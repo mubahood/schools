@@ -1,0 +1,14 @@
+.sidebar{
+    background-color: #FFFFFF;
+}
+.content-header,.content{
+    background-color: #F9F9F9;
+}
+
+.sidebar-menu .active{
+    border-left: solid 5px  #860002!important;;
+    color:#860002!important;;
+}
+.navbar,.logo,.sidebar-toggle,.navbar-static-top{ 
+    background-color:#860002!important;;
+}
