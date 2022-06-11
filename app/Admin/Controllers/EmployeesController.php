@@ -8,6 +8,8 @@ use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
+use Illuminate\Support\Facades\Hash;
+
 /*
 
 `first_name` TEXT DEFAULT NULL,
@@ -138,7 +140,8 @@ class EmployeesController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Administrator());
-
+        $grid->model()->where('enterprise_id', Admin::user()->enterprise_id);
+        
         $grid->actions(function ($actions) {
             $actions->disableView();
         });
@@ -230,7 +233,18 @@ class EmployeesController extends AdminController
                 $form->text('bank_name');
                 $form->text('bank_account_number');
             })
+            ->tab('USER ROLES', function (Form $form) {
+                $roleModel = config('admin.database.roles_model');
+                $form->multipleSelect('roles', trans('admin.roles'))->options(
+                    $roleModel::where('slug', '!=', 'super-admin')
+                        ->where('slug', '!=', 'admin')
+                        ->get()
+                        ->pluck('name', 'id')
+                )->rules('required');
+            })
             ->tab('SYSTEM ACCOUNT', function (Form $form) {
+                $form->image('avatar', trans('admin.avatar'));
+                
                 $form->email('email', 'Email address')
                     ->creationRules(['required', "unique:admin_users"])
                     ->updateRules(['required', "unique:admin_users,username,{{id}}"]);
@@ -238,7 +252,19 @@ class EmployeesController extends AdminController
                     ->creationRules(['required', "unique:admin_users"])
                     ->updateRules(['required', "unique:admin_users,username,{{id}}"]);
 
-                $form->password('password', 'Password')->rules('required');
+                $form->password('password', trans('admin.password'))->rules('required|confirmed');
+                $form->password('password_confirmation', trans('admin.password_confirmation'))->rules('required')
+                    ->default(function ($form) {
+                        return $form->model()->password;
+                    });
+
+                $form->ignore(['password_confirmation']);
+                $form->saving(function (Form $form) {
+                    if ($form->password && $form->model()->password != $form->password) {
+                        $form->password = Hash::make($form->password);
+                    }
+                });
+
             });
 
 

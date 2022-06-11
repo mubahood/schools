@@ -12,6 +12,9 @@ Route::group([
 ], function (Router $router) {
 
     $router->resource('employees', EmployeesController::class);
+    $router->resource('books-categories', BooksCategoryController::class);
+    $router->resource('book-authors', BookAuthorController::class);
+    $router->resource('books', BookController::class);
 
     $router->get('/', 'HomeController@index')->name('home');
     $router->resources([

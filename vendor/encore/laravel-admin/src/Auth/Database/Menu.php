@@ -38,7 +38,7 @@ class Menu extends Model
     {
         $connection = config('admin.database.connection') ?: config('database.default');
 
-        $this->setConnection($connection);
+        $this->setConnection($connection); 
 
         $this->setTable(config('admin.database.menu_table'));
 

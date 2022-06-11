@@ -1,7 +1,7 @@
 <?php
 
 namespace Encore\Admin\Controllers;
-
+ 
 use Encore\Admin\Form;
 use Encore\Admin\Layout\Column;
 use Encore\Admin\Layout\Content;

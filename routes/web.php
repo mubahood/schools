@@ -13,7 +13,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-/* Route::get('/', function () {
+/*  Route::get('/', function () {
+    //$sub_counties = readfile("https://www.googleapis.com/books/v1/volumes?q=rich%20dad");
     return view('welcome');
 });
- */
+  */
