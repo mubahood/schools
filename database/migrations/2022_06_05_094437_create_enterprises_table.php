@@ -22,7 +22,7 @@ class CreateEnterprisesTable extends Migration
             $table->text('logo')->nullable();
             $table->text('phone_number')->nullable();
             $table->text('email')->nullable();
-            $table->text('address')->nullable();
+            $table->text('address')->nullable(); 
         });
     }
 
