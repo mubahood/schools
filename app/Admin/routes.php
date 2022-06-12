@@ -17,7 +17,6 @@ Route::group([
     $router->resource('departments', DepartmentController::class);
     $router->resource('projects', ProjectController::class);
     
-    
 
     $router->get('/', 'HomeController@index')->name('home');
     $router->resources([
