@@ -15,10 +15,10 @@ class HomeController extends Controller
         return $content
             ->title('Dashboard')
             ->description('Description...')
-            ->row(Dashboard::title())
+            /* ->row(Dashboard::title()) */
             ->row(function (Row $row) {
 
-                $row->column(4, function (Column $column) {
+               /*  $row->column(4, function (Column $column) {
                     $column->append(Dashboard::environment());
                 });
 
@@ -28,7 +28,7 @@ class HomeController extends Controller
 
                 $row->column(4, function (Column $column) {
                     $column->append(Dashboard::dependencies());
-                });
+                }); */
             });
     }
 }

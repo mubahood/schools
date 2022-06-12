@@ -28,23 +28,35 @@ class BookController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Book());
+        $grid->model()->where('enterprise_id', Admin::user()->enterprise_id);
 
-        $grid->column('id', __('Id'));
-        $grid->column('enterprise_id', __('Enterprise id'));
-        $grid->column('books_category_id', __('Books category id'));
-        $grid->column('api_id', __('Api id'));
-        $grid->column('title', __('Title'));
-        $grid->column('subtitle', __('Subtitle'));
-        $grid->column('book_author_id', __('Book author id'));
-        $grid->column('published_date', __('Published date'));
-        $grid->column('description', __('Description'));
+        $grid->column('id', __('BOOK ID'))->sortable();
+        $grid->column('thumbnail', __('Book cover'));
+        $grid->column('title', __('Title'))->sortable();
+        $grid->column('book_author_id', __('Author'))->display(function () {
+            if ($this->author == null) {
+                return "-";
+            }
+            return $this->author->name;
+        })->sortable();
+        $grid->column('books_category_id', __('Category'))->display(function () {
+            if ($this->category == null) {
+                return "-";
+            }
+            return $this->category->title;
+        })->sortable();
+
         $grid->column('isbn', __('Isbn'));
-        $grid->column('page_count', __('Page count'));
-        $grid->column('thumbnail', __('Thumbnail'));
-        $grid->column('language', __('Language'));
-        $grid->column('price', __('Price'));
-        $grid->column('quantity', __('Quantity'));
-        $grid->column('pdf', __('Pdf'));
+        $grid->column('quantity', __('Quantity Available'));
+        $grid->column('language', __('Language'))->hide();
+        $grid->column('pdf', __('Pdf'))->hide();
+        $grid->column('price', __('Price'))->hide();
+        $grid->column('page_count', __('Pages'))->hide();
+        $grid->column('description', __('Description'))->hide();
+        $grid->column('published_date', __('Published'))->hide();
+        $grid->column('subtitle', __('Subtitle'))->hide();
+
+        //$grid->column('enterprise_id', __('Enterprise id'));
 
         return $grid;
     }
