@@ -13,6 +13,12 @@ Route::group([
 
     $router->resource('employees', EmployeesController::class);
 
+    $router->resource('tasks', TaskController::class);
+    $router->resource('departments', DepartmentController::class);
+    $router->resource('projects', ProjectController::class);
+    
+    
+
     $router->get('/', 'HomeController@index')->name('home');
     $router->resources([
         'enterprises' => EnterpriseController::class
