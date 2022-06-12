@@ -588,6 +588,8 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
 
     public static $classMap = array (
         'App\\Admin\\Controllers\\AuthController' => __DIR__ . '/../..' . '/app/Admin/Controllers/AuthController.php',
+        'App\\Admin\\Controllers\\BookAuthorController' => __DIR__ . '/../..' . '/app/Admin/Controllers/BookAuthorController.php',
+        'App\\Admin\\Controllers\\BookController' => __DIR__ . '/../..' . '/app/Admin/Controllers/BookController.php',
         'App\\Admin\\Controllers\\BooksCategoryController' => __DIR__ . '/../..' . '/app/Admin/Controllers/BooksCategoryController.php',
         'App\\Admin\\Controllers\\EmployeesController' => __DIR__ . '/../..' . '/app/Admin/Controllers/EmployeesController.php',
         'App\\Admin\\Controllers\\EnterpriseController' => __DIR__ . '/../..' . '/app/Admin/Controllers/EnterpriseController.php',
@@ -605,6 +607,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Http\\Middleware\\TrustProxies' => __DIR__ . '/../..' . '/app/Http/Middleware/TrustProxies.php',
         'App\\Http\\Middleware\\VerifyCsrfToken' => __DIR__ . '/../..' . '/app/Http/Middleware/VerifyCsrfToken.php',
         'App\\Models\\Book' => __DIR__ . '/../..' . '/app/Models/Book.php',
+        'App\\Models\\BookAuthor' => __DIR__ . '/../..' . '/app/Models/BookAuthor.php',
         'App\\Models\\BooksCategory' => __DIR__ . '/../..' . '/app/Models/BooksCategory.php',
         'App\\Models\\Enterprise' => __DIR__ . '/../..' . '/app/Models/Enterprise.php',
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',

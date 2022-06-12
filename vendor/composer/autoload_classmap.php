@@ -7,6 +7,8 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'App\\Admin\\Controllers\\AuthController' => $baseDir . '/app/Admin/Controllers/AuthController.php',
+    'App\\Admin\\Controllers\\BookAuthorController' => $baseDir . '/app/Admin/Controllers/BookAuthorController.php',
+    'App\\Admin\\Controllers\\BookController' => $baseDir . '/app/Admin/Controllers/BookController.php',
     'App\\Admin\\Controllers\\BooksCategoryController' => $baseDir . '/app/Admin/Controllers/BooksCategoryController.php',
     'App\\Admin\\Controllers\\EmployeesController' => $baseDir . '/app/Admin/Controllers/EmployeesController.php',
     'App\\Admin\\Controllers\\EnterpriseController' => $baseDir . '/app/Admin/Controllers/EnterpriseController.php',
@@ -24,6 +26,7 @@ return array(
     'App\\Http\\Middleware\\TrustProxies' => $baseDir . '/app/Http/Middleware/TrustProxies.php',
     'App\\Http\\Middleware\\VerifyCsrfToken' => $baseDir . '/app/Http/Middleware/VerifyCsrfToken.php',
     'App\\Models\\Book' => $baseDir . '/app/Models/Book.php',
+    'App\\Models\\BookAuthor' => $baseDir . '/app/Models/BookAuthor.php',
     'App\\Models\\BooksCategory' => $baseDir . '/app/Models/BooksCategory.php',
     'App\\Models\\Enterprise' => $baseDir . '/app/Models/Enterprise.php',
     'App\\Models\\User' => $baseDir . '/app/Models/User.php',
