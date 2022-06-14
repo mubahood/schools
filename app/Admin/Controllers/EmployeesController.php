@@ -141,7 +141,7 @@ class EmployeesController extends AdminController
     {
         $grid = new Grid(new Administrator());
         $grid->model()->where('enterprise_id', Admin::user()->enterprise_id);
-        
+
         $grid->actions(function ($actions) {
             $actions->disableView();
         });
@@ -244,7 +244,7 @@ class EmployeesController extends AdminController
             })
             ->tab('SYSTEM ACCOUNT', function (Form $form) {
                 $form->image('avatar', trans('admin.avatar'));
-                
+
                 $form->email('email', 'Email address')
                     ->creationRules(['required', "unique:admin_users"])
                     ->updateRules(['required', "unique:admin_users,username,{{id}}"]);
@@ -264,7 +264,6 @@ class EmployeesController extends AdminController
                         $form->password = Hash::make($form->password);
                     }
                 });
-
             });
 
 

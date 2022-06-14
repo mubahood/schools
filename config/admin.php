@@ -11,7 +11,7 @@ return [
     | login page.
     |
     */
-    'name' => 'HELL Doctor',
+    'name' => 'NEWLINE - SCHOOLS',
 
     /*
     |--------------------------------------------------------------------------
@@ -22,7 +22,7 @@ return [
     | `img` tag, eg '<img src="http://logo-url" alt="Admin logo">'.
     |
     */
-    'logo' => '<b>HELL Doctor</b>',
+    'logo' => '<b>NEWLINE - SCHOOLS</b>',
 
     /*
     |--------------------------------------------------------------------------
@@ -34,7 +34,7 @@ return [
     | '<img src="http://logo-url" alt="Admin logo">'.
     |
     */
-    'logo-mini' => '<b>HELL Doctor</b>',
+    'logo-mini' => '<b>NEWLINE - SCHOOLS</b>',
 
     /*
     |--------------------------------------------------------------------------
