@@ -148,6 +148,43 @@ class EmployeesController extends AdminController
 
         $grid->column('id', __('Id'))->sortable();
         $grid->column('name', __('Name'))->sortable();
+        $grid->column('phone_number_1', __('Phone number'));
+        $grid->column('phone_number_2', __('Phone number 2'))->hide();
+        $grid->column('email', __('Email'));
+        $grid->column('date_of_birth', __('D.O.B'))->sortable();
+        $grid->column('nationality', __('Nationality'))->sortable();
+        $grid->column('sex', __('Sex'));
+        $grid->column('place_of_birth', __('Place of birth'))->sortable();
+        $grid->column('home_address', __('Home address'))->hide();
+        $grid->column('current_address', __('Current address'))->hide();
+        $grid->column('religion', __('Religion'))->hide();
+        $grid->column('spouse_name', __('Spouse name'))->hide();
+        $grid->column('spouse_phone', __('Spouse phone'))->hide();
+        $grid->column('father_name')->hide();
+        $grid->column('father_phone')->hide();
+        $grid->column('mother_name')->hide();
+        $grid->column('mother_phone')->hide();
+        $grid->column('languages')->hide();
+        $grid->column('emergency_person_name')->hide();
+        $grid->column('emergency_person_phone')->hide();
+        $grid->column('national_id_number', 'N.I.N')->hide();
+        $grid->column('passport_number')->hide();
+        $grid->column('tin', 'TIN')->hide();
+        $grid->column('nssf_number')->hide();
+        $grid->column('bank_name')->hide();
+        $grid->column('bank_account_number')->hide();
+        $grid->column('primary_school_name')->hide();
+        $grid->column('primary_school_year_graduated')->hide();
+        $grid->column('seconday_school_name')->hide();
+        $grid->column('seconday_school_year_graduated')->hide();
+        $grid->column('high_school_name')->hide();
+        $grid->column('high_school_year_graduated')->hide();
+        $grid->column('degree_university_name')->hide();
+        $grid->column('degree_university_year_graduated')->hide();
+        $grid->column('masters_university_name')->hide();
+        $grid->column('masters_university_year_graduated')->hide();
+        $grid->column('phd_university_name')->hide();
+        $grid->column('phd_university_year_graduated')->hide();
 
         return $grid;
     }
@@ -173,10 +210,7 @@ class EmployeesController extends AdminController
     protected function form()
     {
         $u = Admin::user();
-        if (!$u->isRole('admin')) {
-            return admin_error('Warning', 'Administrators are can create a new employee.');
-        }
-
+       
         $form = new Form(new Administrator());
 
 

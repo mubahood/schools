@@ -2,6 +2,7 @@
 
 namespace Encore\Admin\Auth\Database;
 
+use App\Models\Enterprise;
 use Encore\Admin\Traits\DefaultDatetimeFormat;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
@@ -22,7 +23,55 @@ class Administrator extends Model implements AuthenticatableContract
 
     protected $fillable = ['username', 'password', 'name', 'avatar'];
 
-    /**
+    public static function boot()
+    {
+        parent::boot();
+
+        self::creating(function ($model) {
+            if ($model->enterprise_id == null) {
+                die("enterprise is required");
+            }
+            $enterprise_id = ((int)($model->enterprise_id));
+            $e = Enterprise::find($enterprise_id);
+            if ($e == null) {
+                die("enterprise is required");
+            }
+            $model->name = $model->first_name . " " . $model->last_name;
+            return $model;
+        });
+
+        self::created(function ($model) {
+            //created
+        });
+
+        self::updating(function ($model) {
+            if ($model->enterprise_id == null) {
+                die("enterprise is required");
+            }
+            $enterprise_id = ((int)($model->enterprise_id));
+            $e = Enterprise::find($enterprise_id);
+            if ($e == null) {
+                die("enterprise is required");
+            }
+            $model->name = $model->first_name . " " . $model->last_name;
+            return $model;
+        });
+
+        self::updated(function ($model) {
+            // ... code here
+        });
+
+        self::deleting(function ($model) {
+            // ... code here
+        });
+
+        self::deleted(function ($model) {
+            // ... code here
+        });
+    }
+
+
+    /** 
      * Create a new Eloquent model instance.
      *
      * @param array $attributes
@@ -74,6 +123,16 @@ class Administrator extends Model implements AuthenticatableContract
         $relatedModel = config('admin.database.roles_model');
 
         return $this->belongsToMany($relatedModel, $pivotTable, 'user_id', 'role_id');
+    }
+
+    public function enterprise()
+    {
+        $e = Enterprise::find($this->enterprise_id);
+        if ($e == null) {
+            $this->enterprise_id = 1;
+            $this->save();
+        }
+        return $this->belongsTo(Enterprise::class);
     }
 
     /**
