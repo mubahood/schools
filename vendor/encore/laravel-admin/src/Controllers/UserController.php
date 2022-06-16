@@ -2,9 +2,11 @@
 
 namespace Encore\Admin\Controllers;
 
+use App\Models\Enterprise;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends AdminController
@@ -97,6 +99,10 @@ class UserController extends AdminController
         $userTable = config('admin.database.users_table');
         $connection = config('admin.database.connection');
 
+        if (Auth::user()->isRole('super-admin')) {
+            $form->select('enterprise_id', 'Enterprise')
+                ->options(Enterprise::all()->pluck('name', 'id'));
+        }
         $form->display('id', 'ID');
         $form->text('username', trans('admin.username'))
             ->creationRules(['required', "unique:{$connection}.{$userTable}"])

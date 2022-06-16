@@ -28,9 +28,11 @@ class ProjectController extends AdminController
     {
         $grid = new Grid(new Project());
 
-        $grid->column('id', __('Id'));
-        $grid->column('head_of_project', __('Head of project'));
-        $grid->column('department_id', __('#ID'));
+        $grid->column('id', __('Id'))->sortable();
+        $grid->column('head_of_project', __('Head of project'))->display(function () {
+            return $this->head->name;
+        });
+        //$grid->column('department_id', __('#ID'));
         $grid->column('name', __('Name'));
         $grid->column('details', __('Details'));
 

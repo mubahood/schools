@@ -7,6 +7,7 @@ use App\Models\Task;
 use Carbon\Carbon;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
+use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Grid\Model;
@@ -174,16 +175,27 @@ class TaskController extends AdminController
         if ($u->isRole('manager')) {
             $is_manager = true;
         }
+        $is_manager = true;
 
         $admins = [];
-        foreach (Administrator::all() as $key => $v) {
+        $u = Admin::user();
+        foreach (Administrator::where([
+            'enterprise_id' => $u->enterprise_id
+        ])->get() as $key => $v) {
             $admins[$v->id] = $v->name . " - " . $v->id . " - ({$v->username})";
         }
 
         $projects = [];
-        foreach (Project::all() as $key => $v) {
+        foreach (Project::where([
+            'enterprise_id' => $u->enterprise_id
+        ])->get() as $key => $v) {
             $projects[$v->id] = $v->name . " - " . $v->short_name;
         }
+
+        $form->text('enterprise_id')
+            ->rules('required')
+            ->default($u->enterprise_id)
+            ->value($u->enterprise_id);
 
 
         if ($form->isCreating()) {
@@ -206,8 +218,6 @@ class TaskController extends AdminController
             }
 
 
-
-
             $form->select('project_id', __('Project'))
                 ->options($projects)
                 ->required();
@@ -218,9 +228,9 @@ class TaskController extends AdminController
                 ->help("Explain the task")
                 ->required();
 
-            $form->datetime('start_date', __('Start date'))->default(date('Y-m-d'))->required();
-            $form->datetime('end_date', __('End date'))->required();
-            $form->datetime('submit_before', __('Submit before'))->required();
+            $form->datetime('start_date', __('Shedule start date'))->default(date('Y-m-d'))->required();
+            $form->datetime('end_date', __('Schedule end date'))->required();
+            $form->datetime('submit_before', __('Submit before'));
         } else {
 
             if ($m->assigned_to == $u->id) {
