@@ -5,6 +5,7 @@ namespace App\Admin\Controllers;
 use App\Models\Project;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
+use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
@@ -63,12 +64,18 @@ class ProjectController extends AdminController
     protected function form()
     {
         $form = new Form(new Project());
-
+        $u = Admin::user();
         $admins = [];
-        foreach (Administrator::all() as $key => $v) {
+        foreach (Administrator::where([
+            'enterprise_id' => $u->enterprise_id
+        ])->get() as $key => $v) {
             $admins[$v->id] = $v->name . " - " . $v->id . " - ({$v->username})";
         }
 
+        $form->hidden('enterprise_id')
+            ->rules('required')
+            ->default($u->enterprise_id)
+            ->value($u->enterprise_id);
         $form->text('name', __('Name'))->required();
         $form->text('short_name', __('Short Name'))->required();
         $form->select('head_of_project', __('Head of project'))
