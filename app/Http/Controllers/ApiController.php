@@ -17,6 +17,7 @@ class ApiController  extends Controller
         }
         $u = Administrator::where('username', $r->username)->first();
         if ($u == null) {
+            //wronfg pass
             return Utils::response(['message' => 'Account with provided credentials wsa not found.', 'status' => 0]);
         }
 
