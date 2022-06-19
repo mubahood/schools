@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Validator;
 
 class ApiController  extends Controller
 {
+    public function tasks(Request $r){
+        return $r->user->username;
+    }
     public function login(Request $r)
     {
         if ((!isset($_POST['username'])) || (!isset($_POST['password']))) {
@@ -25,6 +28,6 @@ class ApiController  extends Controller
             return Utils::response(['message' => 'Wrong password.', 'status' => 0]);
         }
         unset($u->password);
-        return Utils::response(['message' => 'Wrong password.', 'status' => 0, 'data' => $u]);
+        return Utils::response(['message' => 'Logged in successfully.', 'status' => 1, 'data' => $u]);
     }
 }
