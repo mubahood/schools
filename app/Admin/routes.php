@@ -15,6 +15,7 @@ Route::group([
     $router->resource('books-categories', BooksCategoryController::class);
     $router->resource('book-authors', BookAuthorController::class);
     $router->resource('books', BookController::class);
+    $router->resource('students', StudentsController::class);
 
     $router->get('/', 'HomeController@index')->name('home');
     $router->resources([

@@ -123,14 +123,14 @@ ACCOUNT INFORMATION
 
 */
 
-class EmployeesController extends AdminController
+class StudentsController extends AdminController
 {
     /**
      * Title for current resource.
      *
      * @var string
      */
-    protected $title = 'Employees';
+    protected $title = 'Students';
 
     /**
      * Make a grid builder.
@@ -210,7 +210,7 @@ class EmployeesController extends AdminController
     protected function form()
     {
         $u = Admin::user();
-       
+
         $form = new Form(new Administrator());
 
 
