@@ -7,8 +7,12 @@ php artisan make:model Enterprise
 php artisan make:migration create_books_categories_table
 php artisan make:migration create_books_table
 php artisan make:migration create_book_authors_table
+php artisan make:migration create_book_borrows_table
+php artisan make:migration create_book_borrow_books_table
 php artisan make:model BooksCategory
 php artisan make:model BookAuthor
+php artisan make:model BookBorrow
+php artisan make:model BookBorrowBook
 
 
 php artisan admin:make EnterpriseController --model=App\\Models\\Enterprise
@@ -20,7 +24,8 @@ php artisan admin:make BooksCategoryController --model=App\\Models\\BooksCategor
 php artisan admin:make BooksCategoryController --model=App\\Models\\BooksCategory
 php artisan admin:make BookAuthorController --model=App\\Models\\BookAuthor
 php artisan admin:make BookController --model=App\\Models\\Book
-
+php artisan admin:make BookBorrowController --model=App\\Models\\BookBorrow
+book_borrow_books
 
 {
    "kind":"books#volumes",

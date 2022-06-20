@@ -1,19 +1,32 @@
 <?php
 
+use App\Models\Book;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
-*/
-
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+Route::get('books', function (Request $r) {
+    $q = $r->get('q');
+    $enterprise_id = $r->get('enterprise_id');
+
+    $c = Book::where('title', 'like', "%$q%")
+        ->where([
+            'enterprise_id' => $enterprise_id
+        ])
+        ->limit(100)->get();
+
+    $data = [];
+    foreach ($c as $key => $v) {
+        $data[] = [
+            'id' => $v->id,
+            'text' => $v->title 
+        ];
+    }
+
+    return [
+        'data' => $data
+    ];
 });
