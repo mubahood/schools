@@ -18,7 +18,7 @@ class BookController extends AdminController
      *
      * @var string
      */
-    protected $title = 'Book';
+    protected $title = 'Books catalogue';
 
     /**
      * Make a grid builder.
@@ -30,8 +30,29 @@ class BookController extends AdminController
         $grid = new Grid(new Book());
         $grid->model()->where('enterprise_id', Admin::user()->enterprise_id);
 
+        $u = Admin::user();
+        if (!$u->isRole('librarian')) {
+            $grid->disableActions();
+            $grid->disableCreateButton();
+            $grid->disableExport();
+            $grid->disableBatchActions();
+        }
+
         $grid->column('id', __('BOOK ID'))->sortable();
-        $grid->column('thumbnail', __('Book cover'));
+        
+        /* $grid->column('thumbnail', __('Book cover'))->lightbox(['zooming' => true]);
+        
+                $grid->picture('thumbnail', __('Book cover'))->display(function ($thumb){
+            return '<img width="30" src="'.url("uploads/".$thumb).'">';
+        })->lightbox();
+
+        
+        */
+
+        $grid->column('thumbnail', __('Book cover'))->display(function ($thumb){
+            return '<img width="30" src="'.url("storage/".$thumb).'">';
+        });
+
         $grid->column('title', __('Title'))->sortable();
         $grid->column('book_author_id', __('Author'))->display(function () {
             if ($this->author == null) {

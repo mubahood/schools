@@ -5,7 +5,7 @@
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => '749ef2508ec029b0758c70f25a8bc758cbf63ede',
+        'reference' => '6db316de6f0db7d44425519b3ced261e4a3a8a6a',
         'name' => 'laravel/laravel',
         'dev' => true,
     ),
@@ -457,6 +457,15 @@
                 0 => '*',
             ),
         ),
+        'laravel-admin-ext/grid-lightbox' => array(
+            'pretty_version' => 'v1.0.3',
+            'version' => '1.0.3.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../laravel-admin-ext/grid-lightbox',
+            'aliases' => array(),
+            'reference' => 'f8a247f0d017eb05830cc720fb621401b1bfbc2c',
+            'dev_requirement' => false,
+        ),
         'laravel/framework' => array(
             'pretty_version' => 'v8.83.16',
             'version' => '8.83.16.0',
@@ -472,7 +481,7 @@
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => '749ef2508ec029b0758c70f25a8bc758cbf63ede',
+            'reference' => '6db316de6f0db7d44425519b3ced261e4a3a8a6a',
             'dev_requirement' => false,
         ),
         'laravel/legacy-factories' => array(

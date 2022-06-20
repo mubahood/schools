@@ -140,8 +140,10 @@ class EmployeesController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Administrator());
-        $grid->model()->where('enterprise_id', Admin::user()->enterprise_id);
-
+        $grid->model()->where([
+            'enterprise_id' => Admin::user()->enterprise_id,
+            'user_type' => 'employee'
+        ]);
         $grid->actions(function ($actions) {
             $actions->disableView();
         });
@@ -210,7 +212,7 @@ class EmployeesController extends AdminController
     protected function form()
     {
         $u = Admin::user();
-       
+
         $form = new Form(new Administrator());
 
 
@@ -220,6 +222,8 @@ class EmployeesController extends AdminController
             $u = Admin::user();
             $form->hidden('enterprise_id')->rules('required')->default($u->enterprise_id)
                 ->value($u->enterprise_id);
+
+            $form->text('user_type')->default('employee')->value('employee');
 
             $form->text('first_name')->rules('required');
             $form->text('last_name')->rules('required');

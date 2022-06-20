@@ -10,6 +10,7 @@
         "encore/laravel-admin": "1.*",
         "fruitcake/laravel-cors": "^3.0",
         "guzzlehttp/guzzle": "^7.0.1",
+        "laravel-admin-ext/grid-lightbox": "^1.0",
         "laravel/framework": "^8.54",
         "laravel/legacy-factories": "^1.1",
         "laravel/sanctum": "^2.11",

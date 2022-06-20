@@ -140,7 +140,10 @@ class StudentsController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Administrator());
-        $grid->model()->where('enterprise_id', Admin::user()->enterprise_id);
+        $grid->model()->where([
+            'enterprise_id' => Admin::user()->enterprise_id,
+            'user_type' => 'student'
+        ]);
 
         $grid->actions(function ($actions) {
             $actions->disableView();
@@ -220,6 +223,8 @@ class StudentsController extends AdminController
             $u = Admin::user();
             $form->hidden('enterprise_id')->rules('required')->default($u->enterprise_id)
                 ->value($u->enterprise_id);
+
+            $form->text('user_type')->default('student')->value('student');
 
             $form->text('first_name')->rules('required');
             $form->text('last_name')->rules('required');

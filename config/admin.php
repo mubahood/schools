@@ -403,13 +403,14 @@ return [
     |
     */
     'extensions' => [
-        'chartjs' => [
 
-            // Set to `false` if you want to disable this extension
+        'grid-lightbox' => [
+            'enable' => true,
+        ],
+        'chartjs' => [
             'enable' => true,
         ],
         'material-ui' => [
-            // If the value is set to false, this extension will be disabled
             'enable' => false
         ],
         'latlong' => [
