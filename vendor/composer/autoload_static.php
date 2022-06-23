@@ -592,6 +592,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
     );
 
     public static $classMap = array (
+        'App\\Admin\\Controllers\\AcademicYearController' => __DIR__ . '/../..' . '/app/Admin/Controllers/AcademicYearController.php',
         'App\\Admin\\Controllers\\AuthController' => __DIR__ . '/../..' . '/app/Admin/Controllers/AuthController.php',
         'App\\Admin\\Controllers\\BookAuthorController' => __DIR__ . '/../..' . '/app/Admin/Controllers/BookAuthorController.php',
         'App\\Admin\\Controllers\\BookBorrowController' => __DIR__ . '/../..' . '/app/Admin/Controllers/BookBorrowController.php',
@@ -601,6 +602,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Admin\\Controllers\\EnterpriseController' => __DIR__ . '/../..' . '/app/Admin/Controllers/EnterpriseController.php',
         'App\\Admin\\Controllers\\HomeController' => __DIR__ . '/../..' . '/app/Admin/Controllers/HomeController.php',
         'App\\Admin\\Controllers\\StudentsController' => __DIR__ . '/../..' . '/app/Admin/Controllers/StudentsController.php',
+        'App\\Admin\\Controllers\\TermController' => __DIR__ . '/../..' . '/app/Admin/Controllers/TermController.php',
         'App\\Console\\Kernel' => __DIR__ . '/../..' . '/app/Console/Kernel.php',
         'App\\Exceptions\\Handler' => __DIR__ . '/../..' . '/app/Exceptions/Handler.php',
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
@@ -613,11 +615,14 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Http\\Middleware\\TrustHosts' => __DIR__ . '/../..' . '/app/Http/Middleware/TrustHosts.php',
         'App\\Http\\Middleware\\TrustProxies' => __DIR__ . '/../..' . '/app/Http/Middleware/TrustProxies.php',
         'App\\Http\\Middleware\\VerifyCsrfToken' => __DIR__ . '/../..' . '/app/Http/Middleware/VerifyCsrfToken.php',
+        'App\\Models\\AcademicYear' => __DIR__ . '/../..' . '/app/Models/AcademicYear.php',
         'App\\Models\\Book' => __DIR__ . '/../..' . '/app/Models/Book.php',
         'App\\Models\\BookAuthor' => __DIR__ . '/../..' . '/app/Models/BookAuthor.php',
         'App\\Models\\BookBorrow' => __DIR__ . '/../..' . '/app/Models/BookBorrow.php',
+        'App\\Models\\BookBorrowBook' => __DIR__ . '/../..' . '/app/Models/BookBorrowBook.php',
         'App\\Models\\BooksCategory' => __DIR__ . '/../..' . '/app/Models/BooksCategory.php',
         'App\\Models\\Enterprise' => __DIR__ . '/../..' . '/app/Models/Enterprise.php',
+        'App\\Models\\Term' => __DIR__ . '/../..' . '/app/Models/Term.php',
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
         'App\\Providers\\AuthServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AuthServiceProvider.php',

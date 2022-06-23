@@ -2,6 +2,7 @@ google api key
 AIzaSyCymVo9QxwffvO-tO2aciD96rnrnpxS2IU
 
 php artisan make:migration create_enterprises_table
+php artisan make:migration create_academic_years_table
 php artisan make:model Banner 
 php artisan make:model Enterprise
 php artisan make:migration create_books_categories_table
@@ -9,13 +10,18 @@ php artisan make:migration create_books_table
 php artisan make:migration create_book_authors_table
 php artisan make:migration create_book_borrows_table
 php artisan make:migration create_book_borrow_books_table
+php artisan make:migration create_terms_table
+php artisan make:migration create_courses_table
 php artisan make:model BooksCategory
 php artisan make:model BookAuthor
 php artisan make:model BookBorrow
 php artisan make:model BookBorrowBook
+php artisan make:model AcademicYear
+php artisan make:model Term
+php artisan make:model Course
 
 
-php artisan admin:make EnterpriseController --model=App\\Models\\Enterprise
+php artisan admin:make TermController --model=App\\Models\\Term
 php artisan admin:make EmployeesController --vendor\\encore\\laravel-admin\\src\\Auth\\Database\\Administrator
 
 php artisan make:migration create_books_categories_table
@@ -24,7 +30,8 @@ php artisan admin:make BooksCategoryController --model=App\\Models\\BooksCategor
 php artisan admin:make BooksCategoryController --model=App\\Models\\BooksCategory
 php artisan admin:make BookAuthorController --model=App\\Models\\BookAuthor
 php artisan admin:make BookController --model=App\\Models\\Book
-php artisan admin:make BookBorrowController --model=App\\Models\\BookBorrow
+php artisan admin:make AcademicYearController --model=App\\Models\\AcademicYear
+php artisan admin:make CourseController --model=App\\Models\\Course
 book_borrow_books
 
 {

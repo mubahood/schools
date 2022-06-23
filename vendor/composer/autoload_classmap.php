@@ -6,6 +6,7 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'App\\Admin\\Controllers\\AcademicYearController' => $baseDir . '/app/Admin/Controllers/AcademicYearController.php',
     'App\\Admin\\Controllers\\AuthController' => $baseDir . '/app/Admin/Controllers/AuthController.php',
     'App\\Admin\\Controllers\\BookAuthorController' => $baseDir . '/app/Admin/Controllers/BookAuthorController.php',
     'App\\Admin\\Controllers\\BookBorrowController' => $baseDir . '/app/Admin/Controllers/BookBorrowController.php',
@@ -15,6 +16,7 @@ return array(
     'App\\Admin\\Controllers\\EnterpriseController' => $baseDir . '/app/Admin/Controllers/EnterpriseController.php',
     'App\\Admin\\Controllers\\HomeController' => $baseDir . '/app/Admin/Controllers/HomeController.php',
     'App\\Admin\\Controllers\\StudentsController' => $baseDir . '/app/Admin/Controllers/StudentsController.php',
+    'App\\Admin\\Controllers\\TermController' => $baseDir . '/app/Admin/Controllers/TermController.php',
     'App\\Console\\Kernel' => $baseDir . '/app/Console/Kernel.php',
     'App\\Exceptions\\Handler' => $baseDir . '/app/Exceptions/Handler.php',
     'App\\Http\\Controllers\\Controller' => $baseDir . '/app/Http/Controllers/Controller.php',
@@ -27,11 +29,14 @@ return array(
     'App\\Http\\Middleware\\TrustHosts' => $baseDir . '/app/Http/Middleware/TrustHosts.php',
     'App\\Http\\Middleware\\TrustProxies' => $baseDir . '/app/Http/Middleware/TrustProxies.php',
     'App\\Http\\Middleware\\VerifyCsrfToken' => $baseDir . '/app/Http/Middleware/VerifyCsrfToken.php',
+    'App\\Models\\AcademicYear' => $baseDir . '/app/Models/AcademicYear.php',
     'App\\Models\\Book' => $baseDir . '/app/Models/Book.php',
     'App\\Models\\BookAuthor' => $baseDir . '/app/Models/BookAuthor.php',
     'App\\Models\\BookBorrow' => $baseDir . '/app/Models/BookBorrow.php',
+    'App\\Models\\BookBorrowBook' => $baseDir . '/app/Models/BookBorrowBook.php',
     'App\\Models\\BooksCategory' => $baseDir . '/app/Models/BooksCategory.php',
     'App\\Models\\Enterprise' => $baseDir . '/app/Models/Enterprise.php',
+    'App\\Models\\Term' => $baseDir . '/app/Models/Term.php',
     'App\\Models\\User' => $baseDir . '/app/Models/User.php',
     'App\\Providers\\AppServiceProvider' => $baseDir . '/app/Providers/AppServiceProvider.php',
     'App\\Providers\\AuthServiceProvider' => $baseDir . '/app/Providers/AuthServiceProvider.php',
