@@ -20,6 +20,8 @@ Route::group([
     $router->resource('academic-years', AcademicYearController::class);
     $router->resource('terms', TermController::class);
     $router->resource('courses', CourseController::class);
+    $router->resource('classes', AcademicClassController::class);
+    $router->resource('subjects', SubjectController::class);
 
     $router->get('/', 'HomeController@index')->name('home');
     $router->resources([

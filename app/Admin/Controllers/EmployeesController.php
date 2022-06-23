@@ -223,7 +223,7 @@ class EmployeesController extends AdminController
             $form->hidden('enterprise_id')->rules('required')->default($u->enterprise_id)
                 ->value($u->enterprise_id);
 
-            $form->text('user_type')->default('employee')->value('employee');
+            $form->hidden('user_type')->default('employee')->value('employee');
 
             $form->text('first_name')->rules('required');
             $form->text('last_name')->rules('required');

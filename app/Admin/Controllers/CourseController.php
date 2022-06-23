@@ -29,9 +29,8 @@ class CourseController extends AdminController
         $grid->model()->where('enterprise_id', Admin::user()->enterprise_id);
         $grid->column('id', __('Subject ID'))->sortable();
         $grid->column('name', __('Name'));
-        $grid->column('short_name', __('Short name'));
-        $grid->column('short_name', __('Short name'));
-        $grid->column('details', __('Details'));
+        $grid->column('short_name', __('Short name')); 
+        $grid->column('details', __('Details'))->hide();
 
         return $grid;
     }
