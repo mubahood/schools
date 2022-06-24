@@ -2,6 +2,8 @@
 
 namespace App\Admin\Controllers;
 
+use App\Models\AcademicClass;
+use App\Models\AcademicYear;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -9,6 +11,7 @@ use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Redirect;
 
 /*
 
@@ -216,6 +219,35 @@ class StudentsController extends AdminController
 
         $form = new Form(new Administrator());
 
+        $form->saving(function (Form $form) {
+            //return Redirect::back()->withErrors(['user_type' => 'The Message']);
+        });
+
+
+
+
+
+        $form->morphMany('classes', 'Click on new to add a class', function (Form\NestedForm $form) {
+            $u = Admin::user();
+            $form->hidden('enterprise_id')->default($u->enterprise_id);
+
+
+            $form->select('academic_year', 'Academic year')
+                ->options(
+                    AcademicYear::where([
+                        'enterprise_id' => $u->enterprise_id
+                    ])->get()
+                        ->pluck('name', 'id')
+                )
+                ->load('academic_class_id', url('/api/classes?enterprise_id=' . $u->enterprise_id))
+                ->required();
+
+            $form->select('academic_class_id', 'Class')
+                ->load('stream_id', url('/api/streams?enterprise_id=' . $u->enterprise_id))
+                ->required();
+
+            $form->select('stream_id', 'Stream');
+        });
 
 
         $form->tab('BIO DATA', function (Form $form) {
@@ -224,7 +256,7 @@ class StudentsController extends AdminController
             $form->hidden('enterprise_id')->rules('required')->default($u->enterprise_id)
                 ->value($u->enterprise_id);
 
-            $form->text('user_type')->default('student')->value('student');
+            $form->text('user_type')->default('student')->value('student')->updateRules('required|max:223');
 
             $form->text('first_name')->rules('required');
             $form->text('last_name')->rules('required');
