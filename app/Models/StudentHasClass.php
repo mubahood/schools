@@ -10,7 +10,7 @@ class StudentHasClass extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['enterprise_id', 'academic_class_id', 'administrator_id', 'stream_id'];
+    protected $fillable = ['enterprise_id', 'academic_class_id', 'administrator_id', 'stream_id','academic_year_id'];
 
 
     function student()

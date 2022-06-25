@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Models\AcademicClass;
 use App\Models\AcademicYear;
+use App\Models\StudentHasClass;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -220,10 +221,19 @@ class StudentsController extends AdminController
         $form = new Form(new Administrator());
 
         $form->saving(function (Form $form) {
-            //return Redirect::back()->withErrors(['user_type' => 'The Message']);
+            $class = StudentHasClass::where([
+                
+            ])->first();
+            $current_class = $form->current_class;
+            return Redirect::back()->withInput()->withErrors([
+                'current_class' => 'Must be in a single a single ' . $current_class
+            ]);
         });
 
 
+        $form->select('current_class', 'Current Class')->options(function () {
+            return AcademicClass::all()->pluck('name', 'id');
+        });
 
 
 
@@ -232,19 +242,15 @@ class StudentsController extends AdminController
             $form->hidden('enterprise_id')->default($u->enterprise_id);
 
 
-            $form->select('academic_year', 'Academic year')
+            $form->select('academic_year_id', 'Academic year')
                 ->options(
                     AcademicYear::where([
                         'enterprise_id' => $u->enterprise_id
                     ])->get()
                         ->pluck('name', 'id')
-                )
-                ->load('academic_class_id', url('/api/classes?enterprise_id=' . $u->enterprise_id))
-                ->required();
+                );
 
-            $form->select('academic_class_id', 'Class')
-                ->load('stream_id', url('/api/streams?enterprise_id=' . $u->enterprise_id))
-                ->required();
+
 
             $form->select('stream_id', 'Stream');
         });

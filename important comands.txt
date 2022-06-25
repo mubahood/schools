@@ -12,6 +12,7 @@ php artisan make:migration create_book_borrows_table
 php artisan make:migration create_book_borrow_books_table
 php artisan make:migration create_terms_table
 php artisan make:migration create_courses_table
+php artisan make:migration create_student_has_classes_table
 php artisan make:model BooksCategory
 php artisan make:model BookAuthor
 php artisan make:model BookBorrow
@@ -20,7 +21,7 @@ php artisan make:model AcademicYear
 php artisan make:model Term
 php artisan make:model Course
 php artisan make:model Subject
-php artisan make:model AcademicClassSctream
+php artisan make:model StudentHasClass
 
 
 php artisan admin:make TermController --model=App\\Models\\Term
@@ -36,8 +37,9 @@ php artisan admin:make BookAuthorController --model=App\\Models\\BookAuthor
 php artisan admin:make BookController --model=App\\Models\\Book
 php artisan admin:make AcademicYearController --model=App\\Models\\AcademicYear
 php artisan admin:make AcademicClassController --model=App\\Models\\AcademicClass
-php artisan admin:make SubjectController --model=App\\Models\\Subject
 book_borrow_books
+php artisan admin:make SubjectController --model=App\\Models\\Subject
+php artisan admin:make StudentHasClassController --model=App\\Models\\StudentHasClass
 
 {
    "kind":"books#volumes",

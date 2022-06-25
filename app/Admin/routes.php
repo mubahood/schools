@@ -22,6 +22,7 @@ Route::group([
     $router->resource('courses', CourseController::class);
     $router->resource('classes', AcademicClassController::class);
     $router->resource('subjects', SubjectController::class);
+    $router->resource('students-classes', StudentHasClassController::class);
 
     $router->get('/', 'HomeController@index')->name('home');
     $router->resources([
