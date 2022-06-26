@@ -1,9 +1,7 @@
 <?php
 use App\Models\Utils;
 $ent = Utils::ent();
-echo '<pre>';
-print_r($ent->name);
-die();
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -70,7 +68,7 @@ die();
 
 <body class="">
     <div class="row">
-        <div class="col-md-6 fill " style="background-color: #2F963F">
+        <div class="col-md-6 fill " style="background-color: {{ $ent->color }}">
             <img class="img-fluid center " width="30%" src="{{ url('assets/logo_1.png') }}" alt="">
 
             <div class="description">
@@ -89,7 +87,7 @@ die();
 
                 <div class="login-logo">
                     {{-- <h2>Log in to your account</h2> --}}
-                    <h2>{{ config('app.name') }}</h2>
+                    <h2>{{ $ent->name }}</h2>
                 </div>
 
                 <!-- /.login-logo -->
@@ -128,7 +126,7 @@ die();
                                 @if (config('admin.auth.remember'))
                                     <div class="checkbox icheck">
 
-                                        <p><a href="javascript:;" style="color: #2F963F;">Forgot password</a></p>
+                                        <p><a href="javascript:;" style="color: {{ $ent->color }};">Forgot password</a></p>
                                         {{-- <label>
                                             <input type="checkbox" name="remember" value="1" 
                                                 {{ !old('username') || old('remember') ? 'checked' : '' }}>
@@ -141,7 +139,7 @@ die();
                             <div class="col-xs-4">
                                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                 <button type="submit" class="btn  btn-block btn-flat"
-                                    style="background-color: #2F963F; color: white">{{ trans('admin.login') }}</button>
+                                    style="background-color: {{ $ent->color }}; color: white">{{ trans('admin.login') }}</button>
                             </div>
                             <!-- /.col -->
                         </div>
