@@ -221,9 +221,7 @@ class StudentsController extends AdminController
         $form = new Form(new Administrator());
 
         $form->saving(function (Form $form) {
-            $class = StudentHasClass::where([
-                
-            ])->first();
+            $class = StudentHasClass::where([])->first();
             $current_class = $form->current_class;
             return Redirect::back()->withInput()->withErrors([
                 'current_class' => 'Must be in a single a single ' . $current_class
