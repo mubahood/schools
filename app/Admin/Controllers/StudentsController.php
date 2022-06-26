@@ -220,38 +220,7 @@ class StudentsController extends AdminController
 
         $form = new Form(new Administrator());
 
-        $form->saving(function (Form $form) {
-            $class = StudentHasClass::where([])->first();
-            $current_class = $form->current_class;
-            return Redirect::back()->withInput()->withErrors([
-                'current_class' => 'Must be in a single a single ' . $current_class
-            ]);
-        });
 
-
-        $form->select('current_class', 'Current Class')->options(function () {
-            return AcademicClass::all()->pluck('name', 'id');
-        });
-
-
-
-        $form->morphMany('classes', 'Click on new to add a class', function (Form\NestedForm $form) {
-            $u = Admin::user();
-            $form->hidden('enterprise_id')->default($u->enterprise_id);
-
-
-            $form->select('academic_year_id', 'Academic year')
-                ->options(
-                    AcademicYear::where([
-                        'enterprise_id' => $u->enterprise_id
-                    ])->get()
-                        ->pluck('name', 'id')
-                );
-
-
-
-            $form->select('stream_id', 'Stream');
-        });
 
 
         $form->tab('BIO DATA', function (Form $form) {
@@ -260,7 +229,7 @@ class StudentsController extends AdminController
             $form->hidden('enterprise_id')->rules('required')->default($u->enterprise_id)
                 ->value($u->enterprise_id);
 
-            $form->text('user_type')->default('student')->value('student')->updateRules('required|max:223');
+            $form->hidden('user_type')->default('student')->value('student')->updateRules('required|max:223');
 
             $form->text('first_name')->rules('required');
             $form->text('last_name')->rules('required');
@@ -274,8 +243,7 @@ class StudentsController extends AdminController
             $form->text('nationality');
         })->tab('PERSONAL INFORMATION', function (Form $form) {
             $form->text('religion');
-            $form->text('spouse_name', "Spouse's name");
-            $form->text('spouse_phone', "Spouse's phone number");
+
             $form->text('father_name', "Father's name");
             $form->text('father_phone', "Father's phone number");
             $form->text('mother_name', "Mother's name");
@@ -284,7 +252,7 @@ class StudentsController extends AdminController
             $form->text('emergency_person_name', "Emergency person to contact name");
             $form->text('emergency_person_phone', "Emergency person to contact phone number");
         })
-            ->tab('EDUCATIONAL INFORMATION', function (Form $form) {
+            /* ->tab('EDUCATIONAL INFORMATION', function (Form $form) {
 
                 $form->text('primary_school_name');
                 $form->year('primary_school_year_graduated');
@@ -298,8 +266,8 @@ class StudentsController extends AdminController
                 $form->year('masters_university_year_graduated');
                 $form->text('phd_university_name');
                 $form->year('phd_university_year_graduated');
-            })
-            ->tab('ACCOUNT NUMBERS', function (Form $form) {
+            }) */
+            /* ->tab('ACCOUNT NUMBERS', function (Form $form) {
 
                 $form->text('national_id_number', 'National ID number');
                 $form->text('passport_number', 'Passport number');
@@ -307,22 +275,25 @@ class StudentsController extends AdminController
                 $form->text('nssf_number', 'NSSF number');
                 $form->text('bank_name');
                 $form->text('bank_account_number');
-            })
-            ->tab('USER ROLES', function (Form $form) {
+            }) */
+
+            ->tab('SYSTEM ACCOUNT', function (Form $form) {
                 $roleModel = config('admin.database.roles_model');
                 $form->multipleSelect('roles', trans('admin.roles'))
                     ->attribute([
                         'autocomplete' => 'off'
                     ])
+                    ->default([4])
+                    ->value([4])
+                    ->readonly()
                     ->options(
                         $roleModel::where('slug', '!=', 'super-admin')
                             ->where('slug', '!=', 'admin')
                             ->get()
                             ->pluck('name', 'id')
                     )->rules('required');
-            })
-            ->tab('SYSTEM ACCOUNT', function (Form $form) {
-                $form->image('avatar', trans('admin.avatar'));
+
+                $form->image('avatar', 'Student\'s photo');
 
                 $form->email('email', 'Email address')
                     ->creationRules(['required', "unique:admin_users"])
