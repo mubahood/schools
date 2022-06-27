@@ -2094,6 +2094,65 @@
             "install-path": "../hamcrest/hamcrest-php"
         },
         {
+            "name": "jxlwqq/quill",
+            "version": "1.0.4",
+            "version_normalized": "1.0.4.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel-admin-extensions/quill.git",
+                "reference": "be5ab91840f25dfee4db0ea5c408943930912645"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laravel-admin-extensions/quill/zipball/be5ab91840f25dfee4db0ea5c408943930912645",
+                "reference": "be5ab91840f25dfee4db0ea5c408943930912645",
+                "shasum": ""
+            },
+            "require": {
+                "encore/laravel-admin": "~1.6",
+                "php": ">=7.0.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~6.0"
+            },
+            "time": "2021-12-15T10:49:17+00:00",
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Jxlwqq\\Quill\\QuillServiceProvider"
+                    ]
+                }
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "Jxlwqq\\Quill\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "jxlwqq",
+                    "email": "jxlwqq@gmail.com"
+                }
+            ],
+            "description": "quill editor for laravel-admin",
+            "homepage": "https://github.com/jxlwqq/quill",
+            "keywords": [
+                "extension",
+                "laravel-admin"
+            ],
+            "support": {
+                "issues": "https://github.com/laravel-admin-extensions/quill/issues",
+                "source": "https://github.com/laravel-admin-extensions/quill/tree/1.0.4"
+            },
+            "install-path": "../jxlwqq/quill"
+        },
+        {
             "name": "laravel-admin-ext/grid-lightbox",
             "version": "v1.0.3",
             "version_normalized": "1.0.3.0",

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "55c4f8eddd0d51133caa4db7aa495a17",
+    "content-hash": "d3fb9af3ac99da000cb367b31494bb7c",
     "packages": [
         {
             "name": "binarytorch/larecipe",
@@ -1562,6 +1562,62 @@
                 }
             ],
             "time": "2022-06-09T08:26:02+00:00"
+        },
+        {
+            "name": "jxlwqq/quill",
+            "version": "1.0.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel-admin-extensions/quill.git",
+                "reference": "be5ab91840f25dfee4db0ea5c408943930912645"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laravel-admin-extensions/quill/zipball/be5ab91840f25dfee4db0ea5c408943930912645",
+                "reference": "be5ab91840f25dfee4db0ea5c408943930912645",
+                "shasum": ""
+            },
+            "require": {
+                "encore/laravel-admin": "~1.6",
+                "php": ">=7.0.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~6.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Jxlwqq\\Quill\\QuillServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Jxlwqq\\Quill\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "jxlwqq",
+                    "email": "jxlwqq@gmail.com"
+                }
+            ],
+            "description": "quill editor for laravel-admin",
+            "homepage": "https://github.com/jxlwqq/quill",
+            "keywords": [
+                "extension",
+                "laravel-admin"
+            ],
+            "support": {
+                "issues": "https://github.com/laravel-admin-extensions/quill/issues",
+                "source": "https://github.com/laravel-admin-extensions/quill/tree/1.0.4"
+            },
+            "time": "2021-12-15T10:49:17+00:00"
         },
         {
             "name": "laravel-admin-ext/grid-lightbox",

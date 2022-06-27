@@ -9,7 +9,8 @@ class Utils  extends Model
     public static function ent()
     {
         $subdomain = explode('.', $_SERVER['HTTP_HOST'])[0];
-        $ent = Enterprise::where([
+        $subdomain = 'sudais';
+        $ent = Enterprise::where([ 
             'subdomain' => $subdomain
         ])->first();
         if ($ent == null) {

@@ -65,6 +65,7 @@ return array(
     'Laravel\\SerializableClosure\\' => array($vendorDir . '/laravel/serializable-closure/src'),
     'Laravel\\Sanctum\\' => array($vendorDir . '/laravel/sanctum/src'),
     'Laravel\\Sail\\' => array($vendorDir . '/laravel/sail/src'),
+    'Jxlwqq\\Quill\\' => array($vendorDir . '/jxlwqq/quill/src'),
     'Illuminate\\Support\\' => array($vendorDir . '/laravel/framework/src/Illuminate/Macroable', $vendorDir . '/laravel/framework/src/Illuminate/Collections'),
     'Illuminate\\Database\\Eloquent\\' => array($vendorDir . '/laravel/legacy-factories/src'),
     'Illuminate\\' => array($vendorDir . '/laravel/framework/src/Illuminate'),

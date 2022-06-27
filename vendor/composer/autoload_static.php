@@ -31,8 +31,8 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'c7a3c339e7e14b60e06a2d7fcce9476b' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Events/functions.php',
         'f0906e6318348a765ffb6eb24e0d0938' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Foundation/helpers.php',
         '58571171fd5812e6e447dce228f52f4d' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Support/helpers.php',
-        '8825ede83f2f289127722d4e842cf7e8' => __DIR__ . '/..' . '/symfony/polyfill-intl-grapheme/bootstrap.php',
         '4e8671d7be9056dcd04ddd9e8e15f9cc' => __DIR__ . '/..' . '/encore/laravel-admin/src/helpers.php',
+        '8825ede83f2f289127722d4e842cf7e8' => __DIR__ . '/..' . '/symfony/polyfill-intl-grapheme/bootstrap.php',
         '9cdd7b9056abc3081735233ba9dd9c7f' => __DIR__ . '/..' . '/facade/flare-client-php/src/helpers.php',
         '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
         'b6b991a57620e2fb6b2f66f03fe9ddc2' => __DIR__ . '/..' . '/symfony/string/Resources/functions.php',
@@ -134,6 +134,10 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
             'Laravel\\SerializableClosure\\' => 28,
             'Laravel\\Sanctum\\' => 16,
             'Laravel\\Sail\\' => 13,
+        ),
+        'J' => 
+        array (
+            'Jxlwqq\\Quill\\' => 13,
         ),
         'I' => 
         array (
@@ -434,6 +438,10 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         array (
             0 => __DIR__ . '/..' . '/laravel/sail/src',
         ),
+        'Jxlwqq\\Quill\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/jxlwqq/quill/src',
+        ),
         'Illuminate\\Support\\' => 
         array (
             0 => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Macroable',
@@ -603,6 +611,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Admin\\Controllers\\EmployeesController' => __DIR__ . '/../..' . '/app/Admin/Controllers/EmployeesController.php',
         'App\\Admin\\Controllers\\EnterpriseController' => __DIR__ . '/../..' . '/app/Admin/Controllers/EnterpriseController.php',
         'App\\Admin\\Controllers\\HomeController' => __DIR__ . '/../..' . '/app/Admin/Controllers/HomeController.php',
+        'App\\Admin\\Controllers\\StudentHasClassController' => __DIR__ . '/../..' . '/app/Admin/Controllers/StudentHasClassController.php',
         'App\\Admin\\Controllers\\StudentsController' => __DIR__ . '/../..' . '/app/Admin/Controllers/StudentsController.php',
         'App\\Admin\\Controllers\\SubjectController' => __DIR__ . '/../..' . '/app/Admin/Controllers/SubjectController.php',
         'App\\Admin\\Controllers\\TermController' => __DIR__ . '/../..' . '/app/Admin/Controllers/TermController.php',
@@ -628,9 +637,11 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Models\\BooksCategory' => __DIR__ . '/../..' . '/app/Models/BooksCategory.php',
         'App\\Models\\Course' => __DIR__ . '/../..' . '/app/Models/Course.php',
         'App\\Models\\Enterprise' => __DIR__ . '/../..' . '/app/Models/Enterprise.php',
+        'App\\Models\\StudentHasClass' => __DIR__ . '/../..' . '/app/Models/StudentHasClass.php',
         'App\\Models\\Subject' => __DIR__ . '/../..' . '/app/Models/Subject.php',
         'App\\Models\\Term' => __DIR__ . '/../..' . '/app/Models/Term.php',
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
+        'App\\Models\\Utils' => __DIR__ . '/../..' . '/app/Models/Utils.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
         'App\\Providers\\AuthServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AuthServiceProvider.php',
         'App\\Providers\\BroadcastServiceProvider' => __DIR__ . '/../..' . '/app/Providers/BroadcastServiceProvider.php',
@@ -3409,6 +3420,9 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'Illuminate\\View\\ViewName' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/View/ViewName.php',
         'Illuminate\\View\\ViewServiceProvider' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/View/ViewServiceProvider.php',
         'JsonException' => __DIR__ . '/..' . '/symfony/polyfill-php73/Resources/stubs/JsonException.php',
+        'Jxlwqq\\Quill\\Editor' => __DIR__ . '/..' . '/jxlwqq/quill/src/Editor.php',
+        'Jxlwqq\\Quill\\Quill' => __DIR__ . '/..' . '/jxlwqq/quill/src/Quill.php',
+        'Jxlwqq\\Quill\\QuillServiceProvider' => __DIR__ . '/..' . '/jxlwqq/quill/src/QuillServiceProvider.php',
         'Laravel\\Sail\\Console\\InstallCommand' => __DIR__ . '/..' . '/laravel/sail/src/Console/InstallCommand.php',
         'Laravel\\Sail\\Console\\PublishCommand' => __DIR__ . '/..' . '/laravel/sail/src/Console/PublishCommand.php',
         'Laravel\\Sail\\SailServiceProvider' => __DIR__ . '/..' . '/laravel/sail/src/SailServiceProvider.php',

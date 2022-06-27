@@ -96,8 +96,9 @@ class EnterpriseController extends AdminController
             ->rules('required');
 
         $form->text('name', __('Name'))->required();
-        $form->text('subdomain', __('Subdomain'))->required();
         $form->text('short_name', __('Short name'))->required();
+        $form->quill('welcome_message', __('Welcome_message'))->required();
+        $form->text('subdomain', __('Subdomain'))->required();
         $form->image('logo', __('Logo'));
         $form->text('color', __('Primary color'))->required();
         $form->text('phone_number', __('Phone number'))->attribute('type', 'number');
