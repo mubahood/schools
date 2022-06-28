@@ -97,7 +97,8 @@ class EnterpriseController extends AdminController
 
         $form->text('name', __('Name'))->required();
         $form->text('short_name', __('Short name'))->required();
-        $form->quill('welcome_message', __('Welcome_message'))->required();
+        $form->textarea('welcome_message', __('Welcome_message'))->required();
+        //$form->quill('welcome_message', __('Welcome_message'))->required();
         $form->text('subdomain', __('Subdomain'))->required();
         $form->image('logo', __('Logo'));
         $form->text('color', __('Primary color'))->required();
