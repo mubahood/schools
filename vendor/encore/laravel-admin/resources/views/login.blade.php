@@ -2,8 +2,7 @@
 use App\Models\Utils;
 $ent = Utils::ent();
 
-?>
-<!DOCTYPE html>
+?><!DOCTYPE html>
 <html>
 
 <head>
@@ -83,28 +82,30 @@ $ent = Utils::ent();
 <body class="">
     <div class="row">
         <div class="col-md-6 fill pc-only " style="background-color: {{ $ent->color }}">
-            <img class="img-fluid center " width="20%" src="{{ url('assets/logo_1.png') }}" alt="">
+            <img class="img-fluid center " width="25%" src="{{ url($ent->logo) }}" alt="">
 
             <div class="description">
                 <h2>{{ $ent->name }}.</h2>
                 {!! $ent->welcome_message !!}
             </div>
         </div>
-        <div class="col-md-1 fill pc-only"
-            style="background-image: url({{ url('assets/pattern.png') }});    
+        <div  class="col-md-1 fill pc-only " style="padding: 0px; width: 4rem;" >
+            <div class="fill pc-only"
+                style="width: 3rem; background-image: url({{ url('assets/pattern.png') }});    
             background-size:     cover;
             background-repeat:   no-repeat;
             background-position: center center;
             ">
+            </div>
         </div>
+
         <div class="col-md-5 fill">
             <div class="login-box">
                 {{-- <div class="login-logo">
                     <a href="{{ admin_url('/') }}"><b>{{ config('admin.name') }}</b></a>
                 </div> --}}
 
-                <img class="img-fluid center mobo-only " width="30%" src="{{ url('assets/logo_1.png') }}"
-                    alt="">
+                <img class="img-fluid center mobo-only " width="30%" src="{{ url($ent->logo) }}" alt="">
 
                 <div class="login-logo">
                     {{-- <h2>Log in to your account</h2> --}}
@@ -112,7 +113,7 @@ $ent = Utils::ent();
                 </div>
 
                 <!-- /.login-logo -->
-                <div class="login-box-body"> 
+                <div class="login-box-body">
 
                     <form action="{{ admin_url('auth/login') }}" method="post">
                         <div class="form-group has-feedback {!! !$errors->has('username') ?: 'has-error' !!}">
