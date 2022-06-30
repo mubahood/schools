@@ -32,9 +32,9 @@ class HomeController extends Controller
                     ])->count();
 
                     $box  = new Box('Teachers', view('widgets.box-3', [
-                        'icon' => 'student.png',
+                        'icon' => 'teacher.png',
                         'count' => number_format($teachers_count),
-                        'sub_title' => 'All teatures registered',
+                        'sub_title' => 'All teachers registered',
                     ]));
                     $box->style('success');
                     $column->append($box);
@@ -47,7 +47,7 @@ class HomeController extends Controller
                     ])->count();
 
                     $box  = new Box('Students', view('widgets.box-3', [
-                        'icon' => 'teacher.png',
+                        'icon' => 'student.png',
                         'count' => number_format($students_count),
                         'sub_title' => 'All students registered',
                     ]));
