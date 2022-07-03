@@ -22,6 +22,7 @@ class CreateExamHasClassesTable extends Migration
             $table->foreignIdFor(Enterprise::class);
             $table->foreignIdFor(Exam::class);
             $table->foreignIdFor(AcademicClass::class, 'class_id');
+            
         });
     }
 

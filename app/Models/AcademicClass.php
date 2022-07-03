@@ -24,4 +24,14 @@ class AcademicClass extends Model
     {
         return $this->belongsTo(Administrator::class, 'class_teahcer_id');
     }
+
+    function subjects()
+    {
+        return $this->hasMany(Subject::class, 'academic_class_id');
+    }
+
+    function students()
+    {
+        return $this->hasMany(StudentHasClass::class, 'academic_class_id');
+    }
 }

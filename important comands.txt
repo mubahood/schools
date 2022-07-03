@@ -25,6 +25,8 @@ php artisan make:migration create_exams_table
 php artisan make:migration create_exam_has_classes_table
 php artisan make:model Exam
 php artisan make:model ExamHasClass
+php artisan make:model Mark
+php artisan make:migration create_marks_table
  
 
 

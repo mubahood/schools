@@ -69,12 +69,11 @@ class ExamController extends AdminController
      */
     protected function form()
     {
-        $e = Exam::find(1);
+        /* $e = Exam::find(1);
         $e->name .= rand(100000, 1000000000);
         $e->save();
-        die("done"); 
+        die("done");  */
         $form = new Form(new Exam());
-
         $u = Admin::user();
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
 
