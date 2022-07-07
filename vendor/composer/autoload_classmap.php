@@ -46,6 +46,7 @@ return array(
     'App\\Models\\Enterprise' => $baseDir . '/app/Models/Enterprise.php',
     'App\\Models\\Exam' => $baseDir . '/app/Models/Exam.php',
     'App\\Models\\ExamHasClass' => $baseDir . '/app/Models/ExamHasClass.php',
+    'App\\Models\\Mark' => $baseDir . '/app/Models/Mark.php',
     'App\\Models\\StudentHasClass' => $baseDir . '/app/Models/StudentHasClass.php',
     'App\\Models\\Subject' => $baseDir . '/app/Models/Subject.php',
     'App\\Models\\Term' => $baseDir . '/app/Models/Term.php',

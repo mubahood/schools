@@ -640,6 +640,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Models\\Enterprise' => __DIR__ . '/../..' . '/app/Models/Enterprise.php',
         'App\\Models\\Exam' => __DIR__ . '/../..' . '/app/Models/Exam.php',
         'App\\Models\\ExamHasClass' => __DIR__ . '/../..' . '/app/Models/ExamHasClass.php',
+        'App\\Models\\Mark' => __DIR__ . '/../..' . '/app/Models/Mark.php',
         'App\\Models\\StudentHasClass' => __DIR__ . '/../..' . '/app/Models/StudentHasClass.php',
         'App\\Models\\Subject' => __DIR__ . '/../..' . '/app/Models/Subject.php',
         'App\\Models\\Term' => __DIR__ . '/../..' . '/app/Models/Term.php',
