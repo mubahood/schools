@@ -1,14 +1,20 @@
-.sidebar{
-    background-color: #FFFFFF;
-}
-.content-header,.content{
-    background-color: #F9F9F9;
+.bagde {
+    background-color: rgb(229, 229, 229);
+    padding: 2px 5px 2px 5px;
+    border-radius: 5px;
 }
 
-.sidebar-menu .active{
-    border-left: solid 5px  #860002!important;;
-    color:#860002!important;;
+.bagde-danger {
+    background-color: red;
+    color: white;
 }
-.navbar,.logo,.sidebar-toggle,.navbar-static-top{ 
-    background-color:#860002!important;;
+
+.bagde-success {
+    background-color: green;
+    color: white;
+}
+
+.bagde-warning {
+    background-color: yellow;
+    color: black;
 }

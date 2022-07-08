@@ -11,6 +11,9 @@ class Exam extends Model
     use HasFactory;
 
 
+    protected $cascadeDeletes = ['marks'];
+
+
     public static function boot()
     {
         parent::boot();
@@ -24,6 +27,10 @@ class Exam extends Model
         });
     }
 
+    public function marks()
+    {
+        return $this->hasMany(Mark::class);
+    }
 
 
     public static function my_update($m)

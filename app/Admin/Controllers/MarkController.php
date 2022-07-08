@@ -3,7 +3,9 @@
 namespace App\Admin\Controllers;
 
 use App\Models\Mark;
+use Carbon\Carbon;
 use Encore\Admin\Controllers\AdminController;
+use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
@@ -25,20 +27,30 @@ class MarkController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Mark());
+        $grid->disableBatchActions();
+        $grid->model()->where([
+            'enterprise_id' => Admin::user()->enterprise_id,
+        ])->orderBy('id', 'DESC');
 
-        $grid->column('id', __('Id'));
-        $grid->column('created_at', __('Created at'));
-        $grid->column('updated_at', __('Updated at'));
-        $grid->column('enterprise_id', __('Enterprise id'));
-        $grid->column('exam_id', __('Exam id'));
-        $grid->column('class_id', __('Class id'));
-        $grid->column('subject_id', __('Subject id'));
-        $grid->column('student_id', __('Student id'));
-        $grid->column('teacher_id', __('Teacher id'));
-        $grid->column('score', __('Score'));
-        $grid->column('remarks', __('Remarks'));
-        $grid->column('is_submitted', __('Is submitted'));
-        $grid->column('is_missed', __('Is missed'));
+        $grid->column('student.name', __('Student'))->sortable();
+        $grid->column('exam.name', __('Exam'))->sortable();
+        $grid->column('class.name', __('Class'))->sortable();
+        $grid->column('subject.name', __('Subject'))->sortable();
+        $grid->column('score', __('Score'))->sortable()->editable();
+        $grid->column('remarks', __('Remarks'))->editable();
+        $grid->column('is_missed', __('Missed'));
+        $grid->column('is_submitted', __('Submitted'))->display(function ($st) {
+            if ($st)
+                return '<span class="bagde bagde-success">Submitted</span>';
+            else
+                return '<span class="bagde bagde-danger">Missing</span>';
+        })->sortable();
+
+        $grid->column('teacher.name', __('Teacher'))->sortable()->hide();
+
+        $grid->column('updated_at', __('Updated'))->display(function ($v) {
+            return Carbon::parse($v)->format('d-M-Y');
+        })->sortable();
 
         return $grid;
     }

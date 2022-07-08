@@ -23,4 +23,15 @@ class Subject extends Model
     {
         return $this->belongsTo(Administrator::class, 'subject_teacher');
     }
+
+    function getNameAttribute()
+    {
+        if ($this->course == null) {
+            return "-";
+        }
+        return $this->course->name;
+    }
+
+
+    protected $appends = ['name'];
 }

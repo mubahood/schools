@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PrintController2;
 use App\Models\AcademicClass;
 use App\Models\Book;
 use App\Models\BooksCategory;
@@ -87,3 +88,4 @@ Route::get('/', function () {
   return view('welcome');
 });
  */
+Route::match(['get', 'post'], '/print', [PrintController2::class, 'index']);

@@ -18,6 +18,7 @@ class CreateMarksTable extends Migration
      */
     public function up()
     {
+        Schema::drop('marks');
         Schema::create('marks', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
