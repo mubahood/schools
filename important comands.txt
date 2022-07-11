@@ -25,8 +25,10 @@ php artisan make:migration create_Marks_table
 php artisan make:migration create_Mark_has_classes_table
 php artisan make:model Mark
 php artisan make:model MarkHasClass
-php artisan make:model Mark
+php artisan make:model ReportCard
 php artisan make:migration create_marks_table
+php artisan make:migration create_grading_scales_table
+php artisan make:model TermlyReportCard
  
 
 
@@ -36,6 +38,7 @@ php artisan admin:make EmployeesController --vendor\\encore\\laravel-admin\\src\
 php artisan make:migration create_books_categories_table
 php artisan make:migration create_subjects_table
 php artisan make:migration create_academic_class_sctreams_table
+php artisan make:migration create_termly_report_cards_table
 
 php artisan admin:make BooksCategoryController --model=App\\Models\\BooksCategory
 php artisan admin:make BooksCategoryController --model=App\\Models\\BooksCategory
@@ -47,4 +50,4 @@ book_borrow_books
 php artisan admin:make SubjectController --model=App\\Models\\Subject
 php artisan admin:make StudentHasClassController --model=App\\Models\\StudentHasClass
  
-php artisan admin:make MarkController --model=App\\Models\\Mark
+php artisan admin:make TermlyReportCardController --model=App\\Models\\TermlyReportCard

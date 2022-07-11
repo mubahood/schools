@@ -25,6 +25,7 @@ Route::group([
     $router->resource('students-classes', StudentHasClassController::class);
     $router->resource('exams', ExamController::class);
     $router->resource('marks', MarkController::class);
+    $router->resource('termly-report-cards', TermlyReportCardController::class);
     
     $router->get('/', 'HomeController@index')->name('home');
     $router->resources([
