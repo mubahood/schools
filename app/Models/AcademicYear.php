@@ -13,6 +13,12 @@ class AcademicYear extends Model
         return $this->belongsTo(Enterprise::class);
     }
 
+    function classes()
+    {
+        return $this->hasMany(AcademicClass::class,'academic_year_id');
+    }
+
+
     public static function boot()
     {
         parent::boot();
