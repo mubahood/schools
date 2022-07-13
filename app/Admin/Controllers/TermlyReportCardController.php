@@ -73,9 +73,9 @@ class TermlyReportCardController extends AdminController
      */
     protected function form()
     {
-        $m = TermlyReportCard::find(1);
+        /* $m = TermlyReportCard::find(1);
         $m->report_title .= rand(10000000, 1000000000);
-        $m->save();
+        $m->save(); */
         $form = new Form(new TermlyReportCard());
         $u = Admin::user();
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
@@ -97,6 +97,7 @@ class TermlyReportCardController extends AdminController
         $form->radio('has_mid_term', __('Include Mid term exams?'))->options([1 => 'Yes', 0 => 'No'])->required();
         $form->radio('has_end_term', __('Include End of term exams?'))->options([1 => 'Yes', 0 => 'No'])->required();
         $form->text('report_title', __('Report title'));
+        $form->text('grading_scale_id', __('Grading scale'))->required();
 
         return $form;
     }

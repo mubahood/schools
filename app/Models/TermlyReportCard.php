@@ -47,6 +47,11 @@ class TermlyReportCard extends Model
         return $this->belongsTo(Term::class);
     }
 
+    function exam()
+    {
+        return $this->belongsTo(Exam::class);
+    }
+
     public static function my_update($m)
     {
         if (
@@ -95,65 +100,64 @@ class TermlyReportCard extends Model
                                 $report_item->enterprise_id = $m->enterprise_id;
                                 $report_item->subject_id = $subjet->id;
                                 $report_item->student_report_card_id = $report_card->id;
-
-                                $marks = Mark::where([
-                                    'subject_id' => $subjet->id,
-                                    'student_id' => $student->id,
-                                    'class_id' => $class->id
-                                ])->get();
-
-                                foreach ($marks as $mark) {
-
-                                    if ($m->term_id == $mark->exam->term_id) {
-
-                                        if ($m->has_beginning_term && ($mark->exam->type == 'B.O.T')) {
-                                            $report_item->did_bot = 0;
-
-                                            $report_item->did_bot = (!$mark->is_missed);
-                                            $report_item->bot_mark = $mark->score;
-                                            $report_item->remarks = $mark->remarks;
-                                            $report_item->initials = '-';
-                                            /* if ((!$mark->is_missed) && ($mark->is_submitted)) {
-                                                
-                                            } */
-                                        }
-                                        if ($m->has_mid_term && ($mark->exam->type == 'M.O.T')) {
-
-                                            $report_item->did_mot = (!$mark->is_missed);
-                                            $report_item->mot_mark = $mark->score;
-                                            $report_item->remarks = $mark->remarks;
-                                            $report_item->initials = '-';
-                                            /* if ((!$mark->is_missed) && ($mark->is_submitted)) {
-                                                
-                                            } */
-                                        }
-                                        if ($m->has_mid_term && ($mark->exam->type == 'E.O.T')) {
-                                            $report_item->did_eot = 0;
-                                            $report_item->eot_mark = 0;
-
-                                            $report_item->did_eot = (!$mark->is_missed);
-                                            $report_item->eot_mark = $mark->score;
-                                            $report_item->remarks = $mark->remarks;
-                                            $report_item->initials = '-';
-
-                                            /* if ((!$mark->is_missed) && ($mark->is_submitted)) {
-                                                
-                                            } */
-                                        }
-                                    }
-                                }
                             } else {
-                                die("Updating...");
+                                //die("Updating...");
                             }
 
+                            $marks = Mark::where([
+                                'subject_id' => $subjet->id,
+                                'student_id' => $student->id,
+                                'class_id' => $class->id
+                            ])->get();
 
-                            dd($report_item);
-                            dd("Done mark ===  READY TO GRADE");
+                            foreach ($marks as $mark) {
 
+                                if ($m->term_id == $mark->exam->term_id) {
 
-                            dd($subjet->name);
+                                    if ($m->has_beginning_term && ($mark->exam->type == 'B.O.T')) {
+                                        $report_item->did_bot = 0;
+
+                                        $report_item->did_bot = (!$mark->is_missed);
+                                        $report_item->bot_mark = $mark->score;
+                                        $report_item->remarks = $mark->remarks;
+                                        $report_item->initials = '-';
+                                        /* if ((!$mark->is_missed) && ($mark->is_submitted)) {
+                                            
+                                        } */
+                                    }
+                                    if ($m->has_mid_term && ($mark->exam->type == 'M.O.T')) {
+
+                                        $report_item->did_mot = (!$mark->is_missed);
+                                        $report_item->mot_mark = $mark->score;
+                                        $report_item->remarks = $mark->remarks;
+                                        $report_item->initials = '-';
+                                        /* if ((!$mark->is_missed) && ($mark->is_submitted)) {
+                                            
+                                        } */
+                                    }
+                                    if ($m->has_mid_term && ($mark->exam->type == 'E.O.T')) {
+                                        $report_item->did_eot = 0;
+                                        $report_item->eot_mark = 0;
+
+                                        $report_item->did_eot = (!$mark->is_missed);
+                                        $report_item->eot_mark = $mark->score;
+                                        $report_item->remarks = $mark->remarks;
+                                        $report_item->initials = '-';
+
+                                        /* if ((!$mark->is_missed) && ($mark->is_submitted)) {
+                                            
+                                        } */
+                                    }
+                                }
+                            }
+
+                            $scale = Utils::grade_marks($report_item);
+
+                            $report_item->grade_name = $scale->name;
+                            $report_item->aggregates = $scale->aggregates;
+                            $report_item->save();
                         }
-                        dd($class->subjects->count());
+                        //dd($class->subjects->count());
                         //die($report_card->id . ""); 
                         //StudentReportCardItem
                     }
@@ -162,8 +166,8 @@ class TermlyReportCard extends Model
             /*
             		did_bot	did_mot	did_eot	bot_mark	mot_mark	eot_mark	grade_name	aggregates	remarks	initials
  */
-            die("111");
+            //die("111");
         }
-        die("updaring... ==> " . $m->term->academic_year->classes->count());
+        //die("updaring... ==> " . $m->term->academic_year->classes->count());
     }
 }

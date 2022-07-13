@@ -31,6 +31,7 @@ php artisan make:migration create_grading_scales_table
 php artisan make:model TermlyReportCard
 php artisan make:model StudentReportCard
 php artisan make:model StudentReportCardItem
+php artisan make:model GradingScale
  
 
 
@@ -43,6 +44,9 @@ php artisan make:migration create_academic_class_sctreams_table
 php artisan make:migration create_termly_report_cards_table
 php artisan make:migration create_student_report_cards_table
 php artisan make:migration create_student_report_card_items_table
+php artisan make:migration create_grade_ranges_table
+php artisan make:migration create_grading_scales_table
+2022_07_12_193945_create_grading_scales_table
 
 php artisan admin:make BooksCategoryController --model=App\\Models\\BooksCategory
 php artisan admin:make BooksCategoryController --model=App\\Models\\BooksCategory
@@ -55,3 +59,5 @@ php artisan admin:make SubjectController --model=App\\Models\\Subject
 php artisan admin:make StudentHasClassController --model=App\\Models\\StudentHasClass
  
 php artisan admin:make TermlyReportCardController --model=App\\Models\\TermlyReportCard
+php artisan admin:make GradingScaleController --model=App\\Models\\GradingScale
+php artisan admin:make GradeRangeController --model=App\\Models\\GradeRange

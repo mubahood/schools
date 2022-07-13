@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ReportCard;
+use App\Models\StudentReportCard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 
@@ -21,6 +22,41 @@ class PrintController2 extends Controller
 
     public function index()
     {
+
+        $id = ((int)($_GET['id']));
+        $item = StudentReportCard::find($id);
+        if ($item == null) {
+            die("Report card not found.");
+        }
+
+        $rows = "";
+        foreach ($item->items as $v) {
+            $rows .= "<tr>";
+            $rows .= "<td>{$v->subject->subject_name}</td>";
+            $rows .= "<td>{$v->bot_mark}</td>";
+            $rows .= "<td>{$v->mot_mark}</td>";
+            $rows .= "<td>{$v->eot_mark}</td>";
+            $rows .= "<td>" . ($v->eot_mark + $v->mot_mark + $v->subject->bot_mark) . "</td>";
+            $rows .= "<td>{$v->grade_name}</td>";
+            $rows .= "<td>{$v->aggregates}</td>";
+            $rows .= "<td>{$v->remarks}</td>";
+            $rows .= "</tr>";
+        }
+
+        /* 
+        "subject_id" => 1
+        "student_report_card_id" => 1
+        "did_bot" => 1
+        "did_mot" => 1
+        "did_eot" => 1
+        "bot_mark" => 3
+        "mot_mark" => 24
+        "eot_mark" => 23
+        "grade_name" => "P8"
+        "aggregates" => 8
+        "remarks" => "V.Good"
+        "initials" => "-"
+        */
 
         $r = new ReportCard();
         $data = '<link type="text/css" href="' . url('assets/bootstrap.css') . '" rel="stylesheet" />';
@@ -154,46 +190,7 @@ class PrintController2 extends Controller
                         </tr>        
                     </thead>       
                     <tbody>
-                        <tr>
-                            <th>English<th>
-                            <td>23<td>
-                            <td>46<td>
-                            <td>69<td>
-                            <td>C<td>
-                            <td>3<td>
-                            <td>V.Good<td>
-                            <td>M. Muhindo<td>
-                        </tr>        
-                        <tr>
-                            <th>Mathematics<th>
-                            <td>23<td>
-                            <td>46<td>
-                            <td>69<td>
-                            <td>C<td>
-                            <td>3<td>
-                            <td>V.Good<td>
-                            <td>M. Muhindo<td>
-                        </tr>        
-                        <tr>
-                            <th>Geography<th>
-                            <td>23<td>
-                            <td>46<td>
-                            <td>69<td>
-                            <td>C<td>
-                            <td>3<td>
-                            <td>V.Good<td>
-                            <td>M. Muhindo<td>
-                        </tr>        
-                        <tr>
-                            <th>Biology<th>
-                            <td>23<td>
-                            <td>46<td>
-                            <td>69<td>
-                            <td>C<td>
-                            <td>3<td>
-                            <td>V.Good<td>
-                            <td>M. Muhindo<td>
-                        </tr>        
+                    ' . $rows . '       
                     </tbody>       
             </table>';
 
