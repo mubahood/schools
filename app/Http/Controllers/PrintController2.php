@@ -179,14 +179,14 @@ class PrintController2 extends Controller
         $data .= '<table class="bordered-table" >
                     <thead>
                         <tr>
-                            <th>SUBJECTS<th>
-                            <th>B.O.T (30)<th>
-                            <th>M.O.T (30)<th>
-                            <th>E.O.T (100%)<th>
-                            <th>Grade<th>
-                            <th>Aggr<th>
-                            <th>Remarks<th>
-                            <th>Initials<th>
+                            <th>SUBJECTS</th>
+                            <th>B.O.T (30)</th>
+                            <th>M.O.T (30)</th>
+                            <th>E.O.T (100%)</th>
+                            <th>Grade</th>
+                            <th>Aggr</th>
+                            <th>Remarks</th>
+                            <th>Initials</th>
                         </tr>        
                     </thead>       
                     <tbody>
