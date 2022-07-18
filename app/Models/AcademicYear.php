@@ -31,8 +31,7 @@ class AcademicYear extends Model
             ])->first();
             if ($_m != null) {
                 $_m->is_active = true;
-                die("You cannot have two active academic years deativate the other first.");
-                //$_m->save();
+                $_m->save();
                 //die("You cannot have to active academic years.");
             }
         });
@@ -42,9 +41,9 @@ class AcademicYear extends Model
                 'enterprise_id' => $m->enterprise_id,
                 'is_active' => 1,
             ])->first();
-            if ($_m != null) {
+            /* if ($_m != null) {
                 die("You cannot have two active academic years deativate the other first.");
-            }
+            } */
         });
     }
 }

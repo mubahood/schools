@@ -28,6 +28,7 @@ Route::group([
     $router->resource('termly-report-cards', TermlyReportCardController::class);
     $router->resource('grading-scales', GradingScaleController::class);
     $router->resource('student-report-cards', StudentReportCardController::class);
+    $router->resource('demo', DemoController::class);
     
     $router->get('/', 'HomeController@index')->name('home');
     $router->resources([

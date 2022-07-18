@@ -84,6 +84,200 @@ class Utils  extends Model
 
         return $ent;
     }
+
+
+    public static function courses_a_level()
+    {
+        return [
+            [
+                'name' => 'English Language',
+                'short_name' => '112',
+            ],
+            [
+                'name' => 'History',
+                'short_name' => '241',
+            ],
+            [
+                'name' => 'Geography',
+                'short_name' => '273',
+            ],
+            [
+                'name' => 'Mathematics',
+                'short_name' => '456',
+            ],
+            [
+                'name' => 'Biology',
+                'short_name' => '553',
+            ],
+            [
+                'name' => 'Chemistry',
+                'short_name' => '545',
+            ],
+            [
+                'name' => 'Physics',
+                'short_name' => '535',
+            ],
+            [
+                'name' => 'Art',
+                'short_name' => '610',
+            ],
+            [
+                'name' => 'Commerce',
+                'short_name' => '800',
+            ],
+            [
+                'name' => 'Agriculture',
+                'short_name' => '527',
+            ],
+        ];
+    }
+
+
+    public static function courses_o_level()
+    {
+        return [
+            [
+                'name' => 'English Language',
+                'short_name' => '112',
+            ],
+            [
+                'name' => 'History',
+                'short_name' => '241',
+            ],
+            [
+                'name' => 'Geography',
+                'short_name' => '273',
+            ],
+            [
+                'name' => 'Mathematics',
+                'short_name' => '456',
+            ],
+            [
+                'name' => 'Biology',
+                'short_name' => '553',
+            ],
+            [
+                'name' => 'Chemistry',
+                'short_name' => '545',
+            ],
+            [
+                'name' => 'Physics',
+                'short_name' => '535',
+            ],
+            [
+                'name' => 'Art',
+                'short_name' => '610',
+            ],
+            [
+                'name' => 'Commerce',
+                'short_name' => '800',
+            ],
+            [
+                'name' => 'Agriculture',
+                'short_name' => '527',
+            ],
+        ];
+    }
+
+
+    public static function courses_primary()
+    {
+        return [
+            [
+                'name' => 'Social studies',
+                'short_name' => 'SST',
+            ],
+            [
+                'name' => 'Science',
+                'short_name' => 'Sci',
+            ],
+            [
+                'name' => 'Mathematics',
+                'short_name' => 'Maths',
+            ],
+            [
+                'name' => 'English',
+                'short_name' => 'Eng',
+            ],
+        ];
+    }
+
+
+
+
+    public static function classes_advanced()
+    {
+        return [
+            [
+                'name' => 'Secondary Five',
+                'short_name' => 'S5',
+            ],
+            [
+                'name' => 'Secondary Six',
+                'short_name' => 'S6',
+            ],
+        ];
+    }
+
+
+    public static function classes_secondary()
+    {
+        return [
+            [
+                'name' => 'Secondary One',
+                'short_name' => 'S1',
+            ],
+            [
+                'name' => 'Secondary Two',
+                'short_name' => 'S2',
+            ],
+            [
+                'name' => 'Secondary Three',
+                'short_name' => 'S3',
+            ],
+            [
+                'name' => 'Secondary Four',
+                'short_name' => 'S4',
+            ],
+        ];
+    }
+
+
+
+
+    public static function classes_primary()
+    {
+        return [
+            [
+                'name' => 'Primary One',
+                'short_name' => 'P1',
+            ],
+            [
+                'name' => 'Primary Two',
+                'short_name' => 'P2',
+            ],
+            [
+                'name' => 'Primary Three',
+                'short_name' => 'P3',
+            ],
+            [
+                'name' => 'Primary Four',
+                'short_name' => 'P4',
+            ],
+            [
+                'name' => 'Primary Five',
+                'short_name' => 'P5',
+            ],
+            [
+                'name' => 'Primary Six',
+                'short_name' => 'P6',
+            ],
+            [
+                'name' => 'Primary Seven',
+                'short_name' => 'P7',
+            ],
+        ];
+    }
 }
 /* $conn = new mysqli(
     env('DB_HOST'),

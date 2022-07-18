@@ -20,8 +20,8 @@ class Term extends Model
                 'is_active' => 1,
             ])->first();
             if ($_m != null) {
-                $_m->is_active = true;
-                die("You cannot have two active Terms deativate the other first.");
+                //$_m->is_active = true;
+                //die("You cannot have two active Terms deativate the other first.");
                 //$_m->save();
                 //die("You cannot have to active academic years.");
             }
@@ -33,7 +33,7 @@ class Term extends Model
                 'is_active' => 1,
             ])->first();
             if ($_m != null) {
-                die("You cannot have two active Terms deativate the other first.");
+                //die("You cannot have two active Terms deativate the other first.");
             }
         });
     }
