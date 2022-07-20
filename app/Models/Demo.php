@@ -122,14 +122,9 @@ class Demo extends Model
             $range->min_mark = $m->id;
             $range->max_mark = $m->id;
             $range->aggregates = $m->id;
-     	
+            $range->demo_id = $m->id;
 	
-	
-	
-	
-demo_id	
-	
-Edit
+
             $scale->save();
             die("Love");
         }else if ($m->grade_scale_type == 'a_level') {
