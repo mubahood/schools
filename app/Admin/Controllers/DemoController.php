@@ -26,12 +26,12 @@ class DemoController extends AdminController
     protected function grid()
     {
         
-        $d = Demo::find(4);
+        /* $d = Demo::find(4);
         $d->temp .= rand(100, 1000);
         $d->create_grade_scale = 1;
         $d->grade_scale_type = 'o_level';
         $d->save();
-        die("Romina");
+        die("Romina"); */
         $grid = new Grid(new Demo());
 
         $grid->column('id', __('Id'));

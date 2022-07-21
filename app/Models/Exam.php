@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Mail\Markdown;
 
 class Exam extends Model
@@ -18,12 +19,31 @@ class Exam extends Model
     {
         parent::boot();
 
+        self::creating(function ($m) {
+            $term = Exam::where([
+                'term_id' => $m->term_id,
+                'type' => $m->type,
+            ])->first();
+            if ($term != null) {
+                die("This term already have {$m->type} exams.");
+            }
+            if ($m->max_mark > 100) {
+                die("Maximum exam mark must be less than 100.");
+            }
+        });
+
         self::created(function ($m) {
             Exam::my_update($m);
         });
 
         self::updated(function ($m) {
             Exam::my_update($m);
+        });
+
+        self::deleting(function ($m) {
+            Mark::where([
+                'exam_id' => $m->id
+            ])->delete();
         });
     }
 
@@ -38,6 +58,10 @@ class Exam extends Model
         if (empty($m->classes)) {
             return;
         }
+        
+        ini_set ( 'max_execution_time', -1); //unlimit
+
+        
 
         foreach ($m->classes as $k => $class) {
             foreach ($class->subjects as $_k => $subject) {

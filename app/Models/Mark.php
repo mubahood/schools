@@ -13,14 +13,11 @@ class Mark extends Model
     public static function boot()
     {
         parent::boot();
-
-
+ 
         self::updating(function ($m) {
-
             if (($m->exam->max_mark < 0) || ($m->score > $m->exam->max_mark)) {
                 return false;
             }
-
             $m->is_submitted = 1;
         });
     }

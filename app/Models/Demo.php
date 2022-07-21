@@ -92,58 +92,339 @@ class Demo extends Model
 
     public static function do_create_grade_scale($m)
     {
-        $scale = new GradingScale();
-        $scale->enterprise_id = $m->enterprise_id;
-        $scale->demo_id = $m->id;
+
 
         if ($m->grade_scale_type == 'primary') {
+            $scale = new GradingScale();
+            $scale->enterprise_id = $m->enterprise_id;
+            $scale->demo_id = $m->id;
             $scale->name = 'Primary school grading';
-            $g = GradingScale::where([
-                'name' =>$scale->name
+
+            $ay = GradingScale::where([
+                'name' => $scale->name,
+                'enterprise_id' => $m->enterprise_id,
             ])->first();
-            if($g != null){
+            if ($ay != null) {
                 return;
             }
+
+ 
+
             $scale->save();
-            die("Love");
-        }else if ($m->grade_scale_type == 'o_level') {
-            $scale->name = 'O\' Level grading'.rand(100000,1000000);
-            $g = GradingScale::where([
-                'name' =>$scale->name
-            ])->first();
-            if($g != null){
-                return;
-            }
 
             $range = new GradeRange();
             $range->grading_scale_id = $scale->id;
             $range->enterprise_id = $m->id;
-            $range->name = $m->id;
-            $range->min_mark = $m->id;
-            $range->max_mark = $m->id;
-            $range->aggregates = $m->id;
+            $range->name = 'F9';
+            $range->min_mark = 0;
+            $range->max_mark = 49;
+            $range->aggregates = 9;
             $range->demo_id = $m->id;
-	
+            $range->save();
 
-            $scale->save();
-            die("Love");
-        }else if ($m->grade_scale_type == 'a_level') {
-            $scale->name = 'A\' Level grading';
-            $g = GradingScale::where([
-                'name' =>$scale->name
+            $range = new GradeRange();
+            $range->grading_scale_id = $scale->id;
+            $range->enterprise_id = $m->id;
+            $range->name = 'P8';
+            $range->min_mark = 50;
+            $range->max_mark = 55;
+            $range->aggregates = 8;
+            $range->demo_id = $m->id;
+            $range->save();
+
+            $range = new GradeRange();
+            $range->grading_scale_id = $scale->id;
+            $range->enterprise_id = $m->id;
+            $range->name = 'P7';
+            $range->min_mark = 56;
+            $range->max_mark = 59;
+            $range->aggregates = 7;
+            $range->demo_id = $m->id;
+            $range->save();
+
+            $range = new GradeRange();
+            $range->grading_scale_id = $scale->id;
+            $range->enterprise_id = $m->id;
+            $range->name = 'C6';
+            $range->min_mark = 60;
+            $range->max_mark = 65;
+            $range->aggregates = 6;
+            $range->demo_id = $m->id;
+            $range->save();
+
+            $range = new GradeRange();
+            $range->grading_scale_id = $scale->id;
+            $range->enterprise_id = $m->id;
+            $range->name = 'C5';
+            $range->min_mark = 66;
+            $range->max_mark = 69;
+            $range->aggregates = 5;
+            $range->demo_id = $m->id;
+            $range->save();
+
+            $range = new GradeRange();
+            $range->grading_scale_id = $scale->id;
+            $range->enterprise_id = $m->id;
+            $range->name = 'C4';
+            $range->min_mark = 70;
+            $range->max_mark = 79;
+            $range->aggregates = 4;
+            $range->demo_id = $m->id;
+            $range->save();
+
+            $range = new GradeRange();
+            $range->grading_scale_id = $scale->id;
+            $range->enterprise_id = $m->id;
+            $range->name = 'C3';
+            $range->min_mark = 80;
+            $range->max_mark = 89;
+            $range->aggregates = 3;
+            $range->demo_id = $m->id;
+            $range->save();
+
+            $range = new GradeRange();
+            $range->grading_scale_id = $scale->id;
+            $range->enterprise_id = $m->id;
+            $range->name = 'D2';
+            $range->min_mark = 90;
+            $range->max_mark = 94;
+            $range->aggregates = 2;
+            $range->demo_id = $m->id;
+            $range->save();
+
+            $range = new GradeRange();
+            $range->grading_scale_id = $scale->id;
+            $range->enterprise_id = $m->id;
+            $range->name = 'D1';
+            $range->min_mark = 95;
+            $range->max_mark = 100;
+            $range->aggregates = 1;
+            $range->demo_id = $m->id;
+            $range->save();
+        } else if ($m->grade_scale_type == 'o_level') {
+
+            $scale = new GradingScale();
+            $scale->enterprise_id = $m->enterprise_id;
+            $scale->demo_id = $m->id;
+            $scale->name = 'O\' Level grading';
+            $ay = GradingScale::where([
+                'name' => $scale->name,
+                'enterprise_id' => $m->enterprise_id,
             ])->first();
-            if($g != null){
+            if ($ay != null) {
                 return;
             }
+
+ 
+
             $scale->save();
-            die("Love");
+
+            $range = new GradeRange();
+            $range->grading_scale_id = $scale->id;
+            $range->enterprise_id = $m->id;
+            $range->name = 'F9';
+            $range->min_mark = 0;
+            $range->max_mark = 49;
+            $range->aggregates = 9;
+            $range->demo_id = $m->id;
+            $range->save();
+
+            $range = new GradeRange();
+            $range->grading_scale_id = $scale->id;
+            $range->enterprise_id = $m->id;
+            $range->name = 'P8';
+            $range->min_mark = 50;
+            $range->max_mark = 55;
+            $range->aggregates = 8;
+            $range->demo_id = $m->id;
+            $range->save();
+
+            $range = new GradeRange();
+            $range->grading_scale_id = $scale->id;
+            $range->enterprise_id = $m->id;
+            $range->name = 'P7';
+            $range->min_mark = 56;
+            $range->max_mark = 59;
+            $range->aggregates = 7;
+            $range->demo_id = $m->id;
+            $range->save();
+
+            $range = new GradeRange();
+            $range->grading_scale_id = $scale->id;
+            $range->enterprise_id = $m->id;
+            $range->name = 'C6';
+            $range->min_mark = 60;
+            $range->max_mark = 65;
+            $range->aggregates = 6;
+            $range->demo_id = $m->id;
+            $range->save();
+
+            $range = new GradeRange();
+            $range->grading_scale_id = $scale->id;
+            $range->enterprise_id = $m->id;
+            $range->name = 'C5';
+            $range->min_mark = 66;
+            $range->max_mark = 69;
+            $range->aggregates = 5;
+            $range->demo_id = $m->id;
+            $range->save();
+
+            $range = new GradeRange();
+            $range->grading_scale_id = $scale->id;
+            $range->enterprise_id = $m->id;
+            $range->name = 'C4';
+            $range->min_mark = 70;
+            $range->max_mark = 79;
+            $range->aggregates = 4;
+            $range->demo_id = $m->id;
+            $range->save();
+
+            $range = new GradeRange();
+            $range->grading_scale_id = $scale->id;
+            $range->enterprise_id = $m->id;
+            $range->name = 'C3';
+            $range->min_mark = 80;
+            $range->max_mark = 89;
+            $range->aggregates = 3;
+            $range->demo_id = $m->id;
+            $range->save();
+
+            $range = new GradeRange();
+            $range->grading_scale_id = $scale->id;
+            $range->enterprise_id = $m->id;
+            $range->name = 'D2';
+            $range->min_mark = 90;
+            $range->max_mark = 94;
+            $range->aggregates = 2;
+            $range->demo_id = $m->id;
+            $range->save();
+
+            $range = new GradeRange();
+            $range->grading_scale_id = $scale->id;
+            $range->enterprise_id = $m->id;
+            $range->name = 'D1';
+            $range->min_mark = 95;
+            $range->max_mark = 100;
+            $range->aggregates = 1;
+            $range->demo_id = $m->id;
+            $range->save();
+        } else if ($m->grade_scale_type == 'a_level') {
+
+            $scale = new GradingScale();
+            $scale->enterprise_id = $m->enterprise_id;
+            $scale->demo_id = $m->id;
+            $scale->name = 'A\' Level grading';
+            $ay = GradingScale::where([
+                'name' => $scale->name,
+                'enterprise_id' => $m->enterprise_id,
+            ])->first();
+            if ($ay != null) {
+                return;
+            }
+
+          
+            $scale->save();
+
+            $range = new GradeRange();
+            $range->grading_scale_id = $scale->id;
+            $range->enterprise_id = $m->id;
+            $range->name = 'F9';
+            $range->min_mark = 0;
+            $range->max_mark = 49;
+            $range->aggregates = 9;
+            $range->demo_id = $m->id;
+            $range->save();
+
+            $range = new GradeRange();
+            $range->grading_scale_id = $scale->id;
+            $range->enterprise_id = $m->id;
+            $range->name = 'P8';
+            $range->min_mark = 50;
+            $range->max_mark = 55;
+            $range->aggregates = 8;
+            $range->demo_id = $m->id;
+            $range->save();
+
+            $range = new GradeRange();
+            $range->grading_scale_id = $scale->id;
+            $range->enterprise_id = $m->id;
+            $range->name = 'P7';
+            $range->min_mark = 56;
+            $range->max_mark = 59;
+            $range->aggregates = 7;
+            $range->demo_id = $m->id;
+            $range->save();
+
+            $range = new GradeRange();
+            $range->grading_scale_id = $scale->id;
+            $range->enterprise_id = $m->id;
+            $range->name = 'C6';
+            $range->min_mark = 60;
+            $range->max_mark = 65;
+            $range->aggregates = 6;
+            $range->demo_id = $m->id;
+            $range->save();
+
+            $range = new GradeRange();
+            $range->grading_scale_id = $scale->id;
+            $range->enterprise_id = $m->id;
+            $range->name = 'C5';
+            $range->min_mark = 66;
+            $range->max_mark = 69;
+            $range->aggregates = 5;
+            $range->demo_id = $m->id;
+            $range->save();
+
+            $range = new GradeRange();
+            $range->grading_scale_id = $scale->id;
+            $range->enterprise_id = $m->id;
+            $range->name = 'C4';
+            $range->min_mark = 70;
+            $range->max_mark = 79;
+            $range->aggregates = 4;
+            $range->demo_id = $m->id;
+            $range->save();
+
+            $range = new GradeRange();
+            $range->grading_scale_id = $scale->id;
+            $range->enterprise_id = $m->id;
+            $range->name = 'C3';
+            $range->min_mark = 80;
+            $range->max_mark = 89;
+            $range->aggregates = 3;
+            $range->demo_id = $m->id;
+            $range->save();
+
+            $range = new GradeRange();
+            $range->grading_scale_id = $scale->id;
+            $range->enterprise_id = $m->id;
+            $range->name = 'D2';
+            $range->min_mark = 90;
+            $range->max_mark = 94;
+            $range->aggregates = 2;
+            $range->demo_id = $m->id;
+            $range->save();
+
+            $range = new GradeRange();
+            $range->grading_scale_id = $scale->id;
+            $range->enterprise_id = $m->id;
+            $range->name = 'D1';
+            $range->min_mark = 95;
+            $range->max_mark = 100;
+            $range->aggregates = 1;
+            $range->demo_id = $m->id;
+            $range->save();
         }
 
-        die("=========done=======");
-
-
-        
+        DB::table('demos')
+            ->where('id', $m->id)
+            ->update([
+                'create_grade_scale' => 0,
+                'grade_scale_type' => 0,
+            ]);
     }
+
+
     public static function do_create_subjects($m)
     {
         $ay = AcademicYear::where([
