@@ -30,7 +30,7 @@ class MarkController extends AdminController
         $grid->disableBatchActions();
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
-        ])->orderBy('id', 'DESC');
+        ])->orderBy('id', 'DESC'); 
 
         $grid->column('student.name', __('Student'))->sortable();
         $grid->column('exam.name', __('Exam'))->sortable();
