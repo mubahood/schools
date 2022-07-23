@@ -83,10 +83,7 @@ class SubjectController extends AdminController
     {
         $form = new Form(new Subject());
 
-
-
-
-
+  
         $u = Admin::user();
         $teachers = [];
         foreach (Administrator::where([
@@ -94,7 +91,7 @@ class SubjectController extends AdminController
             'user_type' => 'employee',
         ])->get() as $key => $a) {
             if ($a->isRole('teacher')) {
-                $teachers[$a['id']] = $a['name'];
+                $teachers[$a['id']] = $a['name']." => ".$a['id'];
             }
         }
 

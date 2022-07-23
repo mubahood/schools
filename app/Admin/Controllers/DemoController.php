@@ -25,11 +25,11 @@ class DemoController extends AdminController
      */
     protected function grid()
     {
-        
+
         /* $d = Demo::find(4);
         $d->temp .= rand(100, 1000);
-        $d->create_grade_scale = 1;
-        $d->grade_scale_type = 'o_level';
+        $d->number_of_students = 20;
+        $d->generate_students = 1;
         $d->save();
         die("Romina"); */
         $grid = new Grid(new Demo());
@@ -96,6 +96,7 @@ class DemoController extends AdminController
             });
 
 
+
         $form->radio('create_courses', __('Create courses'))->options([
             1 => "Yes",
             0 => "No",
@@ -156,6 +157,18 @@ class DemoController extends AdminController
                     'a_level' => "Uganda A'level grading",
                 ])
                     ->rules('required');
+            });
+
+        $form->radio('generate_students', __('Generate students'))->options([
+            1 => "Yes",
+            0 => "No",
+        ])->default(0)
+            ->rules('required')
+            ->when('1', function (Form $form) {
+                $form->text('number_of_students', __('Number of students'))
+                    ->rules('required|int')
+                    ->attribute('type', 'number')
+                    ->help("How many students do you want to be generated?");
             });
 
 

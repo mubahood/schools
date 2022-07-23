@@ -88,6 +88,9 @@ class Demo extends Model
         if (($m->create_grade_scale == 1)) {
             Demo::do_create_grade_scale($m);
         }
+        if (($m->generate_students == 1)) {
+            Demo::do_generate_students($m);
+        }
     }
 
     public static function do_create_grade_scale($m)
@@ -108,7 +111,7 @@ class Demo extends Model
                 return;
             }
 
- 
+
 
             $scale->save();
 
@@ -215,7 +218,7 @@ class Demo extends Model
                 return;
             }
 
- 
+
 
             $scale->save();
 
@@ -322,7 +325,7 @@ class Demo extends Model
                 return;
             }
 
-          
+
             $scale->save();
 
             $range = new GradeRange();
@@ -439,7 +442,7 @@ class Demo extends Model
             'enterprise_id' => $m->enterprise_id,
         ])->first();
         if ($ay == null) {
-            die("No active farm found.");
+            die("No active academic found.");
             return;
         }
 
@@ -522,7 +525,7 @@ class Demo extends Model
             'enterprise_id' => $m->enterprise_id,
         ])->first();
         if ($ay == null) {
-            die("No active farm found.");
+            die("No active academic found.");
             return;
         }
 
@@ -684,6 +687,107 @@ class Demo extends Model
             ->update([
                 'create_courses' => 0,
                 'courses_type' => '',
+            ]);
+    }
+
+    public static function do_generate_students($m)
+    {
+
+
+        if ($m->number_of_students < 1) {
+            return;
+        }
+
+
+        $ay = AcademicYear::where([
+            'is_active' => 1,
+            'enterprise_id' => $m->enterprise_id,
+        ])->first();
+        if ($ay == null) {
+            die("No active academic found.");
+            return;
+        }
+
+        $classes = AcademicClass::where([
+            'enterprise_id' => $m->enterprise_id,
+            'academic_year_id' => $ay->id,
+        ])->get();
+        if ($classes == null) {
+            die("No classes found. Please create one and try again.");
+        }
+        $class_ids = [];
+        foreach ($classes as $v) {
+            $class_ids[] = $v->id;
+        }
+
+        if (empty($class_ids)) {
+            die("No classes found. Please create one and try again.");
+        }
+
+        $u = new Administrator();
+        $f = Faker::create();
+
+        for ($i = 0; $i < $m->number_of_students; $i++) {
+            $sex = ['Male', 'Female'];
+            $religion = ['Christian', 'Muslim'];
+            $u = new Administrator();
+            $num = Administrator::count();
+            $num++;
+            $u->demo_id = $m->id;
+            $u->enterprise_id = $m->enterprise_id;
+            $u->username = 'student' . $num . "@gmail.com";
+            $u->email = $u->username;
+            $u->password = password_hash('4321', PASSWORD_DEFAULT);
+            $u->avatar = 'no_image.jpg';
+            $u->first_name = $f->name(1);
+            $u->emergency_person_name = $f->name(1);
+            $u->father_name = $f->name(1);
+            $u->mother_name = $f->name(1);
+            $u->father_phone = $f->phoneNumber();
+            $u->mother_phone = $f->phoneNumber();
+            $u->emergency_person_phone = $f->phoneNumber();
+            $u->phone_number_1 = $f->phoneNumber;
+            $u->last_name = $u->first_name;
+            $u->name = $u->first_name . " " . $u->last_name;
+            $u->date_of_birth = '1994-08-14';
+            $u->place_of_birth = 'Bwera, Kasese';
+            $u->home_address = 'Bwera, Kasese';
+            $u->current_address = 'Bwera, Kasese';
+            $u->nationality = 'Ugandan';
+            $u->national_id_number = '1210128991231';
+            $u->user_type = 'student';
+            shuffle($religion);
+            $u->religion = $religion[0];
+            shuffle($sex);
+            $u->sex = $sex[0];
+            $u->save();
+
+
+            $role = new AdminRoleUser();
+            $role->role_id = 4;
+            $role->user_id = $u->id;
+            $role->save();
+
+            $has_class =  new StudentHasClass();
+            $has_class->enterprise_id = $m->enterprise_id;
+            shuffle($class_ids);
+            $has_class->academic_class_id = $class_ids[0];
+            $has_class->administrator_id = $u->id;
+            $has_class->stream_id = 1;
+
+            $class = AcademicClass::find($class_ids[0]);
+            if ($class ==  null) {
+                die("Class not found.");
+            }
+            $has_class->academic_year_id = $class->id;
+            $has_class->save();
+        }
+
+        DB::table('demos')
+            ->where('id', $m->id)
+            ->update([
+                'generate_students' => 0,
+                'number_of_students' => 0,
             ]);
     }
 

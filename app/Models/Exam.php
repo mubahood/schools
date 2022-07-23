@@ -58,10 +58,9 @@ class Exam extends Model
         if (empty($m->classes)) {
             return;
         }
-        
-        ini_set ( 'max_execution_time', -1); //unlimit
 
-        
+        ini_set('max_execution_time', -1); //unlimit
+
 
         foreach ($m->classes as $k => $class) {
             foreach ($class->subjects as $_k => $subject) {

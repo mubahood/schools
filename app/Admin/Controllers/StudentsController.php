@@ -4,6 +4,8 @@ namespace App\Admin\Controllers;
 
 use App\Models\AcademicClass;
 use App\Models\AcademicYear;
+use App\Models\AdminRole;
+use App\Models\AdminRoleUser;
 use App\Models\StudentHasClass;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
@@ -278,16 +280,16 @@ class StudentsController extends AdminController
             }) */
 
             ->tab('SYSTEM ACCOUNT', function (Form $form) {
+                
                 $roleModel = config('admin.database.roles_model');
                 $form->multipleSelect('roles', trans('admin.roles'))
                     ->attribute([
                         'autocomplete' => 'off'
                     ])
                     ->default([4])
-                    ->value([4])
-                    ->readonly()
+                    ->value([4]) 
                     ->options(
-                        $roleModel::where('slug', '!=', 'super-admin')
+                        AdminRole::where('slug', '!=', 'super-admin')
                             ->where('slug', '!=', 'admin')
                             ->get()
                             ->pluck('name', 'id')

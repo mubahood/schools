@@ -28,10 +28,10 @@ class ExamController extends AdminController
     protected function grid()
     {
 
-        $e = Exam::find(20);
+        /* $e = Exam::find(20);
         $e->name .= rand(1000,10000);
         $e->save();
-        die("done");
+        die("done"); */
 
         $grid = new Grid(new Exam());
         $grid->model()->where([
