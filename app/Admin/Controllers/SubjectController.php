@@ -83,7 +83,6 @@ class SubjectController extends AdminController
     {
         $form = new Form(new Subject());
 
-  
         $u = Admin::user();
         $teachers = [];
         foreach (Administrator::where([
