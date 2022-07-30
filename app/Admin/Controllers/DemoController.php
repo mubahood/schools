@@ -26,10 +26,9 @@ class DemoController extends AdminController
     protected function grid()
     {
 
-        /* $d = Demo::find(4);
+        /* $d = Demo::find(5);
         $d->temp .= rand(100, 1000);
-        $d->number_of_students = 20;
-        $d->generate_students = 1;
+        $d->generate_marks = 1;
         $d->save();
         die("Romina"); */
         $grid = new Grid(new Demo());
@@ -171,6 +170,11 @@ class DemoController extends AdminController
                     ->help("How many students do you want to be generated?");
             });
 
+        $form->radio('generate_marks', __('Generate marks'))->options([
+            1 => "Yes",
+            0 => "No",
+        ])->default(0)
+            ->rules('required');
 
         return $form;
     }

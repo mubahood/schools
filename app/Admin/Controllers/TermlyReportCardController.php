@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Models\GradingScale;
 use App\Models\Term;
 use App\Models\TermlyReportCard;
 use Encore\Admin\Controllers\AdminController;
@@ -91,13 +92,23 @@ class TermlyReportCardController extends AdminController
             $terms[$v->id] = $v->academic_year->name . " - " . $v->name;
         }
 
+        $scales = [];
+        foreach (GradingScale::where([
+            'enterprise_id' => $u->enterprise_id
+        ])
+            ->orderBy('id', 'DESC')
+            ->get() as $v) {
+            $scales[$v->id] =  $v->name;
+        }
+
         $form->select('term_id', __('Term'))->options($terms)
             ->creationRules(['required', "unique:termly_report_cards"]);
         $form->radio('has_beginning_term', __('Include beginning term exams?'))->options([1 => 'Yes', 0 => 'No'])->required();
         $form->radio('has_mid_term', __('Include Mid term exams?'))->options([1 => 'Yes', 0 => 'No'])->required();
         $form->radio('has_end_term', __('Include End of term exams?'))->options([1 => 'Yes', 0 => 'No'])->required();
         $form->text('report_title', __('Report title'));
-        $form->text('grading_scale_id', __('Grading scale'))->required();
+
+        $form->select('grading_scale_id', __('Grading scale'))->options($scales)->required();
 
         return $form;
     }

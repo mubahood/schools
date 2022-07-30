@@ -29,6 +29,21 @@ class PrintController2 extends Controller
             die("Report card not found.");
         }
 
+        $ranges_titles = [];
+        $ranges_values = [];
+        foreach ($item->termly_report_card->grading_scale->grade_ranges as $val) {
+            $ranges_titles[] = $val->name;
+            $ranges_values[] = $val->max_mark;
+        }
+        $grading_tabel = '<tabel class="table ">';
+        $grading_tabel .= '<tbody>';
+        $grading_tabel .= '<tr>';
+        $grading_tabel .= '</tr>';
+        $grading_tabel .= '</tbody>';
+        $grading_tabel .= "</tabel>";
+
+
+        //dd($item->termly_report_card->grading_scale->grade_ranges);
         $rows = "";
         foreach ($item->items as $v) {
             $rows .= "<tr>";
@@ -39,6 +54,7 @@ class PrintController2 extends Controller
             $rows .= "<td>" . ($v->eot_mark + $v->mot_mark + $v->subject->bot_mark) . "</td>";
             $rows .= "<td>{$v->grade_name}</td>";
             $rows .= "<td>{$v->aggregates}</td>";
+            $rows .= "<td>{$v->remarks}</td>";
             $rows .= "<td>{$v->remarks}</td>";
             $rows .= "</tr>";
         }
@@ -84,10 +100,23 @@ class PrintController2 extends Controller
                 font-weight: 100;
                 text-align: reight;
                 font-family:  sans-serif;
-                font-size: 12px;
+                font-size: 12px; 
                 border-collapse: collapse;
                 padding: 4px;
             }
+
+            .marks-cell tr td, 
+            .marks-cell thead tr th, 
+            {
+                font-weight: 100;
+                text-align: reight;
+                font-family:  sans-serif;
+                font-size: 12px; 
+                border-collapse: collapse;
+                border: 1px solid black;
+                padding: 4px;
+            }
+
             .bordered-table{
                 border: 1px solid black;
                 border-collapse: collapse;
@@ -136,6 +165,9 @@ class PrintController2 extends Controller
             .fs-12{
                 font-size: 2px;
             }
+
+            @page { margin: 20px; }
+            body { padding: 10px; border: 3px solid black; }
             </style>
         ";
 
@@ -165,24 +197,25 @@ class PrintController2 extends Controller
 
         $data .= '<table style="width: 100%;" >
                     <tr>
-                        <td class="fs-5">NAME: <b>Muhindo Mubaraka</b><td>
-                        <td class="fs-5 ">SEX: <b>Male</b> <td>
-                        <td class="fs-5 text-right">REG No.: <b>U1211</b> <td>
+                        <td class="fs-5">NAME: <b>Muhindo Mubaraka</b></td>
+                        <td class="fs-5">SEX: <b>Male</b></td>
+                        <td class="fs-5 text-right">REG No.: <b>U1211</b></td> 
                     </tr>        
                     <tr>
-                        <td class="fs-5">CLASS: <b>S.6 Lion</b><td> 
-                        <td class="fs-5 ">Aggregates.: <b>12</b> <td>
-                        <td class="fs-5 text-right">Grade: <b>B</b> <td>
-                    </tr>        
+                        <td class="fs-5">CLASS: <b>S.6 Lion</b></td>
+                        <td class="fs-5">Aggregates.: <b>12</b> </td>
+                        <td class="fs-5 text-right">Grade: <b>B</b></td> 
+                    </tr>    
                 </table>';
 
-        $data .= '<table class="bordered-table" >
+        $data .= '<table class="bordered-table marks-cell" >
                     <thead>
                         <tr>
                             <th>SUBJECTS</th>
                             <th>B.O.T (30)</th>
                             <th>M.O.T (30)</th>
-                            <th>E.O.T (100%)</th>
+                            <th>E.O.T (40)</th>
+                            <th>TOTAL (100%)</th>
                             <th>Grade</th>
                             <th>Aggr</th>
                             <th>Remarks</th>
@@ -195,6 +228,10 @@ class PrintController2 extends Controller
             </table>';
 
 
+        $data .= '<br><h4 class="text-center">TOTAL POINTS: 18</h4>';
+
+        $data .= $grading_tabel;
+        //die($data);
 
         $pdf = App::make('dompdf.wrapper');
         $pdf->loadHTML($data);

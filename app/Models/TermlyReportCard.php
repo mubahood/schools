@@ -16,20 +16,22 @@ class TermlyReportCard extends Model
         self::deleting(function ($m) {
         });
         self::creating(function ($m) {
-            $_m = AcademicYear::find($m->academic_year_id);
-            if ($_m == null) {
+            $term = Term::find($m->term_id);
+            if ($term == null) {
                 die("Term not found.");
             }
-            $m->academic_year_id = $_m->id;
+            $m->academic_year_id = $term->academic_year_id;
+            $m->term_id = $term->id;
             return $m;
         });
 
         self::updating(function ($m) {
-            $_m = AcademicYear::find($m->academic_year_id);
-            if ($_m == null) {
-                die("Class not found.");
+            $term = Term::find($m->term_id);
+            if ($term == null) {
+                die("Term not found.");
             }
-            $m->academic_year_id = $_m->id;
+            $m->academic_year_id = $term->academic_year_id;
+            $m->term_id = $term->id;
             return $m;
         });
 
@@ -40,6 +42,11 @@ class TermlyReportCard extends Model
         self::updated(function ($m) {
             TermlyReportCard::my_update($m);
         });
+    }
+
+    function grading_scale()
+    {
+        return $this->belongsTo(GradingScale::class);
     }
 
     function term()

@@ -91,6 +91,48 @@ class Demo extends Model
         if (($m->generate_students == 1)) {
             Demo::do_generate_students($m);
         }
+        if (($m->generate_marks == 1)) {
+            Demo::do_generate_marks($m);
+        }
+    }
+
+    public static function do_generate_marks($m)
+    {
+
+        $marks = Mark::where([
+            'enterprise_id' => $m->enterprise_id,
+        ])->get();
+        if (empty($marks)) {
+            die("No marks found");
+        }
+        foreach ($marks as $mark) {
+            $max_mark = ((int)($mark->exam->max_mark));
+            if ($max_mark < 1) {
+                die("Exam not foudn");
+            }
+            $mark->score = rand(0, $max_mark);
+            $val  = Utils::convert_to_percentage($mark->score, $max_mark);
+            if ($val < 20) {
+                $mark->remarks = 'Poor';
+            } else if ($val < 30) {
+                $mark->remarks = 'Fair';
+            } else if ($val < 50) {
+                $mark->remarks = 'Good';
+            } else if ($val < 70) {
+                $mark->remarks = 'V.Good';
+            } else {
+                $mark->remarks = 'Excellent';
+            }
+            $mark->is_submitted = true;
+            $mark->is_missed = false;
+            $mark->save();
+        }
+ 
+        DB::table('demos')
+            ->where('id', $m->id)
+            ->update([
+                'generate_marks' => 0,
+            ]);
     }
 
     public static function do_create_grade_scale($m)
