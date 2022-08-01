@@ -11,8 +11,9 @@ class Enterprise extends Model
 {
     use HasFactory;
 
-    public function owner(){
-        return $this->belongsTo(Administrator::class,'administrator_id');
+    public function owner()
+    {
+        return $this->belongsTo(Administrator::class, 'administrator_id');
     }
     public function getCreatedAtAttribute($value)
     {
@@ -44,6 +45,19 @@ class Enterprise extends Model
         if ($owner != null) {
             $owner->enterprise_id = $m->id;
             $owner->save();
+        }
+
+        $acc = Account::where([
+            'type' => 'CASH_ACCOUNT',
+            'enterprise_id' => $m->id,
+        ])->first();
+        if ($acc == null) {
+            $ac =  new Account();
+            $ac->name = 'CASH ACCOUNT';
+            $ac->enterprise_id = $m->id;
+            $ac->type = 'CASH_ACCOUNT';
+            $ac->administrator_id = $m->administrator_id;
+            $ac->save();
         }
     }
 }

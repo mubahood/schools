@@ -29,7 +29,12 @@ Route::group([
     $router->resource('grading-scales', GradingScaleController::class);
     $router->resource('student-report-cards', StudentReportCardController::class);
     $router->resource('demo', DemoController::class);
-    
+    $router->resource('accounts', AccountController::class);
+    $router->resource('fees', AcademicClassFeeController::class);
+    $router->resource('transactions', TransactionController::class);
+    $router->resource('school-fees-payment', SchoolFeesPaymentController::class);
+    //$router->resource('fees', StudentHasFeeController::class);
+
     $router->get('/', 'HomeController@index')->name('home');
     $router->resources([
         'enterprises' => EnterpriseController::class

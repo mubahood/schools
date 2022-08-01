@@ -2,10 +2,68 @@
 
 namespace App\Models;
 
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 
 class Utils  extends Model
 {
+    public static function reconcile_in_background($enterprise_id)
+    {
+        $url = url('api/reconcile?enterprise_id=' . $enterprise_id);
+        $ctx = stream_context_create(['http' => ['timeout' => 3]]);
+
+        try {
+            $data =  file_get_contents($url, null, $ctx);
+        } catch (Exception $x) {
+        }
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 0.0000001);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 0.0000001);
+        $response = curl_exec($ch);
+    }
+
+
+    public static function reconcile($enterprise_id)
+    {
+        $ent = Enterprise::find($enterprise_id);
+        if ($ent == null) {
+            die("ent not found");
+        }
+        $rec = Reconciler::where([
+            'enterprise_id' => $enterprise_id
+        ])->first();
+        if ($rec == null) {
+            $rec = new Reconciler();
+            $rec->enterprise_id = $enterprise_id;
+            $rec->last_update = time();
+            $rec->save();
+        }
+        $diff = time() - ($rec->last_update);
+        if ($diff < (60 * 2)) {
+            die("too early to reconcile $diff");
+        }
+
+        $accs = Account::where([
+            'enterprise_id' => $enterprise_id
+        ])->get();
+        foreach ($accs as $acc) {
+            $bal = Transaction::where([
+                'account_id' => $acc->id
+            ])->sum('amount');
+            $acc->balance = $bal;
+            $acc->save();
+        }
+
+        $rec->last_update = time();
+        $rec->save();
+        die("Reconciled successfully $diff");
+    }
+
     public static function dummy_update_mark()
     {
         $marks = Mark::all();

@@ -34,7 +34,11 @@ php artisan make:model StudentReportCardItem
 php artisan make:model GradingScale
 php artisan make:model Demo
 php artisan make:model AdminRoleUser
- 
+php artisan make:model StudentHasFees
+php artisan make:model Account
+php artisan make:model Transaction
+php artisan make:model Reconciler
+  
 
 
 php artisan admin:make TermController --model=App\\Models\\Term
@@ -49,7 +53,13 @@ php artisan make:migration create_student_report_card_items_table
 php artisan make:migration create_grade_ranges_table
 2022_07_12_193945_create_grading_scales_table
 php artisan make:migration create_grading_scales_table
-php artisan make:migration create_demos_table
+php artisan make:migration create__table
+php artisan make:migration create_fees_table
+php artisan make:migration create_academic_class_fee_table
+php artisan make:migration create_student_as_fees_table
+php artisan make:migration create_accounts_table
+php artisan make:migration create_transactions_table 
+php artisan make:migration create_reconciler_table 
 
 
 php artisan admin:make BooksCategoryController --model=App\\Models\\BooksCategory
@@ -65,4 +75,8 @@ php artisan admin:make StudentHasClassController --model=App\\Models\\StudentHas
 php artisan admin:make TermlyReportCardController --model=App\\Models\\TermlyReportCard
 php artisan admin:make GradingScaleController --model=App\\Models\\GradingScale
 php artisan admin:make GradeRangeController --model=App\\Models\\GradeRange
-php artisan admin:make DemoController --model=App\\Models\\Demo
+php artisan admin:make AccountController --model=App\\Models\\Account
+php artisan admin:make StudentHasFeeController --model=App\\Models\\StudentHasFee
+php artisan admin:make AcademicClassFeeController --model=App\\Models\\AcademicClassFee
+php artisan admin:make TransactionController --model=App\\Models\\Transaction
+php artisan admin:make SchoolFeesPaymentController --model=App\\Models\\Transaction

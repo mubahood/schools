@@ -33,14 +33,36 @@ class PrintController2 extends Controller
         $ranges_values = [];
         foreach ($item->termly_report_card->grading_scale->grade_ranges as $val) {
             $ranges_titles[] = $val->name;
-            $ranges_values[] = $val->max_mark;
+            $ranges_values[] = $val->min_mark . " - " . $val->max_mark;
         }
-        $grading_tabel = '<tabel class="table ">';
+        $grading_tabel = '<table class="ranges_values bordered-table">';
         $grading_tabel .= '<tbody>';
-        $grading_tabel .= '<tr>';
+
+
+        $grading_tabel .= '<tr  class=\"bordered-table\">';
+        $grading_tabel .= "<th  class=\"bordered-table\">Marks</th>";
+        foreach ($ranges_values as $t) {
+            $grading_tabel .= "<th  class=\"bordered-table\">$t</th>";
+        }
         $grading_tabel .= '</tr>';
+
+
+        $grading_tabel .= '<tr  class=\"bordered-table\">';
+        $grading_tabel .= "<th  class=\"bordered-table\">Aggre.</th>";
+        foreach ($ranges_titles as $t) {
+            $grading_tabel .= "<td class=\"bordered-table text-center \" >$t</td>";
+        }
+        $grading_tabel .= '</tr>';
+
+
         $grading_tabel .= '</tbody>';
-        $grading_tabel .= "</tabel>";
+        $grading_tabel .= "</table>";
+
+        $bottom_table = '<table>';
+        $bottom_table .= '<tr><td>Class teacher\'s remarts</td><td><br>Signature:</td></tr>';
+        $bottom_table .= '<tr><td>Head teacher\'s remarts</td><td><br>Signature:</td></tr>';
+        $bottom_table .= '<tr><td><b>Fees  balance</b>:............ <br>NEXT TERM BENINS ON:</b>:..../..../......</td><td><br>Signature:</td></tr>';
+        $bottom_table .= '</table>';
 
 
         //dd($item->termly_report_card->grading_scale->grade_ranges);
@@ -231,6 +253,7 @@ class PrintController2 extends Controller
         $data .= '<br><h4 class="text-center">TOTAL POINTS: 18</h4>';
 
         $data .= $grading_tabel;
+        $data .= $bottom_table;
         //die($data);
 
         $pdf = App::make('dompdf.wrapper');

@@ -14,7 +14,7 @@ class StudentHasClass extends Model
 
     public static function boot()
     {
-        
+
         parent::boot();
         self::deleting(function ($m) {
         });
@@ -35,7 +35,16 @@ class StudentHasClass extends Model
             $m->academic_year_id = $_m->academic_year_id;
             return $m;
         });
+
+        self::created(function ($m) {
+            AcademicClass::update_fees($m->academic_class_id);
+        });
+
+        self::updated(function ($m) {
+            AcademicClass::update_fees($m->academic_class_id);
+        });
     }
+
 
 
     function student()

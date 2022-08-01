@@ -18,6 +18,7 @@ class HomeController extends Controller
     {
 
         $ent = Utils::ent();
+        Utils::reconcile_in_background(Admin::user()->enterprise_id);
 
         return $content
             ->title($ent->name)

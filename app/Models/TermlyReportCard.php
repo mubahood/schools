@@ -79,14 +79,14 @@ class TermlyReportCard extends Model
                 $report_card = StudentReportCard::where([
                     'term_id' => $m->term_id,
                     'termly_report_card_id' => $m->id,
-                    'student_id' => $student->id,
+                    'student_id' => $student->administrator_id,
                 ])->first();
                 if ($report_card == null) {
                     $report_card = new StudentReportCard();
                     $report_card->enterprise_id = $m->enterprise_id;
                     $report_card->academic_year_id = $m->academic_year_id;
                     $report_card->term_id = $m->term_id;
-                    $report_card->student_id = $student->id;
+                    $report_card->student_id = $student->administrator_id;
                     $report_card->academic_class_id = $class->id;
                     $report_card->termly_report_card_id = $m->id;
                     $report_card->save();
@@ -113,7 +113,7 @@ class TermlyReportCard extends Model
 
                             $marks = Mark::where([
                                 'subject_id' => $subjet->id,
-                                'student_id' => $student->id,
+                                'student_id' => $student->administrator_id,
                                 'class_id' => $class->id
                             ])->get();
 
