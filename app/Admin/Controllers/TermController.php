@@ -100,8 +100,8 @@ class TermController extends AdminController
         $form->date('ends', __('Term Ends'))->required();
         $form->textarea('details', __('Details'));
         $form->radio('is_active', __('is_active'))->options([
-            1 => 'Set as current academic year',
-            0 => 'Not current academic year',
+            1 => 'Set as current term',
+            0 => 'Not current term',
         ]);
 
         return $form;

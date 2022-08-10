@@ -136,7 +136,7 @@ class StudentsController extends AdminController
      *
      * @var string
      */
-    protected $title = 'Students';
+    protected $title = 'Students admission';
 
     /**
      * Make a grid builder.
@@ -147,6 +147,8 @@ class StudentsController extends AdminController
     {
         $grid = new Grid(new Administrator());
 
+
+
         $grid->filter(function ($filter) {
 
             // Remove the default id filter
@@ -154,7 +156,7 @@ class StudentsController extends AdminController
 
             // Add a column filter
 
-            $filter->like('name', 'name');
+            //$filter->like('name', 'Search by name');
 
             $u = Admin::user();
             /* $ajax_url = url(
@@ -182,8 +184,10 @@ class StudentsController extends AdminController
 
 
 
-            $filter->expand();
+            //$filter->expand();
         });
+
+        $grid->quickSearch('name');
 
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
@@ -201,7 +205,9 @@ class StudentsController extends AdminController
         $grid->column('email', __('Email'));
         $grid->column('date_of_birth', __('D.O.B'))->sortable();
         $grid->column('nationality', __('Nationality'))->sortable();
-        $grid->column('sex', __('Sex'));
+        $grid->column('sex', __('Sex'))
+            ->sortable() 
+            ->filter(['Male' => 'Male', 'Female' => 'Female']);
         $grid->column('place_of_birth', __('Place of birth'))->sortable();
         $grid->column('home_address', __('Home address'))->hide();
         $grid->column('current_address', __('Current address'))->hide();

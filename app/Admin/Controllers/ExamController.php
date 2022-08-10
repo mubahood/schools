@@ -18,7 +18,7 @@ class ExamController extends AdminController
      *
      * @var string
      */
-    protected $title = 'Exam';
+    protected $title = 'Exams';
 
     /**
      * Make a grid builder.
@@ -38,10 +38,7 @@ class ExamController extends AdminController
             'enterprise_id' => Admin::user()->enterprise_id,
         ])->orderBy('id', 'DESC');
 
-        $grid->column('id', __('Id'));
-        $grid->column('created_at', __('Created at'));
-        $grid->column('updated_at', __('Updated at'));
-        $grid->column('enterprise_id', __('Enterprise id'));
+        $grid->column('id', __('ID'))->sortable();
         $grid->column('term_id', __('Term id'));
         $grid->column('type', __('Type'));
         $grid->column('name', __('Name'));

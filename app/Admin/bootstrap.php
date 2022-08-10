@@ -43,5 +43,5 @@ Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
     $navbar->right(new \App\Admin\Extensions\Nav\Links());
 });
 
-Admin::css(url('/assets/bootstrap.css'));
+Admin::css(url('/assets/bootstrap.css')); 
 Admin::css('/assets/styles.css');

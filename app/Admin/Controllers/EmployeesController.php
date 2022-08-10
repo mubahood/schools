@@ -130,7 +130,7 @@ class EmployeesController extends AdminController
      *
      * @var string
      */
-    protected $title = 'Employees';
+    protected $title = 'Teachers';
 
     /**
      * Make a grid builder.
@@ -140,13 +140,35 @@ class EmployeesController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Administrator());
-        $grid->model()->where([
-            'enterprise_id' => Admin::user()->enterprise_id,
-            'user_type' => 'employee'
-        ]);
+        $grid->model()
+            ->orderBy('id', 'Desc')
+            ->where([
+                'enterprise_id' => Admin::user()->enterprise_id,
+                'user_type' => 'employee'
+            ]);
         $grid->actions(function ($actions) {
             $actions->disableView();
         });
+
+
+
+        $grid->filter(function ($filter) {
+            $filter->disableIdFilter();
+            $u = Admin::user();
+            $teachers = [];
+            foreach (Administrator::where([
+                'enterprise_id' => $u->enterprise_id,
+                'user_type' => 'employee',
+            ])->get() as $key => $a) {
+                if ($a->isRole('teacher')) {
+                    $teachers[$a['id']] = $a['name'] . " => " . $a['id'];
+                }
+            }
+
+            $filter->like('name', 'Name');
+        });
+
+
 
         $grid->column('id', __('Id'))->sortable();
         $grid->column('name', __('Name'))->sortable();

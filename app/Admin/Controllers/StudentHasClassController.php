@@ -5,6 +5,7 @@ namespace App\Admin\Controllers;
 use App\Models\AcademicClass;
 use App\Models\AcademicClassSctream;
 use App\Models\StudentHasClass;
+use App\Models\User;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -20,7 +21,7 @@ class StudentHasClassController extends AdminController
      *
      * @var string
      */
-    protected $title = 'Classes';
+    protected $title = 'Student\'s class';
 
     /**
      * Make a grid builder.
@@ -34,23 +35,35 @@ class StudentHasClassController extends AdminController
         $grid->disableExport();
 
         $grid->filter(function ($filter) {
-
             // Remove the default id filter
             $filter->disableIdFilter();
 
             // Add a column filter
             $u = Admin::user();
-            $filter->equal('academic_class_id')->select(AcademicClass::where([
+            $filter->equal('academic_class_id', 'Filter by class')->select(AcademicClass::where([
                 'enterprise_id' => $u->enterprise_id
             ])->get()->pluck('name_text', 'id'));
+
+            $u = Admin::user();
+            $ajax_url = url(
+                '/api/ajax?'
+                    . 'enterprise_id=' . $u->enterprise_id
+                    . "&search_by_1=name"
+                    . "&search_by_2=id"
+                    . "&model=User"
+            );
+
+            $filter->equal('administrator_id', 'Student')->select()->ajax($ajax_url);
         });
 
 
 
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
-        ]);
+        ])
+            ->orderBy('id', 'Desc');
 
+        $grid->column('id', __('Id'))->sortable();
 
         $grid->column('administrator_id', __('Student'))->display(function () {
             if (!$this->student) {
@@ -58,11 +71,12 @@ class StudentHasClassController extends AdminController
             }
             return  $this->student->name;
         });
+
         $grid->column('academic_class_id', __('Class'))->display(function () {
             if (!$this->class) {
                 return "-";
             }
-            return  $this->class->name;
+            return  $this->class->name_text;
         });
         $grid->column('stream_id', __('Stream'))->display(function () {
             if (!$this->stream) {

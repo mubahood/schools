@@ -17,7 +17,7 @@ class GradingScaleController extends AdminController
      *
      * @var string
      */
-    protected $title = 'GradingScale';
+    protected $title = 'Grading scale';
 
     /**
      * Make a grid builder.
@@ -26,11 +26,15 @@ class GradingScaleController extends AdminController
      */
     protected function grid()
     {
-        $grid = new Grid(new GradingScale());
+        $grid = new Grid(new GradingScale()); 
 
-        $grid->column('enterprise_id', __('Enterprise id'));
+        $grid->model()
+            ->orderBy('id', 'Desc')
+            ->where([
+                'enterprise_id' => Admin::user()->enterprise_id, 
+            ]);
+
         $grid->column('name', __('Name'));
-
         return $grid;
     }
 
@@ -70,11 +74,12 @@ class GradingScaleController extends AdminController
         $range->save();
         dd("anjane");
  */
-/*         $table->integer('')->default(0);
+        /*         $table->integer('')->default(0);
         $table->integer('max_mark')->default(0);
         $table->integer('aggregates')->default(0);
 
- */        $form = new Form(new GradingScale());
+ */
+        $form = new Form(new GradingScale());
 
         $u = Admin::user();
         $form->hidden('enterprise_id')->rules('required')->default($u->enterprise_id)

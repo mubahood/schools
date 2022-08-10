@@ -16,7 +16,7 @@ class CourseController extends AdminController
      *
      * @var string
      */
-    protected $title = 'Courses';
+    protected $title = 'Subjects';
 
     /**
      * Make a grid builder.
@@ -26,8 +26,6 @@ class CourseController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Course());
-        $grid->model()->where('enterprise_id', Admin::user()->enterprise_id);
-        //$grid->column('id', __('Subject ID'))->sortable();
         $grid->column('short_name', __('CODE'));
         $grid->column('name', __('Course Name'))->sortable();
         $grid->column('details', __('Details'))->hide();
@@ -48,7 +46,6 @@ class CourseController extends AdminController
         $show->field('id', __('Id'));
         $show->field('created_at', __('Created at'));
         $show->field('updated_at', __('Updated at'));
-        $show->field('enterprise_id', __('Enterprise id'));
         $show->field('name', __('Name'));
         $show->field('details', __('Details'));
 
@@ -65,7 +62,7 @@ class CourseController extends AdminController
         $form = new Form(new Course());
 
         $u = Admin::user();
-        $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
+        $form->hidden('enterprise_id', __('Enterprise id'))->default(1)->rules('required');
         $form->text('name', __('Name'))->rules('required');
         $form->text('short_name', __('Short Name'))->rules('required');
         $form->textarea('details', __('Details'));

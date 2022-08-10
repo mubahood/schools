@@ -19,7 +19,7 @@ class SubjectController extends AdminController
      *
      * @var string
      */
-    protected $title = 'Subject';
+    protected $title = 'Subjects';
 
     /**
      * Make a grid builder.
@@ -29,24 +29,49 @@ class SubjectController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Subject());
-        $grid->model()->where('enterprise_id', Admin::user()->enterprise_id);
 
+        $grid->filter(function ($filter) {
+            $filter->disableIdFilter();
+            $u = Admin::user();
+            $teachers = [];
+            foreach (Administrator::where([
+                'enterprise_id' => $u->enterprise_id,
+                'user_type' => 'employee',
+            ])->get() as $key => $a) {
+                if ($a->isRole('teacher')) {
+                    $teachers[$a['id']] = $a['name'] . " => " . $a['id'];
+                }
+            }
+
+            $filter->equal('academic_class_id', 'Fliter by class')->select(AcademicClass::where([
+                'enterprise_id' => $u->enterprise_id
+            ])->get()
+                ->pluck('name_text', 'id'));
+            $filter->equal('subject_teacher', 'Fliter by teacher')->select($teachers);
+        });
+
+
+
+        $grid->model()
+            ->orderBy('id', 'Desc')
+            ->where('enterprise_id', Admin::user()->enterprise_id);
+        $grid->column('id', __('#ID'))->sortable();
         $grid->column('subject_name', __('SUBJECT'))->sortable();
         $grid->column('academic_class_id', __('Class'))
             ->display(function ($t) {
                 return $this->academic_class->name;
-            });
-        $grid->column('course_id', __('Course'))
+            })->sortable();
+        /* $grid->column('course_id', __('Course'))
             ->display(function ($t) {
                 return $this->course->name;
-            });
+            }); */
 
         $grid->column('subject_teacher', __('Subject Teacher'))
             ->display(function ($t) {
                 return $this->teacher->name;
             });
 
-        $grid->column('code', __('Code'));
+        $grid->column('code', __('Code'))->sortable();
         $grid->column('details', __('Details'))->hide();
 
         return $grid;
@@ -90,7 +115,7 @@ class SubjectController extends AdminController
             'user_type' => 'employee',
         ])->get() as $key => $a) {
             if ($a->isRole('teacher')) {
-                $teachers[$a['id']] = $a['name']." => ".$a['id'];
+                $teachers[$a['id']] = $a['name'] . " => " . $a['id'];
             }
         }
 
@@ -113,13 +138,12 @@ class SubjectController extends AdminController
             )->rules('required');
 
 
-
         $form->select('subject_teacher', 'Subject teacher')
             ->options(
                 $teachers
             )->rules('required');
 
-        $form->text('subject_name', __('Subject name'))->rules('required');
+
         $form->text('code', __('Code'))->rules('required');
 
         $form->textarea('details', __('Details'));
