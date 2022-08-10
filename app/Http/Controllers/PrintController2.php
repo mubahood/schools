@@ -68,6 +68,7 @@ class PrintController2 extends Controller
         //dd($item->termly_report_card->grading_scale->grade_ranges);
         $rows = "";
         foreach ($item->items as $v) {
+          
             $rows .= "<tr>";
             $rows .= "<td>{$v->subject->subject_name}</td>";
             $rows .= "<td>{$v->bot_mark}</td>";
