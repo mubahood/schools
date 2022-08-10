@@ -6,9 +6,17 @@ use Illuminate\Contracts\Support\Renderable;
 
 class Dropdown implements Renderable
 {
-    public function render()
-    {
-        return <<<HTML
+  public function render()
+  {
+
+    $fees = admin_url('fees');
+    $transactions = admin_url('transactions');
+    $accounts = admin_url('accounts');
+    $students = admin_url('students');
+    $teachers = admin_url('employees');
+    $classes = admin_url('students-classes');
+    $marks = admin_url('marks');
+    return <<<HTML
 <li class="dropdown">
     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
         <i class="fa fa-th"></i>
@@ -18,28 +26,30 @@ class Dropdown implements Renderable
            <div class="box box-solid" style="width: 300px;height: 300px;margin-bottom: 0;">
             <!-- /.box-header -->
             <div class="box-body">
-              <a class="btn btn-app" href="/posts">
-            <i class="fa fa-edit"></i> Posts
+              <a class="btn btn-app" href="$fees">
+            <i class="fa fa-money"></i> School fees
               </a>
-              <a class="btn btn-app" href="/users">
-                <i class="fa fa-users"></i> Users
+              <a class="btn btn-app" href="$transactions">
+                <i class="fa fa-balance-scale"></i> Transactions
               </a>
-              <a class="btn btn-app" href="/images">
-                <i class="fa fa-picture-o"></i> Images
+              <a class="btn btn-app" href="$accounts">
+                <i class="fa fa-calculator"></i>Accounts
               </a>
-              <a class="btn btn-app" href="/videos">
-                <i class="fa fa-play"></i> Videos
+              <a class="btn btn-app" href="$students">
+                <i class="fa fa-users"></i>Students
               </a>
-              <a class="btn btn-app" href="/articles">
-                <i class="fa fa-file-text"></i> Articles
+              <a class="btn btn-app" href="$teachers">
+                <i class="fa fa-graduation-cap"></i> Teachers
               </a>
-              <a class="btn btn-app" href="/tags">
-                <i class="fa fa-tags"></i> Tags
+              
+              <a class="btn btn-app" href="$classes">
+                <i class="fa fa-building-o"></i> Classes
               </a>
-              <a class="btn btn-app" href="/documents">
-                <i class="fa fa-file-o"></i> Documents
+              <a class="btn btn-app" href="$marks">
+                <i class="fa fa-check"></i> Marks
               </a>
-              <a class="btn btn-app" href="/chartjs">
+ 
+              <a class="btn btn-app" href="javascript:;">
                 <i class="fa fa-line-chart"></i> Charts
               </a>
             </div>
@@ -49,6 +59,5 @@ class Dropdown implements Renderable
     </ul>
 </li>
 HTML;
-
-    }
+  }
 }

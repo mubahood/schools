@@ -26,7 +26,7 @@ $ent = Utils::ent();
 
         <!-- Navbar Right Menu -->
         <div class="navbar-custom-menu">
-            <ul class="nav navbar-nav d-block">
+            <ul class="nav navbar-nav ">
 
                 {!! Admin::getNavbar()->render() !!}
 

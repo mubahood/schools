@@ -29,19 +29,17 @@ Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
     $navbar->left(view('admin.search-bar'));
 
     $navbar->left(Shortcut::make([
-        'Posts' => 'posts/create',
-        'Users' => 'users/create',
-        'Images' => 'images/create',
-        'Videos' => 'videos/create',
-        'Articles' => 'articles/create',
-        'Tags' => 'tags/create',
-        'Categories' => 'categories/create',
-    ], 'fa-plus')->title('Create'));
+        'School fees payment' => 'school-fees-payment/create',
+        'Transaction' => 'transactions/create',
+        'Students' => 'students/create',
+        'Teacher' => 'employees/create',
+
+    ], 'fa-plus')->title('ADD NEW'));
 
     $navbar->left(new Dropdown());
 
     $navbar->right(new \App\Admin\Extensions\Nav\Links());
 });
 
-Admin::css(url('/assets/bootstrap.css')); 
+Admin::css(url('/assets/bootstrap.css'));
 Admin::css('/assets/styles.css');

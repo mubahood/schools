@@ -13,12 +13,17 @@ class Mark extends Model
     public static function boot()
     {
         parent::boot();
- 
+
         self::updating(function ($m) {
             if (($m->exam->max_mark < 0) || ($m->score > $m->exam->max_mark)) {
                 return false;
             }
             $m->is_submitted = 1;
+            if ($m->remarks == null || (strlen($m->remarks) < 3)) {
+                $m->remarks = Utils::get_automaic_mark_remarks(
+                    Utils::convert_to_percentage($m->score, $m->exam->max_mark)
+                );
+            }
         });
     }
 

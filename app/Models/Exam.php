@@ -93,6 +93,18 @@ class Exam extends Model
 
 
 
+    public function term()
+    {
+        return $this->belongsTo(Term::class);
+    }
+
+
+    protected  $appends = ['name_text'];
+    function getNameTextAttribute($x)
+    {
+        return $this->name . " - " . $this->term->name . "";
+    }
+
     public function classes()
     {
         return $this->belongsToMany(AcademicClass::class, 'exam_has_classes');

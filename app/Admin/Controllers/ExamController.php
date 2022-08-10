@@ -5,6 +5,7 @@ namespace App\Admin\Controllers;
 use App\Models\AcademicClass;
 use App\Models\AcademicYear;
 use App\Models\Exam;
+use App\Models\Term;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -39,8 +40,27 @@ class ExamController extends AdminController
         ])->orderBy('id', 'DESC');
 
         $grid->column('id', __('ID'))->sortable();
-        $grid->column('term_id', __('Term id'));
-        $grid->column('type', __('Type'));
+
+
+
+
+
+        $terms = [];
+        foreach (Term::where([
+            'enterprise_id' => Admin::user()->enterprise_id,
+        ])
+            ->orderBy('id', 'Desc')
+            ->get() as $v) {
+            $terms[$v->id] = $v->name;
+        }
+        $grid->column('term_id', __('Term'))->display(function () {
+            return $this->term->name;
+        })->filter($terms); 
+        $grid->column('type', __('Type'))->filter([
+            'B.O.T' => 'Begnining of term exam',
+            'M.O.T' => 'Mid of term exam',
+            'E.O.T' => 'End of term exam'
+        ]);
         $grid->column('name', __('Name'));
         $grid->column('max_mark', __('Max mark'));
 

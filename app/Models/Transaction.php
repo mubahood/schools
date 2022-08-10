@@ -72,6 +72,8 @@ class Transaction extends Model
             die("Transaction not created because account was not found.");
         }
 
+
+
         $trans = new Transaction();
         $trans->enterprise_id = $acc->enterprise_id;
         $trans->account_id = $account_id;
@@ -120,5 +122,10 @@ class Transaction extends Model
             $acc->balance = $bal;
             $acc->save();
         }
+    }
+
+    public function account()
+    {
+        return $this->belongsTo(Account::class);
     }
 }

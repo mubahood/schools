@@ -66,7 +66,7 @@ class Subject extends Model
         if ($this->course == null) {
             return "-";
         }
-        return $this->course->name;
+        return $this->course->name . " - " . $this->academic_class->name;
     }
 
 

@@ -2,7 +2,10 @@
 
 namespace App\Admin\Controllers;
 
+use App\Models\AcademicClass;
+use App\Models\Exam;
 use App\Models\Mark;
+use App\Models\Subject;
 use Carbon\Carbon;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -17,7 +20,7 @@ class MarkController extends AdminController
      *
      * @var string
      */
-    protected $title = 'Mark';
+    protected $title = 'Marks';
 
     /**
      * Make a grid builder.
@@ -28,14 +31,72 @@ class MarkController extends AdminController
     {
         $grid = new Grid(new Mark());
         $grid->disableBatchActions();
+
+        $grid->filter(function ($filter) {
+            // Remove the default id filter
+            $filter->disableIdFilter();
+
+            // Add a column filter
+            $u = Admin::user();
+            $filter->equal('class_id', 'Filter by class')->select(AcademicClass::where([
+                'enterprise_id' => $u->enterprise_id
+            ])
+                ->orderBy('id', 'Desc')
+                ->get()->pluck('name_text', 'id'));
+
+
+            $exams = [];
+            foreach (Exam::where([
+                'enterprise_id' => $u->enterprise_id
+            ])->get() as $ex) {
+                $exams[$ex->id] = $ex->name_text;
+            }
+            $filter->equal('exam_id', 'Filter by exam')->select($exams);
+
+            $subs = [];
+            foreach (Subject::where([
+                'enterprise_id' => $u->enterprise_id
+            ])
+                ->orderBy('subject_name', 'asc')
+                ->get() as $ex) {
+                $subs[$ex->id] = $ex->name;
+            }
+            $filter->equal('subject_id', 'Filter by subject')->select($subs);
+
+
+            $u = Admin::user();
+            $ajax_url = url(
+                '/api/ajax?'
+                    . 'enterprise_id=' . $u->enterprise_id
+                    . "&search_by_1=name"
+                    . "&search_by_2=id"
+                    . "&model=User"
+            );
+
+            $filter->equal('student_id', 'Student')->select()->ajax($ajax_url);
+        });
+
+
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
-        ])->orderBy('id', 'DESC'); 
+        ])->orderBy('id', 'DESC');
 
-        $grid->column('student.name', __('Student'))->sortable();
-        $grid->column('exam.name', __('Exam'))->sortable();
-        $grid->column('class.name', __('Class'))->sortable();
-        $grid->column('subject.name', __('Subject'))->sortable();
+        $grid->column('id', __('#ID'))->sortable();
+        $grid->column('student_id', __('Student'))->display(function () {
+            return $this->student->name;
+        })->sortable();
+        $grid->column('exam_id', __('Exam'))
+            ->display(function () {
+                return $this->exam->name_text;
+            })->sortable();
+
+        $grid->column('class_id', __('Class'))->display(function () {
+            return $this->class->name;
+        })->sortable();
+        $grid->column('subject_id', __('Subject'))->display(function () {
+            return $this->subject->name;
+        })->sortable();
+
         $grid->column('score', __('Score'))->sortable()->editable();
         $grid->column('remarks', __('Remarks'))->editable();
         $grid->column('is_missed', __('Missed'));

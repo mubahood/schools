@@ -23,19 +23,19 @@ class HomeController extends Controller
 
 
 
-        $menu_items = MenuItem::all();
-        return $content
+        /*$menu_items = MenuItem::all();
+         return $content
             ->view('admin.dashboard', [
                 'menu_items' => $menu_items
-            ])->title(' - Dashboard');
+            ])->title(' - Dashboard'); */
 
 
-        $content->title($ent->name)
-            ->description(' - Dashboard')
+        return $content->title($ent->name)
+            ->description(' - Dashboard coming soon...')
             /* ->row(Dashboard::title()) */
             ->row(function (Row $row) {
 
-                $row->column(3, function (Column $column) {
+                /* $row->column(3, function (Column $column) {
                     $teachers_count = Administrator::where([
                         'enterprise_id' => Admin::user()->enterprise_id,
                         'user_type' => 'teacher',
@@ -63,7 +63,7 @@ class HomeController extends Controller
                     ]));
                     $box->style('success');
                     $column->append($box);
-                });
+                }); */
             });
     }
 }

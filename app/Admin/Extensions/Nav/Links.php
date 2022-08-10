@@ -4,9 +4,9 @@ namespace App\Admin\Extensions\Nav;
 
 class Links
 {
-    public function __toString()
-    {
-        return <<<HTML
+  public function __toString()
+  {
+    return <<<HTML
 <li>
     <a href="#">
       <i class="fa fa-envelope-o"></i>
@@ -15,19 +15,14 @@ class Links
 </li>
 
 <li>
-    <a href="/demo/posts">
+    <a href="#">
       <i class="fa fa-bell-o"></i>
       <span class="label label-warning">7</span>
     </a>
 </li>
 
-<li>
-    <a href="/demo/users" no-pjax>
-      <i class="fa fa-flag-o"></i>
-      <span class="label label-danger">9</span>
-    </a>
-</li>
+ 
 
 HTML;
-    }
+  }
 }

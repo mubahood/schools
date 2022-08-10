@@ -17,6 +17,8 @@ class StudentReportCard extends Model
 
     function items()
     {
+
+
         return $this->hasMany(StudentReportCardItem::class);
     }
 }

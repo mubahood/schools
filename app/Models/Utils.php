@@ -64,6 +64,22 @@ class Utils  extends Model
         die("Reconciled successfully $diff");
     }
 
+    public static function get_automaic_mark_remarks($score)
+    {
+        $remarks = "Fair";
+        if ($score < 20) {
+            $remarks = 'Tried';
+        } else if ($score < 30) {
+            $remarks = 'Fair';
+        } else if ($score < 50) {
+            $remarks = 'Good';
+        } else if ($score < 70) {
+            $remarks = 'V.Good';
+        } else {
+            $remarks = 'Excellent';
+        }
+        return $remarks;
+    }
     public static function dummy_update_mark()
     {
         $marks = Mark::all();

@@ -28,12 +28,18 @@ class SchoolFeesPaymentController extends AdminController
     {
         $grid = new Grid(new Transaction());
 
-        $grid->column('id', __('Id'));
-        $grid->column('created_at', __('Created at'));
-        $grid->column('updated_at', __('Updated at'));
-        $grid->column('enterprise_id', __('Enterprise id'));
-        $grid->column('account_id', __('Account id'));
-        $grid->column('amount', __('Amount'));
+        $grid->model()->where([
+            'enterprise_id' => Admin::user()->enterprise_id,
+        ])->orderBy('id', 'DESC');
+
+        $grid->column('id', __('ID'))->sortable();
+        $grid->column('created_at', __('Created'));
+        $grid->column('account_id', __('Account id'))->display(function () {
+            return $this->account->name;
+        });
+        $grid->column('amount', __('Amount'))->display(function () {
+            return "UGX " . number_format($this->amount);
+        });
         $grid->column('description', __('Description'));
         $grid->column('academic_year_id', __('Academic year id'));
         $grid->column('term_id', __('Term id'));

@@ -15,6 +15,11 @@ class StudentReportCardItem extends Model
     }
     function subject()
     {
+        $sub = Subject::find($this->subject_id);
+        if ($sub == null) {
+            $this->subject_id = 1;
+        }
+
         return $this->belongsTo(Subject::class);
     }
 }
