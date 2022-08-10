@@ -67,6 +67,7 @@ return array(
     'App\\Models\\GradingScale' => $baseDir . '/app/Models/GradingScale.php',
     'App\\Models\\Mark' => $baseDir . '/app/Models/Mark.php',
     'App\\Models\\MarkHasClass' => $baseDir . '/app/Models/MarkHasClass.php',
+    'App\\Models\\Reconciler' => $baseDir . '/app/Models/Reconciler.php',
     'App\\Models\\ReportCard' => $baseDir . '/app/Models/ReportCard.php',
     'App\\Models\\StudentHasClass' => $baseDir . '/app/Models/StudentHasClass.php',
     'App\\Models\\StudentHasFee' => $baseDir . '/app/Models/StudentHasFee.php',

@@ -154,10 +154,9 @@ return [
 
         // Disk in `config/filesystem.php`.
         'disk' => 'admin',
-
         // Image and file upload path under the disk above.
         'directory' => [
-            'image' => 'storage',
+            'image' => '/',
             'file'  => 'files',
         ],
     ],
@@ -443,7 +442,7 @@ return [
                         'formula',
                         'clean'
                     ],
- 
+
                 ],
                 'theme' => 'snow',
                 'height' => '200px',

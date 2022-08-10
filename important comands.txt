@@ -38,6 +38,7 @@ php artisan make:model StudentHasFees
 php artisan make:model Account
 php artisan make:model Transaction
 php artisan make:model Reconciler
+php artisan make:model MenuItem
   
 
 
@@ -60,6 +61,7 @@ php artisan make:migration create_student_as_fees_table
 php artisan make:migration create_accounts_table
 php artisan make:migration create_transactions_table 
 php artisan make:migration create_reconciler_table 
+php artisan make:migration create_menu_items_table 
 
 
 php artisan admin:make BooksCategoryController --model=App\\Models\\BooksCategory
@@ -80,3 +82,4 @@ php artisan admin:make StudentHasFeeController --model=App\\Models\\StudentHasFe
 php artisan admin:make AcademicClassFeeController --model=App\\Models\\AcademicClassFee
 php artisan admin:make TransactionController --model=App\\Models\\Transaction
 php artisan admin:make SchoolFeesPaymentController --model=App\\Models\\Transaction
+php artisan admin:make MenuItemController --model=App\\Models\\MenuItem

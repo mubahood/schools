@@ -1,4 +1,17 @@
-<?php
+<style>
+    .content-header {
+        margin-bottom: 1rem;
+    }
+
+    .my-box-3 {
+        color: black;
+    }
+
+    .my-box-3:hover {
+        background-color: var(--primary);
+        color: white;
+    }
+</style><?php
 if (!isset($icon)) {
     $icon = 'icon-announcement.png';
 }
@@ -8,13 +21,25 @@ if (!isset($count)) {
 if (!isset($sub_title)) {
     $sub_title = '-';
 }
+if (!isset($title)) {
+    $title = '-';
+}
+
+if (!isset($link)) {
+    $link = admin_url();
+}
+
 ?>
-<div class="row">
-    <div class="col-sm-4 p-2">
-        <img width="85" height="85" src="{{ url('assets/icons/' . $icon) }}" alt="">
+<a href="{{ $link }}" class="card rounded border-primary my-box-3 mb-5">
+    <div class="card-body rounded">
+        <h2 class="h3 m-0 p-0 mb-2  ">{{ $title }}</h2>
+        <div class="row pl-3 pb-0">
+            <div class="col-3  p-0">
+                <img class="img-fluid" src="{{ $icon }}" alt="">
+            </div>
+            <div class="col-9 p-0 pl-md-3 ">
+                <p class="p-0  m-0">{{ $sub_title }}</p>
+            </div>
+        </div>
     </div>
-    <div class="col-sm-8">
-        <h2 class="box-counter">{{ $count }}</h2>
-        <p class="text-right box-subtitle">{{ $sub_title }}</p>
-    </div>
-</div>
+</a>

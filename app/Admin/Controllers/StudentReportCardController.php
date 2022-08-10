@@ -7,6 +7,7 @@ use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
+use Encore\Admin\Widgets\Box;
 
 class StudentReportCardController extends AdminController
 {
@@ -25,6 +26,12 @@ class StudentReportCardController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new StudentReportCard());
+
+        $grid->header(function ($query) {
+
+
+            return new Box('Gender ratio', 'Romina Love');
+        });
 
         $grid->column('id', __('Id'));
         $grid->column('created_at', __('Created at'));

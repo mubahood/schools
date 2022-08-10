@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\MenuItem;
 use App\Models\Utils;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\Dashboard;
@@ -20,8 +21,16 @@ class HomeController extends Controller
         $ent = Utils::ent();
         Utils::reconcile_in_background(Admin::user()->enterprise_id);
 
+
+
+        $menu_items = MenuItem::all();
         return $content
-            ->title($ent->name)
+            ->view('admin.dashboard', [
+                'menu_items' => $menu_items
+            ])->title(' - Dashboard');
+
+
+        $content->title($ent->name)
             ->description(' - Dashboard')
             /* ->row(Dashboard::title()) */
             ->row(function (Row $row) {

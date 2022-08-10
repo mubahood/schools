@@ -31,9 +31,21 @@ class StudentHasClassController extends AdminController
     {
         $grid = new Grid(new StudentHasClass());
         $grid->disableBatchActions();
-        $grid->disableExport(); 
+        $grid->disableExport();
 
-        
+        $grid->filter(function ($filter) {
+
+            // Remove the default id filter
+            $filter->disableIdFilter();
+
+            // Add a column filter
+            $u = Admin::user();
+            $filter->equal('academic_class_id')->select(AcademicClass::where([
+                'enterprise_id' => $u->enterprise_id
+            ])->get()->pluck('name_text', 'id'));
+        });
+
+
 
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
@@ -119,7 +131,7 @@ class StudentHasClassController extends AdminController
         $u = Admin::user();
         $form->hidden('enterprise_id')->rules('required')->default($u->enterprise_id)
             ->value($u->enterprise_id);
- 
+
         if ($form->isCreating()) {
 
             $form->select('administrator_id', 'Student')->options(function () {

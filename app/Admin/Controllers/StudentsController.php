@@ -146,6 +146,45 @@ class StudentsController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Administrator());
+
+        $grid->filter(function ($filter) {
+
+            // Remove the default id filter
+            $filter->disableIdFilter();
+
+            // Add a column filter
+
+            $filter->like('name', 'name');
+
+            $u = Admin::user();
+            /* $ajax_url = url(
+                '/api/ajax?'
+                    . 'enterprise_id=' . $u->enterprise_id
+                    . "&search_by_1=name"
+                    . "&search_by_2=id"
+                    . "&model=User"
+            );
+
+            $filter->equal('id','Name')->select()->ajax($ajax_url); */
+            /*  $filter->whereIn(function ($query) {
+
+                $ids = StudentHasClass::where([
+                    'academic_class_id' => ((int)($this->input))
+                ])->get()->pluck('id');
+
+                $query->whereIn('id', $ids);
+            }, 'Filter by class')->select(
+                AcademicClass::where([
+                    'enterprise_id' => $u->enterprise_id
+                ])->get()->pluck('name_text', 'id')
+            ); */
+
+
+
+
+            $filter->expand();
+        });
+
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
             'user_type' => 'student'
@@ -254,21 +293,23 @@ class StudentsController extends AdminController
             $form->text('emergency_person_name', "Emergency person to contact name");
             $form->text('emergency_person_phone', "Emergency person to contact phone number");
         })
-            /* ->tab('EDUCATIONAL INFORMATION', function (Form $form) {
+            ->tab('CLASS ALLOCATION', function (Form $form) {
+                $form->morphMany('classes', 'Click on new to add this student to a class', function (Form\NestedForm $form) {
+                    $u = Admin::user();
+                    $form->hidden('enterprise_id')->default($u->enterprise_id);
 
-                $form->text('primary_school_name');
-                $form->year('primary_school_year_graduated');
-                $form->text('seconday_school_name');
-                $form->year('seconday_school_year_graduated');
-                $form->text('high_school_name');
-                $form->year('high_school_year_graduated');
-                $form->text('degree_university_name');
-                $form->year('degree_university_year_graduated');
-                $form->text('masters_university_name');
-                $form->year('masters_university_year_graduated');
-                $form->text('phd_university_name');
-                $form->year('phd_university_year_graduated');
-            }) */
+
+                    $form->select('academic_class_id', 'Class')->options(function () {
+                        return AcademicClass::where([
+                            'enterprise_id' => Admin::user()->enterprise_id,
+                        ])->get()->pluck('name', 'id');
+                    })
+                        ->rules('required')->load(
+                            'stream_id',
+                            url('/api/streams?enterprise_id=' . $u->enterprise_id)
+                        );
+                });
+            })
             /* ->tab('ACCOUNT NUMBERS', function (Form $form) {
 
                 $form->text('national_id_number', 'National ID number');
@@ -280,14 +321,14 @@ class StudentsController extends AdminController
             }) */
 
             ->tab('SYSTEM ACCOUNT', function (Form $form) {
-                
+
                 $roleModel = config('admin.database.roles_model');
                 $form->multipleSelect('roles', trans('admin.roles'))
                     ->attribute([
                         'autocomplete' => 'off'
                     ])
                     ->default([4])
-                    ->value([4]) 
+                    ->value([4])
                     ->options(
                         AdminRole::where('slug', '!=', 'super-admin')
                             ->where('slug', '!=', 'admin')
