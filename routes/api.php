@@ -9,11 +9,13 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('git', function (Request $r) {
     $resp = shell_exec('git pull'); 
+    $resp = shell_exec('git fetch'); 
+    $resp = shell_exec('git fetch --all');
 
     echo "<pre>";
     print_r($resp);
 
-    die("<h1>I love rominah k</h1>");
+    die("<h1>Simple test</h1>");
     
 });
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
