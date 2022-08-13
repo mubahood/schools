@@ -1,3 +1,53 @@
+ssh-keygen -t ed25519 -C "mubs0x@gmail.com"
+AAAAC3NzaC1lZDI1NTE5AAAAIOhhW2nwqAvPKk4X9Qu02jvOHjiZmc402H8PmvzVMF8D mubs0x@gmail.com
+
+
+git clone https://github.com/mubahood/schools.git public_html
+
+----
+PASS: 
+()(+256@Kampala+)()
+
+SERVER:
+gator4311.hostgator.com
+
+Username
+schooics
+
+ssh schooics@gator4311.hostgator.com
+
+
+ssh -T mubahood@github.com
+----
+
+ssh T git@github.com
+
+git@github.com:mubahood/schools.git
+
+
+Generating public/private rsa key pair.
+Enter passphrase (empty for no passphrase): 
+Enter same passphrase again: 
+Your identification has been saved in /home4/schooics/.ssh/id_rsa.
+Your public key has been saved in /home4/schooics/.ssh/id_rsa.pub.
+The key fingerprint is:
+SHA256:jsb7Xpc1tSNmK6swc4WCy1BQ4sWwbjBIjUkJwzOXCK0 
+The key's randomart image is:
++---[RSA 2048]----+
+|O+*+=o           |
+|oXo+=.           |
+|.++o .          .|
+|E + . .   .    ..|
+|   + . .S. . +oo |
+|  . o..o. . ooo..|
+|     o++....o.   |
+|     . .=. .o    |
+|      .oo...     |
++----[SHA256]-----+
+
+
+
+
 google api key
 AIzaSyCymVo9QxwffvO-tO2aciD96rnrnpxS2IU
 
