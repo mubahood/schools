@@ -8,17 +8,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('git', function (Request $r) {
-    $resp = shell_exec('git add *');
-    $resp = shell_exec('git commit -a');
-    $resp = shell_exec('git commit fetch');
-    $resp = shell_exec('git pull');
-    $resp = shell_exec('git fetch');
-    $resp = shell_exec('git fetch --all');
+    $resp = shell_exec('git pull --rebase=interactive -s recursive -X theirs');  
+ 
 
     echo "<pre>";
     print_r($resp);
 
-    die("<h1>Simple test</h1>");
+    die("<h1>test  test</h1>");
 });
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
