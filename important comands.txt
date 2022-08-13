@@ -1,10 +1,143 @@
+ssh-keygen -t ed25519 -C "mubs0x@gmail.com"
 
+git config --global user.email "mubs0x@gmail.com"
+git config --global user.name "mubahood"
+
+schooics@schooldynamics.ug [~/public_html]# git config --global user.email "mubs0x@gmail.com"
+schooics@schooldynamics.ug [~/public_html]# git commit
+
+git config --global user.email "mubs0x@gmail.com"
+
+git checkout schools
+
+git clone https://github.com/mubahood/schools.git public_html
+
+----
+PASS: 
+()(+256@Kampala+)()
+
+SERVER:
+gator4311.hostgator.com
+
+Username
+schooics
+
+ssh schooics@gator4311.hostgator.com
+
+
+ssh -T mubahood@github.com
+----
+
+ssh T git@github.com
+
+git@github.com:mubahood/schools.git
+
+
+Generating public/private rsa key pair.
+Enter passphrase (empty for no passphrase): 
+Enter same passphrase again: 
+Your identification has been saved in /home4/schooics/.ssh/id_rsa.
+Your public key has been saved in /home4/schooics/.ssh/id_rsa.pub.
+The key fingerprint is:
+SHA256:jsb7Xpc1tSNmK6swc4WCy1BQ4sWwbjBIjUkJwzOXCK0 
+The key's randomart image is:
++---[RSA 2048]----+
+|O+*+=o           |
+|oXo+=.           |
+|.++o .          .|
+|E + . .   .    ..|
+|   + . .S. . +oo |
+|  . o..o. . ooo..|
+|     o++....o.   |
+|     . .=. .o    |
+|      .oo...     |
++----[SHA256]-----+
+
+
+
+
+google api key
+AIzaSyCymVo9QxwffvO-tO2aciD96rnrnpxS2IU
 
 php artisan make:migration create_enterprises_table
+php artisan make:migration create_academic_years_table
 php artisan make:model Banner 
 php artisan make:model Enterprise
+php artisan make:migration create_books_categories_table
+php artisan make:migration create_books_table
+php artisan make:migration create_book_authors_table
+php artisan make:migration create_book_borrows_table
+php artisan make:migration create_book_borrow_books_table
+php artisan make:migration create_terms_table
+php artisan make:migration create_student_has_classes_table
+php artisan make:model BooksCategory
+php artisan make:model BookAuthor
+php artisan make:model BookBorrow
+php artisan make:model BookBorrowBook
+php artisan make:model AcademicYear
+php artisan make:model Term
+php artisan make:model Course
+php artisan make:model Subject
+php artisan make:model StudentHasClass
+php artisan make:migration create_Marks_table
+php artisan make:migration create_Mark_has_classes_table
+php artisan make:model Mark
+php artisan make:model MarkHasClass
+php artisan make:model ReportCard
+php artisan make:migration create_marks_table
+php artisan make:migration create_grading_scales_table
+php artisan make:model TermlyReportCard
+php artisan make:model StudentReportCard
+php artisan make:model StudentReportCardItem
+php artisan make:model GradingScale
+php artisan make:model Demo
+php artisan make:model AdminRoleUser
+php artisan make:model StudentHasFees
+php artisan make:model Account
+php artisan make:model Transaction
+php artisan make:model Reconciler
+php artisan make:model MenuItem
+  
 
 
-php artisan admin:make EnterpriseController --model=App\\Models\\Enterprise
+php artisan admin:make TermController --model=App\\Models\\Term
 php artisan admin:make EmployeesController --vendor\\encore\\laravel-admin\\src\\Auth\\Database\\Administrator
 
+php artisan make:migration create_books_categories_table
+php artisan make:migration create_subjects_table
+php artisan make:migration create_academic_class_sctreams_table
+php artisan make:migration create_termly_report_cards_table
+php artisan make:migration create_student_report_cards_table
+php artisan make:migration create_student_report_card_items_table
+php artisan make:migration create_grade_ranges_table
+2022_07_12_193945_create_grading_scales_table
+php artisan make:migration create_grading_scales_table
+php artisan make:migration create__table
+php artisan make:migration create_fees_table
+php artisan make:migration create_academic_class_fee_table
+php artisan make:migration create_student_as_fees_table
+php artisan make:migration create_accounts_table
+php artisan make:migration create_transactions_table 
+php artisan make:migration create_reconciler_table 
+php artisan make:migration create_menu_items_table 
+
+
+php artisan admin:make BooksCategoryController --model=App\\Models\\BooksCategory
+php artisan admin:make BooksCategoryController --model=App\\Models\\BooksCategory
+php artisan admin:make BookAuthorController --model=App\\Models\\BookAuthor
+php artisan admin:make BookController --model=App\\Models\\Book
+php artisan admin:make AcademicYearController --model=App\\Models\\AcademicYear
+php artisan admin:make AcademicClassController --model=App\\Models\\AcademicClass
+book_borrow_books
+php artisan admin:make SubjectController --model=App\\Models\\Subject
+php artisan admin:make StudentHasClassController --model=App\\Models\\StudentHasClass
+ 
+php artisan admin:make TermlyReportCardController --model=App\\Models\\TermlyReportCard
+php artisan admin:make GradingScaleController --model=App\\Models\\GradingScale
+php artisan admin:make GradeRangeController --model=App\\Models\\GradeRange
+php artisan admin:make AccountController --model=App\\Models\\Account
+php artisan admin:make StudentHasFeeController --model=App\\Models\\StudentHasFee
+php artisan admin:make AcademicClassFeeController --model=App\\Models\\AcademicClassFee
+php artisan admin:make TransactionController --model=App\\Models\\Transaction
+php artisan admin:make SchoolFeesPaymentController --model=App\\Models\\Transaction
+php artisan admin:make MenuItemController --model=App\\Models\\MenuItem

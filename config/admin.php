@@ -11,7 +11,7 @@ return [
     | login page.
     |
     */
-    'name' => 'HELL Doctor',
+    'name' => 'NEWLINE - SCHOOLS',
 
     /*
     |--------------------------------------------------------------------------
@@ -22,7 +22,7 @@ return [
     | `img` tag, eg '<img src="http://logo-url" alt="Admin logo">'.
     |
     */
-    'logo' => '<b>HELL Doctor</b>',
+    'logo' => '<b>NEWLINE - SCHOOLS</b>',
 
     /*
     |--------------------------------------------------------------------------
@@ -34,7 +34,7 @@ return [
     | '<img src="http://logo-url" alt="Admin logo">'.
     |
     */
-    'logo-mini' => '<b>HELL Doctor</b>',
+    'logo-mini' => '<b>NEWLINE - SCHOOLS</b>',
 
     /*
     |--------------------------------------------------------------------------
@@ -153,15 +153,13 @@ return [
     'upload' => [
 
         // Disk in `config/filesystem.php`.
-        'disk' => 'public',
-
+        'disk' => 'admin',
         // Image and file upload path under the disk above.
         'directory' => [
-            'image' => 'public/',
+            'image' => '/',
             'file'  => 'files',
         ],
-    ], 
-
+    ],
     /*
     |--------------------------------------------------------------------------
     | Laravel-admin database settings
@@ -209,7 +207,7 @@ return [
     */
     'operation_log' => [
 
-        'enable' => true,
+        'enable' => false,
 
         /*
          * Only logging allowed methods in the list
@@ -403,14 +401,53 @@ return [
     |
     */
     'extensions' => [
-        'chartjs' => [
 
-            // Set to `false` if you want to disable this extension
+        'grid-lightbox' => [
+            'enable' => true,
+        ],
+        'chartjs' => [
             'enable' => true,
         ],
         'material-ui' => [
-            // If the value is set to false, this extension will be disabled
             'enable' => false
+        ],
+        'quill' => [
+            'enable' => true,
+            'config' => [
+                'modules' => [
+                    'syntax' => true,
+                    'toolbar' =>
+                    [
+                        ['size' => []],
+                        ['header' => []],
+                        'bold',
+                        'italic',
+                        'underline',
+                        'strike',
+                        ['script' => 'super'],
+                        ['script' => 'sub'],
+                        ['color' => []],
+                        ['background' => []],
+                        'blockquote',
+                        'code-block',
+                        ['list' => 'ordered'],
+                        ['list' => 'bullet'],
+                        ['indent' => '-1'],
+                        ['indent' => '+1'],
+                        'direction',
+                        ['align' => []],
+                        'link',
+                        'image',
+                        'video',
+                        'formula',
+                        'clean'
+                    ],
+
+                ],
+                'theme' => 'snow',
+                'height' => '200px',
+            ]
+
         ],
         'latlong' => [
 
@@ -422,7 +459,7 @@ return [
 
             // According to the selected provider above, fill in the corresponding api_key
             'providers' => [
- 
+
                 'yandex' => [
                     'api_key' => '',
                 ],

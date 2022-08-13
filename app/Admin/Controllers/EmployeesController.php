@@ -8,6 +8,8 @@ use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
+use Illuminate\Support\Facades\Hash;
+
 /*
 
 `first_name` TEXT DEFAULT NULL,
@@ -128,7 +130,7 @@ class EmployeesController extends AdminController
      *
      * @var string
      */
-    protected $title = 'Employees';
+    protected $title = 'Teachers';
 
     /**
      * Make a grid builder.
@@ -138,13 +140,75 @@ class EmployeesController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Administrator());
-
+        $grid->model()
+            ->orderBy('id', 'Desc')
+            ->where([
+                'enterprise_id' => Admin::user()->enterprise_id,
+                'user_type' => 'employee'
+            ]);
         $grid->actions(function ($actions) {
             $actions->disableView();
         });
 
+
+
+        $grid->filter(function ($filter) {
+            $filter->disableIdFilter();
+            $u = Admin::user();
+            $teachers = [];
+            foreach (Administrator::where([
+                'enterprise_id' => $u->enterprise_id,
+                'user_type' => 'employee',
+            ])->get() as $key => $a) {
+                if ($a->isRole('teacher')) {
+                    $teachers[$a['id']] = $a['name'] . " => " . $a['id'];
+                }
+            }
+
+            $filter->like('name', 'Name');
+        });
+
+
+
         $grid->column('id', __('Id'))->sortable();
         $grid->column('name', __('Name'))->sortable();
+        $grid->column('phone_number_1', __('Phone number'));
+        $grid->column('phone_number_2', __('Phone number 2'))->hide();
+        $grid->column('email', __('Email'));
+        $grid->column('date_of_birth', __('D.O.B'))->sortable();
+        $grid->column('nationality', __('Nationality'))->sortable();
+        $grid->column('sex', __('Sex'));
+        $grid->column('place_of_birth', __('Place of birth'))->sortable();
+        $grid->column('home_address', __('Home address'))->hide();
+        $grid->column('current_address', __('Current address'))->hide();
+        $grid->column('religion', __('Religion'))->hide();
+        $grid->column('spouse_name', __('Spouse name'))->hide();
+        $grid->column('spouse_phone', __('Spouse phone'))->hide();
+        $grid->column('father_name')->hide();
+        $grid->column('father_phone')->hide();
+        $grid->column('mother_name')->hide();
+        $grid->column('mother_phone')->hide();
+        $grid->column('languages')->hide();
+        $grid->column('emergency_person_name')->hide();
+        $grid->column('emergency_person_phone')->hide();
+        $grid->column('national_id_number', 'N.I.N')->hide();
+        $grid->column('passport_number')->hide();
+        $grid->column('tin', 'TIN')->hide();
+        $grid->column('nssf_number')->hide();
+        $grid->column('bank_name')->hide();
+        $grid->column('bank_account_number')->hide();
+        $grid->column('primary_school_name')->hide();
+        $grid->column('primary_school_year_graduated')->hide();
+        $grid->column('seconday_school_name')->hide();
+        $grid->column('seconday_school_year_graduated')->hide();
+        $grid->column('high_school_name')->hide();
+        $grid->column('high_school_year_graduated')->hide();
+        $grid->column('degree_university_name')->hide();
+        $grid->column('degree_university_year_graduated')->hide();
+        $grid->column('masters_university_name')->hide();
+        $grid->column('masters_university_year_graduated')->hide();
+        $grid->column('phd_university_name')->hide();
+        $grid->column('phd_university_year_graduated')->hide();
 
         return $grid;
     }
@@ -170,9 +234,6 @@ class EmployeesController extends AdminController
     protected function form()
     {
         $u = Admin::user();
-        if (!$u->isRole('admin')) {
-            return admin_error('Warning', 'Administrators are can create a new employee.');
-        }
 
         $form = new Form(new Administrator());
 
@@ -183,6 +244,8 @@ class EmployeesController extends AdminController
             $u = Admin::user();
             $form->hidden('enterprise_id')->rules('required')->default($u->enterprise_id)
                 ->value($u->enterprise_id);
+
+            $form->hidden('user_type')->default('employee')->value('employee');
 
             $form->text('first_name')->rules('required');
             $form->text('last_name')->rules('required');
@@ -230,7 +293,22 @@ class EmployeesController extends AdminController
                 $form->text('bank_name');
                 $form->text('bank_account_number');
             })
+            ->tab('USER ROLES', function (Form $form) {
+                $roleModel = config('admin.database.roles_model');
+                $form->multipleSelect('roles', trans('admin.roles'))
+                    ->attribute([
+                        'autocomplete' => 'off'
+                    ])
+                    ->options(
+                        $roleModel::where('slug', '!=', 'super-admin')
+                            ->where('slug', '!=', 'admin')
+                            ->get()
+                            ->pluck('name', 'id')
+                    )->rules('required');
+            })
             ->tab('SYSTEM ACCOUNT', function (Form $form) {
+                $form->image('avatar', trans('admin.avatar'));
+
                 $form->email('email', 'Email address')
                     ->creationRules(['required', "unique:admin_users"])
                     ->updateRules(['required', "unique:admin_users,username,{{id}}"]);
@@ -238,7 +316,18 @@ class EmployeesController extends AdminController
                     ->creationRules(['required', "unique:admin_users"])
                     ->updateRules(['required', "unique:admin_users,username,{{id}}"]);
 
-                $form->password('password', 'Password')->rules('required');
+                $form->password('password', trans('admin.password'))->rules('required|confirmed');
+                $form->password('password_confirmation', trans('admin.password_confirmation'))->rules('required')
+                    ->default(function ($form) {
+                        return $form->model()->password;
+                    });
+
+                $form->ignore(['password_confirmation']);
+                $form->saving(function (Form $form) {
+                    if ($form->password && $form->model()->password != $form->password) {
+                        $form->password = Hash::make($form->password);
+                    }
+                });
             });
 
 

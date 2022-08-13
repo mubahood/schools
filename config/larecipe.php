@@ -33,9 +33,11 @@ return [
     */
 
     'versions'      => [
-        'default'   => '1.0',
-        'published' => [
-            '1.0'
+        'default'   => 'Administrators', 
+        'published' => [ 
+            'Administrators',
+            'Users',
+            'Developers',
         ]
     ],
 
@@ -95,7 +97,7 @@ return [
     */
 
     'search'            => [
-        'enabled'       => false,
+        'enabled'       => true,
         'default'       => 'algolia',
         'engines'       => [
             'internal'  => [
@@ -126,7 +128,7 @@ return [
         'fa_v4_shims'    => true, // Add FontAwesome v4 shims prevent BC break
         'show_side_bar'  => true,
         'colors'         => [
-            'primary'    => '#787AF6',
+            'primary'    => '#860002', 
             'secondary'  => '#2b9cf2'
         ],
 

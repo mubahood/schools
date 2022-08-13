@@ -19,6 +19,27 @@
  */
 
 use Encore\Admin\Facades\Admin;
+use App\Admin\Extensions\Nav\Shortcut;
+use App\Admin\Extensions\Nav\Dropdown;
+
 Encore\Admin\Form::forget(['map', 'editor']);
 
+Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
+
+    $navbar->left(view('admin.search-bar'));
+
+    $navbar->left(Shortcut::make([
+        'School fees payment' => 'school-fees-payment/create',
+        'Transaction' => 'transactions/create',
+        'Students' => 'students/create',
+        'Teacher' => 'employees/create',
+
+    ], 'fa-plus')->title('ADD NEW'));
+
+    $navbar->left(new Dropdown());
+
+    $navbar->right(new \App\Admin\Extensions\Nav\Links());
+});
+
+Admin::css(url('/assets/bootstrap.css'));
 Admin::css('/assets/styles.css');

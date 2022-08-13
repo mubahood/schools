@@ -5,6 +5,7 @@ namespace App\Admin\Controllers;
 use App\Models\Enterprise;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
+use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
@@ -33,7 +34,7 @@ class EnterpriseController extends AdminController
 
         $grid->column('id', __('Id'))->sortable();
         $grid->column('name', __('Name'))->sortable();
-        $grid->column('administrator_id', __('Onwer'))->display(function (){
+        $grid->column('administrator_id', __('Onwer'))->display(function () {
             return $this->owner->name;
         });
         $grid->column('logo', __('Logo'));
@@ -80,15 +81,27 @@ class EnterpriseController extends AdminController
     {
         $form = new Form(new Enterprise());
 
+        $ads = [];
+        foreach (Administrator::all() as $ad) {
+            if ($ad->isRole('admin')) {
+                $ads[$ad->id] = $ad->username;
+            };
+        }
+
+
         $form->select('administrator_id', __('Enterprise owner'))
             ->options(
-                Administrator::where('enterprise_id', 1)->get()->pluck('name', 'id')
+                $ads
             )
             ->rules('required');
 
         $form->text('name', __('Name'))->required();
         $form->text('short_name', __('Short name'))->required();
+        $form->textarea('welcome_message', __('Welcome_message'))->required();
+        //$form->quill('welcome_message', __('Welcome_message'))->required();
+        $form->text('subdomain', __('Subdomain'))->required();
         $form->image('logo', __('Logo'));
+        $form->text('color', __('Primary color'))->required();
         $form->text('phone_number', __('Phone number'))->attribute('type', 'number');
         $form->text('email', __('Email'))->attribute('type', 'email')->required();
         $form->text('address', __('Address'));
