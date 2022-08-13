@@ -7,6 +7,14 @@ use App\Models\Utils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+Route::get('git', function (Request $r) {
+    $resp = shell_exec('pwd && ls');
+
+    echo "<pre>";
+    print_r($resp);
+
+    die("Test");
+});
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
