@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('git', function (Request $r) {
-    $resp = shell_exec('git pull');
+    $resp = shell_exec('git config pull.rebase false ');
 
     echo "<pre>";
     print_r($resp);
