@@ -1,6 +1,14 @@
 ssh-keygen -t ed25519 -C "mubs0x@gmail.com"
-AAAAC3NzaC1lZDI1NTE5AAAAIOhhW2nwqAvPKk4X9Qu02jvOHjiZmc402H8PmvzVMF8D mubs0x@gmail.com
 
+git config --global user.email "mubs0x@gmail.com"
+git config --global user.name "mubahood"
+
+schooics@schooldynamics.ug [~/public_html]# git config --global user.email "mubs0x@gmail.com"
+schooics@schooldynamics.ug [~/public_html]# git commit
+
+git config --global user.email "mubs0x@gmail.com"
+
+git checkout schools
 
 git clone https://github.com/mubahood/schools.git public_html
 
