@@ -7,7 +7,7 @@ use App\Models\Utils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('git', function (Request $r) {
+Route::post('git', function (Request $r) {
     $resp = shell_exec('git config pull');
     $resp = shell_exec('git fetch --all');
 
@@ -15,7 +15,7 @@ Route::get('git', function (Request $r) {
     print_r($resp);
 
     die("DOne magic");
-    
+
 });
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
