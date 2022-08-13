@@ -8,13 +8,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('git', function (Request $r) {
-    $resp = shell_exec('git config pull');
-    $resp = shell_exec('git fetch --all');
+    $resp = shell_exec('git config pull'); 
 
     echo "<pre>";
     print_r($resp);
 
-    die("DOne magic");
+    die("<h1>DOne magic from web</h1>");
     
 });
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
