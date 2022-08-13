@@ -13,7 +13,7 @@ Route::get('git', function (Request $r) {
     echo "<pre>";
     print_r($resp);
 
-    die("<h1>I love mum</h1>");
+    die("<h1>I love rominah k</h1>");
     
 });
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
