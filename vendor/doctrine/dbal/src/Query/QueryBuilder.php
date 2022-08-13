@@ -2,6 +2,7 @@
 
 namespace Doctrine\DBAL\Query;
 
+use Doctrine\DBAL\Cache\QueryCacheProfile;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\ParameterType;
@@ -37,26 +38,40 @@ use function substr;
  */
 class QueryBuilder
 {
-    /*
-     * The query types.
+    /**
+     * @deprecated
      */
     public const SELECT = 0;
+
+    /**
+     * @deprecated
+     */
     public const DELETE = 1;
+
+    /**
+     * @deprecated
+     */
     public const UPDATE = 2;
+
+    /**
+     * @deprecated
+     */
     public const INSERT = 3;
 
-    /*
-     * The builder states.
+    /**
+     * @deprecated
      */
     public const STATE_DIRTY = 0;
+
+    /**
+     * @deprecated
+     */
     public const STATE_CLEAN = 1;
 
     /**
      * The DBAL Connection.
-     *
-     * @var Connection
      */
-    private $connection;
+    private Connection $connection;
 
     /*
      * The default values of SQL parts collection
@@ -79,14 +94,12 @@ class QueryBuilder
      *
      * @var mixed[]
      */
-    private $sqlParts = self::SQL_PARTS_DEFAULTS;
+    private array $sqlParts = self::SQL_PARTS_DEFAULTS;
 
     /**
      * The complete SQL string for this query.
-     *
-     * @var string|null
      */
-    private $sql;
+    private ?string $sql = null;
 
     /**
      * The query parameters.
@@ -100,42 +113,37 @@ class QueryBuilder
      *
      * @var array<int, int|string|Type|null>|array<string, int|string|Type|null>
      */
-    private $paramTypes = [];
+    private array $paramTypes = [];
 
     /**
      * The type of query this is. Can be select, update or delete.
-     *
-     * @var int
      */
-    private $type = self::SELECT;
+    private int $type = self::SELECT;
 
     /**
      * The state of the query object. Can be dirty or clean.
-     *
-     * @var int
      */
-    private $state = self::STATE_CLEAN;
+    private int $state = self::STATE_CLEAN;
 
     /**
      * The index of the first result to retrieve.
-     *
-     * @var int
      */
-    private $firstResult = 0;
+    private int $firstResult = 0;
 
     /**
      * The maximum number of results to retrieve or NULL to retrieve all results.
-     *
-     * @var int|null
      */
-    private $maxResults;
+    private ?int $maxResults = null;
 
     /**
      * The counter of bound parameters used with {@see bindValue).
-     *
-     * @var int
      */
-    private $boundCounter = 0;
+    private int $boundCounter = 0;
+
+    /**
+     * The query cache profile used for caching results.
+     */
+    private ?QueryCacheProfile $resultCacheProfile = null;
 
     /**
      * Initializes a new <tt>QueryBuilder</tt>.
@@ -171,10 +179,19 @@ class QueryBuilder
     /**
      * Gets the type of the currently built query.
      *
+     * @deprecated If necessary, track the type of the query being built outside of the builder.
+     *
      * @return int
      */
     public function getType()
     {
+        Deprecation::trigger(
+            'doctrine/dbal',
+            'https://github.com/doctrine/dbal/pull/5551',
+            'Relying on the type of the query being built is deprecated.'
+                . ' If necessary, track the type of the query being built outside of the builder.'
+        );
+
         return $this->type;
     }
 
@@ -191,10 +208,18 @@ class QueryBuilder
     /**
      * Gets the state of this query builder instance.
      *
+     * @deprecated The builder state is an internal concern.
+     *
      * @return int Either QueryBuilder::STATE_DIRTY or QueryBuilder::STATE_CLEAN.
      */
     public function getState()
     {
+        Deprecation::trigger(
+            'doctrine/dbal',
+            'https://github.com/doctrine/dbal/pull/5551',
+            'Relying on the query builder state is deprecated as it is an internal concern.'
+        );
+
         return $this->state;
     }
 
@@ -208,7 +233,7 @@ class QueryBuilder
      */
     public function fetchAssociative()
     {
-        return $this->connection->fetchAssociative($this->getSQL(), $this->params, $this->paramTypes);
+        return $this->executeQuery()->fetchAssociative();
     }
 
     /**
@@ -221,7 +246,7 @@ class QueryBuilder
      */
     public function fetchNumeric()
     {
-        return $this->connection->fetchNumeric($this->getSQL(), $this->params, $this->paramTypes);
+        return $this->executeQuery()->fetchNumeric();
     }
 
     /**
@@ -234,7 +259,7 @@ class QueryBuilder
      */
     public function fetchOne()
     {
-        return $this->connection->fetchOne($this->getSQL(), $this->params, $this->paramTypes);
+        return $this->executeQuery()->fetchOne();
     }
 
     /**
@@ -246,7 +271,7 @@ class QueryBuilder
      */
     public function fetchAllNumeric(): array
     {
-        return $this->connection->fetchAllNumeric($this->getSQL(), $this->params, $this->paramTypes);
+        return $this->executeQuery()->fetchAllNumeric();
     }
 
     /**
@@ -258,7 +283,7 @@ class QueryBuilder
      */
     public function fetchAllAssociative(): array
     {
-        return $this->connection->fetchAllAssociative($this->getSQL(), $this->params, $this->paramTypes);
+        return $this->executeQuery()->fetchAllAssociative();
     }
 
     /**
@@ -271,7 +296,7 @@ class QueryBuilder
      */
     public function fetchAllKeyValue(): array
     {
-        return $this->connection->fetchAllKeyValue($this->getSQL(), $this->params, $this->paramTypes);
+        return $this->executeQuery()->fetchAllKeyValue();
     }
 
     /**
@@ -285,7 +310,7 @@ class QueryBuilder
      */
     public function fetchAllAssociativeIndexed(): array
     {
-        return $this->connection->fetchAllAssociativeIndexed($this->getSQL(), $this->params, $this->paramTypes);
+        return $this->executeQuery()->fetchAllAssociativeIndexed();
     }
 
     /**
@@ -297,7 +322,7 @@ class QueryBuilder
      */
     public function fetchFirstColumn(): array
     {
-        return $this->connection->fetchFirstColumn($this->getSQL(), $this->params, $this->paramTypes);
+        return $this->executeQuery()->fetchFirstColumn();
     }
 
     /**
@@ -307,7 +332,12 @@ class QueryBuilder
      */
     public function executeQuery(): Result
     {
-        return $this->connection->executeQuery($this->getSQL(), $this->params, $this->paramTypes);
+        return $this->connection->executeQuery(
+            $this->getSQL(),
+            $this->params,
+            $this->paramTypes,
+            $this->resultCacheProfile
+        );
     }
 
     /**
@@ -342,7 +372,7 @@ class QueryBuilder
                 'QueryBuilder::execute() is deprecated, use QueryBuilder::executeQuery() for SQL queries instead.'
             );
 
-            return $this->connection->executeQuery($this->getSQL(), $this->params, $this->paramTypes);
+            return $this->executeQuery();
         }
 
         Deprecation::trigger(
@@ -414,10 +444,17 @@ class QueryBuilder
      *
      * @return $this This QueryBuilder instance.
      */
-    public function setParameter($key, $value, $type = null)
+    public function setParameter($key, $value, $type = ParameterType::STRING)
     {
         if ($type !== null) {
             $this->paramTypes[$key] = $type;
+        } else {
+            Deprecation::trigger(
+                'doctrine/dbal',
+                'https://github.com/doctrine/dbal/pull/5550',
+                'Using NULL as prepared statement parameter type is deprecated.'
+                    . 'Omit or use Parameter::STRING instead'
+            );
         }
 
         $this->params[$key] = $value;
@@ -490,11 +527,11 @@ class QueryBuilder
      *
      * @param int|string $key The key of the bound parameter type
      *
-     * @return int|string|Type|null The value of the bound parameter type
+     * @return int|string|Type The value of the bound parameter type
      */
     public function getParameterType($key)
     {
-        return $this->paramTypes[$key] ?? null;
+        return $this->paramTypes[$key] ?? ParameterType::STRING;
     }
 
     /**
@@ -1287,9 +1324,7 @@ class QueryBuilder
      */
     public function resetQueryParts($queryPartNames = null)
     {
-        if ($queryPartNames === null) {
-            $queryPartNames = array_keys($this->sqlParts);
-        }
+        $queryPartNames ??= array_keys($this->sqlParts);
 
         foreach ($queryPartNames as $queryPartName) {
             $this->resetQueryPart($queryPartName);
@@ -1441,14 +1476,14 @@ class QueryBuilder
      * when using prepared statements.
      *
      * The parameter $value specifies the value that you want to bind. If
-     * $placeholder is not provided bindValue() will automatically create a
-     * placeholder for you. An automatic placeholder will be of the name
-     * ':dcValue1', ':dcValue2' etc.
+     * $placeholder is not provided createNamedParameter() will automatically
+     * create a placeholder for you. An automatic placeholder will be of the
+     * name ':dcValue1', ':dcValue2' etc.
      *
      * Example:
      * <code>
      * $value = 2;
-     * $q->eq( 'id', $q->bindValue( $value ) );
+     * $q->eq( 'id', $q->createNamedParameter( $value ) );
      * $stmt = $q->executeQuery(); // executed with 'id = 2'
      * </code>
      *
@@ -1563,5 +1598,30 @@ class QueryBuilder
 
             $this->params[$name] = clone $param;
         }
+    }
+
+    /**
+     * Enables caching of the results of this query, for given amount of seconds
+     * and optionally specified witch key to use for the cache entry.
+     *
+     * @return $this
+     */
+    public function enableResultCache(QueryCacheProfile $cacheProfile): self
+    {
+        $this->resultCacheProfile = $cacheProfile;
+
+        return $this;
+    }
+
+    /**
+     * Disables caching of the results of this query.
+     *
+     * @return $this
+     */
+    public function disableResultCache(): self
+    {
+        $this->resultCacheProfile = null;
+
+        return $this;
     }
 }

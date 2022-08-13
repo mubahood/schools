@@ -6,6 +6,7 @@ use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Schema\Exception\InvalidTableName;
 use Doctrine\DBAL\Schema\Visitor\Visitor;
 use Doctrine\DBAL\Types\Type;
+use Doctrine\Deprecations\Deprecation;
 
 use function array_filter;
 use function array_keys;
@@ -46,7 +47,7 @@ class Table extends AbstractAsset
     protected $_schemaConfig;
 
     /** @var Index[] */
-    private $implicitIndexes = [];
+    private array $implicitIndexes = [];
 
     /**
      * @param Column[]               $columns
@@ -148,13 +149,11 @@ class Table extends AbstractAsset
      */
     public function addIndex(array $columnNames, ?string $indexName = null, array $flags = [], array $options = [])
     {
-        if ($indexName === null) {
-            $indexName = $this->_generateIdentifierName(
-                array_merge([$this->getName()], $columnNames),
-                'idx',
-                $this->_getMaxIdentifierLength()
-            );
-        }
+        $indexName ??= $this->_generateIdentifierName(
+            array_merge([$this->getName()], $columnNames),
+            'idx',
+            $this->_getMaxIdentifierLength()
+        );
 
         return $this->_addIndex($this->_createIndex($columnNames, $indexName, false, false, $flags, $options));
     }
@@ -172,13 +171,11 @@ class Table extends AbstractAsset
         array $flags = [],
         array $options = []
     ): Table {
-        if ($indexName === null) {
-            $indexName = $this->_generateIdentifierName(
-                array_merge([$this->getName()], $columnNames),
-                'uniq',
-                $this->_getMaxIdentifierLength()
-            );
-        }
+        $indexName ??= $this->_generateIdentifierName(
+            array_merge([$this->getName()], $columnNames),
+            'uniq',
+            $this->_getMaxIdentifierLength()
+        );
 
         return $this->_addUniqueConstraint($this->_createUniqueConstraint($columnNames, $indexName, $flags, $options));
     }
@@ -231,13 +228,11 @@ class Table extends AbstractAsset
      */
     public function addUniqueIndex(array $columnNames, $indexName = null, array $options = [])
     {
-        if ($indexName === null) {
-            $indexName = $this->_generateIdentifierName(
-                array_merge([$this->getName()], $columnNames),
-                'uniq',
-                $this->_getMaxIdentifierLength()
-            );
-        }
+        $indexName ??= $this->_generateIdentifierName(
+            array_merge([$this->getName()], $columnNames),
+            'uniq',
+            $this->_getMaxIdentifierLength()
+        );
 
         return $this->_addIndex($this->_createIndex($columnNames, $indexName, true, false, [], $options));
     }
@@ -411,13 +406,11 @@ class Table extends AbstractAsset
         array $options = [],
         $name = null
     ) {
-        if ($name === null) {
-            $name = $this->_generateIdentifierName(
-                array_merge((array) $this->getName(), $localColumnNames),
-                'fk',
-                $this->_getMaxIdentifierLength()
-            );
-        }
+        $name ??= $this->_generateIdentifierName(
+            array_merge([$this->getName()], $localColumnNames),
+            'fk',
+            $this->_getMaxIdentifierLength()
+        );
 
         if ($foreignTable instanceof Table) {
             foreach ($foreignColumnNames as $columnName) {
@@ -904,12 +897,20 @@ class Table extends AbstractAsset
     }
 
     /**
+     * @deprecated
+     *
      * @return void
      *
      * @throws SchemaException
      */
     public function visit(Visitor $visitor)
     {
+        Deprecation::triggerIfCalledFromOutside(
+            'doctrine/dbal',
+            'https://github.com/doctrine/dbal/pull/5435',
+            'Table::visit() is deprecated.'
+        );
+
         $visitor->acceptTable($this);
 
         foreach ($this->getColumns() as $column) {

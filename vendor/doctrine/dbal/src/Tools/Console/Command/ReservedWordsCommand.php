@@ -31,16 +31,24 @@ use function implode;
 use function is_array;
 use function is_string;
 
+/**
+ * @deprecated Use database documentation instead.
+ */
 class ReservedWordsCommand extends Command
 {
     /** @var array<string,KeywordList> */
-    private $keywordLists;
+    private array $keywordLists;
 
-    /** @var ConnectionProvider */
-    private $connectionProvider;
+    private ConnectionProvider $connectionProvider;
 
     public function __construct(ConnectionProvider $connectionProvider)
     {
+        Deprecation::triggerIfCalledFromOutside(
+            'doctrine/dbal',
+            'https://github.com/doctrine/dbal/pull/5431',
+            'ReservedWordsCommand is deprecated. Use database documentation instead.'
+        );
+
         parent::__construct();
         $this->connectionProvider = $connectionProvider;
 
@@ -139,6 +147,12 @@ EOT
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $output->writeln(
+            '<comment>The <info>dbal:reserved-words</info> command is deprecated.</comment>'
+                . ' Use the documentation on the used database platform(s) instead.'
+        );
+        $output->writeln('');
+
         $conn = $this->getConnection($input);
 
         $keywordLists = $input->getOption('list');

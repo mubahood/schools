@@ -94,7 +94,7 @@ final class DriverManager
      *
      * @var string[]
      */
-    private static $driverSchemeAliases = [
+    private static array $driverSchemeAliases = [
         'db2'        => 'ibm_db2',
         'mssql'      => 'pdo_sqlsrv',
         'mysql'      => 'pdo_mysql',
@@ -184,15 +184,9 @@ final class DriverManager
         ?EventManager $eventManager = null
     ): Connection {
         // create default config and event manager, if not set
-        if ($config === null) {
-            $config = new Configuration();
-        }
-
-        if ($eventManager === null) {
-            $eventManager = new EventManager();
-        }
-
-        $params = self::parseDatabaseUrl($params);
+        $config       ??= new Configuration();
+        $eventManager ??= new EventManager();
+        $params         = self::parseDatabaseUrl($params);
 
         // URL support for PrimaryReplicaConnection
         if (isset($params['primary'])) {

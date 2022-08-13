@@ -2,18 +2,17 @@
 
 namespace Doctrine\DBAL\Platforms;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\ColumnDiff;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Schema\Identifier;
 use Doctrine\DBAL\Schema\Index;
+use Doctrine\DBAL\Schema\PostgreSQLSchemaManager;
 use Doctrine\DBAL\Schema\Sequence;
 use Doctrine\DBAL\Schema\TableDiff;
-use Doctrine\DBAL\Types\BigIntType;
 use Doctrine\DBAL\Types\BinaryType;
 use Doctrine\DBAL\Types\BlobType;
-use Doctrine\DBAL\Types\IntegerType;
-use Doctrine\DBAL\Types\Type;
 use Doctrine\Deprecations\Deprecation;
 use UnexpectedValueException;
 
@@ -39,11 +38,10 @@ use function trim;
  */
 class PostgreSQLPlatform extends AbstractPlatform
 {
-    /** @var bool */
-    private $useBooleanTrueFalseStrings = true;
+    private bool $useBooleanTrueFalseStrings = true;
 
     /** @var string[][] PostgreSQL booleans literals */
-    private $booleanLiterals = [
+    private array $booleanLiterals = [
         'true' => [
             't',
             'true',
@@ -172,9 +170,18 @@ class PostgreSQLPlatform extends AbstractPlatform
 
     /**
      * {@inheritdoc}
+     *
+     * @deprecated
      */
     public function getDefaultSchemaName()
     {
+        Deprecation::trigger(
+            'doctrine/dbal',
+            'https://github.com/doctrine/dbal/pull/5513',
+            '%s is deprecated.',
+            __METHOD__
+        );
+
         return 'public';
     }
 
@@ -188,6 +195,8 @@ class PostgreSQLPlatform extends AbstractPlatform
 
     /**
      * {@inheritdoc}
+     *
+     * @internal The method should be only used from within the {@see AbstractPlatform} class hierarchy.
      */
     public function supportsPartialIndexes()
     {
@@ -196,22 +205,42 @@ class PostgreSQLPlatform extends AbstractPlatform
 
     /**
      * {@inheritdoc}
+     *
+     * @deprecated
      */
     public function usesSequenceEmulatedIdentityColumns()
     {
+        Deprecation::trigger(
+            'doctrine/dbal',
+            'https://github.com/doctrine/dbal/pull/5513',
+            '%s is deprecated.',
+            __METHOD__
+        );
+
         return true;
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @deprecated
      */
     public function getIdentitySequenceName($tableName, $columnName)
     {
+        Deprecation::triggerIfCalledFromOutside(
+            'doctrine/dbal',
+            'https://github.com/doctrine/dbal/pull/5513',
+            '%s is deprecated.',
+            __METHOD__
+        );
+
         return $tableName . '_' . $columnName . '_seq';
     }
 
     /**
      * {@inheritDoc}
+     *
+     * @internal The method should be only used from within the {@see AbstractPlatform} class hierarchy.
      */
     public function supportsCommentOnStatement()
     {
@@ -220,14 +249,25 @@ class PostgreSQLPlatform extends AbstractPlatform
 
     /**
      * {@inheritDoc}
+     *
+     * @deprecated
      */
     public function hasNativeGuidType()
     {
+        Deprecation::triggerIfCalledFromOutside(
+            'doctrine/dbal',
+            'https://github.com/doctrine/dbal/pull/5509',
+            '%s is deprecated.',
+            __METHOD__
+        );
+
         return true;
     }
 
     /**
      * {@inheritDoc}
+     *
+     * @internal The method should be only used from within the {@see AbstractSchemaManager} class hierarchy.
      */
     public function getListDatabasesSQL()
     {
@@ -256,17 +296,24 @@ class PostgreSQLPlatform extends AbstractPlatform
 
     /**
      * {@inheritDoc}
+     *
+     * @internal The method should be only used from within the {@see AbstractSchemaManager} class hierarchy.
      */
     public function getListSequencesSQL($database)
     {
-        return "SELECT sequence_name AS relname,
-                       sequence_schema AS schemaname
+        return 'SELECT sequence_name AS relname,
+                       sequence_schema AS schemaname,
+                       minimum_value AS min_value,
+                       increment AS increment_by
                 FROM   information_schema.sequences
-                WHERE  sequence_schema NOT LIKE 'pg\_%'
+                WHERE  sequence_catalog = ' . $this->quoteStringLiteral($database) . "
+                AND    sequence_schema NOT LIKE 'pg\_%'
                 AND    sequence_schema != 'information_schema'";
     }
 
     /**
+     * @deprecated The SQL used for schema introspection is an implementation detail and should not be relied upon.
+     *
      * {@inheritDoc}
      */
     public function getListTablesSQL()
@@ -283,6 +330,8 @@ class PostgreSQLPlatform extends AbstractPlatform
 
     /**
      * {@inheritDoc}
+     *
+     * @internal The method should be only used from within the {@see AbstractSchemaManager} class hierarchy.
      */
     public function getListViewsSQL($database)
     {
@@ -294,6 +343,8 @@ class PostgreSQLPlatform extends AbstractPlatform
     }
 
     /**
+     * @deprecated The SQL used for schema introspection is an implementation detail and should not be relied upon.
+     *
      * @param string      $table
      * @param string|null $database
      *
@@ -313,6 +364,8 @@ class PostgreSQLPlatform extends AbstractPlatform
     }
 
     /**
+     * @deprecated
+     *
      * {@inheritDoc}
      */
     public function getListTableConstraintsSQL($table)
@@ -340,6 +393,8 @@ SQL
     }
 
     /**
+     * @deprecated The SQL used for schema introspection is an implementation detail and should not be relied upon.
+     *
      * {@inheritDoc}
      *
      * @link http://ezcomponents.org/docs/api/trunk/DatabaseSchema/ezcDbSchemaPgsqlReader.html
@@ -386,6 +441,8 @@ SQL
     }
 
     /**
+     * @deprecated The SQL used for schema introspection is an implementation detail and should not be relied upon.
+     *
      * {@inheritDoc}
      */
     public function getListTableColumnsSQL($table, $database = null)
@@ -425,6 +482,8 @@ SQL
 
     /**
      * {@inheritDoc}
+     *
+     * @internal The method should be only used from within the {@see AbstractPlatform} class hierarchy.
      */
     public function getAdvancedForeignKeyOptionsSQL(ForeignKeyConstraint $foreignKey)
     {
@@ -522,7 +581,7 @@ SQL
                 $sql[] = 'ALTER TABLE ' . $diff->getName($this)->getQuotedName($this) . ' ' . $query;
             }
 
-            if ($columnDiff->hasChanged('default') || $this->typeChangeBreaksDefaultValue($columnDiff)) {
+            if ($columnDiff->hasChanged('default')) {
                 $defaultClause = $column->getDefault() === null
                     ? ' DROP DEFAULT'
                     : ' SET' . $this->getDefaultValueDeclarationSQL($column->toArray());
@@ -662,6 +721,8 @@ SQL
 
     /**
      * {@inheritdoc}
+     *
+     * @internal The method should be only used from within the {@see AbstractPlatform} class hierarchy.
      */
     public function getCommentOnColumnSQL($tableName, $columnName, $comment)
     {
@@ -756,7 +817,7 @@ SQL
         }
 
         if (isset($options['foreignKeys'])) {
-            foreach ((array) $options['foreignKeys'] as $definition) {
+            foreach ($options['foreignKeys'] as $definition) {
                 $sql[] = $this->getCreateForeignKeySQL($definition, $name);
             }
         }
@@ -803,7 +864,7 @@ SQL
             return $callback(true);
         }
 
-        throw new UnexpectedValueException("Unrecognized boolean literal '${value}'");
+        throw new UnexpectedValueException(sprintf("Unrecognized boolean literal '%s'", $value));
     }
 
     /**
@@ -1128,9 +1189,17 @@ SQL
 
     /**
      * {@inheritDoc}
+     *
+     * @deprecated
      */
     public function getVarcharMaxLength()
     {
+        Deprecation::triggerIfCalledFromOutside(
+            'doctrine/dbal',
+            'https://github.com/doctrine/dbal/issues/3263',
+            'PostgreSQLPlatform::getVarcharMaxLength() is deprecated.'
+        );
+
         return 65535;
     }
 
@@ -1139,22 +1208,45 @@ SQL
      */
     public function getBinaryMaxLength()
     {
+        Deprecation::triggerIfCalledFromOutside(
+            'doctrine/dbal',
+            'https://github.com/doctrine/dbal/issues/3263',
+            'PostgreSQLPlatform::getBinaryMaxLength() is deprecated.'
+        );
+
         return 0;
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @deprecated
      */
     public function getBinaryDefaultLength()
     {
+        Deprecation::trigger(
+            'doctrine/dbal',
+            'https://github.com/doctrine/dbal/issues/3263',
+            'Relying on the default binary column length is deprecated, specify the length explicitly.'
+        );
+
         return 0;
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @deprecated
      */
     public function hasNativeJsonType()
     {
+        Deprecation::triggerIfCalledFromOutside(
+            'doctrine/dbal',
+            'https://github.com/doctrine/dbal/pull/5509',
+            '%s is deprecated.',
+            __METHOD__
+        );
+
         return true;
     }
 
@@ -1185,10 +1277,12 @@ SQL
 
     /**
      * {@inheritdoc}
+     *
+     * @internal The method should be only used from within the {@see AbstractPlatform} class hierarchy.
      */
     public function getDefaultValueDeclarationSQL($column)
     {
-        if ($this->isSerialColumn($column)) {
+        if (isset($column['autoincrement']) && $column['autoincrement'] === true) {
             return '';
         }
 
@@ -1197,6 +1291,8 @@ SQL
 
     /**
      * {@inheritdoc}
+     *
+     * @internal The method should be only used from within the {@see AbstractPlatform} class hierarchy.
      */
     public function supportsColumnCollation()
     {
@@ -1205,6 +1301,8 @@ SQL
 
     /**
      * {@inheritdoc}
+     *
+     * @internal The method should be only used from within the {@see AbstractPlatform} class hierarchy.
      */
     public function getColumnCollationDeclarationSQL($collation)
     {
@@ -1223,43 +1321,14 @@ SQL
         return 'JSON';
     }
 
-    /**
-     * @param mixed[] $column
-     */
-    private function isSerialColumn(array $column): bool
-    {
-        return isset($column['type'], $column['autoincrement'])
-            && $column['autoincrement'] === true
-            && $this->isNumericType($column['type']);
-    }
-
-    /**
-     * Check whether the type of a column is changed in a way that invalidates the default value for the column
-     */
-    private function typeChangeBreaksDefaultValue(ColumnDiff $columnDiff): bool
-    {
-        if ($columnDiff->fromColumn === null) {
-            return $columnDiff->hasChanged('type');
-        }
-
-        $oldTypeIsNumeric = $this->isNumericType($columnDiff->fromColumn->getType());
-        $newTypeIsNumeric = $this->isNumericType($columnDiff->column->getType());
-
-        // default should not be changed when switching between numeric types and the default comes from a sequence
-        return $columnDiff->hasChanged('type')
-            && ! ($oldTypeIsNumeric && $newTypeIsNumeric && $columnDiff->column->getAutoincrement());
-    }
-
-    private function isNumericType(Type $type): bool
-    {
-        return $type instanceof IntegerType || $type instanceof BigIntType;
-    }
-
     private function getOldColumnComment(ColumnDiff $columnDiff): ?string
     {
         return $columnDiff->fromColumn !== null ? $this->getColumnComment($columnDiff->fromColumn) : null;
     }
 
+    /**
+     * @deprecated The SQL used for schema introspection is an implementation detail and should not be relied upon.
+     */
     public function getListTableMetadataSQL(string $table, ?string $schema = null): string
     {
         if ($schema !== null) {
@@ -1273,5 +1342,10 @@ SQL
             ,
             $this->quoteStringLiteral($table)
         );
+    }
+
+    public function createSchemaManager(Connection $connection): PostgreSQLSchemaManager
+    {
+        return new PostgreSQLSchemaManager($connection, $this);
     }
 }

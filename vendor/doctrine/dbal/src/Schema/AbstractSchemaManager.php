@@ -7,13 +7,16 @@ use Doctrine\DBAL\Event\SchemaColumnDefinitionEventArgs;
 use Doctrine\DBAL\Event\SchemaIndexDefinitionEventArgs;
 use Doctrine\DBAL\Events;
 use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\Exception\DatabaseRequired;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Result;
 use Doctrine\Deprecations\Deprecation;
 use Throwable;
 
 use function array_filter;
 use function array_intersect;
 use function array_map;
+use function array_shift;
 use function array_values;
 use function assert;
 use function call_user_func_array;
@@ -59,10 +62,19 @@ abstract class AbstractSchemaManager
     /**
      * Returns the associated platform.
      *
+     * @deprecated Use {@link Connection::getDatabasePlatform()} instead.
+     *
      * @return T
      */
     public function getDatabasePlatform()
     {
+        Deprecation::trigger(
+            'doctrine/dbal',
+            'https://github.com/doctrine/dbal/pull/5387',
+            'AbstractSchemaManager::getDatabasePlatform() is deprecated.'
+                . ' Use Connection::getDatabasePlatform() instead.'
+        );
+
         return $this->_platform;
     }
 
@@ -168,7 +180,13 @@ abstract class AbstractSchemaManager
     public function listSequences($database = null)
     {
         if ($database === null) {
-            $database = $this->_conn->getDatabase();
+            $database = $this->getDatabase(__METHOD__);
+        } else {
+            Deprecation::trigger(
+                'doctrine/dbal',
+                'https://github.com/doctrine/dbal/issues/5284',
+                'Passing $database to AbstractSchemaManager::listSequences() is deprecated.'
+            );
         }
 
         $sql = $this->_platform->getListSequencesSQL($database);
@@ -198,7 +216,13 @@ abstract class AbstractSchemaManager
     public function listTableColumns($table, $database = null)
     {
         if ($database === null) {
-            $database = $this->_conn->getDatabase();
+            $database = $this->getDatabase(__METHOD__);
+        } else {
+            Deprecation::trigger(
+                'doctrine/dbal',
+                'https://github.com/doctrine/dbal/issues/5284',
+                'Passing $database to AbstractSchemaManager::listTableColumns() is deprecated.'
+            );
         }
 
         $sql = $this->_platform->getListTableColumnsSQL($table, $database);
@@ -206,6 +230,34 @@ abstract class AbstractSchemaManager
         $tableColumns = $this->_conn->fetchAllAssociative($sql);
 
         return $this->_getPortableTableColumnList($table, $database, $tableColumns);
+    }
+
+    /**
+     * @param string      $table
+     * @param string|null $database
+     *
+     * @return Column[]
+     *
+     * @throws Exception
+     */
+    protected function doListTableColumns($table, $database = null): array
+    {
+        if ($database === null) {
+            $database = $this->getDatabase(__METHOD__);
+        } else {
+            Deprecation::trigger(
+                'doctrine/dbal',
+                'https://github.com/doctrine/dbal/issues/5284',
+                'Passing $database to AbstractSchemaManager::listTableColumns() is deprecated.'
+            );
+        }
+
+        return $this->_getPortableTableColumnList(
+            $table,
+            $database,
+            $this->selectTableColumns($database, $this->normalizeName($table))
+                ->fetchAllAssociative()
+        );
     }
 
     /**
@@ -226,6 +278,26 @@ abstract class AbstractSchemaManager
         $tableIndexes = $this->_conn->fetchAllAssociative($sql);
 
         return $this->_getPortableTableIndexesList($tableIndexes, $table);
+    }
+
+    /**
+     * @param string $table
+     *
+     * @return Index[]
+     *
+     * @throws Exception
+     */
+    protected function doListTableIndexes($table): array
+    {
+        $database = $this->getDatabase(__METHOD__);
+
+        return $this->_getPortableTableIndexesList(
+            $this->selectIndexColumns(
+                $database,
+                $this->normalizeName($table)
+            )->fetchAllAssociative(),
+            $table
+        );
     }
 
     /**
@@ -273,6 +345,23 @@ abstract class AbstractSchemaManager
     }
 
     /**
+     * @return list<string>
+     *
+     * @throws Exception
+     */
+    protected function doListTableNames(): array
+    {
+        $database = $this->getDatabase(__METHOD__);
+
+        return $this->filterAssetNames(
+            $this->_getPortableTablesList(
+                $this->selectTableNames($database)
+                    ->fetchAllAssociative()
+            )
+        );
+    }
+
+    /**
      * Filters asset names if they are configured to return only a subset of all
      * the found elements.
      *
@@ -310,6 +399,41 @@ abstract class AbstractSchemaManager
     }
 
     /**
+     * @return list<Table>
+     *
+     * @throws Exception
+     */
+    protected function doListTables(): array
+    {
+        $database = $this->getDatabase(__METHOD__);
+
+        $tableColumnsByTable      = $this->fetchTableColumnsByTable($database);
+        $indexColumnsByTable      = $this->fetchIndexColumnsByTable($database);
+        $foreignKeyColumnsByTable = $this->fetchForeignKeyColumnsByTable($database);
+        $tableOptionsByTable      = $this->fetchTableOptionsByTable($database);
+
+        $filter = $this->_conn->getConfiguration()->getSchemaAssetsFilter();
+        $tables = [];
+
+        foreach ($tableColumnsByTable as $tableName => $tableColumns) {
+            if ($filter !== null && ! $filter($tableName)) {
+                continue;
+            }
+
+            $tables[] = new Table(
+                $tableName,
+                $this->_getPortableTableColumnList($tableName, $database, $tableColumns),
+                $this->_getPortableTableIndexesList($indexColumnsByTable[$tableName] ?? [], $tableName),
+                [],
+                $this->_getPortableTableForeignKeysList($foreignKeyColumnsByTable[$tableName] ?? []),
+                $tableOptionsByTable[$tableName] ?? []
+            );
+        }
+
+        return $tables;
+    }
+
+    /**
      * @param string $name
      *
      * @return Table
@@ -328,6 +452,147 @@ abstract class AbstractSchemaManager
         $indexes = $this->listTableIndexes($name);
 
         return new Table($name, $columns, $indexes, [], $foreignKeys);
+    }
+
+    /**
+     * @param string $name
+     *
+     * @throws Exception
+     */
+    protected function doListTableDetails($name): Table
+    {
+        $database = $this->getDatabase(__METHOD__);
+
+        $normalizedName = $this->normalizeName($name);
+
+        $tableOptionsByTable = $this->fetchTableOptionsByTable($database, $normalizedName);
+
+        if ($this->_platform->supportsForeignKeyConstraints()) {
+            $foreignKeys = $this->listTableForeignKeys($name);
+        } else {
+            $foreignKeys = [];
+        }
+
+        return new Table(
+            $name,
+            $this->listTableColumns($name, $database),
+            $this->listTableIndexes($name),
+            [],
+            $foreignKeys,
+            $tableOptionsByTable[$normalizedName] ?? []
+        );
+    }
+
+    /**
+     * An extension point for those platforms where case sensitivity of the object name depends on whether it's quoted.
+     *
+     * Such platforms should convert a possibly quoted name into a value of the corresponding case.
+     */
+    protected function normalizeName(string $name): string
+    {
+        return $name;
+    }
+
+    /**
+     * Selects names of tables in the specified database.
+     *
+     * @throws Exception
+     *
+     * @abstract
+     */
+    protected function selectTableNames(string $databaseName): Result
+    {
+        throw Exception::notSupported(__METHOD__);
+    }
+
+    /**
+     * Selects definitions of table columns in the specified database. If the table name is specified, narrows down
+     * the selection to this table.
+     *
+     * @throws Exception
+     *
+     * @abstract
+     */
+    protected function selectTableColumns(string $databaseName, ?string $tableName = null): Result
+    {
+        throw Exception::notSupported(__METHOD__);
+    }
+
+    /**
+     * Selects definitions of index columns in the specified database. If the table name is specified, narrows down
+     * the selection to this table.
+     *
+     * @throws Exception
+     */
+    protected function selectIndexColumns(string $databaseName, ?string $tableName = null): Result
+    {
+        throw Exception::notSupported(__METHOD__);
+    }
+
+    /**
+     * Selects definitions of foreign key columns in the specified database. If the table name is specified,
+     * narrows down the selection to this table.
+     *
+     * @throws Exception
+     */
+    protected function selectForeignKeyColumns(string $databaseName, ?string $tableName = null): Result
+    {
+        throw Exception::notSupported(__METHOD__);
+    }
+
+    /**
+     * Fetches definitions of table columns in the specified database and returns them grouped by table name.
+     *
+     * @return array<string,list<array<string,mixed>>>
+     *
+     * @throws Exception
+     */
+    protected function fetchTableColumnsByTable(string $databaseName): array
+    {
+        return $this->fetchAllAssociativeGrouped($this->selectTableColumns($databaseName));
+    }
+
+    /**
+     * Fetches definitions of index columns in the specified database and returns them grouped by table name.
+     *
+     * @return array<string,list<array<string,mixed>>>
+     *
+     * @throws Exception
+     */
+    protected function fetchIndexColumnsByTable(string $databaseName): array
+    {
+        return $this->fetchAllAssociativeGrouped($this->selectIndexColumns($databaseName));
+    }
+
+    /**
+     * Fetches definitions of foreign key columns in the specified database and returns them grouped by table name.
+     *
+     * @return array<string, list<array<string, mixed>>>
+     *
+     * @throws Exception
+     */
+    protected function fetchForeignKeyColumnsByTable(string $databaseName): array
+    {
+        if (! $this->_platform->supportsForeignKeyConstraints()) {
+            return [];
+        }
+
+        return $this->fetchAllAssociativeGrouped(
+            $this->selectForeignKeyColumns($databaseName)
+        );
+    }
+
+    /**
+     * Fetches table options for the tables in the specified database and returns them grouped by table name.
+     * If the table name is specified, narrows down the selection to this table.
+     *
+     * @return array<string,array<string,mixed>>
+     *
+     * @throws Exception
+     */
+    protected function fetchTableOptionsByTable(string $databaseName, ?string $tableName = null): array
+    {
+        throw Exception::notSupported(__METHOD__);
     }
 
     /**
@@ -359,13 +624,47 @@ abstract class AbstractSchemaManager
     public function listTableForeignKeys($table, $database = null)
     {
         if ($database === null) {
-            $database = $this->_conn->getDatabase();
+            $database = $this->getDatabase(__METHOD__);
+        } else {
+            Deprecation::trigger(
+                'doctrine/dbal',
+                'https://github.com/doctrine/dbal/issues/5284',
+                'Passing $database to AbstractSchemaManager::listTableForeignKeys() is deprecated.'
+            );
         }
 
         $sql              = $this->_platform->getListTableForeignKeysSQL($table, $database);
         $tableForeignKeys = $this->_conn->fetchAllAssociative($sql);
 
         return $this->_getPortableTableForeignKeysList($tableForeignKeys);
+    }
+
+    /**
+     * @param string      $table
+     * @param string|null $database
+     *
+     * @return ForeignKeyConstraint[]
+     *
+     * @throws Exception
+     */
+    protected function doListTableForeignKeys($table, $database = null): array
+    {
+        if ($database === null) {
+            $database = $this->getDatabase(__METHOD__);
+        } else {
+            Deprecation::trigger(
+                'doctrine/dbal',
+                'https://github.com/doctrine/dbal/issues/5284',
+                'Passing $database to AbstractSchemaManager::listTableForeignKeys() is deprecated.'
+            );
+        }
+
+        return $this->_getPortableTableForeignKeysList(
+            $this->selectForeignKeyColumns(
+                $database,
+                $this->normalizeName($table)
+            )->fetchAllAssociative()
+        );
     }
 
     /* drop*() Methods */
@@ -423,7 +722,25 @@ abstract class AbstractSchemaManager
     public function dropIndex($index, $table)
     {
         if ($index instanceof Index) {
+            Deprecation::trigger(
+                'doctrine/dbal',
+                'https://github.com/doctrine/dbal/issues/4798',
+                'Passing $index as an Index object to %s is deprecated. Pass it as a quoted name instead.',
+                __METHOD__
+            );
+
             $index = $index->getQuotedName($this->_platform);
+        }
+
+        if ($table instanceof Table) {
+            Deprecation::trigger(
+                'doctrine/dbal',
+                'https://github.com/doctrine/dbal/issues/4798',
+                'Passing $table as an Table object to %s is deprecated. Pass it as a quoted name instead.',
+                __METHOD__
+            );
+
+            $table = $table->getQuotedName($this->_platform);
         }
 
         $this->_execSql($this->_platform->getDropIndexSQL($index, $table));
@@ -442,7 +759,21 @@ abstract class AbstractSchemaManager
      */
     public function dropConstraint(Constraint $constraint, $table)
     {
-        $this->_execSql($this->_platform->getDropConstraintSQL($constraint, $table));
+        if ($table instanceof Table) {
+            Deprecation::trigger(
+                'doctrine/dbal',
+                'https://github.com/doctrine/dbal/issues/4798',
+                'Passing $table as a Table object to %s is deprecated. Pass it as a quoted name instead.',
+                __METHOD__
+            );
+
+            $table = $table->getQuotedName($this->_platform);
+        }
+
+        $this->_execSql($this->_platform->getDropConstraintSQL(
+            $constraint->getQuotedName($this->_platform),
+            $table
+        ));
     }
 
     /**
@@ -457,6 +788,29 @@ abstract class AbstractSchemaManager
      */
     public function dropForeignKey($foreignKey, $table)
     {
+        if ($foreignKey instanceof ForeignKeyConstraint) {
+            Deprecation::trigger(
+                'doctrine/dbal',
+                'https://github.com/doctrine/dbal/issues/4798',
+                'Passing $foreignKey as a ForeignKeyConstraint object to %s is deprecated.'
+                . ' Pass it as a quoted name instead.',
+                __METHOD__
+            );
+
+            $foreignKey = $foreignKey->getQuotedName($this->_platform);
+        }
+
+        if ($table instanceof Table) {
+            Deprecation::trigger(
+                'doctrine/dbal',
+                'https://github.com/doctrine/dbal/issues/4798',
+                'Passing $table as a Table object to %s is deprecated. Pass it as a quoted name instead.',
+                __METHOD__
+            );
+
+            $table = $table->getQuotedName($this->_platform);
+        }
+
         $this->_execSql($this->_platform->getDropForeignKeySQL($foreignKey, $table));
     }
 
@@ -499,6 +853,14 @@ abstract class AbstractSchemaManager
     }
 
     /* create*() Methods */
+
+    /**
+     * @throws Exception
+     */
+    public function createSchemaObjects(Schema $schema): void
+    {
+        $this->_execSql($schema->toSql($this->_platform));
+    }
 
     /**
      * Creates a new database.
@@ -609,6 +971,14 @@ abstract class AbstractSchemaManager
     }
 
     /* dropAndCreate*() Methods */
+
+    /**
+     * @throws Exception
+     */
+    public function dropSchemaObjects(Schema $schema): void
+    {
+        $this->_execSql($schema->toDropSql($this->_platform));
+    }
 
     /**
      * Drops and creates a constraint.
@@ -1109,31 +1479,6 @@ abstract class AbstractSchemaManager
     }
 
     /**
-     * @param mixed[][] $users
-     *
-     * @return string[][]
-     */
-    protected function _getPortableUsersList($users)
-    {
-        $list = [];
-        foreach ($users as $value) {
-            $list[] = $this->_getPortableUserDefinition($value);
-        }
-
-        return $list;
-    }
-
-    /**
-     * @param string[] $user
-     *
-     * @return string[]
-     */
-    protected function _getPortableUserDefinition($user)
-    {
-        return $user;
-    }
-
-    /**
      * @param mixed[][] $views
      *
      * @return View[]
@@ -1185,6 +1530,8 @@ abstract class AbstractSchemaManager
      * @param mixed $tableForeignKey
      *
      * @return ForeignKeyConstraint
+     *
+     * @abstract
      */
     protected function _getPortableTableForeignKeyDefinition($tableForeignKey)
     {
@@ -1332,8 +1679,40 @@ abstract class AbstractSchemaManager
         return str_replace('(DC2Type:' . $type . ')', '', $comment);
     }
 
+    /**
+     * @throws Exception
+     */
+    private function getDatabase(string $methodName): string
+    {
+        $database = $this->_conn->getDatabase();
+
+        if ($database === null) {
+            throw DatabaseRequired::new($methodName);
+        }
+
+        return $database;
+    }
+
     public function createComparator(): Comparator
     {
-        return new Comparator($this->getDatabasePlatform());
+        return new Comparator($this->_platform);
+    }
+
+    /**
+     * @return array<string,list<array<string,mixed>>>
+     *
+     * @throws Exception
+     */
+    private function fetchAllAssociativeGrouped(Result $result): array
+    {
+        $data = [];
+
+        foreach ($result->fetchAllAssociative() as $row) {
+            $group = array_shift($row);
+            assert(is_string($group));
+            $data[$group][] = $row;
+        }
+
+        return $data;
     }
 }
