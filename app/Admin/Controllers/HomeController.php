@@ -21,6 +21,15 @@ class HomeController extends Controller
         $ent = Utils::ent();
         Utils::reconcile_in_background(Admin::user()->enterprise_id);
 
+        return $content
+            ->title('Dashboard')
+            ->description('Description... ' . $ent->name)
+            ->row(function (Row $row) {
+
+                $row->column(3, function (Column $column) {
+                    $column->append(Dashboard::environment());
+                }); 
+            });
 
 
         /*$menu_items = MenuItem::all();
