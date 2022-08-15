@@ -69,7 +69,7 @@ Route::get('ajax', function (Request $r) {
     if (strlen($_model) < 2) {
         return [
             'data' => []
-        ];;
+        ];
     }
 
     $model = "App\Models\\" . $_model;
