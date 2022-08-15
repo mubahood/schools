@@ -28,7 +28,7 @@ class HomeController extends Controller
 
                 $row->column(3, function (Column $column) {
                     $column->append(Dashboard::environment());
-                }); 
+                }); //new staff
 
                 $row->column(3, function (Column $column) {
                     $column->append(Dashboard::environment());
