@@ -7,6 +7,14 @@ use Illuminate\Support\Arr;
 
 class Dashboard
 {
+
+    public static function students()
+    {
+        return view('widgets.box-5', []);
+    }
+
+
+
     /**
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
@@ -21,7 +29,7 @@ class Dashboard
     public static function environment()
     {
         $envs = [
-            ['name' => 'PHP version',       'value' => 'PHP/'.PHP_VERSION],
+            ['name' => 'PHP version',       'value' => 'PHP/' . PHP_VERSION],
             ['name' => 'Laravel version',   'value' => app()->version()],
             ['name' => 'CGI',               'value' => php_sapi_name()],
             ['name' => 'Uname',             'value' => php_uname()],

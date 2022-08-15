@@ -27,13 +27,17 @@ class HomeController extends Controller
             ->row(function (Row $row) {
 
                 $row->column(3, function (Column $column) {
-                    $column->append(Dashboard::environment());
-                }); //new staff
-
+                    $column->append(Dashboard::students());
+                });
                 $row->column(3, function (Column $column) {
-                    $column->append(Dashboard::environment());
-                }); 
- 
+                    $column->append(Dashboard::students());
+                });
+                $row->column(3, function (Column $column) {
+                    $column->append(Dashboard::students());
+                });
+                $row->column(3, function (Column $column) {
+                    $column->append(Dashboard::students());
+                });
             });
 
 

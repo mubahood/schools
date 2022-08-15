@@ -6,13 +6,12 @@ $ent = Utils::ent();
         background-color: #FFFFFF;
     }
 
-    .content-header,
-    .content {
+    .content-header {
         background-color: #F9F9F9;
     }
 
     .sidebar-menu .active {
-        border-left: solid 5px {{ $ent->color }}!important;
+        border-left: solid 5px {{ $ent->color }} !important;
         ;
         color: {{ $ent->color }} !important;
         ;
@@ -30,11 +29,16 @@ $ent = Utils::ent();
     .navbar-static-top {
         background-color: {{ $ent->color }} !important;
     }
-   
-    .dropdown-menu{
-        border: none!important;
+
+    .dropdown-menu {
+        border: none !important;
     }
-    .box-success{
-        border-top: {{ $ent->color }} .5rem solid!important;
+
+    .box-success {
+        border-top: {{ $ent->color }} .5rem solid !important;
+    }
+
+    :root {
+        --primary: {{ $ent->color }};
     }
 </style>
