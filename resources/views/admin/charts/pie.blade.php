@@ -10,10 +10,10 @@ if (!isset($data)) {
 }
 $view_id = 'id-' . rand(10000, 100000000);
 ?>
-<div class="card ">
-    <div class="card-body">
-        <p class="h3  text-bold mb-2 mb-md-3 text-primary ">Fees collected</p>
-        <canvas id="{{ $view_id }}" height="165"></canvas>
+<div class="card  ">
+    <div class="card-body ">
+        <p class="h3  text-bold mb-2 mb-md-3 text-primary p-0 m-0">Fees collected</p>
+        <canvas id="{{ $view_id }}" height="180"></canvas>
         <a href="{{ $link }}">View All</a>
     </div>
 </div>
