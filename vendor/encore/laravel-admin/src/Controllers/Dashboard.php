@@ -63,7 +63,7 @@ class Dashboard
         $sub_title .= number_format($female_students) . ' Females.';
         return view('widgets.box-5', [
             'is_dark' => false,
-            'title' => 'Teachers',
+            'title' => '==>Teachers',
             'sub_title' => $sub_title,
             'number' => number_format($all_students),
             'link' => admin_url('employees')
