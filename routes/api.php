@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('git', function (Request $r) {
     //$resp = shell_exec('git pull --rebase=interactive -s recursive -X theirs');  
-    $resp = shell_exec('git commit --romina');  
-    $resp = shell_exec('git pull');  
+    //$resp = shell_exec('git commit --romina');  
+    $resp = shell_exec('cd public_html/ && git pull');  
  
 
     echo "<pre>";
