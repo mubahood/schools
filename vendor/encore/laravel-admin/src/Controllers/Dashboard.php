@@ -39,12 +39,34 @@ class Dashboard
             'title' => 'Students',
             'sub_title' => $sub_title,
             'number' => number_format($all_students),
+            'link' => admin_url('students')
         ]);
     }
+
     public static function teachers()
     {
+        $u = Auth::user();
+        $all_students = User::where([
+            'enterprise_id' => $u->enterprise_id,
+            'user_type' => 'employee',
+        ])->count();
+
+        $male_students = User::where([
+            'enterprise_id' => $u->enterprise_id,
+            'user_type' => 'employee',
+            'sex' => 'Male',
+        ])->count();
+
+        $female_students = $all_students - $male_students;
+
+        $sub_title = number_format($male_students) . ' Males, ';
+        $sub_title .= number_format($female_students) . ' Females.';
         return view('widgets.box-5', [
-            'is_dark' => false
+            'is_dark' => false,
+            'title' => 'Teachers',
+            'sub_title' => $sub_title,
+            'number' => number_format($all_students),
+            'link' => admin_url('employees')
         ]);
     }
 
