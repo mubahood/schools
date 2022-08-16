@@ -7,7 +7,7 @@ use App\Models\Utils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('git', function (Request $r) {
+Route::post('git', function (Request $r) {
     //$resp = shell_exec('git pull --rebase=interactive -s recursive -X theirs');  
     //$resp = shell_exec('git commit --romina');  
    // $resp = shell_exec('cd public_html/ && git pull');  
