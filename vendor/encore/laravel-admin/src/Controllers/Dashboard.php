@@ -8,9 +8,50 @@ use Illuminate\Support\Arr;
 class Dashboard
 {
 
+    public static function help_videos()
+    {
+        return view('widgets.help-videos');
+    }
+
     public static function students()
     {
-        return view('widgets.box-5', []);
+        return view('widgets.box-5', [
+            'is_dark' => false
+        ]);
+    }
+    public static function teachers()
+    {
+        return view('widgets.box-5', [
+            'is_dark' => false
+        ]);
+    }
+
+    public static function finance()
+    {
+        return view('widgets.box-5', [
+            'is_dark' => false
+        ]);
+    }
+
+    public static function fees()
+    {
+        return view('widgets.box-5', [
+            'is_dark' => true
+        ]);
+    }
+
+    public static function income_vs_expenses()
+    {
+        return view('admin.charts.bar', [
+            'is_dark' => true
+        ]);
+    }
+
+    public static function fees_collected()
+    {
+        return view('admin.charts.pie', [
+            'is_dark' => true
+        ]);
     }
 
 

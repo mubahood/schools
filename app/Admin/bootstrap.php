@@ -41,5 +41,8 @@ Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
     $navbar->right(new \App\Admin\Extensions\Nav\Links());
 });
 
+Admin::css('/css/jquery-confirm.min.css');
+Admin::js('/js/charts.js');
+
 Admin::css(url('/assets/bootstrap.css'));
 Admin::css('/assets/styles.css');

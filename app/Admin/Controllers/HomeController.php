@@ -25,63 +25,29 @@ class HomeController extends Controller
             ->title('Dashboard')
             ->description('Description... ' . $ent->name)
             ->row(function (Row $row) {
-
                 $row->column(3, function (Column $column) {
                     $column->append(Dashboard::students());
                 });
                 $row->column(3, function (Column $column) {
-                    $column->append(Dashboard::students());
+                    $column->append(Dashboard::teachers());
                 });
                 $row->column(3, function (Column $column) {
-                    $column->append(Dashboard::students());
+                    $column->append(Dashboard::finance());
                 });
                 $row->column(3, function (Column $column) {
-                    $column->append(Dashboard::students());
+                    $column->append(Dashboard::fees());
                 });
-            });
-
-
-        /*$menu_items = MenuItem::all();
-         return $content
-            ->view('admin.dashboard', [
-                'menu_items' => $menu_items
-            ])->title(' - Dashboard'); */
-
-
-        return $content->title($ent->name)
-            ->description(' - Dashboard coming soon...')
-            /* ->row(Dashboard::title()) */
+            })
             ->row(function (Row $row) {
-
-                /* $row->column(3, function (Column $column) {
-                    $teachers_count = Administrator::where([
-                        'enterprise_id' => Admin::user()->enterprise_id,
-                        'user_type' => 'teacher',
-                    ])->count();
-
-                    $box  = new Box('Teachers', view('widgets.box-3', [
-                        'icon' => 'teacher.png',
-                        'count' => number_format($teachers_count),
-                        'sub_title' => 'All teachers registered',
-                    ]));
-                    $box->style('success');
-                    $column->append($box);
+                $row->column(6, function (Column $column) {
+                    $column->append(Dashboard::income_vs_expenses());
                 });
-
                 $row->column(3, function (Column $column) {
-                    $students_count = Administrator::where([
-                        'enterprise_id' => Admin::user()->enterprise_id,
-                        'user_type' => 'student',
-                    ])->count();
-
-                    $box  = new Box('Students', view('widgets.box-3', [
-                        'icon' => 'student.png',
-                        'count' => number_format($students_count),
-                        'sub_title' => 'All students registered',
-                    ]));
-                    $box->style('success');
-                    $column->append($box);
-                }); */
+                    $column->append(Dashboard::fees_collected());
+                });
+                $row->column(3, function (Column $column) {
+                    $column->append(Dashboard::help_videos());
+                });
             });
     }
 }
