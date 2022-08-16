@@ -2,8 +2,11 @@
 
 namespace Encore\Admin\Controllers;
 
+use App\Models\StudentHasClass;
+use App\Models\User;
 use Encore\Admin\Admin;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 
 class Dashboard
 {
@@ -15,8 +18,27 @@ class Dashboard
 
     public static function students()
     {
+        $u = Auth::user();
+        $all_students = User::where([
+            'enterprise_id' => $u->enterprise_id,
+            'user_type' => 'Student',
+        ])->count();
+
+        $male_students = User::where([
+            'enterprise_id' => $u->enterprise_id,
+            'user_type' => 'Student',
+            'sex' => 'Male',
+        ])->count();
+
+        $female_students = $all_students - $male_students;
+
+        $sub_title = number_format($male_students) . ' Males, ';
+        $sub_title .= number_format($female_students) . ' Females.';
         return view('widgets.box-5', [
-            'is_dark' => false
+            'is_dark' => false,
+            'title' => 'Students',
+            'sub_title' => $sub_title,
+            'number' => number_format($all_students),
         ]);
     }
     public static function teachers()

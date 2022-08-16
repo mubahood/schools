@@ -22,8 +22,8 @@ class HomeController extends Controller
         Utils::reconcile_in_background(Admin::user()->enterprise_id);
 
         return $content
-            ->title('Dashboard')
-            ->description('Description... ' . $ent->name)
+            ->title($ent->name)
+            ->description('Dashboard')
             ->row(function (Row $row) {
                 $row->column(3, function (Column $column) {
                     $column->append(Dashboard::students());
