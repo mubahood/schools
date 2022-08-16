@@ -251,7 +251,7 @@ class EmployeesController extends AdminController
             $form->text('last_name')->rules('required');
             $form->date('date_of_birth')->rules('required');
             $form->text('place_of_birth');
-            $form->select('sex')->options(['Male' => 'Male', 'Female' => 'Female']);
+            $form->select('sex')->options(['Male' => 'Male', 'Female' => 'Female'])->rules('required');
             $form->text('home_address');
             $form->text('current_address');
             $form->text('phone_number_1', 'Mobile phone number')->rules('required');

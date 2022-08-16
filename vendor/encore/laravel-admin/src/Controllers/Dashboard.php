@@ -57,7 +57,7 @@ class Dashboard
             'sex' => 'Male',
         ])->count();
 
-        
+
         $female_students = $all_students - $male_students;
 
         $sub_title = number_format($male_students) . ' Males, ';
@@ -71,19 +71,65 @@ class Dashboard
         ]);
     }
 
-    public static function finance()
+
+    public static function parents()
     {
+        $u = Auth::user();
+        $all_students = User::where([
+            'enterprise_id' => $u->enterprise_id,
+            'user_type' => 'employee',
+        ])->count();
+
+        $male_students = User::where([
+            'enterprise_id' => $u->enterprise_id,
+            'user_type' => 'employee',
+            'sex' => 'Male',
+        ])->count();
+
+        $female_students = $all_students - $male_students;
+
+        $sub_title = number_format($male_students) . ' Males, ';
+        $sub_title .= number_format($female_students) . ' Females.';
         return view('widgets.box-5', [
-            'is_dark' => false
+            'is_dark' => false,
+            'title' => 'Parents',
+            'sub_title' => $sub_title,
+            'number' => number_format($all_students),
+            'link' => admin_url('employees')
         ]);
     }
 
+
+
+
     public static function fees()
     {
+        $u = Auth::user();
+        $all_students = User::where([
+            'enterprise_id' => $u->enterprise_id,
+            'user_type' => 'employee',
+        ])->count();
+
+        $male_students = User::where([
+            'enterprise_id' => $u->enterprise_id,
+            'user_type' => 'employee',
+            'sex' => 'Male',
+        ])->count();
+
+        $female_students = $all_students - $male_students;
+
+        $sub_title = number_format($male_students) . ' Males, ';
+        $sub_title .= number_format($female_students) . ' Females.';
         return view('widgets.box-5', [
-            'is_dark' => true
+            'is_dark' => true,
+            'title' => 'School fees',
+            'sub_title' => $sub_title,
+            'number' => number_format($all_students),
+            'link' => admin_url('employees')
         ]);
     }
+
+
 
     public static function income_vs_expenses()
     {

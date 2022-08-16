@@ -32,7 +32,7 @@ class HomeController extends Controller
                     $column->append(Dashboard::teachers());
                 });
                 $row->column(3, function (Column $column) {
-                    $column->append(Dashboard::finance());
+                    $column->append(Dashboard::parents());
                 });
                 $row->column(3, function (Column $column) {
                     $column->append(Dashboard::fees());
