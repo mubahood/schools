@@ -165,7 +165,7 @@ term_id
 
         $female_students = $all_students - $male_students;
 
-        $fees_to_be_collected = (-1) * ($fees_to_be_collected);
+        $fees_to_be_collected = (-1) * ($fees_to_be_collected); 
         $sub_title = number_format($male_students) . ' Males, ';
         $sub_title .= number_format($female_students) . ' Females.';
         $sub_title = number_format($fees_to_be_collected) . " School fees to be collected";
