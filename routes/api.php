@@ -10,13 +10,14 @@ use Illuminate\Support\Facades\Route;
 Route::get('git', function (Request $r) {
     //$resp = shell_exec('git pull --rebase=interactive -s recursive -X theirs');  
     //$resp = shell_exec('git commit --romina');  
-    $resp = shell_exec('cd public_html/ && git pull');  
+   // $resp = shell_exec('cd public_html/ && git pull');  
+    $resp = shell_exec('PWD');  
  
 
     echo "<pre>";
     print_r($resp);
 
-    die("<h1>test  test</h1>");
+ 
 });
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
