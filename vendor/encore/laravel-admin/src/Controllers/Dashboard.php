@@ -57,6 +57,7 @@ class Dashboard
             'sex' => 'Male',
         ])->count();
 
+    
         $female_students = $all_students - $male_students;
 
         $sub_title = number_format($male_students) . ' Males, ';
