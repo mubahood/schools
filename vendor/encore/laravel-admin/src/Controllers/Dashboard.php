@@ -57,14 +57,14 @@ class Dashboard
             'sex' => 'Male',
         ])->count();
 
-    
+        
         $female_students = $all_students - $male_students;
 
         $sub_title = number_format($male_students) . ' Males, ';
         $sub_title .= number_format($female_students) . ' Females.';
         return view('widgets.box-5', [
             'is_dark' => false,
-            'title' => '==>Teachers',
+            'title' => 'Teachers',
             'sub_title' => $sub_title,
             'number' => number_format($all_students),
             'link' => admin_url('employees')
