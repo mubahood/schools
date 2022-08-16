@@ -19,7 +19,7 @@ if ($is_dark) {
     $text2 = 'text-white';
 }
 ?><a href="{{ $link }}" class="card {{ $bg }} border-primary mb-4 mb-md-5">
-    <div class="card-body py-0">
+    <div class="card-body py-0"> romina 1
         <p class="h3  text-bold mb-2 mb-md-3 {{ $text }} ">{{ $title }}</p>
         <p class="display-3  m-0 text-right {{ $text2 }}" style="line-height: 3.2rem">{{ $number }}</p>
         <p class="mt-4 {{ $text2 }}">{{ $sub_title }}</p>
