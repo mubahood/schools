@@ -12,7 +12,7 @@ $view_id = 'id-' . rand(10000, 100000000);
 ?>
 <div class="card ">
     <div class="card-body">
-        <p class="h3  text-bold mb-2 mb-md-3 text-primary ">Channel analytics</p>
+        <p class="h3  text-bold mb-2 mb-md-3 text-primary ">Fees collected</p>
         <canvas id="{{ $view_id }}" height="165"></canvas>
         <a href="{{ $link }}">View All</a>
     </div>

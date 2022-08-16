@@ -11,7 +11,7 @@ if (!isset($data)) {
 ?>
 <div class="card ">
     <div class="card-body">
-        <p class="h3  text-bold mb-2 mb-md-3 text-primary ">Channel analytics</p>
+        <p class="h3  text-bold mb-2 mb-md-3 text-primary ">Finance - Income Vs. Expenses</p>
         <canvas id="myChart" height="165"></canvas>
         <a href="{{ $link }}">View All</a>
     </div>
