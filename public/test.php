@@ -1,3 +1,3 @@
 <?php 
-$resp = exec('PWD');
+$resp = exec('pwd');
 print_r($resp);
