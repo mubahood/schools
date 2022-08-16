@@ -3,7 +3,9 @@
 namespace Encore\Admin\Controllers;
 
 use App\Models\StudentHasClass;
+use App\Models\Transaction;
 use App\Models\User;
+use App\Models\Utils;
 use Encore\Admin\Admin;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
@@ -104,11 +106,56 @@ class Dashboard
 
     public static function fees()
     {
+        $ent = Utils::ent();
+
+        /* 
+"id" => 1
+"created_at" => "2022-06-05 10:08:22"
+"updated_at" => "2022-06-28 21:50:34"
+"name" => "Default school"
+"short_name" => "DS"
+"details" => "Simple test"
+"logo" => "storage/f8ff9f5a6c69c98d4c14e3ad5d84d74e.png"
+"phone_number" => "25677063324"
+"email" => "default@gmail.com"
+"address" => "Near Ndere Cultural Centre, Plot 4505 Kira Rd, Ntinda - Kisaasi Rd, Kampala."
+"expiry" => "2022-06-05"
+"administrator_id" => 11
+"subdomain" => "schools"
+"color" => "#004295"
+"welcome_message" => "Welcome to test school"
+
+
+	
+id	
+created_at	
+updated_at	
+enterprise_id	
+account_id	
+	
+description	
+academic_year_id	
+term_id	
+
+*/
+
         $u = Auth::user();
-        $all_students = User::where([
+        $all_students = Transaction::where([
             'enterprise_id' => $u->enterprise_id,
-            'user_type' => 'employee',
-        ])->count();
+        ])->where('academic_year_id', '!=', $ent->administrator_id)->sum('amount');
+
+        $fees_to_be_collected = Transaction::where([
+            'enterprise_id' => $u->enterprise_id,
+        ])
+            ->where('amount', '<', 0)
+            ->where('academic_year_id', '!=', $ent->administrator_id)->sum('amount');
+
+        $fees_collected = Transaction::where([
+            'enterprise_id' => $u->enterprise_id,
+        ])
+            ->where('amount', '>', 0)
+            ->where('academic_year_id', '!=', $ent->administrator_id)->sum('amount');
+        //dd($all_students);
 
         $male_students = User::where([
             'enterprise_id' => $u->enterprise_id,
@@ -118,13 +165,15 @@ class Dashboard
 
         $female_students = $all_students - $male_students;
 
+        $fees_to_be_collected = (-1) * ($fees_to_be_collected);
         $sub_title = number_format($male_students) . ' Males, ';
         $sub_title .= number_format($female_students) . ' Females.';
+        $sub_title = number_format($fees_to_be_collected) . " School fees to be collected";
         return view('widgets.box-5', [
             'is_dark' => true,
             'title' => 'School fees',
             'sub_title' => $sub_title,
-            'number' => number_format($all_students),
+            'number' => number_format($fees_collected),
             'link' => admin_url('employees')
         ]);
     }
