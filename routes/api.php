@@ -14,8 +14,11 @@ Route::get('git', function (Request $r) {
     $resp = shell_exec('PWD');  
  
 
+    echo "=========START=========";
     echo "<pre>";
     print_r($resp);
+    echo "</pre>";
+    echo "=========END=========";
 
  
 });
