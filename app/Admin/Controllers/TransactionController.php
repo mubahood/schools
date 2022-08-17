@@ -29,6 +29,9 @@ class TransactionController extends AdminController
     {
         $grid = new Grid(new Transaction());
 
+        $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
+            ->orderBy('id', 'Desc');
+
         $grid->column('id', __('Id'));
         $grid->column('created_at', __('Created at'));
         $grid->column('updated_at', __('Updated at'));

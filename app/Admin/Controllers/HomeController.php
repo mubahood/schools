@@ -17,8 +17,9 @@ class HomeController extends Controller
 {
     public function index(Content $content)
     {
+        return $content;
 
-        $ent = Utils::ent();
+        $ent = Utils::ent(); 
         Utils::reconcile_in_background(Admin::user()->enterprise_id);
 
         return $content

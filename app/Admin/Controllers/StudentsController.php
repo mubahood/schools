@@ -335,6 +335,7 @@ class StudentsController extends AdminController
                     ])
                     ->default([4])
                     ->value([4])
+                    ->readonly()
                     ->options(
                         AdminRole::where('slug', '!=', 'super-admin')
                             ->where('slug', '!=', 'admin')

@@ -3,7 +3,7 @@
         'name' => 'laravel/laravel',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => '7020da9e6dc745eb9d695f9334caf6f33b2f6ee8',
+        'reference' => 'eb4d6222b8ab86f2d847ce67e61bb8ac3399f56f',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -68,9 +68,9 @@
             'dev_requirement' => false,
         ),
         'doctrine/dbal' => array(
-            'pretty_version' => '3.4.0',
-            'version' => '3.4.0.0',
-            'reference' => '118a360e9437e88d49024f36283c8bcbd76105f5',
+            'pretty_version' => '3.4.1',
+            'version' => '3.4.1.0',
+            'reference' => '94e016428884227245fb1219e0de7d8b86ca16d7',
             'type' => 'library',
             'install_path' => __DIR__ . '/../doctrine/dbal',
             'aliases' => array(),
@@ -505,7 +505,7 @@
         'laravel/laravel' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '7020da9e6dc745eb9d695f9334caf6f33b2f6ee8',
+            'reference' => 'eb4d6222b8ab86f2d847ce67e61bb8ac3399f56f',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -521,9 +521,9 @@
             'dev_requirement' => false,
         ),
         'laravel/sail' => array(
-            'pretty_version' => 'v1.15.2',
-            'version' => '1.15.2.0',
-            'reference' => '8eb6d7116deda5b0e26153c1993f3e326d67768c',
+            'pretty_version' => 'v1.15.4',
+            'version' => '1.15.4.0',
+            'reference' => '853dea1fa866a52a93beccc4e5affdc49b98e7d5',
             'type' => 'library',
             'install_path' => __DIR__ . '/../laravel/sail',
             'aliases' => array(),
@@ -1154,7 +1154,7 @@
         'stefangabos/zebra_image' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '703dc6557ea2443a8ad8c239fe10790afb8da5dd',
+            'reference' => '27d3738bf9a139f0e2c003555943449c3dc335ba',
             'type' => 'library',
             'install_path' => __DIR__ . '/../stefangabos/zebra_image',
             'aliases' => array(

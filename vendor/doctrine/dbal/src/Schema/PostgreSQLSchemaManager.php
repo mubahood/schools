@@ -605,7 +605,7 @@ SQL;
         $sql = 'SELECT';
 
         if ($tableName === null) {
-            $sql .= ' c.relname,';
+            $sql .= ' c.relname AS table_name, n.nspname AS schema_name,';
         }
 
         $sql .= <<<'SQL'
@@ -653,18 +653,21 @@ SQL;
         $sql = 'SELECT';
 
         if ($tableName === null) {
-            $sql .= ' pg_index.indrelid::REGCLASS AS tablename,';
+            $sql .= ' tc.relname AS table_name, tn.nspname AS schema_name,';
         }
 
         $sql .= <<<'SQL'
-                   quote_ident(relname) AS relname,
-                   pg_index.indisunique,
-                   pg_index.indisprimary,
-                   pg_index.indkey,
-                   pg_index.indrelid,
-                   pg_get_expr(indpred, indrelid) AS where
-              FROM pg_class, pg_index
-             WHERE oid IN (
+                   quote_ident(ic.relname) AS relname,
+                   i.indisunique,
+                   i.indisprimary,
+                   i.indkey,
+                   i.indrelid,
+                   pg_get_expr(indpred, indrelid) AS "where"
+              FROM pg_index i
+                   JOIN pg_class AS tc ON tc.oid = i.indrelid
+                   JOIN pg_namespace tn ON tn.oid = tc.relnamespace
+                   JOIN pg_class AS ic ON ic.oid = i.indexrelid
+             WHERE ic.oid IN (
                 SELECT indexrelid
                 FROM pg_index i, pg_class c, pg_namespace n
 SQL;
@@ -674,7 +677,7 @@ SQL;
             'c.relnamespace = n.oid',
         ], $this->buildQueryConditions($tableName));
 
-        $sql .= ' WHERE ' . implode(' AND ', $conditions) . ') AND pg_index.indexrelid = oid';
+        $sql .= ' WHERE ' . implode(' AND ', $conditions) . ')';
 
         return $this->_conn->executeQuery($sql);
     }
@@ -684,16 +687,19 @@ SQL;
         $sql = 'SELECT';
 
         if ($tableName === null) {
-            $sql .= ' r.conrelid :: REGCLASS as tablename,';
+            $sql .= ' tc.relname AS table_name, tn.nspname AS schema_name,';
         }
 
         $sql .= <<<'SQL'
-                  quote_ident(r.conname) as conname, pg_catalog.pg_get_constraintdef(r.oid, true) as condef
-                  FROM pg_catalog.pg_constraint r
+                  quote_ident(r.conname) as conname,
+                  pg_get_constraintdef(r.oid, true) as condef
+                  FROM pg_constraint r
+                      JOIN pg_class AS tc ON tc.oid = r.conrelid
+                      JOIN pg_namespace tn ON tn.oid = tc.relnamespace
                   WHERE r.conrelid IN
                   (
                       SELECT c.oid
-                      FROM pg_catalog.pg_class c, pg_catalog.pg_namespace n
+                      FROM pg_class c, pg_namespace n
 SQL;
 
         $conditions = array_merge(['n.oid = c.relnamespace'], $this->buildQueryConditions($tableName));
@@ -745,7 +751,6 @@ SQL;
         if ($schemaName !== null) {
             $conditions[] = 'n.nspname = ' . $this->_platform->quoteStringLiteral($schemaName);
         } else {
-            $conditions[] = 'n.nspname = ANY(current_schemas(false))';
             $conditions[] = "n.nspname NOT IN ('pg_catalog', 'information_schema', 'pg_toast')";
         }
 

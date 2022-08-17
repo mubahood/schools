@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Models\StudentReportCard;
 use Encore\Admin\Controllers\AdminController;
+use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
@@ -26,12 +27,15 @@ class StudentReportCardController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new StudentReportCard());
+        
 
-        $grid->header(function ($query) {
-
-
+       /*  $grid->header(function ($query) {
             return new Box('Gender ratio', 'Romina Love');
         });
+ */
+        $grid->model()->where([
+            'enterprise_id' => Admin::user()->enterprise_id,
+        ])->orderBy('id', 'DESC'); 
 
         $grid->column('id', __('Id'));
         $grid->column('created_at', __('Created at'));

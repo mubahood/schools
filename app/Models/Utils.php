@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class Utils  extends Model
 {
@@ -147,11 +148,24 @@ class Utils  extends Model
 
     public static function ent()
     {
-        $subdomain = explode('.', $_SERVER['HTTP_HOST'])[0];
-        //$subdomain = 'sudais';
-        $ent = Enterprise::where([
-            'subdomain' => $subdomain
-        ])->first();
+
+
+
+        $ent_id  = 1;
+        $u = Auth::user();
+        if ($u != null) {
+            $ent_id = ((int)($u->enterprise_id));
+        }
+        $ent = Enterprise::find($ent_id);
+
+        if ($ent == null) {
+            $subdomain = explode('.', $_SERVER['HTTP_HOST'])[0];
+            $ent = Enterprise::where([
+                'subdomain' => $subdomain
+            ])->first();
+        }
+
+
         if ($ent == null) {
             $ent = Enterprise::find(1);
         }

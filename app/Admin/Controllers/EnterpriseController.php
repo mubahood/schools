@@ -28,6 +28,8 @@ class EnterpriseController extends AdminController
     {
         $grid = new Grid(new Enterprise());
 
+        $grid->model()->orderBy('id', 'DESC');
+
         $grid->actions(function ($actions) {
             $actions->disableView();
         });
