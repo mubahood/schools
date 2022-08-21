@@ -16,7 +16,7 @@ class AcademicYearController extends AdminController
      *
      * @var string
      */
-    protected $title = 'AcademicYear';
+    protected $title = 'Academic year';
 
     /**
      * Make a grid builder.
@@ -73,6 +73,12 @@ class AcademicYearController extends AdminController
     {
         $form = new Form(new AcademicYear());
         $u = Admin::user();
+        $form->disableCreatingCheck();
+        $form->disableEditingCheck();
+        $form->disableReset();
+        $form->disableViewCheck();
+
+
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
         $form->text('name', __('Name'))->rules('required');
         $form->date('starts', __('Starts'))->default(date('Y-m-d'))->rules('required');

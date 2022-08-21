@@ -15,7 +15,7 @@ class AcademicYear extends Model
 
     function classes()
     {
-        return $this->hasMany(AcademicClass::class,'academic_year_id');
+        return $this->hasMany(AcademicClass::class, 'academic_year_id');
     }
     function terms()
     {
@@ -36,7 +36,7 @@ class AcademicYear extends Model
             if ($_m != null) {
                 $_m->is_active = true;
                 $_m->save();
-                //die("You cannot have to active academic years.");
+                die("You cannot have to active academic years.");
             }
         });
 
@@ -45,9 +45,15 @@ class AcademicYear extends Model
                 'enterprise_id' => $m->enterprise_id,
                 'is_active' => 1,
             ])->first();
-            /* if ($_m != null) {
-                die("You cannot have two active academic years deativate the other first.");
-            } */
+
+            if ($_m != null) {
+                if ($_m->id != $m->id) {
+                    if ($_m->is_active == 1) {
+
+                        die("You cannot have two active academic years deativate the other first.");
+                    }
+                }
+            }
         });
     }
 }

@@ -59,6 +59,9 @@ The key's randomart image is:
 google api key
 AIzaSyCymVo9QxwffvO-tO2aciD96rnrnpxS2IU
 
+
+composer install --ignore-platform-reqs
+
 php artisan make:migration create_enterprises_table
 php artisan make:migration create_academic_years_table
 php artisan make:model Banner 
