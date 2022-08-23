@@ -94,6 +94,10 @@ class AcademicClassController extends AdminController
     {
         $form = new Form(new AcademicClass());
 
+        $form->disableCreatingCheck();
+        $form->disableEditingCheck();
+        $form->disableReset();
+        $form->disableViewCheck();
 
         $form->tab('Basic info', function (Form $form) {
 
@@ -104,13 +108,16 @@ class AcademicClassController extends AdminController
             $form->select('academic_year_id', 'Academic year')
                 ->options(
                     AcademicYear::where([
-                        'enterprise_id' => $u->enterprise_id
+                        'enterprise_id' => $u->enterprise_id,
+                        'is_active' => 1,
                     ])->get()
                         ->pluck('name', 'id')
                 )->rules('required');
 
             $form->text('name', __('Class Name'))->rules('required');
             $form->text('short_name', __('Class short name'))->rules('required');
+            $form->text('compulsory_subjects', __('Number of compulsory subjects'))->rules('required');
+            $form->text('optional_subjects', __('Number of optional subjects'))->rules('required');
 
             $teachers = [];
             foreach (Administrator::where([
@@ -146,7 +153,7 @@ class AcademicClassController extends AdminController
                     'user_type' => 'employee',
                 ])->get() as $key => $a) {
                     if ($a->isRole('teacher')) {
-                        $teachers[$a['id']] = $a['name'] . " => " . $a['id'];
+                        $teachers[$a['id']] = $a['name'] . " #" . $a['id'];
                     }
                 }
                 $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
@@ -158,12 +165,17 @@ class AcademicClassController extends AdminController
                             ->pluck('name', 'id')
                     )->rules('required');
 
-
+                $form->radio('is_optional', 'Subject type')
+                    ->options([
+                        1 => 'Compulsory subject',
+                        0 => 'Optional subject',
+                    ])->rules('required');
 
                 $form->select('subject_teacher', 'Subject teacher')
                     ->options(
                         $teachers
                     )->rules('required');
+
                 $form->text('details', __('Details'));
             });
         });

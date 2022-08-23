@@ -8,6 +8,54 @@ use Illuminate\Support\Facades\Auth;
 
 class Utils  extends Model
 {
+    public static function system_checklist()
+    {
+        Utils::classes_checklist();
+    }
+
+    public static function classes_checklist()
+    {
+        $u = Auth::user();
+        if (!$u->isRole('admin')) {
+            return [];
+        }
+        $classes = AcademicClass::where([
+            'enterprise_id' => $u->enterprise_id,
+        ])->get();
+
+
+        foreach ($classes as $key => $class) {
+            $compulsory_subjects = Subject::where([
+                'academic_class_id' => $class->id,
+                'is_optional' => 0,
+            ])->count();
+            $optional_subjects = Subject::where([
+                'academic_class_id' => $class->id,
+                'is_optional' => 1,
+            ])->count();
+
+            $msg = "";
+            if ($class->$optional_subjects < $optional_subjects) {
+                $msg .= "Class {$class->name} is supposed to have 
+                $class->optional_subjects optional subjects, but there is only 
+                $optional_subjects optional subjetcs.
+                Navigate to subjects tab under Academics and add missing subjects in this class.";
+            }
+            if ($class->$compulsory_subjects < $compulsory_subjects) {
+                $msg .= "Class {$class->name} is supposed to have 
+                $class->compulsory_subjects compulsory subjects, but there is only 
+                $compulsory_subjects compulsory subjects.
+                Navigate to subjects tab under Academics and add missing subjects in this class.";
+            }
+
+            dd($msg);
+        }
+        /* "compulsory_subjects" => 8
+        "optional_subjects" => 4 */
+
+
+        dd($classes);
+    }
     public static function reconcile_in_background($enterprise_id)
     {
         $url = url('api/reconcile?enterprise_id=' . $enterprise_id);

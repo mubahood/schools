@@ -5,11 +5,11 @@ namespace App\Models;
 use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Mockery\Matcher\Subset;
 
 class Subject extends Model
 {
     use HasFactory;
-
     protected $fillable = [
         'enterprise_id',
         'academic_class_id',
@@ -21,7 +21,6 @@ class Subject extends Model
         'demo_id',
     ];
 
-
     public static function boot()
     {
 
@@ -31,15 +30,41 @@ class Subject extends Model
             if ($c == null) {
                 die("Course not found.");
             }
+
+            $subjects = Subject::where([
+                'academic_class_id' => $m->academic_class_id,
+                'course_id' => $m->course_id,
+            ])->get();
+
+            foreach ($subjects as $key => $s) {
+                if ($s != null) {
+                    die("This subject is already in this class.");
+                }
+            }
+
             $m->subject_name = $c->name;
             $m->code = $c->code;
         });
 
         static::updating(function ($m) {
             $c = Course::find($m->course_id);
+
             if ($c == null) {
                 die("Course not found.");
             }
+            $subjects = Subject::where([
+                'academic_class_id' => $m->academic_class_id,
+                'course_id' => $m->course_id,
+            ])->get();
+
+            foreach ($subjects as $key => $s) {
+                if ($s != null) {
+                    if ($s->id != $m->id) {
+                        die("This subject is already in this class.");
+                    }
+                }
+            }
+
             $m->subject_name = $c->name;
             $m->code = $c->code;
         });

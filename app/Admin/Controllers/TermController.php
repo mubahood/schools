@@ -83,13 +83,20 @@ class TermController extends AdminController
     {
         $form = new Form(new Term());
 
+        $form->disableCreatingCheck();
+        $form->disableEditingCheck();
+        $form->disableReset();
+        $form->disableViewCheck();
+
+
         $u = Admin::user();
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
-
+ 
         $form->select('academic_year_id', 'Academic year')
             ->options(
                 AcademicYear::where([
-                    'enterprise_id' => $u->enterprise_id
+                    'enterprise_id' => $u->enterprise_id,
+                    'is_active' => 1,
                 ])->get()
                     ->pluck('name', 'id')
             )->rules('required');

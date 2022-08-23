@@ -5,6 +5,7 @@ namespace App\Admin\Controllers;
 use App\Models\AcademicClass;
 use App\Models\Course;
 use App\Models\Subject;
+use App\Models\Utils;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -28,6 +29,7 @@ class SubjectController extends AdminController
      */
     protected function grid()
     {
+        Utils::system_checklist();
         $grid = new Grid(new Subject());
 
         $grid->filter(function ($filter) {
@@ -39,7 +41,7 @@ class SubjectController extends AdminController
                 'user_type' => 'employee',
             ])->get() as $key => $a) {
                 if ($a->isRole('teacher')) {
-                    $teachers[$a['id']] = $a['name'] . " => " . $a['id'];
+                    $teachers[$a['id']] = $a['name'] . " " . $a['id'];
                 }
             }
 
@@ -106,6 +108,10 @@ class SubjectController extends AdminController
      */
     protected function form()
     {
+        /* $s = Subject::find(150);
+        $s->details .= time().rand(1000,10000000);
+        $s->save();  */
+
         $form = new Form(new Subject());
 
         $u = Admin::user();
@@ -115,7 +121,7 @@ class SubjectController extends AdminController
             'user_type' => 'employee',
         ])->get() as $key => $a) {
             if ($a->isRole('teacher')) {
-                $teachers[$a['id']] = $a['name'] . " => " . $a['id'];
+                $teachers[$a['id']] = $a['name'] . "  " . $a['id'];
             }
         }
 
@@ -129,11 +135,9 @@ class SubjectController extends AdminController
                     ->pluck('name', 'id')
             )->rules('required');
 
-        $form->select('course_id', 'Course')
+        $form->select('course_id', 'Subject')
             ->options(
-                Course::where([
-                    'enterprise_id' => $u->enterprise_id
-                ])->get()
+                Course::all()
                     ->pluck('name', 'id')
             )->rules('required');
 
@@ -144,7 +148,13 @@ class SubjectController extends AdminController
             )->rules('required');
 
 
-        $form->text('code', __('Code'))->rules('required');
+        $form->text('code', __('Subject Code'));
+
+        $form->radio('is_optional', 'Subject type')
+            ->options([
+                1 => 'Compulsory subject',
+                0 => 'Optional subject',
+            ])->rules('required');
 
         $form->textarea('details', __('Details'));
 

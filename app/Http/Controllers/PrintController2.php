@@ -82,21 +82,7 @@ class PrintController2 extends Controller
             $rows .= "</tr>";
         }
 
-        /* 
-        "subject_id" => 1
-        "student_report_card_id" => 1
-        "did_bot" => 1
-        "did_mot" => 1
-        "did_eot" => 1
-        "bot_mark" => 3
-        "mot_mark" => 24
-        "eot_mark" => 23
-        "grade_name" => "P8"
-        "aggregates" => 8
-        "remarks" => "V.Good"
-        "initials" => "-"
-        */
-
+ 
         $r = new ReportCard();
         $data = '<link type="text/css" href="' . url('assets/bootstrap.css') . '" rel="stylesheet" />';
         $data .= "

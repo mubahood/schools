@@ -29,28 +29,28 @@ class AcademicYear extends Model
         self::deleting(function ($m) {
         });
         self::creating(function ($m) {
-            $_m = AcademicYear::find([
+            $_m = AcademicYear::where([
                 'enterprise_id' => $m->enterprise_id,
                 'is_active' => 1,
             ])->first();
             if ($_m != null) {
-                $_m->is_active = true;
-                $_m->save();
-                die("You cannot have to active academic years.");
+                $m->is_active = 0;
             }
         });
 
         self::updating(function ($m) {
-            $_m = AcademicYear::find([
+            $_m = AcademicYear::where([
                 'enterprise_id' => $m->enterprise_id,
                 'is_active' => 1,
             ])->first();
 
+
+
             if ($_m != null) {
                 if ($_m->id != $m->id) {
                     if ($_m->is_active == 1) {
-
-                        die("You cannot have two active academic years deativate the other first.");
+                        $m->is_active = 0;
+                        admin_error('Warning',"You cannot have two active academic years deativate the other first.");
                     }
                 }
             }
