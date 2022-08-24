@@ -21,6 +21,8 @@
 use Encore\Admin\Facades\Admin;
 use App\Admin\Extensions\Nav\Shortcut;
 use App\Admin\Extensions\Nav\Dropdown;
+use App\Models\Utils;
+use Illuminate\Support\Facades\Auth;
 
 Encore\Admin\Form::forget(['map', 'editor']);
 
@@ -38,7 +40,15 @@ Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
 
     $navbar->left(new Dropdown());
 
-    $navbar->right(new \App\Admin\Extensions\Nav\Links());
+
+    $check_list = [];
+    $u = Auth::user();
+    if ($u != null) {
+        $check_list = Utils::system_checklist($u);
+    }
+    $navbar->right(view('widgets.admin-links', [
+        'items' => $check_list
+    ]));
 });
 
 Admin::css('/css/jquery-confirm.min.css');

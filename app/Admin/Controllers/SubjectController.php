@@ -29,8 +29,9 @@ class SubjectController extends AdminController
      */
     protected function grid()
     {
-        Utils::system_checklist();
+
         $grid = new Grid(new Subject());
+        Utils::display_system_checklist();
 
         $grid->filter(function ($filter) {
             $filter->disableIdFilter();
@@ -114,6 +115,8 @@ class SubjectController extends AdminController
 
         $form = new Form(new Subject());
 
+        Utils::display_system_checklist();
+
         $u = Admin::user();
         $teachers = [];
         foreach (Administrator::where([
@@ -152,8 +155,8 @@ class SubjectController extends AdminController
 
         $form->radio('is_optional', 'Subject type')
             ->options([
-                1 => 'Compulsory subject',
-                0 => 'Optional subject',
+                0 => 'Compulsory subject',
+                1 => 'Optional subject',
             ])->rules('required');
 
         $form->textarea('details', __('Details'));

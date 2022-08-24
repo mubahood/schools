@@ -2,23 +2,42 @@
 
 namespace App\Models;
 
+use Encore\Admin\Facades\Admin;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
 class Utils  extends Model
 {
-    public static function system_checklist()
+    public static function system_checklist($u)
     {
-        Utils::classes_checklist();
+        $list = [];
+
+        if ($u->isRole('admin')) {
+            $_list = Utils::classes_checklist($u);
+
+            foreach ($_list as $key => $x) {
+                $list[] = $x;
+            }
+        }
+
+        return $list;
     }
 
-    public static function classes_checklist()
+    public static function display_system_checklist()
     {
-        $u = Auth::user();
-        if (!$u->isRole('admin')) {
-            return [];
+        $u = Admin::user();
+        $check_list = Utils::classes_checklist($u);
+        foreach ($check_list as $check) {
+            admin_error('Warning', $check['message']);
         }
+    }
+
+
+    public static function classes_checklist($u)
+    {
+
+        $items = [];
         $classes = AcademicClass::where([
             'enterprise_id' => $u->enterprise_id,
         ])->get();
@@ -26,35 +45,43 @@ class Utils  extends Model
 
         foreach ($classes as $key => $class) {
             $compulsory_subjects = Subject::where([
-                'academic_class_id' => $class->id,
-                'is_optional' => 0,
-            ])->count();
+                'academic_class_id' => $class->id
+
+            ])
+                ->where('is_optional', '!=', 1)
+                ->count();
+
             $optional_subjects = Subject::where([
                 'academic_class_id' => $class->id,
                 'is_optional' => 1,
             ])->count();
 
             $msg = "";
-            if ($class->$optional_subjects < $optional_subjects) {
-                $msg .= "Class {$class->name} is supposed to have 
+            if ($class->optional_subjects > $optional_subjects) {
+                $msg = "Class {$class->name} is supposed to have 
                 $class->optional_subjects optional subjects, but there is only 
                 $optional_subjects optional subjetcs.
                 Navigate to subjects tab under Academics and add missing subjects in this class.";
+
+                $resp['message'] = $msg;
+                $resp['link'] = admin_url("classes/$class->id/edit/#tab-form-2");
+                $items[] =  $resp;
             }
-            if ($class->$compulsory_subjects < $compulsory_subjects) {
-                $msg .= "Class {$class->name} is supposed to have 
+
+            if ($class->compulsory_subjects > $compulsory_subjects) {
+                $msg = "Class {$class->name} is supposed to have 
                 $class->compulsory_subjects compulsory subjects, but there is only 
                 $compulsory_subjects compulsory subjects.
                 Navigate to subjects tab under Academics and add missing subjects in this class.";
+                $resp['message'] = $msg;
+                $resp['link'] = admin_url("classes/$class->id/edit/#tab-form-2");
+                $items[] =  $resp;
             }
-
-            dd($msg);
         }
         /* "compulsory_subjects" => 8
         "optional_subjects" => 4 */
 
-
-        dd($classes);
+        return $items;
     }
     public static function reconcile_in_background($enterprise_id)
     {

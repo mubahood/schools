@@ -6,6 +6,7 @@ use App\Models\AcademicClass;
 use App\Models\AcademicClassFee;
 use App\Models\AcademicYear;
 use App\Models\Course;
+use App\Models\Utils;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -37,6 +38,8 @@ class AcademicClassController extends AdminController
         }else{
             dd("Bad");
         } */
+
+        Utils::display_system_checklist();
 
         $grid = new Grid(new AcademicClass());
         $grid->model()
@@ -93,6 +96,8 @@ class AcademicClassController extends AdminController
     protected function form()
     {
         $form = new Form(new AcademicClass());
+
+       Utils::display_system_checklist();
 
         $form->disableCreatingCheck();
         $form->disableEditingCheck();
@@ -167,8 +172,8 @@ class AcademicClassController extends AdminController
 
                 $form->radio('is_optional', 'Subject type')
                     ->options([
-                        1 => 'Compulsory subject',
-                        0 => 'Optional subject',
+                        0 => 'Compulsory subject',
+                        1 => 'Optional subject',
                     ])->rules('required');
 
                 $form->select('subject_teacher', 'Subject teacher')
