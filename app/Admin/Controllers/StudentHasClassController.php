@@ -6,6 +6,8 @@ use App\Models\AcademicClass;
 use App\Models\AcademicClassSctream;
 use App\Models\StudentHasClass;
 use App\Models\User;
+use App\Models\Utils;
+use Dflydev\DotAccessData\Util;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -30,6 +32,10 @@ class StudentHasClassController extends AdminController
      */
     protected function grid()
     {
+
+ 
+        Utils::display_checklist(Utils::students_checklist(Admin::user()));
+
         $grid = new Grid(new StudentHasClass());
         $grid->disableBatchActions();
         $grid->disableExport();
@@ -124,6 +130,11 @@ class StudentHasClassController extends AdminController
     protected function form()
     {
         $form = new Form(new StudentHasClass());
+        $form->disableCreatingCheck();
+        $form->disableEditingCheck();
+        $form->disableReset();
+        $form->disableViewCheck();
+
 
         $form->saving(function (Form $form) {
 

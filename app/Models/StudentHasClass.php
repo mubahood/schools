@@ -23,7 +23,19 @@ class StudentHasClass extends Model
             if ($_m == null) {
                 die("Academic not found.");
             }
+
             $m->academic_year_id = $_m->academic_year_id;
+            $m->enterprise_id = $_m->enterprise_id;
+
+
+            $existing = StudentHasClass::where([
+                'administrator_id' => $m->administrator_id,
+                'academic_class_id' => $m->academic_class_id,
+            ])->first();
+            if ($existing != null) {
+                die("A student can't be in same class more than once.");
+            }
+
             return $m;
         });
 

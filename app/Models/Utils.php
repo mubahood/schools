@@ -6,6 +6,7 @@ use Encore\Admin\Facades\Admin;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class Utils  extends Model
 {
@@ -15,7 +16,11 @@ class Utils  extends Model
 
         if ($u->isRole('admin')) {
             $_list = Utils::classes_checklist($u);
+            foreach ($_list as $key => $x) {
+                $list[] = $x;
+            }
 
+            $_list = Utils::students_checklist($u);
             foreach ($_list as $key => $x) {
                 $list[] = $x;
             }
@@ -23,6 +28,14 @@ class Utils  extends Model
 
         return $list;
     }
+
+    public static function display_checklist($items)
+    {
+        foreach ($items as $key => $check) {
+            admin_error('Warning', $check['message']);
+        }
+    }
+
 
     public static function display_system_checklist()
     {
@@ -33,6 +46,61 @@ class Utils  extends Model
         }
     }
 
+
+    public static function students_optional_subjects_checklist($u)
+    {
+
+
+        $sql_classes_with_optionals =
+            "SELECT id FROM academic_classes WHERE 
+            enterprise_id = {$u->enterprise_id} AND
+            optional_subjects > 0
+            ";
+
+
+        $sql_ids_of_students_in_classes_with_optionals =
+            "SELECT administrator_id FROM student_has_classes WHERE 
+            enterprise_id = {$u->enterprise_id} AND
+            academic_class_id IN ($sql_classes_with_optionals)
+            ";
+
+        $sql_students_in_classes_with_optionals = "SELECT * FROM admin_users WHERE 
+            user_type = 'student' AND
+            enterprise_id = {$u->enterprise_id} AND
+            id IN ($sql_ids_of_students_in_classes_with_optionals)
+        ";
+
+        $students = DB::select($sql_students_in_classes_with_optionals);
+        dd($students); 
+
+        $students = DB::select($sql_students_in_classes_with_optionals);
+        $items = [];
+        foreach ($students as $s) {
+            $resp['message'] = "Student $s->name - ID #{$s->id} has not been assign to any class. Assign this student to at least class.";
+            $resp['link'] = admin_url("classes/$s->id/edit/#tab-form-2");
+            $items[] =  $resp;
+        }
+        return $items;
+    }
+
+    public static function students_checklist($u)
+    {
+
+        $sql_1 = "SELECT administrator_id FROM student_has_classes WHERE enterprise_id = {$u->enterprise_id}";
+        $sql = "SELECT * FROM admin_users WHERE 
+            user_type = 'student' AND
+            enterprise_id = {$u->enterprise_id} AND
+            id NOT IN ($sql_1)
+        ";
+        $students = DB::select($sql);
+        $items = [];
+        foreach ($students as $s) {
+            $resp['message'] = "Student $s->name - ID #{$s->id} has not been assign to any class. Assign this student to at least class.";
+            $resp['link'] = admin_url("classes/$s->id/edit/#tab-form-2");
+            $items[] =  $resp;
+        }
+        return $items;
+    }
 
     public static function classes_checklist($u)
     {

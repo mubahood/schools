@@ -7,6 +7,7 @@ use App\Models\AcademicYear;
 use App\Models\AdminRole;
 use App\Models\AdminRoleUser;
 use App\Models\StudentHasClass;
+use App\Models\Utils;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -147,6 +148,9 @@ class StudentsController extends AdminController
     {
         $grid = new Grid(new Administrator());
 
+        Utils::display_checklist(Utils::students_checklist(Admin::user()));
+        Utils::display_checklist(Utils::students_optional_subjects_checklist(Admin::user()));
+
 
 
         $grid->filter(function ($filter) {
@@ -206,7 +210,7 @@ class StudentsController extends AdminController
         $grid->column('date_of_birth', __('D.O.B'))->sortable();
         $grid->column('nationality', __('Nationality'))->sortable();
         $grid->column('sex', __('Sex'))
-            ->sortable() 
+            ->sortable()
             ->filter(['Male' => 'Male', 'Female' => 'Female']);
         $grid->column('place_of_birth', __('Place of birth'))->sortable();
         $grid->column('home_address', __('Home address'))->hide();
