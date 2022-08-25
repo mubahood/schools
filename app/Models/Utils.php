@@ -24,6 +24,10 @@ class Utils  extends Model
             foreach ($_list as $key => $x) {
                 $list[] = $x;
             }
+            $_list = Utils::students_optional_subjects_checklist($u);
+            foreach ($_list as $key => $x) {
+                $list[] = $x;
+            }
         }
 
         return $list;
@@ -58,28 +62,29 @@ class Utils  extends Model
             ";
 
 
-        $sql_ids_of_students_in_classes_with_optionals =
+        $sql_ids_of_students_in_classes_with_pending_optionals =
             "SELECT administrator_id FROM student_has_classes WHERE 
             enterprise_id = {$u->enterprise_id} AND
+            done_selecting_option_courses != 1 AND
             academic_class_id IN ($sql_classes_with_optionals)
             ";
 
+
         $sql_students_in_classes_with_optionals = "SELECT * FROM admin_users WHERE 
-            user_type = 'student' AND
-            enterprise_id = {$u->enterprise_id} AND
-            id IN ($sql_ids_of_students_in_classes_with_optionals)
-        ";
+        user_type = 'student' AND
+        enterprise_id = {$u->enterprise_id} AND
+        id IN ($sql_ids_of_students_in_classes_with_pending_optionals)";
+
 
         $students = DB::select($sql_students_in_classes_with_optionals);
-        dd($students); 
 
-        $students = DB::select($sql_students_in_classes_with_optionals);
         $items = [];
         foreach ($students as $s) {
-            $resp['message'] = "Student $s->name - ID #{$s->id} has not been assign to any class. Assign this student to at least class.";
+            $resp['message'] = "Student $s->name - ID #{$s->id} has not selected all required optional subjects.";
             $resp['link'] = admin_url("classes/$s->id/edit/#tab-form-2");
             $items[] =  $resp;
         }
+
         return $items;
     }
 
