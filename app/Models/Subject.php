@@ -19,6 +19,7 @@ class Subject extends Model
         'course_id',
         'subject_name',
         'demo_id',
+        'is_optional',
     ];
 
     public static function boot()

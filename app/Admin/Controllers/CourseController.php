@@ -65,6 +65,22 @@ class CourseController extends AdminController
         $form->hidden('enterprise_id', __('Enterprise id'))->default(1)->rules('required');
         $form->text('name', __('Name'))->rules('required');
         $form->text('short_name', __('Short Name'))->rules('required');
+        $form->text('code', __('Subject code'))->rules('required');
+        $form->radio('subject_type', __('Subject category'))
+            ->options([
+                'Primary' => 'Primary school subject',
+                'Secondary' => 'O\'level subject',
+                'Advanced' => 'For A\'level subject',
+            ])
+            ->rules('required');
+        $form->radio('is_compulsory', __('Subject choice'))
+            ->options([
+                1 => 'Is compulsory subject',
+                0 => 'Is optional subject',
+            ])
+            ->default(1)
+            ->rules('required');
+
         $form->textarea('details', __('Details'));
 
         return $form;

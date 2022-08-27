@@ -63,6 +63,7 @@ AIzaSyCymVo9QxwffvO-tO2aciD96rnrnpxS2IU
 composer install --ignore-platform-reqs
 
 php artisan make:migration create_enterprises_table
+php artisan make:migration create_main_courses_table
 php artisan make:migration create_academic_years_table
 php artisan make:model Banner 
 php artisan make:model Enterprise
@@ -100,6 +101,8 @@ php artisan make:model Account
 php artisan make:model Transaction
 php artisan make:model Reconciler
 php artisan make:model MenuItem
+php artisan make:model MenuItem
+php artisan make:model MainCourse
   
 
 
@@ -144,3 +147,18 @@ php artisan admin:make AcademicClassFeeController --model=App\\Models\\AcademicC
 php artisan admin:make TransactionController --model=App\\Models\\Transaction
 php artisan admin:make SchoolFeesPaymentController --model=App\\Models\\Transaction
 php artisan admin:make MenuItemController --model=App\\Models\\MenuItem
+php artisan admin:make MainCourseController --model=App\\Models\\MainCourse
+
+
+
+enterprise_id
+name
+short_name	
+details	
+code
+
+subject_type
+subject_choice
+
+
+demo_id	
