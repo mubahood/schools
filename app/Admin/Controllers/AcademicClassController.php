@@ -118,6 +118,7 @@ class AcademicClassController extends AdminController
                     ])->get()
                         ->pluck('name', 'id')
                 )->rules('required');
+                
 
             $form->text('name', __('Class Name'))->rules('required');
             $form->text('short_name', __('Class short name'))->rules('required');
