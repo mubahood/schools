@@ -131,7 +131,7 @@ class PermissionController extends AdminController
 
         $form->multipleSelect('http_method', trans('admin.http.method'))
             ->options($this->getHttpMethodsOptions())
-            ->help(trans('admin.all_methods_if_empty'));
+            ->help(trans('admin.all_methods_if_empty')); 
         $form->textarea('http_path', trans('admin.http.path'));
 
         $form->display('created_at', trans('admin.created_at'));
