@@ -15,7 +15,10 @@ use Encore\Admin\Widgets\Box;
 
 class HomeController extends Controller
 {
-    public function index(Content $content)
+    public function index(Content $content){
+        return $content->view('admin.index'); 
+    }
+    public function stats(Content $content)
     {
 
         $ent = Utils::ent();
