@@ -8,6 +8,7 @@ use App\Models\AdminRole;
 use App\Models\AdminRoleUser;
 use App\Models\StudentHasClass;
 use App\Models\Utils;
+use Carbon\Carbon;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -137,7 +138,7 @@ class StudentsController extends AdminController
      *
      * @var string
      */
-    protected $title = 'Students admission';
+    protected $title = 'Students admissions';
 
     /**
      * Make a grid builder.
@@ -154,6 +155,9 @@ class StudentsController extends AdminController
 
 
         $grid->filter(function ($filter) {
+
+            $filter->between('created_at', 'Admitted')->date();
+
 
             // Remove the default id filter
             $filter->disableIdFilter();
@@ -204,7 +208,7 @@ class StudentsController extends AdminController
 
         $grid->column('id', __('Id'))->sortable();
         $grid->column('name', __('Name'))->sortable();
-        $grid->column('phone_number_1', __('Phone number'));
+        $grid->column('phone_number_1', __('Phone number'))->hide();
         $grid->column('phone_number_2', __('Phone number 2'))->hide();
         $grid->column('email', __('Email'));
         $grid->column('date_of_birth', __('D.O.B'))->sortable();
@@ -231,18 +235,23 @@ class StudentsController extends AdminController
         $grid->column('nssf_number')->hide();
         $grid->column('bank_name')->hide();
         $grid->column('bank_account_number')->hide();
-        $grid->column('primary_school_name')->hide();
-        $grid->column('primary_school_year_graduated')->hide();
-        $grid->column('seconday_school_name')->hide();
-        $grid->column('seconday_school_year_graduated')->hide();
-        $grid->column('high_school_name')->hide();
-        $grid->column('high_school_year_graduated')->hide();
-        $grid->column('degree_university_name')->hide();
-        $grid->column('degree_university_year_graduated')->hide();
-        $grid->column('masters_university_name')->hide();
-        $grid->column('masters_university_year_graduated')->hide();
-        $grid->column('phd_university_name')->hide();
-        $grid->column('phd_university_year_graduated')->hide();
+        //$grid->column('primary_school_name')->hide();
+        //$grid->column('primary_school_year_graduated')->hide();
+        //$grid->column('seconday_school_name')->hide();
+        //$grid->column('seconday_school_year_graduated')->hide();
+        //$grid->column('high_school_name')->hide();
+        //$grid->column('high_school_year_graduated')->hide();
+        //$grid->column('degree_university_name')->hide();
+        //$grid->column('degree_university_year_graduated')->hide();
+        //$grid->column('masters_university_name')->hide();
+        //$grid->column('masters_university_year_graduated')->hide();
+        //$grid->column('phd_university_name')->hide();
+        //$grid->column('phd_university_year_graduated')->hide();
+
+        $grid->column('created_at', __('Admitted'))
+            ->display(function ($date) {
+                return Carbon::parse($date)->format('d-M-Y');
+            })->sortable();
 
         return $grid;
     }
