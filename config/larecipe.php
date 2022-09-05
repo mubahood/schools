@@ -33,8 +33,8 @@ return [
     */
 
     'versions'      => [
-        'default'   => 'Administrators', 
-        'published' => [ 
+        'default'   => 'Administrators',
+        'published' => [
             'Administrators',
             'Users',
             'Developers',
@@ -79,7 +79,7 @@ return [
     */
 
     'cache'       => [
-        'enabled' => false,
+        'enabled' => true,
         'period'  => 5
     ],
 
@@ -101,7 +101,7 @@ return [
         'default'       => 'algolia',
         'engines'       => [
             'internal'  => [
-                'index' => ['h2', 'h3']
+                'index' => ['h1', 'h2', 'h3']
             ],
             'algolia'   => [
                 'key'   => '',
@@ -128,7 +128,7 @@ return [
         'fa_v4_shims'    => true, // Add FontAwesome v4 shims prevent BC break
         'show_side_bar'  => true,
         'colors'         => [
-            'primary'    => '#860002', 
+            'primary'    => '#860002',
             'secondary'  => '#2b9cf2'
         ],
 
@@ -160,7 +160,7 @@ return [
         ]
     ],
 
-   /*
+    /*
    |--------------------------------------------------------------------------
    | Forum
    |--------------------------------------------------------------------------
@@ -173,7 +173,7 @@ return [
    |
    */
 
-  'forum'                   => [
+    'forum'                   => [
         'enabled'           => false,
         'default'           => 'disqus',
         'services'          => [

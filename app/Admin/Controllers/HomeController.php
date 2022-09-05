@@ -15,8 +15,12 @@ use Encore\Admin\Widgets\Box;
 
 class HomeController extends Controller
 {
-    public function index(Content $content){
-        return $content->view('admin.index'); 
+    public function index(Content $content)
+    {
+        $u = Admin::user();
+        return $content->view('admin.index', [
+            'u' => $u
+        ]);
     }
     public function stats(Content $content)
     {

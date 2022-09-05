@@ -17,75 +17,107 @@
 
     <div class="row border-primary border-bottom  p-0">
         <div class="col-4 p-0 m-0">
-            {{-- <img src="public/assets/icons/logo.png"> --}}
+            {{-- <img src="/assets/icons/logo.png"> --}}
         </div>
         <div class="col-md-4  m-0 cpanel-tab ">
             <h2 class="text-center pt-3 pb-1 m-0 bg-primary rounded-top h3">CONTROL PANEL</h2>
         </div>
         <div class="col-4">
-            {{-- <img class="float-right" src="public/assets/icons/badge.png"> --}}
+            {{-- <img class="float-right" src="/assets/icons/badge.png"> --}}
         </div>
     </div>
     <div class="row  mt-3 ">
         <div class="col-md-6 pl-0 pr-1">
             <div class=" border border-primary m-0 rounded">
-                @include('widgets.dashboard-widget', [
-                    'title' => 'Admission & Classes Centre',
-                    'icon' => url('public/assets/icons/student.png'),
-                    'links' => [
-                        [
-                            'link' => admin_url('students/create'),
-                            'text' => 'Admit new student',
-                        ],
-                        [
-                            'link' => admin_url('students'),
-                            'text' => 'Manage students bio data & admissions',
-                        ],
-                        [
-                            'link' => admin_url('students-classes'),
-                            'text' => 'Students class & stream management',
-                        ],
-                    ],
-                ])
-                <div class="divider"></div>
-                @include('widgets.dashboard-widget', [
-                    'title' => 'Examination centre',
-                    'icon' => url('public/assets/icons/exam.png'),
-                    'links' => [
-                        [
-                            'link' => admin_url('exams'),
-                            'text' => 'Exams',
-                        ],
-                        [
-                            'link' => admin_url('marks'),
-                            'text' => 'Results entry (Marks)',
-                        ],
-                        [
-                            'link' => admin_url('student-report-cards'),
-                            'text' => 'Student report cards',
-                        ],
-                    ],
-                ])
-                <div class="divider"></div>
-                @include('widgets.dashboard-widget', [
-                    'title' => 'School fees managment',
-                    'icon' => url('public/assets/icons/money.png'),
-                    'links' => [
-                        [
-                            'link' => admin_url('school-fees-payment'),
-                            'text' => 'Fees payment',
-                        ],
-                        [
-                            'link' => admin_url('fees'),
-                            'text' => 'Fees billing',
-                        ],
-                        [
-                            'link' => admin_url('accounts'),
-                            'text' => 'Students fees accounts',
-                        ],
-                    ],
-                ])
 
+
+                @if ($u->isRole('super-admin'))
+                    @include('widgets.dashboard-widget', [
+                        'title' => 'System administration',
+                        'icon' => url('/assets/icons/settings.png'),
+                        'links' => [
+                            [
+                                'link' => admin_url('auth/users/create'),
+                                'text' => 'Create new user',
+                            ],
+                            [
+                                'link' => admin_url('enterprises/create'),
+                                'text' => 'Create new enterprise',
+                            ],
+                            [
+                                'link' => admin_url('enterprises'),
+                                'text' => 'Manage enterprises',
+                            ],
+                        ],
+                    ])
+                @endif
+
+
+                @if ($u->isRole('dos'))
+                    @include('widgets.dashboard-widget', [
+                        'title' => 'Admission & Classes Centre',
+                        'icon' => url('/assets/icons/student.png'),
+                        'links' => [
+                            [
+                                'link' => admin_url('students/create'),
+                                'text' => 'Admit new student',
+                            ],
+                            [
+                                'link' => admin_url('students'),
+                                'text' => 'Manage students bio data & admissions',
+                            ],
+                            [
+                                'link' => admin_url('students-classes'),
+                                'text' => 'Students class & stream management',
+                            ],
+                        ],
+                    ])
+                    <div class="divider"></div>
+                @endif
+
+
+                @if ($u->isRole('dos'))
+                    @include('widgets.dashboard-widget', [
+                        'title' => 'Examination centre',
+                        'icon' => url('/assets/icons/exam.png'),
+                        'links' => [
+                            [
+                                'link' => admin_url('exams'),
+                                'text' => 'Exams',
+                            ],
+                            [
+                                'link' => admin_url('marks'),
+                                'text' => 'Results entry (Marks)',
+                            ],
+                            [
+                                'link' => admin_url('student-report-cards'),
+                                'text' => 'Student report cards',
+                            ],
+                        ],
+                    ])
+                    <div class="divider"></div>
+                @endif
+
+                @if ($u->isRole('dos'))
+                    @include('widgets.dashboard-widget', [
+                        'title' => 'School fees managment',
+                        'icon' => url('/assets/icons/money.png'),
+                        'links' => [
+                            [
+                                'link' => admin_url('school-fees-payment'),
+                                'text' => 'Fees payment',
+                            ],
+                            [
+                                'link' => admin_url('fees'),
+                                'text' => 'Fees billing',
+                            ],
+                            [
+                                'link' => admin_url('accounts'),
+                                'text' => 'Students fees accounts',
+                            ],
+                        ],
+                    ])
+                @endif
 
 
             </div>
@@ -95,62 +127,71 @@
         <div class="col-md-6 pl-0 pr-1">
             <div class=" border border-primary m-0 rounded">
 
-                @include('widgets.dashboard-widget', [
-                    'title' => 'Accounting & Finance Centre',
-                    'icon' => url('public/assets/icons/accounts.png'),
-                    'links' => [
-                        [
-                            'text' => 'Financial accounts',
-                            'link' => admin_url('accounts'),
+                @if ($u->isRole('bursar'))
+                    @include('widgets.dashboard-widget', [
+                        'title' => 'Accounting & Finance Centre',
+                        'icon' => url('/assets/icons/accounts.png'),
+                        'links' => [
+                            [
+                                'text' => 'Financial accounts',
+                                'link' => admin_url('accounts'),
+                            ],
+                            [
+                                'link' => admin_url('transactions'),
+                                'text' => 'All financial transactions',
+                            ],
+                            [
+                                'link' => '#',
+                                'text' => 'Documentation',
+                            ],
                         ],
-                        [
-                            'link' => admin_url('transactions'),
-                            'text' => 'All financial transactions',
+                    ])
+                    <div class="divider"></div>
+                @endif
+
+                @if ($u->isRole('admin'))
+                    @include('widgets.dashboard-widget', [
+                        'title' => 'Human resource management',
+                        'icon' => url('/assets/icons/human.png'),
+                        'links' => [
+                            [
+                                'link' => admin_url('employees/create'),
+                                'text' => 'Add new employee',
+                            ],
+                            [
+                                'link' => admin_url('employees'),
+                                'text' => 'Manage staff bio data',
+                            ],
+                            [
+                                'link' => '#',
+                                'text' => 'Payroll processing',
+                            ],
                         ],
-                        [
-                            'link' => '#',
-                            'text' => 'Documentation',
+                    ])
+                    <div class="divider"></div>
+                @endif
+
+
+                @if ($u->isRole('dos'))
+                    @include('widgets.dashboard-widget', [
+                        'title' => 'System settings & configuration',
+                        'icon' => url('/assets/icons/settings.png'),
+                        'links' => [
+                            [
+                                'link' => admin_url('subjects'),
+                                'text' => 'Manage subjects',
+                            ],
+                            [
+                                'link' => admin_url('classes'),
+                                'text' => 'Manage classes',
+                            ],
+                            [
+                                'link' => admin_url('academic-years'),
+                                'text' => 'Manage academic years',
+                            ],
                         ],
-                    ],
-                ])
-                <div class="divider"></div>
-                @include('widgets.dashboard-widget', [
-                    'title' => 'Human resource management',
-                    'icon' => url('public/assets/icons/human.png'),
-                    'links' => [
-                        [
-                            'link' => admin_url('employees/create'),
-                            'text' => 'Add new employee',
-                        ],
-                        [
-                            'link' => admin_url('employees'),
-                            'text' => 'Manage staff bio data',
-                        ],
-                        [
-                            'link' => '#',
-                            'text' => 'Payroll processing',
-                        ],
-                    ],
-                ])
-                <div class="divider"></div>
-                @include('widgets.dashboard-widget', [
-                    'title' => 'System settings & configuration',
-                    'icon' => url('public/assets/icons/settings.png'),
-                    'links' => [
-                        [
-                            'link' => admin_url('subjects'),
-                            'text' => 'Manage subjects',
-                        ],
-                        [
-                            'link' => admin_url('classes'),
-                            'text' => 'Manage classes',
-                        ],
-                        [
-                            'link' => admin_url('academic-years'),
-                            'text' => 'Manage academic years',
-                        ],
-                    ],
-                ])
+                    ])
+                @endif
 
 
 
