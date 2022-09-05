@@ -10,6 +10,23 @@ class AcademicClass extends Model
 {
     use HasFactory;
 
+    public static function boot()
+    {
+        parent::boot();
+        self::deleting(function ($m) {
+        });
+        self::creating(function ($m) {
+            $_m = AcademicYear::where([
+                'enterprise_id' => $m->enterprise_id,
+                'is_active' => 1,
+            ])->first();
+            if ($_m != null) {
+                $m->is_active = 0;
+            }
+        });
+
+    }
+
 
     public static function update_fees($academic_class_id)
     {

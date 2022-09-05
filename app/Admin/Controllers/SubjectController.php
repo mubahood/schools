@@ -30,6 +30,27 @@ class SubjectController extends AdminController
     protected function grid()
     {
 
+        $c = new AcademicClass();
+        $u = Admin::user();
+        $c->enterprise_id = $u->enterprise_id;
+        $c->academic_year_id = 4;
+        $c->class_teahcer_id = $u->id;
+        $c->name = 'Class X';
+        $c->short_name = 'S. X';
+        $c->details = 'About this calss';
+        $c->class_type = 'S.1';
+
+        die("Romina");
+
+
+
+
+        // compulsory_subjects	
+        // optional_subjects  	
+
+
+
+        die("Romina");
         $grid = new Grid(new Subject());
         Utils::display_system_checklist();
 
