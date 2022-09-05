@@ -73,7 +73,6 @@
                             ],
                         ],
                     ])
-
                 @endif
 
 
@@ -97,7 +96,7 @@
                             ],
                         ],
                     ])
-                    <div class="divider"></div>
+
                 @endif
 
 
@@ -120,7 +119,6 @@
                             ],
                         ],
                     ])
-                    <div class="divider"></div>
                 @endif
 
                 @if ($u->isRole('dos'))
@@ -144,14 +142,6 @@
                     ])
                 @endif
 
-
-            </div>
-        </div>
-
-
-        <div class="col-md-6 pl-0 pr-1">
-            <div class=" border border-primary m-0 rounded">
-
                 @if ($u->isRole('bursar'))
                     @include('widgets.dashboard-widget', [
                         'title' => 'Accounting & Finance Centre',
@@ -170,8 +160,7 @@
                                 'text' => 'Documentation',
                             ],
                         ],
-                    ])
-                    <div class="divider"></div>
+                    ]) 
                 @endif
 
 
@@ -202,5 +191,13 @@
         </div>
 
 
+        {{-- <div class="col-md-6 pl-0 pr-1">
+            <div class=" border border-primary m-0 rounded">
+
+            
+
+
+            </div>
+        </div> --}}
     </div>
 </div>
