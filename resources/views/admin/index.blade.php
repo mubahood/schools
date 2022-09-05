@@ -53,6 +53,31 @@
                 @endif
 
 
+
+                @if ($u->isRole('admin'))
+                    @include('widgets.dashboard-widget', [
+                        'title' => 'Human resource management',
+                        'icon' => url('/assets/icons/human.png'),
+                        'links' => [
+                            [
+                                'link' => admin_url('employees/create'),
+                                'text' => 'Add new employee',
+                            ],
+                            [
+                                'link' => admin_url('employees'),
+                                'text' => 'Manage staff bio data',
+                            ],
+                            [
+                                'link' => '#',
+                                'text' => 'Payroll processing',
+                            ],
+                        ],
+                    ])
+
+                @endif
+
+
+
                 @if ($u->isRole('dos'))
                     @include('widgets.dashboard-widget', [
                         'title' => 'Admission & Classes Centre',
@@ -143,28 +168,6 @@
                             [
                                 'link' => '#',
                                 'text' => 'Documentation',
-                            ],
-                        ],
-                    ])
-                    <div class="divider"></div>
-                @endif
-
-                @if ($u->isRole('admin'))
-                    @include('widgets.dashboard-widget', [
-                        'title' => 'Human resource management',
-                        'icon' => url('/assets/icons/human.png'),
-                        'links' => [
-                            [
-                                'link' => admin_url('employees/create'),
-                                'text' => 'Add new employee',
-                            ],
-                            [
-                                'link' => admin_url('employees'),
-                                'text' => 'Manage staff bio data',
-                            ],
-                            [
-                                'link' => '#',
-                                'text' => 'Payroll processing',
                             ],
                         ],
                     ])
