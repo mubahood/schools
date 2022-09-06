@@ -2,6 +2,7 @@
 
 namespace Encore\Admin\Controllers;
 
+use App\Models\Enterprise;
 use App\Models\StudentHasClass;
 use App\Models\Transaction;
 use App\Models\User;
@@ -17,6 +18,78 @@ class Dashboard
     {
         return view('widgets.help-videos');
     }
+
+    public static function all_users()
+    {
+        $u = Auth::user();
+        $all_students = User::count();
+
+        $male_students = User::where([
+            'user_type' => 'Student',
+            'sex' => 'Male',
+        ])->count();
+        $female_students = $all_students - $male_students;
+        $sub_title = number_format($male_students) . ' Males, ';
+        $sub_title .= number_format($female_students) . ' Females.';
+        return view('widgets.box-5', [
+            'is_dark' => false,
+            'title' => 'All system users',
+            'sub_title' => $sub_title,
+            'number' => number_format($all_students),
+            'link' => admin_url('auth/users')
+        ]);
+    }
+    public static function all_teachers()
+    {
+        $all_students = User::where([
+            'user_type' => 'employee',
+        ])->count();
+
+        $male_students = User::where([
+            'user_type' => 'employee',
+            'sex' => 'Male',
+        ])->count();
+
+
+        $female_students = $all_students - $male_students;
+        $sub_title = number_format($male_students) . ' Males, ';
+        $sub_title .= number_format($female_students) . ' Females.';
+        return view('widgets.box-5', [
+            'is_dark' => false,
+            'title' => 'All teachers',
+            'sub_title' => $sub_title,
+            'number' => number_format($all_students),
+            'link' => admin_url('auth/users')
+        ]);
+    }
+
+
+    public static function all_students()
+    {
+        $all_students = User::where([
+            'user_type' => 'Student',
+        ])->count();
+
+        $male_students = User::where([
+            'user_type' => 'Student',
+            'sex' => 'Male',
+        ])->count();
+
+        $female_students = $all_students - $male_students;
+
+        $sub_title = number_format($male_students) . ' Males, ';
+        $sub_title .= number_format($female_students) . ' Females.';
+        return view('widgets.box-5', [
+            'is_dark' => false,
+            'title' => 'All students',
+            'sub_title' => $sub_title,
+            'number' => number_format($all_students),
+            'link' => admin_url('auth/users')
+        ]);
+    }
+
+
+
 
     public static function students()
     {
@@ -104,40 +177,25 @@ class Dashboard
 
 
 
+    public static function enterprises()
+    {
+        $enterprises = Enterprise::count();
+
+        return view('widgets.box-5', [
+            'is_dark' => true,
+            'title' => 'All Enterprises',
+            'sub_title' => 'Lifetime',
+            'number' => number_format($enterprises),
+            'link' => admin_url('employees')
+        ]);
+    }
+
+
+
+
     public static function fees()
     {
         $ent = Utils::ent();
-
-        /* 
-"id" => 1
-"created_at" => "2022-06-05 10:08:22"
-"updated_at" => "2022-06-28 21:50:34"
-"name" => "Default school"
-"short_name" => "DS"
-"details" => "Simple test"
-"logo" => "storage/f8ff9f5a6c69c98d4c14e3ad5d84d74e.png"
-"phone_number" => "25677063324"
-"email" => "default@gmail.com"
-"address" => "Near Ndere Cultural Centre, Plot 4505 Kira Rd, Ntinda - Kisaasi Rd, Kampala."
-"expiry" => "2022-06-05"
-"administrator_id" => 11
-"subdomain" => "schools"
-"color" => "#004295"
-"welcome_message" => "Welcome to test school"
-
-
-	
-id	
-created_at	
-updated_at	
-enterprise_id	
-account_id	
-	
-description	
-academic_year_id	
-term_id	
-
-*/
 
         $u = Auth::user();
         $all_students = Transaction::where([
@@ -165,7 +223,7 @@ term_id
 
         $female_students = $all_students - $male_students;
 
-        $fees_to_be_collected = (-1) * ($fees_to_be_collected);     
+        $fees_to_be_collected = (-1) * ($fees_to_be_collected);
         $sub_title = number_format($male_students) . ' Males, ';
         $sub_title .= number_format($female_students) . ' Females.';
         $sub_title = number_format($fees_to_be_collected) . " School fees to be collected";

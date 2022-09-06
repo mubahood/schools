@@ -96,7 +96,6 @@
                             ],
                         ],
                     ])
-
                 @endif
 
 
@@ -160,7 +159,7 @@
                                 'text' => 'Documentation',
                             ],
                         ],
-                    ]) 
+                    ])
                 @endif
 
 
