@@ -35,7 +35,7 @@ class Link implements Renderable
         }
 
         return <<<HTML
-<li>
+    <li>
     <a href="{$link}">
       {$icon}
       <span>{$this->title}</span>

@@ -29,26 +29,35 @@ Encore\Admin\Form::forget(['map', 'editor']);
 Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
 
     $navbar->left(view('admin.search-bar'));
-
-    $navbar->left(Shortcut::make([
-        'School fees payment' => 'school-fees-payment/create',
-        'Transaction' => 'transactions/create',
-        'Students' => 'students/create',
-        'Teacher' => 'employees/create',
-
-    ], 'fa-plus')->title('ADD NEW'));
-
-    $navbar->left(new Dropdown());
-
-
-    $check_list = [];
     $u = Auth::user();
+    $links = [];
+
     if ($u != null) {
-        $check_list = Utils::system_checklist($u);
+
+        if ($u->isRole('super-admin')) {
+            
+        }
+        if ($u->isRole('admin')) {
+            $links = [
+                'Create new user' => admin_url('auth/users/create'),
+                'Add new enterprise' => admin_url('enterprises/create'),
+            ];
+        }
+
+        $navbar->left(Shortcut::make($links, 'fa-plus')->title('ADD NEW'));
+
+        $navbar->left(new Dropdown());
+
+
+        $check_list = [];
+        $u = Auth::user();
+        if ($u != null) {
+            $check_list = Utils::system_checklist($u);
+        }
+        $navbar->right(view('widgets.admin-links', [
+            'items' => $check_list
+        ]));
     }
-    $navbar->right(view('widgets.admin-links', [
-        'items' => $check_list
-    ]));
 });
 
 Admin::css('/css/jquery-confirm.min.css');
