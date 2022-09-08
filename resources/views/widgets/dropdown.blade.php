@@ -1,12 +1,3 @@
-<?php
-$accounts = admin_url('accounts');
-$students = admin_url('students');
-$teachers = admin_url('employees');
-$classes = admin_url('students-classes');
-$marks = admin_url('marks');
-
-?>
-
 <li class="dropdown">
     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
         <i class="fa fa-th"></i>
@@ -21,8 +12,6 @@ $marks = admin_url('marks');
                             <i class="fa fa-{{ $i['icon'] }}"></i> {{ $i['title'] }}
                         </a>
                     @endforeach
-  
-     
                 </div>
             </div>
         </li>

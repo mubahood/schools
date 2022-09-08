@@ -104,7 +104,7 @@ class EnterpriseController extends AdminController
             ->options([
                 'Primary' => 'Primary school school',
                 'Secondary' => 'O\'level school',
-                'Advanced' => 'For A\'level school',
+                'Advanced' => 'Both O\'level and A\'level school',
             ])
             ->rules('required');
 

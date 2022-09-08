@@ -30,6 +30,26 @@ class AcademicClassController extends AdminController
      */
     protected function grid()
     {
+        /* 
+	
+	
+	
+name	
+short_name	
+details	
+demo_id	
+compulsory_subjects	
+optional_subjects	
+
+*/
+        $class = new AcademicClass();
+        $u = Admin::user();
+        $class->enterprise_id = $u->enterprise_id;
+        $class->entacademic_year_id = 4;
+        $class->class_teahcer_id = $u->id;
+
+
+        die("time to crate new class");
         /* $fee = AcademicClassFee::find(1); 
         if($fee!=null){
             $fee->name .= rand(100,1000);
@@ -97,7 +117,7 @@ class AcademicClassController extends AdminController
     {
         $form = new Form(new AcademicClass());
 
-       Utils::display_system_checklist();
+        Utils::display_system_checklist();
 
         $form->disableCreatingCheck();
         $form->disableEditingCheck();
@@ -118,7 +138,7 @@ class AcademicClassController extends AdminController
                     ])->get()
                         ->pluck('name', 'id')
                 )->rules('required');
-                
+
 
             $form->text('name', __('Class Name'))->rules('required');
             $form->text('short_name', __('Class short name'))->rules('required');
@@ -195,14 +215,14 @@ class AcademicClassController extends AdminController
         });
 
 
-        $form->tab('Fees', function (Form $form) {
+        /* $form->tab('Fees', function (Form $form) {
             $form->morphMany('academic_class_fees', 'Click on new to add fees to this class', function (Form\NestedForm $form) {
                 $u = Admin::user();
                 $form->hidden('enterprise_id')->default($u->enterprise_id);
                 $form->text('name', __('Fee title'))->rules('required');
                 $form->text('amount', __('Fee amount'))->rules('required')->rules('int')->attribute('type', 'number');
             });
-        });
+        }); */
 
 
 

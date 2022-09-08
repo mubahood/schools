@@ -28,19 +28,26 @@ Encore\Admin\Form::forget(['map', 'editor']);
 
 Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
 
-    $navbar->left(view('admin.search-bar'));
     $u = Auth::user();
+    $navbar->left(view('admin.search-bar', [
+        'u' => $u
+    ]));
     $links = [];
 
     if ($u != null) {
 
         if ($u->isRole('super-admin')) {
-            
+            $links = [
+                'Create new user' => admin_url('auth/users/create'),
+                'Create new enterprise' => admin_url('enterprises/create'),
+            ];
         }
         if ($u->isRole('admin')) {
             $links = [
-                'Create new user' => admin_url('auth/users/create'),
-                'Add new enterprise' => admin_url('enterprises/create'),
+                'School fees payment' => 'school-fees-payment/create',
+                'Transaction' => 'transactions/create',
+                'Students' => 'students/create',
+                'Teacher' => 'employees/create',
             ];
         }
 

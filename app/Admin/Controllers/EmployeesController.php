@@ -130,7 +130,7 @@ class EmployeesController extends AdminController
      *
      * @var string
      */
-    protected $title = 'Teachers';
+    protected $title = 'Teaching & non teaching staff';
 
     /**
      * Make a grid builder.
@@ -301,6 +301,8 @@ class EmployeesController extends AdminController
                     ])
                     ->options(
                         $roleModel::where('slug', '!=', 'super-admin')
+                            ->where('slug', '!=', 'student')
+                            ->where('slug', '!=', 'librarian')
                             ->where('slug', '!=', 'admin')
                             ->get()
                             ->pluck('name', 'id')

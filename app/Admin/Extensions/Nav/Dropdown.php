@@ -18,7 +18,12 @@ class Dropdown implements Renderable
           'icon' => 'building',
           'url' => admin_url('enterprises'),
           'title' => 'Enterprises',
-        ]
+        ],
+        [
+          'icon' => 'users',
+          'url' => admin_url('auth/users'),
+          'title' => 'Users',
+        ],
       ];
     }
 
