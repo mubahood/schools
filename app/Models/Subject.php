@@ -28,23 +28,7 @@ class Subject extends Model
         parent::boot();
         static::creating(function ($m) {
             $c = Course::find($m->course_id);
-            if ($c == null) {
-                die("Course not found.");
-            }
-
-            $subjects = Subject::where([
-                'academic_class_id' => $m->academic_class_id,
-                'course_id' => $m->course_id,
-            ])->get();
-
-            foreach ($subjects as $key => $s) {
-                if ($s != null) {
-                    die("This subject is already in this class.");
-                }
-            }
-
-            $m->subject_name = $c->name;
-            $m->code = $c->code;
+            
         });
 
         static::updating(function ($m) {

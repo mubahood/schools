@@ -30,6 +30,7 @@ class AcademicClassController extends AdminController
      */
     protected function grid()
     {
+        
         /* 
 	
 	
@@ -42,14 +43,7 @@ compulsory_subjects
 optional_subjects	
 
 */
-        $class = new AcademicClass();
-        $u = Admin::user();
-        $class->enterprise_id = $u->enterprise_id;
-        $class->entacademic_year_id = 4;
-        $class->class_teahcer_id = $u->id;
 
-
-        die("time to crate new class");
         /* $fee = AcademicClassFee::find(1); 
         if($fee!=null){
             $fee->name .= rand(100,1000);

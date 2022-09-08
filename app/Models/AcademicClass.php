@@ -5,6 +5,7 @@ namespace App\Models;
 use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Mockery\Matcher\Subset;
 
 class AcademicClass extends Model
 {
@@ -15,18 +16,81 @@ class AcademicClass extends Model
         parent::boot();
         self::deleting(function ($m) {
         });
-        self::creating(function ($m) {
-            $_m = AcademicYear::where([
-                'enterprise_id' => $m->enterprise_id,
-                'is_active' => 1,
-            ])->first();
-            if ($_m != null) {
-                $m->is_active = 0;
+
+
+
+        self::created(function ($m) {
+            $category = AcademicClass::get_academic_class_category($m->short_name);
+            $courses = MainCourse::where([
+                'subject_type' => $category
+            ])->get();
+
+            foreach ($courses as $main_course) {
+                if (
+                    $category == 'Secondary' ||
+                    $category == 'Advanced'
+                ) {
+                    foreach ($main_course->papers as  $paper) {
+                        $s = new Subject();
+                        $s->enterprise_id = $m->enterprise_id;
+                        $s->academic_class_id = $m->id;
+                        $s->subject_teacher = $m->class_teahcer_id;
+                        $s->code =  $main_course->code . "/" . $paper->name;
+                        $s->course_id =  $main_course->id;
+                        $s->subject_name =  $main_course->name . " - Paper " . $paper->name;
+                        $s->demo_id =  0;
+                        $s->details =  '';
+                        $s->is_optional =  (!((bool)($paper->is_compulsory)));
+                        $s->save();
+                    }
+                } else {
+                    $s = new Subject();
+                    $s->enterprise_id = $m->enterprise_id;
+                    $s->academic_class_id = $m->id;
+                    $s->subject_teacher = $m->class_teahcer_id;
+                    $s->code =  $main_course->code;
+                    $s->course_id =  $main_course->id;
+                    $s->subject_name =  $main_course->name;
+                    $s->demo_id =  0;
+                    $s->details =  '';
+                    $s->is_optional =  false;
+                    $s->save();
+                }
             }
         });
-
+        self::creating(function ($m) {
+        });
     }
 
+
+    public static function get_academic_class_category($class)
+    {
+        if (
+            $class == 'P.1' ||
+            $class == 'P.2' ||
+            $class == 'P.3' ||
+            $class == 'P.4' ||
+            $class == 'P.5' ||
+            $class == 'P.6' ||
+            $class == 'P.7'
+        ) {
+            return "Primary";
+        } else if (
+            $class == 'S.1' ||
+            $class == 'S.2' ||
+            $class == 'S.3' ||
+            $class == 'S.4'
+        ) {
+            return "Secondary";
+        } else if (
+            $class == 'S.5' ||
+            $class == 'S.6'
+        ) {
+            return "Advanced";
+        } else {
+            return "Other";
+        }
+    }
 
     public static function update_fees($academic_class_id)
     {

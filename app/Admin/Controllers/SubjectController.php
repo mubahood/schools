@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Models\AcademicClass;
+use App\Models\AcademicYear;
 use App\Models\Course;
 use App\Models\Subject;
 use App\Models\Utils;
@@ -30,27 +31,31 @@ class SubjectController extends AdminController
     protected function grid()
     {
 
-        $c = new AcademicClass();
-        $u = Admin::user();
-        $c->enterprise_id = $u->enterprise_id;
-        $c->academic_year_id = 4;
-        $c->class_teahcer_id = $u->id;
-        $c->name = 'Class X';
-        $c->short_name = 'S. X';
-        $c->details = 'About this calss';
-        $c->class_type = 'S.1';
+        /*  $u = Admin::user();
+        $ac = new AcademicYear();
+        $ac->enterprise_id = $u->enterprise_id;
+        $ac->name = 'Test year';
+        $ac->starts = null;
+        $ac->ends = null;
+        $ac->details = 'Some details';
+        $ac->is_active = 0;
+        $ac->demo_id = 0;
+        $ac->save();
+        die("======Romina====="); */
 
-        die("Romina");
+        /* */
 
 
 
+        /* 
+        compulsory_subjects
+        optional_subjects
+        */
 
         // compulsory_subjects	
         // optional_subjects  	
 
 
-
-        die("Romina");
         $grid = new Grid(new Subject());
         Utils::display_system_checklist();
 

@@ -28,6 +28,52 @@ class AcademicYear extends Model
         parent::boot();
         self::deleting(function ($m) {
         });
+
+
+
+        self::created(function ($m) {
+            $ent = Enterprise::find($m->enterprise_id);
+            if ($ent == null) {
+                die("Ent not found");
+            }
+            $classes = [];
+
+            if ($ent->type == 'Primary') {
+                $classes[] = 'P.1';
+                $classes[] = 'P.2';
+                $classes[] = 'P.3';
+                $classes[] = 'P.4';
+                $classes[] = 'P.5';
+                $classes[] = 'P.6';
+                $classes[] = 'P.7';
+            } else if ($ent->type == 'Secondary') {
+                $classes[] = 'S.1';
+                $classes[] = 'S.2';
+                $classes[] = 'S.3';
+                $classes[] = 'S.4';
+            } else if ($ent->type == 'Advanced') {
+                $classes[] = 'S.1';
+                $classes[] = 'S.2';
+                $classes[] = 'S.3';
+                $classes[] = 'S.4';
+                $classes[] = 'S.5';
+                $classes[] = 'S.6';
+            }
+
+            foreach ($classes as $class) {
+
+                $c = new AcademicClass();
+                $c->enterprise_id = $ent->id;
+                $c->academic_year_id = $m->id;
+                $c->class_teahcer_id = $ent->administrator_id;
+                $c->name = $class . " - " . $m->name;
+                $c->short_name = $class;
+                $c->details = $class . " - " . $m->name;
+                $c->save();
+            }
+        });
+
+
         self::creating(function ($m) {
             $_m = AcademicYear::where([
                 'enterprise_id' => $m->enterprise_id,
@@ -43,14 +89,11 @@ class AcademicYear extends Model
                 'enterprise_id' => $m->enterprise_id,
                 'is_active' => 1,
             ])->first();
-
-
-
             if ($_m != null) {
                 if ($_m->id != $m->id) {
                     if ($_m->is_active == 1) {
                         $m->is_active = 0;
-                        admin_error('Warning',"You cannot have two active academic years deativate the other first.");
+                        admin_error('Warning', "You cannot have two active academic years deativate the other first.");
                     }
                 }
             }
