@@ -149,8 +149,6 @@ class AcademicClass extends Model
 
     function get_students_subjects($administrator_id)
     {
-
-
         $subs = [];
         $subs = Subject::where(
             'academic_class_id',
