@@ -30,7 +30,6 @@ class AcademicYearController extends AdminController
 
         $grid->column('name', __('Name'));
         $grid->column('starts', __('Starts'));
-        $grid->column('enterprise_id', __('enterprise_id'));
         $grid->column('ends', __('Ends'));
         $grid->column('is_active', __('Status'))->display(function ($is_active) {
             if ($is_active) {
@@ -72,7 +71,7 @@ class AcademicYearController extends AdminController
      */
     protected function form()
     {
-       /*  $u = Admin::user(); 
+        /*  $u = Admin::user(); 
         $m = AcademicYear::where('id',5)->first();
         $m->name = rand(1000,100000)."";
         $m->is_active = 1;

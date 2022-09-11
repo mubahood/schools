@@ -15,10 +15,20 @@ class Term extends Model
         self::deleting(function ($m) {
         });
         self::creating(function ($m) {
+            $_m_1 = Term::where([
+                'enterprise_id' => $m->enterprise_id,
+                'name' => $m->name,
+                'academic_year_id' => $m->academic_year_id,
+            ])->first();
+            if ($_m_1 != null) {
+                die("Same term cannot be twice in a year.");
+            }
+
             $_m = Term::where([
                 'enterprise_id' => $m->enterprise_id,
                 'is_active' => 1,
             ])->first();
+
             if ($_m != null) {
                 $m->is_active = 0;
             }

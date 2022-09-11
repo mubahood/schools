@@ -5,6 +5,7 @@ namespace App\Admin\Controllers;
 use App\Models\AcademicClass;
 use App\Models\AcademicYear;
 use App\Models\Exam;
+use App\Models\ExamHasClass;
 use App\Models\Term;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -28,8 +29,35 @@ class ExamController extends AdminController
      */
     protected function grid()
     {
+        /*
+        $has = new ExamHasClass();
+        $has->exam_id = 1;
+        $has->academic_class_id = 1;
+        $has->save(); 
+        
+        $e = new Exam();
+        $e->enterprise_id = 4;
+        $e->term_id = 1;
+        $e->name = 'B.O.T - ' . $e->term_id;
+        $e->type = 'B.O.T';
+        $e->max_mark = 30;
 
-        /* $e = Exam::find(20);
+        $term = Exam::where([
+            'term_id' => $e->term_id,
+            'type' => $e->type,
+        ])->first();
+        if ($term != null) {
+            $term->delete();
+        }
+
+        $e->save();
+        $has = new ExamHasClass();
+        $has->exam_id = $e->id;
+        $has->academic_class_id = 1;
+        $has->save();
+ 
+
+        $e = Exam::find(20);
         $e->name .= rand(1000,10000);
         $e->save();
         die("done"); */
@@ -55,7 +83,7 @@ class ExamController extends AdminController
         }
         $grid->column('term_id', __('Term'))->display(function () {
             return $this->term->name;
-        })->filter($terms); 
+        })->filter($terms);
         $grid->column('type', __('Type'))->filter([
             'B.O.T' => 'Begnining of term exam',
             'M.O.T' => 'Mid of term exam',
@@ -96,6 +124,7 @@ class ExamController extends AdminController
      */
     protected function form()
     {
+
         /* $e = Exam::find(1);
         $e->name .= rand(100000, 1000000000);
         $e->save();
@@ -138,7 +167,7 @@ class ExamController extends AdminController
             AcademicClass::where([
                 'enterprise_id' => Admin::user()->enterprise_id,
             ])->pluck('name', 'id')
-        );
+        )->rules('required');
 
 
 

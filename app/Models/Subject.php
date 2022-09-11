@@ -28,7 +28,8 @@ class Subject extends Model
         parent::boot();
         static::creating(function ($m) {
             $c = Course::find($m->course_id);
-            
+            $m->main_course_id = $c->main_course_id;
+            return $m;
         });
 
         static::updating(function ($m) {

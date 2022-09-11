@@ -26,9 +26,12 @@ use Illuminate\Support\Facades\Auth;
 
 Encore\Admin\Form::forget(['map', 'editor']);
 
+$u = Auth::user();
+
 Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
 
     $u = Auth::user();
+    Utils::system_boot($u);
     $navbar->left(view('admin.search-bar', [
         'u' => $u
     ]));

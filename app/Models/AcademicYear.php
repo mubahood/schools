@@ -32,6 +32,25 @@ class AcademicYear extends Model
 
 
         self::created(function ($m) {
+
+            $terms = [1, 2, 3];
+            foreach ($terms as $t) {
+                $term = new Term();
+                $term->enterprise_id = $m->enterprise_id;
+                $term->academic_year_id = $m->id;
+                $term->name = $t;
+                $term->starts = $m->starts;
+                $term->ends = $m->ends;
+                $term->demo_id = 0;
+                $term->details = "Term $t - " . $m->name;
+                if ($t == 1) {
+                    $term->is_active = 1;
+                } else {
+                    $term->is_active = 0;
+                }
+                $term->save();
+            }
+
             $ent = Enterprise::find($m->enterprise_id);
             if ($ent == null) {
                 die("Ent not found");

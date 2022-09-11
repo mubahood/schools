@@ -10,6 +10,15 @@ use Illuminate\Support\Facades\DB;
 
 class Utils  extends Model
 {
+    public static function system_boot($u)
+    {
+        $subs = ExamHasClass::where('marks_generated', '!=', 1)->get();
+        foreach ($subs as $m) {
+            Exam::my_update($m);
+            $m->marks_generated = 1;
+            $m->save();
+        }
+    }
     public static function system_checklist($u)
     {
         $list = [];

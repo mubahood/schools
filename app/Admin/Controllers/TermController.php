@@ -34,7 +34,9 @@ class TermController extends AdminController
             ->display(function ($t) {
                 return $this->academic_year->name;
             });
-        $grid->column('name', __('Term Name'));
+        $grid->column('name', __('Term'))->display(function ($t) {
+            return "Term $t";
+        });
         $grid->column('starts', __('Starts'));
         $grid->column('ends', __('Ends'));
         $grid->column('details', __('Details'))->hide();
@@ -91,7 +93,7 @@ class TermController extends AdminController
 
         $u = Admin::user();
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
- 
+
         $form->select('academic_year_id', 'Academic year')
             ->options(
                 AcademicYear::where([
@@ -100,7 +102,15 @@ class TermController extends AdminController
                 ])->get()
                     ->pluck('name', 'id')
             )->rules('required');
-        $form->text('name', __('Term name'))->rules('required');
+
+
+        $form->select('name', 'Term')
+            ->options([
+                1 => 'Term 1',
+                2 => 'Term 2',
+                3 => 'Term 3',
+            ])->rules('required');
+
 
 
         $form->date('starts', __('Term Starts'))->default(date('Y-m-d'))->required();

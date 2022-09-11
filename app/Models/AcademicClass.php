@@ -5,6 +5,7 @@ namespace App\Models;
 use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Mockery\Matcher\Subset;
 
 class AcademicClass extends Model
@@ -147,9 +148,42 @@ class AcademicClass extends Model
         return $this->belongsTo(Administrator::class, 'class_teahcer_id');
     }
 
+    function get_students_subjects()
+    {
+        $subs = [];
+        $subs = Subject::where(
+            'academic_class_id',
+            $this->id,
+        )
+            ->where(
+                'is_optional',
+                '!=',
+                1
+            )
+            ->get();
+        return $subs;
+    }
+
     function subjects()
     {
         return $this->hasMany(Subject::class, 'academic_class_id');
+    }
+
+    function main_subjects()
+    {
+        $my_subs = DB::select("SELECT * FROM subjects WHERE academic_class_id =  $this->id");
+        $subs = [];
+        $done_ids = [];
+
+        foreach ($my_subs as $sub) {
+
+            if (in_array($sub->main_course_id, $done_ids)) {
+                continue;
+            }
+            $subs[] = $sub;
+            $done_ids[] = $sub->main_course_id;
+        }
+        return $subs;
     }
 
     function students()
@@ -160,6 +194,28 @@ class AcademicClass extends Model
     function getNameTextAttribute($x)
     {
         return $this->name . " - " . $this->academic_year->name . "";
+    }
+    function getOptionalSubjectsAttribute($x)
+    {
+        $count = 0;
+
+        foreach ($this->main_subjects() as $sub) {
+            if (((bool)($sub->is_optional))) {
+                $count++;
+            }
+        }
+        return $count;
+    }
+
+    function getCompulsorySubjectsAttribute($x)
+    {
+        $count = 0;
+        foreach ($this->main_subjects() as $sub) {
+            if (!((bool)($sub->is_optional))) {
+                $count++;
+            }
+        }
+        return $count;
     }
 
     protected  $appends = ['name_text'];

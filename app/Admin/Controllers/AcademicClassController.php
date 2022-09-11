@@ -30,28 +30,7 @@ class AcademicClassController extends AdminController
      */
     protected function grid()
     {
-        
-        /* 
-	
-	
-	
-name	
-short_name	
-details	
-demo_id	
-compulsory_subjects	
-optional_subjects	
 
-*/
-
-        /* $fee = AcademicClassFee::find(1); 
-        if($fee!=null){
-            $fee->name .= rand(100,1000);
-            $fee->save();
-            dd("Done"); 
-        }else{
-            dd("Bad");
-        } */
 
         Utils::display_system_checklist();
 
@@ -75,8 +54,10 @@ optional_subjects
             return $this->academic_class_sctreams->count();
         });
         $grid->column('subjects', __('Subjects'))->display(function ($ay) {
-            return $this->subjects->count();
+            return count($this->main_subjects());
         });
+        $grid->column('compulsory_subjects', __('Compulsory Subjects'));
+        $grid->column('optional_subjects', __('Optional Subjects'));;
 
         return $grid;
     }
@@ -136,8 +117,6 @@ optional_subjects
 
             $form->text('name', __('Class Name'))->rules('required');
             $form->text('short_name', __('Class short name'))->rules('required');
-            $form->text('compulsory_subjects', __('Number of compulsory subjects'))->rules('required');
-            $form->text('optional_subjects', __('Number of optional subjects'))->rules('required');
 
             $teachers = [];
             foreach (Administrator::where([
