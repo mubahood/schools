@@ -36,7 +36,7 @@ class UserController extends AdminController
             ->display(function () {
                 return $this->enterprise->name;
             });
-        $grid->column('roles', trans('admin.roles'))->pluck('name')->label();
+        $grid->column('roles', trans('admin.roles'))->pluck('name')->label(); 
         $grid->column('created_at', trans('Created'));
 
         $grid->actions(function (Grid\Displayers\Actions $actions) {
