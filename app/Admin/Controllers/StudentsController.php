@@ -158,7 +158,7 @@ class StudentsController extends AdminController
 
             $filter->between('created_at', 'Admitted')->date();
 
-
+ 
             // Remove the default id filter
             $filter->disableIdFilter();
 
