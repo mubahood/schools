@@ -105,6 +105,7 @@ php artisan make:model Reconciler
 php artisan make:model MenuItem
 php artisan make:model MenuItem
 php artisan make:model MainCourse
+php artisan make:model StudentHasOptionalSubject
   
 
 

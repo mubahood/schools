@@ -77,4 +77,9 @@ class StudentHasClass extends Model
     {
         return $this->belongsTo(AcademicYear::class, 'academic_year_id');
     }
+
+    function optional_subjects()
+    {
+        return $this->hasMany(StudentHasOptionalSubject::class, 'student_has_class_id');
+    }
 }

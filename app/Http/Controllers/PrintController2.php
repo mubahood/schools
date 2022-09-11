@@ -23,6 +23,7 @@ class PrintController2 extends Controller
     public function index()
     {
 
+
         $id = ((int)($_GET['id']));
         $item = StudentReportCard::find($id);
         if ($item == null) {
@@ -39,12 +40,14 @@ class PrintController2 extends Controller
         $grading_tabel .= '<tbody>';
 
 
+
         $grading_tabel .= '<tr  class=\"bordered-table\">';
         $grading_tabel .= "<th  class=\"bordered-table\">Marks</th>";
         foreach ($ranges_values as $t) {
             $grading_tabel .= "<th  class=\"bordered-table\">$t</th>";
         }
         $grading_tabel .= '</tr>';
+
 
 
         $grading_tabel .= '<tr  class=\"bordered-table\">';
@@ -68,13 +71,14 @@ class PrintController2 extends Controller
         //dd($item->termly_report_card->grading_scale->grade_ranges);
         $rows = "";
         foreach ($item->items as $v) {
-          
+
             $rows .= "<tr>";
-            $rows .= "<td>{$v->subject->subject_name}</td>";
+            $rows .= "<td>{$v->main_course->name}</td>";
+            $rows .= "<td>{$v->main_course->code}</td>";
             $rows .= "<td>{$v->bot_mark}</td>";
             $rows .= "<td>{$v->mot_mark}</td>";
             $rows .= "<td>{$v->eot_mark}</td>";
-            $rows .= "<td>" . ($v->eot_mark + $v->mot_mark + $v->subject->bot_mark) . "</td>";
+            $rows .= "<td>" . ($v->eot_mark + $v->mot_mark + $v->main_course->bot_mark) . "</td>";
             $rows .= "<td>{$v->grade_name}</td>";
             $rows .= "<td>{$v->aggregates}</td>";
             $rows .= "<td>{$v->remarks}</td>";
@@ -82,8 +86,9 @@ class PrintController2 extends Controller
             $rows .= "</tr>";
         }
 
- 
+
         $r = new ReportCard();
+
         $data = '<link type="text/css" href="' . url('assets/bootstrap.css') . '" rel="stylesheet" />';
         $data .= "
             <style>
@@ -221,6 +226,7 @@ class PrintController2 extends Controller
                     <thead>
                         <tr>
                             <th>SUBJECTS</th>
+                            <th>CODE</th>
                             <th>B.O.T (30)</th>
                             <th>M.O.T (30)</th>
                             <th>E.O.T (40)</th>
@@ -238,10 +244,8 @@ class PrintController2 extends Controller
 
 
         $data .= '<br><h4 class="text-center">TOTAL POINTS: 18</h4>';
-
         $data .= $grading_tabel;
         $data .= $bottom_table;
-        //die($data);
 
         $pdf = App::make('dompdf.wrapper');
         $pdf->loadHTML($data);

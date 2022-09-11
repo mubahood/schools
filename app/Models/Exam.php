@@ -56,7 +56,7 @@ class Exam extends Model
         ini_set('max_execution_time', -1); //unlimit
 
         foreach ($class->students as $student) {
-            foreach ($class->get_students_subjects() as $_k => $subject) {
+            foreach ($class->get_students_subjects($student->administrator_id) as $_k => $subject) {
                 $mark = new Mark();
                 $mark->exam_id = $m->id;
                 $mark->class_id = $class->id;

@@ -13,13 +13,16 @@ class StudentReportCardItem extends Model
     {
         return $this->belongsTo(StudentReportCard::class);
     }
-    function subject()
-    {
-        $sub = Subject::find($this->subject_id);
-        if ($sub == null) {
-            $this->subject_id = 1;
-        }
 
-        return $this->belongsTo(Subject::class);
+    function main_course()
+    {
+
+        $sub = MainCourse::find($this->main_course_id);
+        if ($sub == null) {
+            die("Main course not found.");
+            $this->main_course_id = 2;
+            $this->save();
+        }
+        return $this->belongsTo(MainCourse::class);
     }
 }

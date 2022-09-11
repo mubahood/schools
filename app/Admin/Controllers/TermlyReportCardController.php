@@ -27,6 +27,10 @@ class TermlyReportCardController extends AdminController
      */
     protected function grid()
     {
+        /* $m = TermlyReportCard::find(1);
+        $m->report_title = rand(10000000, 1000000000);
+        $m->save();
+        die("======DONE======");  */
         $grid = new Grid(new TermlyReportCard());
 
         $grid->column('id', __('Id'));
@@ -74,9 +78,7 @@ class TermlyReportCardController extends AdminController
      */
     protected function form()
     {
-        /* $m = TermlyReportCard::find(1);
-        $m->report_title .= rand(10000000, 1000000000);
-        $m->save(); */
+
         $form = new Form(new TermlyReportCard());
         $u = Admin::user();
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');

@@ -142,14 +142,15 @@ class AcademicClass extends Model
     {
         return $this->belongsTo(AcademicYear::class, 'academic_year_id');
     }
-
     function class_teacher()
     {
         return $this->belongsTo(Administrator::class, 'class_teahcer_id');
     }
 
-    function get_students_subjects()
+    function get_students_subjects($administrator_id)
     {
+
+
         $subs = [];
         $subs = Subject::where(
             'academic_class_id',
@@ -160,8 +161,48 @@ class AcademicClass extends Model
                 '!=',
                 1
             )
-            ->get();
-        return $subs;
+            ->get(); 
+
+
+        $done_main_subs = [];
+        $main_subs = [];
+
+        $optionals = StudentHasOptionalSubject::where([
+            'academic_class_id' => $this->id,
+            'administrator_id' => $administrator_id
+        ])->get();
+
+        foreach ($optionals as $option) {
+
+            if (in_array($option->main_course_id, $done_main_subs)) {
+                continue;
+            }
+            $done_main_subs[] = $option->main_course_id;
+
+            $course = MainCourse::find($option->main_course_id);
+            if ($course == null) {
+                continue;
+            }
+
+            $main_subs[] = $course;
+        }
+
+
+
+        foreach ($subs as $key => $sub) {
+            if (in_array($sub->main_course_id, $done_main_subs)) {
+                continue;
+            }
+            $done_main_subs[] = $sub->main_course_id;
+            $course = MainCourse::find($sub->main_course_id);
+            if ($course == null) {
+                continue;
+            }
+            $main_subs[] = $course;
+        }
+
+    
+        return $main_subs;
     }
 
     function subjects()
@@ -195,6 +236,17 @@ class AcademicClass extends Model
     {
         return $this->name . " - " . $this->academic_year->name . "";
     }
+    function getOptionalSubjectsItems()
+    {
+        $subs = [];
+        foreach ($this->main_subjects() as $sub) {
+            if (((bool)($sub->is_optional))) {
+                $subs[] = $sub;
+            }
+        }
+        return $subs;
+    }
+
     function getOptionalSubjectsAttribute($x)
     {
         $count = 0;
