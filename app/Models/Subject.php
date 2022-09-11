@@ -5,6 +5,7 @@ namespace App\Models;
 use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Mockery\Matcher\Subset;
 
 class Subject extends Model
@@ -69,6 +70,19 @@ class Subject extends Model
 
     function teacher()
     {
+        $admin  = Administrator::find(((int)($this->subject_teacher)));
+        if ($admin == null) {
+            $ent = Enterprise::find($this->enterprise_id);
+            if ($ent == null) {
+                die("Enterprise not found.");
+            }
+            $this->subject_teacher  = $ent->administrator_id;
+
+            die("UPDATE subjects SET subject_teacher = $ent->administrator_id WHERE id = $this->id");
+            DB::update("UPDATE subjects SET subject_teacher = $ent->administrator_id WHERE id = $this->id");
+
+        }
+
         return $this->belongsTo(Administrator::class, 'subject_teacher');
     }
 
