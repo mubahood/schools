@@ -232,11 +232,7 @@ class AcademicClass extends Model
                 die("Subjet not found.");
             }
             $main_subs[] = $subject;
-        }
-
-        dd($main_subs);
-
-
+        }  
  
         return $main_subs;
     }

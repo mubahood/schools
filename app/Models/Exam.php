@@ -64,7 +64,6 @@ class Exam extends Model
                 $mark->student_id = $student->administrator_id;
                 $mark->enterprise_id = $m->enterprise_id;
                 $mark->teacher_id = $subject->subject_teacher;
-                dd($subject);
                 $mark->score = 0;
                 $mark->is_submitted = 0;
                 $mark->is_missed = 1;
