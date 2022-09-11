@@ -2,6 +2,7 @@
 
 use App\Models\AcademicClass;
 use App\Models\Course;
+use App\Models\Enterprise;
 use App\Models\MainCourse;
 use App\Models\StudentHasClass;
 use Encore\Admin\Auth\Database\Administrator;
@@ -20,7 +21,8 @@ class CreateStudentHasOptionalSubjectsTable extends Migration
     {
         Schema::create('student_has_optional_subjects', function (Blueprint $table) {
             $table->id();
-            $table->timestamps(); 
+            $table->timestamps();
+            $table->foreignIdFor(Enterprise::class);
             $table->foreignIdFor(AcademicClass::class);
             $table->foreignIdFor(Course::class);
             $table->foreignIdFor(MainCourse::class);
