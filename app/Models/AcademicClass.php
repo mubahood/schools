@@ -205,8 +205,9 @@ class AcademicClass extends Model
 
     function get_students_subjects_papers($administrator_id)
     {
-        $subs = [];
-        $subs = Subject::where(
+
+        $main_subs = [];
+        $main_subs = Subject::where(
             'academic_class_id',
             $this->id,
         )
@@ -223,7 +224,6 @@ class AcademicClass extends Model
         ])->get();
 
         foreach ($optionals as $option) {
-
             $subject = Subject::find([
                 'academic_class_id' => $option->academic_class_id,
                 'course_id' => $option->course_id,
@@ -237,19 +237,7 @@ class AcademicClass extends Model
         dd($main_subs);
 
 
-        foreach ($subs as $key => $sub) {
-            if (in_array($sub->main_course_id, $done_main_subs)) {
-                continue;
-            }
-            $done_main_subs[] = $sub->main_course_id;
-            $course = MainCourse::find($sub->main_course_id);
-            if ($course == null) {
-                continue;
-            }
-            $main_subs[] = $course;
-        }
-
-
+ 
         return $main_subs;
     }
 
