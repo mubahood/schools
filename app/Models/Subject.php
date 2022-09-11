@@ -77,12 +77,8 @@ class Subject extends Model
                 die("Enterprise not found.");
             }
             $this->subject_teacher  = $ent->administrator_id;
-
-            die("UPDATE subjects SET subject_teacher = $ent->administrator_id WHERE id = $this->id");
             DB::update("UPDATE subjects SET subject_teacher = $ent->administrator_id WHERE id = $this->id");
-
         }
-
         return $this->belongsTo(Administrator::class, 'subject_teacher');
     }
 
