@@ -47,17 +47,25 @@ Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
         }
         if ($u->isRole('admin')) {
             $links = [
+                'Add new staff' => 'employees/create',
+            ];
+        }
+        if ($u->isRole('bursar')) {
+            $links = [
                 'School fees payment' => 'school-fees-payment/create',
                 'Transaction' => 'transactions/create',
-                'Students' => 'students/create',
-                'Teacher' => 'employees/create',
+            ];
+        }
+
+        if ($u->isRole('dos')) {
+            $links = [
+                'Admit new student' => 'students/create',
             ];
         }
 
         $navbar->left(Shortcut::make($links, 'fa-plus')->title('ADD NEW'));
 
         $navbar->left(new Dropdown());
-
 
         $check_list = [];
         $u = Auth::user();

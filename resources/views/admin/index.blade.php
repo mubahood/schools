@@ -120,7 +120,7 @@
                     ])
                 @endif
 
-                @if ($u->isRole('dos'))
+                @if ($u->isRole('bursar'))
                     @include('widgets.dashboard-widget', [
                         'title' => 'School fees managment',
                         'icon' => url('/assets/icons/money.png'),

@@ -38,7 +38,9 @@ class HomeController extends Controller
 
 
 
-                if ($u->isRole('super-admin')) {
+                if (
+                    $u->isRole('super-admin')
+                ) {
                     $row->column(3, function (Column $column) {
                         $column->append(Dashboard::all_users());
                     });
@@ -53,7 +55,11 @@ class HomeController extends Controller
                     });
                 }
 
-                if ($u->isRole('admin')) {
+                if (
+                    $u->isRole('admin') ||
+                    $u->isRole('bursar') ||
+                    $u->isRole('dos')
+                ) {
                     $row->column(3, function (Column $column) {
                         $column->append(Dashboard::students());
                     });
@@ -72,7 +78,10 @@ class HomeController extends Controller
             ->row(function (Row $row) {
 
                 $u = Admin::user();
-                if ($u->isRole('admin')) {
+                if (
+                    $u->isRole('admin') ||
+                    $u->isRole('bursar')
+                ) {
                     $row->column(6, function (Column $column) {
                         $column->append(Dashboard::income_vs_expenses());
                     });
