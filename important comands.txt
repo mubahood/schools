@@ -74,6 +74,8 @@ php artisan make:migration create_book_borrows_table
 php artisan make:migration create_book_borrow_books_table
 php artisan make:migration create_terms_table
 php artisan make:migration create_student_has_classes_table
+php artisan make:migration create_student_has_optional_subjects_table
+
 php artisan make:model BooksCategory
 php artisan make:model BookAuthor
 php artisan make:model BookBorrow

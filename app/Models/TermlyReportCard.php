@@ -14,7 +14,7 @@ class TermlyReportCard extends Model
 
         parent::boot();
         self::deleting(function ($m) {
-        });
+        }); 
         self::creating(function ($m) {
             $term = Term::find($m->term_id);
             if ($term == null) {
