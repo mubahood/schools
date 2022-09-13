@@ -17,7 +17,7 @@ class AcademicClassFeeController extends AdminController
      *
      * @var string
      */
-    protected $title = 'Fees - structures';
+    protected $title = 'School fees - billing';
 
     /**
      * Make a grid builder.

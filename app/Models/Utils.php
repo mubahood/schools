@@ -12,12 +12,28 @@ class Utils  extends Model
 {
     public static function system_boot($u)
     {
+        Utils::financial_accounts_creation();
         $subs = ExamHasClass::where('marks_generated', '!=', 1)->get();
         foreach ($subs as $m) {
             Exam::my_update($m);
             $m->marks_generated = 1;
             $m->save();
         }
+    }
+
+    public static function financial_accounts_creation()
+    {
+        $ent_id  = 1;
+        $u = Admin::user();
+        if ($u != null) {
+            $ent_id = ((int)($u->enterprise_id));
+        }
+        $ent = Enterprise::find($ent_id);
+        if ($ent == null) {
+            die("Enterprise not found.");
+        }
+
+        Enterprise::my_update($ent);
     }
     public static function system_checklist($u)
     {

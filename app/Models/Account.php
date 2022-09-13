@@ -11,6 +11,32 @@ class Account extends Model
 {
     use HasFactory;
 
+
+    public static function boot()
+    {
+        parent::boot();
+        self::creating(function ($m) {
+            if ($m->type == 'CASH_ACCOUNT') {
+                $cash_acc = Account::where([
+                    'type' => 'CASH_ACCOUNT',
+                    'enterprise_id' => $m->enterprise_id,
+                ])->first();
+                if ($cash_acc != null) {
+                    return false;
+                }
+            }
+            if ($m->type == 'FEES_ACCOUNT') {
+                $acc = Account::where([
+                    'type' => 'FEES_ACCOUNT',
+                    'enterprise_id' => $m->enterprise_id,
+                ])->first();
+                if ($acc != null) {
+                    return false;
+                }
+            }
+        });
+    }
+
     public static function create($administrator_id)
     {
         $admin = Administrator::where([
@@ -39,6 +65,6 @@ class Account extends Model
 
     function owner()
     {
-        return $this->belongsTo(Administrator::class,'administrator_id');
+        return $this->belongsTo(Administrator::class, 'administrator_id');
     }
 }

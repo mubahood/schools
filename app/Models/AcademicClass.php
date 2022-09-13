@@ -118,6 +118,32 @@ class AcademicClass extends Model
                         'amount' => ((-1) * ($fee->amount))
                     ]);
 
+
+                    Transaction::create([
+                        'academic_year_id' => $class->academic_year_id,
+                        'administrator_id' => $student->administrator_id,
+                        'description' => "Debited {$fee->amount} for $fee->name",
+                        'amount' => ((-1) * ($fee->amount))
+                    ]);
+
+                    $bank_acc = Account::where([
+                        'type' => 'FEES_ACCOUNT',
+                        'enterprise_id' => $student->enterprise_id,
+                    ])->first();
+
+                    if ($bank_acc != null) {
+                        $trans = new Transaction();
+                        $trans->enterprise_id = $student->enterprise_id;
+                        $trans->amount = $fee->amount;
+                        $trans->account_id = $bank_acc->id;
+                        $trans->term_id = 1;
+                        $trans->academic_year_id = $class->academic_year_id;
+                        $trans->description = "Fee debited $fee->amount on {$student->name}'s account for $fee->name";
+                        $trans->save();
+                    }
+
+
+
                     $has_fee =  new StudentHasFee();
                     $has_fee->enterprise_id    = $student->enterprise_id;
                     $has_fee->administrator_id    = $student->administrator_id;
@@ -232,8 +258,8 @@ class AcademicClass extends Model
                 die("Subjet not found.");
             }
             $main_subs[] = $subject;
-        }  
- 
+        }
+
         return $main_subs;
     }
 

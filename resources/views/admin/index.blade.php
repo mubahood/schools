@@ -99,7 +99,7 @@
                 @endif
 
 
-                @if ($u->isRole('bursar'))
+                @if ($u->isRole('dos'))
                     @include('widgets.dashboard-widget', [
                         'title' => 'Examination centre',
                         'icon' => url('/assets/icons/exam.png'),

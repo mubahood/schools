@@ -37,6 +37,7 @@ class Administrator extends Model implements AuthenticatableContract
             if ($e == null) {
                 die("enterprise is required");
             }
+            Enterprise::my_update($e);
             $model->name = $model->first_name . " " . $model->last_name;
             return $model;
         });
