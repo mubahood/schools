@@ -29,7 +29,6 @@ class AcademicClassFee extends Model
     }
 
     protected  $appends = ['amount_text'];
-
     function getAmountTextAttribute()
     {
         return "UGX " . number_format($this->amount);
