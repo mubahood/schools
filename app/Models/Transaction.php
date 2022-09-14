@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 class Transaction extends Model
 {
     use HasFactory;
-    public static function create($data)
+    public static function my_create($data)
     {
 
         $amount = 0;
@@ -37,6 +37,8 @@ class Transaction extends Model
         if (isset($data['description'])) {
             $description = $data['description'];
         }
+
+
 
         $account_id = 0;
 
@@ -81,6 +83,12 @@ class Transaction extends Model
         $trans->description = $description;
         $trans->academic_year_id = $academic_year_id;
         $trans->term_id = $term_id;
+
+        if (isset($data['type'])) {
+            $trans->type = $data['type'];
+        } else {
+            $trans->type = 'OTHER';
+        }
         $trans->save();
 
         return $trans;
@@ -105,6 +113,18 @@ class Transaction extends Model
         });
         self::created(function ($m) {
             Transaction::my_update($m);
+        });
+        self::creating(function ($m) {
+            if ($m->type == 'SCHOOL_FEES') {
+                if ($m->description == null || (strlen($m->description) < 2)) {
+                    if ($m->amount > 0) {
+                        $m->description = "Paid schoool fees UGX $m->amount.";
+                    }
+                }
+            }
+
+
+            return $m;
         });
 
         self::updated(function ($m) {

@@ -29,15 +29,26 @@ class TransactionController extends AdminController
     {
         $grid = new Grid(new Transaction());
 
+        $grid->disableBatchActions();
+        $grid->disableActions();
+
         $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
             ->orderBy('id', 'Desc');
 
-        $grid->column('id', __('Id'));
-        $grid->column('created_at', __('Created at'));
-        $grid->column('updated_at', __('Updated at'));
-        $grid->column('enterprise_id', __('Enterprise id'));
-        $grid->column('account_id', __('Account id'));
-        $grid->column('amount', __('Amount'));
+        $grid->column('id', __('Id'))->sortable();
+
+        $grid->column('description', __('Description'));
+        $grid->column('academic_year_id', __('Academic year id'))->hide();
+        $grid->column('account_id', __('Account'))->display(function () {
+            return $this->account->name;
+        });
+
+
+
+        $grid->column('amount', __('Amount'))->display(function () {
+            return "UGX " . number_format($this->amount);
+        })->sortable();
+        $grid->column('created_at', __('Created'))->sortable();
 
         return $grid;
     }

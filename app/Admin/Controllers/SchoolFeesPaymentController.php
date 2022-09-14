@@ -28,21 +28,24 @@ class SchoolFeesPaymentController extends AdminController
     {
         $grid = new Grid(new Transaction());
 
+        $grid->disableBatchActions();
+        $grid->disableActions();
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
+            'type' => 'SCHOOL_FEES'
         ])->orderBy('id', 'DESC');
 
         $grid->column('id', __('ID'))->sortable();
-        $grid->column('created_at', __('Created'));
-        $grid->column('account_id', __('Account id'))->display(function () {
+        $grid->column('account_id', __('Account '))->display(function () {
             return $this->account->name;
         });
         $grid->column('amount', __('Amount'))->display(function () {
             return "UGX " . number_format($this->amount);
         });
         $grid->column('description', __('Description'));
-        $grid->column('academic_year_id', __('Academic year id'));
-        $grid->column('term_id', __('Term id'));
+        $grid->column('academic_year_id', __('Academic year id'))->hide();
+        $grid->column('created_at', __('Created'))->sortable();
+        $grid->column('term_id', __('Term id'))->hide();
 
         return $grid;
     }
@@ -80,12 +83,14 @@ class SchoolFeesPaymentController extends AdminController
         $form = new Form(new Transaction());
         $u = Admin::user();
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
+        $form->hidden('type', __('Transaction type'))->default('SCHOOL_FEES')->rules('required');
 
         $ajax_url = url(
             '/api/ajax?'
                 . 'enterprise_id=' . $u->enterprise_id
                 . "&search_by_1=name"
                 . "&search_by_2=id"
+                . "&query_type=STUDENT_ACCOUNT"
                 . "&model=Account"
         );
         $ajax_url = trim($ajax_url);
@@ -107,7 +112,6 @@ class SchoolFeesPaymentController extends AdminController
             ->options([
                 'to_bank' => 'To bank',
                 'to_cash' => 'To cash',
-                'to_other' => 'To other',
             ])
             ->rules('required')
             ->when('to_bank', function ($f) {
@@ -121,13 +125,24 @@ class SchoolFeesPaymentController extends AdminController
                     ->rules('required');
             })
             ->when('to_cash', function ($f) {
-                return $f->select('source_account', "Select cash account")
+
+                $acc =  Account::where([
+                    'enterprise_id' => Admin::user()->enterprise_id,
+                    'type' => 'CASH_ACCOUNT'
+                ])->first();
+                if ($acc == null) {
+                    die("Cash account not found.");
+                }
+
+                return $f->select('source_account', "Cash account")
                     ->options(
                         Account::where([
                             'enterprise_id' => Admin::user()->enterprise_id,
                             'type' => 'CASH_ACCOUNT'
                         ])->get()->pluck('name', 'id')
                     )
+                    ->default($acc->id)
+                    ->readonly()
                     ->rules('required');
             });
         $form->disableCreatingCheck();
@@ -135,7 +150,15 @@ class SchoolFeesPaymentController extends AdminController
         $form->disableReset();
         $form->disableViewCheck();
 
+        $form->ignore(['source', 'source_account']);
 
+        /* $form->saving(function (Form $form) {
+            $form->ignore(['source']);
+            if ($form->password && $form->model()->password != $form->password) {
+                $form->password = Hash::make($form->password);
+            }
+        });
+ */
 
         return $form;
     }

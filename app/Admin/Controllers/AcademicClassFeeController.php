@@ -26,6 +26,19 @@ class AcademicClassFeeController extends AdminController
      */
     protected function grid()
     {
+
+        /* 
+        $fee = new AcademicClassFee;
+        $fee->enterprise_id = Admin::user()->enterprise_id;
+        $fee->academic_class_id = 1;
+        $fee->name = 'Test fee';
+        $fee->amount = 20000;
+        $fee->save();
+  	         die("romina");
+        */
+
+
+
         $grid = new Grid(new AcademicClassFee());
         $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
             ->orderBy('id', 'Desc');

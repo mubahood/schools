@@ -121,7 +121,7 @@ class UserController extends AdminController
                 return $form->model()->password;
             });
 
-        $form->ignore(['password_confirmation']);
+        $form->ignore(['password_confirmation']); 
 
         $form->multipleSelect('roles', trans('admin.roles'))->options($roleModel::all()->pluck('name', 'id'));
         //$form->multipleSelect('permissions', trans('admin.permissions'))->options($permissionModel::all()->pluck('name', 'id'));

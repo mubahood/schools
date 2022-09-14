@@ -27,23 +27,10 @@ class Dropdown implements Renderable
       ];
     }
 
-    if ($u->isRole('admin')) {
+
+    if ($u->isRole('dos')) {
       $links = [
-        [
-          'icon' => 'money',
-          'url' => admin_url('fees'),
-          'title' => 'Fees',
-        ],
-        [
-          'url' => admin_url('transactions'),
-          'icon' => 'balance-scale',
-          'title' => 'Transactions',
-        ],
-        [
-          'url' => admin_url('accounts'),
-          'icon' => 'calculator',
-          'title' => 'Accounts',
-        ],
+ 
         [
           'url' => admin_url('students'),
           'icon' => 'users',
@@ -69,6 +56,42 @@ class Dropdown implements Renderable
           'icon' => 'line-chart',
           'title' => 'Marks',
         ],
+      ];
+    }
+
+
+    if ($u->isRole('admin')) {
+      $links = [
+ 
+  
+        [
+          'url' => admin_url('teachers'),
+          'icon' => 'graduation-cap',
+          'title' => 'Human resource',
+        ],
+ 
+  
+      ];
+    }
+
+    if ($u->isRole('bursar')) {
+      $links = [
+        [
+          'icon' => 'money',
+          'url' => admin_url('fees'),
+          'title' => 'Fees',
+        ],
+        [
+          'url' => admin_url('transactions'),
+          'icon' => 'balance-scale',
+          'title' => 'Transactions',
+        ],
+        [
+          'url' => admin_url('accounts'),
+          'icon' => 'calculator',
+          'title' => 'Accounts',
+        ],
+   
       ];
     }
 

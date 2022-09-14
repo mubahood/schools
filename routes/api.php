@@ -10,17 +10,15 @@ use Illuminate\Support\Facades\Route;
 Route::get('git', function (Request $r) {
     //$resp = shell_exec('git pull --rebase=interactive -s recursive -X theirs');  
     //$resp = shell_exec('git commit --romina');  
-   // $resp = shell_exec('cd public_html/ && git pull');  
-    $resp = exec('PWD');  
- 
+    // $resp = shell_exec('cd public_html/ && git pull');  
+    $resp = exec('PWD');
+
 
     echo "=========START=========";
     echo "<pre>";
     print_r($resp);
     echo "</pre>";
     echo "=========END=========";
-
- 
 });
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -71,6 +69,14 @@ Route::get('classes', function (Request $r) {
 Route::get('ajax', function (Request $r) {
 
     $_model = trim($r->get('model'));
+    $conditions = [];
+    foreach ($_GET as $key => $v) {
+        if (substr($key, 0, 6) != 'query_') {
+            continue;
+        }
+        $_key = str_replace('query_', "", $key);
+        $conditions[$_key] = $v;
+    }
 
     if (strlen($_model) < 2) {
         return [
@@ -97,6 +103,7 @@ Route::get('ajax', function (Request $r) {
         ->where([
             'enterprise_id' => $enterprise_id
         ])
+        ->where($conditions)
         ->limit(20)->get();
     $res_2 = [];
 
@@ -109,6 +116,7 @@ Route::get('ajax', function (Request $r) {
             ->where([
                 'enterprise_id' => $enterprise_id
             ])
+            ->where($conditions)
             ->limit(20)->get();
     }
 

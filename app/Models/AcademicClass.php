@@ -102,8 +102,7 @@ class AcademicClass extends Model
         }
 
         $fees = $class->academic_class_fees;
-
-        foreach ($class->students as $student) {
+         foreach ($class->students as $student) {
 
             foreach ($fees as $fee) {
                 $has_fee = StudentHasFee::where([
@@ -111,22 +110,17 @@ class AcademicClass extends Model
                     'academic_class_fee_id' => $fee->id,
                 ])->first();
                 if ($has_fee == null) {
-                    Transaction::create([
+                   
+
+                    Transaction::my_create([
                         'academic_year_id' => $class->academic_year_id,
                         'administrator_id' => $student->administrator_id,
+                        'type' => 'SCHOOL_FEES',
                         'description' => "Debited {$fee->amount} for $fee->name",
                         'amount' => ((-1) * ($fee->amount))
                     ]);
 
-
-                    Transaction::create([
-                        'academic_year_id' => $class->academic_year_id,
-                        'administrator_id' => $student->administrator_id,
-                        'description' => "Debited {$fee->amount} for $fee->name",
-                        'amount' => ((-1) * ($fee->amount))
-                    ]);
-
-                    $bank_acc = Account::where([
+                    /* $bank_acc = Account::where([
                         'type' => 'FEES_ACCOUNT',
                         'enterprise_id' => $student->enterprise_id,
                     ])->first();
@@ -140,7 +134,7 @@ class AcademicClass extends Model
                         $trans->academic_year_id = $class->academic_year_id;
                         $trans->description = "Fee debited $fee->amount on {$student->name}'s account for $fee->name";
                         $trans->save();
-                    }
+                    } */
 
 
 

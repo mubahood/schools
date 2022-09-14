@@ -347,8 +347,7 @@ class StudentsController extends AdminController
                         'autocomplete' => 'off'
                     ])
                     ->default([4])
-                    ->value([4])
-                    ->readonly()
+                    ->value([4]) 
                     ->options(
                         AdminRole::where('slug', '!=', 'super-admin')
                             ->where('slug', '!=', 'admin')
