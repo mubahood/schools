@@ -29,7 +29,7 @@ class UserBatchImporter extends Model
 
 
     public static function students_batch_import($m)
-    {
+    { 
         $file_path = 'public/storage/' . $m->file_path;
 
         $cla = AcademicClass::find($m->academic_class_id);
