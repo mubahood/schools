@@ -27,3 +27,5 @@
     </div>
     <div class="col-12 col-md-4"><img class="img img-fluid" src="{{ $u->avatar }}" alt=""></div>
 </div>
+
+

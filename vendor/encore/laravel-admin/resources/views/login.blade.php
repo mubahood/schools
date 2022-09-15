@@ -2,7 +2,8 @@
 use App\Models\Utils;
 $ent = Utils::ent();
 
-?><!DOCTYPE html>
+?>
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -24,6 +25,22 @@ $ent = Utils::ent();
     <link rel="stylesheet" href="{{ admin_asset('vendor/laravel-admin/AdminLTE/dist/css/AdminLTE.min.css') }}">
     <!-- iCheck -->
     <link rel="stylesheet" href="{{ admin_asset('vendor/laravel-admin/AdminLTE/plugins/iCheck/square/blue.css') }}">
+
+    <!--Start of Tawk.to Script-->
+    <script type="text/javascript">
+        var Tawk_API = Tawk_API || {},
+            Tawk_LoadStart = new Date();
+        (function() {
+            var s1 = document.createElement("script"),
+                s0 = document.getElementsByTagName("script")[0];
+            s1.async = true;
+            s1.src = 'https://embed.tawk.to/6322adcd54f06e12d894cbb7/1gcvndrj2';
+            s1.charset = 'UTF-8';
+            s1.setAttribute('crossorigin', '*');
+            s0.parentNode.insertBefore(s1, s0);
+        })();
+    </script>
+    <!--End of Tawk.to Script-->
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -89,7 +106,7 @@ $ent = Utils::ent();
                 {!! $ent->welcome_message !!}
             </div>
         </div>
-        <div  class="col-md-1 fill pc-only " style="padding: 0px; width: 4rem;" >
+        <div class="col-md-1 fill pc-only " style="padding: 0px; width: 4rem;">
             <div class="fill pc-only"
                 style="width: 3rem; background-image: url({{ url('assets/pattern.png') }});    
             background-size:     cover;
