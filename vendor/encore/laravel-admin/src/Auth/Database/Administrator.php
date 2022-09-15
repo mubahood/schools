@@ -2,9 +2,11 @@
 
 namespace Encore\Admin\Auth\Database;
 
+use App\Models\Account;
 use App\Models\Enterprise;
 use App\Models\StudentHasClass;
 use App\Models\StudentHasFee;
+use App\Models\Transaction;
 use Encore\Admin\Traits\DefaultDatetimeFormat;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
@@ -151,6 +153,12 @@ class Administrator extends Model implements AuthenticatableContract
     public function bills()
     {
         return $this->hasMany(StudentHasFee::class);
+    }
+
+
+    public function account()
+    {
+        return $this->hasOne(Account::class);
     }
 
     /**

@@ -7,16 +7,15 @@
     <div class="col-12 col-md-8">
         <h4 class="m-0"><b>{{ $u->first_name }} {{ $u->last_name }}</b></h4>
         <hr>
-
         <div class="row">
             <div class="col-md-12">
-                @if (empty($u->bills))
-                    <div class="alert alert-info">This student no any bill.</div>
+                @if (empty($u->account->transactions))
+                    <div class="alert alert-info">This student no Transactions.</div>
                 @else
                     <ul>
-                        @foreach ($u->bills as $bill)
+                        @foreach ($u->account->transactions as $tra)
                             <li>
-                                <p><b>UGX. {{ number_format($bill->fee->amount) }}</b> - {{ $bill->fee->name }}</p>
+                                <p><b>UGX. {{ number_format($tra->amount) }}</b> - {{ $tra->description }}</p>
                             </li>
                         @endforeach
                     </ul>

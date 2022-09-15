@@ -67,4 +67,9 @@ class Account extends Model
     {
         return $this->belongsTo(Administrator::class, 'administrator_id');
     }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
 }
