@@ -24,6 +24,9 @@ use App\Admin\Extensions\Nav\Dropdown;
 use App\Models\Utils;
 use Illuminate\Support\Facades\Auth;
 
+/* Utils::students_batch_import("public/storage/files/1.xlsx");
+die("DONE!"); */
+
 Encore\Admin\Form::forget(['map', 'editor']);
 
 $u = Auth::user();
