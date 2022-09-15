@@ -168,3 +168,8 @@ subject_choice
 git add *
 git fetch --all
 user-batch-importers
+
+Auto-merging vendor/composer/autoload_classmap.php
+Auto-merging vendor/composer/autoload_real.php
+Auto-merging vendor/composer/autoload_static.php
+Auto-merging vendor/composer/installed.php
