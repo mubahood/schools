@@ -15,6 +15,7 @@ use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
+use Encore\Admin\Widgets\Tab;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
 
@@ -158,7 +159,7 @@ class StudentsController extends AdminController
 
             $filter->between('created_at', 'Admitted')->date();
 
- 
+
             // Remove the default id filter
             $filter->disableIdFilter();
 
@@ -264,9 +265,19 @@ class StudentsController extends AdminController
      */
     protected function detail($id)
     {
-        $show = new Show(Administrator::findOrFail($id));
-        $show->field('id', __('Id'));
-        return $show;
+
+        $u = Administrator::findOrFail($id);
+        $tab = new Tab();
+        $tab->add('Bio', view('admin.dashboard.show-user-profile-bio', [
+            'u' => $u
+        ]));
+        $tab->add('Classes', view('admin.dashboard.show-user-profile-classes', [
+            'u' => $u
+        ]));
+        $tab->add('Bills & Fees payment', view('admin.dashboard.show-user-profile-bills', [
+            'u' => $u
+        ]));
+        return $tab;
     }
 
     /**
@@ -347,7 +358,7 @@ class StudentsController extends AdminController
                         'autocomplete' => 'off'
                     ])
                     ->default([4])
-                    ->value([4]) 
+                    ->value([4])
                     ->options(
                         AdminRole::where('slug', '!=', 'super-admin')
                             ->where('slug', '!=', 'admin')

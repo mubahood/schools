@@ -8,6 +8,7 @@ use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
+use Encore\Admin\Widgets\Tab;
 use Illuminate\Support\Facades\Hash;
 
 /*
@@ -147,7 +148,7 @@ class EmployeesController extends AdminController
                 'user_type' => 'employee'
             ]);
         $grid->actions(function ($actions) {
-            $actions->disableView();
+            //$actions->disableView();
         });
 
 
@@ -222,9 +223,13 @@ class EmployeesController extends AdminController
      */
     protected function detail($id)
     {
-        $show = new Show(Administrator::findOrFail($id));
-        $show->field('id', __('Id'));
-        return $show;
+
+        $u = Administrator::findOrFail($id);
+        $tab = new Tab();
+        $tab->add('Bio', view('admin.dashboard.show-user-profile-bio',[
+            'u' => $u
+        ])); 
+        return $tab;  
     }
 
     /**
