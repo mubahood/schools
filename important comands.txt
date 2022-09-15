@@ -107,6 +107,7 @@ php artisan make:model MenuItem
 php artisan make:model MenuItem
 php artisan make:model MainCourse
 php artisan make:model StudentHasOptionalSubject
+php artisan make:model UserBatchImporter
   
 
 
@@ -151,8 +152,7 @@ php artisan admin:make AcademicClassFeeController --model=App\\Models\\AcademicC
 php artisan admin:make TransactionController --model=App\\Models\\Transaction
 php artisan admin:make SchoolFeesPaymentController --model=App\\Models\\Transaction
 php artisan admin:make MenuItemController --model=App\\Models\\MenuItem
-php artisan admin:make MainCourseController --model=App\\Models\\MainCourse
-php artisan admin:make MainCourseController --model=App\\Models\\UserBatchImporter
+php artisan admin:make UserBatchImporterController --model=App\\Models\\UserBatchImporter
 
 
 
@@ -165,5 +165,6 @@ code
 subject_type
 subject_choice
 
-
-demo_id	
+git add *
+git fetch --all
+user-batch-importers
