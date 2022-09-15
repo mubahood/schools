@@ -26,7 +26,9 @@ class UserBatchImporterController extends AdminController
      */
     protected function grid()
     {
-       /*  $x = new UserBatchImporter();
+
+
+        /*  $x = new UserBatchImporter();
         $x->enterprise_id = 6;
         $x->academic_class_id = 1;
         $x->type = 'students';
@@ -35,6 +37,17 @@ class UserBatchImporterController extends AdminController
 
         $x->save(); */
         $grid = new Grid(new UserBatchImporter());
+
+        $grid->header(function ($query) {
+            $link = url('assets/files/students-template.xlsx');
+            return "Download Students <b>batch importation excel template</b> 
+            
+            <a target=\"_blank\" href=\"$link\" download>here.</a>
+            <br>
+            <b>NOTE</b> Only feed in data of students in a particular class. Don't temper with the structure of the file.
+            ";
+        });
+
         $grid->disableActions();
         $grid->disableBatchActions();
         $grid->disableFilter();
