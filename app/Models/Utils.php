@@ -8,7 +8,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Excel;
+
 
 class Utils  extends Model
 {
@@ -17,6 +17,7 @@ class Utils  extends Model
 
     public static function system_boot($u)
     {
+
         Utils::financial_accounts_creation();
         $subs = ExamHasClass::where('marks_generated', '!=', 1)->get();
         foreach ($subs as $m) {
@@ -547,126 +548,4 @@ class Utils  extends Model
 
 
 
-    public static function students_batch_import($file_path)
-    {
-        if (!file_exists($file_path)) {
-            die("File does not exist.");
-        }
-        $array = Excel::toArray([], $file_path);
-
-        $i = 0;
-        $enterprise_id = 1;
-        $_duplicates = [];
-        foreach ($array[0] as $key => $v) {
-            $i++;
-            if (
-                $i <= 1 ||
-                (count($v) < 3) ||
-                (!isset($v[0])) ||
-                (!isset($v[1])) ||
-                (!isset($v[2])) ||
-                (!isset($v[3])) ||
-                ($v[0] == null) ||
-                ($v[1] == null) ||
-                ($v[2] == null) ||
-                ($v[3] == null)
-            ) {
-                continue;
-            }
-            $user_id = trim($v[0]);
-            $_u = Administrator::where([
-                'enterprise_id' => $enterprise_id,
-                'user_id' => $user_id
-            ])->first();
-
-            if ($_u != null) {
-                $_duplicates[] = "Student with student ID #$user_id was skipped because a student with exact same id already exist";
-                continue;
-            }
-
-            $u = new Administrator();
-            $u->user_id = $user_id;
-            $u->username = $user_id;
-            $u->password = password_hash('4321', PASSWORD_DEFAULT);
-            $u->enterprise_id = $enterprise_id;
-            $u->first_name = trim($v[1]);
-            $u->last_name = trim($v[2]);
-            $u->sex = trim($v[3]);
-            $u->date_of_birth = trim($v[4]);
-            $u->nationality = trim($v[5]);
-            $u->home_address = trim($v[6]);
-            $u->religion = trim($v[7]);
-            $u->father_name = trim($v[8]);
-            $u->father_phone = trim($v[9]);
-            $u->mother_name = trim($v[10]);
-            $u->mother_phone = trim($v[11]);
-
-            dd($user_id);
-
-            echo "<pre>";
-            print_r($v);
-            die();
-        }
-    }
 }
-/* 	
-
--
--	
--	
--
--
--	
--
--
--	
--
--
--
-	
-	
-
-
-
-name
-avatar
-enterprise_id
-place_of_birth
-current_address	
-phone_number_1	
-phone_number_2
-email
-spouse_name	
-spouse_phone
-languages	
-emergency_person_name
-emergency_person_phone
-national_id_number
-
-passport_number	
-tin	
-nssf_number	
-bank_name	
-bank_account_number	
-primary_school_name	
-primary_school_year_graduated	
-seconday_school_name	
-seconday_school_year_graduated	
-high_school_name	
-high_school_year_graduated	
-degree_university_name	
-degree_university_year_graduated	
-masters_university_name	
-masters_university_year_graduated	
-phd_university_name	
-phd_university_year_graduated	
-user_type
-
-
-
-
-	
-	
-	
-
-*/
