@@ -66,11 +66,7 @@
                             [
                                 'link' => admin_url('employees'),
                                 'text' => 'Manage staff bio data',
-                            ],
-                            [
-                                'link' => '#',
-                                'text' => 'Payroll processing',
-                            ],
+                            ], 
                         ],
                     ])
                 @endif

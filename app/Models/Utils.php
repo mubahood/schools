@@ -330,8 +330,9 @@ class Utils  extends Model
 
 
 
-        $ent_id  = 1;
+        $ent_id  = 0;
         $u = Auth::user();
+       
         if ($u != null) {
             $ent_id = ((int)($u->enterprise_id));
         }
@@ -342,13 +343,13 @@ class Utils  extends Model
             $ent = Enterprise::where([
                 'subdomain' => $subdomain
             ])->first();
+
         }
 
 
         if ($ent == null) {
             $ent = Enterprise::find(1);
         }
-
         return $ent;
     }
 
