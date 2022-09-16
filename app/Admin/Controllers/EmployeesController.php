@@ -145,6 +145,10 @@ class EmployeesController extends AdminController
             $actions->disableDelete();
         });
 
+/*         $ git add .git -f
+
+
+        UW PICO 5.09                 File: /home4/schooics/public_html/.git/MERGE_MSG                 Modified   */
         $grid->model()
             ->orderBy('id', 'Desc')
             ->where([
