@@ -1,4 +1,4 @@
-<div class="card ">
+{{-- <div class="card ">
     <div class="card-body">
         <p class="h3  text-bold mb-2 mb-md-3 text-primary p-0 m-0">Help videos</p>
         <table class="w-100 table table-striped">
@@ -68,3 +68,4 @@
             Browse all help videos</a>
     </div>
 </div>
+ --}}
