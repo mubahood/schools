@@ -141,6 +141,10 @@ class EmployeesController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Administrator());
+        $grid->actions(function ($actions) {
+            $actions->disableDelete();
+        });
+
         $grid->model()
             ->orderBy('id', 'Desc')
             ->where([
@@ -150,7 +154,6 @@ class EmployeesController extends AdminController
         $grid->actions(function ($actions) {
             //$actions->disableView();
         });
-
 
 
         $grid->filter(function ($filter) {
@@ -226,10 +229,10 @@ class EmployeesController extends AdminController
 
         $u = Administrator::findOrFail($id);
         $tab = new Tab();
-        $tab->add('Bio', view('admin.dashboard.show-user-profile-bio',[
+        $tab->add('Bio', view('admin.dashboard.show-user-profile-bio', [
             'u' => $u
-        ])); 
-        return $tab;  
+        ]));
+        return $tab;
     }
 
     /**
