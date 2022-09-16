@@ -115,6 +115,7 @@ EDUCATIONAL INFORMATION
 - PHD university name
 - PHD university year graduated
 - 
+romina
 
 ==someohting new
 ACCOUNT INFORMATION
