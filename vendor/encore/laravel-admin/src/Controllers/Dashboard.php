@@ -240,16 +240,16 @@ class Dashboard
 
     public static function income_vs_expenses()
     {
-        return view('admin.charts.bar', [
+/*         return view('admin.charts.bar', [
             'is_dark' => true
-        ]);
+        ]); */
     }
 
     public static function fees_collected()
     {
-        return view('admin.charts.pie', [
+/*         return view('admin.charts.pie', [
             'is_dark' => true
-        ]);
+        ]); */
     }
 
 
