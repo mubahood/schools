@@ -1,0 +1,54 @@
+Student Account 
+Payment Code 
+First Name 
+Given name 
+Last Name
+Gender 
+Day Boarding 
+Home Address 
+Transport 
+Swimming swimming
+Outstanding outstanding 
+Guardian Name
+Guardian Phone
+Guardian Phone 2
+Guardian Relation  
+D.O.B
+Referral 
+Guardian Email
+Previous School previous_school
+Nationality
+
+
+------------ 
+
+
+A0. Student Account  
+B1. Payment Code 
+C2. First Name 
+C3. Given name  
+E4. Last Name
+F5. Gender
+G6. Day Boarding  
+H7. Home Address
+I8. Swimming
+J9. Transport        
+K10. Guardian Name
+L11. Guardian Phone
+M12. Guardian Phone 2
+N13. Guardian Relation
+O14. D.O.B
+P15. Referral 
+Q17. email
+R16. Previous School
+S18. Nationality
+T19. Religion
+
+
+   
+
+ 
+17/- Guardian Email 
+ 18/- Previous School
+19/-  Nationality
+20/- Religion

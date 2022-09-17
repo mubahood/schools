@@ -212,7 +212,7 @@ class PrintController2 extends Controller
         $data .= '<table style="width: 100%;" >
                     <tr>
                         <td class="fs-5">NAME: <b>Muhindo Mubaraka</b></td>
-                        <td class="fs-5">SEX: <b>Male</b></td>
+                        <td class="fs-5">GENDER: <b>Male</b></td>
                         <td class="fs-5 text-right">REG No.: <b>U1211</b></td> 
                     </tr>        
                     <tr>
