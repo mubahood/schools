@@ -115,9 +115,7 @@ EDUCATIONAL INFORMATION
 - PHD university name
 - PHD university year graduated
 - 
-romina
 
-==someohting new
 ACCOUNT INFORMATION
 --------------------
 - Usename
@@ -147,7 +145,7 @@ class EmployeesController extends AdminController
             $actions->disableDelete();
         });
 
-/*         $ git add .git -f
+/*         $ git add  .git/MERGE_MSG -f
 
 
         UW PICO 5.09                 File: /home4/schooics/public_html/.git/MERGE_MSG                 Modified   */

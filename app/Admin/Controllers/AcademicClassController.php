@@ -123,9 +123,10 @@ class AcademicClassController extends AdminController
                 'enterprise_id' => $u->enterprise_id,
                 'user_type' => 'employee',
             ])->get() as $key => $a) {
-                if ($a->isRole('teacher')) {
-                    $teachers[$a['id']] = $a['name'];
-                }
+                $teachers[$a['id']] = $a['name'];
+                /* if ($a->isRole('teacher')) {
+
+                } */
             }
 
 
@@ -158,7 +159,7 @@ class AcademicClassController extends AdminController
                 $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
 
 
-                $form->select('course_id', 'Course')
+                $form->select('course_id', 'Subject')
                     ->options(
                         Course::all()
                             ->pluck('name', 'id')

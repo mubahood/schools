@@ -41,6 +41,10 @@ class StudentHasClassController extends AdminController
         Utils::display_checklist(Utils::students_checklist(Admin::user()));
 
         $grid = new Grid(new StudentHasClass());
+        $grid->actions(function ($actions) {
+            $actions->disableDelete();
+        });
+
         $grid->disableBatchActions();
         $grid->disableExport();
 
@@ -100,18 +104,21 @@ class StudentHasClassController extends AdminController
             }
             return  $this->year->name;
         });
+        $u = Admin::user();
 
-        $grid->column('optional_subjects_picked', __('Selected optional subjects'))
-            ->display(function ($title) {
+        if ($u->enterprise->type != 'Primary') {
 
-                if ($title == 1) {
-                    return "<span style='color:green'>Done</span>";
-                } else {
-                    return "<span style='color:red'>Not done</span>";
-                }
-            })
-            ->sortable();
+            $grid->column('optional_subjects_picked', __('Selected optional subjects'))
+                ->display(function ($title) {
 
+                    if ($title == 1) {
+                        return "<span style='color:green'>Done</span>";
+                    } else {
+                        return "<span style='color:red'>Not done</span>";
+                    }
+                })
+                ->sortable();
+        }
 
         return $grid;
     }
@@ -295,54 +302,58 @@ class StudentHasClassController extends AdminController
             $form->select('stream_id', __('Stream'))->options(function ($id) {
                 return AcademicClassSctream::all()->pluck('name', 'id');
             });
-        })->tab('Optional subjects', function ($form) {
-
-            $form->morphMany('optional_subjects', 'Click to add optional subject', function (Form\NestedForm $form) {
-
-                $id = ((int)(FacadesRequest::segment(2)));
-                if ($id < 1) {
-                    $id = ((int)(FacadesRequest::segment(1)));
-                }
-                if ($id < 1) {
-                    $id = ((int)(FacadesRequest::segment(0)));
-                }
-                if ($id < 1) {
-                    $id = ((int)(FacadesRequest::segment(3)));
-                }
-                if ($id < 1) {
-                    $id = ((int)(FacadesRequest::segment(4)));
-                }
-                if ($id < 1) {
-                    die("Class not found.");
-                }
-                $class = StudentHasClass::find($id);
-
-                if ($class == null) {
-                    die("Class not found..");
-                }
-
-                $academic_class = AcademicClass::find($class->academic_class_id);
-                if ($academic_class == null) {
-                    die("Academic class not found.");
-                }
-
-                $subs = [];
-                foreach ($academic_class->getOptionalSubjectsItems() as  $s) {
-                    $subs[((int)($s->course_id))] = $s->subject_name . " - " . $s->code;
-                }
-
-                $u = Admin::user();
-
-                $form->hidden('enterprise_id')->default($u->enterprise_id);
-
-
-
-                $form->select('course_id', 'Select subject')
-                    ->options(
-                        $subs
-                    )->rules('required');
-            });
         });
+
+        if (Admin::user()->enterprise->type != 'Primary') {
+            $form->tab('Optional subjects', function ($form) {
+
+                $form->morphMany('optional_subjects', 'Click to add optional subject', function (Form\NestedForm $form) {
+
+                    $id = ((int)(FacadesRequest::segment(2)));
+                    if ($id < 1) {
+                        $id = ((int)(FacadesRequest::segment(1)));
+                    }
+                    if ($id < 1) {
+                        $id = ((int)(FacadesRequest::segment(0)));
+                    }
+                    if ($id < 1) {
+                        $id = ((int)(FacadesRequest::segment(3)));
+                    }
+                    if ($id < 1) {
+                        $id = ((int)(FacadesRequest::segment(4)));
+                    }
+                    if ($id < 1) {
+                        die("Class not found.");
+                    }
+                    $class = StudentHasClass::find($id);
+
+                    if ($class == null) {
+                        die("Class not found..");
+                    }
+
+                    $academic_class = AcademicClass::find($class->academic_class_id);
+                    if ($academic_class == null) {
+                        die("Academic class not found.");
+                    }
+
+                    $subs = [];
+                    foreach ($academic_class->getOptionalSubjectsItems() as  $s) {
+                        $subs[((int)($s->course_id))] = $s->subject_name . " - " . $s->code;
+                    }
+
+                    $u = Admin::user();
+
+                    $form->hidden('enterprise_id')->default($u->enterprise_id);
+
+
+
+                    $form->select('course_id', 'Select subject')
+                        ->options(
+                            $subs
+                        )->rules('required');
+                });
+            });
+        }
 
 
 

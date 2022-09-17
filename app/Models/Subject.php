@@ -65,7 +65,7 @@ class Subject extends Model
 
     function course()
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsTo(MainCourse::class);
     }
 
     function teacher()
@@ -84,10 +84,14 @@ class Subject extends Model
 
     function getNameAttribute()
     {
-        if ($this->course == null) {
-            return "-";
+        $_name = "";
+        if ($this->course != null) {
+            return $_name = $this->course->name;
+        } else {
+            $_name = $this->course->name;
         }
-        return $this->course->name . " - " . $this->academic_class->name;
+ 
+        return  " $_name ";
     }
 
 

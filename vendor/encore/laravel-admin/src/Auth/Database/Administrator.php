@@ -12,6 +12,7 @@ use Illuminate\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -21,9 +22,13 @@ use Illuminate\Support\Facades\Storage;
  */
 class Administrator extends Model implements AuthenticatableContract
 {
+    use SoftDeletes;
     use Authenticatable;
     use HasPermissions;
     use DefaultDatetimeFormat;
+
+//    ALTER TABLE `admin_users` ADD `deleted_at` DATE NULL DEFAULT NULL AFTER `previous_school`;
+
 
     protected $fillable = ['username', 'password', 'name', 'avatar'];
 
@@ -145,6 +150,7 @@ class Administrator extends Model implements AuthenticatableContract
         return $this->belongsTo(Enterprise::class);
     }
 
+ 
     public function classes()
     {
         return $this->hasMany(StudentHasClass::class);

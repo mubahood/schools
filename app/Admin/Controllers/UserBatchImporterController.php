@@ -65,7 +65,8 @@ class UserBatchImporterController extends AdminController
         /*         $grid->column('created_at', __('Created at'));
         $grid->column('updated_at', __('Updated at')); 
         $grid->column('enterprise_id', __('Enterprise id'));*/
-        $grid->column('academic_class_id', __('Description'))
+        $grid->column('description', __('Description'));
+        /*         $grid->column('academic_class_id', __('Description'))
             ->display(function ($academic_class_id) {
                 $class = AcademicClass::find($academic_class_id);
                 $count  = count($this->users);
@@ -74,7 +75,7 @@ class UserBatchImporterController extends AdminController
                     $class_name = $class->name;
                 }
                 return "Imported $count students to $class_name ";
-            });
+            }); */
         /*  $grid->column('type', __('Type')); */
 
         return $grid;
