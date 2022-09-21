@@ -108,6 +108,7 @@ php artisan make:model MenuItem
 php artisan make:model MainCourse
 php artisan make:model StudentHasOptionalSubject
 php artisan make:model UserBatchImporter
+php artisan make:model StockItemCategory
   
 
 
@@ -131,6 +132,8 @@ php artisan make:migration create_accounts_table
 php artisan make:migration create_transactions_table 
 php artisan make:migration create_reconciler_table 
 php artisan make:migration create_menu_items_table 
+php artisan make:migration create_fund_requisitions_table 
+php artisan make:migration create_stock_item_categories_table 
 
 
 php artisan admin:make BooksCategoryController --model=App\\Models\\BooksCategory
