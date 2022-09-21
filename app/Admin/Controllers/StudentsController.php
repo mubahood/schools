@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\Redirect;
 `last_name` TEXT DEFAULT NULL,
 `date_of_birth` TEXT DEFAULT NULL,
 `place_of_birth` TEXT DEFAULT NULL,
-`sex` TEXT DEFAULT NULL,
+`sex` TEXT DEFAULT NULpL,
 `home_address` TEXT DEFAULT NULL,
 `current_address` TEXT DEFAULT NULL,
 `phone_number_1` TEXT DEFAULT NULL,
