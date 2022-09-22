@@ -317,6 +317,7 @@ class EmployeesController extends AdminController
                             ->where('slug', '!=', 'student')
                             ->where('slug', '!=', 'librarian')
                             ->where('slug', '!=', 'admin')
+                            ->where('slug', '!=', 'supplier')
                             ->get()
                             ->pluck('name', 'id')
                     )->rules('required');

@@ -37,7 +37,12 @@ Route::group([
     $router->resource('menu-items', MenuItemController::class);
     $router->resource('main-courses', MainCourseController::class);
     $router->resource('user-batch-importers', UserBatchImporterController::class);
-    
+    $router->resource('fund-requisitions', FundRequisitionController::class);
+    $router->resource('stock-item-categories', StockItemCategoryController::class);
+    $router->resource('stock-batches', StockBatchController::class);
+    $router->resource('suppliers', SuppliersController::class);
+    $router->resource('stock-records', StockRecordController::class);
+
     //$router->resource('fees', StudentHasFeeController::class);
 
     $router->get('/', 'HomeController@index')->name('home');

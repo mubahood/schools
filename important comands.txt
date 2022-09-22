@@ -76,6 +76,7 @@ php artisan make:migration create_terms_table
 php artisan make:migration create_student_has_classes_table
 php artisan make:migration create_student_has_optional_subjects_table
 php artisan make:migration create_user_batch_importers_table
+php artisan make:migration create_stock_records_table
 
 php artisan make:model BooksCategory
 php artisan make:model BookAuthor
@@ -109,6 +110,9 @@ php artisan make:model MainCourse
 php artisan make:model StudentHasOptionalSubject
 php artisan make:model UserBatchImporter
 php artisan make:model StockItemCategory
+php artisan make:model FundRequisition
+php artisan make:model StockBatch
+php artisan make:model StockRecord
   
 
 
@@ -134,6 +138,7 @@ php artisan make:migration create_reconciler_table
 php artisan make:migration create_menu_items_table 
 php artisan make:migration create_fund_requisitions_table 
 php artisan make:migration create_stock_item_categories_table 
+php artisan make:migration create_stock_batches_table 
 
 
 php artisan admin:make BooksCategoryController --model=App\\Models\\BooksCategory
@@ -156,6 +161,10 @@ php artisan admin:make TransactionController --model=App\\Models\\Transaction
 php artisan admin:make SchoolFeesPaymentController --model=App\\Models\\Transaction
 php artisan admin:make MenuItemController --model=App\\Models\\MenuItem
 php artisan admin:make UserBatchImporterController --model=App\\Models\\UserBatchImporter
+php artisan admin:make FundRequisitionController --model=App\\Models\\FundRequisition
+php artisan admin:make StockItemCategoryController --model=App\\Models\\StockItemCategory
+php artisan admin:make StockBatchController --model=App\\Models\\StockBatch
+php artisan admin:make StockRecordController --model=App\\Models\\StockRecord
 
 
 
@@ -176,3 +185,4 @@ Auto-merging vendor/composer/autoload_classmap.php
 Auto-merging vendor/composer/autoload_real.php
 Auto-merging vendor/composer/autoload_static.php
 Auto-merging vendor/composer/installed.php
+

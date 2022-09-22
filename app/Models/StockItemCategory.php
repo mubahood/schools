@@ -10,4 +10,5 @@ class StockItemCategory extends Model
 {
     use SoftDeletes;
     use HasFactory;
+ 
 }
