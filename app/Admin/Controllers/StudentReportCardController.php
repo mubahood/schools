@@ -8,7 +8,7 @@ use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
-use Encore\Admin\Widgets\Box;
+use Encore\Admin\Widgets\Box;               
 
 class StudentReportCardController extends AdminController
 {
@@ -17,7 +17,7 @@ class StudentReportCardController extends AdminController
      *
      * @var string
      */
-    protected $title = 'StudentReportCard';
+protected $title = 'Students report cards';
 
     /**
      * Make a grid builder.
@@ -54,7 +54,7 @@ class StudentReportCardController extends AdminController
     }
 
     /**
-     * Make a show builder.
+     * Make a show builder.q                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
      *
      * @param mixed $id
      * @return Show
