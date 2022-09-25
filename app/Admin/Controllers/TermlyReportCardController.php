@@ -18,7 +18,7 @@ class TermlyReportCardController extends AdminController
      *
      * @var string
      */
-    protected $title = 'TermlyReportCard';
+    protected $title = 'Termly report cards';
 
     /**
      * Make a grid builder.
@@ -27,11 +27,16 @@ class TermlyReportCardController extends AdminController
      */
     protected function grid()
     {
-        /* $m = TermlyReportCard::find(1);
-        $m->report_title = rand(10000000, 1000000000);
-        $m->save();
-        die("======DONE======");  */
+
         $grid = new Grid(new TermlyReportCard());
+        $x = TermlyReportCard::find(2);
+        $x->report_title .= rand(1, 10);
+        $x->save();
+
+
+        $grid->model()->where([
+            'enterprise_id' => Admin::user()->enterprise_id,
+        ])->orderBy('id', 'DESC');
 
         $grid->column('id', __('Id'));
         $grid->column('created_at', __('Created at'));
@@ -95,9 +100,7 @@ class TermlyReportCardController extends AdminController
         }
 
         $scales = [];
-        foreach (GradingScale::where([
-            'enterprise_id' => $u->enterprise_id
-        ])
+        foreach (GradingScale::where([])
             ->orderBy('id', 'DESC')
             ->get() as $v) {
             $scales[$v->id] =  $v->name;

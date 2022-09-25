@@ -247,6 +247,7 @@ class PrintController2 extends Controller
         $data .= $grading_tabel;
         $data .= $bottom_table;
 
+        return $data;
         $pdf = App::make('dompdf.wrapper');
         $pdf->loadHTML($data);
         return $pdf->stream();

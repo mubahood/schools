@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Models\AcademicClass;
 use App\Models\AcademicClassSctream;
+use App\Models\AcademicYear;
 use App\Models\Course;
 use App\Models\StudentHasClass;
 use App\Models\StudentHasOptionalSubject;
@@ -38,9 +39,19 @@ class StudentHasClassController extends AdminController
     {
 
 
+
         Utils::display_checklist(Utils::students_checklist(Admin::user()));
 
         $grid = new Grid(new StudentHasClass());
+
+        $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
+            ->orderBy('id', 'Desc');
+        if (!Admin::user()->isRole('dos')) {
+            $grid->disableCreateButton();
+            $grid->disableExport();
+            $grid->disableActions();
+        }
+
         $grid->actions(function ($actions) {
             $actions->disableDelete();
         });
@@ -56,7 +67,11 @@ class StudentHasClassController extends AdminController
             $u = Admin::user();
             $filter->equal('academic_class_id', 'Filter by class')->select(AcademicClass::where([
                 'enterprise_id' => $u->enterprise_id
-            ])->get()->pluck('name_text', 'id'));
+            ])->orderBy('id', 'Desc')->get()->pluck('name_text', 'id'));
+
+            $filter->equal('academic_year_id', 'Filter by academic year')->select(AcademicYear::where([
+                'enterprise_id' => $u->enterprise_id
+            ])->orderBy('id', 'Desc')->get()->pluck('name', 'id'));
 
             $u = Admin::user();
             $ajax_url = url(
@@ -103,7 +118,7 @@ class StudentHasClassController extends AdminController
                 return "-";
             }
             return  $this->year->name;
-        });
+        })->sortable();
         $u = Admin::user();
 
         if ($u->enterprise->type != 'Primary') {

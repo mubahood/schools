@@ -12,6 +12,7 @@ use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
+use Illuminate\Http\Request;
 
 class MarkController extends AdminController
 {
@@ -30,9 +31,65 @@ class MarkController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Mark());
+        /* foreach (Mark::where([
+            'exam_id' => 5
+        ])->get() as $key => $v) {
+            $v->score = rand(1000, 10000) % 41;
+            $v->save();
+        } */
+
+        $grid->model()->where([
+            'enterprise_id' => Admin::user()->enterprise_id,
+        ])->orderBy('id', 'DESC');
+
+        if (!Admin::user()->isRole('dos')) {
+
+            $grid->model()->where([
+                'teacher_id' => Admin::user()->id,
+            ]);
+            $grid->disableCreateButton();
+            $grid->disableExport();
+            $grid->disableActions();
+        }
+
         $grid->disableBatchActions();
 
+
+
+        if (
+            (!Admin::user()->isRole('dos')) &&
+            ((!isset($_GET['class_id'])) ||
+                (!isset($_GET['exam_id'])) ||
+                (!isset($_GET['subject_id'])) ||
+                (((int)($_GET['subject_id'])) < 1) ||
+                (((int)($_GET['exam_id'])) < 1) ||
+                (((int)($_GET['class_id'])) < 1))
+        ) {
+            admin_error(
+                'Alert',
+                'Select class, exam and subject and press "search button" to enter marks.'
+            );
+            $grid->model()->where([
+                'enterprise_id' => 0,
+            ])->orderBy('id', 'DESC');
+        }
+
         $grid->filter(function ($filter) {
+
+
+            if (
+                (!Admin::user()->isRole('dos')) &&
+                ((!isset($_GET['class_id'])) ||
+                    (!isset($_GET['exam_id'])) ||
+                    (!isset($_GET['subject_id'])) ||
+                    (((int)($_GET['subject_id'])) < 1) ||
+                    (((int)($_GET['exam_id'])) < 1) ||
+                    (((int)($_GET['class_id'])) < 1))
+            ) {
+                $filter->expand();
+            }
+
+
             // Remove the default id filter
             $filter->disableIdFilter();
 
@@ -59,8 +116,11 @@ class MarkController extends AdminController
             ])
                 ->orderBy('subject_name', 'asc')
                 ->get() as $ex) {
-                $subs[$ex->id] = $ex->name;
+                if ($ex->subject_teacher == Admin::user()->id) {
+                    $subs[$ex->id] = $ex->name . " - " . $ex->academic_class->name_text;
+                }
             }
+
             $filter->equal('subject_id', 'Filter by subject')->select($subs);
 
 
@@ -77,12 +137,12 @@ class MarkController extends AdminController
         });
 
 
-        $grid->model()->where([
-            'enterprise_id' => Admin::user()->enterprise_id,
-        ])->orderBy('id', 'DESC');
 
         $grid->column('id', __('#ID'))->sortable();
         $grid->column('student_id', __('Student'))->display(function () {
+            if ($this->student == null) {
+                return "-";
+            }
             return $this->student->name;
         })->sortable();
         $grid->column('exam_id', __('Exam'))
@@ -99,7 +159,7 @@ class MarkController extends AdminController
 
         $grid->column('score', __('Score'))->sortable()->editable();
         $grid->column('remarks', __('Remarks'))->editable();
-        $grid->column('is_missed', __('Missed'));
+        /*  $grid->column('is_missed', __('Missed')); */
         $grid->column('is_submitted', __('Submitted'))->display(function ($st) {
             if ($st)
                 return '<span class="bagde bagde-success">Submitted</span>';
@@ -150,6 +210,7 @@ class MarkController extends AdminController
      */
     protected function form()
     {
+
         $form = new Form(new Mark());
 
         $form->number('enterprise_id', __('Enterprise id'));

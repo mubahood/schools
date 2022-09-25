@@ -95,7 +95,6 @@ class AcademicClassController extends AdminController
         Utils::display_system_checklist();
 
         $form->disableCreatingCheck();
-        $form->disableEditingCheck();
         $form->disableReset();
         $form->disableViewCheck();
 
@@ -147,6 +146,7 @@ class AcademicClassController extends AdminController
 
                 $form->hidden('enterprise_id')->default($u->enterprise_id);
                 $u = Admin::user();
+                $ent = Utils::ent();
                 $teachers = [];
                 foreach (Administrator::where([
                     'enterprise_id' => $u->enterprise_id,
@@ -159,10 +159,23 @@ class AcademicClassController extends AdminController
                 $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
 
 
+
+                $subjects = [];
+                foreach (Course::all() as $key => $c) {
+                    if (
+                        $ent->type == 'Primary'
+                    ) {
+                        if ($c->subject->subject_type == 'Primary') {
+                            $subjects[$c->id] =   $c->subject->name . " - " . $c->subject->code;
+                        }
+                    } else {
+                        $subjects[$c->id] =   $c->subject->name . " - " . $c->subject->code . "/" . $c->name;
+                    }
+                }
+
                 $form->select('course_id', 'Subject')
                     ->options(
-                        Course::all()
-                            ->pluck('name', 'id')
+                        $subjects
                     )->rules('required');
 
                 $form->radio('is_optional', 'Subject type')

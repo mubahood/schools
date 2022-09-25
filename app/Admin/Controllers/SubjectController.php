@@ -31,33 +31,20 @@ class SubjectController extends AdminController
     protected function grid()
     {
 
-        /*  $u = Admin::user();
-        $ac = new AcademicYear();
-        $ac->enterprise_id = $u->enterprise_id;
-        $ac->name = 'Test year';
-        $ac->starts = null;
-        $ac->ends = null;
-        $ac->details = 'Some details';
-        $ac->is_active = 0;
-        $ac->demo_id = 0;
-        $ac->save();
-        die("======Romina====="); */
-
-        /* */
-
-
-
-        /* 
-        compulsory_subjects
-        optional_subjects
-        */
-
-        // compulsory_subjects	
-        // optional_subjects  	
-
 
         $grid = new Grid(new Subject());
         Utils::display_system_checklist();
+
+        $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
+            ->orderBy('id', 'Desc');
+        $grid->disableBatchActions();
+
+        if (!Admin::user()->isRole('dos')) {
+            $grid->model()->where('subject_teacher', Admin::user()->id);
+            $grid->disableCreateButton();
+            $grid->disableExport();
+            $grid->disableActions();
+        }
 
         $grid->filter(function ($filter) {
             $filter->disableIdFilter();
@@ -88,7 +75,9 @@ class SubjectController extends AdminController
         $grid->column('subject_name', __('SUBJECT'))->sortable();
         $grid->column('academic_class_id', __('Class'))
             ->display(function ($t) {
-                return $this->academic_class->name;
+                return $this->academic_class->name
+                    . " - " .
+                    $this->academic_class->academic_year->name;
             })->sortable();
         /* $grid->column('course_id', __('Course'))
             ->display(function ($t) {

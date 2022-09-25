@@ -28,8 +28,20 @@ class Subject extends Model
 
         parent::boot();
         static::creating(function ($m) {
+
+            $s = Subject::where([
+                'academic_class_id' => $m->academic_class_id,
+                'course_id' => $m->course_id
+            ])->first();
+            if ($s != null) {
+                admin_error('Warning', 'Same subject cannot be in a certain class twice');
+                return false;
+            }
+
             $c = Course::find($m->course_id);
             $m->main_course_id = $c->main_course_id;
+            $m->subject_name = $c->subject->name;
+            $m->code = $c->subject->code;
             return $m;
         });
 
@@ -52,8 +64,8 @@ class Subject extends Model
                 }
             }
 
-            $m->subject_name = $c->name;
-            $m->code = $c->code;
+            $m->subject_name = $c->subject->name;
+            $m->code = $c->subject->code;
         });
     }
 
@@ -65,7 +77,7 @@ class Subject extends Model
 
     function course()
     {
-        return $this->belongsTo(MainCourse::class);
+        return $this->belongsTo(Course::class);
     }
 
     function teacher()
@@ -90,7 +102,7 @@ class Subject extends Model
         } else {
             $_name = $this->course->name;
         }
- 
+
         return  " $_name ";
     }
 

@@ -23,11 +23,10 @@ class Course extends Model
             return  $c->name;
         }
         return  $this->name;
- 
     }
 
     public function subject()
     {
-        return $this->belongsTo(MainCourse::class);
+        return $this->belongsTo(MainCourse::class, 'main_course_id');
     }
 }

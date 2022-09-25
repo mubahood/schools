@@ -29,43 +29,12 @@ class ExamController extends AdminController
      */
     protected function grid()
     {
-        /*
-        $has = new ExamHasClass();
-        $has->exam_id = 1;
-        $has->academic_class_id = 1;
-        $has->save(); 
-        
-        $e = new Exam();
-        $e->enterprise_id = 4;
-        $e->term_id = 1;
-        $e->name = 'B.O.T - ' . $e->term_id;
-        $e->type = 'B.O.T';
-        $e->max_mark = 30;
-
-        $term = Exam::where([
-            'term_id' => $e->term_id,
-            'type' => $e->type,
-        ])->first();
-        if ($term != null) {
-            $term->delete();
-        }
-
-        $e->save();
-        $has = new ExamHasClass();
-        $has->exam_id = $e->id;
-        $has->academic_class_id = 1;
-        $has->save();
- 
-
-        $e = Exam::find(20);
-        $e->name .= rand(1000,10000);
-        $e->save();
-        die("done"); */
+  
 
         $grid = new Grid(new Exam());
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
-        ])->orderBy('id', 'DESC');
+        ])->orderBy('id', 'DESC'); 
 
         $grid->column('id', __('ID'))->sortable();
 
@@ -125,10 +94,6 @@ class ExamController extends AdminController
     protected function form()
     {
 
-        /* $e = Exam::find(1);
-        $e->name .= rand(100000, 1000000000);
-        $e->save();
-        die("done");  */
         $form = new Form(new Exam());
         $u = Admin::user();
 
@@ -140,7 +105,7 @@ class ExamController extends AdminController
         $terms = [];
         if ($ay != null) {
             foreach ($ay->terms as $v) {
-                $terms[$v->id] = $v->name;
+                $terms[$v->id] = "Term " . $v->name . " - " . $ay->name;
             }
         }
 
@@ -166,6 +131,7 @@ class ExamController extends AdminController
         $form->multipleSelect('classes')->options(
             AcademicClass::where([
                 'enterprise_id' => Admin::user()->enterprise_id,
+                'academic_year_id' => $ay->id,
             ])->pluck('name', 'id')
         )->rules('required');
 
