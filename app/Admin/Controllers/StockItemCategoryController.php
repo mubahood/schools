@@ -32,7 +32,7 @@ class StockItemCategoryController extends AdminController
 
         $grid->column('id', __('ID'));
         $grid->column('name', __('Name'));
-        $grid->column('measuring_unit', __('Measuring unit'));
+        $grid->column('measuring_unit', __('Measuring unit')); 
         $grid->column('description', __('Description'))->hide();
 
         return $grid;
