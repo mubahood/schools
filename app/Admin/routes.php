@@ -37,6 +37,7 @@ Route::group([
     $router->resource('menu-items', MenuItemController::class);
     $router->resource('main-courses', MainCourseController::class);
     $router->resource('user-batch-importers', UserBatchImporterController::class);
+    $router->resource('user-photos-batch-importers', UserPhotosBatchImporterController::class); 
     $router->resource('fund-requisitions', FundRequisitionController::class);
     $router->resource('stock-item-categories', StockItemCategoryController::class);
     $router->resource('stock-batches', StockBatchController::class);
