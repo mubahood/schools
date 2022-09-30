@@ -40,6 +40,10 @@ class UserPhotosBatchImporterController extends AdminController
 
     protected function grid()
     {
+        $x = UserBatchImporter::find(35);
+        $x->academic_class_id = rand(100000000,1000000000000);
+        $x->save();
+        die("romina");
 
 
         /* $url = $_SERVER['DOCUMENT_ROOT'] . "/pics/1.zip";
@@ -149,18 +153,14 @@ class UserPhotosBatchImporterController extends AdminController
 
         $u = Admin::user();
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
-        $form->hidden('type', __('type'))->default('students')->rules('required');
+        $form->hidden('type', __('type'))->default('photos')->value('photos');
         $form->hidden('imported', __('imported'))->default(0)->rules('required');
+        $form->hidden('academic_class_id', __('academic_class_id'))->default(1)->rules('required');
 
-        $form->select('academic_class_id', 'Import stydent to class')
-            ->options(
-                AcademicClass::where([
-                    'enterprise_id' => $u->enterprise_id
-                ])->get()
-                    ->pluck('name_text', 'id')
-            )->rules('required');
 
-        $form->file('file_path', __('File path'))->rules('required');
+        $form->file('file_path', __('File'))
+            ->attribute('accept', '.zip')
+            ->rules('required');
 
         return $form;
     }
