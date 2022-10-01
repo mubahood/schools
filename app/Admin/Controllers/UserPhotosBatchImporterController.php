@@ -29,6 +29,8 @@ class UserPhotosBatchImporterController extends AdminController
 
     protected function grid()
     {
+        
+        die("time to rename_images");
         $x = UserBatchImporter::find(35);
         $x->academic_class_id = rand(100000000,1000000000000);
         $x->save();

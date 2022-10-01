@@ -173,8 +173,7 @@ class StockBatchController extends AdminController
         $form->decimal('original_quantity', __('Quantity (in Units)'))
             ->attribute('type', 'number')
             ->rules('required');
-        $form->textarea('description', __('Stock Description'))
-            ->rules('required');
+        $form->textarea('description', __('Stock Description'));
 
         $form->image('photo', __('Stock Photo'));
 
