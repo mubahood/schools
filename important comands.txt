@@ -195,3 +195,14 @@ Auto-merging vendor/composer/autoload_classmap.php
 Auto-merging vendor/composer/autoload_real.php
 Auto-merging vendor/composer/autoload_static.php
 Auto-merging vendor/composer/installed.php
+
+git rm vendor/composer/autoload_classmap.php -f
+git rm vendor/composer/autoload_real.php -f
+git rm vendor/composer/autoload_static.php -f
+git rm vendor/composer/installed.php -f
+git rm vendor/composer/platform_check.php -f
+
+Auto-merging vendor/composer/autoload_classmap.php
+Auto-merging vendor/composer/autoload_real.php
+Auto-merging vendor/composer/autoload_static.php
+Auto-merging vendor/composer/installed.php
