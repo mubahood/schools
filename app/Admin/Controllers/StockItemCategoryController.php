@@ -16,7 +16,7 @@ class StockItemCategoryController extends AdminController
      *
      * @var string
      */
-    protected $title = 'StockItemCategory';
+    protected $title = 'Stock item categories';
 
     /**
      * Make a grid builder.
