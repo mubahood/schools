@@ -9,6 +9,7 @@ use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UserPhotosBatchImporterController extends AdminController
 {
@@ -29,10 +30,45 @@ class UserPhotosBatchImporterController extends AdminController
 
     protected function grid()
     {
-        
+
+        $excel = $_SERVER['DOCUMENT_ROOT'] . "/schools/public/temp/StudentsBabyClass.xlsx";
+        $array = Excel::toArray([], $excel);
+        $is_first = true;
+        $ids = [];
+        foreach ($array[0] as $key => $v) {
+            if ($is_first) {
+                $is_first = false;
+                continue;
+            }
+            $x = trim($v[0]);
+            $ids[] = $x;
+        }
+
+
+        $path = $_SERVER['DOCUMENT_ROOT'] . "/schools/public/temp/bc_thumb";
+        $files = scandir($path, 0);
+        $pics = [];
+        $x = 0;
+        foreach ($files as $f) {
+            $ext = pathinfo($f, PATHINFO_EXTENSION);
+            if ($ext != 'jpg') {
+                continue;
+            }
+
+            if (isset($ids[$x])) {
+                $new_file = $path . "/" . $ids[$x] . ".jpg";
+                $old_file = $path . "/" . $f;
+                rename($old_file, $new_file);
+            }
+            print($f . "<hr>");
+            $x++;
+        }
+
+        dd("romina " . count($ids));
+
         die("time to rename_images");
         $x = UserBatchImporter::find(35);
-        $x->academic_class_id = rand(100000000,1000000000000);
+        $x->academic_class_id = rand(100000000, 1000000000000);
         $x->save();
         die("romina");
 
