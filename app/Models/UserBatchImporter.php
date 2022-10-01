@@ -114,15 +114,12 @@ class UserBatchImporter extends Model
             if ($u == null) {
                 continue;
             }
-            $destination_file = "./public/storage/images/" . $base_name;
+            $destination_file = $_SERVER['DOCUMENT_ROOT'] . "/storage/images/" . $base_name;
             rename($f, $destination_file);
-            $u->avatar = $destination_file;
+            $u->avatar = $base_name;
             $u->save();
         }
 
-        foreach ($photos as $f) {
-            unlink($f);
-        }
 
         for ($i = 2; $i < count($files); $i++) {
             if (!is_dir($zip_folder_path . "/" . $files[$i])) {
@@ -131,14 +128,8 @@ class UserBatchImporter extends Model
 
             if (is_dir($zip_folder_path . "/" . $files[$i])) {
                 $path_ = $zip_folder_path . "/" . $files[$i];
-                echo $files[$i];
-                echo "<hr>";
             }
         }
-
-
-
-        die("");
     }
 
 

@@ -31,6 +31,10 @@ class UserPhotosBatchImporterController extends AdminController
     protected function grid()
     {
 
+        // $x = UserBatchImporter::find(11);
+        // $x = UserBatchImporter::user_photos_batch_import($x);
+        // dd("done");
+        /*
         $excel = $_SERVER['DOCUMENT_ROOT'] . "/schools/public/temp/StudentsBabyClass.xlsx";
         $array = Excel::toArray([], $excel);
         $is_first = true;
@@ -64,13 +68,15 @@ class UserPhotosBatchImporterController extends AdminController
             $x++;
         }
 
-        dd("romina " . count($ids));
+        dd("romina " . count($ids));*/
 
+
+        /*
         die("time to rename_images");
         $x = UserBatchImporter::find(35);
         $x->academic_class_id = rand(100000000, 1000000000000);
         $x->save();
-        die("romina");
+        die("romina");*/
 
 
         /* $url = $_SERVER['DOCUMENT_ROOT'] . "/pics/1.zip";
