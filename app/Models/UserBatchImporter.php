@@ -43,9 +43,9 @@ class UserBatchImporter extends Model
     public static function user_photos_batch_import($m)
     {
 
-        $file_path = 'public/storage/' . $m->file_path;
+        $file_path = $_SERVER['DOCUMENT_ROOT'].'public/storage/' . $m->file_path;
 
-        $cla = Enterprise::find($m->enterprise_id);
+        $cla = Enterprise::find($m->enterprise_id); 
         if ($cla == null) {
             die("Enterprise not found.");
         }
