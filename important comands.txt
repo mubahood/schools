@@ -186,3 +186,12 @@ Auto-merging vendor/composer/autoload_real.php
 Auto-merging vendor/composer/autoload_static.php
 Auto-merging vendor/composer/installed.php
 
+git clean -df
+git reset --hard
+git checkout master
+git pull origin master
+
+Auto-merging vendor/composer/autoload_classmap.php
+Auto-merging vendor/composer/autoload_real.php
+Auto-merging vendor/composer/autoload_static.php
+Auto-merging vendor/composer/installed.php
