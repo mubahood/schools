@@ -26,16 +26,18 @@ class UserBatchImporterController extends AdminController
      */
     protected function grid()
     {
-
+        //$x = UserBatchImporter::find(2);
+        //UserBatchImporter::students_batch_import($x);
+ 
 
         /*  $x = new UserBatchImporter();
-        $x->enterprise_id = 6;
+        $x->enterprise_id = Admin::user()->enterprise_id;
         $x->academic_class_id = 1;
         $x->type = 'students';
-        $x->file_path = 'files/students.xlsx';
+        $x->file_path = 'files/StudentsBabyClass.xlsx';
         $x->imported = 0;
-
-        $x->save(); */
+        $x->save();  
+        die("===romina===");   */
         $grid = new Grid(new UserBatchImporter());
 
         $grid->header(function ($query) {
@@ -47,6 +49,7 @@ class UserBatchImporterController extends AdminController
             <b>NOTE</b> Only feed in data of students in a particular class. Don't temper with the structure of the file.
             ";
         });
+        
 
         $grid->disableActions();
         $grid->disableBatchActions();

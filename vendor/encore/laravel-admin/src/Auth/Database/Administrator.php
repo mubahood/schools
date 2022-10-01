@@ -7,6 +7,7 @@ use App\Models\Enterprise;
 use App\Models\StudentHasClass;
 use App\Models\StudentHasFee;
 use App\Models\Transaction;
+use App\Models\Utils;
 use Encore\Admin\Traits\DefaultDatetimeFormat;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
@@ -27,7 +28,7 @@ class Administrator extends Model implements AuthenticatableContract
     use HasPermissions;
     use DefaultDatetimeFormat;
 
-//    ALTER TABLE `admin_users` ADD `deleted_at` DATE NULL DEFAULT NULL AFTER `previous_school`;
+    //    ALTER TABLE `admin_users` ADD `deleted_at` DATE NULL DEFAULT NULL AFTER `previous_school`;
 
 
     protected $fillable = ['username', 'password', 'name', 'avatar'];
@@ -37,6 +38,23 @@ class Administrator extends Model implements AuthenticatableContract
         parent::boot();
 
         self::creating(function ($model) {
+
+            if (isset($model->phone_number_1)) {
+                if ($model->phone_number_1 != null) {
+                    if (strlen($model->phone_number_1) > 7) {
+                        $model->phone_number_1 = Utils::prepare_phone_number($model->phone_number_1);
+                    }
+                }
+            }
+
+            if (isset($model->phone_number_2)) {
+                if ($model->phone_number_2 != null) {
+                    if (strlen($model->phone_number_2) > 7) {
+                        $model->phone_number_2 = Utils::prepare_phone_number($model->phone_number_2);
+                    }
+                }
+            }
+
             if ($model->enterprise_id == null) {
                 die("enterprise is required");
             }
@@ -150,7 +168,7 @@ class Administrator extends Model implements AuthenticatableContract
         return $this->belongsTo(Enterprise::class);
     }
 
- 
+
     public function classes()
     {
         return $this->hasMany(StudentHasClass::class);

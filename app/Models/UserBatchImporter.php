@@ -31,10 +31,10 @@ class UserBatchImporter extends Model
         });
         static::updated(function ($m) {
             if ($m->type == 'photos') {
-                UserBatchImporter::user_photos_batch_import($m);
+                //UserBatchImporter::user_photos_batch_import($m);
                 return $m;
             }
-            UserBatchImporter::students_batch_import($m);
+            //UserBatchImporter::students_batch_import($m);
             return $m;
         });
     }
@@ -43,12 +43,14 @@ class UserBatchImporter extends Model
     public static function user_photos_batch_import($m)
     {
 
-        $file_path = 'public/storage/' . $m->file_path;
 
-        $cla = Enterprise::find($m->enterprise_id); 
+        $file_path = $_SERVER['DOCUMENT_ROOT'].'/storage/' . $m->file_path;
+ 
+        $cla = Enterprise::find($m->enterprise_id);
         if ($cla == null) {
             die("Enterprise not found.");
         }
+        set_time_limit(-1);
 
         $zip_folder_path = './public/storage/files/' . $m->enterprise_id;
         if (!is_dir($zip_folder_path)) {
@@ -142,12 +144,18 @@ class UserBatchImporter extends Model
 
     public static function students_batch_import($m)
     {
+
+
+
+      
         if ($m->type == 'photos') {
             UserBatchImporter::user_photos_batch_import($m);
             return $m;
         }
+        set_time_limit(-1);
 
-        $file_path = 'public/storage/' . $m->file_path;
+        $file_path = $_SERVER['DOCUMENT_ROOT'].'/storage/' . $m->file_path;
+        
 
         $cla = AcademicClass::find($m->academic_class_id);
         if ($cla == null) {
@@ -165,18 +173,14 @@ class UserBatchImporter extends Model
         $update_count = 0;
         $import_count = 0;
         foreach ($array[0] as $key => $v) {
+
             $i++;
             if (
                 $i <= 1 ||
                 (count($v) < 3) ||
                 (!isset($v[0])) ||
                 (!isset($v[1])) ||
-                (!isset($v[2])) ||
-                (!isset($v[3])) ||
-                ($v[0] == null) ||
-                ($v[1] == null) ||
-                ($v[2] == null) ||
-                ($v[3] == null)
+                ($v[0] == null)
             ) {
                 continue;
             }
