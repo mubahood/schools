@@ -21,6 +21,9 @@ class StockItemCategoryController extends AdminController
     /**
      * Make a grid builder.
      *
+     * public_html/storage/files/566a4a65425d5b27667e8d454cd7c845.xlsx
+     * public/storage/files/566a4a65425d5b27667e8d454cd7c845.xlsx File does not exist.
+
      * @return Grid
      */
     protected function grid()
