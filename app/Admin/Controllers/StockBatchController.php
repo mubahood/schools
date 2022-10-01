@@ -73,7 +73,7 @@ class StockBatchController extends AdminController
             return $this->supplier->name . " " . $this->supplier->phone_number_1;
         })->sortable();
 
-        $grid->column('created_at', __('Date'));
+        $grid->column('purchase_date', __('Date'));
 
         $grid->column('photo', __('Photo'))->hide();
         $grid->column('fund_requisition_id', __('Requisition form ID'))->hide();
@@ -92,7 +92,7 @@ class StockBatchController extends AdminController
         $show = new Show(StockBatch::findOrFail($id));
 
         $show->field('id', __('Id'));
-        $show->field('created_at', __('Created at'));
+        $show->field('purchase_date', __('Created'));
         $show->field('updated_at', __('Updated at'));
         $show->field('enterprise_id', __('Enterprise id'));
         $show->field('stock_item_category_id', __('Stock item category id'));
@@ -115,6 +115,10 @@ class StockBatchController extends AdminController
     {
         $form = new Form(new StockBatch());
 
+
+        $form->date('purchase_date', __('Date'))->rules('required');
+
+        
         $form->hidden('enterprise_id')->rules('required')->default(Admin::user()->enterprise_id)
             ->value(Admin::user()->enterprise_id);
 
@@ -143,7 +147,7 @@ class StockBatchController extends AdminController
         }
 
 
-        $form->select('supplier_id', __('School owner'))
+        $form->select('supplier_id', __('Supplier'))
             ->options(
                 $ads
             )
@@ -158,7 +162,7 @@ class StockBatchController extends AdminController
             ->orderBy('id', 'Desc')
             ->get() as $val) {
             $forms[$val->id] = $val->cat->name . " UGX " . number_format($val->total_amount)
-                . " - " . $val->created_at;;
+                . " - " . $val->created_at;
         }
 
 
@@ -173,6 +177,7 @@ class StockBatchController extends AdminController
             ->rules('required');
 
         $form->image('photo', __('Stock Photo'));
+
 
 
 

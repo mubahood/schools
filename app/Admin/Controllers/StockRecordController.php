@@ -61,7 +61,7 @@ class StockRecordController extends AdminController
             });
 
         $grid->column('description', __('Description'));
-        $grid->column('created_at', __('Date'));
+        $grid->column('record_date', __('Date'));
 
         return $grid;
     }
@@ -98,6 +98,9 @@ class StockRecordController extends AdminController
     protected function form()
     {
         $form = new Form(new StockRecord());
+
+
+        $form->date('record_date', __('Date'))->rules('required');
 
         $form->hidden('enterprise_id')->rules('required')->default(Admin::user()->enterprise_id)
             ->value(Admin::user()->enterprise_id);
