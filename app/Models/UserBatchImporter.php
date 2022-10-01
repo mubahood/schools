@@ -44,8 +44,8 @@ class UserBatchImporter extends Model
     {
 
 
-        $file_path = $_SERVER['DOCUMENT_ROOT'].'/storage/' . $m->file_path;
- 
+        $file_path = $_SERVER['DOCUMENT_ROOT'] . '/storage/' . $m->file_path;
+
         $cla = Enterprise::find($m->enterprise_id);
         if ($cla == null) {
             die("Enterprise not found.");
@@ -147,15 +147,15 @@ class UserBatchImporter extends Model
 
 
 
-      
+
         if ($m->type == 'photos') {
             UserBatchImporter::user_photos_batch_import($m);
             return $m;
         }
         set_time_limit(-1);
 
-        $file_path = $_SERVER['DOCUMENT_ROOT'].'/storage/' . $m->file_path;
-        
+        $file_path = $_SERVER['DOCUMENT_ROOT'] . '/storage/' . $m->file_path;
+
 
         $cla = AcademicClass::find($m->academic_class_id);
         if ($cla == null) {
@@ -172,7 +172,12 @@ class UserBatchImporter extends Model
         $_duplicates = '';
         $update_count = 0;
         $import_count = 0;
+        $is_first = true;
         foreach ($array[0] as $key => $v) {
+            if ($is_first) {
+                $is_first = false;
+                continue;
+            }
 
             $i++;
             if (
