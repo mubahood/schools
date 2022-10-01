@@ -25,18 +25,7 @@ class UserPhotosBatchImporterController extends AdminController
      * @return Grid
      */
 
-    static function unzip(string $zip_file_path, string $extract_dir_path)
-    {
-        $zip = new \ZipArchive;
-        $res = $zip->open($zip_file_path);
-        if ($res === TRUE) {
-            $zip->extractTo($extract_dir_path);
-            $zip->close();
-            return TRUE;
-        } else {
-            return FALSE;
-        }
-    }
+
 
     protected function grid()
     {
