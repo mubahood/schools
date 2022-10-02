@@ -55,7 +55,7 @@ class UserPhotosBatchImporterController extends AdminController
                 $u->save();
                 echo $x."<hr>";
                 rename($old_file, $new_file);
-            } //
+            } 
             $x++;
         }
 

@@ -220,8 +220,7 @@ class StudentsController extends AdminController
                 return $id;
             })
             ->sortable();
-        
-        $grid->column('avatar', __('avatar'))->sortable()->image();
+        $grid->column('avatar', __('Photo'))->sortable()->image(null, 100);
         $grid->column('name', __('Name'))->sortable();
         $grid->column('given_name', __('Given Name'))->sortable();
         $grid->column('sex', __('Sex'))
@@ -319,7 +318,7 @@ class StudentsController extends AdminController
         $u = Admin::user();
 
         $form = new Form(new Administrator());
-        
+
 
 
 
@@ -436,12 +435,12 @@ user_id
         })->tab('PERSONAL INFORMATION', function (Form $form) {
             $form->text('religion');
             $form->text('previous_school');
-            
+
             $form->text('father_name', "Father's name");
             $form->text('father_phone', "Father's phone number");
             $form->text('mother_name', "Mother's name");
-            $form->text('mother_phone', "Mother's phone number"); 
-            
+            $form->text('mother_phone', "Mother's phone number");
+
             $form->text('residential_type');
             $form->text('transportation');
             $form->text('swimming');
