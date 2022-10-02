@@ -55,7 +55,7 @@ class UserPhotosBatchImporterController extends AdminController
         }
 
 
-        $path = $_SERVER['DOCUMENT_ROOT'] . "/temp/bc_thumb";
+        $path = $_SERVER['DOCUMENT_ROOT'] . "/temp";
         $path_2 = $_SERVER['DOCUMENT_ROOT'] . "/storage/images";
         $files = scandir($path, 0);
         $x = 0;
