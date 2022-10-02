@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Models\AcademicClass;
 use App\Models\UserBatchImporter;
+use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -34,8 +35,13 @@ class UserPhotosBatchImporterController extends AdminController
         // $x = UserBatchImporter::find(11);
         // $x = UserBatchImporter::user_photos_batch_import($x);
         // dd("done");
-        /*
-        $excel = $_SERVER['DOCUMENT_ROOT'] . "/schools/public/temp/StudentsBabyClass.xlsx";
+
+        $excel = $_SERVER['DOCUMENT_ROOT'] . "/temp/StudentsBabyClass.xlsx";
+
+        if (!file_exists($excel)) {
+            dd("D.N.E ==>$excel<=== ");
+        }
+
         $array = Excel::toArray([], $excel);
         $is_first = true;
         $ids = [];
@@ -49,9 +55,9 @@ class UserPhotosBatchImporterController extends AdminController
         }
 
 
-        $path = $_SERVER['DOCUMENT_ROOT'] . "/schools/public/temp/bc_thumb";
+        $path = $_SERVER['DOCUMENT_ROOT'] . "/temp/bc_thumb";
+        $path_2 = $_SERVER['DOCUMENT_ROOT'] . "/storage/images";
         $files = scandir($path, 0);
-        $pics = [];
         $x = 0;
         foreach ($files as $f) {
             $ext = pathinfo($f, PATHINFO_EXTENSION);
@@ -59,16 +65,25 @@ class UserPhotosBatchImporterController extends AdminController
                 continue;
             }
 
-            if (isset($ids[$x])) {
-                $new_file = $path . "/" . $ids[$x] . ".jpg";
-                $old_file = $path . "/" . $f;
-                rename($old_file, $new_file);
+
+            $name = $ids[$x];
+            $u = Administrator::where([
+                'user_id' => $name
+            ])->first();
+            if ($u != null) {
+
+                if (isset($ids[$x])) {
+                    $new_file = $path_2 . "/" . $ids[$x] . ".jpg";
+                    $old_file = $path . "/" . $f;
+                    $u->avatar = $name . ".jpg";
+                    $u->save();
+                    rename($old_file, $new_file);
+                }
             }
-            print($f . "<hr>");
             $x++;
         }
 
-        dd("romina " . count($ids));*/
+        dd("romina " . count($ids));
 
 
         /*
