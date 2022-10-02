@@ -32,8 +32,21 @@ class UserPhotosBatchImporterController extends AdminController
     protected function grid()
     {
 
+        $users = Administrator::where([
+            'user_type' => 'student'
+        ])->get();
 
-        $path = $_SERVER['DOCUMENT_ROOT'] . "/public/temp";
+        $X = 1;
+        foreach ($users as $u) {
+            $u->avatar = $u->user_id.".jpg";
+            echo $u->avatar."<hr>";
+            $u->save();
+            $X++;
+        }
+        die("DONE ===> $X <===");
+
+
+        /*  $path = $_SERVER['DOCUMENT_ROOT'] . "/public/temp";
         $path_2 = $_SERVER['DOCUMENT_ROOT'] . "/public/storage/images";
         $files = scandir($path, 0);
         $x = 0;
@@ -58,14 +71,14 @@ class UserPhotosBatchImporterController extends AdminController
             } 
             $x++;
         }
-        die("done");
- 
+ */
+
 
         // $x = UserBatchImporter::find(11);
         // $x = UserBatchImporter::user_photos_batch_import($x);
-        // dd("done"); 
+        // dd("done");
 
-        $class = "p2";
+        $class = "tc";
         $excel = $_SERVER['DOCUMENT_ROOT'] . "/temp/{$class}.xlsx";
 
         if (!file_exists($excel)) {
