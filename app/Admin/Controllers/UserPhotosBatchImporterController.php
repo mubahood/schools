@@ -32,6 +32,7 @@ class UserPhotosBatchImporterController extends AdminController
     protected function grid()
     {
 
+        die("======");
         $users = Administrator::where([
             'user_type' => 'student'
         ])->get();

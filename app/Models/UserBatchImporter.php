@@ -202,6 +202,7 @@ class UserBatchImporter extends Model
                 $u->password = password_hash('4321', PASSWORD_DEFAULT);
                 $u->enterprise_id = $enterprise_id;
                 $u->school_pay_payment_code = trim($v[1]);
+                $u->avatar = url('user.png');
             }
 
 
@@ -246,7 +247,7 @@ class UserBatchImporter extends Model
             $u->passport_number = '-';
 
             $u->name = $u->first_name . " " . $u->last_name;
-            $u->avatar = url('user.png');
+          
             $u->user_type = 'student';
 
             $u->save();
