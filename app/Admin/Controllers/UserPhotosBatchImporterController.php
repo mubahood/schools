@@ -51,11 +51,11 @@ class UserPhotosBatchImporterController extends AdminController
             if ($u != null) {
                 $new_file = $path_2 . "/" . $f;
                 $old_file = $path . "/" . $f;
-                $u->avatar = $base_name;
+                $u->avatar = $base_name.".jpg"; 
                 $u->save();
-                echo $x;
+                echo $x."<hr>";
                 rename($old_file, $new_file);
-            }
+            } //
             $x++;
         }
 
