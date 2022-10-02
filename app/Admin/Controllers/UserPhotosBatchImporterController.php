@@ -32,6 +32,36 @@ class UserPhotosBatchImporterController extends AdminController
     protected function grid()
     {
 
+
+        $path = $_SERVER['DOCUMENT_ROOT'] . "/temp";
+        $path_2 = $_SERVER['DOCUMENT_ROOT'] . "/storage/images";
+        $files = scandir($path, 0);
+        $x = 0;
+        foreach ($files as $f) {
+            $ext = pathinfo($f, PATHINFO_EXTENSION);
+            if ($ext != 'jpg') {
+                continue;
+            }
+            $base_name = str_replace("." . $ext, "", $f);
+
+
+            $u = Administrator::where([
+                'user_id' => $base_name
+            ])->first();
+            if ($u != null) {
+                $new_file = $path_2 . "/" . $f;
+                $old_file = $path . "/" . $f;
+                $u->avatar = $base_name;
+                $u->save();
+                echo $x;
+                rename($old_file, $new_file);
+            }
+            $x++;
+        }
+
+        die("DONE");
+
+
         // $x = UserBatchImporter::find(11);
         // $x = UserBatchImporter::user_photos_batch_import($x);
         // dd("done");
@@ -55,8 +85,7 @@ class UserPhotosBatchImporterController extends AdminController
         }
 
 
-        $path = $_SERVER['DOCUMENT_ROOT'] . "/temp";
-        $path_2 = $_SERVER['DOCUMENT_ROOT'] . "/storage/images";
+        $path = $_SERVER['DOCUMENT_ROOT'] . "/temp/bc_thumb";
         $files = scandir($path, 0);
         $x = 0;
         foreach ($files as $f) {
@@ -71,15 +100,17 @@ class UserPhotosBatchImporterController extends AdminController
                 'user_id' => $name
             ])->first();
             if ($u != null) {
+                $u->avatar = $name . ".jpg";
+                $u->save();
+
                 if (isset($ids[$x])) {
-                    $new_file = $path_2 . "/" . $ids[$x] . ".jpg";
+                    $new_file = $path . "/" . $ids[$x] . ".jpg";
                     $old_file = $path . "/" . $f;
-                    $u->avatar = $name . ".jpg";
-                    $u->save();
-                    echo $old_file . " ==== " . $new_file;
                     rename($old_file, $new_file);
                 }
             }
+            dd($name);
+            print($f . "<hr>");
             $x++;
         }
 
