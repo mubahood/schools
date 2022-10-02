@@ -33,7 +33,7 @@ class UserPhotosBatchImporterController extends AdminController
     {
 
 
-        /*  $path = $_SERVER['DOCUMENT_ROOT'] . "/public/temp";
+        $path = $_SERVER['DOCUMENT_ROOT'] . "/public/temp";
         $path_2 = $_SERVER['DOCUMENT_ROOT'] . "/public/storage/images";
         $files = scandir($path, 0);
         $x = 0;
@@ -58,8 +58,8 @@ class UserPhotosBatchImporterController extends AdminController
             } 
             $x++;
         }
- */
-
+        die("done");
+ 
 
         // $x = UserBatchImporter::find(11);
         // $x = UserBatchImporter::user_photos_batch_import($x);
