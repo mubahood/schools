@@ -220,7 +220,10 @@ class StudentsController extends AdminController
                 return $id;
             })
             ->sortable();
-        $grid->column('avatar', __('Photo'))->sortable()->image(null, 20);
+        $grid->column('avatar', __('Photo'))
+        ->display(function ($img){
+            return '<img width=60 src='.$img.' />';
+        }); 
         $grid->column('name', __('Name'))->sortable();
         $grid->column('given_name', __('Given Name'))->sortable();
         $grid->column('sex', __('Sex'))
