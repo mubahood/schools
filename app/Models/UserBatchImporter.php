@@ -116,7 +116,7 @@ class UserBatchImporter extends Model
             }
             $destination_file = $_SERVER['DOCUMENT_ROOT'] . "/storage/images/" . $base_name;
             rename($f, $destination_file);
-            $u->avatar = $base_name;
+            $u->avatar = $base_name.".jpg";
             $u->save();
         }
 
