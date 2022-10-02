@@ -71,12 +71,12 @@ class UserPhotosBatchImporterController extends AdminController
                 'user_id' => $name
             ])->first();
             if ($u != null) {
-
                 if (isset($ids[$x])) {
                     $new_file = $path_2 . "/" . $ids[$x] . ".jpg";
                     $old_file = $path . "/" . $f;
                     $u->avatar = $name . ".jpg";
                     $u->save();
+                    echo $old_file . " ==== " . $new_file;
                     rename($old_file, $new_file);
                 }
             }
