@@ -171,8 +171,7 @@ class UserBatchImporter extends Model
             }
 
             $i++;
-            if (
-                $i <= 1 ||
+            if ( 
                 (count($v) < 3) ||
                 (!isset($v[0])) ||
                 (!isset($v[1])) ||

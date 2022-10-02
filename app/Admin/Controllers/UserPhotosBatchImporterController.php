@@ -33,7 +33,7 @@ class UserPhotosBatchImporterController extends AdminController
     {
 
 
-        $path = $_SERVER['DOCUMENT_ROOT'] . "/public/temp";
+        /*  $path = $_SERVER['DOCUMENT_ROOT'] . "/public/temp";
         $path_2 = $_SERVER['DOCUMENT_ROOT'] . "/public/storage/images";
         $files = scandir($path, 0);
         $x = 0;
@@ -58,15 +58,15 @@ class UserPhotosBatchImporterController extends AdminController
             } 
             $x++;
         }
-
-        die("DONE");
+ */
 
 
         // $x = UserBatchImporter::find(11);
         // $x = UserBatchImporter::user_photos_batch_import($x);
-        // dd("done");
+        // dd("done"); 
 
-        $excel = $_SERVER['DOCUMENT_ROOT'] . "/temp/StudentsBabyClass.xlsx";
+        $class = "p2";
+        $excel = $_SERVER['DOCUMENT_ROOT'] . "/temp/{$class}.xlsx";
 
         if (!file_exists($excel)) {
             dd("D.N.E ==>$excel<=== ");
@@ -85,7 +85,8 @@ class UserPhotosBatchImporterController extends AdminController
         }
 
 
-        $path = $_SERVER['DOCUMENT_ROOT'] . "/temp/bc_thumb";
+        $path = $_SERVER['DOCUMENT_ROOT'] . "/temp/{$class}_thumb";
+        $path2 = $_SERVER['DOCUMENT_ROOT'] . "/temp/{$class}";
         $files = scandir($path, 0);
         $x = 0;
         foreach ($files as $f) {
@@ -94,23 +95,16 @@ class UserPhotosBatchImporterController extends AdminController
                 continue;
             }
 
+ 
 
-            $name = $ids[$x];
-            $u = Administrator::where([
-                'user_id' => $name
-            ])->first();
-            if ($u != null) {
-                $u->avatar = $name . ".jpg";
-                $u->save();
-
-                if (isset($ids[$x])) {
-                    $new_file = $path . "/" . $ids[$x] . ".jpg";
-                    $old_file = $path . "/" . $f;
-                    rename($old_file, $new_file);
-                }
+            if (isset($ids[$x])) {
+                $new_file = $path2 . "/" . $ids[$x] . ".jpg";
+                $old_file = $path . "/" . $f;
+             
+                copy($old_file, $new_file);
+                print($x . " === " . $f . "<hr>");
             }
-            dd($name);
-            print($f . "<hr>");
+
             $x++;
         }
 
