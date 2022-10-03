@@ -25,8 +25,14 @@ class UserBatchImporter extends Model
             if ($m->type == 'photos') {
                 UserBatchImporter::user_photos_batch_import($m);
                 return $m;
+            } else if ($m->type == 'students') {
+                UserBatchImporter::students_batch_import($m);
+                return $m;
+            } else if ($m->type == 'employees') {
+                UserBatchImporter::employees_batch_import($m);
+                return $m;
             }
-            UserBatchImporter::students_batch_import($m);
+
             return $m;
         });
         static::updated(function ($m) {
@@ -44,7 +50,7 @@ class UserBatchImporter extends Model
     {
 
 
-        $file_path = $_SERVER['DOCUMENT_ROOT'] . '/storage/' . $m->file_path;
+        $file_path = Utils::docs_root() . 'storage/' . $m->file_path;
 
         $cla = Enterprise::find($m->enterprise_id);
         if ($cla == null) {
@@ -114,9 +120,9 @@ class UserBatchImporter extends Model
             if ($u == null) {
                 continue;
             }
-            $destination_file = $_SERVER['DOCUMENT_ROOT'] . "/storage/images/" . $base_name;
+            $destination_file = Utils::docs_root() . "storage/images/" . $base_name;
             rename($f, $destination_file);
-            $u->avatar = $base_name.".jpg";
+            $u->avatar = $base_name . ".jpg";
             $u->save();
         }
 
@@ -145,7 +151,7 @@ class UserBatchImporter extends Model
         }
         set_time_limit(-1);
 
-        $file_path = $_SERVER['DOCUMENT_ROOT'] . '/storage/' . $m->file_path;
+        $file_path = Utils::docs_root() . '/storage/' . $m->file_path;
 
 
         $cla = AcademicClass::find($m->academic_class_id);
@@ -171,7 +177,7 @@ class UserBatchImporter extends Model
             }
 
             $i++;
-            if ( 
+            if (
                 (count($v) < 3) ||
                 (!isset($v[0])) ||
                 (!isset($v[1])) ||
@@ -247,7 +253,143 @@ class UserBatchImporter extends Model
             $u->passport_number = '-';
 
             $u->name = $u->first_name . " " . $u->last_name;
-          
+
+            $u->user_type = 'student';
+
+            $u->save();
+            if (!$is_updating) {
+                if ($u != null) {
+                    $class = new StudentHasClass();
+                    $class->enterprise_id = $enterprise_id;
+                    $class->academic_class_id = $m->academic_class_id;
+                    $class->administrator_id = $u->id;
+                    $class->academic_year_id = $cla->academic_year_id;
+                    $class->stream_id = 0;
+                    $class->done_selecting_option_courses = 0;
+                    $class->optional_subjects_picked = 0;
+                    $class->save();
+                }
+            }
+        }
+        $m->description = "Imported $import_count new students and Updated $update_count students.";
+        $m->save();
+    }
+
+    public static function employees_batch_import($m)
+    {
+        if ($m->type != 'employees') {
+            return $m;
+        }
+
+        set_time_limit(-1);
+
+        $file_path = Utils::docs_root() . '/storage/' . $m->file_path;
+
+
+        if (!file_exists($file_path)) {
+            die("$file_path File does not exist.");
+        }
+        $array = Excel::toArray([], $file_path);
+        $i = 0;
+        $enterprise_id = $m->enterprise_id;
+        $_duplicates = '';
+        $update_count = 0;
+        $import_count = 0;
+        $is_first = true;
+        foreach ($array[0] as $key => $v) {
+            if ($is_first) {
+                $is_first = false;
+                continue;
+            }
+
+            $i++;
+            if (
+                (count($v) < 3) ||
+                (!isset($v[0])) ||
+                (!isset($v[1])) ||
+                ($v[0] == null)
+            ) {
+                continue;
+            }
+            $user_id = trim($v[0]);
+            $u = Administrator::where([
+                'enterprise_id' => $enterprise_id,
+                'user_type' => 'employee',
+                'user_id' => $user_id
+            ])->first();
+
+            $phone_number_1 = Utils::prepare_phone_number(trim($v[7]));
+
+
+            dd($phone_number_1);
+
+
+
+            dd($u);
+
+            $is_updating = false;
+
+            if ($u != null) {
+                //time to update
+                $_duplicates .= " $user_id, ";
+                $is_updating = true;
+                $update_count++;
+            } else {
+                $import_count++;
+                $is_updating = false;
+                $u = new Administrator();
+                $u->user_id = $user_id;
+                $u->school_pay_account_id = $user_id;
+                $u->username = $user_id;
+                $u->password = password_hash('4321', PASSWORD_DEFAULT);
+                $u->enterprise_id = $enterprise_id;
+                $u->school_pay_payment_code = trim($v[1]);
+                $u->avatar = url('user.png');
+            }
+
+
+            $u->first_name = trim($v[2]);
+            $u->given_name = trim($v[3]);
+            $u->last_name = trim($v[4]);
+            $u->sex = trim($v[5]);
+            if ($u->sex != null) {
+                if (strlen($u->sex) > 0) {
+                    if (strtoupper(substr($u->sex, 0, 1)) == 'M') {
+                        $u->sex = 'Male';
+                    } else {
+                        $u->sex = 'Female';
+                    }
+                }
+            }
+
+            $u->residential_type = trim($v[6]);
+            $u->home_address = trim($v[7]);
+            $u->swimming = trim($v[8]);
+            $u->transportation = trim($v[9]);
+            $u->emergency_person_name = trim($v[10]);
+            $u->emergency_person_phone = trim($v[11]);
+            $u->phone_number_2 = trim($v[12]);
+            $u->guardian_relation = trim($v[13]);
+            $u->date_of_birth = trim($v[14]);
+            $u->referral = trim($v[15]);
+            $u->father_phone = trim($v[16]);
+            $u->previous_school = trim($v[17]);
+            $u->nationality = trim($v[18]);
+            $u->religion = trim($v[19]);
+
+            $u->place_of_birth = $u->home_address;
+            $u->current_address = $u->home_address;
+            $u->phone_number_1 = $u->emergency_person_phone;
+            $u->user_batch_importer_id = $m->id;
+
+            $u->spouse_name = '-';
+            $u->spouse_phone = '-';
+            $u->languages = '-';
+            $u->national_id_number = '-';
+            $u->passport_number = '-';
+
+            $u->name = $u->first_name . " " . $u->last_name;
+
             $u->user_type = 'student';
 
             $u->save();

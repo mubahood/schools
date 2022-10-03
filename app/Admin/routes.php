@@ -11,6 +11,7 @@ Route::group([
     'as'            => config('admin.route.prefix') . '.',
 ], function (Router $router) {
 
+    $router->resource('employees-batch-importers', EmployeesBatchImporterController::class);
     $router->resource('employees', EmployeesController::class);
     $router->get('/statistics', 'HomeController@stats')->name('home');
     $router->resource('books-categories', BooksCategoryController::class);
@@ -37,7 +38,7 @@ Route::group([
     $router->resource('menu-items', MenuItemController::class);
     $router->resource('main-courses', MainCourseController::class);
     $router->resource('user-batch-importers', UserBatchImporterController::class);
-    $router->resource('user-photos-batch-importers', UserPhotosBatchImporterController::class); 
+    $router->resource('user-photos-batch-importers', UserPhotosBatchImporterController::class);
     $router->resource('fund-requisitions', FundRequisitionController::class);
     $router->resource('stock-item-categories', StockItemCategoryController::class);
     $router->resource('stock-batches', StockBatchController::class);

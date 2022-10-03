@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Models\AcademicClass;
 use App\Models\UserBatchImporter;
+use App\Models\Utils;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -31,24 +32,23 @@ class UserPhotosBatchImporterController extends AdminController
 
     protected function grid()
     {
+ 
 
-        die("======");
-        $users = Administrator::where([
-            'user_type' => 'student'
-        ])->get();
+        $users = Administrator::all();
 
         $X = 1;
         foreach ($users as $u) {
-            $u->avatar = $u->user_id.".jpg";
-            echo $u->avatar."<hr>";
+            $u->phone_number_1 = Utils::prepare_phone_number($u->phone_number_1);
+            $u->phone_number_2 = Utils::prepare_phone_number($u->phone_number_2);
+            echo $u->phone_number_1."<hr>";
             $u->save();
             $X++;
         }
         die("DONE ===> $X <===");
 
 
-        /*  $path = $_SERVER['DOCUMENT_ROOT'] . "/public/temp";
-        $path_2 = $_SERVER['DOCUMENT_ROOT'] . "/public/storage/images";
+        /*  $path = Utils::docs_root() . "temp";
+        $path_2 = $Utils::docs_root() . "storage/images";
         $files = scandir($path, 0);
         $x = 0;
         foreach ($files as $f) {
@@ -80,7 +80,7 @@ class UserPhotosBatchImporterController extends AdminController
         // dd("done");
 
         $class = "tc";
-        $excel = $_SERVER['DOCUMENT_ROOT'] . "/temp/{$class}.xlsx";
+        $excel = Utils::docs_root() . "temp/{$class}.xlsx";
 
         if (!file_exists($excel)) {
             dd("D.N.E ==>$excel<=== ");
@@ -99,8 +99,8 @@ class UserPhotosBatchImporterController extends AdminController
         }
 
 
-        $path = $_SERVER['DOCUMENT_ROOT'] . "/temp/{$class}_thumb";
-        $path2 = $_SERVER['DOCUMENT_ROOT'] . "/temp/{$class}";
+        $path = Utils::docs_root() . "temp/{$class}_thumb";
+        $path2 = Utils::docs_root() . "/temp/{$class}";
         $files = scandir($path, 0);
         $x = 0;
         foreach ($files as $f) {
@@ -133,8 +133,8 @@ class UserPhotosBatchImporterController extends AdminController
         die("romina");*/
 
 
-        /* $url = $_SERVER['DOCUMENT_ROOT'] . "/pics/1.zip";
-        $dest = $_SERVER['DOCUMENT_ROOT'] . "/pics/1";
+        /* $url = Utils::docs_root() . "/pics/1.zip";
+        $dest = Utils::docs_root() . "/pics/1";
         if (!file_exists($url)) {
             dd("FILE DNE => $url");
         }
