@@ -277,7 +277,7 @@ class UserBatchImporter extends Model
 
     public static function employees_batch_import($m)
     {
-        if ($m->type == 'employees') {
+        if ($m->type != 'employees') {
             return $m;
         }
 
@@ -437,6 +437,7 @@ class UserBatchImporter extends Model
             $u->nssf_number = trim($v[21]);
             $u->user_type = 'employee';
             $u->save();
+            print($u->id."<hr>");
 
             $_role = DB::select("SELECT * FROM admin_role_users WHERE role_id = 5 AND user_id = $u->id");
             if($_role == null){

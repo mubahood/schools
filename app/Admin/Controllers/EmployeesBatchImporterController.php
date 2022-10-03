@@ -26,9 +26,9 @@ class EmployeesBatchImporterController extends AdminController
      */
     protected function grid()
     {
-        /* $x = UserBatchImporter::find(22);
+        $x = UserBatchImporter::find(28);
         UserBatchImporter::employees_batch_import($x);
-        die("romina k"); */
+        die("romina k");
 
 
         /*  $x = new UserBatchImporter();
