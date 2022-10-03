@@ -151,7 +151,7 @@ class UserBatchImporter extends Model
         }
         set_time_limit(-1);
 
-        $file_path = Utils::docs_root() . '/storage/' . $m->file_path;
+        $file_path = Utils::docs_root() . 'storage/' . $m->file_path;
 
 
         $cla = AcademicClass::find($m->academic_class_id);
@@ -283,7 +283,7 @@ class UserBatchImporter extends Model
 
         set_time_limit(-1);
 
-        $file_path = Utils::docs_root() . '/storage/' . $m->file_path;
+        $file_path = Utils::docs_root() . 'storage/' . $m->file_path;
 
 
         if (!file_exists($file_path)) {

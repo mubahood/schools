@@ -100,7 +100,7 @@ class UserPhotosBatchImporterController extends AdminController
 
 
         $path = Utils::docs_root() . "temp/{$class}_thumb";
-        $path2 = Utils::docs_root() . "/temp/{$class}";
+        $path2 = Utils::docs_root() . "temp/{$class}";
         $files = scandir($path, 0);
         $x = 0;
         foreach ($files as $f) {
@@ -133,8 +133,8 @@ class UserPhotosBatchImporterController extends AdminController
         die("romina");*/
 
 
-        /* $url = Utils::docs_root() . "/pics/1.zip";
-        $dest = Utils::docs_root() . "/pics/1";
+        /* $url = Utils::docs_root() . "pics/1.zip";
+        $dest = Utils::docs_root() . "pics/1";
         if (!file_exists($url)) {
             dd("FILE DNE => $url");
         }
