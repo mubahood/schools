@@ -277,7 +277,7 @@ class UserBatchImporter extends Model
 
     public static function employees_batch_import($m)
     {
-        if ($m->type != 'employees') {
+        if ($m->type == 'employees') {
             return $m;
         }
 
