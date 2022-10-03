@@ -452,13 +452,10 @@ class UserBatchImporter extends Model
                     5,
                     $u->id
                 )";
-                dd($sql1);
-                DB::insert("INSERT INTO admin_role_users (
-                    role_id,user_id
-                )VALUES(
-                    5,
-                    $u->id
-                )");
+                DB::insert("INSERT INTO admin_role_users ( role_id,user_id )VALUES( 5, $u->id )");
+                
+                echo "$sql <br> $sql1";
+                dd("");
 
                 die("scucesss");
             }
