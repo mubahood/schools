@@ -208,6 +208,12 @@ class StudentsController extends AdminController
             'user_type' => 'student'
         ]);
 
+        $states = [
+            'on' => ['value' => 1, 'text' => 'Verified', 'color' => 'success'],
+            'off' => ['value' => 0, 'text' => 'Pending', 'color' => 'danger'],
+        ];
+
+
         $grid->column('verification', __('Verification'))->switch($states)->sortable();
 
 
@@ -286,10 +292,6 @@ class StudentsController extends AdminController
             })->hide()->sortable();
 
 
-        $states = [
-            'on' => ['value' => 1, 'text' => 'Verified', 'color' => 'success'],
-            'off' => ['value' => 0, 'text' => 'Pending', 'color' => 'danger'],
-        ];
 
 
 
