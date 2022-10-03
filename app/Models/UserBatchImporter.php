@@ -437,27 +437,16 @@ class UserBatchImporter extends Model
             $u->nssf_number = trim($v[21]);
             $u->user_type = 'employee';
             $u->save();
-            
+
 
             $sql = "SELECT * FROM admin_role_users WHERE role_id = 5 AND user_id = $u->id";
 
             $_role = DB::select($sql);
-            if($_role == null){
+            if ($_role == null) {
                 $_role = [];
             }
             if (count($_role)  == 0) {
-                $sql1 =  "INSERT INTO admin_role_users (
-                    role_id,user_id
-                )VALUES(
-                    5,
-                    $u->id
-                )";
                 DB::insert("INSERT INTO admin_role_users ( role_id,user_id )VALUES( 5, $u->id )");
-                
-                echo "$sql <br> $sql1";
-                dd("");
-
-                die("scucesss");
             }
         }
         $m->description = "Imported $import_count new employees and Updated $update_count employees.";
