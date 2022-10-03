@@ -438,8 +438,11 @@ class UserBatchImporter extends Model
             $u->user_type = 'employee';
             $u->save();
 
-            $x = DB::select("SELECT * FROM admin_role_users WHERE role_id = 5 AND user_id = $u->id");
-            if (count($x)  == 0) {
+            $_role = DB::select("SELECT * FROM admin_role_users WHERE role_id = 5 AND user_id = $u->id");
+            if($_role == null){
+                $_role = [];
+            }
+            if (count($_role)  == 0) {
                 DB::insert("INSERT INTO admin_role_users (
                     role_id,user_id
                 )VALUES(
