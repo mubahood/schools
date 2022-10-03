@@ -214,7 +214,7 @@ class StudentsController extends AdminController
             'on' => ['value' => 1, 'text' => 'Verified', 'color' => 'success'],
             'off' => ['value' => 0, 'text' => 'Pending', 'color' => 'danger'],
         ];
-        $grid->column('verification', __('Verification'))->switch($states);
+        $grid->column('verification', __('Verification'))->switch($states)->sortable();
 
         $grid->column('id', __('ID'))
             ->display(function ($id) {
@@ -229,7 +229,7 @@ class StudentsController extends AdminController
         $grid->column('avatar', __('Photo'))
             ->display(function ($img) {
                 return '<img width="40" class="img img-fluid rounded" src="' . $img . '" />';
-            });
+            })->sortable();
         $grid->column('name', __('Name'))->sortable();
         $grid->column('given_name', __('Given Name'))->sortable();
         $grid->column('sex', __('Sex'))
