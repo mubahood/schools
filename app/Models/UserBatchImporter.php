@@ -439,7 +439,10 @@ class UserBatchImporter extends Model
             $u->save();
             print($u->id."<hr>");
 
-            $_role = DB::select("SELECT * FROM admin_role_users WHERE role_id = 5 AND user_id = $u->id");
+            $sql = "SELECT * FROM admin_role_users WHERE role_id = 5 AND user_id = $u->id";
+
+            dd($sql);
+            $_role = DB::select($sql);
             if($_role == null){
                 $_role = [];
             }
