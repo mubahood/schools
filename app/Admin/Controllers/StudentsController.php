@@ -208,6 +208,13 @@ class StudentsController extends AdminController
             'user_type' => 'student'
         ]);
 
+        $grid->column('verification', __('Verification'))->switch($states)->sortable();
+
+
+        $grid->column('avatar', __('Photo'))
+            ->lightbox(['width' => 60, 'height' => 60])
+            ->sortable();
+
         $grid->column('id', __('ID'))
             ->display(function ($id) {
                 if ($this->school_pay_account_id != null) {
@@ -217,9 +224,6 @@ class StudentsController extends AdminController
                 }
                 return $id;
             })
-            ->sortable();
-        $grid->column('avatar', __('Photo'))
-            ->lightbox(['width' => 60, 'height' => 60])
             ->sortable();
         $grid->column('name', __('Name'))->sortable();
         $grid->column('given_name', __('Given Name'))->sortable();
@@ -286,7 +290,7 @@ class StudentsController extends AdminController
             'on' => ['value' => 1, 'text' => 'Verified', 'color' => 'success'],
             'off' => ['value' => 0, 'text' => 'Pending', 'color' => 'danger'],
         ];
-        $grid->column('verification', __('Verification'))->switch($states)->sortable();
+
 
 
         return $grid;
