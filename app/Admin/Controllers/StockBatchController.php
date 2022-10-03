@@ -44,7 +44,7 @@ class StockBatchController extends AdminController
 
 
 
-        $grid->disableActions();
+        //$grid->disableActions();
         $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
             ->orderBy('id', 'Desc');
 

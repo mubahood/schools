@@ -34,5 +34,9 @@ class StockBatch extends Model
             $m->current_quantity = $m->original_quantity;
             return $m;
         });
+
+        self::deleting(function ($m) {
+            return false;
+        });
     }
 }
