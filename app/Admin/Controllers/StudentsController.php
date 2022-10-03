@@ -228,7 +228,7 @@ class StudentsController extends AdminController
             })
             ->sortable();
         $grid->column('avatar', __('Photo'))
-            ->lightbox()
+            ->lightbox(['width' => 50, 'height' => 50]) 
             ->sortable();
         $grid->column('name', __('Name'))->sortable();
         $grid->column('given_name', __('Given Name'))->sortable();
