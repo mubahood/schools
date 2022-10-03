@@ -33,7 +33,7 @@ class UserPhotosBatchImporterController extends AdminController
     protected function grid()
     {
  
-
+/* 
         $users = Administrator::all();
 
         $X = 1;
@@ -45,7 +45,7 @@ class UserPhotosBatchImporterController extends AdminController
             $X++;
         }
         die("DONE ===> $X <===");
-
+ */
 
         /*  $path = Utils::docs_root() . "temp";
         $path_2 = $Utils::docs_root() . "storage/images";

@@ -319,13 +319,53 @@ class UserBatchImporter extends Model
             ])->first();
 
             $phone_number_1 = Utils::prepare_phone_number(trim($v[7]));
+            $phone_number_2 = Utils::prepare_phone_number(trim($v[8]));
+            if ($u == null && Utils::phone_number_is_valid($phone_number_1)) {
+                $u = Administrator::where([
+                    'enterprise_id' => $enterprise_id,
+                    'user_type' => 'employee',
+                    'phone_number_1' => $phone_number_1
+                ])->first();
 
+                if ($u == null) {
+                    $u = Administrator::where([
+                        'enterprise_id' => $enterprise_id,
+                        'user_type' => 'employee',
+                        'phone_number_2' => $phone_number_1
+                    ])->first();
+                }
+            }
 
-            dd($phone_number_1);
+            if ($u == null && Utils::phone_number_is_valid($phone_number_2)) {
+                $u = Administrator::where([
+                    'enterprise_id' => $enterprise_id,
+                    'user_type' => 'employee',
+                    'phone_number_2' => $phone_number_2
+                ])
+                    ->first();
 
+                if ($u == null) {
+                    $u = Administrator::where([
+                        'enterprise_id' => $enterprise_id,
+                        'user_type' => 'employee',
+                        'phone_number_1' => $phone_number_2
+                    ])->first();
+                }
+            }
 
-
-            dd($u);
+            $email = trim($v[9]);
+            if (
+                $u == null &&
+                ($email != null) &&
+                (strlen($email) > 4)
+            ) {
+                $u = Administrator::where([
+                    'enterprise_id' => $enterprise_id,
+                    'user_type' => 'employee',
+                    'email' => $email
+                ])
+                    ->first();
+            }
 
             $is_updating = false;
 
@@ -340,7 +380,20 @@ class UserBatchImporter extends Model
                 $u = new Administrator();
                 $u->user_id = $user_id;
                 $u->school_pay_account_id = $user_id;
-                $u->username = $user_id;
+
+                if (Utils::phone_number_is_valid($phone_number_1)) {
+                    $__x = Administrator::where('username', $phone_number_1)->first();
+                    if ($__x == null) {
+                        $u->username = $phone_number_1;
+                        $u->email = $phone_number_1;
+                    } else {
+                        $u->username = $user_id;
+                        $u->email = $user_id;
+                    }
+                } else {
+                    $u->username = $user_id;
+                    $u->email = $user_id;
+                }
                 $u->password = password_hash('4321', PASSWORD_DEFAULT);
                 $u->enterprise_id = $enterprise_id;
                 $u->school_pay_payment_code = trim($v[1]);
@@ -348,9 +401,12 @@ class UserBatchImporter extends Model
             }
 
 
-            $u->first_name = trim($v[2]);
-            $u->given_name = trim($v[3]);
-            $u->last_name = trim($v[4]);
+            $u->first_name = trim($v[1]);
+            $u->last_name = trim($v[2]);
+            $u->date_of_birth = trim($v[3]);
+            $u->home_address = trim($v[4]);
+
+
             $u->sex = trim($v[5]);
             if ($u->sex != null) {
                 if (strlen($u->sex) > 0) {
@@ -361,53 +417,28 @@ class UserBatchImporter extends Model
                     }
                 }
             }
+            $u->current_address = trim($v[6]);
+            $u->phone_number_1 = $phone_number_1;
+            $u->phone_number_2 = $phone_number_2;
+            $u->email = trim($v[9]);
+            $u->nationality = trim($v[10]);
+            $u->religion = trim($v[11]);
+            $u->marital_status = trim($v[12]);
+            $u->emergency_person_name = trim($v[13]);
+            $u->emergency_person_phone = Utils::prepare_phone_number(trim($v[14]));
+            $u->father_name = trim($v[15]);
+            $u->father_phone = Utils::prepare_phone_number(trim($v[16]));
 
-            $u->residential_type = trim($v[6]);
-            $u->home_address = trim($v[7]);
-            $u->swimming = trim($v[8]);
-            $u->transportation = trim($v[9]);
-            $u->emergency_person_name = trim($v[10]);
-            $u->emergency_person_phone = trim($v[11]);
-            $u->phone_number_2 = trim($v[12]);
-            $u->guardian_relation = trim($v[13]);
-            $u->date_of_birth = trim($v[14]);
-            $u->referral = trim($v[15]);
-            $u->father_phone = trim($v[16]);
-            $u->previous_school = trim($v[17]);
-            $u->nationality = trim($v[18]);
-            $u->religion = trim($v[19]);
-
-            $u->place_of_birth = $u->home_address;
-            $u->current_address = $u->home_address;
-            $u->phone_number_1 = $u->emergency_person_phone;
-            $u->user_batch_importer_id = $m->id;
-
-            $u->spouse_name = '-';
-            $u->spouse_phone = '-';
-            $u->languages = '-';
-            $u->national_id_number = '-';
-            $u->passport_number = '-';
-
-            $u->name = $u->first_name . " " . $u->last_name;
-
-            $u->user_type = 'student';
-
-            $u->save();
-            if (!$is_updating) {
-                if ($u != null) {
-                    $class = new StudentHasClass();
-                    $class->enterprise_id = $enterprise_id;
-                    $class->academic_class_id = $m->academic_class_id;
-                    $class->administrator_id = $u->id;
-                    $class->academic_year_id = $cla->academic_year_id;
-                    $class->stream_id = 0;
-                    $class->done_selecting_option_courses = 0;
-                    $class->optional_subjects_picked = 0;
-                    $class->save();
-                }
+            if (strlen($u->emergency_person_phone) < 3) {
+                $u->emergency_person_phone = Utils::prepare_phone_number(trim($v[18]));
             }
+            $u->national_id_number = trim($v[19]);
+            $u->tin = trim($v[20]);
+            $u->nssf_number = trim($v[21]);
+            $u->user_type = 'employee';
+            $u->save();
         }
-        $m->description = "Imported $import_count new students and Updated $update_count students.";
+        $m->description = "Imported $import_count new employees and Updated $update_count employees.";
         $m->save();
     }
 }
