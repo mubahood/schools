@@ -210,6 +210,12 @@ class StudentsController extends AdminController
             $actions->disableView();
         });
 
+        $states = [
+            'on' => ['value' => 1, 'text' => 'Verified', 'color' => 'success'],
+            'off' => ['value' => 0, 'text' => 'Pending', 'color' => 'danger'],
+        ];
+        $grid->column('verification', __('Verification'))->switch($states);
+
         $grid->column('id', __('ID'))
             ->display(function ($id) {
                 if ($this->school_pay_account_id != null) {
@@ -224,13 +230,6 @@ class StudentsController extends AdminController
             ->display(function ($img) {
                 return '<img width="40" class="img img-fluid rounded" src="' . $img . '" />';
             });
-
-        $states = [
-            'on' => ['value' => 1, 'text' => 'Verified', 'color' => 'success'],
-            'off' => ['value' => 0, 'text' => 'Pending', 'color' => 'danger'],
-        ];
-
-        $grid->column('verification', __('Verification'))->editable()->sortable();
         $grid->column('name', __('Name'))->sortable();
         $grid->column('given_name', __('Given Name'))->sortable();
         $grid->column('sex', __('Sex'))
@@ -247,7 +246,7 @@ class StudentsController extends AdminController
         $grid->column('date_of_birth', __('D.O.B'))->sortable()->hide();
         $grid->column('nationality', __('Nationality'))->sortable()->hide();
 
-        $grid->column('place_of_birth', __('Address'))->sortable();
+        $grid->column('place_of_birth', __('Address'))->sortable()->hide();
         $grid->column('home_address', __('Home address'))->hide();
         $grid->column('previous_school', __('Previous school'))->hide();
         $grid->column('residential_type', __('Residential type'))->hide();
@@ -351,97 +350,12 @@ class StudentsController extends AdminController
             $form->text('emergency_person_phone', "Guardian phone number")->rules('required');
             $form->text('phone_number_2', "Guardian phone number 2");
 
-            /*            id
- 
-email
-nationality
-religion
-spouse_name
-spouse_phone
-father_name
-father_phone
-mother_name
-mother_phone
-languages
-emergency_person_phone
-national_id_number
-passport_number
-tin
-nssf_number
-bank_name
-bank_account_number
-primary_school_name
-primary_school_year_graduated
-seconday_school_name
-seconday_school_year_graduated
-high_school_name
-high_school_year_graduated
-degree_university_name
-degree_university_year_graduated
-masters_university_name
-masters_university_year_graduated
-phd_university_name
-phd_university_year_graduated
-user_type
-demo_id
-user_id
-user_batch_importer_id 
+            $states = [
+                'on' => ['value' => 1, 'text' => 'Verified', 'color' => 'success'],
+                'off' => ['value' => 0, 'text' => 'Pending', 'color' => 'danger'],
+            ];
 
-
-
-Full texts
-id	
-username	
-password	
-name	
-avatar	
-remember_token	
-created_at	
-updated_at	
-enterprise_id	
-first_name	
-last_name	
-date_of_birth	
-place_of_birth	
-sex	
-home_address	
-current_address	
-phone_number_1	
-phone_number_2	
-email	
-nationality	
-religion	
-spouse_name	
-spouse_phone	
-father_name	
-father_phone	
-mother_name	
-mother_phone	
-languages	
-emergency_person_name	
-emergency_person_phone	
-national_id_number	
-passport_number	
-tin	
-nssf_number	
-bank_name	
-bank_account_number	
-primary_school_name	
-primary_school_year_graduated	
-seconday_school_name	
-seconday_school_year_graduated	
-high_school_name	
-high_school_year_graduated	
-degree_university_name	
-degree_university_year_graduated	
-masters_university_name	
-masters_university_year_graduated	
-phd_university_name	
-phd_university_year_graduated	
-user_type	
-demo_id	
-user_id		
-*/
+            $form->switch('verification')->rules('required')->default(0);
         })->tab('PERSONAL INFORMATION', function (Form $form) {
             $form->text('religion');
             $form->text('previous_school');
