@@ -228,9 +228,8 @@ class StudentsController extends AdminController
             })
             ->sortable();
         $grid->column('avatar', __('Photo'))
-            ->display(function ($img) {
-                return '<img width="40" class="img img-fluid rounded" src="' . $img . '" />';
-            })->sortable();
+            ->lightbox()
+            ->sortable();
         $grid->column('name', __('Name'))->sortable();
         $grid->column('given_name', __('Given Name'))->sortable();
         $grid->column('sex', __('Sex'))
