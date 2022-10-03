@@ -221,9 +221,16 @@ class StudentsController extends AdminController
             })
             ->sortable();
         $grid->column('avatar', __('Photo'))
-        ->display(function ($img){
-            return '<img width="40" class="img img-fluid rounded" src="'.$img.'" />';
-        }); 
+            ->display(function ($img) {
+                return '<img width="40" class="img img-fluid rounded" src="' . $img . '" />';
+            });
+
+        $states = [
+            'on' => ['value' => 1, 'text' => 'Verified', 'color' => 'success'],
+            'off' => ['value' => 0, 'text' => 'Pending', 'color' => 'danger'],
+        ];
+
+        $grid->column('verification', __('Verification'))->editable()->sortable();
         $grid->column('name', __('Name'))->sortable();
         $grid->column('given_name', __('Given Name'))->sortable();
         $grid->column('sex', __('Sex'))
