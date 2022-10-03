@@ -33,14 +33,14 @@ return [
 
         'local' => [
             'driver' => 'local',
-            'root' => $_SERVER['DOCUMENT_ROOT'].'/storage',
+            'root' => env('DOCUMENT_ROOT').'storage',
             'url' => env('APP_URL') . '/storage',
             'visibility' => 'public',
         ],
 
         'public' => [
             'driver' => 'local',
-            'root' => $_SERVER['DOCUMENT_ROOT'].'public/storage',
+            'root' => env('DOCUMENT_ROOT').'storage',
             'url' => env('APP_URL') . 'public/storage',
             'visibility' => 'public',
         ],
@@ -57,7 +57,7 @@ return [
         ],
         'admin' => [
             'driver' => 'local',
-            'root' => env('DOCUMENT_ROOT').'/storage/',
+            'root' => env('DOCUMENT_ROOT').'storage/',
             'url' => env('APP_URL') . '/storage',
             'visibility' => 'public',
         ],
