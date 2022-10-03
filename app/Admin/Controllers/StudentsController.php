@@ -149,6 +149,7 @@ class StudentsController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Administrator());
+        $grid->disableBatchActions();
         $grid->actions(function ($actions) {
             $actions->disableDelete();
         });
