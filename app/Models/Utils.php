@@ -2,19 +2,115 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Facades\Admin;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 
 class Utils  extends Model
 {
 
 
-    public static function docs_root($params = array())
+    public static function school_pay_import()
+    {
+        $excel = Utils::docs_root() . "/temp/school_pay.xlsx";
+        if (!file_exists($excel)) {
+            dd("D.N.E ==>$excel<=== ");
+        }
+
+        $u = Auth::user();
+
+        if ($u != null) {
+            $ent_id = ((int)($u->enterprise_id));
+        }
+        $ent = Enterprise::find($ent_id);
+
+        if ($ent == null) {
+            die("Account not found.");
+        }
+
+        $bank = Enterprise::main_bank_account($ent);
+        if ($bank == null) {
+            die("Account not found.");
+        }
+
+        $array = Excel::toArray([], $excel);
+        $is_first = true;
+        $ids = [];
+        $i = 0;
+        $tot = 0;
+        set_time_limit(-1);
+
+        foreach ($array[0] as $key => $v) {
+            if ($is_first) {
+                $is_first = false;
+                continue;
+            }
+
+            $school_pay_payment_code = $v[4];
+            $student = Administrator::where([
+                'enterprise_id' => $ent->id,
+                'user_type' => 'student',
+                'school_pay_payment_code' => $school_pay_payment_code
+            ])->first();
+
+            $amount=  (int)($v[11]);
+            $tot += ((int)($amount));
+            $i++;
+            echo $i . ". => " . number_format($tot) . "<br>";
+
+
+            if ($student == null) {
+                continue;
+            }
+            $school_pay_transporter_id = trim($v[7]);
+            $trans = Transaction::where([
+                'school_pay_transporter_id' => $school_pay_transporter_id
+            ])->first();
+            if ($trans != null) {
+                continue;
+            }
+            if ($student->account == null) {
+                die("Student account not found.");
+            }
+
+            $account_id = $student->account->id;
+
+            $trans = new Transaction();
+            $trans->enterprise_id = $ent->id;
+            $trans->account_id = $account_id;
+            $trans->created_by_id = $ent->administrator_id;
+            $trans->school_pay_transporter_id = $school_pay_transporter_id;
+            $trans->amount = (int)($v[11]);
+            $trans->is_contra_entry = false;
+            $trans->type = 'FEES_PAYMENT';
+            $trans->contra_entry_account_id = $bank->id;
+            $amount = number_format($trans->amount);
+            $trans->description = "$student->name paid UGX $amount school fees through school pay. Transaction ID #$school_pay_transporter_id";
+
+            $t = $ent->active_term();
+            if ($t != null) {
+                $trans->term_id = $t->id;
+                $trans->academic_year_id = $t->academic_year_id;
+            }
+
+
+            $trans->save();
+        }
+
+        echo "<hr>" . number_format($tot);
+        die();
+
+
+        dd("good to go with ... ");
+    }
+
+    public static function docs_root()
     {
         return env('DOCUMENT_ROOT');
     }
@@ -33,7 +129,7 @@ class Utils  extends Model
 
     public static function financial_accounts_creation()
     {
-        $ent_id  = 1;
+        $ent_id  = null;
         $u = Admin::user();
         if ($u != null) {
             $ent_id = ((int)($u->enterprise_id));
