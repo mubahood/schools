@@ -317,8 +317,8 @@ class Utils  extends Model
         $rec->last_update = time();
         $rec->save();
 
-        $enterprise_id = 1;
-        die("romina k.");
+        $enterprise_id = time() . rand(10000, 1000000);
+        die("$enterprise_id");
         return;
         $ent = Enterprise::find($enterprise_id);
         if ($ent == null) {
