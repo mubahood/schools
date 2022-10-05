@@ -148,8 +148,7 @@ Route::get('ajax', function (Request $r) {
 });
 
 Route::get('reconcile', function (Request $r) {
-    $enterprise_id = ((int)($r->get('enterprise_id')));
-    Utils::reconcile($enterprise_id);
+    Utils::reconcile();
 });
 
 Route::get('books', function (Request $r) {

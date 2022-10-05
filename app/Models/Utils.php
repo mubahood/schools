@@ -310,13 +310,15 @@ class Utils  extends Model
     }
 
 
-    public static function reconcile($enterprise_id)
+    public static function reconcile()
     {
         $rec = new Reconciler();
         $rec->enterprise_id = 1;
         $rec->last_update = time();
         $rec->save();
-        die("romina");
+
+        $enterprise_id = 1;
+        die("romina k.");
         return;
         $ent = Enterprise::find($enterprise_id);
         if ($ent == null) {
