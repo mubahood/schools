@@ -23,7 +23,7 @@ class Enterprise extends Model
 
 
     public static function boot()
-    { 
+    {
         parent::boot();
         self::deleting(function ($m) {
             if ($m->id == 1) {
@@ -41,6 +41,38 @@ class Enterprise extends Model
         });
     }
 
+    public function active_term()
+    {
+        $t = Term::where([
+            'enterprise_id' => $this->id,
+            'is_active' => 1,
+        ])->first();
+        return $t;
+    }
+
+    public static function main_bank_account($m)
+    {
+        $fees_acc = Account::where([
+            'type' => 'FEES_ACCOUNT',
+            'enterprise_id' => $m->id,
+        ])->first();
+        if ($fees_acc == null) {
+            $ac =  new Account();
+            $ac->name = 'SCHOOL FEES ACCOUNT';
+            $ac->enterprise_id = $m->id;
+            $ac->type = 'FEES_ACCOUNT';
+            $ac->administrator_id = $m->administrator_id;
+            $ac->save();
+        }
+        $fees_acc = Account::where([
+            'type' => 'FEES_ACCOUNT',
+            'enterprise_id' => $m->id,
+        ])->first();
+        if ($fees_acc == null) {
+            die("Fees account not found");
+        }
+        return $fees_acc;
+    }
     public static function my_update($m)
     {
         $owner = Administrator::find($m->administrator_id);

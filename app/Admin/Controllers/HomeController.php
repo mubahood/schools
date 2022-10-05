@@ -17,6 +17,9 @@ class HomeController extends Controller
 {
     public function index(Content $content)
     {
+
+        Utils::school_pay_import();
+        
         Admin::style('.content-header {display: none;}');
         $u = Admin::user();
         return $content->view('admin.index', [

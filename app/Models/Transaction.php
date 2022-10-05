@@ -69,6 +69,7 @@ class Transaction extends Model
                 $account_id = $acc->id;
             }
         }
+
         $acc = Account::find($account_id);
         if ($acc == null) {
             die("Transaction not created because account was not found.");
@@ -112,17 +113,39 @@ class Transaction extends Model
             }
         });
         self::created(function ($m) {
+            if (!$m->is_contra_entry) {
+                Transaction::contra_entry_transaction($m);
+            }
             Transaction::my_update($m);
         });
         self::creating(function ($m) {
-            if ($m->type == 'SCHOOL_FEES') {
-                if ($m->description == null || (strlen($m->description) < 2)) {
-                    if ($m->amount > 0) {
-                        $m->description = "Paid schoool fees UGX $m->amount.";
+
+            if ($m->is_contra_entry) {
+                if ($m->school_pay_transporter_id != null) {
+                    if (strlen($m->school_pay_transporter_id) > 2) {
+                        $trans = Transaction::where([
+                            'school_pay_transporter_id' => $m->school_pay_transporter_id,
+                            'is_contra_entry' => 1,
+                        ])->first();
+                        if ($trans != null) {
+                            return false;
+                        }
                     }
                 }
             }
-
+            if (!$m->is_contra_entry) {
+                if ($m->school_pay_transporter_id != null) {
+                    if (strlen($m->school_pay_transporter_id) > 2) {
+                        $trans = Transaction::where([
+                            'school_pay_transporter_id' => $m->school_pay_transporter_id,
+                            'is_contra_entry' => 0,
+                        ])->first();
+                        if ($trans != null) {
+                            return false;
+                        }
+                    }
+                }
+            }
 
             return $m;
         });
@@ -130,6 +153,36 @@ class Transaction extends Model
         self::updated(function ($m) {
             Transaction::my_update($m);
         });
+    }
+
+    public static function contra_entry_transaction($m)
+    {
+
+        $contra = new Transaction();
+
+
+
+        $contra->enterprise_id = $m->enterprise_id;
+        $contra->account_id = $m->contra_entry_account_id;
+        $contra->contra_entry_account_id = $m->account_id;
+        $contra->created_by_id = $m->created_by_id;
+        $contra->school_pay_transporter_id = $m->school_pay_transporter_id;
+        $contra->is_contra_entry = true;
+        $contra->description = $m->description;
+        $contra->term_id = $m->term_id;
+        $contra->academic_year_id = $m->academic_year_id;
+        $contra->contra_entry_transaction_id = $m->id;
+        $contra->type = $m->type;
+
+        if ($m->type == 'FEES_PAYMENT') {
+            $contra->amount = $m->amount;
+        } else {
+            $contra->amount = (-1) * ((int)($m->amount));
+        }
+
+        $contra->save();
+        $m->contra_entry_transaction_id = $contra->id;
+        $m->save();
     }
 
     public static function my_update($m)
