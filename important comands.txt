@@ -22,7 +22,7 @@ gator4311.hostgator.com
 Username
 schooics
 
-ssh schooics@gator4311.hostgator.com
+ssh schooics@schooldynamics.ug
 
 
 ssh -T mubahood@github.com
@@ -212,3 +212,15 @@ git rm .gitignore --cached
 git commit -m "Stopped tracking .env File"
 git rm vendor --cached  -r
 git commit -m "Stopped tracking .vendor File"git
+
+
+
+
+
+SHA256:UsVYuccvX03M/ptzLE6Z/DFAbwGTunWGP988PEMaHc4.
+
+Add correct host key in /Users/mac/.ssh/known_hosts to get rid of this message.
+Offending ECDSA key in /Users/mac/.ssh/known_hosts:3
+Host key for gator4311.hostgator.com has changed and you have requested strict checking.
+Host key verification failed.
+mac:schools juniorbendera$ 
