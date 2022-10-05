@@ -30,7 +30,30 @@ class AccountController extends AdminController
     {
         Utils::reconcile_in_background(Admin::user()->enterprise_id);
 
+
+
+
         $grid = new Grid(new Account());
+
+
+        $grid->filter(function ($filter) {
+            // Remove the default id filter
+            $filter->disableIdFilter();
+
+            $u = Admin::user();
+            $ajax_url = url(
+                '/api/ajax?'
+                    . 'enterprise_id=' . $u->enterprise_id
+                    . "&search_by_1=name"
+                    . "&search_by_2=id"
+                    . "&model=User"
+            );
+
+            $filter->equal('administrator_id', 'Student')->select()->ajax($ajax_url);
+        });
+
+
+
 
         $grid->disableBatchActions();
         $grid->disableActions();
@@ -44,7 +67,7 @@ class AccountController extends AdminController
         $grid->column('administrator_id', __('Account owner'))
             ->display(function () {
                 return $this->owner->name;
-            }); 
+            });
         $grid->column('balance', __('Account balance'))->display(function () {
             return "UGX " . number_format($this->balance);
         })->sortable();

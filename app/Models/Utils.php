@@ -59,7 +59,7 @@ class Utils  extends Model
                 'school_pay_payment_code' => $school_pay_payment_code
             ])->first();
 
-            $amount=  (int)($v[11]);
+            $amount =  (int)($v[11]);
             $tot += ((int)($amount));
             $i++;
             echo $i . ". => " . number_format($tot) . "<br>";
@@ -289,11 +289,13 @@ class Utils  extends Model
     }
     public static function reconcile_in_background($enterprise_id)
     {
+
+        return "";
         $url = url('api/reconcile?enterprise_id=' . $enterprise_id);
         $ctx = stream_context_create(['http' => ['timeout' => 3]]);
 
         try {
-            $data =  file_get_contents($url, null, $ctx);
+            $data =  file_get_contents($url);
         } catch (Exception $x) {
         }
 
@@ -310,6 +312,12 @@ class Utils  extends Model
 
     public static function reconcile($enterprise_id)
     {
+        $rec = new Reconciler();
+        $rec->enterprise_id = 1;
+        $rec->last_update = time();
+        $rec->save();
+        die("romina");
+        return;
         $ent = Enterprise::find($enterprise_id);
         if ($ent == null) {
             die("ent not found");

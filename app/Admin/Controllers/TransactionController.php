@@ -29,6 +29,22 @@ class TransactionController extends AdminController
     {
         $grid = new Grid(new Transaction());
 
+        $grid->filter(function ($filter) {
+            // Remove the default id filter
+            $filter->disableIdFilter();
+
+            $u = Admin::user();
+            $ajax_url = url(
+                '/api/ajax?'
+                    . 'enterprise_id=' . $u->enterprise_id
+                    . "&search_by_1=name"
+                    . "&search_by_2=id"
+                    . "&model=Account"
+            );
+
+            $filter->equal('account_id', 'Student')->select()->ajax($ajax_url);
+        });
+
         $grid->disableBatchActions();
         $grid->disableActions();
 
