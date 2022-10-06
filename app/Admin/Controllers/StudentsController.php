@@ -315,10 +315,10 @@ class StudentsController extends AdminController
         $tab->add('Classes', view('admin.dashboard.show-user-profile-classes', [
             'u' => $u
         ]));
-        $tab->add('Bills', view('admin.dashboard.show-user-profile-bills', [
+        $tab->add('Services', view('admin.dashboard.show-user-profile-bills', [
             'u' => $u
         ]));
-        $tab->add('Fees payments', view('admin.dashboard.show-user-profile-transactions', [
+        $tab->add('Transactions', view('admin.dashboard.show-user-profile-transactions', [
             'u' => $u
         ]));
         return $tab;

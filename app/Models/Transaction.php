@@ -154,6 +154,22 @@ class Transaction extends Model
                 $m->is_contra_entry = false;
             }
 
+            if (isset($m->is_debit)) {
+
+                if ($m->is_debit == 1) {
+                    if ($m->amount < 0) {
+                        $m->amount = (-1) * ($m->amount);
+                    }
+                } else if ($m->is_debit == 0) {
+                    if ($m->amount < 0) {
+                        $m->amount = (-1) * ($m->amount);
+                    }
+                    $m->amount = (-1) * ($m->amount);
+                }
+
+                unset($m->is_debit);
+            }
+
             return $m;
         });
 

@@ -36,6 +36,7 @@ class StockBatch extends Model
         });
 
         self::deleting(function ($m) {
+            die("You cannot delete this item.");
             return false;
         });
     }

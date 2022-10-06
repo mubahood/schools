@@ -28,6 +28,12 @@ class AccountController extends AdminController
      */
     protected function grid()
     {
+        /* $ac = Account::find(810);
+        $ac->name .= "11";
+        $ac->new_balance = 1;
+        $ac->new_balance_amount = 10000;
+        $ac->save();
+        dd("done"); */
         Utils::reconcile_in_background(Admin::user()->enterprise_id);
         $grid = new Grid(new Account());
         $grid->filter(function ($filter) {
@@ -77,11 +83,14 @@ class AccountController extends AdminController
                 'CASH_ACCOUNT' => 'Cash accounts',
             ]);
 
-        $grid->column('name', __('Account Name'))->sortable();
-        $grid->column('administrator_id', __('Account owner'))
-            ->hide()
+        /*  $grid->column('name', __('Account Name'))
+            ->link()
+            ->sortable(); */
+
+        $grid->column('name', __('Account owner'))
             ->display(function () {
-                return $this->owner->name;
+                return
+                    '<a class="text-dark" href="' . admin_url('students/' . $this->administrator_id) . '">' . $this->name . "</a>";;
             });
 
         $grid->column('school', __('School pay'))
@@ -98,6 +107,14 @@ class AccountController extends AdminController
         $grid->column('balance', __('Account balance'))->display(function () {
             return "UGX " . number_format($this->balance);
         })->sortable();
+        $grid->column('status', __('Verification'))
+            ->filter([0 => 'Pending', 1 => 'Verified'])
+            ->using([0 => 'Pending', 1 => 'Verified'])
+            ->label([
+                0 => 'danger',
+                1 => 'success',
+            ])
+            ->sortable();
 
         return $grid;
     }
@@ -130,6 +147,46 @@ class AccountController extends AdminController
     protected function form()
     {
         $form = new Form(new Account());
+
+        $payable = 0;
+        $paid = 0;
+        $balance = 0;
+        $id = 0;
+
+        if ($form->isEditing()) {
+
+            $params = request()->route()->parameters();
+            if (isset($params['account'])) {
+                $id =  $params['account'];
+            }
+
+            $u = $form->model()->find($id);
+
+            if ($u == null) {
+                die("Model not found.");
+            }
+
+
+            foreach ($u->transactions as $key => $v) {
+                if ($v->amount < 0) {
+                    $payable += $v->amount;
+                } else {
+                    $paid += $v->amount;
+                }
+            }
+            $balance = $payable + $paid;
+
+            $form->display('name', __('Account name'));
+            $form->display('payable', __('Total payable fees'))
+                ->default("UGX " . number_format($payable));
+
+            $form->display('paid', __('Total paid fees'))
+                ->default("UGX " . number_format($paid));
+
+            $form->display('paid', __('FEES BALANCE'))
+                ->default("UGX " . number_format($balance));
+            $form->divider();
+        }
 
         if (!$form->isEditing()) {
             $form->saving(function ($f) {
@@ -170,8 +227,32 @@ class AccountController extends AdminController
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
         $form->hidden('administrator_id', __('Enterprise id'))->default($ent->administrator_id)->rules('required');
 
+
         $form->text('name', __('Account name'))
             ->rules('required');
+
+        if ($form->isEditing()) {
+            $form->radio('status', "Account verification")
+                ->options([
+                    0 => 'Not verified',
+                    1 => 'Account verified',
+                ])->rules('required');
+        }
+
+        if ($form->isEditing()) {
+            $form->radio('new_balance', "Change balance")
+                ->options([
+                    0 => 'Don\'t change account balance',
+                    1 => 'Change account balance',
+                ])
+                ->when(1, function ($f) {
+                    $f->text('new_balance_amount', __('New Account Amount'))
+                        ->rules('int')->attribute('type', 'number')
+                        ->rules('required');
+                })
+                ->default(0)
+                ->rules('required');
+        }
 
         if (!$form->isEditing()) {
             $form->radio('type', "Account type")

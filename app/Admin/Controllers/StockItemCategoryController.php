@@ -28,14 +28,22 @@ class StockItemCategoryController extends AdminController
      */
     protected function grid()
     {
+
         $grid = new Grid(new StockItemCategory());
+
+        $grid->actions(function ($actions) {
+            $actions->disableView();
+            $actions->disableDelete();
+        });
+
+
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
         ])->orderBy('id', 'DESC');
 
         $grid->column('id', __('ID'));
-        $grid->column('name', __('Name'));
-        $grid->column('measuring_unit', __('Measuring unit')); 
+        $grid->column('name', __('Name'))->sortable();
+        $grid->column('measuring_unit', __('Measuring unit'));
         $grid->column('description', __('Description'))->hide();
 
         return $grid;

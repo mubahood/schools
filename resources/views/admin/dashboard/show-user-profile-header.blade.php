@@ -2,7 +2,7 @@
 
 </style>
 <?php
-$avatar = url('user.jpeg');
+$avatar = $u->avatar;
 $payable = 0;
 $paid = 0;
 $balance = 0;

@@ -3,10 +3,9 @@
         font-size: 1.5rem;
     }
 </style>
+@include('admin.dashboard.show-user-profile-header', ['u' => $u])
 <div class="row">
-    <div class="col-12 col-md-8">
-        <h4 class="m-0"><b>{{ $u->first_name }} {{ $u->last_name }}</b></h4>
-        <hr>
+    <div class="col-md-12"> 
         <div class="row">
             <div class="col-md-12">
                 @if (empty($u->account->transactions))
@@ -24,5 +23,4 @@
         </div>
 
     </div>
-    <div class="col-12 col-md-4"><img class="img img-fluid" src="{{ $u->avatar }}" alt=""></div>
 </div>

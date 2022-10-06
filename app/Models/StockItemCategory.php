@@ -10,5 +10,12 @@ class StockItemCategory extends Model
 {
     use SoftDeletes;
     use HasFactory;
- 
+
+    public static function boot()
+    {
+        parent::boot();
+        self::deleting(function ($m) {
+            die("You cannot delete this item.");
+        });
+    }
 }

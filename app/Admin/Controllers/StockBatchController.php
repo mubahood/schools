@@ -43,6 +43,12 @@ class StockBatchController extends AdminController
         });
 
 
+        $grid->actions(function ($actions) {
+            $actions->disableView();
+            $actions->disableDelete();
+        });
+
+
 
         //$grid->disableActions();
         $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)

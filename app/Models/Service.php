@@ -21,7 +21,13 @@ class Service extends Model
         self::created(function ($m) {
             Service::update_fees($m);
         });
+
+        self::deleting(function ($m) {
+            die("You cannot delete this item.");
+        });
     }
+
+
 
     public static function update_fees($m)
     {

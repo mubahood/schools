@@ -6,7 +6,7 @@
 
 @include('admin.dashboard.show-user-profile-header', ['u' => $u])
 <div class="row">
-    <div class="col-8 col-md-6">  
+    <div class="col-xs-12 col-md-12">  
         <p class="mb-2 mb-md-3 item"><b>NAME:</b> {{ $u->first_name }} {{ $u->last_name }}</p>
         <p class="mb-2 mb-md-3 item"><b>Date of birth:</b> {{ $u->date_of_birth }}</p>
         <p class="mb-2 mb-md-3 item"><b>Place of birth:</b> {{ $u->place_of_birth }}</p>
@@ -53,5 +53,4 @@
         @endif
 
     </div>
-    <div class="col-4 col-md-6"><img class="img img-fluid" src="{{ $u->avatar }}" alt=""></div>
 </div>

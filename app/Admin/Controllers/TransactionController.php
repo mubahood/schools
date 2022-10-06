@@ -128,6 +128,13 @@ class TransactionController extends AdminController
         $form->text('amount', __('Amount'))
             ->attribute('type', 'number')
             ->rules('required|int');
+        $form->textarea('description', __('Description'))->rules('required');
+
+        $form->disableCreatingCheck();
+        $form->disableReset();
+        $form->disableViewCheck();
+        $form->disableEditingCheck();
+
 
 
 
