@@ -63,6 +63,7 @@ AIzaSyCymVo9QxwffvO-tO2aciD96rnrnpxS2IU
 composer install --ignore-platform-reqs
 
 php artisan make:migration create_enterprises_table
+php artisan make:migration create_service_subscriptions_table
 php artisan make:migration create_main_courses_table
 php artisan make:migration create_academic_years_table
 php artisan make:model Banner 
@@ -113,7 +114,9 @@ php artisan make:model StockItemCategory
 php artisan make:model FundRequisition
 php artisan make:model StockBatch
 php artisan make:model StockRecord
-  
+php artisan make:model Service
+php artisan make:model ServiceSubscription
+php artisan make:model FeeDepositConfirmation
 
 
 php artisan admin:make TermController --model=App\\Models\\Term
@@ -139,6 +142,7 @@ php artisan make:migration create_menu_items_table
 php artisan make:migration create_fund_requisitions_table 
 php artisan make:migration create_stock_item_categories_table 
 php artisan make:migration create_stock_batches_table 
+php artisan make:migration create_fee_deposit_confirmations_table 
 
 
 php artisan admin:make BooksCategoryController --model=App\\Models\\BooksCategory
@@ -165,6 +169,8 @@ php artisan admin:make FundRequisitionController --model=App\\Models\\FundRequis
 php artisan admin:make StockItemCategoryController --model=App\\Models\\StockItemCategory
 php artisan admin:make StockBatchController --model=App\\Models\\StockBatch
 php artisan admin:make StockRecordController --model=App\\Models\\StockRecord
+php artisan admin:make ServiceController --model=App\\Models\\Service
+php artisan admin:make ServiceSubscriptionController --model=App\\Models\\ServiceSubscription
 
 
 

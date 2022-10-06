@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Encore\Admin\Facades\Admin;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -15,6 +16,7 @@ class Transaction extends Model
         $amount = 0;
         $academic_year_id = 0;
         $term_id = 0;
+
 
         if (isset($data['academic_year_id'])) {
             $academic_year_id = ((int)($data['academic_year_id']));
@@ -29,9 +31,9 @@ class Transaction extends Model
         }
 
         if ($amount < 1) {
-            $description = 'Debited ' . $amount;
+            $description = 'Debited ' . number_format((int)($amount));
         } else {
-            $description = 'Created ' . $amount;
+            $description = 'Created ' . number_format((int)($amount));
         }
 
         if (isset($data['description'])) {
@@ -117,6 +119,7 @@ class Transaction extends Model
         });
         self::creating(function ($m) {
 
+
             if ($m->is_contra_entry) {
                 if ($m->school_pay_transporter_id != null) {
                     if (strlen($m->school_pay_transporter_id) > 2) {
@@ -144,8 +147,17 @@ class Transaction extends Model
                 }
             }
 
+            if (Admin::user() != null) {
+                $m->created_by_id = Admin::user()->id;
+            }
+            if ($m->is_contra_entry == null) {
+                $m->is_contra_entry = false;
+            }
+
             return $m;
         });
+
+
 
         self::updated(function ($m) {
             Transaction::my_update($m);
@@ -155,8 +167,12 @@ class Transaction extends Model
     public static function contra_entry_transaction($m)
     {
 
-        $contra = new Transaction();
+        $ac = Account::find($m->contra_entry_account_id);
+        if ($ac == null) {
+            return;
+        }
 
+        $contra = new Transaction();
 
 
         $contra->enterprise_id = $m->enterprise_id;

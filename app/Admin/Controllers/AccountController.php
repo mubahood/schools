@@ -50,7 +50,11 @@ class AccountController extends AdminController
 
 
         $grid->disableBatchActions();
-        $grid->disableActions();
+        $grid->actions(function ($actions) {
+            $actions->disableView();
+            $actions->disableDelete();
+        });
+
 
         $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
             ->orderBy('id', 'Desc');
@@ -59,6 +63,7 @@ class AccountController extends AdminController
 
         $grid->column('owner.avatar', __('Photo'))
             ->width(80)
+            ->hide()
             ->lightbox(['width' => 60, 'height' => 60])
             ->sortable();
 
@@ -78,6 +83,18 @@ class AccountController extends AdminController
             ->display(function () {
                 return $this->owner->name;
             });
+
+        $grid->column('school', __('School pay'))
+            ->display(function () {
+                if ($this->owner->school_pay_payment_code == null) {
+                    return "-";
+                }
+                if (strlen($this->owner->school_pay_payment_code) < 2) {
+                    return "-";
+                }
+                return $this->owner->school_pay_payment_code;
+            });
+
         $grid->column('balance', __('Account balance'))->display(function () {
             return "UGX " . number_format($this->balance);
         })->sortable();

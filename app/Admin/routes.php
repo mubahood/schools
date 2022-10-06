@@ -44,6 +44,8 @@ Route::group([
     $router->resource('stock-batches', StockBatchController::class);
     $router->resource('suppliers', SuppliersController::class);
     $router->resource('stock-records', StockRecordController::class);
+    $router->resource('services', ServiceController::class);
+    $router->resource('service-subscriptions', ServiceSubscriptionController::class);
 
     //$router->resource('fees', StudentHasFeeController::class);
 

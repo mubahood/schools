@@ -3,10 +3,9 @@
         font-size: 1.5rem;
     }
 </style>
+@include('admin.dashboard.show-user-profile-header', ['u' => $u])
 <div class="row">
-    <div class="col-12 col-md-6">
-        <h4 class="m-0"><b>{{ $u->first_name }} {{ $u->last_name }}</b></h4>
-        <hr>
+    <div class="col-12 col-md-6"> 
         @if (empty($u->classes))
             <div class="alert alert-info">This student no class.</div>
         @else

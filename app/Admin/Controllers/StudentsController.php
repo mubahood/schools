@@ -139,7 +139,7 @@ class StudentsController extends AdminController
      *
      * @var string
      */
-    protected $title = 'Students admissions';
+    protected $title = 'Students';
 
     /**
      * Make a grid builder.

@@ -1,0 +1,960 @@
+@charset "UTF-8";
+@tailwind preflight;
+@tailwind components;
+/**************************************/
+/************** Alerts ****************/
+/**************************************/
+.alert {
+  @apply relative bg-primary shadow-lg my-8 p-6 rounded-lg overflow-hidden;
+  transition: box-shadow 0.1s;
+}
+.alert:hover {
+  @apply shadow;
+}
+.alert.is-info {
+  @apply bg-info;
+}
+.alert.is-success {
+  @apply bg-success;
+}
+.alert.is-danger {
+  @apply bg-danger;
+}
+.alert.is-warning {
+  @apply bg-warning;
+}
+.alert p {
+  @apply pl-8 mb-0 text-white;
+}
+.alert .icon {
+  @apply absolute w-16 h-16 opacity-25 font-bold;
+  left: -10px;
+  top: -10px;
+}
+.alert .icon svg {
+  fill: white;
+  width: 60px;
+  height: 60px;
+}
+
+.badge {
+  @apply px-4 py-2 text-sm;
+}
+.badge.is-white {
+  @apply bg-grey-lightest text-grey-darkest;
+}
+.badge.is-black {
+  @apply bg-grey-darkest text-white;
+}
+.badge.is-primary {
+  @apply bg-primary text-white;
+}
+.badge.is-secondary {
+  @apply bg-secondary text-white;
+}
+.badge.is-success {
+  @apply bg-success text-white;
+}
+.badge.is-info {
+  @apply bg-info text-white;
+}
+.badge.is-warning {
+  @apply bg-warning text-white;
+}
+.badge.is-danger {
+  @apply bg-danger text-white;
+}
+
+.search-box {
+  @apply w-full h-24 flex items-center z-50 shadow;
+  transition: all 0.2s;
+  margin-top: 4.25rem;
+}
+.search-box input {
+  @apply border-none mb-0 h-full w-full text-center outline-none;
+  font-size: 2rem;
+  text-transform: uppercase;
+  background: #f4f5f7;
+  transition: all 0.2s;
+}
+.search-box input:focus {
+  @apply bg-white;
+}
+.search-box .algolia-autocomplete {
+  @apply w-full h-full shadow-lg;
+}
+
+.internal-autocomplete-result {
+  @apply shadow-lg bg-white;
+  min-width: 300px;
+  max-height: 400px;
+  position: absolute;
+  top: 7rem;
+  right: 10px;
+  border-radius: 10px;
+  transition: all 0.2s;
+  z-index: 100;
+  overflow: scroll;
+}
+.internal-autocomplete-result ul {
+  list-style: none;
+  margin-left: -20px !important;
+  margin-right: 20px !important;
+}
+.internal-autocomplete-result ul li {
+  width: 100%;
+  margin-top: 20px;
+}
+.internal-autocomplete-result ul li .page-title {
+  @apply text-grey-darker font-bold;
+}
+.internal-autocomplete-result ul li hr {
+  @apply bg-grey-lighter w-full border-t border-grey-light my-2;
+}
+.internal-autocomplete-result ul li .heading {
+  @apply w-full mb-0 text-grey;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+.internal-autocomplete-result ul li .heading:hover {
+  @apply font-bold;
+}
+
+/**************************************/
+/*************** Switch ***************/
+/**************************************/
+.switch {
+  @apply relative select-none w-12 mr-2 leading-normal;
+}
+
+.switch-checkbox {
+  @apply hidden;
+}
+
+.switch-label {
+  @apply block overflow-hidden cursor-pointer bg-grey-light rounded-full h-6 shadow-inner border-2 border-white;
+  transition: background-color 0.1s ease-in;
+}
+
+.switch-label:before {
+  @apply absolute block bg-white border shadow pin-y w-6 rounded-full -ml-1;
+  right: 50%;
+  content: "";
+  transition: all 0.1s ease-in;
+}
+
+.switch-checkbox:checked + .switch-label {
+  @apply bg-primary shadow-none;
+}
+
+.switch-checkbox:checked + .switch-label:before {
+  @apply pin-r;
+}
+
+#backtotop {
+  @apply fixed pin-r opacity-0 z-50 mr-6;
+  bottom: 25px;
+  transition: 0.35s;
+  transform: scale(0.7);
+  transition: all 0.5s;
+}
+
+#backtotop.visible {
+  @apply opacity-100;
+  transform: scale(1);
+}
+
+#backtotop.visible a:hover {
+  @apply bg-primary opacity-75 outline-none;
+}
+
+#backtotop a {
+  @apply bg-primary outline-none border-none block opacity-100 w-12 h-12 rounded-full;
+  text-decoration: none;
+  transition: all 0.3s;
+  text-align: center;
+  font-size: 26px;
+}
+
+body #backtotop a {
+  @apply outline-none text-white;
+}
+
+#backtotop a:after {
+  @apply outline-none relative block;
+  content: "\f106";
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  top: 50%;
+  transform: translateY(-55%);
+}
+
+.documentation.is-dark {
+  /* Code blocks */
+  /* Inline code */
+}
+.documentation.is-dark code[class*=language-],
+.documentation.is-dark pre[class*=language-] {
+  text-shadow: none;
+}
+.documentation.is-dark :not(pre) > code[class*=language-],
+.documentation.is-dark pre[class*=language-] {
+  background: #344258 !important;
+}
+.documentation.is-dark code[class*=language-],
+.documentation.is-dark pre[class*=language-] {
+  color: #ccc;
+  background: none;
+  font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.5;
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+  -webkit-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+}
+.documentation.is-dark pre[class*=language-] {
+  padding: 1em;
+  margin: 0.5em 0;
+  overflow: auto;
+}
+.documentation.is-dark :not(pre) > code[class*=language-] {
+  padding: 0.1em;
+  border-radius: 0.3em;
+  white-space: normal;
+}
+.documentation.is-dark :not(pre) > code[class*=language-],
+.documentation.is-dark pre[class*=language-] {
+  padding: 20px;
+  border-radius: 5px;
+}
+.documentation.is-dark .token.comment,
+.documentation.is-dark .token.block-comment,
+.documentation.is-dark .token.prolog,
+.documentation.is-dark .token.doctype,
+.documentation.is-dark .token.cdata {
+  color: #999;
+}
+.documentation.is-dark .token.punctuation {
+  color: #ccc;
+}
+.documentation.is-dark .token.tag,
+.documentation.is-dark .token.attr-name,
+.documentation.is-dark .token.namespace,
+.documentation.is-dark .token.deleted {
+  color: #e2777a;
+}
+.documentation.is-dark .token.function-name {
+  color: #6196cc;
+}
+.documentation.is-dark .token.boolean,
+.documentation.is-dark .token.number,
+.documentation.is-dark .token.function {
+  color: #f08d49;
+}
+.documentation.is-dark .token.property,
+.documentation.is-dark .token.class-name,
+.documentation.is-dark .token.constant,
+.documentation.is-dark .token.symbol {
+  color: #f8c555;
+}
+.documentation.is-dark .token.selector,
+.documentation.is-dark .token.important,
+.documentation.is-dark .token.atrule,
+.documentation.is-dark .token.keyword,
+.documentation.is-dark .token.builtin {
+  color: #cc99cd;
+}
+.documentation.is-dark .token.string,
+.documentation.is-dark .token.char,
+.documentation.is-dark .token.attr-value,
+.documentation.is-dark .token.regex,
+.documentation.is-dark .token.variable {
+  color: #7ec699;
+}
+.documentation.is-dark .token.operator,
+.documentation.is-dark .token.entity,
+.documentation.is-dark .token.url {
+  color: #67cdcc;
+}
+.documentation.is-dark .token.important,
+.documentation.is-dark .token.bold {
+  font-weight: bold;
+}
+.documentation.is-dark .token.italic {
+  font-style: italic;
+}
+.documentation.is-dark .token.entity {
+  cursor: help;
+}
+.documentation.is-dark .token.inserted {
+  color: green;
+}
+.documentation.is-dark pre[data-line] {
+  position: relative;
+  padding: 1em 0 1em 3em;
+}
+.documentation.is-dark .line-highlight {
+  position: absolute;
+  left: 0;
+  right: 0;
+  padding: inherit 0;
+  margin-top: 1em; /* Same as .prism’s padding-top */
+  background: hsla(24deg, 20%, 50%, 0.08);
+  background: linear-gradient(to right, hsla(24deg, 20%, 50%, 0.1) 70%, hsla(24deg, 20%, 50%, 0));
+  pointer-events: none;
+  line-height: inherit;
+  white-space: pre;
+}
+.documentation.is-dark .line-highlight:before,
+.documentation.is-dark .line-highlight[data-end]:after {
+  content: attr(data-start);
+  position: absolute;
+  top: 0.4em;
+  left: 0.6em;
+  min-width: 1em;
+  padding: 0 0.5em;
+  background-color: hsla(24deg, 20%, 50%, 0.4);
+  color: hsl(24deg, 20%, 95%);
+  font: bold 65%/1.5 sans-serif;
+  text-align: center;
+  vertical-align: 0.3em;
+  border-radius: 999px;
+  text-shadow: none;
+  box-shadow: 0 1px white;
+}
+.documentation.is-dark .line-highlight[data-end]:after {
+  content: attr(data-end);
+  top: auto;
+  bottom: 0.4em;
+}
+.documentation.is-dark .line-numbers .line-highlight:before,
+.documentation.is-dark .line-numbers .line-highlight:after {
+  content: none;
+}
+.documentation.is-dark pre[class*=language-].line-numbers {
+  position: relative;
+  padding-left: 3.8em;
+  counter-reset: linenumber;
+}
+.documentation.is-dark pre[class*=language-].line-numbers > code {
+  position: relative;
+  white-space: inherit;
+}
+.documentation.is-dark .line-numbers .line-numbers-rows {
+  position: absolute;
+  pointer-events: none;
+  top: 0;
+  font-size: 100%;
+  left: -3.8em;
+  width: 3em; /* works for line-numbers below 1000 lines */
+  letter-spacing: -1px;
+  border-right: 1px solid #999;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.documentation.is-dark .line-numbers-rows > span {
+  pointer-events: none;
+  display: block;
+  counter-increment: linenumber;
+}
+.documentation.is-dark .line-numbers-rows > span:before {
+  content: counter(linenumber);
+  color: #999;
+  display: block;
+  padding-right: 0.8em;
+  text-align: right;
+}
+
+.documentation.is-light {
+  /* Code blocks */
+  /* Inline code */
+}
+.documentation.is-light code[class*=language-],
+.documentation.is-light pre[class*=language-] {
+  color: black;
+  text-shadow: 0 1px white;
+  direction: ltr;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  line-height: 1.7;
+  font-size: 14px;
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+  -webkit-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+}
+.documentation.is-light pre[class*=language-]::-moz-selection, .documentation.is-light pre[class*=language-] ::-moz-selection,
+.documentation.is-light code[class*=language-]::-moz-selection, .documentation.is-light code[class*=language-] ::-moz-selection {
+  text-shadow: none;
+  background: #b3d4fc;
+}
+.documentation.is-light pre[class*=language-]::-moz-selection, .documentation.is-light pre[class*=language-] ::-moz-selection, .documentation.is-light code[class*=language-]::-moz-selection, .documentation.is-light code[class*=language-] ::-moz-selection {
+  text-shadow: none;
+  background: #b3d4fc;
+}
+.documentation.is-light pre[class*=language-]::selection, .documentation.is-light pre[class*=language-] ::selection,
+.documentation.is-light code[class*=language-]::selection, .documentation.is-light code[class*=language-] ::selection {
+  text-shadow: none;
+  background: #b3d4fc;
+}
+@media print {
+  .documentation.is-light code[class*=language-],
+.documentation.is-light pre[class*=language-] {
+    text-shadow: none;
+  }
+}
+.documentation.is-light pre[class*=language-] {
+  padding: 1em;
+  margin: 10px 0 20px;
+  overflow: auto;
+}
+.documentation.is-light :not(pre) > code[class*=language-],
+.documentation.is-light pre[class*=language-] {
+  background: #fff;
+  border-radius: 5px;
+  padding: 20px;
+  @apply shadow border-t-4 border-primary;
+}
+.documentation.is-light :not(pre) > code[class*=language-] {
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+.documentation.is-light .token.comment,
+.documentation.is-light .token.prolog,
+.documentation.is-light .token.doctype,
+.documentation.is-light .token.cdata {
+  color: #999;
+}
+.documentation.is-light .token.punctuation {
+  color: #999;
+}
+.documentation.is-light .namespace {
+  opacity: 0.7;
+}
+.documentation.is-light .token.property,
+.documentation.is-light .token.tag,
+.documentation.is-light .token.boolean,
+.documentation.is-light .token.number,
+.documentation.is-light .token.constant,
+.documentation.is-light .token.symbol,
+.documentation.is-light .token.deleted {
+  color: #DA564A;
+}
+.documentation.is-light .token.scope, .documentation.is-light .token.attr-name {
+  color: #DA564A;
+}
+.documentation.is-light .token.selector,
+.documentation.is-light .token.string,
+.documentation.is-light .token.char,
+.documentation.is-light .token.builtin,
+.documentation.is-light .token.inserted {
+  color: #2E7D32;
+}
+.documentation.is-light .token.operator,
+.documentation.is-light .token.entity,
+.documentation.is-light .token.url,
+.documentation.is-light .language-css .token.string,
+.documentation.is-light .style .token.string {
+  color: #555;
+}
+.documentation.is-light .token.atrule,
+.documentation.is-light .token.attr-value,
+.documentation.is-light .token.keyword {
+  color: #07a;
+}
+.documentation.is-light .token.function {
+  color: #555;
+}
+.documentation.is-light .token.regex,
+.documentation.is-light .token.important,
+.documentation.is-light .token.variable {
+  color: #4EA1DF;
+}
+.documentation.is-light .token.important,
+.documentation.is-light .token.bold {
+  font-weight: bold;
+}
+.documentation.is-light .token.italic {
+  font-style: italic;
+}
+.documentation.is-light .token.entity {
+  cursor: help;
+}
+.documentation.is-light pre.line-numbers {
+  position: relative;
+  padding-left: 3.8em;
+  padding-top: 0px;
+  margin-top: -1px;
+  border-radius: 0;
+  counter-reset: linenumber;
+}
+.documentation.is-light pre.line-numbers > code {
+  position: relative;
+}
+.documentation.is-light .line-numbers .line-numbers-rows {
+  position: absolute;
+  pointer-events: none;
+  top: -4px;
+  padding-top: 0px;
+  font-size: 100%;
+  left: -3.8em;
+  width: 3em; /* works for line-numbers below 1000 lines */
+  letter-spacing: -1px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.documentation.is-light .line-numbers-rows > span {
+  pointer-events: none;
+  display: block;
+  counter-increment: linenumber;
+}
+.documentation.is-light .line-numbers-rows > span:before {
+  content: counter(linenumber);
+  color: #999;
+  display: block;
+  padding-right: 0.8em;
+  text-align: right;
+}
+.documentation.is-light .dark-code {
+  /* Code blocks */
+  /* Inline code */
+}
+.documentation.is-light .dark-code code[class*=language-],
+.documentation.is-light .dark-code pre[class*=language-] {
+  color: #f8f8f2;
+  text-shadow: 0 1px rgba(0, 0, 0, 0.3);
+  direction: ltr;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  line-height: 1.5;
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+  -webkit-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+}
+.documentation.is-light .dark-code pre[class*=language-] {
+  padding: 1em;
+  margin: 0.5em 0;
+  overflow: auto;
+  border-radius: 0.3em;
+}
+.documentation.is-light .dark-code :not(pre) > code[class*=language-],
+.documentation.is-light .dark-code pre[class*=language-] {
+  background: #272822;
+}
+.documentation.is-light .dark-code :not(pre) > code[class*=language-] {
+  padding: 0.1em;
+  border-radius: 0.3em;
+}
+.documentation.is-light .dark-code .token.comment,
+.documentation.is-light .dark-code .token.prolog,
+.documentation.is-light .dark-code .token.doctype,
+.documentation.is-light .dark-code .token.cdata {
+  color: slategray;
+}
+.documentation.is-light .dark-code .token.punctuation {
+  color: #f8f8f2;
+}
+.documentation.is-light .dark-code .namespace {
+  opacity: 0.7;
+}
+.documentation.is-light .dark-code .token.property,
+.documentation.is-light .dark-code .token.tag,
+.documentation.is-light .dark-code .token.constant,
+.documentation.is-light .dark-code .token.symbol,
+.documentation.is-light .dark-code .token.deleted {
+  color: #f92672;
+}
+.documentation.is-light .dark-code .token.boolean,
+.documentation.is-light .dark-code .token.number {
+  color: #ae81ff;
+}
+.documentation.is-light .dark-code .token.selector,
+.documentation.is-light .dark-code .token.attr-name,
+.documentation.is-light .dark-code .token.string,
+.documentation.is-light .dark-code .token.char,
+.documentation.is-light .dark-code .token.builtin,
+.documentation.is-light .dark-code .token.inserted {
+  color: #a6e22e;
+}
+.documentation.is-light .dark-code .token.operator,
+.documentation.is-light .dark-code .token.entity,
+.documentation.is-light .dark-code .token.url,
+.documentation.is-light .dark-code .language-css .token.string,
+.documentation.is-light .dark-code .style .token.string,
+.documentation.is-light .dark-code .token.variable {
+  color: #f8f8f2;
+}
+.documentation.is-light .dark-code .token.atrule,
+.documentation.is-light .dark-code .token.attr-value {
+  color: #e6db74;
+}
+.documentation.is-light .dark-code .token.keyword {
+  color: #66d9ef;
+}
+.documentation.is-light .dark-code .token.regex,
+.documentation.is-light .dark-code .token.important {
+  color: #fd971f;
+}
+.documentation.is-light .dark-code .token.important,
+.documentation.is-light .dark-code .token.bold {
+  font-weight: bold;
+}
+.documentation.is-light .dark-code .token.italic {
+  font-style: italic;
+}
+.documentation.is-light .dark-code .token.entity {
+  cursor: help;
+}
+
+div.code-toolbar {
+  position: relative;
+}
+
+div.code-toolbar > .toolbar {
+  position: absolute;
+  top: 15px;
+  right: 10px;
+  transition: opacity 0.3s ease-in-out;
+  opacity: 0;
+}
+
+div.code-toolbar:hover > .toolbar {
+  opacity: 1;
+}
+
+div.code-toolbar > .toolbar .toolbar-item {
+  display: inline-block;
+}
+
+div.code-toolbar > .toolbar a {
+  cursor: pointer;
+}
+
+div.code-toolbar > .toolbar button {
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  line-height: normal;
+  overflow: visible;
+  padding: 0;
+  -webkit-user-select: none; /* for button */
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+div.code-toolbar > .toolbar a,
+div.code-toolbar > .toolbar button,
+div.code-toolbar > .toolbar span {
+  @apply text-white bg-primary p-2 shadow rounded-lg text-sm;
+  transition: box-shadow 0.2s;
+}
+
+div.code-toolbar > .toolbar a:hover,
+div.code-toolbar > .toolbar a:focus,
+div.code-toolbar > .toolbar button:hover,
+div.code-toolbar > .toolbar button:focus,
+div.code-toolbar > .toolbar span:hover,
+div.code-toolbar > .toolbar span:focus {
+  color: #fff;
+  text-decoration: none;
+}
+
+div.code-toolbar > .toolbar a,
+div.code-toolbar > .toolbar button,
+div.code-toolbar > .toolbar span {
+  padding: 0.25rem 0.5em;
+}
+
+div.code-toolbar > .toolbar a:hover,
+div.code-toolbar > .toolbar a:focus,
+div.code-toolbar > .toolbar button:hover,
+div.code-toolbar > .toolbar button:focus,
+div.code-toolbar > .toolbar span:hover,
+div.code-toolbar > .toolbar span:focus {
+  @apply shadow-md;
+}
+
+/**************************************/
+/**************** Root ****************/
+/**************************************/
+:root {
+  --black: #22292f;
+  --white: white;
+  --primary: #787AF6;
+  --secondary: #2b9cf2;
+  --info: #03a9f4;
+  --warning: #fb6340;
+  --success: #21b978;
+  --danger: #f5365c;
+  --sidebar: #f4f5f7;
+  --documentation: rgb(254, 254, 254);
+  --navbar: white;
+}
+
+/**************************************/
+/*************** Global ***************/
+/**************************************/
+html, body {
+  @apply bg-documentation;
+}
+
+a {
+  @apply no-underline;
+}
+
+/**************************************/
+/*************** Sidebar **************/
+/**************************************/
+.sidebar {
+  @apply bg-sidebar border-r border-grey-light w-64 fixed z-10 text-base pin-y pin-l mt-16 overflow-y-auto py-8;
+  transition: all 0.2s;
+}
+.sidebar.is-hidden {
+  left: -16rem;
+}
+.sidebar > ul {
+  @apply list-reset;
+}
+.sidebar > ul > li > h2 {
+  @apply p-5 text-grey-darkest text-base mb-0;
+}
+.sidebar > ul > li > ul {
+  @apply list-reset leading-loose;
+}
+.sidebar > ul > li > ul > li.is-active {
+  @apply pl-2;
+}
+.sidebar > ul > li > ul > li.is-active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  z-index: 100;
+  width: 2px;
+  height: 35px;
+  background: var(--primary);
+}
+.sidebar > ul > li > ul > li.is-active a {
+  @apply font-bold;
+}
+.sidebar > ul > li > ul > li.is-active > ul > li {
+  @apply -ml-2;
+}
+.sidebar > ul > li > ul > li.is-active > ul > li a {
+  @apply font-normal;
+}
+.sidebar > ul > li > ul > li a {
+  @apply text-base font-thin text-grey-dark py-0 px-8 block;
+  transition: padding-left 0.3s;
+}
+.sidebar > ul > li > ul > li a:hover {
+  padding-left: 2.25rem;
+}
+.sidebar > ul > li > ul > li ul {
+  @apply list-reset;
+}
+.sidebar > ul > li > ul > li ul > li {
+  @apply pl-4;
+}
+.sidebar > ul > li > ul > li ul > li.is-active {
+  @apply border-l-2 border-primary;
+}
+.sidebar > ul > li > ul > li ul > li.is-active a {
+  @apply font-bold;
+}
+
+/**************************************/
+/**************** Cards ***************/
+/**************************************/
+.card {
+  @apply p-6 my-4 shadow-xs rounded;
+}
+.card.is-default {
+  @apply bg-white text-grey-darkest border border-grey-lighter;
+}
+.card.is-white {
+  @apply bg-grey-lightest text-grey-darkest;
+}
+.card.is-black {
+  @apply bg-grey-darkest text-white;
+}
+.card.is-primary {
+  @apply bg-primary text-white;
+}
+.card.is-secondary {
+  @apply bg-secondary text-white;
+}
+.card.is-success {
+  @apply bg-success text-white;
+}
+.card.is-info {
+  @apply bg-info text-white;
+}
+.card.is-warning {
+  @apply bg-warning text-white;
+}
+.card.is-danger {
+  @apply bg-danger text-white;
+}
+
+/**************************************/
+/************** Buttons ***************/
+/**************************************/
+.button {
+  @apply py-3 px-6 rounded shadow;
+  transition: all 0.1s;
+}
+.button:hover {
+  transform: translateY(-1px);
+  @apply shadow-md;
+}
+.button:focus {
+  @apply outline-none;
+}
+.button.is-link {
+  @apply bg-transparent text-grey shadow-none;
+}
+.button.is-white {
+  @apply bg-grey-lightest text-grey-darkest;
+}
+.button.is-black {
+  @apply bg-grey-darkest text-white;
+}
+.button.is-primary {
+  @apply bg-primary text-white;
+}
+.button.is-secondary {
+  @apply bg-secondary text-white;
+}
+.button.is-success {
+  @apply bg-success text-white;
+}
+.button.is-info {
+  @apply bg-info text-white;
+}
+.button.is-warning {
+  @apply bg-warning text-white;
+}
+.button.is-danger {
+  @apply bg-danger text-white;
+}
+
+/**************************************/
+/************** Tables ****************/
+/**************************************/
+table {
+  @apply shadow-lg bg-white w-full p-4 my-4;
+  transition: box-shadow 0.1s;
+}
+table:hover {
+  @apply shadow;
+}
+table tr, table td, table th {
+  @apply border border-grey-light;
+}
+table tr:hover, table td:hover, table th:hover {
+  @apply bg-grey-lightest;
+}
+table td, table th {
+  @apply p-4;
+}
+
+/**************************************/
+/*********** Medium-Zoom **************/
+/**************************************/
+.medium-zoom-overlay, img.medium-zoom-image--opened {
+  z-index: 10;
+}
+
+/**************************************/
+/********** Documentation *************/
+/**************************************/
+.documentation {
+  @apply bg-documentation static my-32 pl-50 w-3/4;
+  transition: padding-left 0.2s;
+}
+.documentation.expanded {
+  @apply pl-20;
+}
+.documentation h1:first-of-type {
+  @apply border-l-2 border-primary pl-4 mb-6 font-bold;
+}
+.documentation h2 {
+  @apply mt-10 mb-4 font-bold;
+}
+.documentation h2 a, .documentation h2 a:hover {
+  @apply text-grey-darker no-underline;
+}
+.documentation h2 a:before {
+  content: "#";
+  @apply -ml-4 mt-1 absolute text-base text-primary opacity-75;
+}
+.documentation h3 {
+  @apply mt-10 mb-4;
+}
+.documentation hr {
+  @apply border-t-2 border-dashed border-grey-lighter my-4;
+}
+.documentation img {
+  max-width: 100%;
+}
+.documentation > ul:first-of-type {
+  @apply fixed p-4 list-reset w-1/5;
+  top: 100px;
+  right: 30px;
+}
+.documentation > ul:first-of-type li {
+  @apply border-b border-dashed border-grey-light leading-normal p-3;
+}
+.documentation > ul:first-of-type li a {
+  @apply text-sm text-grey;
+}
+.documentation > ul:first-of-type ul {
+  @apply list-reset pl-4;
+}
+.documentation :not(pre) > code {
+  @apply bg-grey-lighter px-2 rounded text-primary leading-normal;
+  padding-top: 0.1rem;
+  padding-bottom: 0.1rem;
+  line-height: 1.6;
+}
+.documentation ul > li, .documentation ol > li {
+  @apply py-2;
+}
+.documentation p {
+  @apply text-base leading-large;
+}
+
+@media (max-width: 780px) {
+  .documentation {
+    padding: 0 40px !important;
+    @apply w-full;
+  }
+  .documentation > ul:first-of-type {
+    @apply list-reset w-full;
+    position: inherit;
+    top: 10px;
+    right: 30px;
+  }
+}
+@tailwind utilities;/*# sourceMappingURL=app.css.map */
