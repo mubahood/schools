@@ -173,6 +173,7 @@ class Transaction extends Model
         $contra->academic_year_id = $m->academic_year_id;
         $contra->contra_entry_transaction_id = $m->id;
         $contra->type = $m->type;
+        $contra->payment_date = $m->payment_date;
 
         if ($m->type == 'FEES_PAYMENT') {
             $contra->amount = $m->amount;
