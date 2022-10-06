@@ -107,10 +107,7 @@ class Transaction extends Model
     {
         parent::boot();
         self::deleting(function ($m) {
-            if ($m->id == 1) {
-                die("Default enterprise cannot be deleted.");
-                return false;
-            }
+            die("You cannot delete this item.");
         });
         self::created(function ($m) {
             if (!$m->is_contra_entry) {

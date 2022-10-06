@@ -3,7 +3,9 @@
 namespace App\Admin\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Account;
 use App\Models\MenuItem;
+use App\Models\Transaction;
 use App\Models\Utils;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\Dashboard;
@@ -17,6 +19,16 @@ class HomeController extends Controller
 {
     public function index(Content $content)
     {
+        /* foreach (Transaction::all() as $key => $a) {
+            if ($a->account == null) {
+
+                echo $a->id . "  DNE => " .  ($a->amount) . " <br>";
+            } else {
+                echo $a->id . "  GOOD => " .  ($a->account->owner->name) . " <br>";
+                continue;
+            }
+        } */
+
         Admin::style('.content-header {display: none;}');
         $u = Admin::user();
         return $content->view('admin.index', [

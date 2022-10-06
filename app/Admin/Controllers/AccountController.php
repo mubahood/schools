@@ -29,13 +29,7 @@ class AccountController extends AdminController
     protected function grid()
     {
         Utils::reconcile_in_background(Admin::user()->enterprise_id);
-
-
-
-
         $grid = new Grid(new Account());
-
-
         $grid->filter(function ($filter) {
             // Remove the default id filter
             $filter->disableIdFilter();
@@ -61,10 +55,26 @@ class AccountController extends AdminController
         $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
             ->orderBy('id', 'Desc');
 
-        $grid->column('id', __('Account number'));
-        $grid->column('created_at', __('Created'))->sortable();
+        $grid->column('id', __('#ID'));
+
+        $grid->column('owner.avatar', __('Photo'))
+            ->width(80)
+            ->lightbox(['width' => 60, 'height' => 60])
+            ->sortable();
+
+
+        $grid->column('created_at', __('Created'))->hide()->sortable();
+        $grid->column('type', __('Account Category'))
+            ->filter([
+                'STUDENT_ACCOUNT' => 'Student\'s accounts',
+                'EMPLOYEE_ACCOUNT' => 'Employees accounts',
+                'BANK_ACCOUNT' => 'Bank accounts',
+                'CASH_ACCOUNT' => 'Cash accounts',
+            ]);
+
         $grid->column('name', __('Account Name'))->sortable();
         $grid->column('administrator_id', __('Account owner'))
+            ->hide()
             ->display(function () {
                 return $this->owner->name;
             });

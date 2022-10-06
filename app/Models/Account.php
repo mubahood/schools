@@ -34,6 +34,9 @@ class Account extends Model
                     return false;
                 }
             }
+            self::deleting(function ($m) {
+                die("You cannot delete this account.");
+            });
         });
     }
 
@@ -51,9 +54,18 @@ class Account extends Model
         }
 
         $acc =  new Account();
+
         $acc->enterprise_id = $admin->enterprise_id;
-        $acc->name = $admin->name;
+        $acc->name = $admin->first_name . " " . $admin->given_name . " " . $admin->last_name;
         $acc->administrator_id = $administrator_id;
+        $acc->type = $administrator_id;
+        $acc->balance = 0;
+        $acc->type = $admin->user_type;
+        if ($admin->user_type == 'student') {
+            $acc->type = 'STUDENT_ACCOUNT';
+        } else if ($admin->user_type == 'employee') {
+            $acc->type = 'EMPLOYEE_ACCOUNT';
+        }
         $acc->save();
         return $acc;
     }
