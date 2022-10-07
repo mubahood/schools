@@ -142,9 +142,9 @@ class Utils  extends Model
         }
         $ent = Enterprise::find($ent_id);
         if ($ent == null) {
-            die("Enterprise not found.");
+            return null;
         }
-
+ 
         Enterprise::my_update($ent);
     }
     public static function system_checklist($u)
