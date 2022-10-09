@@ -233,7 +233,7 @@ class StudentsController extends AdminController
             ->sortable();
         $grid->column('name', __('Name'))->sortable();
         $grid->column('given_name', __('Given Name'))->sortable();
-        $grid->column('sex', __('Sex'))
+        $grid->column('sex', __('Gender'))
             ->sortable()
             ->filter(['Male' => 'Male', 'Female' => 'Female']);
         $grid->column('emergency_person_name', __('Guardian'))->sortable();
@@ -349,12 +349,12 @@ class StudentsController extends AdminController
             $form->text('first_name')->rules('required');
             $form->text('last_name')->rules('required');
             $form->text('given_name');
-            $form->select('sex')->options(['Male' => 'Male', 'Female' => 'Female'])->rules('required');
+            $form->select('sex', 'Gender')->options(['Male' => 'Male', 'Female' => 'Female'])->rules('required');
             $form->text('home_address');
             $form->text('current_address');
-            $form->text('emergency_person_name', "Guardian name")->rules('required');
-            $form->text('guardian_relation', "Guardian relation")->rules('required');
-            $form->text('emergency_person_phone', "Guardian phone number")->rules('required');
+            $form->text('emergency_person_name', "Guardian name");
+            $form->text('guardian_relation', "Guardian relation");
+            $form->text('emergency_person_phone', "Guardian phone number");
             $form->text('phone_number_2', "Guardian phone number 2");
 
             $states = [
@@ -424,14 +424,14 @@ class StudentsController extends AdminController
                 $form->image('avatar', 'Student\'s photo');
 
                 $form->email('email', 'Email address')
-                    ->creationRules(['required', "unique:admin_users"])
-                    ->updateRules(['required', "unique:admin_users,username,{{id}}"]);
+                    ->creationRules(["unique:admin_users"])
+                    ->updateRules([ "unique:admin_users,username,{{id}}"]);
                 $form->text('username', 'School pay - Payment code.')
-                    ->creationRules(['required', "unique:admin_users"])
-                    ->updateRules(['required', "unique:admin_users,username,{{id}}"]);
+                    ->creationRules([ "unique:admin_users"])
+                    ->updateRules([ "unique:admin_users,username,{{id}}"]);
 
-                $form->password('password', trans('admin.password'))->rules('required|confirmed');
-                $form->password('password_confirmation', trans('admin.password_confirmation'))->rules('required')
+                $form->password('password', trans('admin.password'))->rules('confirmed');
+                $form->password('password_confirmation', trans('admin.password_confirmation'))
                     ->default(function ($form) {
                         return $form->model()->password;
                     });

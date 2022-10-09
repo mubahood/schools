@@ -41,12 +41,13 @@ class TransactionController extends AdminController
                     . "&search_by_2=id"
                     . "&model=Account"
             );
-
             $filter->equal('account_id', 'Student')->select()->ajax($ajax_url);
+            $filter->between('created_at', 'Created between')->date();
         });
 
         $grid->disableBatchActions();
         $grid->disableActions();
+        $grid->quickSearch('account_id');
 
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
