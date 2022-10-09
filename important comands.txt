@@ -239,3 +239,6 @@ git reset --hard orign/master
 
 
 php artisan make:migration add_sex_to_users_table --table=users
+
+git add --all
+git commit -am "Your commit message"
