@@ -145,7 +145,7 @@ class Administrator extends Model implements AuthenticatableContract
         $avatar = str_replace('images/', '', $avatar);
         $link = 'storage/images/' . $avatar;
         if (!file_exists($link)) {
-            $link = 'user.jpeg';
+            //$link = 'user.jpeg';
         }
         return url($link);
     }
