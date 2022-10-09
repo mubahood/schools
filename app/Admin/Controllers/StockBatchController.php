@@ -44,8 +44,7 @@ class StockBatchController extends AdminController
 
 
         $grid->actions(function ($actions) {
-            $actions->disableView();
-            $actions->disableDelete();
+            $actions->disableView(); 
         });
 
 
