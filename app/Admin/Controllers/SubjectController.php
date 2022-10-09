@@ -58,7 +58,7 @@ class SubjectController extends AdminController
                     $teachers[$a['id']] = $a['name'] . " " . $a['id'];
                 }
             }
-
+            //romina
             $filter->equal('academic_class_id', 'Fliter by class')->select(AcademicClass::where([
                 'enterprise_id' => $u->enterprise_id
             ])->get()
