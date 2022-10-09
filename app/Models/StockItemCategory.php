@@ -15,7 +15,9 @@ class StockItemCategory extends Model
     {
         parent::boot();
         self::deleting(function ($m) {
-            die("You cannot delete this item.");
+            StockBatch::where([
+                'stock_item_category_id' => $m->id
+            ])->delete();
         });
     }
 }

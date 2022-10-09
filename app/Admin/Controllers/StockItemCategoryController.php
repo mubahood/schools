@@ -32,8 +32,7 @@ class StockItemCategoryController extends AdminController
         $grid = new Grid(new StockItemCategory());
 
         $grid->actions(function ($actions) {
-            $actions->disableView();
-            $actions->disableDelete();
+            $actions->disableView(); 
         });
 
 

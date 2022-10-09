@@ -32,7 +32,7 @@ class SchoolFeesPaymentController extends AdminController
         $grid->disableActions();
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
-            'type' => 'SCHOOL_FEES'
+            'type' => 'FEES_PAYMENT'
         ])->orderBy('id', 'DESC');
 
         $grid->column('id', __('ID'))->sortable();
@@ -83,7 +83,10 @@ class SchoolFeesPaymentController extends AdminController
         $form = new Form(new Transaction());
         $u = Admin::user();
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
-        $form->hidden('type', __('Transaction type'))->default('SCHOOL_FEES')->rules('required');
+        $form->hidden('type', __('Transaction type'))->default('FEES_PAYMENT')->rules('required');
+        $form->hidden('created_by_id', __('created_by_id'))->default(Admin::user()->id)->rules('required');
+        $form->hidden('is_contra_entry', __('is_contra_entry'))->default(0)->rules('required');
+        $form->hidden('school_pay_transporter_id', __('is_contra_entry'))->default('-')->rules('required');
 
         $ajax_url = url(
             '/api/ajax?'
@@ -108,6 +111,9 @@ class SchoolFeesPaymentController extends AdminController
             ->attribute('type', 'number')
             ->rules('required|int');
 
+        $form->text('payment_date', __('Date'))
+            ->rules('required');
+
         $form->radio('source', "Money deposited to")
             ->options([
                 'to_bank' => 'To bank',
@@ -115,7 +121,7 @@ class SchoolFeesPaymentController extends AdminController
             ])
             ->rules('required')
             ->when('to_bank', function ($f) {
-                return $f->select('source_account', "Select bank account")
+                return $f->select('contra_entry_account_id', "Select bank account")
                     ->options(
                         Account::where([
                             'enterprise_id' => Admin::user()->enterprise_id,
@@ -134,7 +140,7 @@ class SchoolFeesPaymentController extends AdminController
                     die("Cash account not found.");
                 }
 
-                return $f->select('source_account', "Cash account")
+                return $f->select('contra_entry_account_id', "Cash account")
                     ->options(
                         Account::where([
                             'enterprise_id' => Admin::user()->enterprise_id,

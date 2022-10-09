@@ -115,7 +115,7 @@ class AcademicClass extends Model
                     Transaction::my_create([
                         'academic_year_id' => $class->academic_year_id,
                         'administrator_id' => $student->administrator_id,
-                        'type' => 'SCHOOL_FEES',
+                        'type' => 'FEES_PAYMENT',
                         'description' => "Debited {$fee->amount} for $fee->name",
                         'amount' => ((-1) * ($fee->amount))
                     ]);
