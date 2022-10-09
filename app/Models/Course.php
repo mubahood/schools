@@ -15,7 +15,11 @@ class Course extends Model
         'main_course_id',
     ];
 
-    function getNameAttribute()
+    protected $appends =  [
+        'name_text',
+    ];
+
+    function getNameTextAttribute()
     {
 
         $c = MainCourse::find($this->main_course_id);
