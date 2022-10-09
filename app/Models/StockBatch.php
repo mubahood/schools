@@ -35,9 +35,12 @@ class StockBatch extends Model
             return $m;
         });
 
+
+
         self::deleting(function ($m) {
-            die("You cannot delete this item.");
-            return false;
+            StockRecord::where([
+                'stock_batch_id' => $m->id
+            ])->delete();
         });
     }
 }
