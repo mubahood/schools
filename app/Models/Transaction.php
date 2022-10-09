@@ -171,8 +171,8 @@ class Transaction extends Model
             }
 
 
-      /*       [enterprise_id] => 7
-            [type] => SCHOOL_FEES
+      /*      [enterprise_id] => 7
+            [type] => FEES_PAYMENT
             [account_id] => 153
             [amount] => 12000
             [created_by_id] => 2206
