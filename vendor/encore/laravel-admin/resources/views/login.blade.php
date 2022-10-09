@@ -9,13 +9,17 @@ $ent = Utils::ent();
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>{{ config('admin.title') }} | {{ trans('admin.login') }}</title>
+    {{-- <title>{{ config('admin.title') }} | {{ trans('admin.login') }}</title> --}}
+    {{--     <title>School Dynamics | {{ trans('admin.login') }}</title> --}}
+    <title>School Dynamics | {{ trans('admin.login') }}</title>
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
 
-    @if (!is_null($favicon = Admin::favicon()))
+    {{--  @if (!is_null($favicon = Admin::favicon()))
         <link rel="shortcut icon" href="{{ $favicon }}">
-    @endif
+    @endif --}}
+
+    <link rel="shortcut icon" href="https://schooldynamics.ug/storage/25e4968d007f840581bc7cd19605f443.png">
 
     <!-- Bootstrap 3.3.5 -->
     <link rel="stylesheet" href="{{ admin_asset('vendor/laravel-admin/AdminLTE/bootstrap/css/bootstrap.min.css') }}">
@@ -29,16 +33,16 @@ $ent = Utils::ent();
     <!--Start of Tawk.to Script-->
     <script type="text/javascript">
         /* var Tawk_API = Tawk_API || {},
-            Tawk_LoadStart = new Date();
-        (function() {
-            var s1 = document.createElement("script"),
-                s0 = document.getElementsByTagName("script")[0];
-            s1.async = true;
-            s1.src = 'https://embed.tawk.to/6322adcd54f06e12d894cbb7/1gcvndrj2';
-            s1.charset = 'UTF-8';
-            s1.setAttribute('crossorigin', '*');
-            s0.parentNode.insertBefore(s1, s0);
-        })(); */
+                Tawk_LoadStart = new Date();
+            (function() {
+                var s1 = document.createElement("script"),
+                    s0 = document.getElementsByTagName("script")[0];
+                s1.async = true;
+                s1.src = 'https://embed.tawk.to/6322adcd54f06e12d894cbb7/1gcvndrj2';
+                s1.charset = 'UTF-8';
+                s1.setAttribute('crossorigin', '*');
+                s0.parentNode.insertBefore(s1, s0);
+            })(); */
     </script>
     <!--End of Tawk.to Script-->
 

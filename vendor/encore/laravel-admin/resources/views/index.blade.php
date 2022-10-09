@@ -13,9 +13,10 @@
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
 
-    @if (!is_null($favicon = Admin::favicon()))
-        <link rel="shortcut icon" href="{{ $favicon }}">
-    @endif
+{{--     @if (!is_null($favicon = Admin::favicon()))
+    <link rel="shortcut icon" href="{{ $favicon }}">
+    @endif --}}
+    <link rel="shortcut icon" href="https://schooldynamics.ug/storage/25e4968d007f840581bc7cd19605f443.png">
 
     {!! Admin::css() !!}
 
