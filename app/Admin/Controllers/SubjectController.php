@@ -58,7 +58,7 @@ class SubjectController extends AdminController
                     $teachers[$a['id']] = $a['name'] . " " . $a['id'];
                 }
             }
-            //romina
+
             $filter->equal('academic_class_id', 'Fliter by class')->select(AcademicClass::where([
                 'enterprise_id' => $u->enterprise_id
             ])->get()
@@ -153,10 +153,23 @@ class SubjectController extends AdminController
                     ->pluck('name', 'id')
             )->rules('required');
 
+        $ent = Utils::ent();
+        $subjects = [];
+        foreach (Course::all() as $key => $c) {
+            if (
+                $ent->type == 'Primary'
+            ) {
+                if ($c->subject->subject_type == 'Primary') {
+                    $subjects[$c->id] =   $c->subject->name . " - " . $c->subject->code;
+                }
+            } else {
+                $subjects[$c->id] =   $c->subject->name . " - " . $c->subject->code . "/" . $c->name;
+            }
+        }
+
         $form->select('course_id', 'Subject')
             ->options(
-                Course::all()
-                    ->pluck('name', 'id')
+                $subjects
             )->rules('required');
 
 

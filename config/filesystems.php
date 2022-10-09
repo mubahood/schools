@@ -57,7 +57,7 @@ return [
         ],
         'admin' => [
             'driver' => 'local',
-            'root' => env('DOCUMENT_ROOT').'storage/',
+            'root' => public_path('storage/uploads'),
             'url' => env('APP_URL') . '/storage',
             'visibility' => 'public',
         ],
