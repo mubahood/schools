@@ -48,7 +48,9 @@ class TransactionController extends AdminController
         $grid->disableBatchActions();
         $grid->disableActions();
 
-        $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
+        $grid->model()->where([
+            'enterprise_id' => Admin::user()->enterprise_id,
+        ])
             ->orderBy('id', 'Desc');
 
         $grid->column('id', __('Id'))->sortable();
@@ -63,7 +65,10 @@ class TransactionController extends AdminController
 
         $grid->column('amount', __('Amount'))->display(function () {
             return "UGX " . number_format($this->amount);
-        })->sortable();
+        })
+            ->sortable()->totalRow(function ($x) {
+                return  number_format($x);
+            });
         $grid->column('created_at', __('Created'))->sortable();
 
         return $grid;

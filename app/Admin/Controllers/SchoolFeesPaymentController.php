@@ -28,23 +28,48 @@ class SchoolFeesPaymentController extends AdminController
     {
         $grid = new Grid(new Transaction());
 
+        $grid->filter(function ($filter) {
+            // Remove the default id filter
+            $filter->disableIdFilter();
+
+            $u = Admin::user();
+            $ajax_url = url(
+                '/api/ajax?'
+                    . 'enterprise_id=' . $u->enterprise_id
+                    . "&search_by_1=name"
+                    . "&search_by_2=id"
+                    . "&model=Account"
+            );
+
+            $filter->equal('account_id', 'Student')->select()->ajax($ajax_url);
+        });
+
+
         $grid->disableBatchActions();
         $grid->disableActions();
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
-            'type' => 'FEES_PAYMENT'
+            'type' => 'FEES_PAYMENT',
+            'is_contra_entry' => 0,
         ])->orderBy('id', 'DESC');
 
         $grid->column('id', __('ID'))->sortable();
-        $grid->column('account_id', __('Account '))->display(function () {
-            return $this->account->name;
-        });
+
+        $grid->column('description', __('Description'));
+
+
         $grid->column('amount', __('Amount'))->display(function () {
             return "UGX " . number_format($this->amount);
+        })->sortable()->totalRow(function ($x) {
+            return  number_format($x);
         });
-        $grid->column('description', __('Description'));
+
+        $grid->column('account_id', __('Student Account'))->display(function () {
+            return $this->account->name;
+        })->sortable();
+
         $grid->column('academic_year_id', __('Academic year id'))->hide();
-        $grid->column('created_at', __('Created'))->sortable();
+        $grid->column('created_at', __('Date'))->sortable();
         $grid->column('term_id', __('Term id'))->hide();
 
         return $grid;
@@ -111,7 +136,7 @@ class SchoolFeesPaymentController extends AdminController
             ->attribute('type', 'number')
             ->rules('required|int');
 
-        $form->text('payment_date', __('Date'))
+        $form->date('payment_date', __('Date'))
             ->rules('required');
 
         $form->radio('source', "Money deposited to")

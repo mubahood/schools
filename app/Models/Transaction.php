@@ -101,7 +101,7 @@ class Transaction extends Model
 
     public function getCreatedAtAttribute($value)
     {
-        return Carbon::parse($value)->format('d-M-Y');
+        return Carbon::parse($value)->toDateString()." - ". Carbon::parse($value)->toTimeString();
     }
 
 
@@ -119,6 +119,7 @@ class Transaction extends Model
         });
         self::creating(function ($m) {
 
+            $ent = Enterprise::find($m->enterprise_id);
             if ($m->is_contra_entry) {
                 if ($m->school_pay_transporter_id != null) {
                     if (strlen($m->school_pay_transporter_id) > 2) {
@@ -152,6 +153,13 @@ class Transaction extends Model
             if ($m->is_contra_entry == null) {
                 $m->is_contra_entry = false;
             }
+            if ($m->term_id == null || ($m->term_id < 1)) {
+                if ($ent != null) {
+                    $term = $ent->active_term();
+                    $m->term_id = $term->id;
+                    $m->academic_year_id = $term->academic_year_id;
+                }
+            }
 
             if (isset($m->is_debit)) {
 
@@ -167,11 +175,14 @@ class Transaction extends Model
                 }
 
                 unset($m->is_debit);
-
             }
 
 
-      /*      [enterprise_id] => 7
+
+
+
+
+            /*      [enterprise_id] => 7
             [type] => FEES_PAYMENT
             [account_id] => 153
             [amount] => 12000
@@ -182,14 +193,27 @@ class Transaction extends Model
             echo "<pre>";
             print_r($m);
             die("romina");
+            
+
+            if ($m->type == 'FEES_PAYMENT') {
+ */
+
             if ($m->description == null) {
                 if (strlen($m->description) < 3) {
+                    $m->description = "UGX " . number_format((int)($m->amount));
                     if ($m->type == 'FEES_PAYMENT') {
+                        if ($m->account != null) {
+                            $m->description = $m->account->name . " paid school fees "
+                                . "UGX " . number_format((int)($m->amount));
+                        } else {
+                            $m->description = "UGX " . number_format((int)($m->amount)) .
+                                " on " . $m->account->name . "'s account.";
+                        }
                         //BANK_ACCOUNT
                     }
                 }
             }
- */
+
             return $m;
         });
 
