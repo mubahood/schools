@@ -99,6 +99,7 @@ return array(
     'App\\Models\\Enterprise' => $baseDir . '/app/Models/Enterprise.php',
     'App\\Models\\Exam' => $baseDir . '/app/Models/Exam.php',
     'App\\Models\\ExamHasClass' => $baseDir . '/app/Models/ExamHasClass.php',
+    'App\\Models\\FeeDepositConfirmation' => $baseDir . '/app/Models/FeeDepositConfirmation.php',
     'App\\Models\\FundRequisition' => $baseDir . '/app/Models/FundRequisition.php',
     'App\\Models\\GradeRange' => $baseDir . '/app/Models/GradeRange.php',
     'App\\Models\\GradingScale' => $baseDir . '/app/Models/GradingScale.php',

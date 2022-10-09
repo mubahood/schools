@@ -426,7 +426,7 @@ class StudentsController extends AdminController
                 $form->email('email', 'Email address')
                     ->creationRules(['required', "unique:admin_users"])
                     ->updateRules(['required', "unique:admin_users,username,{{id}}"]);
-                $form->text('username', 'Username')
+                $form->text('username', 'School pay - Payment code.')
                     ->creationRules(['required', "unique:admin_users"])
                     ->updateRules(['required', "unique:admin_users,username,{{id}}"]);
 

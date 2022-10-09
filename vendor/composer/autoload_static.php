@@ -770,6 +770,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Models\\Enterprise' => __DIR__ . '/../..' . '/app/Models/Enterprise.php',
         'App\\Models\\Exam' => __DIR__ . '/../..' . '/app/Models/Exam.php',
         'App\\Models\\ExamHasClass' => __DIR__ . '/../..' . '/app/Models/ExamHasClass.php',
+        'App\\Models\\FeeDepositConfirmation' => __DIR__ . '/../..' . '/app/Models/FeeDepositConfirmation.php',
         'App\\Models\\FundRequisition' => __DIR__ . '/../..' . '/app/Models/FundRequisition.php',
         'App\\Models\\GradeRange' => __DIR__ . '/../..' . '/app/Models/GradeRange.php',
         'App\\Models\\GradingScale' => __DIR__ . '/../..' . '/app/Models/GradingScale.php',

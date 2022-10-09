@@ -235,4 +235,7 @@ wget -q -O - https://kjs.schooldynamics.ug/api/reconcile >/dev/null 2>&1
 
 //force update from remote
 git fetch origin master
-git reset --hard origin/master
+git reset --hard orign/master
+
+
+php artisan make:migration add_sex_to_users_table --table=users

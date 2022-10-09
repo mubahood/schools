@@ -60,6 +60,10 @@ class ServiceSubscriptionController extends AdminController
         $grid->column('service_id', __('Service'))->display(function () {
             return $this->service->name;
         })->filter($services);
+        $grid->column('quantity', __('Quantity'))->sortable();
+        $grid->column('fee', __('Total fee'))->display(function () {
+            return "UGX " . number_format(((int)($this->quantity * $this->service->fee)));
+        });
 
 
         return $grid;
@@ -97,11 +101,6 @@ class ServiceSubscriptionController extends AdminController
         $u = Admin::user();
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
 
-        $form->select('service_id', 'Select Service')->options(Service::where(
-            'enterprise_id',
-            Admin::user()->enterprise_id
-        )->get()->pluck('name', 'id'))->rules('required');
-
 
         $u = Admin::user();
         $ajax_url = url(
@@ -111,6 +110,7 @@ class ServiceSubscriptionController extends AdminController
                 . "&search_by_2=id"
                 . "&model=User"
         );
+
         $form->select('administrator_id', "Subscriber")
             ->options(function ($id) {
                 $a = Administrator::find($id);
@@ -120,7 +120,19 @@ class ServiceSubscriptionController extends AdminController
             })
             ->ajax($ajax_url)->rules('required');
 
-        admin_warning('Warning', 'Make sure you enter correct information because this action cannot be reversed.');
+        $form->select('service_id', 'Select Service')->options(Service::where(
+            'enterprise_id',
+            Admin::user()->enterprise_id
+        )->get()->pluck('name', 'id'))->rules('required');
+
+        $form->text('quantity', __('Quantity'))
+            ->rules('required|int')
+            ->attribute('type', 'number')
+            ->help("How much/many units of this service was subscribed for?");
+
+
+
+        //admin_warning('Warning', 'Make sure you enter correct information because this action cannot be reversed.');
 
 
         $form->disableCreatingCheck();

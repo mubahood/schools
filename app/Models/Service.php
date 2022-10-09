@@ -59,6 +59,8 @@ class Service extends Model
             $trans->created_by_id = Auth::user()->id;
             $trans->school_pay_transporter_id = '-';
             $trans->amount = ((-1) * $m->fee);
+            $trans->amount = $trans->amount * $s->quantity;
+
 
             $today = Carbon::now();
             $trans->payment_date = $today->toDateTimeString();

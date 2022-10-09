@@ -25,6 +25,11 @@ class ServiceSubscription extends Model
             if ($s != null) {
                 return false;
             }
+            $quantity = ((int)($m->quantity));
+            if ($quantity < 0) {
+                $m->quantity = $quantity;
+            }
+            return $m;
         });
     }
 
