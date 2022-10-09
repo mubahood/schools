@@ -46,7 +46,11 @@ class ServiceController extends AdminController
 
         $grid->column('id', __('Service #ID'));
         $grid->column('name', __('Name'));
-        $grid->column('fee', __('Fee'));
+        $grid->column('fee', __('Fee'))->display(function () {
+            return "UGX " . number_format($this->fee);
+        });
+
+
         $grid->column('subs', __('Subscribers'))->display(function () {
             return count($this->subs);
         });
