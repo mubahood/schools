@@ -169,7 +169,7 @@ class SuppliersController extends AdminController
             ->tab('SYSTEM ACCOUNT', function (Form $form) {
                 $form->image('avatar', trans('admin.avatar'));
 
-                $form->email('email', 'Email address')
+                $form->text('email', 'Email address')
                     ->creationRules(['required', "unique:admin_users"])
                     ->updateRules(['required', "unique:admin_users,username,{{id}}"]);
                 $form->text('username', 'Username')

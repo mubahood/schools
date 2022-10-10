@@ -213,8 +213,15 @@ class StudentsController extends AdminController
             'off' => ['value' => 0, 'text' => 'Pending', 'color' => 'danger'],
         ];
 
-
-        $grid->column('verification', __('Verification'))->switch($states)->sortable();
+        $grid->column('verification', __('Verification'))
+            ->filter([0 => 'Pending', 1 => 'Verified'])
+            ->using([0 => 'Pending', 1 => 'Verified'])
+            ->width(100)
+            ->label([
+                0 => 'danger',
+                1 => 'success',
+            ])
+            ->sortable();
 
 
         $grid->column('avatar', __('Photo'))
@@ -340,6 +347,24 @@ class StudentsController extends AdminController
 
         $form->tab('BIO DATA', function (Form $form) {
 
+            if (Admin::user()->isRole('dos')) {
+                $form->multipleSelect('roles', trans('admin.roles'))
+                    ->attribute([
+                        'autocomplete' => 'off'
+                    ])
+                    ->default([4])
+
+
+
+                    ->options(
+                        AdminRole::where('slug', '!=', 'super-admin')
+                            ->where('slug', '!=', 'admin')
+                            ->get()
+                            ->pluck('name', 'id')
+                    )->rules('required');
+            }
+
+
             $u = Admin::user();
             $form->hidden('enterprise_id')->rules('required')->default($u->enterprise_id)
                 ->value($u->enterprise_id);
@@ -350,6 +375,30 @@ class StudentsController extends AdminController
             $form->text('last_name')->rules('required');
             $form->text('given_name');
             $form->select('sex', 'Gender')->options(['Male' => 'Male', 'Female' => 'Female'])->rules('required');
+
+            if (Admin::user()->isRole('dos')) {
+                $form->morphMany('classes', 'CLASS ALLOCATION', function (Form\NestedForm $form) {
+                    $form->html('Click on new to add this student to a class');
+                    $u = Admin::user();
+                    $form->hidden('enterprise_id')->default($u->enterprise_id);
+
+                    $form->select('academic_class_id', 'Class')->options(function () {
+                        return AcademicClass::where([
+                            'enterprise_id' => Admin::user()->enterprise_id,
+                        ])->get()->pluck('name', 'id');
+                    })
+                        ->rules('required')->load(
+                            'stream_id',
+                            url('/api/streams?enterprise_id=' . $u->enterprise_id)
+                        );
+                });
+                $form->divider();
+            }
+
+
+            $form->switch('verification')->rules('required')->default(0);
+        })->tab('PERSONAL INFORMATION', function (Form $form) {
+
             $form->text('home_address');
             $form->text('current_address');
             $form->text('emergency_person_name', "Guardian name");
@@ -357,13 +406,6 @@ class StudentsController extends AdminController
             $form->text('emergency_person_phone', "Guardian phone number");
             $form->text('phone_number_2', "Guardian phone number 2");
 
-            $states = [
-                'on' => ['value' => 1, 'text' => 'Verified', 'color' => 'success'],
-                'off' => ['value' => 0, 'text' => 'Pending', 'color' => 'danger'],
-            ];
-
-            $form->switch('verification')->rules('required')->default(0);
-        })->tab('PERSONAL INFORMATION', function (Form $form) {
             $form->text('religion');
             $form->text('previous_school');
 
@@ -377,58 +419,19 @@ class StudentsController extends AdminController
             $form->text('swimming');
             $form->text('nationality');
             $form->text('referral');
-        })
-            ->tab('CLASS ALLOCATION', function (Form $form) {
-                $form->morphMany('classes', 'Click on new to add this student to a class', function (Form\NestedForm $form) {
-                    $u = Admin::user();
-                    $form->hidden('enterprise_id')->default($u->enterprise_id);
+        });
 
-
-                    $form->select('academic_class_id', 'Class')->options(function () {
-                        return AcademicClass::where([
-                            'enterprise_id' => Admin::user()->enterprise_id,
-                        ])->get()->pluck('name', 'id');
-                    })
-                        ->rules('required')->load(
-                            'stream_id',
-                            url('/api/streams?enterprise_id=' . $u->enterprise_id)
-                        );
-                });
-            })
-            /* ->tab('ACCOUNT NUMBERS', function (Form $form) {
-
-                $form->text('national_id_number', 'National ID number');
-                $form->text('passport_number', 'Passport number');
-                $form->text('tin', 'TIN Number');
-                $form->text('nssf_number', 'NSSF number');
-                $form->text('bank_name');
-                $form->text('bank_account_number');
-            }) */
-
-            ->tab('SYSTEM ACCOUNT', function (Form $form) {
-
-                $roleModel = config('admin.database.roles_model');
-                $form->multipleSelect('roles', trans('admin.roles'))
-                    ->attribute([
-                        'autocomplete' => 'off'
-                    ])
-                    ->default([4])
-                    ->value([4])
-                    ->options(
-                        AdminRole::where('slug', '!=', 'super-admin')
-                            ->where('slug', '!=', 'admin')
-                            ->get()
-                            ->pluck('name', 'id')
-                    )->rules('required');
+        if (Admin::user()->isRole('dos')) {
+            $form->tab('SYSTEM ACCOUNT', function (Form $form) {
 
                 $form->image('avatar', 'Student\'s photo');
 
-                $form->email('email', 'Email address')
+                $form->text('email', 'Email address')
                     ->creationRules(["unique:admin_users"])
-                    ->updateRules([ "unique:admin_users,username,{{id}}"]);
+                    ->updateRules(["unique:admin_users,username,{{id}}"]);
                 $form->text('username', 'School pay - Payment code.')
-                    ->creationRules([ "unique:admin_users"])
-                    ->updateRules([ "unique:admin_users,username,{{id}}"]);
+                    ->creationRules(["unique:admin_users"])
+                    ->updateRules(["unique:admin_users,username,{{id}}"]);
 
                 $form->password('password', trans('admin.password'))->rules('confirmed');
                 $form->password('password_confirmation', trans('admin.password_confirmation'))
@@ -443,7 +446,7 @@ class StudentsController extends AdminController
                     }
                 });
             });
-
+        }
 
 
 

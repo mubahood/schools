@@ -47,7 +47,7 @@ class Administrator extends Model implements AuthenticatableContract
 
             if (isset($model->phone_number_1)) {
                 if ($model->phone_number_1 != null) {
-                    if (strlen($model->phone_number_1) > 7) {
+                    if (strlen($model->phone_number_1) > 5) {
                         $model->phone_number_1 = Utils::prepare_phone_number($model->phone_number_1);
                     }
                 }
@@ -55,8 +55,16 @@ class Administrator extends Model implements AuthenticatableContract
 
             if (isset($model->phone_number_2)) {
                 if ($model->phone_number_2 != null) {
-                    if (strlen($model->phone_number_2) > 7) {
+                    if (strlen($model->phone_number_2) > 5) {
                         $model->phone_number_2 = Utils::prepare_phone_number($model->phone_number_2);
+                    }
+                }
+            }
+
+            if (isset($model->emergency_person_phone)) {
+                if ($model->emergency_person_phone != null) {
+                    if (strlen($model->emergency_person_phone) > 5) {
+                        $model->emergency_person_phone = Utils::prepare_phone_number($model->emergency_person_phone);
                     }
                 }
             }
@@ -69,8 +77,48 @@ class Administrator extends Model implements AuthenticatableContract
             if ($e == null) {
                 die("enterprise is required");
             }
+
+
+            if (
+                $model->username == null ||
+                $model->email == null ||
+                strlen($model->username) < 3 ||
+                strlen($model->email) < 3
+            ) {
+                $model->username = null;
+                $model->email = null;
+
+
+                if (
+                    $model->school_pay_payment_code == null ||
+                    strlen($model->school_pay_payment_code) < 4
+                ) {
+                    $model->email = $model->school_pay_payment_code;
+                    $model->username = $model->school_pay_payment_code;
+                }
+
+
+                if ($model->phone_number_1 != null && (strlen($model->phone_number_1) > 3)) {
+                    $model->username = $model->phone_number_1;
+                    $model->email = $model->phone_number_1;
+                }
+
+                if ($model->email == null) {
+                    strtolower($model->first_name . $model->last_name);
+                    $model->email = $model->first_name . $model->last_name . rand(1000, 10000);
+                    $model->username = $model->first_name . $model->last_name . rand(1000, 10000);
+                }
+            }
+
+            if (
+                $model->password == null ||
+                strlen($model->password) < 4
+            ) {
+                $model->password = password_hash('4321', PASSWORD_DEFAULT);
+            }
+
             Enterprise::my_update($e);
-            $model->name = $model->first_name . " " . $model->last_name;
+            $model->name = $model->first_name . " " . $model->given_name . " " . $model->last_name;
             return $model;
         });
 
@@ -88,12 +136,76 @@ class Administrator extends Model implements AuthenticatableContract
             if ($e == null) {
                 die("enterprise is required");
             }
-            if ($model->first_name != null) {
-                if (strlen($model->first_name) > 2) {
-                    $model->name = $model->first_name . " " . $model->last_name;
+
+
+
+
+            if (
+                $model->username == null ||
+                $model->email == null ||
+                strlen($model->username) < 3 ||
+                strlen($model->email) < 3
+            ) {
+                $model->username = null;
+                $model->email = null;
+
+
+                if (
+                    $model->school_pay_payment_code == null ||
+                    strlen($model->school_pay_payment_code) < 4
+                ) {
+                    $model->email = $model->school_pay_payment_code;
+                    $model->username = $model->school_pay_payment_code;
+                }
+
+
+                if ($model->phone_number_1 != null && (strlen($model->phone_number_1) > 3)) {
+                    $model->username = $model->phone_number_1;
+                    $model->email = $model->phone_number_1;
+                }
+
+                if ($model->email == null) {
+                    strtolower($model->first_name . $model->last_name);
+                    $model->email = $model->first_name . $model->last_name . rand(1000, 10000);
+                    $model->username = $model->first_name . $model->last_name . rand(1000, 10000);
                 }
             }
 
+
+            if (
+                $model->password == null ||
+                strlen($model->password) < 4
+            ) {
+                $model->password = password_hash('4321', PASSWORD_DEFAULT);
+            }
+
+
+            if (isset($model->phone_number_1)) {
+                if ($model->phone_number_1 != null) {
+                    if (strlen($model->phone_number_1) > 5) {
+                        $model->phone_number_1 = Utils::prepare_phone_number($model->phone_number_1);
+                    }
+                }
+            }
+
+            if (isset($model->emergency_person_phone)) {
+                if ($model->emergency_person_phone != null) {
+                    if (strlen($model->emergency_person_phone) > 5) {
+                        $model->emergency_person_phone = Utils::prepare_phone_number($model->emergency_person_phone);
+                    }
+                }
+            }
+
+
+            if (isset($model->phone_number_2)) {
+                if ($model->phone_number_2 != null) {
+                    if (strlen($model->phone_number_2) > 5) {
+                        $model->phone_number_2 = Utils::prepare_phone_number($model->phone_number_2);
+                    }
+                }
+            }
+
+            $model->name = $model->first_name . " " . $model->given_name . " " . $model->last_name;
             return $model;
         });
 
@@ -145,9 +257,9 @@ class Administrator extends Model implements AuthenticatableContract
         $avatar = str_replace('images/', '', $avatar);
         $link = 'storage/images/' . $avatar;
 
-        if (!file_exists( public_path($link) )) {  
+        if (!file_exists(public_path($link))) {
             $link = 'user.jpeg';
-        } 
+        }
         return url($link);
     }
 
