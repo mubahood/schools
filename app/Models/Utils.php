@@ -34,8 +34,7 @@ class Utils  extends Model
                 echo $name . "<hr>";
                 continue;
             }
-        }
-        die("romina");
+        } 
     }
 
     public static function school_pay_import()

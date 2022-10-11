@@ -30,7 +30,8 @@ class StockRecordController extends AdminController
      */
     protected function grid()
     {
-        Utils::reset_account_names();
+        //Utils::reset_account_names();
+
         $grid = new Grid(new StockRecord());
         //$grid->disableActions();
 
