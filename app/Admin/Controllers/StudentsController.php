@@ -201,7 +201,7 @@ class StudentsController extends AdminController
             //$filter->expand();
         });
 
-        $grid->quickSearch('name');
+        $grid->quickSearch('name')->placeholder("Search by name...");
 
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
