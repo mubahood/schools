@@ -34,7 +34,6 @@ class StockRecordController extends AdminController
         //die("as");
         $grid = new Grid(new StockRecord());
         //$grid->disableActions();
-
         $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
             ->orderBy('id', 'Desc');
 
