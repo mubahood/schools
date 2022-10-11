@@ -4,6 +4,8 @@ namespace App\Admin\Controllers;
 
 use App\Models\StockBatch;
 use App\Models\StockRecord;
+use App\Models\Utils;
+use Dflydev\DotAccessData\Util;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -28,6 +30,7 @@ class StockRecordController extends AdminController
      */
     protected function grid()
     {
+        Utils::reset_account_names();
         $grid = new Grid(new StockRecord());
         //$grid->disableActions();
 

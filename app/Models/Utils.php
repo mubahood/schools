@@ -18,6 +18,26 @@ class Utils  extends Model
 {
 
 
+    public static function reset_account_names()
+    {
+        $accs = Account::all();
+        foreach ($accs as $key => $acc) {
+            if ($acc->owner != null) {
+                $name = "";
+                $name = $acc->owner->first_name;
+                if ($acc->owner->given_name != null) {
+                    $name .= " " . $acc->owner->given_name;
+                }
+                $name .= " ".$acc->owner->last_name;
+                $acc->name = $name;
+                $acc->save();
+                echo $name . "<hr>";
+                continue;
+            }
+        }
+        die("romina");
+    }
+
     public static function school_pay_import()
     {
         $excel = Utils::docs_root() . "/temp/school_pay.xlsx";
@@ -144,7 +164,7 @@ class Utils  extends Model
         if ($ent == null) {
             return null;
         }
- 
+
         Enterprise::my_update($ent);
     }
     public static function system_checklist($u)
