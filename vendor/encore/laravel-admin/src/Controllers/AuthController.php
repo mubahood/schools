@@ -2,6 +2,7 @@
 
 namespace Encore\Admin\Controllers;
 
+use App\Models\Utils;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Layout\Content;
@@ -46,6 +47,44 @@ class AuthController extends Controller
 
         $credentials = $request->only([$this->username(), 'password']);
         $remember = $request->get('remember', true);
+
+        if ($this->guard()->attempt($credentials, $remember)) {
+            return $this->sendLoginResponse($request);
+        }
+
+        $phone_num = Utils::prepare_phone_number($request->username);
+        $credentials = [
+            'phone_number_1' => $phone_num,
+            'password' => $request->password,
+        ];
+
+        if ($this->guard()->attempt($credentials, $remember)) {
+            return $this->sendLoginResponse($request);
+        }
+
+
+        $credentials = [
+            'username' => $phone_num,
+            'password' => $request->password,
+        ];
+
+        if ($this->guard()->attempt($credentials, $remember)) {
+            return $this->sendLoginResponse($request);
+        }
+
+        $credentials = [
+            'email' => $request->username,
+            'password' => $request->password,
+        ];
+
+        if ($this->guard()->attempt($credentials, $remember)) {
+            return $this->sendLoginResponse($request);
+        }
+
+        $credentials = [
+            'school_pay_payment_code' => $request->username,
+            'password' => $request->password,
+        ];
 
         if ($this->guard()->attempt($credentials, $remember)) {
             return $this->sendLoginResponse($request);
