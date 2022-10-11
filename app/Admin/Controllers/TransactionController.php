@@ -29,10 +29,11 @@ class TransactionController extends AdminController
     {
         $grid = new Grid(new Transaction());
 
+
+
         $grid->filter(function ($filter) {
             // Remove the default id filter
             $filter->disableIdFilter();
-
             $u = Admin::user();
             $ajax_url = url(
                 '/api/ajax?'
@@ -47,7 +48,17 @@ class TransactionController extends AdminController
 
         $grid->disableBatchActions();
         $grid->disableActions();
-        $grid->quickSearch('account_id');
+
+        $grid->quickSearch(function ($model, $query) {
+            $acc = Account::where('name', 'like', "%$query%")
+                ->where('enterprise_id', Admin::user()->enterprise_id)
+                ->first();
+
+            if ($acc != null) {
+                $model->where('account_id', $acc->id);
+            }
+        });
+
 
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
@@ -58,9 +69,17 @@ class TransactionController extends AdminController
 
         $grid->column('description', __('Description'));
         $grid->column('academic_year_id', __('Academic year id'))->hide();
-        $grid->column('account_id', __('Account'))->display(function () {
+        /* $grid->column('account_id', __('Account'))->display(function () {
             return $this->account->name;
-        });
+        }); */
+
+        $grid->column('account_id', __('Account'))
+            ->sortable()
+            ->display(function () {
+                return
+                    '<a class="text-dark" href="' . admin_url('students/' . $this->account->administrator_id) . '">' . $this->account->name . "</a>";;
+            });
+
 
 
 

@@ -186,7 +186,7 @@ class EmployeesController extends AdminController
         $grid->column('roles', trans('admin.roles'))->pluck('name')->label();
         $grid->column('date_of_birth', __('D.O.B'))->sortable();
         $grid->column('nationality', __('Nationality'))->sortable();
-        $grid->column('sex', __('Sex'));
+        $grid->column('sex', __('Gender'));
         $grid->column('place_of_birth', __('Place of birth'))->sortable();
         $grid->column('home_address', __('Home address'))->hide();
         $grid->column('current_address', __('Current address'))->hide();
@@ -264,7 +264,7 @@ class EmployeesController extends AdminController
             $form->text('last_name')->rules('required');
             $form->date('date_of_birth')->rules('required');
             $form->text('place_of_birth');
-            $form->select('sex')->options(['Male' => 'Male', 'Female' => 'Female'])->rules('required');
+            $form->select('sex','Gender')->options(['Male' => 'Male', 'Female' => 'Female'])->rules('required');
             $form->text('home_address');
             $form->text('current_address');
             $form->text('phone_number_1', 'Mobile phone number')->rules('required');

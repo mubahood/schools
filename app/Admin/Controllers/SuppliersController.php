@@ -70,12 +70,11 @@ class SuppliersController extends AdminController
         $grid->column('name', __('Name'))->sortable();
         $grid->column('phone_number_1', __('Phone number'));
         $grid->column('phone_number_2', __('Phone number 2'));
-        $grid->column('sex', __('Sex'));
+        $grid->column('sex', __('Gender'));
         $grid->column('email', __('Email'));
 
         $grid->column('current_address', __('Address'));
-
-        $grid->column('sex', __('Sex')); 
+ 
         $grid->column('home_address', __('Home address'))->hide();
         /* $grid->column('religion', __('Religion'))->hide();
         $grid->column('spouse_name', __('Spouse name'))->hide();
@@ -149,7 +148,7 @@ class SuppliersController extends AdminController
 
             $form->text('first_name')->rules('required');
             $form->text('last_name')->rules('required');
-            $form->select('sex')->options(['Male' => 'Male', 'Female' => 'Female'])->rules('required');
+            $form->select('sex','Gender')->options(['Male' => 'Male', 'Female' => 'Female'])->rules('required');
             $form->text('current_address', 'Address');
             $form->text('phone_number_1', 'Phone number 1')->rules('required');
             $form->text('phone_number_2', 'Phone number 2');
