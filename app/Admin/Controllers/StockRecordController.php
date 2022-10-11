@@ -33,27 +33,52 @@ class StockRecordController extends AdminController
         //Utils::reset_account_names();
         //die("as");
         $grid = new Grid(new StockRecord());
-        //$grid->disableActions();
-        $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
-            ->orderBy('id', 'Desc');
+        $grid->disableBatchActions();
+
+
+
+
+        if (Admin::user()->isRole('admin')) {
+            $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
+                ->orderBy('id', 'Desc');
+        } else {
+            $grid->disableActions();
+            $grid->model()->where([
+                'enterprise_id' => Admin::user()->enterprise_id,
+                'created_by' => Admin::user()->id,
+            ])
+                ->orderBy('id', 'Desc');
+        }
+
+
+        $grid->filter(function ($filter) {
+            // Remove the default id filter
+            $filter->disableIdFilter();
+
+            $u = Admin::user();
+            $ajax_url = url(
+                '/api/ajax?'
+                    . 'enterprise_id=' . $u->enterprise_id
+                    . "&search_by_1=name"
+                    . "&search_by_2=id"
+                    . "&model=User"
+            );
+
+            $filter->equal('created_by', 'Supplied by')->select()->ajax($ajax_url);
+            $filter->equal('received_by', 'Received by')->select()->ajax($ajax_url);
+
+            $filter->between('record_date', 'Date')->date();
+        });
+
+
 
         $grid->column('id', __('#ID'))->sortable();
+
+
         $grid->column('stock_batch_id', __('Stock batch'))
+            ->hide()
             ->display(function () {
                 return $this->batch->cat->name . " Stock ID #" . $this->batch->id;
-            })->sortable();
-
-        $grid->column('stock_item_category_id', __('Stock category'))
-            ->display(function () {
-                return $this->batch->cat->name;
-            })->sortable();
-        $grid->column('created_by', __('Supplied by'))
-            ->display(function () {
-                return $this->createdBy->name . " - #" . $this->createdBy->id;
-            })->sortable();
-        $grid->column('received_by', __('Received by'))
-            ->display(function () {
-                return $this->receivedBy->name . " - #" . $this->receivedBy->id;
             })->sortable();
 
         $grid->column('quanity', __('Quanity'))
@@ -63,8 +88,31 @@ class StockRecordController extends AdminController
                 return number_format($x);
             });
 
-        $grid->column('description', __('Description'));
-        $grid->column('record_date', __('Date'));
+
+        $grid->column('stock_item_category_id', __('Stock category'))
+            ->display(function () {
+                return $this->batch->cat->name;
+            })->sortable();
+
+
+        if (Admin::user()->isRole('admin')) {
+            $grid->column('created_by', __('Supplied by'))
+                ->display(function () {
+                    return $this->createdBy->name . " - #" . $this->createdBy->id;
+                })->sortable();
+        }
+
+
+        $grid->column('received_by', __('Received by'))
+            ->display(function () {
+                return $this->receivedBy->name . " - #" . $this->receivedBy->id;
+            })->sortable();
+
+
+        $grid->column('description', __('Description'))->hide();
+        $grid->column('record_date', __('Date'))->display(function ($date) {
+            return Utils::to_date_time($date);
+        });
 
         return $grid;
     }
@@ -103,7 +151,7 @@ class StockRecordController extends AdminController
         $form = new Form(new StockRecord());
 
 
-        $form->date('record_date', __('Date'))->rules('required');
+        $form->datetime('record_date', __('Date'))->rules('required');
 
         $form->hidden('enterprise_id')->rules('required')->default(Admin::user()->enterprise_id)
             ->value(Admin::user()->enterprise_id);
@@ -114,6 +162,7 @@ class StockRecordController extends AdminController
         $cats = [];
         foreach (StockBatch::where([
             'enterprise_id' => Admin::user()->enterprise_id,
+            'manager' => Admin::user()->id,
         ])
             ->where('current_quantity', '>', 0)
             ->get() as $val) {

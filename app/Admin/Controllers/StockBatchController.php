@@ -22,7 +22,7 @@ class StockBatchController extends AdminController
      */
     protected $title = 'Stock batches';
 
-    /**
+    /** 
      * Make a grid builder.
      *
      * @return Grid
@@ -44,9 +44,12 @@ class StockBatchController extends AdminController
 
 
         $grid->actions(function ($actions) {
-            $actions->disableView(); 
+            $actions->disableView();
         });
 
+        if (!Admin::user()->isRole('admin')) {
+            $grid->disableActions();
+        };
 
 
         //$grid->disableActions();
@@ -73,9 +76,12 @@ class StockBatchController extends AdminController
             });
         $grid->column('description', __('Description'))->hide();
 
-
         $grid->column('supplier_id', __('Supplier'))->display(function () {
             return $this->supplier->name . " " . $this->supplier->phone_number_1;
+        })->sortable();
+
+        $grid->column('manager', __('Stock manager'))->display(function () {
+            return $this->stock_manager->name;
         })->sortable();
 
         $grid->column('purchase_date', __('Date'));
@@ -123,7 +129,7 @@ class StockBatchController extends AdminController
 
         $form->date('purchase_date', __('Date'))->rules('required');
 
-        
+
         $form->hidden('enterprise_id')->rules('required')->default(Admin::user()->enterprise_id)
             ->value(Admin::user()->enterprise_id);
 
@@ -152,6 +158,15 @@ class StockBatchController extends AdminController
         }
 
 
+        $employees = [];
+        foreach (Administrator::where([
+            'enterprise_id' => Admin::user()->enterprise_id,
+            'user_type' => 'employee'
+        ])->get() as $ad) {
+            $employees[$ad->id] = $ad->name . " - ID #{$ad->id}";
+        }
+
+
         $form->select('supplier_id', __('Supplier'))
             ->options(
                 $ads
@@ -171,17 +186,35 @@ class StockBatchController extends AdminController
         }
 
 
-        $form->select('fund_requisition_id', 'Funds requisition form')
-            ->options($forms);
-
 
         $form->decimal('original_quantity', __('Quantity (in Units)'))
             ->attribute('type', 'number')
             ->rules('required');
+
+        if (Admin::user()->isRole('admin')) {
+            $form->select('manager', __('Stock Manager'))
+                ->options(
+                    $employees
+                )
+                ->rules('required');
+        } else {
+            $form->select('manager', __('Stock Manager'))
+                ->options(
+                    $employees
+                )
+                ->default(Admin::user()->id)
+                ->readOnly()
+                ->rules('required');
+        }
+
+
+
         $form->textarea('description', __('Stock Description'));
 
         $form->image('photo', __('Stock Photo'));
 
+        $form->select('fund_requisition_id', 'Funds requisition form')
+            ->options($forms);
 
 
 

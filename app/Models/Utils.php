@@ -12,12 +12,33 @@ use Illuminate\Queue\Jobs\SyncJob;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Str;
 
 
 class Utils  extends Model
 {
 
+    public static function to_date_time($raw)
+    {
+        $t = Carbon::parse($raw);
+        if ($t == null) {
+            return  "-";
+        }
+        $my_t = $t->toDateString();
 
+        return $my_t." ".$t->toTimeString();
+    }
+    public static function number_format($num, $unit)
+    {
+        $num = (int)($num);
+        $resp = number_format($num);
+        if ($num < 2) {
+            $resp .= " " . $unit;
+        } else {
+            $resp .= " " . Str::plural($unit);
+        }
+        return $resp;
+    }
     public static function reset_account_names()
     {
         $accs = Administrator::all();
@@ -34,8 +55,8 @@ class Utils  extends Model
                 $acc->name = $name;
                 $acc->save();
             }
-            if(strlen($acc->name) < 5){  
-                $acc->name = $acc->username; 
+            if (strlen($acc->name) < 5) {
+                $acc->name = $acc->username;
                 $acc->save();
             }
             echo $name . " ====> {$acc->name}<hr>";

@@ -3,11 +3,14 @@
 namespace App\Admin\Controllers;
 
 use App\Models\StockItemCategory;
+use App\Models\Utils;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
+use Illuminate\Support\Str;
+
 
 class StockItemCategoryController extends AdminController
 {
@@ -29,20 +32,51 @@ class StockItemCategoryController extends AdminController
     protected function grid()
     {
 
+
+        StockItemCategory::update_quantity(Admin::user()->enterprise_id);
         $grid = new Grid(new StockItemCategory());
 
         $grid->actions(function ($actions) {
-            $actions->disableView(); 
+            $actions->disableView();
         });
 
+        $grid->disableBatchActions();
+        if (!Admin::user()->isRole('admin')) {
+            $grid->disableCreateButton();
+            $grid->disableExport();
+            $grid->disableActions();
+        }
+  
 
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
         ])->orderBy('id', 'DESC');
 
-        $grid->column('id', __('ID'));
+        $grid->column('id', __('ID'))->sortable();
         $grid->column('name', __('Name'))->sortable();
-        $grid->column('measuring_unit', __('Measuring unit'));
+
+        $grid->column('reorder_level', __('Reorder level'))->display(function ($x) {
+            return  Utils::number_format($x, $this->measuring_unit);
+        })->sortable();
+
+        $grid->column('quantity', __('Available Quantity'))->display(function ($quantity) {
+            return  Utils::number_format($quantity, $this->measuring_unit);
+        })->sortable();
+
+        $grid->column('status', __('Stock status'))
+            ->using([
+                1 => 'In stock',
+                0 => 'Out of stock',
+            ])
+            ->filter([
+                1 => 'In stock',
+                0 => 'Out of stock',
+            ])
+            ->label([
+                1 => 'success',
+                0 => 'danger',
+            ])
+            ->sortable();
         $grid->column('description', __('Description'))->hide();
 
         return $grid;
@@ -82,6 +116,10 @@ class StockItemCategoryController extends AdminController
             ->value(Admin::user()->enterprise_id);
         $form->text('name', __('Name'))->rules('required');
         $form->text('measuring_unit', __('Measuring unit'))->rules('required');
+        $form->text('reorder_level', __('Reorder level'))
+            ->attribute('type', 'number')
+            ->help('in Specified measuring unit above')
+            ->rules('required|int');
         $form->textarea('description', __('Description'));
 
         return $form;

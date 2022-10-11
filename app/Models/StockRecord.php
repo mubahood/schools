@@ -15,6 +15,14 @@ class StockRecord extends Model
     {
         parent::boot();
 
+        self::created(function ($m) {
+            StockItemCategory::update_quantity($m->enterprise_id);
+        });
+
+        self::updated(function ($m) {
+            StockItemCategory::update_quantity($m->enterprise_id);
+        });
+
         self::creating(function ($m) {
 
             $batch = StockBatch::find($m->stock_batch_id);

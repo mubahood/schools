@@ -20,6 +20,11 @@ class StockBatch extends Model
     {
         return $this->belongsTo(Administrator::class, 'supplier_id');
     }
+   
+    public function stock_manager()
+    {
+        return $this->belongsTo(Administrator::class, 'manager');
+    }
 
     public function getCreatedAtAttribute($v)
     {
@@ -41,6 +46,18 @@ class StockBatch extends Model
             StockRecord::where([
                 'stock_batch_id' => $m->id
             ])->delete();
+        });
+
+        self::created(function ($m) {
+            StockItemCategory::update_quantity($m->enterprise_id);
+        });
+
+        self::updated(function ($m) {
+            StockItemCategory::update_quantity($m->enterprise_id);
+        });
+
+        self::deleted(function ($m) {
+            StockItemCategory::update_quantity($m->enterprise_id);
         });
     }
 }

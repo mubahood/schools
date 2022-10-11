@@ -238,7 +238,7 @@ git fetch origin master
 git reset --hard orign/master
 
 
-php artisan make:migration add_sex_to_users_table --table=users
+php artisan make:migration add_created_by --table=stock_records
 
 git add --all
 git commit -am "Your commit message"
