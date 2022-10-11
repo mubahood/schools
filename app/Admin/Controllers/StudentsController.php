@@ -261,7 +261,7 @@ class StudentsController extends AdminController
         $grid->column('transportation', __('Transportation'))->hide();
         $grid->column('swimming', __('Swimming'))->hide();
         $grid->column('referral', __('Referral'))->hide();
-        $grid->column('school_pay_payment_code', __('School pay payment code'))->hide();
+        $grid->column('school_pay_payment_code', __('School pay payment code'))->sortable();
 
 
 
@@ -372,8 +372,11 @@ class StudentsController extends AdminController
             $form->hidden('user_type')->default('student')->value('student')->updateRules('required|max:223');
 
             $form->text('first_name')->rules('required');
-            $form->text('last_name')->rules('required');
             $form->text('given_name');
+            $form->text('last_name')->rules('required');
+
+            $form->text('school_pay_payment_code')->rules('required');
+            $form->text('school_pay_account_id')->rules('required');
             $form->select('sex', 'Gender')->options(['Male' => 'Male', 'Female' => 'Female'])->rules('required');
 
             if (Admin::user()->isRole('dos')) {
