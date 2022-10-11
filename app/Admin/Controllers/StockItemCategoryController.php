@@ -46,7 +46,10 @@ class StockItemCategoryController extends AdminController
             $grid->disableExport();
             $grid->disableActions();
         }
-  
+
+        $grid->disableFilter();
+        $grid->quickSearch('name')->placeholder("Search...");
+
 
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
