@@ -20,21 +20,27 @@ class Utils  extends Model
 
     public static function reset_account_names()
     {
-        $accs = Account::all();
+        $accs = Administrator::all();
         foreach ($accs as $key => $acc) {
-            if ($acc->owner != null) {
-                $name = "";
-                $name = $acc->owner->first_name;
-                if ($acc->owner->given_name != null) {
-                    $name .= " " . $acc->owner->given_name;
-                }
-                $name .= " ".$acc->owner->last_name;
+            $name = "";
+            $name = $acc->first_name;
+            if ($acc->given_name != null) {
+                $name .= " " . $acc->given_name;
+            }
+            $name .= " " . $acc->last_name;
+
+            $name = trim($name);
+            if (strlen($name) > 6) {
                 $acc->name = $name;
                 $acc->save();
-                echo $name . "<hr>";
-                continue;
             }
-        } 
+            if(strlen($acc->name) < 5){  
+                $acc->name = $acc->username; 
+                $acc->save();
+            }
+            echo $name . " ====> {$acc->name}<hr>";
+        }
+        die("romina");
     }
 
     public static function school_pay_import()
