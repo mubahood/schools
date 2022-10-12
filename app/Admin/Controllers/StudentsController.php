@@ -149,6 +149,7 @@ class StudentsController extends AdminController
     protected function grid()
     {
 
+        Administrator::update_current_classes(Admin::user()->enterprise_id);
         $grid = new Grid(new Administrator());
         $grid->disableBatchActions();
         $grid->actions(function ($actions) {
@@ -156,6 +157,7 @@ class StudentsController extends AdminController
             $actions->disableView();
         });
 
+        
         Utils::display_checklist(Utils::students_checklist(Admin::user()));
         Utils::display_checklist(Utils::students_optional_subjects_checklist(Admin::user()));
 
