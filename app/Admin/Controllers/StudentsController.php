@@ -148,6 +148,7 @@ class StudentsController extends AdminController
      */
     protected function grid()
     {
+
         $grid = new Grid(new Administrator());
         $grid->disableBatchActions();
         $grid->actions(function ($actions) {
@@ -164,6 +165,11 @@ class StudentsController extends AdminController
 
             $filter->between('created_at', 'Admitted')->date();
 
+
+            $u = Admin::user();
+            $filter->equal('current_class_id', 'Filter by class')->select(AcademicClass::where([
+                'enterprise_id' => $u->enterprise_id
+            ])->orderBy('id', 'Desc')->get()->pluck('name_text', 'id'));
 
             // Remove the default id filter
             $filter->disableIdFilter();
@@ -219,7 +225,13 @@ class StudentsController extends AdminController
                 'on' => ['value' => 1, 'text' => 'Verified', 'color' => 'success'],
                 'off' => ['value' => 0, 'text' => 'Pending', 'color' => 'danger'],
             ];
-            $grid->column('verification', 'Verification')->switch($states);
+            $grid->column('verification', 'Verification')
+                ->filter([
+                    0 => 'Pending',
+                    1 => 'Verified',
+                ])
+                ->switch($states)
+                ->sortable();
         } else {
             $grid->column('verification', __('Verification'))
                 ->filter([0 => 'Pending', 1 => 'Verified'])
@@ -229,31 +241,57 @@ class StudentsController extends AdminController
                     0 => 'danger',
                     1 => 'success',
                 ])
+                ->filter([
+                    0 => 'Pending',
+                    1 => 'Verified',
+                ])
                 ->sortable();
         }
+
+
+        $grid->column('id', __('ID'))
+            ->sortable();
 
 
         $grid->column('avatar', __('Photo'))
             ->lightbox(['width' => 60, 'height' => 60])
             ->sortable();
 
-        $grid->column('id', __('ID'))
-            ->display(function ($id) {
-                if ($this->school_pay_account_id != null) {
-                    if (strlen($this->school_pay_account_id) > 2) {
-                        return $this->school_pay_account_id;
-                    }
-                }
-                return $id;
-            })
-            ->sortable();
+
         $grid->column('name', __('Name'))->sortable();
-        $grid->column('given_name', __('Given Name'))->sortable();
+        $grid->column('current_class_id', __('Current class'))
+            ->display(function () {
+                if ($this->current_class == null) {
+                    return '<span class="badge bg-danger">No class</span>';
+                }
+                return $this->current_class->name_text;
+            })
+            ->filter([
+                0 => 'No class'
+            ])
+            ->sortable();
+
+        $grid->column('current_theology_class_id', __('Theology class'))
+            ->display(function () {
+                if ($this->current_theology == null) {
+                    return '<span class="badge bg-danger">No class</span>';
+                }
+                return $this->current_theology->name;
+            })
+            ->filter([
+                0 => 'No class'
+            ])
+            ->sortable();
+
+
+
         $grid->column('sex', __('Gender'))
             ->sortable()
             ->filter(['Male' => 'Male', 'Female' => 'Female']);
-        $grid->column('emergency_person_name', __('Guardian'))->sortable();
-        $grid->column('emergency_person_phone', __('Guardian Phone'))->sortable();
+        $grid->column('emergency_person_name', __('Guardian'))
+            ->hide()
+            ->sortable();
+        $grid->column('emergency_person_phone', __('Guardian Phone'))->hide()->sortable();
         $grid->column('guardian_relation', __('Guardian relation'))->sortable()->hide();
 
 
@@ -398,7 +436,8 @@ class StudentsController extends AdminController
                 'on' => ['value' => 1, 'text' => 'Verified', 'color' => 'success'],
                 'off' => ['value' => 0, 'text' => 'Pending', 'color' => 'danger'],
             ];
-            $form->switch('verification')->states($states)->rules('required')->default(0);
+            $form->switch('verification')->states($states)
+                ->rules('required')->default(0);
         });
 
 

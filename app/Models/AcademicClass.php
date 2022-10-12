@@ -284,9 +284,9 @@ class AcademicClass extends Model
         return $this->hasMany(StudentHasClass::class, 'academic_class_id');
     }
 
-    function getNameTextAttribute($x)
-    {
-        return $this->name . " - " . $this->academic_year->name . "";
+    function getNameTextAttribute()
+    { 
+        return $this->name;// . " - " . $this->academic_year->name . "";
     }
     function getOptionalSubjectsItems()
     {

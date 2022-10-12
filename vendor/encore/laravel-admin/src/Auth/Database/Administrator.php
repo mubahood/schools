@@ -2,12 +2,15 @@
 
 namespace Encore\Admin\Auth\Database;
 
+use App\Models\AcademicClass;
+use App\Models\AcademicYear;
 use App\Models\Account;
 use App\Models\AdminRoleUser;
 use App\Models\Enterprise;
 use App\Models\ServiceSubscription;
 use App\Models\StudentHasClass;
 use App\Models\StudentHasFee;
+use App\Models\StudentHasTheologyClass;
 use App\Models\Transaction;
 use App\Models\Utils;
 use Encore\Admin\Traits\DefaultDatetimeFormat;
@@ -16,6 +19,7 @@ use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -247,6 +251,68 @@ class Administrator extends Model implements AuthenticatableContract
      *
      * @return string
      */
+    public function getCurrentClassIdAttribute()
+    {
+        $class_id = 0;
+
+        foreach ($this->classes as $cls) {
+            $year = AcademicYear::find($cls->academic_year_id);
+            if ($year != null) {
+                if ($year->is_active) {
+                    $class_id = $cls->academic_class_id;
+                }
+            }
+        }
+        DB::update("UPDATE admin_users SET current_class_id = $class_id WHERE id = $this->id");
+        return $class_id;
+    }
+
+    public function getCurrentTheologyClassIdAttribute()
+    {
+        $class_id = 0;
+
+        foreach ($this->theology_classes as $cls) {
+            $year = AcademicYear::find($cls->academic_year_id);
+            if ($year != null) {
+                if ($year->is_active) {
+                    $class_id = $cls->academic_class_id;
+                }
+            }
+        }
+        DB::update("UPDATE admin_users SET current_theology_class_id = $class_id WHERE id = $this->id");
+        return $class_id;
+    }
+
+
+    public static function update_current_classes($enterprise_id)
+    {
+        foreach (Administrator::where([
+            'enterprise_id' => $enterprise_id,
+            'user_type' => 'student'
+        ])->get() as $admin) {
+            $class_id = 0;
+            foreach (StudentHasClass::where([
+                'administrator_id' => $admin->id
+            ])->get() as $cls) {
+                $year = AcademicYear::find($cls->academic_year_id);
+                if ($year != null) {
+                    if ($year->is_active) {
+                        $class_id = $cls->academic_class_id;
+                    }
+                }
+            }
+            DB::update("UPDATE admin_users SET current_class_id = $class_id WHERE id = $admin->id");
+        }
+    }
+
+
+
+
+    public function current_class()
+    {
+        return $this->belongsTo(AcademicClass::class, 'current_class_id');
+    }
+
     public function getAvatarAttribute($avatar)
     {
 
@@ -296,6 +362,11 @@ class Administrator extends Model implements AuthenticatableContract
     public function classes()
     {
         return $this->hasMany(StudentHasClass::class);
+    }
+
+    public function theology_classes()
+    {
+        return $this->hasMany(StudentHasTheologyClass::class, 'theology_class_id');
     }
 
     public function THEclasses()

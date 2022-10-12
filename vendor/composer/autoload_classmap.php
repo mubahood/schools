@@ -119,6 +119,7 @@ return array(
     'App\\Models\\StudentHasClass' => $baseDir . '/app/Models/StudentHasClass.php',
     'App\\Models\\StudentHasFee' => $baseDir . '/app/Models/StudentHasFee.php',
     'App\\Models\\StudentHasOptionalSubject' => $baseDir . '/app/Models/StudentHasOptionalSubject.php',
+    'App\\Models\\StudentHasTheologyClass' => $baseDir . '/app/Models/StudentHasTheologyClass.php',
     'App\\Models\\StudentReportCard' => $baseDir . '/app/Models/StudentReportCard.php',
     'App\\Models\\StudentReportCardItem' => $baseDir . '/app/Models/StudentReportCardItem.php',
     'App\\Models\\Subject' => $baseDir . '/app/Models/Subject.php',
