@@ -33,4 +33,18 @@ class TheologyClass extends Model
     {
         return $this->hasMany(TheologySubject::class, 'theology_class_id');
     }
+
+    function getNameTextAttribute()
+    { 
+        return $this->name. " - " . $this->academic_year->name . "";
+    } 
+
+    function academic_year()
+    {
+        return $this->belongsTo(AcademicYear::class, 'academic_year_id');
+    }
+   
+
+
+    protected  $appends = ['name_text'];
 }

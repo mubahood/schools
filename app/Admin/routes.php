@@ -48,6 +48,7 @@ Route::group([
     $router->resource('service-subscriptions', ServiceSubscriptionController::class);
     $router->resource('theology-classes', TheologyClassController::class); 
     $router->resource('theology-courses', TheologyCourseController::class);
+    $router->resource('students-theology-classes', StudentHasTheologyClassController::class);
 
     //$router->resource('fees', StudentHasFeeController::class);
 

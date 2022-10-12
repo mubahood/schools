@@ -11,6 +11,7 @@ use App\Models\ServiceSubscription;
 use App\Models\StudentHasClass;
 use App\Models\StudentHasFee;
 use App\Models\StudentHasTheologyClass;
+use App\Models\TheologyClass;
 use App\Models\Transaction;
 use App\Models\Utils;
 use Encore\Admin\Traits\DefaultDatetimeFormat;
@@ -270,12 +271,15 @@ class Administrator extends Model implements AuthenticatableContract
     public function getCurrentTheologyClassIdAttribute()
     {
         $class_id = 0;
-
         foreach ($this->theology_classes as $cls) {
-            $year = AcademicYear::find($cls->academic_year_id);
-            if ($year != null) {
-                if ($year->is_active) {
-                    $class_id = $cls->academic_class_id;
+
+            if ($cls->theology_class != null) {
+                $class = $cls->theology_class;
+                $year = AcademicYear::find($class->academic_year_id);
+                if ($year != null) {
+                    if ($year->is_active) {
+                        $class_id = $class->id;
+                    }
                 }
             }
         }
@@ -311,6 +315,11 @@ class Administrator extends Model implements AuthenticatableContract
     public function current_class()
     {
         return $this->belongsTo(AcademicClass::class, 'current_class_id');
+    }
+
+    public function current_theology_class()
+    {
+        return $this->belongsTo(TheologyClass::class, 'current_theology_class_id');
     }
 
     public function getAvatarAttribute($avatar)
@@ -366,7 +375,7 @@ class Administrator extends Model implements AuthenticatableContract
 
     public function theology_classes()
     {
-        return $this->hasMany(StudentHasTheologyClass::class, 'theology_class_id');
+        return $this->hasMany(StudentHasTheologyClass::class);
     }
 
     public function THEclasses()

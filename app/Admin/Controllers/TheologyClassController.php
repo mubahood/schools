@@ -32,6 +32,10 @@ class TheologyClassController extends AdminController
     {
         $grid = new Grid(new TheologyClass());
 
+        $grid->disableBatchActions();
+        $grid->disableFilter();
+        $grid->disableExport();
+
         $grid->column('id', __('Id'))->sortable();
         $grid->column('academic_year_id', __('Academic year id'));
         $grid->column('class_teahcer_id', __('Class teahcer id'));

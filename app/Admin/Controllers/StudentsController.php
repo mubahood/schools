@@ -8,6 +8,8 @@ use App\Models\AdminRole;
 use App\Models\AdminRoleUser;
 use App\Models\StudentHasClass;
 use App\Models\Subject;
+use App\Models\TheologyClass;
+use App\Models\TheologySubject;
 use App\Models\Utils;
 use Carbon\Carbon;
 use Encore\Admin\Auth\Database\Administrator;
@@ -20,118 +22,6 @@ use Encore\Admin\Widgets\Tab;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
 
-/*
-
-`first_name` TEXT DEFAULT NULL,
-`last_name` TEXT DEFAULT NULL,
-`date_of_birth` TEXT DEFAULT NULL,
-`place_of_birth` TEXT DEFAULT NULL,
-`sex` TEXT DEFAULT NULpL,
-`home_address` TEXT DEFAULT NULL,
-`current_address` TEXT DEFAULT NULL,
-`phone_number_1` TEXT DEFAULT NULL,
-`phone_number_2` TEXT DEFAULT NULL,
-`email` TEXT DEFAULT NULL,
-`nationality` TEXT DEFAULT NULL,
-`religion` TEXT DEFAULT NULL,
-`spouse_name` TEXT DEFAULT NULL,
-`spouse_phone` TEXT DEFAULT NULL,
-`father_name` TEXT DEFAULT NULL,
-`father_phone` TEXT DEFAULT NULL,
-`mother_name` TEXT DEFAULT NULL,
-`mother_phone` TEXT DEFAULT NULL,
-`languages` TEXT DEFAULT NULL,
-`emergency_person_name` TEXT DEFAULT NULL,
-`emergency_person_phone` TEXT DEFAULT NULL,
-`national_id_number` TEXT DEFAULT NULL,
-`passport_number` TEXT DEFAULT NULL,
-`tin` TEXT DEFAULT NULL,
-`nssf_number` TEXT DEFAULT NULL,
-`bank_name` TEXT DEFAULT NULL,
-`bank_account_number` TEXT DEFAULT NULL,
-`primary_school_name` TEXT DEFAULT NULL,
-`primary_school_year_graduated` TEXT DEFAULT NULL,
-`seconday_school_name` TEXT DEFAULT NULL,
-`seconday_school_year_graduated` TEXT DEFAULT NULL,
-`high_school_name` TEXT DEFAULT NULL,
-`high_school_year_graduated` TEXT DEFAULT NULL,
-`degree_university_name` TEXT DEFAULT NULL,
-`degree_university_year_graduated` TEXT DEFAULT NULL,
-`masters_university_name` TEXT DEFAULT NULL,
-`masters_university_year_graduated` TEXT DEFAULT NULL,
-`phd_university_name` TEXT DEFAULT NULL,
-`phd_university_year_graduated` TEXT DEFAULT NULL,
- 
-
-
-===================================
-===================================
-===================================
-===================================
-===================================
-===================================
-===================================
-===================================
-PERSONAL INFORMATION
---------------------
-- First name
-- Last name
-- Date of birth
-- Place of birth
-- Sex
-- Home Address
-- Current Address
-- Telephone
-- Cell phone
-- Email address
-- Cival status
-- Citizineship
-- Religion
-- Spource name
-- Spource phone
-- Farther's name
-- Farther's phone
-- Mothers's name
-- Mothers's phone
-- Languages
-- Contact for emergency name
-- Contact for emergency phone
-- Mothers's phone
-- 
-
-ACCOUNT NUMBERS
---------------------
-- National ID Number
-- Passport number
-- TIN Number
-- NSSF NUMBER
-- Bank name
-- Bank account number
-- 
-
-EDUCATIONAL INFORMATION
---------------------
-- Primary school name
-- Primary school year graduated
-- Seconday school name
-- Seconday school year graduated
-- High school name
-- High school year graduated
-- Degree university name
-- Degree university year graduated
-- Masters university name
-- Masters university year graduated
-- PHD university name
-- PHD university year graduated
-- 
-
-ACCOUNT INFORMATION
---------------------
-- Usename
-- Password
-
-
-*/
 
 class StudentsController extends AdminController
 {
@@ -178,12 +68,24 @@ class StudentsController extends AdminController
             ])
             ->get();
 
+        $teacher_theology_subjects = TheologySubject::where([
+            'subject_teacher' => Admin::user()->id
+        ])
+            ->orWhere([
+                'teacher_1' => Admin::user()->id
+            ])
+            ->orWhere([
+                'teacher_2' => Admin::user()->id
+            ])
+            ->orWhere([
+                'teacher_3' => Admin::user()->id
+            ])
+            ->get();
+
 
         $grid->filter(function ($filter) {
 
             $filter->between('created_at', 'Admitted')->date();
-
-
             $u = Admin::user();
 
             if (!Admin::user()->isRole('dos')) {
@@ -203,12 +105,38 @@ class StudentsController extends AdminController
                     ])
                     ->get();
 
+                $teacher_theology_subjects = TheologySubject::where([
+                    'subject_teacher' => Admin::user()->id
+                ])
+                    ->orWhere([
+                        'teacher_1' => Admin::user()->id
+                    ])
+                    ->orWhere([
+                        'teacher_2' => Admin::user()->id
+                    ])
+                    ->orWhere([
+                        'teacher_3' => Admin::user()->id
+                    ])
+                    ->get();
 
-                $filter->equal('current_class_id', 'Filter by class')->select(AcademicClass::where([
-                    'enterprise_id' => $u->enterprise_id
-                ])->where('id', $teacher_subjects->pluck('academic_class_id'))->orderBy('id', 'Desc')->get()->pluck('name_text', 'id'));
+                if ($teacher_subjects->count() > 0) {
+                    $filter->equal('current_class_id', 'Filter by class')->select(AcademicClass::where([
+                        'enterprise_id' => $u->enterprise_id
+                    ])->where('id', $teacher_subjects->pluck('academic_class_id'))->orderBy('id', 'Desc')->get()->pluck('name_text', 'id'));
+                }
+
+
+                if ($teacher_theology_subjects->count() > 0) {
+                    $filter->equal('current_theology_class_id', 'Filter by theology class')->select(TheologyClass::where([
+                        'enterprise_id' => $u->enterprise_id
+                    ])->where('id', $teacher_theology_subjects->pluck('theology_class_id'))->orderBy('id', 'Desc')->get()->pluck('name_text', 'id'));
+                }
             } else {
                 $filter->equal('current_class_id', 'Filter by class')->select(AcademicClass::where([
+                    'enterprise_id' => $u->enterprise_id
+                ])->orderBy('id', 'Desc')->get()->pluck('name_text', 'id'));
+
+                $filter->equal('current_theology_class_id', 'Filter by theology class')->select(TheologyClass::where([
                     'enterprise_id' => $u->enterprise_id
                 ])->orderBy('id', 'Desc')->get()->pluck('name_text', 'id'));
             }
@@ -223,7 +151,6 @@ class StudentsController extends AdminController
 
 
 
-
         if (!Admin::user()->isRole('dos')) {
             $grid->disableExport();
             $grid->disableCreateButton();
@@ -231,9 +158,13 @@ class StudentsController extends AdminController
             $grid->model()->where(
                 'current_class_id',
                 $teacher_subjects->pluck('academic_class_id'),
+            )->orWhereIn(
+                'current_theology_class_id',
+                $teacher_theology_subjects->pluck('theology_class_id'),
             );
         } else {
         }
+
 
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
@@ -261,7 +192,7 @@ class StudentsController extends AdminController
                 ->label([
                     0 => 'danger',
                     1 => 'success',
-                ]) 
+                ])
                 ->sortable();
         }
 
@@ -276,28 +207,25 @@ class StudentsController extends AdminController
 
 
         $grid->column('name', __('Name'))->sortable();
+
+
         $grid->column('current_class_id', __('Current class'))
             ->display(function () {
                 if ($this->current_class == null) {
                     return '<span class="badge bg-danger">No class</span>';
                 }
                 return $this->current_class->name_text;
-            })
-            ->filter([
-                0 => 'No class'
-            ])
-            ->sortable();
+            })->sortable();
+
+
 
         $grid->column('current_theology_class_id', __('Theology class'))
             ->display(function () {
-                if ($this->current_theology == null) {
-                    return '<span class="badge bg-danger">No class</span>';
+                if ($this->current_theology_class == null) {
+                    return '<span class="badge bg-danger">No class</span> ';
                 }
-                return $this->current_theology->name;
+                return $this->current_theology_class->name_text;
             })
-            ->filter([
-                0 => 'No class'
-            ])
             ->sortable();
 
 
@@ -506,21 +434,18 @@ class StudentsController extends AdminController
         }
 
         if (Admin::user()->isRole('dos')) {
+            $form->html('Click on new to add this student to a theology class');
             $form->tab('THEOLOGY CLASSES', function (Form $form) {
-                $form->morphMany('classes', 'CLASS ALLOCATION', function (Form\NestedForm $form) {
-                    $form->html('Click on new to add this student to a class');
+                $form->morphMany('theology_classes', null, function (Form\NestedForm $form) {
+
                     $u = Admin::user();
                     $form->hidden('enterprise_id')->default($u->enterprise_id);
 
-                    $form->select('academic_class_id', 'Class')->options(function () {
-                        return AcademicClass::where([
+                    $form->select('theology_class_id', 'Class')->options(function () {
+                        return TheologyClass::where([
                             'enterprise_id' => Admin::user()->enterprise_id,
                         ])->get()->pluck('name', 'id');
-                    })
-                        ->rules('required')->load(
-                            'stream_id',
-                            url('/api/streams?enterprise_id=' . $u->enterprise_id)
-                        );
+                    });
                 });
                 $form->divider();
             });
