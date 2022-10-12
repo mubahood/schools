@@ -124,6 +124,9 @@ php artisan make:model FeeDepositConfirmation
 php artisan make:model TheologyClass
 php artisan make:model TheologyCourse
 php artisan make:model TheologySubject
+php artisan make:model TheologyExam
+php artisan make:model TheologyMark
+php artisan make:model TheologyExamHasClass
 
 
 php artisan admin:make TermController --model=App\\Models\\Term
@@ -151,6 +154,9 @@ php artisan make:migration create_stock_item_categories_table
 php artisan make:migration create_stock_batches_table 
 php artisan make:migration create_fee_deposit_confirmations_table
 php artisan make:migration create_theology_courses_table
+php artisan make:migration create_theology_exams_table
+php artisan make:migration create_theology_marks_table
+php artisan make:migration create_theology_exam_has_classes_table
 
 --path=/database/migrations/fileName.php
 
@@ -184,6 +190,8 @@ php artisan admin:make ServiceSubscriptionController --model=App\\Models\\Servic
 php artisan admin:make TheologyClassController --model=App\\Models\\TheologyClass
 php artisan admin:make TheologyCourseController --model=App\\Models\\TheologyCourse
 php artisan admin:make TheologySubjectCourseController --model=App\\Models\\TheologySubject
+php artisan admin:make TheologyExamCourseController --model=App\\Models\\TheologyExam
+php artisan admin:make TheologyMarkController --model=App\\Models\\TheologyMark
  
 
 
@@ -254,6 +262,7 @@ git reset --hard orign/master
 php artisan make:migration add_created_by --table=stock_records
 php artisan make:migration add_current_class_id --table=admin_users
 php artisan make:migration add_current_theology_class_id --table=admin_users
+php artisan make:migration remove_enterprise_id --table=theology_exam_has_classes
 
 git add --all
 git commit -am "Your commit message"

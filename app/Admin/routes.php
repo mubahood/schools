@@ -46,9 +46,11 @@ Route::group([
     $router->resource('stock-records', StockRecordController::class);
     $router->resource('services', ServiceController::class);
     $router->resource('service-subscriptions', ServiceSubscriptionController::class);
-    $router->resource('theology-classes', TheologyClassController::class); 
+    $router->resource('theology-classes', TheologyClassController::class);
     $router->resource('theology-courses', TheologyCourseController::class);
     $router->resource('students-theology-classes', StudentHasTheologyClassController::class);
+    $router->resource('theology-exams', TheologyExamCourseController::class);
+    $router->resource('theology-marks', TheologyMarkController::class);
 
     //$router->resource('fees', StudentHasFeeController::class);
 

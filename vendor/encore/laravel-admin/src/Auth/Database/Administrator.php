@@ -375,7 +375,7 @@ class Administrator extends Model implements AuthenticatableContract
 
     public function theology_classes()
     {
-        return $this->hasMany(StudentHasTheologyClass::class);
+        return $this->hasMany(StudentHasTheologyClass::class,'administrator_id');
     }
 
     public function THEclasses()

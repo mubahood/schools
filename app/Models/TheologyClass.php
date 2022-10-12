@@ -35,15 +35,20 @@ class TheologyClass extends Model
     }
 
     function getNameTextAttribute()
-    { 
-        return $this->name. " - " . $this->academic_year->name . "";
-    } 
+    {
+        return $this->name . " - " . $this->academic_year->name . "";
+    }
 
     function academic_year()
     {
         return $this->belongsTo(AcademicYear::class, 'academic_year_id');
     }
-   
+
+
+    function students()
+    {
+        return $this->hasMany(StudentHasTheologyClass::class, 'theology_class_id');
+    }
 
 
     protected  $appends = ['name_text'];

@@ -29,7 +29,7 @@ class ServiceController extends AdminController
         $x->fee = rand(1000, 100000);
         $x->save();
         die("Anjane"); */
-
+ 
         $grid = new Grid(new Service());
         $grid->disableBatchActions();
         $grid->disableFilter();
@@ -40,7 +40,8 @@ class ServiceController extends AdminController
             $actions->disableDelete();
         });
 
-
+        $grid->quickSearch('name')->placeholder("Search...");
+        
         $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
             ->orderBy('id', 'Desc');
 
