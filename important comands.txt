@@ -239,6 +239,7 @@ git reset --hard orign/master
 
 
 php artisan make:migration add_created_by --table=stock_records
+php artisan make:migration add_more_teachers --table=subjects
 
 git add --all
 git commit -am "Your commit message"

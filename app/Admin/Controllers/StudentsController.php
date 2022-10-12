@@ -203,15 +203,17 @@ class StudentsController extends AdminController
 
         $grid->quickSearch('name')->placeholder("Search by name...");
 
+        if (!Admin::user()->isRole('dos')) {
+            $grid->disableExport();
+            $grid->disableCreateButton();
+        }
+
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
             'user_type' => 'student'
         ]);
 
-        $states = [
-            'on' => ['value' => 1, 'text' => 'Verified', 'color' => 'success'],
-            'off' => ['value' => 0, 'text' => 'Pending', 'color' => 'danger'],
-        ];
+
 
         $grid->column('verification', __('Verification'))
             ->filter([0 => 'Pending', 1 => 'Verified'])
@@ -369,6 +371,10 @@ class StudentsController extends AdminController
             $form->hidden('enterprise_id')->rules('required')->default($u->enterprise_id)
                 ->value($u->enterprise_id);
 
+            $form->disableCreatingCheck();
+            $form->disableReset();
+            $form->disableViewCheck();
+
             $form->hidden('user_type')->default('student')->value('student')->updateRules('required|max:223');
 
             $form->text('first_name')->rules('required');
@@ -399,7 +405,11 @@ class StudentsController extends AdminController
             }
 
 
-            $form->switch('verification')->rules('required')->default(0);
+            $states = [
+                'on' => ['value' => 1, 'text' => 'Verified', 'color' => 'success'],
+                'off' => ['value' => 0, 'text' => 'Pending', 'color' => 'danger'],
+            ];
+            $form->switch('verification')->states($states)->rules('required')->default(0);
         })->tab('PERSONAL INFORMATION', function (Form $form) {
 
             $form->text('home_address');

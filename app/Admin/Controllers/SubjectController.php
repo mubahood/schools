@@ -178,6 +178,20 @@ class SubjectController extends AdminController
                 $teachers
             )->rules('required');
 
+        $form->select('teacher_1', 'Subject teacher 2')
+            ->options(
+                $teachers
+            );
+        $form->select('teacher_2', 'Subject teacher 3')
+            ->options(
+                $teachers
+            );
+        $form->select('teacher_3', 'Subject teacher 4')
+            ->options(
+                $teachers
+            );
+
+
 
         $form->text('code', __('Subject Code'));
 
