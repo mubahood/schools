@@ -7,6 +7,7 @@ use App\Models\AcademicYear;
 use App\Models\AdminRole;
 use App\Models\AdminRoleUser;
 use App\Models\StudentHasClass;
+use App\Models\Subject;
 use App\Models\Utils;
 use Carbon\Carbon;
 use Encore\Admin\Auth\Database\Administrator;
@@ -157,10 +158,25 @@ class StudentsController extends AdminController
             $actions->disableView();
         });
 
-        
+
         Utils::display_checklist(Utils::students_checklist(Admin::user()));
         Utils::display_checklist(Utils::students_optional_subjects_checklist(Admin::user()));
 
+
+
+        $teacher_subjects = Subject::where([
+            'subject_teacher' => Admin::user()->id
+        ])
+            ->orWhere([
+                'teacher_1' => Admin::user()->id
+            ])
+            ->orWhere([
+                'teacher_2' => Admin::user()->id
+            ])
+            ->orWhere([
+                'teacher_3' => Admin::user()->id
+            ])
+            ->get();
 
 
         $grid->filter(function ($filter) {
@@ -169,51 +185,54 @@ class StudentsController extends AdminController
 
 
             $u = Admin::user();
-            $filter->equal('current_class_id', 'Filter by class')->select(AcademicClass::where([
-                'enterprise_id' => $u->enterprise_id
-            ])->orderBy('id', 'Desc')->get()->pluck('name_text', 'id'));
+
+            if (!Admin::user()->isRole('dos')) {
+
+
+                $teacher_subjects = Subject::where([
+                    'subject_teacher' => Admin::user()->id
+                ])
+                    ->orWhere([
+                        'teacher_1' => Admin::user()->id
+                    ])
+                    ->orWhere([
+                        'teacher_2' => Admin::user()->id
+                    ])
+                    ->orWhere([
+                        'teacher_3' => Admin::user()->id
+                    ])
+                    ->get();
+
+
+                $filter->equal('current_class_id', 'Filter by class')->select(AcademicClass::where([
+                    'enterprise_id' => $u->enterprise_id
+                ])->where('id', $teacher_subjects->pluck('academic_class_id'))->orderBy('id', 'Desc')->get()->pluck('name_text', 'id'));
+            } else {
+                $filter->equal('current_class_id', 'Filter by class')->select(AcademicClass::where([
+                    'enterprise_id' => $u->enterprise_id
+                ])->orderBy('id', 'Desc')->get()->pluck('name_text', 'id'));
+            }
+
+
 
             // Remove the default id filter
             $filter->disableIdFilter();
-
-            // Add a column filter
-
-            //$filter->like('name', 'Search by name');
-
-            $u = Admin::user();
-            /* $ajax_url = url(
-                '/api/ajax?'
-                    . 'enterprise_id=' . $u->enterprise_id
-                    . "&search_by_1=name"
-                    . "&search_by_2=id"
-                    . "&model=User"
-            );
-
-            $filter->equal('id','Name')->select()->ajax($ajax_url); */
-            /*  $filter->whereIn(function ($query) {
-
-                $ids = StudentHasClass::where([
-                    'academic_class_id' => ((int)($this->input))
-                ])->get()->pluck('id');
-
-                $query->whereIn('id', $ids);
-            }, 'Filter by class')->select(
-                AcademicClass::where([
-                    'enterprise_id' => $u->enterprise_id
-                ])->get()->pluck('name_text', 'id')
-            ); */
-
-
-
-
-            //$filter->expand();
         });
 
         $grid->quickSearch('name')->placeholder("Search by name...");
 
+
+
+
         if (!Admin::user()->isRole('dos')) {
             $grid->disableExport();
             $grid->disableCreateButton();
+
+            $grid->model()->where(
+                'current_class_id',
+                $teacher_subjects->pluck('academic_class_id'),
+            );
+        } else {
         }
 
         $grid->model()->where([
@@ -242,11 +261,7 @@ class StudentsController extends AdminController
                 ->label([
                     0 => 'danger',
                     1 => 'success',
-                ])
-                ->filter([
-                    0 => 'Pending',
-                    1 => 'Verified',
-                ])
+                ]) 
                 ->sortable();
         }
 
