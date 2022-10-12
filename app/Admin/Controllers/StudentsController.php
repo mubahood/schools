@@ -214,16 +214,23 @@ class StudentsController extends AdminController
         ]);
 
 
-
-        $grid->column('verification', __('Verification'))
-            ->filter([0 => 'Pending', 1 => 'Verified'])
-            ->using([0 => 'Pending', 1 => 'Verified'])
-            ->width(100)
-            ->label([
-                0 => 'danger',
-                1 => 'success',
-            ])
-            ->sortable();
+        if (Admin::user()->isRole('dos')) {
+            $states = [
+                'on' => ['value' => 1, 'text' => 'Verified', 'color' => 'success'],
+                'off' => ['value' => 0, 'text' => 'Pending', 'color' => 'danger'],
+            ];
+            $grid->column('verification', 'Verification')->switch($states);
+        } else {
+            $grid->column('verification', __('Verification'))
+                ->filter([0 => 'Pending', 1 => 'Verified'])
+                ->using([0 => 'Pending', 1 => 'Verified'])
+                ->width(100)
+                ->label([
+                    0 => 'danger',
+                    1 => 'success',
+                ])
+                ->sortable();
+        }
 
 
         $grid->column('avatar', __('Photo'))
@@ -346,7 +353,6 @@ class StudentsController extends AdminController
 
 
 
-
         $form->tab('BIO DATA', function (Form $form) {
 
             if (Admin::user()->isRole('dos')) {
@@ -385,24 +391,7 @@ class StudentsController extends AdminController
             $form->text('school_pay_account_id')->rules('required');
             $form->select('sex', 'Gender')->options(['Male' => 'Male', 'Female' => 'Female'])->rules('required');
 
-            if (Admin::user()->isRole('dos')) {
-                $form->morphMany('classes', 'CLASS ALLOCATION', function (Form\NestedForm $form) {
-                    $form->html('Click on new to add this student to a class');
-                    $u = Admin::user();
-                    $form->hidden('enterprise_id')->default($u->enterprise_id);
 
-                    $form->select('academic_class_id', 'Class')->options(function () {
-                        return AcademicClass::where([
-                            'enterprise_id' => Admin::user()->enterprise_id,
-                        ])->get()->pluck('name', 'id');
-                    })
-                        ->rules('required')->load(
-                            'stream_id',
-                            url('/api/streams?enterprise_id=' . $u->enterprise_id)
-                        );
-                });
-                $form->divider();
-            }
 
 
             $states = [
@@ -410,7 +399,11 @@ class StudentsController extends AdminController
                 'off' => ['value' => 0, 'text' => 'Pending', 'color' => 'danger'],
             ];
             $form->switch('verification')->states($states)->rules('required')->default(0);
-        })->tab('PERSONAL INFORMATION', function (Form $form) {
+        });
+
+
+
+        $form->tab('PERSONAL INFORMATION', function (Form $form) {
 
             $form->text('home_address');
             $form->text('current_address');
@@ -433,6 +426,50 @@ class StudentsController extends AdminController
             $form->text('nationality');
             $form->text('referral');
         });
+
+
+        if (Admin::user()->isRole('dos')) {
+            $form->tab('CLASSES', function (Form $form) {
+                $form->morphMany('classes', 'CLASS ALLOCATION', function (Form\NestedForm $form) {
+                    $form->html('Click on new to add this student to a class');
+                    $u = Admin::user();
+                    $form->hidden('enterprise_id')->default($u->enterprise_id);
+
+                    $form->select('academic_class_id', 'Class')->options(function () {
+                        return AcademicClass::where([
+                            'enterprise_id' => Admin::user()->enterprise_id,
+                        ])->get()->pluck('name', 'id');
+                    })
+                        ->rules('required')->load(
+                            'stream_id',
+                            url('/api/streams?enterprise_id=' . $u->enterprise_id)
+                        );
+                });
+                $form->divider();
+            });
+        }
+
+        if (Admin::user()->isRole('dos')) {
+            $form->tab('THEOLOGY CLASSES', function (Form $form) {
+                $form->morphMany('classes', 'CLASS ALLOCATION', function (Form\NestedForm $form) {
+                    $form->html('Click on new to add this student to a class');
+                    $u = Admin::user();
+                    $form->hidden('enterprise_id')->default($u->enterprise_id);
+
+                    $form->select('academic_class_id', 'Class')->options(function () {
+                        return AcademicClass::where([
+                            'enterprise_id' => Admin::user()->enterprise_id,
+                        ])->get()->pluck('name', 'id');
+                    })
+                        ->rules('required')->load(
+                            'stream_id',
+                            url('/api/streams?enterprise_id=' . $u->enterprise_id)
+                        );
+                });
+                $form->divider();
+            });
+        }
+
 
         if (Admin::user()->isRole('dos')) {
             $form->tab('SYSTEM ACCOUNT', function (Form $form) {

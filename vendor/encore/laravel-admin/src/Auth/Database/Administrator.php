@@ -298,6 +298,11 @@ class Administrator extends Model implements AuthenticatableContract
         return $this->hasMany(StudentHasClass::class);
     }
 
+    public function THEclasses()
+    {
+        return $this->hasMany(StudentHasClass::class);
+    }
+
     public function bills()
     {
         return $this->hasMany(StudentHasFee::class);
