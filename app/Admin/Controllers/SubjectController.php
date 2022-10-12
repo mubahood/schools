@@ -129,7 +129,6 @@ class SubjectController extends AdminController
         $s->save();  */
 
         $form = new Form(new Subject());
-
         Utils::display_system_checklist();
 
         $u = Admin::user();
@@ -202,6 +201,9 @@ class SubjectController extends AdminController
             ])->rules('required');
 
         $form->textarea('details', __('Details'));
+
+
+        
 
         return $form;
     }

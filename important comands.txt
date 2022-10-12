@@ -78,7 +78,11 @@ php artisan make:migration create_student_has_classes_table
 php artisan make:migration create_student_has_optional_subjects_table
 php artisan make:migration create_user_batch_importers_table
 php artisan make:migration create_stock_records_table
+php artisan make:migration create_theology_subjects_table
+php artisan make:migration create_student_has_theology_classes_table
 
+
+php artisan make:model StudentHasTheologyClass
 php artisan make:model BooksCategory
 php artisan make:model BookAuthor
 php artisan make:model BookBorrow
@@ -117,6 +121,9 @@ php artisan make:model StockRecord
 php artisan make:model Service
 php artisan make:model ServiceSubscription
 php artisan make:model FeeDepositConfirmation
+php artisan make:model TheologyClass
+php artisan make:model TheologyCourse
+php artisan make:model TheologySubject
 
 
 php artisan admin:make TermController --model=App\\Models\\Term
@@ -142,7 +149,10 @@ php artisan make:migration create_menu_items_table
 php artisan make:migration create_fund_requisitions_table 
 php artisan make:migration create_stock_item_categories_table 
 php artisan make:migration create_stock_batches_table 
-php artisan make:migration create_fee_deposit_confirmations_table 
+php artisan make:migration create_fee_deposit_confirmations_table
+php artisan make:migration create_theology_courses_table
+
+--path=/database/migrations/fileName.php
 
 
 php artisan admin:make BooksCategoryController --model=App\\Models\\BooksCategory
@@ -171,7 +181,10 @@ php artisan admin:make StockBatchController --model=App\\Models\\StockBatch
 php artisan admin:make StockRecordController --model=App\\Models\\StockRecord
 php artisan admin:make ServiceController --model=App\\Models\\Service
 php artisan admin:make ServiceSubscriptionController --model=App\\Models\\ServiceSubscription
-
+php artisan admin:make TheologyClassController --model=App\\Models\\TheologyClass
+php artisan admin:make TheologyCourseController --model=App\\Models\\TheologyCourse
+php artisan admin:make TheologySubjectCourseController --model=App\\Models\\TheologySubject
+ 
 
 
 enterprise_id

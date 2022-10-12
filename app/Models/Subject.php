@@ -15,6 +15,9 @@ class Subject extends Model
         'enterprise_id',
         'academic_class_id',
         'subject_teacher',
+        'teacher_3',
+        'teacher_2',
+        'teacher_1',
         'code',
         'details',
         'course_id',
@@ -22,6 +25,8 @@ class Subject extends Model
         'demo_id',
         'is_optional',
     ];
+
+    
 
     public static function boot()
     {
