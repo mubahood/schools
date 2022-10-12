@@ -93,10 +93,10 @@ class AcademicYearController extends AdminController
         $form->date('ends', __('Ends'))->default(date('Y-m-d'))->rules('required');
         $form->textarea('details', __('Details'));
         $form->radio('is_active', __('is_active'))->options([
-            1 => 'Set as current term',
-            0 => 'Not current term',
+            1 => 'Set as current year',
+            0 => 'Not current year',
         ]);
 
-        return $form;
+        return $form; 
     }
 }
