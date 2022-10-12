@@ -149,7 +149,7 @@ class StudentsController extends AdminController
     protected function grid()
     {
 
-        Administrator::update_current_classes(Admin::user()->enterprise_id);
+        //Administrator::update_current_classes(Admin::user()->enterprise_id);
         $grid = new Grid(new Administrator());
         $grid->disableBatchActions();
         $grid->actions(function ($actions) {
