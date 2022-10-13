@@ -21,8 +21,6 @@ class ServiceSubscriptionController extends AdminController
     protected $title = 'Service subscriptions';
 
     /**
-     * Make a grid builder.
-     *
      * @return Grid
      */
     protected function grid()
@@ -39,6 +37,18 @@ class ServiceSubscriptionController extends AdminController
         $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
             ->orderBy('id', 'Desc');
 
+
+        $grid->quickSearch(function ($model, $query) {
+            $acc = Administrator::where('name', 'like', "%$query%")
+                ->where('enterprise_id', Admin::user()->enterprise_id)
+                ->first();
+
+            if ($acc != null) {
+                $model->where('administrator_id', $acc->id);
+            }
+        })->placeholder('Search...');
+
+
         $grid->column('administrator_id', __('Subscriber'))
             ->display(function () {
                 if ($this->sub == null) {
@@ -54,6 +64,8 @@ class ServiceSubscriptionController extends AdminController
         )->get() as $v) {
             $services[$v->id] = $v->name;
         }
+
+
 
 
         $grid->column('created_at', __('Date'))->hide();
