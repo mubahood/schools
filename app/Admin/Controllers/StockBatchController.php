@@ -53,11 +53,19 @@ class StockBatchController extends AdminController
 
 
         //$grid->disableActions();
-        $grid->model()->where([
-            'enterprise_id' => Admin::user()->enterprise_id,
-            'manager' => Admin::user()->id,
-        ])
-            ->orderBy('id', 'Desc');
+
+        if (!Admin::user()->isRole('admin')) {
+            $grid->model()->where([
+                'enterprise_id' => Admin::user()->enterprise_id,
+                'manager' => Admin::user()->id,
+            ])
+                ->orderBy('id', 'Desc');
+        } else {
+            $grid->model()->where([
+                'enterprise_id' => Admin::user()->enterprise_id,
+            ])
+                ->orderBy('id', 'Desc');
+        }
 
         $grid->column('id', __('Batch Number'))->sortable();
         $grid->column('stock_item_category_id', __('Item'))->display(function () {
