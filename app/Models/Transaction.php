@@ -109,6 +109,9 @@ class Transaction extends Model
     public static function boot()
     {
         parent::boot();
+        self::deleting(function ($m) {
+            die("You cannot delete this item.");
+        });
         self::deleted(function ($m) {
             DB::table('transactions')->where('contra_entry_account_id', $m->id)->delete();
             DB::table('transactions')->where('contra_entry_transaction_id', $m->id)->delete();

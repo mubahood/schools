@@ -5,7 +5,7 @@
 </style>
 @include('admin.dashboard.show-user-profile-header', ['u' => $u])
 <div class="row">
-    <div class="col-md-12"> 
+    <div class="col-md-12">
         <div class="row">
             <div class="col-md-12">
                 @if (empty($u->account->transactions))
@@ -14,7 +14,8 @@
                     <ul>
                         @foreach ($u->account->transactions as $tra)
                             <li>
-                               {{ $tra->payment_date}}, <p> <b>UGX. {{ number_format($tra->amount) }}</b> - {{ $tra->description }}</p>
+                                <p>{{ $tra->payment_date }} -  <b>UGX. {{ number_format($tra->amount) }}</b> -
+                                    {{ $tra->description }}</p>
                             </li>
                         @endforeach
                     </ul>
