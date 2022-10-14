@@ -43,7 +43,7 @@ class TransactionController extends AdminController
                     . "&model=Account"
             );
             $filter->equal('account_id', 'Student')->select()->ajax($ajax_url);
-            $filter->between('created_at', 'Created between')->date();
+            $filter->between('payment_date', 'Created between')->date();
         });
 
         $grid->disableBatchActions();
@@ -89,7 +89,7 @@ class TransactionController extends AdminController
             ->sortable()->totalRow(function ($x) {
                 return  number_format($x);
             });
-        $grid->column('created_at', __('Created'))->sortable();
+        $grid->column('payment_date', __('Created'))->sortable();
 
         return $grid;
     }
@@ -105,7 +105,7 @@ class TransactionController extends AdminController
         $show = new Show(Transaction::findOrFail($id));
 
         $show->field('id', __('Id'));
-        $show->field('created_at', __('Created at'));
+        $show->field('payment_date', __('Created at'));
         $show->field('updated_at', __('Updated at'));
         $show->field('enterprise_id', __('Enterprise id'));
         $show->field('account_id', __('Account id'));

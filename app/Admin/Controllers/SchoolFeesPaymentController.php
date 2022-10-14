@@ -42,7 +42,7 @@ class SchoolFeesPaymentController extends AdminController
             );
 
             $filter->equal('account_id', 'Student')->select()->ajax($ajax_url);
-            $filter->between('created_at', 'Created between')->date();
+            $filter->between('payment_date', 'Created between')->date();
         });
 
 
@@ -70,7 +70,7 @@ class SchoolFeesPaymentController extends AdminController
         })->sortable();
 
         $grid->column('academic_year_id', __('Academic year id'))->hide();
-        $grid->column('created_at', __('Date'))->sortable();
+        $grid->column('payment_date', __('Date'))->sortable();
         $grid->column('term_id', __('Term id'))->hide();
 
         return $grid;
@@ -87,7 +87,7 @@ class SchoolFeesPaymentController extends AdminController
         $show = new Show(Transaction::findOrFail($id));
 
         $show->field('id', __('Id'));
-        $show->field('created_at', __('Created at'));
+        $show->field('payment_date', __('Created at'));
         $show->field('updated_at', __('Updated at'));
         $show->field('enterprise_id', __('Enterprise id'));
         $show->field('account_id', __('Account id'));
