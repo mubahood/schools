@@ -14,7 +14,7 @@
                     <ul>
                         @foreach ($u->account->transactions as $tra)
                             <li>
-                                <p><b>UGX. {{ number_format($tra->amount) }}</b> - {{ $tra->description }}</p>
+                               {{$tra->payment_date}}, <p> <b>UGX. {{ number_format($tra->amount) }}</b> - {{ $tra->description }}</p>
                             </li>
                         @endforeach
                     </ul>
