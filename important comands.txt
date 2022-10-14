@@ -264,5 +264,6 @@ php artisan make:migration add_current_class_id --table=admin_users
 php artisan make:migration add_current_theology_class_id --table=admin_users
 php artisan make:migration remove_enterprise_id --table=theology_exam_has_classes
 
-git add --all
+git add --all 
 git commit -am "Your commit message"
+ssh schooics@gator4311.hostgator.com
