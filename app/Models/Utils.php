@@ -138,6 +138,15 @@ class Utils  extends Model
             $trans->amount = (int)($v[11]);
 
             $trans->payment_date = $v[0];
+            if($trans->payment_date!=null){
+                $d = Carbon::parse($trans->payment_date);
+                $min_data = Carbon::parse('15-08-2022');
+                if($d!=null){
+                    if(!$d->isBefore($min_data)){
+                        continue;  
+                    }
+                }
+            } 
 
             $trans->is_contra_entry = false;
             $trans->type = 'FEES_PAYMENT';
@@ -482,7 +491,7 @@ class Utils  extends Model
                 $trans->account_id = $account_id;
                 $trans->created_by_id = $ent->administrator_id;
                 $trans->school_pay_transporter_id = $school_pay_transporter_id;
-                $trans->is_contra_entry = false;
+                $trans->is_contra_entry = false; 
                 $trans->type = 'FEES_PAYMENT';
                 $trans->contra_entry_account_id = $bank->id;
                 $amount = number_format($trans->amount);

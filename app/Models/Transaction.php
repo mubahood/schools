@@ -125,6 +125,18 @@ class Transaction extends Model
         });
         self::creating(function ($m) {
 
+            if ($m != false) {
+                if ($m->payment_date != null) {
+                    $d = Carbon::parse($m->payment_date);
+                    $min_data = Carbon::parse('15-08-2022');
+                    if ($d != null) {
+                        if (!$d->isBefore($min_data)) {
+                            return false;
+                        }
+                    }
+                }
+            }
+
             $ent = Enterprise::find($m->enterprise_id);
             if ($m->is_contra_entry) {
                 if ($m->school_pay_transporter_id != null) {

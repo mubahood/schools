@@ -20,7 +20,7 @@ class HomeController extends Controller
 {
     public function index(Content $content)
     {
-        $i = 0;
+        /* $i = 0;
         foreach (Transaction::where([])->orderBy('payment_date', 'asc')->get() as $key => $a) {
             $d = Carbon::parse($a->payment_date);
             $min_data = Carbon::parse('15-08-2022');
@@ -31,7 +31,7 @@ class HomeController extends Controller
             $i++; 
             echo $d->format('d-M-Y') . "<hr>";
         }
-        die("romina => $i");
+        die("romina => $i"); */
 
         Admin::style('.content-header {display: none;}');
         $u = Admin::user();
