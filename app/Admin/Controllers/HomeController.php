@@ -7,6 +7,7 @@ use App\Models\Account;
 use App\Models\MenuItem;
 use App\Models\Transaction;
 use App\Models\Utils;
+use Carbon\Carbon;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\Dashboard;
 use Encore\Admin\Facades\Admin;
@@ -19,15 +20,18 @@ class HomeController extends Controller
 {
     public function index(Content $content)
     {
-        /* foreach (Transaction::all() as $key => $a) {
-            if ($a->account == null) {
-
-                echo $a->id . "  DNE => " .  ($a->amount) . " <br>";
-            } else {
-                echo $a->id . "  GOOD => " .  ($a->account->owner->name) . " <br>";
-                continue;
+        $i = 0;
+        foreach (Transaction::where([])->orderBy('payment_date', 'asc')->get() as $key => $a) {
+            $d = Carbon::parse($a->payment_date);
+            $min_data = Carbon::parse('15-08-2022');
+            if(!$d->isBefore($min_data)){
+                continue;  
             }
-        } */
+            $a->delete();
+            $i++; 
+            echo $d->format('d-M-Y') . "<hr>";
+        }
+        die("romina => $i");
 
         Admin::style('.content-header {display: none;}');
         $u = Admin::user();

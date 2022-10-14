@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Encore\Admin\Facades\Admin;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Transaction extends Model
 {
@@ -101,16 +102,21 @@ class Transaction extends Model
 
     public function getCreatedAtAttribute($value)
     {
-        return Carbon::parse($value)->toDateString()." - ". Carbon::parse($value)->toTimeString();
+        return Carbon::parse($value)->toDateString() . " - " . Carbon::parse($value)->toTimeString();
     }
 
 
     public static function boot()
     {
         parent::boot();
-        self::deleting(function ($m) {
-            die("You cannot delete this item.");
+        self::deleted(function ($m) {
+            DB::table('transactions')->where('contra_entry_account_id', $m->id)->delete();
+            DB::table('transactions')->where('contra_entry_transaction_id', $m->id)->delete();
+
+            Transaction::where(['contra_entry_account_id' => $m->id])->delete();
+            Transaction::where(['contra_entry_transaction_id' => $m->id])->delete();
         });
+
         self::created(function ($m) {
             if (!$m->is_contra_entry) {
                 Transaction::contra_entry_transaction($m);
