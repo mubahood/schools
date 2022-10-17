@@ -59,13 +59,12 @@ class AccountController extends AdminController
             );
 
             $filter->equal('id', 'Student')->select()->ajax($ajax_url);
-         
+
             $filter->group('balance', function ($group) {
                 $group->gt('greater than');
-                $group->lt('less than'); 
+                $group->lt('less than');
                 $group->equal('equal to');
             });
-
         });
 
 
@@ -83,8 +82,7 @@ class AccountController extends AdminController
 
         $grid->column('owner.avatar', __('Photo'))
             ->width(80)
-            ->lightbox(['width' => 60, 'height' => 60])
-            ->sortable();
+            ->lightbox(['width' => 60, 'height' => 60]);
 
 
         $grid->column('created_at', __('Created'))->hide()->sortable();
