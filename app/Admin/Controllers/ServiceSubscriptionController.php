@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Models\Service;
 use App\Models\ServiceSubscription;
+use App\Models\Utils;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -26,6 +27,12 @@ class ServiceSubscriptionController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new ServiceSubscription());
+
+        $grid->column('created_at', __('Date'))
+            ->display(function () {
+                return Utils::my_date_time($this->created_at);
+            })
+            ->sortable();
 
         $grid->actions(function ($actions) {
             $actions->disableView();
@@ -68,7 +75,6 @@ class ServiceSubscriptionController extends AdminController
 
 
 
-        $grid->column('created_at', __('Date'))->hide();
         $grid->column('service_id', __('Service'))->display(function () {
             return $this->service->name;
         })->filter($services);

@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Models\Account;
 use App\Models\Transaction;
+use App\Models\Utils;
 use Attribute;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -65,7 +66,12 @@ class TransactionController extends AdminController
         ])
             ->orderBy('id', 'Desc');
 
-        $grid->column('id', __('Id'))->sortable();
+        $grid->column('id', __('Id'))->sortable()->hide();
+
+        $grid->column('payment_date', __('Created'))->display(function () {
+            return Utils::my_date_time($this->payment_date);
+        })
+            ->sortable();
 
         $grid->column('description', __('Description'));
         $grid->column('academic_year_id', __('Academic year id'))->hide();
@@ -89,7 +95,7 @@ class TransactionController extends AdminController
             ->sortable()->totalRow(function ($x) {
                 return  number_format($x);
             });
-        $grid->column('payment_date', __('Created'))->sortable();
+
 
         return $grid;
     }
