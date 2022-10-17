@@ -142,9 +142,6 @@ class Administrator extends Model implements AuthenticatableContract
                 die("enterprise is required");
             }
 
-
-
-
             if (
                 $model->username == null ||
                 $model->email == null ||
@@ -153,7 +150,6 @@ class Administrator extends Model implements AuthenticatableContract
             ) {
                 $model->username = null;
                 $model->email = null;
-
 
                 if (
                     $model->school_pay_payment_code == null ||
@@ -210,6 +206,16 @@ class Administrator extends Model implements AuthenticatableContract
                 }
             }
 
+            if ($model->user_type = 'student') {
+                if ($model->school_pay_payment_code != null) {
+                    if (strlen($model->school_pay_payment_code) > 3) {
+                        $model->username = $model->school_pay_payment_code;
+                        $model->email = $model->school_pay_payment_code;
+                    }
+                }
+            }
+
+
             $model->name = $model->first_name . " " . $model->given_name . " " . $model->last_name;
             return $model;
         });
@@ -252,62 +258,10 @@ class Administrator extends Model implements AuthenticatableContract
      *
      * @return string
      */
-    public function getCurrentClassIdAttribute()
-    {
-        $class_id = 0;
-
-        foreach ($this->classes as $cls) {
-            $year = AcademicYear::find($cls->academic_year_id);
-            if ($year != null) {
-                if ($year->is_active) {
-                    $class_id = $cls->academic_class_id;
-                }
-            }
-        }
-        DB::update("UPDATE admin_users SET current_class_id = $class_id WHERE id = $this->id");
-        return $class_id;
-    }
-
-    public function getCurrentTheologyClassIdAttribute()
-    {
-        $class_id = 0;
-        foreach ($this->theology_classes as $cls) {
-
-            if ($cls->theology_class != null) {
-                $class = $cls->theology_class;
-                $year = AcademicYear::find($class->academic_year_id);
-                if ($year != null) {
-                    if ($year->is_active) {
-                        $class_id = $class->id;
-                    }
-                }
-            }
-        }
-        DB::update("UPDATE admin_users SET current_theology_class_id = $class_id WHERE id = $this->id");
-        return $class_id;
-    }
 
 
-    public static function update_current_classes($enterprise_id)
-    {
-        foreach (Administrator::where([
-            'enterprise_id' => $enterprise_id,
-            'user_type' => 'student'
-        ])->get() as $admin) {
-            $class_id = 0;
-            foreach (StudentHasClass::where([
-                'administrator_id' => $admin->id
-            ])->get() as $cls) {
-                $year = AcademicYear::find($cls->academic_year_id);
-                if ($year != null) {
-                    if ($year->is_active) {
-                        $class_id = $cls->academic_class_id;
-                    }
-                }
-            }
-            DB::update("UPDATE admin_users SET current_class_id = $class_id WHERE id = $admin->id");
-        }
-    }
+
+
 
 
 
@@ -375,7 +329,7 @@ class Administrator extends Model implements AuthenticatableContract
 
     public function theology_classes()
     {
-        return $this->hasMany(StudentHasTheologyClass::class,'administrator_id');
+        return $this->hasMany(StudentHasTheologyClass::class, 'administrator_id');
     }
 
     public function THEclasses()

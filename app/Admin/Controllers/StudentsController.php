@@ -40,7 +40,6 @@ class StudentsController extends AdminController
     protected function grid()
     {
 
-        //Administrator::update_current_classes(Admin::user()->enterprise_id);
         $grid = new Grid(new Administrator());
         $grid->disableBatchActions();
         $grid->actions(function ($actions) {
@@ -127,18 +126,24 @@ class StudentsController extends AdminController
 
 
                 if ($teacher_theology_subjects->count() > 0) {
-                    $filter->equal('current_theology_class_id', 'Filter by theology class')->select(TheologyClass::where([
+
+                    $classes = TheologyClass::where([
                         'enterprise_id' => $u->enterprise_id
-                    ])->where('id', $teacher_theology_subjects->pluck('theology_class_id'))->orderBy('id', 'Desc')->get()->pluck('name_text', 'id'));
+                    ])->where('id', $teacher_theology_subjects->pluck('theology_class_id'))->orderBy('id', 'Desc')->get()->pluck('name_text', 'id');
+                    $filter->equal('current_theology_class_id', 'Filter by theology class')->select($classes);
                 }
             } else {
+
+                $classes = TheologyClass::where([
+                    'enterprise_id' => $u->enterprise_id
+                ])->orderBy('id', 'Desc')->get()->pluck('name_text', 'id');
+
                 $filter->equal('current_class_id', 'Filter by class')->select(AcademicClass::where([
                     'enterprise_id' => $u->enterprise_id
                 ])->orderBy('id', 'Desc')->get()->pluck('name_text', 'id'));
+                $classes[0] = 'No theology class';
 
-                $filter->equal('current_theology_class_id', 'Filter by theology class')->select(TheologyClass::where([
-                    'enterprise_id' => $u->enterprise_id
-                ])->orderBy('id', 'Desc')->get()->pluck('name_text', 'id'));
+                $filter->equal('current_theology_class_id', 'Filter by theology class')->select($classes);
             }
 
 
@@ -207,7 +212,7 @@ class StudentsController extends AdminController
 
 
         $grid->column('name', __('Name'))->sortable();
-        
+
         $grid->column('current_class_id', __('Current class'))
             ->display(function () {
                 if ($this->current_class == null) {
@@ -337,23 +342,23 @@ class StudentsController extends AdminController
 
         $form->tab('BIO DATA', function (Form $form) {
 
-            if (Admin::user()->isRole('dos')) {
-                $form->multipleSelect('roles', trans('admin.roles'))
-                    ->attribute([
-                        'autocomplete' => 'off'
-                    ])
-                    ->default([4])
-
-
-
-                    ->options(
-                        AdminRole::where('slug', '!=', 'super-admin')
-                            ->where('slug', '!=', 'admin')
-                            ->get()
-                            ->pluck('name', 'id')
-                    )->rules('required');
+            if (!$form->isEditing()) {
+                if (Admin::user()->isRole('dos')) {
+                    $form->multipleSelect('roles', trans('admin.roles'))
+                        ->attribute([
+                            'autocomplete' => 'off'
+                        ])
+                        ->default([4])
+                        ->value([4])
+                        ->options(
+                            AdminRole::where('slug', '!=', 'super-admin')
+                                ->where('slug', '!=', 'admin')
+                                ->get()
+                                ->pluck('name', 'id')
+                        )
+                        ->rules('required');
+                }
             }
-
 
             $u = Admin::user();
             $form->hidden('enterprise_id')->rules('required')->default($u->enterprise_id)
@@ -459,7 +464,7 @@ class StudentsController extends AdminController
                 $form->text('email', 'Email address')
                     ->creationRules(["unique:admin_users"])
                     ->updateRules(["unique:admin_users,username,{{id}}"]);
-                $form->text('username', 'School pay - Payment code.')
+                $form->text('username', 'Username')
                     ->creationRules(["unique:admin_users"])
                     ->updateRules(["unique:admin_users,username,{{id}}"]);
 

@@ -8,6 +8,7 @@ use Encore\Admin\Facades\Admin;
 use Exception;
 use Hamcrest\Arrays\IsArray;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Queue\Jobs\SyncJob;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -21,12 +22,12 @@ class Utils  extends Model
     public static function my_date_time($t)
     {
         $c = Carbon::parse($t);
-        if($t == null){
+        if ($t == null) {
             return $t;
         }
         return $c->format('d M, Y - h:m a');
     }
-    
+
     public static function to_date_time($raw)
     {
         $t = Carbon::parse($raw);
@@ -35,7 +36,7 @@ class Utils  extends Model
         }
         $my_t = $t->toDateString();
 
-        return $my_t." ".$t->toTimeString();
+        return $my_t . " " . $t->toTimeString();
     }
     public static function number_format($num, $unit)
     {
@@ -147,15 +148,15 @@ class Utils  extends Model
             $trans->amount = (int)($v[11]);
 
             $trans->payment_date = $v[0];
-            if($trans->payment_date!=null){
+            if ($trans->payment_date != null) {
                 $d = Carbon::parse($trans->payment_date);
                 $min_data = Carbon::parse('15-08-2022');
-                if($d!=null){
-                    if($d->isBefore($min_data)){
-                        continue;  
+                if ($d != null) {
+                    if ($d->isBefore($min_data)) {
+                        continue;
                     }
                 }
-            } 
+            }
 
             $trans->is_contra_entry = false;
             $trans->type = 'FEES_PAYMENT';
@@ -406,7 +407,7 @@ class Utils  extends Model
 
         $last_rec = Reconciler::latest()->first();
         $back_day = 0;
-        $max_back_days = 90;
+        $max_back_days = 30;
 
         $rec = new Reconciler();
         $rec->enterprise_id = 0;
@@ -500,7 +501,7 @@ class Utils  extends Model
                 $trans->account_id = $account_id;
                 $trans->created_by_id = $ent->administrator_id;
                 $trans->school_pay_transporter_id = $school_pay_transporter_id;
-                $trans->is_contra_entry = false; 
+                $trans->is_contra_entry = false;
                 $trans->type = 'FEES_PAYMENT';
                 $trans->contra_entry_account_id = $bank->id;
                 $amount = number_format($trans->amount);
@@ -523,15 +524,56 @@ class Utils  extends Model
         }
     }
 
-    public static function reconcile()
+    public static function reconcile(Request $r)
     {
+        $ent = Enterprise::find(((int)($r->id)));
+        if ($ent == null) {
+            die("NOT FOUND");
+        }
 
-        Utils::schoool_pay_sync();
         Utils::accounts_sync();
+        Utils::sync_classes($r->id);
+        Utils::schoool_pay_sync();
 
         die("Reconciled successfully ");
     }
 
+    public static function sync_classes($ent_id)
+    {
+        $ent = Enterprise::find(((int)($ent_id)));
+        if ($ent == null) {
+            return;
+        }
+        foreach (StudentHasClass::where('enterprise_id', $ent_id)->get() as $class) {
+
+            if ($class->class != null) {
+                if ($class->class->academic_year != null) {
+                    if ($class->class->academic_year->is_active) {
+                        if ($class->student != null) {
+                            $class_id = $class->class->id;
+
+                            DB::update("UPDATE admin_users SET current_class_id = $class_id WHERE id = {$class->student->id}");
+                        }
+                    }
+                }
+            }
+        }
+
+        foreach (StudentHasTheologyClass::where('enterprise_id', $ent_id)->get() as $theo) {
+            if ($theo->class != null) {
+                if ($theo->class->academic_year != null) {
+                    if ($theo->class->academic_year->is_active) {
+                        if ($theo->student != null) {
+                            $class_id = $theo->class->id;
+                            DB::update("UPDATE admin_users SET current_theology_class_id = $class_id WHERE id = {$theo->student->id}");
+                        }
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
     public static function get_automaic_mark_remarks($score)
     {
         $remarks = "Fair";

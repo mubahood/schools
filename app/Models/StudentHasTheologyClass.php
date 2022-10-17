@@ -13,6 +13,12 @@ class StudentHasTheologyClass extends Model
     public static function boot()
     {
         parent::boot();
+        self::created(function ($m) {
+            Utils::sync_classes($m->enterprise_id);
+        });
+        self::updated(function ($m) {
+            Utils::sync_classes($m->enterprise_id);
+        });
         self::creating(function ($m) {
             $exist = StudentHasTheologyClass::where([
                 'enterprise_id' => $m->enterprise_id,

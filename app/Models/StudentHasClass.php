@@ -49,11 +49,11 @@ class StudentHasClass extends Model
         });
 
         self::created(function ($m) {
-            AcademicClass::update_fees($m->academic_class_id);
-            Administrator::update_current_classes($m->enterprise_id);
+            Utils::sync_classes($m->enterprise_id);
         });
 
         self::updated(function ($m) {
+            Utils::sync_classes($m->enterprise_id);
             AcademicClass::update_fees($m->academic_class_id);
         });
     }

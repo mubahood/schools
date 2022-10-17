@@ -148,7 +148,7 @@ Route::get('ajax', function (Request $r) {
 });
 
 Route::get('reconcile', function (Request $r) {
-    Utils::reconcile();
+    Utils::reconcile($r); 
 });
 
 Route::get('books', function (Request $r) {
