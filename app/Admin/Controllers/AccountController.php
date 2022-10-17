@@ -62,8 +62,6 @@ class AccountController extends AdminController
         });
 
 
-
-
         $grid->disableBatchActions();
         $grid->actions(function ($actions) {
             $actions->disableView();
