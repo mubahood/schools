@@ -12,9 +12,7 @@ $ent = Utils::ent();
 
     .sidebar-menu .active {
         border-left: solid 5px {{ $ent->color }} !important;
-        ;
         color: {{ $ent->color }} !important;
-        ;
     }
 
 

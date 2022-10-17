@@ -36,6 +36,15 @@ class AccountController extends AdminController
         dd("done"); */
         Utils::reconcile_in_background(Admin::user()->enterprise_id);
         $grid = new Grid(new Account());
+
+        $grid->model()
+            ->orderBy('id', 'Desc')
+            ->where([
+                'enterprise_id' => Admin::user()->enterprise_id,
+                'type' => 'STUDENT_ACCOUNT'
+            ]);
+
+
         $grid->filter(function ($filter) {
             // Remove the default id filter
             $filter->disableIdFilter();
@@ -75,13 +84,13 @@ class AccountController extends AdminController
 
 
         $grid->column('created_at', __('Created'))->hide()->sortable();
-        $grid->column('type', __('Account Category'))
+        /* $grid->column('type', __('Account Category'))
             ->filter([
                 'STUDENT_ACCOUNT' => 'Student\'s accounts',
                 'EMPLOYEE_ACCOUNT' => 'Employees accounts',
                 'BANK_ACCOUNT' => 'Bank accounts',
                 'CASH_ACCOUNT' => 'Cash accounts',
-            ]);
+            ]); */
 
         /*  $grid->column('name', __('Account Name'))
             ->link()

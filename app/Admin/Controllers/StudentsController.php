@@ -207,8 +207,7 @@ class StudentsController extends AdminController
 
 
         $grid->column('name', __('Name'))->sortable();
-
-
+        
         $grid->column('current_class_id', __('Current class'))
             ->display(function () {
                 if ($this->current_class == null) {

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -42,6 +43,12 @@ class TheologyClass extends Model
     function academic_year()
     {
         return $this->belongsTo(AcademicYear::class, 'academic_year_id');
+    
+    
+    }
+    function class_teahcer()
+    {
+        return $this->belongsTo(Administrator::class, 'class_teahcer_id');
     }
 
 

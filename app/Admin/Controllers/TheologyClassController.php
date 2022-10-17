@@ -34,14 +34,25 @@ class TheologyClassController extends AdminController
 
         $grid->disableBatchActions();
         $grid->disableFilter();
-        $grid->disableExport();
+        $grid->disableExport(); 
 
         $grid->column('id', __('Id'))->sortable();
-        $grid->column('academic_year_id', __('Academic year id'));
-        $grid->column('class_teahcer_id', __('Class teahcer id'));
-        $grid->column('name', __('Name'))->sortable();
-        $grid->column('short_name', __('Short name'));
-        $grid->column('details', __('Details'));
+        /* $grid->column('academic_year_id', __('Academic year id')); */
+        $grid->column('name', __('Name'))->display(function () {
+            return $this->name_text;
+        })->sortable();
+        $grid->column('class_teahcer_id', __('Class teahcer'))->display(function () {
+            if ($this->class_teahcer != null) {
+                return $this->class_teahcer->name;
+            }
+            return $this->class_teahcer_id;
+        });
+
+        $grid->column('short_name', __('Short name'))->hide();
+        $grid->column('students', __('Students'))->display(function () {
+            return count($this->students);
+        });
+        $grid->column('details', __('Details'))->hide();
 
         return $grid;
     }
