@@ -43,7 +43,7 @@ class SchoolFeesPaymentController extends AdminController
             );
 
             $filter->equal('account_id', 'Student')->select()->ajax($ajax_url);
-            $filter->between('payment_date', 'Created between')->date();
+            $filter->between('payment_date', 'Created between')->datetime();
         });
 
 

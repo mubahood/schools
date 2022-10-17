@@ -55,10 +55,17 @@ class AccountController extends AdminController
                     . 'enterprise_id=' . $u->enterprise_id
                     . "&search_by_1=name"
                     . "&search_by_2=id"
-                    . "&model=User"
+                    . "&model=Account"
             );
 
-            $filter->equal('administrator_id', 'Student')->select()->ajax($ajax_url);
+            $filter->equal('id', 'Student')->select()->ajax($ajax_url);
+         
+            $filter->group('balance', function ($group) {
+                $group->gt('greater than');
+                $group->lt('less than'); 
+                $group->equal('equal to');
+            });
+
         });
 
 
