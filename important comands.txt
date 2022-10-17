@@ -3,6 +3,18 @@ ssh-keygen -t ed25519 -C "mubs0x@gmail.com"
 git config --global user.email "mubs0x@gmail.com"
 git config --global user.name "mubahood"
 
+- Authentication
+- 2 Step Auth
+- Session timeout
+- Data integrety 
+- Data validation (Form level)
+- Validate data at DB level
+- Accountability and accessability
+- Data Confidentiality (DATA In transit)
+- Encrypt (imporatant data)
+- Don't make things obvious 
+
+
 schooics@schooldynamics.ug [~/public_html]# git config --global user.email "mubs0x@gmail.com"
 schooics@schooldynamics.ug [~/public_html]# git commit
 
@@ -267,3 +279,5 @@ php artisan make:migration remove_enterprise_id --table=theology_exam_has_classe
 git add --all 
 git commit -am "Your commit message"
 ssh schooics@gator4311.hostgator.com
+
+

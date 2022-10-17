@@ -142,7 +142,7 @@ class Utils  extends Model
                 $d = Carbon::parse($trans->payment_date);
                 $min_data = Carbon::parse('15-08-2022');
                 if($d!=null){
-                    if(!$d->isBefore($min_data)){
+                    if($d->isBefore($min_data)){
                         continue;  
                     }
                 }
