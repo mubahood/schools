@@ -83,7 +83,6 @@ class AccountController extends AdminController
 
         $grid->column('owner.avatar', __('Photo'))
             ->width(80)
-            ->hide()
             ->lightbox(['width' => 60, 'height' => 60])
             ->sortable();
 
