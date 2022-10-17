@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Models\Account;
 use App\Models\Transaction;
+use App\Models\Utils;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -54,10 +55,17 @@ class SchoolFeesPaymentController extends AdminController
             'is_contra_entry' => 0,
         ])->orderBy('id', 'DESC');
 
-        $grid->column('id', __('ID'))->sortable();
+        $grid->column('id', __('ID'))->sortable()->hide();
 
-        $grid->column('description', __('Description'));
+        $grid->column('payment_date', __('Created'))->display(function () {
+            return Utils::my_date_time($this->payment_date);
+        })
+            ->sortable();
 
+
+        $grid->column('account_id', __('Student Account'))->display(function () {
+            return $this->account->name;
+        })->sortable();
 
         $grid->column('amount', __('Amount'))->display(function () {
             return "UGX " . number_format($this->amount);
@@ -65,12 +73,11 @@ class SchoolFeesPaymentController extends AdminController
             return  number_format($x);
         });
 
-        $grid->column('account_id', __('Student Account'))->display(function () {
-            return $this->account->name;
-        })->sortable();
+
+
+        $grid->column('description', __('Description'));
 
         $grid->column('academic_year_id', __('Academic year id'))->hide();
-        $grid->column('payment_date', __('Date'))->sortable();
         $grid->column('term_id', __('Term id'))->hide();
 
         return $grid;
