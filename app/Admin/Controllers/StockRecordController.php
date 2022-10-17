@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Models\StockBatch;
+use App\Models\StockItemCategory;
 use App\Models\StockRecord;
 use App\Models\Utils;
 use Dflydev\DotAccessData\Util;
@@ -40,14 +41,14 @@ class StockRecordController extends AdminController
 
         if (Admin::user()->isRole('admin')) {
             $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
-                ->orderBy('id', 'Desc');
+                ->orderBy('record_date', 'Desc');
         } else {
             $grid->disableActions();
             $grid->model()->where([
                 'enterprise_id' => Admin::user()->enterprise_id,
                 'created_by' => Admin::user()->id,
             ])
-                ->orderBy('id', 'Desc');
+                ->orderBy('record_date', 'Desc');
         }
 
 
@@ -67,12 +68,28 @@ class StockRecordController extends AdminController
             $filter->equal('created_by', 'Supplied by')->select()->ajax($ajax_url);
             $filter->equal('received_by', 'Received by')->select()->ajax($ajax_url);
 
+            $cats = [];
+            foreach (StockItemCategory::where([
+                'enterprise_id' => Admin::user()->enterprise_id,
+            ])->get() as $val) {
+                $p = Str::plural($val->measuring_unit);
+                $cats[$val->id] = $val->name . " - (in $p)";
+            }
+
+            $filter->equal('stock_item_category_id', 'Stock category')->select($cats);
+
+
             $filter->between('record_date', 'Date')->date();
         });
 
 
 
-        $grid->column('id', __('#ID'))->sortable();
+        $grid->column('id', __('#ID'))->sortable()->hide();
+
+        $grid->column('record_date', __('Date'))->display(function ($date) {
+            return Utils::my_date_time($date);
+        })->sortable();
+
 
 
         $grid->column('stock_batch_id', __('Stock batch'))
@@ -110,9 +127,6 @@ class StockRecordController extends AdminController
 
 
         $grid->column('description', __('Description'))->hide();
-        $grid->column('record_date', __('Date'))->display(function ($date) {
-            return Utils::to_date_time($date);
-        });
 
         return $grid;
     }
