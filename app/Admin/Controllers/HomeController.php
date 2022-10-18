@@ -23,7 +23,7 @@ class HomeController extends Controller
     public function index(Content $content)
     {
         
-
+   /*
         set_time_limit(-1);
         $x = 0;
          foreach (StudentHasClass::where('academic_class_id', 17)->get() as $key => $s) {
@@ -44,7 +44,7 @@ class HomeController extends Controller
         
         Utils::sync_classes(7);
         die("done $x");
-        /*
+     
 
                  $x =0; 
         foreach (StudentHasClass::where('academic_class_id', 16)->get() as $key => $s) {
