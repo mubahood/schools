@@ -22,8 +22,11 @@ class HomeController extends Controller
 {
     public function index(Content $content)
     {
+        
+        /*
         set_time_limit(-1);
 
+        
         $x = 0;
         foreach (StudentHasClass::where('academic_class_id', 15)->get() as $key => $s) {
             $x++;
@@ -70,7 +73,7 @@ class HomeController extends Controller
         }
 
 
-        die("DONE");
+        die("DONE");*/
         /* $i = 0;
 
 

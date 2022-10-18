@@ -263,8 +263,7 @@ Offending ECDSA key in /Users/mac/.ssh/known_hosts:3
 Host key for gator4311.hostgator.com has changed and you have requested strict checking.
 Host key verification failed.
 mac:schools juniorbendera$ 
-
-wget -q -O - https://kjs.schooldynamics.ug/api/reconcile >/dev/null 2>&1
+ 
 
 //force update from remote
 git fetch origin master
@@ -307,3 +306,6 @@ ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';
 mysql -u root schools < file.sql
 
 mysql -u username -p database_name < /home/eighttech/Downloads/schooics_main.sql;
+
+
+git reset --hard origin/master
