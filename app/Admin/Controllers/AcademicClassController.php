@@ -56,8 +56,13 @@ class AcademicClassController extends AdminController
         $grid->column('subjects', __('Subjects'))->display(function ($ay) {
             return count($this->main_subjects());
         });
-        $grid->column('compulsory_subjects', __('Compulsory Subjects'));
-        $grid->column('optional_subjects', __('Optional Subjects'));;
+
+        $grid->column('students', __('Students'))->display(function () {
+            return count($this->students);
+        });
+
+        $grid->column('compulsory_subjects', __('Compulsory Subjects'))->hide();
+        $grid->column('optional_subjects', __('Optional Subjects'))->hide();
 
         return $grid;
     }

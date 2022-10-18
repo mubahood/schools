@@ -5,6 +5,8 @@ namespace App\Admin\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Account;
 use App\Models\MenuItem;
+use App\Models\StudentHasClass;
+use App\Models\StudentHasTheologyClass;
 use App\Models\Transaction;
 use App\Models\Utils;
 use Carbon\Carbon;
@@ -20,7 +22,58 @@ class HomeController extends Controller
 {
     public function index(Content $content)
     {
+        set_time_limit(-1);
+
+        $x = 0;
+        foreach (StudentHasClass::where('academic_class_id', 15)->get() as $key => $s) {
+            $x++;
+            StudentHasTheologyClass::where([
+                'administrator_id' => $s->administrator_id
+            ])->delete();
+
+            $th = new StudentHasTheologyClass();
+            $th->enterprise_id = $s->enterprise_id;
+            $th->administrator_id = $s->administrator_id;
+            $th->theology_class_id = 10;
+            $th->save();
+            echo $x . "<hr>";
+        }
+
+        //middle
+        foreach (StudentHasClass::where('academic_class_id', 16)->get() as $key => $s) {
+            $x++;
+            StudentHasTheologyClass::where([
+                'administrator_id' => $s->administrator_id
+            ])->delete();
+
+            $th = new StudentHasTheologyClass();
+            $th->enterprise_id = $s->enterprise_id;
+            $th->administrator_id = $s->administrator_id;
+            $th->theology_class_id = 9;
+            $th->save();
+            echo $x . "<hr>";
+        }
+
+        //upper
+        foreach (StudentHasClass::where('academic_class_id', 17)->get() as $key => $s) {
+            $x++;
+            StudentHasTheologyClass::where([
+                'administrator_id' => $s->administrator_id
+            ])->delete();
+
+            $th = new StudentHasTheologyClass();
+            $th->enterprise_id = $s->enterprise_id;
+            $th->administrator_id = $s->administrator_id;
+            $th->theology_class_id = 1;
+            $th->save();
+            echo $x . "<hr>";
+        }
+
+
+        die("DONE");
         /* $i = 0;
+
+
         foreach (Transaction::where([])->orderBy('payment_date', 'asc')->get() as $key => $a) {
             $d = Carbon::parse($a->payment_date);
             $min_data = Carbon::parse('15-08-2022');

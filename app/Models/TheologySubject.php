@@ -24,6 +24,7 @@ class TheologySubject extends Model
         'subject_name',
         'demo_id',
         'is_optional',
+        'theology_course_id',
     ];
 
     function theology_class()
@@ -48,6 +49,30 @@ class TheologySubject extends Model
 
     public static function boot()
     {
+
+        static::creating(function ($m) {
+            $current = TheologySubject::where([
+                'theology_course_id' => $m->theology_course_id,
+                'theology_class_id' => $m->theology_class_id,
+            ])->first();
+            if ($current != null) {
+                admin_error('Warning', 'A certain subject can not be in same class twice.');
+                return false;
+            }
+        });
+
+        static::updating(function ($m) {
+            $current = TheologySubject::where([
+                'theology_course_id' => $m->theology_course_id,
+                'theology_class_id' => $m->theology_class_id,
+            ])->first();
+            if ($current != null) {
+                if ($current->id != $m->id) {
+                    admin_error('Warning', 'A certain subject can not be in same class twice.');
+                    return false;
+                }
+            }
+        });
 
         parent::boot();
         static::deleting(function ($m) {

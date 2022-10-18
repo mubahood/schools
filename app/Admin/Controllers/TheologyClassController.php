@@ -35,6 +35,7 @@ class TheologyClassController extends AdminController
         $grid->disableBatchActions();
         $grid->disableFilter();
         $grid->disableExport(); 
+        
 
         $grid->column('id', __('Id'))->sortable();
         /* $grid->column('academic_year_id', __('Academic year id')); */
@@ -49,6 +50,9 @@ class TheologyClassController extends AdminController
         });
 
         $grid->column('short_name', __('Short name'))->hide();
+        $grid->column('subjects', __('Subjects'))->display(function () {
+            return count($this->subjects);
+        });
         $grid->column('students', __('Students'))->display(function () {
             return count($this->students);
         });
@@ -148,7 +152,7 @@ class TheologyClassController extends AdminController
                 }
 
 
-                $form->select('theology_class_id', 'Subject')
+                $form->select('theology_course_id', 'Subject')
                     ->options(
                         $subjects
                     )->rules('required');
