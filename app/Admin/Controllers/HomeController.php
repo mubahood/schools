@@ -39,6 +39,23 @@ class HomeController extends Controller
             $th->save();
             echo $x . "<hr>";
         }
+
+         $x =0; 
+        foreach (StudentHasClass::where('academic_class_id', 16)->get() as $key => $s) {
+            $x++;
+            StudentHasTheologyClass::where([
+                'administrator_id' => $s->administrator_id
+            ])->delete();
+
+            $th = new StudentHasTheologyClass();
+            $th->enterprise_id = $s->enterprise_id;
+            $th->administrator_id = $s->administrator_id;
+            $th->theology_class_id = 9;
+            $th->save();
+            echo $x . "<hr>";
+        }
+
+        
         Utils::sync_classes(7);
         die("done $x");
         /*
