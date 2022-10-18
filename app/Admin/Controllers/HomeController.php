@@ -35,12 +35,18 @@ class HomeController extends Controller
             $th = new StudentHasTheologyClass();
             $th->enterprise_id = $s->enterprise_id;
             $th->administrator_id = $s->administrator_id;
-            $th->theology_class_id = 1;
+            $th->theology_class_id = 8;
             $th->save();
             echo $x . "<hr>";
         }
 
-         $x =0; 
+
+        
+        Utils::sync_classes(7);
+        die("done $x");
+        /*
+
+                 $x =0; 
         foreach (StudentHasClass::where('academic_class_id', 16)->get() as $key => $s) {
             $x++;
             StudentHasTheologyClass::where([
@@ -54,11 +60,6 @@ class HomeController extends Controller
             $th->save();
             echo $x . "<hr>";
         }
-
-        
-        Utils::sync_classes(7);
-        die("done $x");
-        /*
 
         
         $x = 0;
