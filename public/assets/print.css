@@ -1,0 +1,44 @@
+@media print {
+    article {
+        page-break-before: always;
+        margin-bottom: 0rem;
+    }
+    @page {
+        margin-left: 0.5in;
+        margin-right: 0.5in;
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+}
+
+@page {
+    size: A4 landscape;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+article {
+    page-break-before: always;
+    border: 2px solid red;
+    height: 20cm;
+    width: 29cm;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    background-color: white;
+}
+
+html,
+html {
+    display: table;
+    margin: auto;
+    background-color: rgb(7, 88, 97);
+}
+
+body {
+    display: table-cell;
+    vertical-align: middle;
+    background-color: rgb(7, 88, 97);
+}

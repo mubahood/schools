@@ -24,6 +24,7 @@ class PrintController2 extends Controller
     {
 
 
+        return view('report-cards.print');
         $id = ((int)($_GET['id']));
         $item = StudentReportCard::find($id);
         if ($item == null) {
@@ -90,6 +91,7 @@ class PrintController2 extends Controller
         $r = new ReportCard();
 
         $data = '<link type="text/css" href="' . url('assets/bootstrap.css') . '" rel="stylesheet" />';
+        $data = '<link type="text/css" href="' . url('assets/print.css') . '" rel="stylesheet" />';
         $data .= "
             <style>
             @page { margin: 15px; }
@@ -180,8 +182,7 @@ class PrintController2 extends Controller
                 font-size: 2px;
             }
 
-            @page { margin: 20px; }
-            body { padding: 10px; border: 3px solid black; }
+            @page { margin: 20px; } 
             </style>
         ";
 
@@ -247,9 +248,9 @@ class PrintController2 extends Controller
         $data .= $grading_tabel;
         $data .= $bottom_table;
 
-        return $data;
+        return $data.$data;
         $pdf = App::make('dompdf.wrapper');
-        $pdf->loadHTML($data);
+        $pdf->loadHTML('romina');
         return $pdf->stream();
     }
 

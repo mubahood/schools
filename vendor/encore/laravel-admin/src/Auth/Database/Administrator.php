@@ -206,7 +206,7 @@ class Administrator extends Model implements AuthenticatableContract
                 }
             }
 
-            if ($model->user_type = 'student') {
+            if ($model->user_type == 'student') {
                 if ($model->school_pay_payment_code != null) {
                     if (strlen($model->school_pay_payment_code) > 3) {
                         $model->username = $model->school_pay_payment_code;
