@@ -262,7 +262,7 @@ class AcademicClass extends Model
         return $this->hasMany(Subject::class, 'academic_class_id');
     }
 
-    function main_subjects()
+    function main_subjects() 
     {
         $my_subs = DB::select("SELECT * FROM subjects WHERE academic_class_id =  $this->id");
         $subs = [];

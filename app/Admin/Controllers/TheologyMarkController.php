@@ -26,7 +26,7 @@ class TheologyMarkController extends AdminController
     {
         $grid = new Grid(new TheologyMark());
 
-        $grid->column('id', __('Id'));
+        $grid->column('id', __('Id')); 
         $grid->column('created_at', __('Created at'));
         $grid->column('updated_at', __('Updated at'));
         $grid->column('enterprise_id', __('Enterprise id'));
@@ -35,7 +35,7 @@ class TheologyMarkController extends AdminController
         $grid->column('theology_subject_id', __('Theology subject id'));
         $grid->column('student_id', __('Student id'));
         $grid->column('teacher_id', __('Teacher id'));
-        $grid->column('score', __('Score'));
+        $grid->column('score', __('Score'))->editable();
         $grid->column('remarks', __('Remarks'));
         $grid->column('is_submitted', __('Is submitted'));
         $grid->column('is_missed', __('Is missed'));

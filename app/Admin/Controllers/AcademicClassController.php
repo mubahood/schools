@@ -54,7 +54,7 @@ class AcademicClassController extends AdminController
             return $this->academic_class_sctreams->count();
         });
         $grid->column('subjects', __('Subjects'))->display(function ($ay) {
-            return count($this->main_subjects());
+            return count($this->subjects);
         });
 
         $grid->column('students', __('Students'))->display(function () {

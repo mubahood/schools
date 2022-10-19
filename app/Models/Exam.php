@@ -33,6 +33,15 @@ class Exam extends Model
             }
         });
 
+        self::created(function ($m) {
+            Exam::my_update($m);
+        });
+
+        self::updated(function ($m) {
+            Exam::my_update($m);
+        });
+
+
 
 
         self::deleting(function ($m) {
@@ -48,39 +57,45 @@ class Exam extends Model
     }
 
 
-    public static function my_update($class_has_exam)
+
+    public static function my_update($exam)
     {
 
-        $m = $class_has_exam->exam;
-        $class = $class_has_exam->academic_class;
+
         ini_set('max_execution_time', -1); //unlimit
+        foreach ($exam->classes as $class) {
+            if ($class->students != null) {
+                foreach ($class->students as $student) {
+                    foreach ($class->subjects as $subject) {
 
-        foreach ($class->students as $student) {
-            foreach ($class->get_students_subjects_papers($student->administrator_id) as $_k => $subject) {
-                $mark = new Mark();
-                $mark->exam_id = $m->id;
-                $mark->class_id = $class->id;
-                $mark->subject_id = $subject->id;
-                $mark->student_id = $student->administrator_id;
-                $mark->enterprise_id = $m->enterprise_id;
-                $mark->teacher_id = $subject->subject_teacher;
-                $mark->score = 0;
-                $mark->is_submitted = 0;
-                $mark->is_missed = 1;
-                $mark->remarks = '';
-
-                $curent = $mark->where([
-                    'exam_id' => $mark->exam_id,
-                    'class_id' => $mark->class_id,
-                    'subject_id' => $mark->subject_id,
-                    'student_id' => $student->administrator_id,
-                ])->first();
-                if ($curent == null) {
-                    $mark->save();
+  
+                        $mark = Mark::where([
+                            'exam_id' => $exam->id,
+                            'student_id' => $student->administrator_id,
+                            'subject_id' => $subject->id,
+                        ])->first();
+                        if ($mark == null) {
+                            $mark = new Mark();
+                            $mark->exam_id = $exam->id;
+                            $mark->student_id = $student->administrator_id;
+                            $mark->enterprise_id = $exam->enterprise_id;
+                            $mark->subject_id = $subject->id;
+                            $mark->main_course_id = $subject->course_id;
+                            $mark->score = 0;
+                            $mark->is_submitted = false;
+                            $mark->is_missed = true;
+                            $mark->remarks = '';
+                        }
+                        $mark->class_id = $class->id;
+                        $mark->teacher_id = $subject->subject_teacher;
+                        $mark->save();
+                    }
                 }
             }
         }
     }
+
+
 
 
 
@@ -100,4 +115,21 @@ class Exam extends Model
     {
         return $this->belongsToMany(AcademicClass::class, 'exam_has_classes');
     }
+
+    public function submitted()
+    {
+        return Mark::where([
+            'exam_id' => $this->id,
+            'is_submitted' => true,
+        ])->count();
+    }  
+    public function not_submitted()
+    {
+        return Mark::where([
+            'exam_id' => $this->id,
+            'is_submitted' => false,
+        ])->count();
+    }
+
+    
 }

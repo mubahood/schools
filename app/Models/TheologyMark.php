@@ -14,7 +14,7 @@ class TheologyMark extends Model
     public static function boot()
     {
         parent::boot();
-
+ 
         self::creating(function ($m) {
             if ($m->subject == null) {
                 die("Main subject not found.");

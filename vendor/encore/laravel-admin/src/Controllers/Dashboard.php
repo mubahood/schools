@@ -3,6 +3,7 @@
 namespace Encore\Admin\Controllers;
 
 use App\Models\Enterprise;
+use App\Models\Mark;
 use App\Models\StudentHasClass;
 use App\Models\Transaction;
 use App\Models\User;
@@ -88,6 +89,44 @@ class Dashboard
         ]);
     }
 
+
+
+
+
+    public static function teacher_marks()
+    {
+        $u = Auth::user();
+
+        $number_main = number_format(Mark::where([
+            'enterprise_id' => $u->enterprise_id,
+            'teacher_id' => $u->id,
+        ])->count());
+
+        $number_1 = number_format(Mark::where([
+            'enterprise_id' => $u->enterprise_id,
+            'teacher_id' => $u->id,
+            'is_submitted' => true,
+        ])->count());
+
+        $number_2 = $number_main - $number_1;
+
+        $sub_title = number_format($number_1) . ' Submitted, ';
+        $sub_title .= number_format($number_2) . ' Not Submitted.';
+
+        $style = 'success';
+        if($number_2>0){
+            $style = 'danger';
+        }
+
+        return view('widgets.box-5', [
+            'is_dark' => false,
+            'style' => $style,
+            'title' => 'Marks submission',
+            'sub_title' => $sub_title,
+            'number' => $number_main,
+            'link' => admin_url('marks')
+        ]);
+    }
 
 
 
@@ -212,6 +251,8 @@ class Dashboard
             'enterprise_id' => $u->enterprise_id,
         ])
             ->where('amount', '>', 0)
+            ->where('is_contra_entry', false)
+
             ->where('academic_year_id', '!=', $ent->administrator_id)->sum('amount');
         //dd($all_students);
 
@@ -240,14 +281,14 @@ class Dashboard
 
     public static function income_vs_expenses()
     {
-/*         return view('admin.charts.bar', [
+        /*         return view('admin.charts.bar', [
             'is_dark' => true
         ]); */
     }
 
     public static function fees_collected()
     {
-/*         return view('admin.charts.pie', [
+        /*         return view('admin.charts.pie', [
             'is_dark' => true
         ]); */
     }

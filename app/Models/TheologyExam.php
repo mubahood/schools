@@ -22,7 +22,8 @@ class TheologyExam extends Model
                 'type' => $m->type,
             ])->first();
             if ($term != null) {
-                die("This term already have {$m->type} exams.");
+                admin_error('Warning', "This term already have {$m->type} exams.");
+                return;
             }
             if ($m->max_mark > 100) {
                 die("Maximum exam mark must be less than 100.");
@@ -31,6 +32,14 @@ class TheologyExam extends Model
 
 
 
+        self::created(function ($m) {
+            TheologyExam::my_update($m);
+        });
+
+        self::updated(function ($m) {
+            TheologyExam::my_update($m);
+        });
+
         self::deleting(function ($m) {
             Mark::where([
                 'exam_id' => $m->id
@@ -38,42 +47,37 @@ class TheologyExam extends Model
         });
     }
 
-    public function marks()
-    {
-        return $this->hasMany(Mark::class);
-    }
 
 
-    public static function my_update($class_has_exam)
+    public static function my_update($exam)
     {
 
-        $m = $class_has_exam->exam;
-        $class = $class_has_exam->theology_class;
         ini_set('max_execution_time', -1); //unlimit
 
-
-        foreach ($class->students as $student) {
-            foreach ($class->subjects as $subject) {
-                $mark = new TheologyMark();
-                $mark->enterprise_id = $m->enterprise_id;
-                $mark->theology_exam_id = $m->id;
-                $mark->theology_class_id = $class->id;
-                $mark->theology_subject_id = $subject->id;
-                $mark->student_id = $student->administrator_id;
-                $mark->teacher_id = $subject->subject_teacher;
-                $mark->score = 0;
-                $mark->remarks = '';
-                $mark->is_submitted = 0;
-                $mark->is_missed = 1;
-
-                $curent = $mark->where([
-                    'theology_exam_id' => $mark->theology_exam_id,
-                    'theology_class_id' => $mark->theology_class_id,
-                    'theology_subject_id' => $mark->theology_subject_id,
-                    'student_id' => $student->administrator_id,
-                ])->first();
-                if ($curent == null) {
-                    $mark->save();
+        foreach ($exam->classes as $class) {
+            if ($class->students != null) {
+                foreach ($class->students as $student) {
+                    foreach ($class->subjects as $subject) {
+                        $mark = TheologyMark::where([
+                            'theology_exam_id' => $exam->id,
+                            'student_id' => $student->administrator_id,
+                            'theology_subject_id' => $subject->id,
+                        ])->first();
+                        if ($mark == null) {
+                            $mark = new TheologyMark();
+                            $mark->theology_exam_id = $exam->id;
+                            $mark->student_id = $student->administrator_id;
+                            $mark->enterprise_id = $exam->enterprise_id;
+                            $mark->theology_subject_id = $subject->id;
+                            $mark->score = 0;
+                            $mark->is_submitted = false;
+                            $mark->is_missed = true;
+                            $mark->remarks = '';
+                        }
+                        $mark->theology_class_id = $class->id;
+                        $mark->teacher_id = $subject->subject_teacher;
+                        $mark->save();
+                    }
                 }
             }
         }
@@ -84,6 +88,26 @@ class TheologyExam extends Model
     public function term()
     {
         return $this->belongsTo(Term::class);
+    }
+
+    public function marks()
+    {
+        return $this->hasMany(TheologyMark::class, 'theology_exam_id');
+    }
+    public function submitted()
+    {
+        return TheologyMark::where([
+            'theology_exam_id' => $this->id,
+            'is_submitted' => true,
+        ])->count();
+    }
+
+    public function not_submitted()
+    {
+        return TheologyMark::where([
+            'theology_exam_id' => $this->id,
+            'is_submitted' => false,
+        ])->count();
     }
 
 

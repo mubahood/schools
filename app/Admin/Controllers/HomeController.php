@@ -143,6 +143,11 @@ class HomeController extends Controller
             ->row(function (Row $row) {
                 $u = Admin::user();
 
+                if($u->isRole('teacher')){
+                    $row->column(3, function (Column $column) {
+                        $column->append(Dashboard::teacher_marks());
+                    });
+                }
 
 
                 if (
@@ -164,8 +169,7 @@ class HomeController extends Controller
 
                 if (
                     $u->isRole('admin') ||
-                    $u->isRole('bursar') ||
-                    $u->isRole('dos')
+                    $u->isRole('bursar')  
                 ) {
                     $row->column(3, function (Column $column) {
                         $column->append(Dashboard::students());
@@ -180,11 +184,10 @@ class HomeController extends Controller
                     $row->column(3, function (Column $column) {
                         $column->append(Dashboard::fees());
                     });
-                }
-            })
-            ->row(function (Row $row) {
 
-                $u = Admin::user();
+                    
+                }
+
                 if (
                     $u->isRole('admin') ||
                     $u->isRole('bursar')
@@ -199,6 +202,9 @@ class HomeController extends Controller
                         $column->append(Dashboard::help_videos());
                     });
                 }
+
+             
+
             });
     }
 }

@@ -29,7 +29,10 @@ class ExamController extends AdminController
      */
     protected function grid()
     {
-  
+        /*$e = Exam::find(1);
+        $e->name .= "1";
+        $e->save();
+        die("|romina");*/
 
         $grid = new Grid(new Exam());
         $grid->model()->where([
@@ -59,7 +62,30 @@ class ExamController extends AdminController
             'E.O.T' => 'End of term exam'
         ]);
         $grid->column('name', __('Name'));
-        $grid->column('max_mark', __('Max mark'));
+        $grid->column('max_mark', __('Max mark')); 
+        $grid->column('_marks', __('All Marks'))->display(function () {
+            return count($this->marks);
+        });
+
+        $grid->column('submitted', __('Submitted Marks'))->display(function () {
+            return $this->submitted();
+        });
+
+
+        $grid->column('not_submitted', __('Not Submitted Marks'))->display(function () {
+            return $this->not_submitted();
+        });
+
+        $grid->column('percentage', __('Submitted Marks percentage'))->display(function () {
+            $tot = count($this->marks);
+            $submitted = $this->submitted();
+            $percentage = 0;
+            if ($tot > 0) {
+                $percentage = ($submitted / $tot) * 100;
+            }
+
+            return round($percentage,2) . "%";
+        });
 
         return $grid;
     }

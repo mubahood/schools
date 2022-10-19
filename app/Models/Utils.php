@@ -19,6 +19,15 @@ use Illuminate\Support\Str;
 class Utils  extends Model
 {
 
+    public static function my_date($t)
+    {
+        $c = Carbon::parse($t);
+        if ($t == null) {
+            return $t;
+        }
+        return $c->format('d M, Y');
+    }
+
     public static function my_date_time($t)
     {
         $c = Carbon::parse($t);

@@ -6,6 +6,7 @@ use App\Models\AcademicYear;
 use App\Models\Exam;
 use App\Models\TheologyClass;
 use App\Models\TheologyExam;
+use App\Models\Utils;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -28,16 +29,44 @@ class TheologyExamCourseController extends AdminController
      */
     protected function grid()
     {
+        /*$e = TheologyExam::find(1);
+        $e->name .= "1";
+        $e->save();
+        die("|romina");*/
         $grid = new Grid(new TheologyExam());
+        $grid->model()->where([
+            'enterprise_id' => Admin::user()->enterprise_id,
+        ])->orderBy('id', 'DESC');
 
-        $grid->column('id', __('Id'));
-        $grid->column('created_at', __('Created at'));
-        $grid->column('updated_at', __('Updated at'));
-        $grid->column('enterprise_id', __('Enterprise id'));
-        $grid->column('term_id', __('Term id'));
+        $grid->column('id', __('EXAM #ID'))->hide();
+        $grid->column('created_at', __('Created'))->display(function ($x) {
+            return Utils::my_date($x);
+        })->sortable();
+        $grid->column('term.name', __('Term'));
         $grid->column('type', __('Type'));
         $grid->column('name', __('Name'));
         $grid->column('max_mark', __('Max mark'));
+        $grid->column('_marks', __('All Marks'))->display(function () {
+            return count($this->marks);
+        });
+        $grid->column('submitted', __('Submitted Marks'))->display(function () {
+            return $this->submitted();
+        });
+
+        $grid->column('not_submitted', __('Not Submitted Marks'))->display(function () {
+            return $this->not_submitted();
+        });
+
+        $grid->column('percentage', __('Submitted Marks percentage'))->display(function () {
+            $tot = count($this->marks);
+            $submitted = $this->submitted();
+            $percentage = 0;
+            if ($tot > 0) {
+                $percentage = ($submitted / $tot) * 100;
+            }
+
+            return round($percentage,2) . "%";
+        });
 
         return $grid;
     }

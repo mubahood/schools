@@ -117,7 +117,7 @@ class MarkController extends AdminController
                 ->orderBy('subject_name', 'asc')
                 ->get() as $ex) {
                 if ($ex->subject_teacher == Admin::user()->id) {
-                    $subs[$ex->id] = $ex->name . " - " . $ex->academic_class->name_text;
+                    $subs[$ex->id] = $ex->subject_name . " - " . $ex->academic_class->name_text;
                 }
             }
 
@@ -167,7 +167,13 @@ class MarkController extends AdminController
                 return '<span class="bagde bagde-danger">Missing</span>';
         })->sortable();
 
-        $grid->column('teacher.name', __('Teacher'))->sortable()->hide();
+        if(Admin::user()->isRole('dos')){
+            $grid->column('teacher.name', __('Teacher'))->sortable(); 
+
+        }else{
+            $grid->column('teacher.name', __('Teacher'))->sortable()->hide(); 
+        }
+
 
         $grid->column('updated_at', __('Updated'))->display(function ($v) {
             return Carbon::parse($v)->format('d-M-Y');

@@ -13,7 +13,6 @@ Route::group([
 
     $router->resource('employees-batch-importers', EmployeesBatchImporterController::class);
     $router->resource('employees', EmployeesController::class);
-    $router->get('/statistics', 'HomeController@stats')->name('home');
     $router->resource('books-categories', BooksCategoryController::class);
     $router->resource('book-authors', BookAuthorController::class);
     $router->resource('books', BookController::class);
@@ -54,7 +53,10 @@ Route::group([
 
     //$router->resource('fees', StudentHasFeeController::class);
 
-    $router->get('/', 'HomeController@index')->name('home');
+    $router->get('/statistics', 'HomeController@stats')->name('statistics');
+    $router->get('/dashboard', 'HomeController@index')->name('dashboard');
+
+    $router->get('/', 'HomeController@stats')->name('home');
     $router->resources([
         'enterprises' => EnterpriseController::class
     ]);
