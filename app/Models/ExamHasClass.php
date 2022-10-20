@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class ExamHasClass extends Model
 {
@@ -29,13 +30,13 @@ class ExamHasClass extends Model
                 'exam_id' => $m->exam_id,
                 'academic_class_id' => $m->academic_class_id,
             ])->first();
+            
             if ($term != null) {
-                die("Same exam cannot be in same class twice");
+                return false;
             }
-        });
 
-        self::created(function ($m) {
-            Exam::my_update($m);
+            DB::update("UPDATE exams SET marks_generated = 1 WHERE id = $m->exam_id");  
         });
+ 
     }
 }

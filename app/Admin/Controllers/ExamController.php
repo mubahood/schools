@@ -7,6 +7,7 @@ use App\Models\AcademicYear;
 use App\Models\Exam;
 use App\Models\ExamHasClass;
 use App\Models\Term;
+use App\Models\Utils;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -34,6 +35,8 @@ class ExamController extends AdminController
         $e->save();
         die("|romina");*/
 
+        //Utils::generate_marks(Admin::user()->enterprise_id);
+
         $grid = new Grid(new Exam());
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
@@ -41,10 +44,7 @@ class ExamController extends AdminController
 
         $grid->column('id', __('ID'))->sortable();
 
-
-
-
-
+ 
         $terms = [];
         foreach (Term::where([
             'enterprise_id' => Admin::user()->enterprise_id,
@@ -152,6 +152,7 @@ class ExamController extends AdminController
             'E.O.T' => 'End of term exam'
         ])->rules('required');
         $form->text('name', __('Exam Name'))->rules('required');
+        $form->hidden('marks_generated', __('marks_generated'))->default(0)->value(0) ->rules('required');
         $form->text('max_mark', __('Max mark'))->rules('required|max:100')->attribute('type', 'number');
 
         $form->multipleSelect('classes')->options(
@@ -161,6 +162,12 @@ class ExamController extends AdminController
             ])->pluck('name', 'id')
         )->rules('required');
 
+
+
+        $form->disableCreatingCheck();
+        $form->disableEditingCheck();
+        $form->disableReset();
+        $form->disableViewCheck();
 
 
 

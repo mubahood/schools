@@ -58,6 +58,12 @@ class AcademicClass extends Model
                     $s->save();
                 }
             }
+
+
+            
+   
+
+    
         });
         self::creating(function ($m) {
         });

@@ -44,7 +44,7 @@ class TheologySubject extends Model
             $this->subject_teacher  = $ent->administrator_id;
             DB::update("UPDATE theology_subjects SET subject_teacher = $ent->administrator_id WHERE id = $this->id");
         }
-        return $this->belongsTo(Administrator::class, 'subject_teacher');
+        return $this->belongsTo(Administrator::class, 'subject_teacher');   
     }
 
     public static function boot()

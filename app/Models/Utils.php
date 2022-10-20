@@ -198,13 +198,18 @@ class Utils  extends Model
     public static function system_boot($u)
     {
 
-        Utils::financial_accounts_creation();
-        $subs = ExamHasClass::where('marks_generated', '!=', 1)->get();
+     
+        $subs = Exam::where('marks_generated', '!=', true)->get();
         foreach ($subs as $m) {
             Exam::my_update($m);
-            $m->marks_generated = 1;
-            $m->save();
         }
+
+        $_subs = TheologyExam::where('marks_generated', '!=', true)->get();
+        foreach ($_subs as $m) {
+            TheologyExam::my_update($m);
+        }      
+
+        Utils::financial_accounts_creation();
     }
 
     public static function financial_accounts_creation()

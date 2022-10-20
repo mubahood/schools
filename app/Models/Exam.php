@@ -20,29 +20,24 @@ class Exam extends Model
     {
         parent::boot();
 
+        self::updating(function ($m) {
+            $m->marks_generated = false;
+        });
+
         self::creating(function ($m) {
             $term = Exam::where([
                 'term_id' => $m->term_id,
                 'type' => $m->type,
             ])->first();
+
             if ($term != null) {
                 die("This term already have {$m->type} exams.");
             }
             if ($m->max_mark > 100) {
                 die("Maximum exam mark must be less than 100.");
             }
-        });
-
-        self::created(function ($m) {
-            Exam::my_update($m);
-        });
-
-        self::updated(function ($m) {
-            Exam::my_update($m);
-        });
-
-
-
+            $m->marks_generated = false;
+        });  
 
         self::deleting(function ($m) {
             Mark::where([
@@ -61,14 +56,23 @@ class Exam extends Model
     public static function my_update($exam)
     {
 
+ 
+        if ($exam == null) {
+            return false;
+        }
+
+
+        if ($exam->classes == null) {
+            return false;
+        }
 
         ini_set('max_execution_time', -1); //unlimit
+        $done = false;
+
         foreach ($exam->classes as $class) {
             if ($class->students != null) {
                 foreach ($class->students as $student) {
                     foreach ($class->subjects as $subject) {
-
-  
                         $mark = Mark::where([
                             'exam_id' => $exam->id,
                             'student_id' => $student->administrator_id,
@@ -88,11 +92,16 @@ class Exam extends Model
                         }
                         $mark->class_id = $class->id;
                         $mark->teacher_id = $subject->subject_teacher;
+                        $done = true;
                         $mark->save();
                     }
                 }
             }
         }
+        if($done){ 
+            DB::update("UPDATE exams SET marks_generated = 1 WHERE id = $exam->id"); 
+        }
+ 
     }
 
 
@@ -122,7 +131,7 @@ class Exam extends Model
             'exam_id' => $this->id,
             'is_submitted' => true,
         ])->count();
-    }  
+    }
     public function not_submitted()
     {
         return Mark::where([
@@ -130,6 +139,4 @@ class Exam extends Model
             'is_submitted' => false,
         ])->count();
     }
-
-    
 }
