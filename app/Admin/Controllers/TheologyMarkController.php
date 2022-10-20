@@ -117,8 +117,8 @@ class TheologyMarkController extends AdminController
                     'enterprise_id' => $u->enterprise_id
                 ])
                     ->orderBy('theology_course_id', 'asc')
-                    ->get() as $ex) {
-                    $subs[$ex->id] = $ex->theology_class->name;
+                    ->get() as $ex) { 
+                    $subs[$ex->id] = $ex->theology_class->name . " - " . $ex->course->name;
                 }
             } else {
                 foreach (TheologySubject::where([
@@ -127,7 +127,7 @@ class TheologyMarkController extends AdminController
                     ->orderBy('theology_course_id', 'asc')
                     ->get() as $ex) {
                     if ($ex->subject_teacher == Admin::user()->id) {
-                        $subs[$ex->id] = $ex->theology_course_id . " - " . $ex->academic_class->name_text;
+                        $subs[$ex->id] = $ex->theology_class->name . " - " . $ex->course->name;
                     }
                 }
             }
@@ -165,7 +165,8 @@ class TheologyMarkController extends AdminController
             return $this->class->name;
         })->sortable();
         $grid->column('theology_subject_id', __('Subject'))->display(function () {
-            return $this->subject->name;
+            
+            return $this->subject->course->name ;  
         })->sortable();
 
         $grid->column('score', __('Score'))->sortable()->editable();

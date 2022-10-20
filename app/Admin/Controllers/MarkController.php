@@ -116,8 +116,12 @@ class MarkController extends AdminController
             ])
                 ->orderBy('subject_name', 'asc')
                 ->get() as $ex) {
-                if ($ex->subject_teacher == Admin::user()->id) {
+                if (Admin::user()->isRole('dos')) {
                     $subs[$ex->id] = $ex->subject_name . " - " . $ex->academic_class->name_text;
+                } else {
+                    if ($ex->subject_teacher == Admin::user()->id) {
+                        $subs[$ex->id] = $ex->subject_name . " - " . $ex->academic_class->name_text;
+                    }
                 }
             }
 
@@ -154,7 +158,7 @@ class MarkController extends AdminController
             return $this->class->name;
         })->sortable();
         $grid->column('subject_id', __('Subject'))->display(function () {
-            return $this->subject->name;
+            return $this->subject->subject_name;
         })->sortable();
 
         $grid->column('score', __('Score'))->sortable()->editable();
@@ -167,11 +171,10 @@ class MarkController extends AdminController
                 return '<span class="bagde bagde-danger">Missing</span>';
         })->sortable();
 
-        if(Admin::user()->isRole('dos')){
-            $grid->column('teacher.name', __('Teacher'))->sortable(); 
-
-        }else{
-            $grid->column('teacher.name', __('Teacher'))->sortable()->hide(); 
+        if (Admin::user()->isRole('dos')) {
+            $grid->column('teacher.name', __('Teacher'))->sortable();
+        } else {
+            $grid->column('teacher.name', __('Teacher'))->sortable()->hide();
         }
 
 

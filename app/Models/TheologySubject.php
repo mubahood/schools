@@ -32,6 +32,11 @@ class TheologySubject extends Model
         return $this->belongsTo(TheologyClass::class);
     }
 
+    function course()
+    {
+        return $this->belongsTo(TheologyCourse::class,'theology_course_id');
+    }
+
 
     function teacher()
     {
