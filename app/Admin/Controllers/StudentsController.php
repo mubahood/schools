@@ -40,6 +40,9 @@ class StudentsController extends AdminController
     protected function grid()
     {
 
+        /*$u = Administrator::find(3021);
+        $u->delete();
+        dd("done");*/
         $grid = new Grid(new Administrator());
         $grid->disableBatchActions();
         $grid->actions(function ($actions) {

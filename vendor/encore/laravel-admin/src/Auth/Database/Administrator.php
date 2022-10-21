@@ -45,6 +45,25 @@ class Administrator extends Model implements AuthenticatableContract
         parent::boot();
 
         self::deleting(function ($m) {
+ 
+            $x = DB::delete("DELETE FROM academic_classes WHERE class_teahcer_id = $m->id ");
+            $x = DB::delete("DELETE FROM admin_role_users WHERE user_id = $m->id ");
+            $x = DB::delete("DELETE FROM fee_deposit_confirmations WHERE administrator_id = $m->id ");
+            $x = DB::delete("DELETE FROM fund_requisitions WHERE administrator_id = $m->id ");
+            $m->account->delete();
+
+            Transaction::where('account_id',$m->id)
+            ->orWhere('contra_entry_account_id',$m->id)
+            ->orWhere('contra_entry_transaction_id',$m->id)
+            ->delete();
+
+
+            echo $x."<hr>";
+            die("time to delete");
+
+            die("You cannot delete a user");
+            AdminRoleUser::where('user_id', $m->id)->delete();
+
             die("You cannot delete this item.");
         });
 
@@ -223,11 +242,7 @@ class Administrator extends Model implements AuthenticatableContract
         self::updated(function ($model) {
             // ... code here
         });
-
-        self::deleting(function ($model) {
-            die("You cannot delete a user");
-            AdminRoleUser::where('user_id', $model->id)->delete();
-        });
+ 
 
         self::deleted(function ($model) {
             // ... code here

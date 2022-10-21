@@ -84,7 +84,10 @@ class Account extends Model
                 }
             }
             self::deleting(function ($m) {
-                die("You cannot delete this account.");
+                Transaction::where('account_id',$m->id)
+                ->orWhere('contra_entry_account_id',$m->id)
+                ->orWhere('contra_entry_transaction_id',$m->id)
+                ->delete();
             });
         });
     }
