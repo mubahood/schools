@@ -24,6 +24,10 @@ class Exam extends Model
             $m->marks_generated = false;
         });
 
+        self::deleting(function ($m) {
+            die("This item   be deleted.");
+        });
+
         self::creating(function ($m) {
             $term = Exam::where([
                 'term_id' => $m->term_id,

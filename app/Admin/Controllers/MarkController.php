@@ -47,10 +47,11 @@ class MarkController extends AdminController
             $grid->model()->where([
                 'teacher_id' => Admin::user()->id,
             ]);
-            $grid->disableCreateButton();
-            $grid->disableExport();
-            $grid->disableActions();
+
         }
+
+        $grid->disableCreateButton();
+        $grid->disableActions();
 
         $grid->disableBatchActions();
 
