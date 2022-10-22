@@ -121,7 +121,11 @@ class TheologyMarkController extends AdminController
                 ])
                     ->orderBy('theology_course_id', 'asc')
                     ->get() as $ex) {
-                        $subs[$ex->id] = $ex->theology_course_id . " - " . $ex->theology_class->name;
+                        if($ex->course == null){
+                            $subs[$ex->id] = $ex->theology_course_id . " - " . $ex->theology_class->name;
+                        }else{
+                            $subs[$ex->id] = $ex->course->name . " - " . $ex->theology_class->name;                            
+                        }
                 }
             } else {
                 foreach (TheologySubject::where([
@@ -130,7 +134,12 @@ class TheologyMarkController extends AdminController
                     ->orderBy('theology_course_id', 'asc')
                     ->get() as $ex) {
                     if ($ex->subject_teacher == Admin::user()->id) {
-                        $subs[$ex->id] = $ex->theology_course_id . " - " . $ex->theology_class->name;
+                        if($ex->course == null){
+                            $subs[$ex->id] = $ex->theology_course_id . " - " . $ex->theology_class->name;
+                        }else{
+                            $subs[$ex->id] = $ex->course->name . " - " . $ex->theology_class->name;                            
+                        }
+
                     }
                 }
             } 
