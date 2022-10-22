@@ -15,10 +15,9 @@ use Encore\Admin\Show;
 
 class TheologyMarkController extends AdminController
 {
-    //romina
     /**
      * Title for current resource.
-     * 
+     *
      * @var string
      */
     protected $title = 'Theology Marks';
@@ -121,12 +120,7 @@ class TheologyMarkController extends AdminController
                 ])
                     ->orderBy('theology_course_id', 'asc')
                     ->get() as $ex) {
-                        if($ex->course == null){
-                            $subs[$ex->id] = $ex->theology_course_id . " - " . $ex->theology_class->name;
-                        }else{
-                            dd($ex->course);
-                            $subs[$ex->id] = $ex->course->name . " - " . $ex->theology_class->name;                            
-                        }
+                        $subs[$ex->id] = $ex->course->name . " - " . $ex->theology_class->name;
                 }
             } else {
                 foreach (TheologySubject::where([
@@ -135,12 +129,7 @@ class TheologyMarkController extends AdminController
                     ->orderBy('theology_course_id', 'asc')
                     ->get() as $ex) {
                     if ($ex->subject_teacher == Admin::user()->id) {
-                        if($ex->course == null){
-                            $subs[$ex->id] = $ex->theology_course_id . " - " . $ex->theology_class->name;
-                        }else{
-                            $subs[$ex->id] = $ex->course->name . " - " . $ex->theology_class->name;                            
-                        }
-
+                        $subs[$ex->id] = $ex->course->name . " - " . $ex->theology_class->name;
                     }
                 }
             } 
