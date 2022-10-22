@@ -31,6 +31,8 @@ class TheologyMarkController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new TheologyMark());
+        $grid->disableActions();
+        $grid->disableCreateButton();
         /* foreach (Mark::where([
             'theology_exam_id' => 5
         ])->get() as $key => $v) {
@@ -117,8 +119,8 @@ class TheologyMarkController extends AdminController
                     'enterprise_id' => $u->enterprise_id
                 ])
                     ->orderBy('theology_course_id', 'asc')
-                    ->get() as $ex) { 
-                    $subs[$ex->id] = $ex->theology_class->name . " - " . $ex->course->name;
+                    ->get() as $ex) {
+                        $subs[$ex->id] = $ex->course->name . " - " . $ex->theology_class->name;
                 }
             } else {
                 foreach (TheologySubject::where([
@@ -127,10 +129,10 @@ class TheologyMarkController extends AdminController
                     ->orderBy('theology_course_id', 'asc')
                     ->get() as $ex) {
                     if ($ex->subject_teacher == Admin::user()->id) {
-                        $subs[$ex->id] = $ex->theology_class->name . " - " . $ex->course->name;
+                        $subs[$ex->id] = $ex->course->name . " - " . $ex->theology_class->name;
                     }
                 }
-            }
+            } 
 
             $filter->equal('theology_subject_id', 'Filter by subject')->select($subs);
 

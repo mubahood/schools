@@ -147,6 +147,9 @@ class HomeController extends Controller
                     $row->column(3, function (Column $column) {
                         $column->append(Dashboard::teacher_marks());
                     });
+                    $row->column(3, function (Column $column) {
+                        $column->append(Dashboard::theology_teacher_marks());
+                    });
                 }
 
 

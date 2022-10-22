@@ -5,6 +5,8 @@ namespace Encore\Admin\Controllers;
 use App\Models\Enterprise;
 use App\Models\Mark;
 use App\Models\StudentHasClass;
+use App\Models\TheologyExam;
+use App\Models\TheologyMark;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Utils;
@@ -90,6 +92,42 @@ class Dashboard
     }
 
 
+
+
+    public static function theology_teacher_marks()
+    {
+        $u = Auth::user();
+
+        $number_main = number_format(TheologyMark::where([
+            'enterprise_id' => $u->enterprise_id,
+            'teacher_id' => $u->id,
+        ])->count());
+
+        $number_1 = number_format(TheologyMark::where([
+            'enterprise_id' => $u->enterprise_id,
+            'teacher_id' => $u->id,
+            'is_submitted' => true,
+        ])->count());
+
+        $number_2 = $number_main - $number_1;
+
+        $sub_title = number_format($number_1) . ' Submitted, ';
+        $sub_title .= number_format($number_2) . ' Not Submitted.';
+
+        $style = 'success';
+        if($number_2>0){
+            $style = 'danger';
+        }
+
+        return view('widgets.box-5', [
+            'is_dark' => false,
+            'style' => $style,
+            'title' => 'Theology Marks',
+            'sub_title' => $sub_title,
+            'number' => $number_main,
+            'link' => admin_url('theology-marks')
+        ]);
+    }
 
 
 
