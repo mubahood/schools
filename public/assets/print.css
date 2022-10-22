@@ -2,12 +2,18 @@
     article {
         page-break-before: always;
         margin-bottom: 0rem;
+        width: 100%!important;
     }
     @page {
         margin-left: 0.5in;
         margin-right: 0.5in;
         margin-top: 0;
         margin-bottom: 0;
+    }
+    .container {
+        margin-left: 5px!important;
+        margin-right: 5px!important;
+        width: 100%!important;
     }
 }
 
@@ -49,6 +55,11 @@ body {
     line-height: 1.2rem;
 }
 
+.value {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.2rem!important;
+}
+
 p,
 h1,
 h2,
@@ -62,4 +73,63 @@ h2,
 .h2 {
     font-size: 20px;
     font-weight: 600;
+}
+
+.marks-table {
+    font-family: sans-serif;
+}
+
+.marks-table thead th {
+    font-size: 12px;
+    font-weight: 600;
+    color: black;
+    padding: 0%;
+    margin: 0%;
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+.marks th {
+    font-size: 12px;
+    padding: 0%;
+    margin: 0%;
+    padding-left: 10px;
+}
+
+.marks td {
+    padding: 0%;
+    margin: 0%;
+    text-align: center;
+    font-size: 12px;
+    font-family: monospace;
+}
+
+.marks .remarks {
+    text-align: left;
+    padding-left: 2px;
+    font-family: 'Courier New', Courier;
+}
+
+.marks-table {
+    border: solid 2px black!important;
+}
+
+.marks-table thead th {
+    border-bottom: solid 1px black!important;
+}
+
+.grade-table {
+    font-size: 12px;
+    padding: 0px;
+}
+
+.grade-table td,
+.grade-table th,
+td {
+    padding: 2px;
+}
+
+.grade-table tbody td {
+    font-size: 15px!important;
+    padding: 1px;
 }

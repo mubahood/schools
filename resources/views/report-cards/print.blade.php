@@ -13,15 +13,11 @@
 <body>
 
     @include('report-cards.print-layout')
-    @include('report-cards.print-layout')
-    @include('report-cards.print-layout')
+    {{-- @include('report-cards.print-layout')
+    @include('report-cards.print-layout') --}}
 
 
 </body>
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-    
-    });
-</script>
+ 
 
 </html>

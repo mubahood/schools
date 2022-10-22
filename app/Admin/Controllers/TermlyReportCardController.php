@@ -22,7 +22,7 @@ class TermlyReportCardController extends AdminController
 
     /**
      * Make a grid builder.
-     *
+     * 
      * @return Grid
      */
     protected function grid()
@@ -39,9 +39,7 @@ class TermlyReportCardController extends AdminController
             'enterprise_id' => Admin::user()->enterprise_id,
         ])->orderBy('id', 'DESC');
 
-        $grid->column('id', __('Id'));
-        $grid->column('created_at', __('Created at'));
-        $grid->column('updated_at', __('Updated at'));
+        $grid->column('id', __('Id')); 
         $grid->column('enterprise_id', __('Enterprise id'));
         $grid->column('academic_year_id', __('Academic year id'));
         $grid->column('term_id', __('Term id'));
@@ -49,6 +47,9 @@ class TermlyReportCardController extends AdminController
         $grid->column('has_mid_term', __('Has mid term'));
         $grid->column('has_end_term', __('Has end term'));
         $grid->column('report_title', __('Report title'));
+        $grid->column('report_cards', __('Report cards'))->display(function(){
+            return count($this->report_cards);
+        }); 
 
         return $grid;
     }

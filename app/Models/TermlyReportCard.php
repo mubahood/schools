@@ -11,7 +11,7 @@ class TermlyReportCard extends Model
     use HasFactory;
 
     public static function boot()
-    {
+    { 
 
         parent::boot();
         self::deleting(function ($m) {
@@ -58,6 +58,11 @@ class TermlyReportCard extends Model
     function exam()
     {
         return $this->belongsTo(Exam::class);
+    }
+
+    function report_cards()
+    {
+        return $this->hasMany(StudentReportCard::class,'termly_report_card_id');
     }
 
     public static function my_update($m)
