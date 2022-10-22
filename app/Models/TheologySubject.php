@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+//new
 
 use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
