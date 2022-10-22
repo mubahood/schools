@@ -124,6 +124,7 @@ class TheologyMarkController extends AdminController
                         if($ex->course == null){
                             $subs[$ex->id] = $ex->theology_course_id . " - " . $ex->theology_class->name;
                         }else{
+                            dd($ex->course);
                             $subs[$ex->id] = $ex->course->name . " - " . $ex->theology_class->name;                            
                         }
                 }
