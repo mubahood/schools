@@ -272,8 +272,8 @@ git reset --hard orign/master
 
 php artisan make:migration add_created_by --table=stock_records
 php artisan make:migration add_current_class_id --table=admin_users
-php artisan make:migration add_current_theology_class_id --table=admin_users
-php artisan make:migration remove_enterprise_id --table=theology_exam_has_classes
+php artisan make:migration add_total --table=student_report_card_items
+
 
 git add --all 
 git commit -am "Your commit message"
@@ -314,25 +314,4 @@ git revert b5a0a6e3d9bce48b9ba33751a385acf137c13777
 sudo /opt/lampp/lampp restart
 
 
-
-----BC----
-1004362006 
-1003778107
-----------
-
-git add         app/Admin/Controllers/MarkController.php
-        git add app/Admin/Controllers/StudentReportCardController.php
-        git add app/Admin/Controllers/TermlyReportCardController.php
-        git add app/Admin/Controllers/UserPhotosBatchImporterController.php
-        git add app/Http/Controllers/PrintController2.php
-        git add app/Models/AcademicClass.php
-        git add app/Models/Exam.php
-        git add app/Models/StudentReportCard.php
-        git add app/Models/StudentReportCardItem.php
-        git add app/Models/TermlyReportCard.php
-        git add app/Models/Utils.php
-        git add git add important comands.txt/important comands.txt
-        git add public/assets/print.css
-        git add resources/views/report-cards/print-layout.blade.php
-        git add resources/views/report-cards/print.blade.php
-        
+ 

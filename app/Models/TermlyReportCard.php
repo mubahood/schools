@@ -11,7 +11,7 @@ class TermlyReportCard extends Model
     use HasFactory;
 
     public static function boot()
-    { 
+    {
 
         parent::boot();
         self::deleting(function ($m) {
@@ -62,14 +62,14 @@ class TermlyReportCard extends Model
 
     function report_cards()
     {
-        return $this->hasMany(StudentReportCard::class,'termly_report_card_id');
+        return $this->hasMany(StudentReportCard::class, 'termly_report_card_id');
     }
 
     public static function my_update($m)
     {
         $ent = Utils::ent();
 
-   if ($ent->type == 'Primary') {
+        if ($ent->type == 'Primary') {
             TermlyReportCard::make_reports_for_primary($m);
         } else if ($ent->type == 'Secondary') {
             TermlyReportCard::make_reports_for_secondary($m);
@@ -80,10 +80,7 @@ class TermlyReportCard extends Model
 
 
     public static function make_reports_for_primary($m)
-    { 
-
-        set_time_limit(-1);
-        ini_set('memory_limit', '-1');
+    {
 
 
         if (
@@ -99,7 +96,7 @@ class TermlyReportCard extends Model
 
         foreach ($m->term->academic_year->classes as $class) {
             foreach ($class->students as $_student) {
-                if($_student->administrator_id != 2704){
+                if ($_student->administrator_id != 2704) {
                     continue;
                 } 
                 $student = $_student->student;
@@ -121,16 +118,16 @@ class TermlyReportCard extends Model
                     $report_card->academic_class_id = $class->id;
                     $report_card->termly_report_card_id = $m->id;
                     $report_card->save();
-                } else { 
+                } else {
                     //do the update
                 }
 
- 
+
                 if ($report_card != null) {
                     if ($report_card->id > 0) {
-                        foreach ($class->get_students_subjects($student->id) as $main_course) { 
-                         
-                    
+                        foreach ($class->get_students_subjects($student->id) as $main_course) {
+
+
                             $report_item =  StudentReportCardItem::where([
                                 'main_course_id' => $main_course->id,
                                 'student_report_card_id' => $report_card->id,
@@ -144,7 +141,7 @@ class TermlyReportCard extends Model
                             } else {
                                 //die("Updating...");
                             }
-/*
+                            /*
     "course_id" => 61
     "subject_name" => "English"
     "demo_id" => 0
@@ -168,14 +165,14 @@ class TermlyReportCard extends Model
         "is_missed" => 1
         "main_course_id" => 19
 */
- 
+
 
                             $marks = Mark::where([
                                 'main_course_id' => $main_course->main_course_id,
                                 'student_id' => $student->id,
                                 'class_id' => $class->id
                             ])->get();
- 
+
 
                             $avg_score = 0;
                             $bot_avg_score = 0;
@@ -186,24 +183,42 @@ class TermlyReportCard extends Model
 
                             $eot_avg_score = 0;
                             $eot_avg_count = 0;
+                            $regular_total = 0;
+
 
                             if (count($marks) > 0) {
                                 $num = count($marks);
                                 $tot = 0;
+                                $regular_total = 0;
                                 foreach ($marks as $my_mark) {
-                                    if ($my_mark->exam->type == 'B.O.T') {
+                                    $regular_total = 0;
+                                    if (
+                                        $my_mark->exam->type == 'B.O.T' &&
+                                        $m->has_beginning_term
+                                    ) {
                                         $bot_avg_count++;
                                         $bot_avg_score +=  $my_mark->score;
+                                        $regular_total += $my_mark->exam->max_mark;
                                     }
-                                    if ($my_mark->exam->type == 'M.O.T') {
+ 
+                                    if (
+                                        $my_mark->exam->type == 'M.O.T' &&
+                                        $m->has_mid_term
+                                    ) {
+                                        $regular_total += $my_mark->exam->max_mark;
                                         $mot_avg_count++;
                                         $mot_avg_score +=  $my_mark->score;
                                     }
 
-                                    if ($my_mark->exam->type == 'E.O.T') {
+                                    if (
+                                        $my_mark->exam->type == 'E.O.T' &&
+                                        $m->has_end_term
+
+                                    ) { 
+                                        $regular_total += $my_mark->exam->max_mark;
                                         $eot_avg_count++;
                                         $eot_avg_score +=  $my_mark->score;
-                                    } 
+                                    }
                                     $tot += $my_mark->score;
                                 }
                                 $avg_score = ($tot / $num);
@@ -233,7 +248,24 @@ class TermlyReportCard extends Model
                                 $report_item->did_bot = 0;
                             }
 
+                            
+                            
 
+                            dd($report_item);
+
+                            if($regular_total > 0 ){
+                                $tot = 0;
+                                $tot += $report_item->bot_mark;
+                                $tot += $report_item->mot_mark;
+                                $tot += $report_item->eot_mark;
+                                $perecante  =(($tot/$regular_total)*100);
+                                $perecante = round($perecante,2);
+                                dd($perecante);
+                                dd($report_item);
+
+                                
+                            }
+                            dd($regular_total);
                             $scale = Utils::grade_marks($report_item);
 
                             $report_item->grade_name = $scale->name;
