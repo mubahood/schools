@@ -87,7 +87,7 @@ class MarkController extends AdminController
                     (((int)($_GET['exam_id'])) < 1) ||
                     (((int)($_GET['class_id'])) < 1))
             ) {
-                $filter->expand();
+                $filter->expand(); 
             }
 
 

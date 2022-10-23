@@ -9,8 +9,7 @@ use Illuminate\Support\Facades\App;
 
 class PrintController2 extends Controller
 {
-
-    public static function get_row($t1 = "Title 1", $d1 = "Deatils 1", $t2 = "Title 2", $d2 = "Deatils 2")
+        public static function get_row($t1 = "Title 1", $d1 = "Deatils 1", $t2 = "Title 2", $d2 = "Deatils 2")
     {
         return '<tr>
                     <th class="title-cell" >' . $t1 . '</th>
@@ -22,15 +21,17 @@ class PrintController2 extends Controller
 
     public function index()
     {
-
-
-        return view('report-cards.print');
         $id = ((int)($_GET['id']));
-        $item = StudentReportCard::find($id);
-        if ($item == null) {
+        $r = StudentReportCard::find($id);
+        if ($r == null) {
             die("Report card not found.");
         }
 
+
+        return view('report-cards.print',['r' => $r]);
+        
+
+        $item = $r;
         $ranges_titles = [];
         $ranges_values = [];
         foreach ($item->termly_report_card->grading_scale->grade_ranges as $val) {
@@ -84,7 +85,7 @@ class PrintController2 extends Controller
             $rows .= "<td>{$v->aggregates}</td>";
             $rows .= "<td>{$v->remarks}</td>";
             $rows .= "<td>{$v->remarks}</td>";
-            $rows .= "</tr>";
+            $rows .= "</tr>"; 
         }
 
 

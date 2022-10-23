@@ -12,7 +12,7 @@
 
 <body>
 
-    @include('report-cards.print-layout')
+    @include('report-cards.print-layout',['r' => $r])
     {{-- @include('report-cards.print-layout')
     @include('report-cards.print-layout') --}}
 

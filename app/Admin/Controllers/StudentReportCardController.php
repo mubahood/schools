@@ -2,13 +2,14 @@
 
 namespace App\Admin\Controllers;
 
+use App\Models\AcademicClass;
 use App\Models\StudentReportCard;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
-use Encore\Admin\Widgets\Box;               
+use Encore\Admin\Widgets\Box;
 
 class StudentReportCardController extends AdminController
 {
@@ -17,7 +18,7 @@ class StudentReportCardController extends AdminController
      *
      * @var string
      */
-protected $title = 'Students report cards';
+    protected $title = 'Students report cards';
 
     /**
      * Make a grid builder.
@@ -27,24 +28,49 @@ protected $title = 'Students report cards';
     protected function grid()
     {
         $grid = new Grid(new StudentReportCard());
-        
 
-       /*  $grid->header(function ($query) {
+
+        /*  $grid->header(function ($query) {
             return new Box('Gender ratio', 'Romina Love');
         });
  */
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
-        ])->orderBy('id', 'DESC'); 
+        ])->orderBy('id', 'DESC');
 
-        $grid->column('id', __('Id'));
-        $grid->column('created_at', __('Created at'));
-        $grid->column('updated_at', __('Updated at'));
-        $grid->column('enterprise_id', __('Enterprise id'));
-        $grid->column('academic_year_id', __('Academic year id'));
+        $grid->filter(function ($filter) {
+            $filter->disableIdFilter();
+
+            $u = Admin::user();
+            $filter->equal('academic_class_id', 'Filter by class')->select(AcademicClass::where([
+                'enterprise_id' => $u->enterprise_id
+            ])
+                ->orderBy('id', 'Desc')
+                ->get()->pluck('name_text', 'id'));
+
+            $u = Admin::user();
+            $ajax_url = url(
+                '/api/ajax?'
+                    . 'enterprise_id=' . $u->enterprise_id
+                    . "&search_by_1=name"
+                    . "&search_by_2=id"
+                    . "&model=User"
+            );
+            $filter->equal('student_id', 'Student')->select()->ajax($ajax_url);
+        });
+
+
+
+        $grid->column('id', __('#ID'))->sortable();
+        $grid->column('academic_year_id', __('Academic year'))->sortable();
         $grid->column('term_id', __('Term id'));
-        $grid->column('student_id', __('Student id'));
-        $grid->column('academic_class_id', __('Academic class id'));
+        $grid->column('student_id', __('Student'))->display(function () {
+            return $this->owner->name;
+        });
+        $grid->column('academic_class_id', __('Academic class id'))
+            ->display(function () {
+                return $this->academic_class->name;
+            })->sortable();
         $grid->column('print', __('Print'))->display(function ($m) {
             return '<a target="_blank" href="' . url('print?id=' . $this->id) . '" >print</a>';
         });

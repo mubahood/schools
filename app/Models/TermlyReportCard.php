@@ -69,7 +69,7 @@ class TermlyReportCard extends Model
     {
         $ent = Utils::ent();
 
-        if ($ent->type == 'Primary') {
+   if ($ent->type == 'Primary') {
             TermlyReportCard::make_reports_for_primary($m);
         } else if ($ent->type == 'Secondary') {
             TermlyReportCard::make_reports_for_secondary($m);
@@ -80,7 +80,11 @@ class TermlyReportCard extends Model
 
 
     public static function make_reports_for_primary($m)
-    {
+    { 
+
+        set_time_limit(-1);
+        ini_set('memory_limit', '-1');
+
 
         if (
             ($m->has_beginning_term  != 1)
@@ -92,8 +96,12 @@ class TermlyReportCard extends Model
             }
         }
 
+
         foreach ($m->term->academic_year->classes as $class) {
             foreach ($class->students as $_student) {
+                if($_student->administrator_id != 2704){
+                    continue;
+                } 
                 $student = $_student->student;
                 if ($student == null) {
                     die("Failed because Student {$student->id} was not found");
@@ -113,15 +121,16 @@ class TermlyReportCard extends Model
                     $report_card->academic_class_id = $class->id;
                     $report_card->termly_report_card_id = $m->id;
                     $report_card->save();
-                } else {
+                } else { 
                     //do the update
                 }
 
-
+ 
                 if ($report_card != null) {
                     if ($report_card->id > 0) {
-                        foreach ($class->get_students_subjects($student->id) as $main_course) {
-
+                        foreach ($class->get_students_subjects($student->id) as $main_course) { 
+                         
+                    
                             $report_item =  StudentReportCardItem::where([
                                 'main_course_id' => $main_course->id,
                                 'student_report_card_id' => $report_card->id,
@@ -135,13 +144,38 @@ class TermlyReportCard extends Model
                             } else {
                                 //die("Updating...");
                             }
+/*
+    "course_id" => 61
+    "subject_name" => "English"
+    "demo_id" => 0
+    "is_optional" => 0
+    "main_course_id" => 18
 
+
+
+            "id" => 1641
+        "created_at" => "2022-10-22 05:22:53"
+        "updated_at" => "2022-10-23 03:54:35"
+        "enterprise_id" => 7
+        "exam_id" => 1
+        "class_id" => 11
+        "subject_id" => 42
+        "student_id" => 2704
+        "teacher_id" => 3012
+        "score" => 3.0
+        "remarks" => "Tried"
+        "is_submitted" => 1
+        "is_missed" => 1
+        "main_course_id" => 19
+*/
+ 
 
                             $marks = Mark::where([
-                                'main_course_id' => $report_item->main_course_id,
+                                'main_course_id' => $main_course->main_course_id,
                                 'student_id' => $student->id,
                                 'class_id' => $class->id
                             ])->get();
+ 
 
                             $avg_score = 0;
                             $bot_avg_score = 0;
@@ -169,9 +203,7 @@ class TermlyReportCard extends Model
                                     if ($my_mark->exam->type == 'E.O.T') {
                                         $eot_avg_count++;
                                         $eot_avg_score +=  $my_mark->score;
-                                    }
-
-
+                                    } 
                                     $tot += $my_mark->score;
                                 }
                                 $avg_score = ($tot / $num);

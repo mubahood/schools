@@ -172,9 +172,18 @@ class AcademicClass extends Model
     {
         return $this->belongsTo(Administrator::class, 'class_teahcer_id');
     }
+    function ent()
+    {
+        return $this->belongsTo(Enterprise::class,'enterprise_id');
+    }
 
     function get_students_subjects($administrator_id)
     {
+
+
+        if ($this->ent->type == 'Primary') {
+            return $this->subjects;
+        }
         $subs = [];
         $subs = Subject::where(
             'academic_class_id',
