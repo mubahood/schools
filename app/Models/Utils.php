@@ -191,8 +191,12 @@ class Utils  extends Model
     }
 
     public static function docs_root()
-    {
-        return env('DOCUMENT_ROOT');
+    { 
+        $r = env('DOCUMENT_ROOT');
+        $r = str_replace('public/','',$r);
+        $r = str_replace('public','',$r);
+        $r .= 'public/';
+        return $r;
     }
 
     public static function system_boot($u)

@@ -12,6 +12,7 @@ use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
 use Maatwebsite\Excel\Facades\Excel;
+use Zebra_Image;
 
 class UserPhotosBatchImporterController extends AdminController
 {
@@ -32,8 +33,12 @@ class UserPhotosBatchImporterController extends AdminController
 
     protected function grid()
     {
- 
-/* 
+
+
+
+
+
+        /* 
         $users = Administrator::all();
 
         $X = 1;
@@ -79,48 +84,161 @@ class UserPhotosBatchImporterController extends AdminController
         // $x = UserBatchImporter::user_photos_batch_import($x);
         // dd("done");
 
-        $class = "tc";
-        $excel = Utils::docs_root() . "temp/{$class}.xlsx";
+        $class = "bc";
 
-        if (!file_exists($excel)) {
-            dd("D.N.E ==>$excel<=== ");
-        }
+        $ids = [
+            '1003839865',
+            '1003878778',
+            '1003195014',
+            '1004083303',
+            '1004007054',
+            '1003314165',
+            '1003979735',
+            '1003936799',
+            '1004280087',
+            '1003885201',
+            '1003797383',
+            '1003587298',
+            '1003868217',
+            '1003483941',
+            '1004096562',
+            '1004329156',
+            '1003885217',
+            '1003578657',
+            '1003441848',
+            '1003876962',
+            '1004295271',
+            '1003778028',
+            '1003311378',
+            '1003352107',
+            '1004311718',
+            '1003365719',
+            '1003778104',
+            '1003778107',
+            '1003891953',
+            '1003258930',
+            '1004310727',
+            '1004046394',
+            '1003862745',
+            '1003801349',
+            '1003487300',
+            '1003567621',
+            '1003328525',
+            '1004303005',
+            '1003812095',
+            '1004269992',
+            '1003772727',
+            '1003801897',
+            '1003425491',
+            '1003879727',
+            '1003204336',
+            '1004273232',
+            '1003877284',
+            '1004327645',
+            '1003635483',
+            '1003351683',
+            '1004316118',
+            '1003866771',
+            '1004286420',
+            '1003331439',
+            '1003910358',
+            '1004362003',
+            '1004362004',
+            '1004362005',
+            '1004362006',
+            '1004362007',
+            '1004366241',
+            '1004366242',
+            '1004366243',
+            '1004366244',
+            '1004366245',
+            '1004366246',
+            '1004366247',
+            '1004376749',
+            '1004376758',
+            '1004376764',
+            '1004361729',
+            '1004295313',
+            '1004376767',
+            '1004299701',
+            '1004292664',
+            '1003964725',
+            '1004405403'
+        ];
 
-        $array = Excel::toArray([], $excel);
-        $is_first = true;
-        $ids = [];
-        foreach ($array[0] as $key => $v) {
-            if ($is_first) {
-                $is_first = false;
-                continue;
+
+        set_time_limit(-1);
+        ini_set('memory_limit', '-1');
+        $task = 'compress';
+
+        if ($task != 'compress') {
+            $path = Utils::docs_root() . "temp/{$class}_thumb";
+            $path2 = Utils::docs_root() . "temp/{$class}";
+            $files = scandir($path, 0);
+            $x = 0;
+            foreach ($files as $f) {
+                $ext = pathinfo($f, PATHINFO_EXTENSION);
+                if ($ext != 'jpg') {
+                    continue;
+                }
+                if (isset($ids[$x])) {
+                    $new_file = $path2 . "/" . $ids[$x] . ".jpg";
+                    $old_file = $path . "/" . $f;
+                    copy($old_file, $new_file);
+                    print($x . " === " . $ids[$x] . "<hr>");
+                }
+                $x++;
             }
-            $x = trim($v[0]);
-            $ids[] = $x;
-        }
+        } else {
+            $path = Utils::docs_root() . "temp/{$class}";
+            $files = scandir($path, 0);
+            $x = 0;
+            foreach ($files as $f) {
+                $ext = pathinfo($f, PATHINFO_EXTENSION);
+                if ($ext != 'jpg') {
+                    continue;
+                }
+                if (isset($ids[$x])) {
 
-
-        $path = Utils::docs_root() . "temp/{$class}_thumb";
-        $path2 = Utils::docs_root() . "temp/{$class}";
-        $files = scandir($path, 0);
-        $x = 0;
-        foreach ($files as $f) {
-            $ext = pathinfo($f, PATHINFO_EXTENSION);
-            if ($ext != 'jpg') {
-                continue;
-            }
+                    $image = new Zebra_Image();
+                    $image->handle_exif_orientation_tag = false;
+                    $image->preserve_aspect_ratio = true;
+                    $image->enlarge_smaller_images = true;
+                    $image->preserve_time = true;
+                    $image->jpeg_quality = 80;
+                    $id = ((String)(str_replace('.jpg','',$f)));
+                  
+                    $image->auto_handle_exif_orientation = true;
+                    $image->source_path =  $path . "/" . $f;
+                    $image->target_path =  Utils::docs_root() .'storage/images/' . $f;
+                    if (!$image->resize(413, 531, ZEBRA_IMAGE_CROP_CENTER)) {
+                        // if no errors
+                        dd("failed");
+                    }
+        
+                    $s = Administrator::where([
+                        'school_pay_payment_code' => $id
+                     ])->first();
+                     if($s == null){
+                        echo "<hr>{$id}<hr>NOT FOUND<hr>";
+                        continue;
+                     }
+                     $s->avatar = $f;
+                     $s->save();
+        
+                    echo '<img src="' . url('temp/'.$class."/".$f) . '" width="300" />';
+                    echo '<img src="' . url($s->avatar) . '" width="300"/><hr>';
 
  
-
-            if (isset($ids[$x])) {
-                $new_file = $path2 . "/" . $ids[$x] . ".jpg";
-                $old_file = $path . "/" . $f;
-             
-                copy($old_file, $new_file);
-                print($x . " === " . $f . "<hr>");
+                }
+                $x++;
             }
 
-            $x++;
+            dd("compressing...");
+           
         }
+
+
 
         dd("romina " . count($ids));
 
