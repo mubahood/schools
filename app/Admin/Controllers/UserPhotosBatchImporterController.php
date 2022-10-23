@@ -36,7 +36,14 @@ class UserPhotosBatchImporterController extends AdminController
 
 
 
-
+        foreach (Administrator::where([
+            'user_type' => 'student'
+        ])->get() as $key => $s) {
+            $s->avatar = $s->school_pay_payment_code.".jpg";
+            $s->save();
+           echo '<img src="' . url($s->avatar) . '" width="300"/><hr>';
+        }
+        die("done");
 
         /* 
         $users = Administrator::all();

@@ -92,6 +92,11 @@ class StudentHasClassController extends AdminController
         ])
             ->orderBy('id', 'Desc');
 
+
+        $grid->column('student.avatar', __('Photo'))
+            ->lightbox(['width' => 60, 'height' => 60]);
+
+
         $grid->column('id', __('Id'))->sortable();
 
         $grid->column('administrator_id', __('Student'))->display(function () {

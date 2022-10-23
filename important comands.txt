@@ -319,3 +319,20 @@ sudo /opt/lampp/lampp restart
 1004362006 
 1003778107
 ----------
+
+git add         app/Admin/Controllers/MarkController.php
+        git add app/Admin/Controllers/StudentReportCardController.php
+        git add app/Admin/Controllers/TermlyReportCardController.php
+        git add app/Admin/Controllers/UserPhotosBatchImporterController.php
+        git add app/Http/Controllers/PrintController2.php
+        git add app/Models/AcademicClass.php
+        git add app/Models/Exam.php
+        git add app/Models/StudentReportCard.php
+        git add app/Models/StudentReportCardItem.php
+        git add app/Models/TermlyReportCard.php
+        git add app/Models/Utils.php
+        git add git add important comands.txt/important comands.txt
+        git add public/assets/print.css
+        git add resources/views/report-cards/print-layout.blade.php
+        git add resources/views/report-cards/print.blade.php
+        
