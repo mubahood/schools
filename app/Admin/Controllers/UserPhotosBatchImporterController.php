@@ -36,7 +36,7 @@ class UserPhotosBatchImporterController extends AdminController
 
 
 
-   
+
 
         /* 
         $users = Administrator::all();
@@ -84,57 +84,43 @@ class UserPhotosBatchImporterController extends AdminController
         // $x = UserBatchImporter::user_photos_batch_import($x);
         // dd("done");
 
-        $class = "p5";
+        $class = "p6";
 
-        $ids = ['1003635511',
-        '1003331578',
-        '1003668446',
-        '1003661479',
-        '1003937216',
-        '1003346936',
-        '1003700712',
-        '1003373515',
-        '1003661417',
-        '1003492710',
-        '1003283076',
-        '1003292325',
-        '1003295570',
-        '1003297109',
-        '1003551488',
-        '1003776765',
-        '1003778037',
-        '1003602061',
-        '1003832805',
-        '1003866855',
-        '1004372182',
-        '1004150076',
-        '1002281258',
-        '1002281253',
-        '1002281296',
-        '1002281271',
-        '1002281259',
-        '1002281297',
-        '1002281339',
-        '1002281316',
-        '1002281362',
-        '1002281319',
-        '1002281322',
-        '1002281318',
-        '1004372165',
-        '1002350478',
-        '1002281324',
-        '1004372171',
-        '1004372193',
-        '1002281255',
-        '1004372205',
-        '1004372208',
-        '1002281269',
-        '1004373076',
-        '1004373096',
-        '1004372202',
-        '1004369428',
-        '1004092842',
-        '1003447092' 
+        $ids = [
+            '1003937172',
+            '1003948294',
+            '1003479070',
+            '1003479118',
+            '1003796238',
+            '1003776775',
+            '1003594729',
+            '1004034884',
+            '1003885375',
+            '1003890295',
+            '1004257821',
+            '1004275160',
+            '1004288885',
+            '1002281312',
+            '1002281314',
+            '1002281313',
+            '1002281357',
+            '1002281342',
+            '1002281361',
+            '1002281340',
+            '1002281343',
+            '1002281359',
+            '1002281329',
+            '1002281384',
+            '1002281370',
+            '1002281380',
+            '1002281365',
+            '1002281382',
+            '1002281358',
+            '1004372408',
+            '1002281320',
+            '1004385875',
+            '1004385885',
+            '1004092834'
         ];
 
 
@@ -146,7 +132,7 @@ class UserPhotosBatchImporterController extends AdminController
             $path = Utils::docs_root() . "temp/{$class}_thumb";
             $path2 = Utils::docs_root() . "temp/{$class}";
             $files = scandir($path, 0);
-      
+
             $x = 0;
             foreach ($files as $f) {
                 $ext = pathinfo($f, PATHINFO_EXTENSION);
@@ -179,36 +165,33 @@ class UserPhotosBatchImporterController extends AdminController
                     $image->enlarge_smaller_images = true;
                     $image->preserve_time = true;
                     $image->jpeg_quality = 80;
-                    $id = ((String)(str_replace('.jpg','',$f)));
-                  
+                    $id = ((string)(str_replace('.jpg', '', $f)));
+
                     $image->auto_handle_exif_orientation = true;
                     $image->source_path =  $path . "/" . $f;
-                    $image->target_path =  Utils::docs_root() .'storage/images/' . $f;
+                    $image->target_path =  Utils::docs_root() . 'storage/images/' . $f;
                     if (!$image->resize(413, 531, ZEBRA_IMAGE_CROP_CENTER)) {
                         // if no errors
                         dd("failed");
                     }
-        
+
                     $s = Administrator::where([
                         'school_pay_payment_code' => $id
-                     ])->first();
-                     if($s == null){
+                    ])->first();
+                    if ($s == null) {
                         echo "<hr>{$id}<hr>NOT FOUND<hr>";
                         continue;
-                     }
-                     $s->avatar = $f;
-                     $s->save();
-        
-                    echo '<img src="' . url('temp/'.$class."/".$f) . '" width="300" />';
-                    echo '<img src="' . url($s->avatar) . '" width="300"/><hr>';
+                    }
+                    $s->avatar = $f;
+                    $s->save();
 
- 
+                    echo '<img src="' . url('temp/' . $class . "/" . $f) . '" width="300" />';
+                    echo '<img src="' . url($s->avatar) . '" width="300"/><hr>';
                 }
                 $x++;
             }
 
             dd("compressing...");
-           
         }
 
 
