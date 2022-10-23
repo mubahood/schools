@@ -251,7 +251,7 @@ class TermlyReportCard extends Model
                             
                             
 
-                            dd($report_item);
+                      
 
                             if($regular_total > 0 ){
                                 $tot = 0;
@@ -260,17 +260,15 @@ class TermlyReportCard extends Model
                                 $tot += $report_item->eot_mark;
                                 $perecante  =(($tot/$regular_total)*100);
                                 $perecante = round($perecante,2);
-                                dd($perecante);
-                                dd($report_item);
+                                $report_item->total = $perecante;
 
-                                
+                                $scale = Utils::grade_marks($report_item);
+                                $report_item->grade_name = $scale->name;
+                                $report_item->aggregates = $scale->aggregates;
+                                $report_item->save();
                             }
-                            dd($regular_total);
-                            $scale = Utils::grade_marks($report_item);
-
-                            $report_item->grade_name = $scale->name;
-                            $report_item->aggregates = $scale->aggregates;
-                            $report_item->save();
+   
+                           
                         }
                     }
                 }

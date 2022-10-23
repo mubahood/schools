@@ -640,9 +640,7 @@ class Utils  extends Model
             die("No grading scale found.");
         }
 
-        $tot = $report_item->bot_mark;
-        $tot += $report_item->mot_mark;
-        $tot += $report_item->eot_mark;
+ 
         $default = new GradeRange();
         $default->id = 1;
         $default->grading_scale_id = 1;
@@ -654,8 +652,8 @@ class Utils  extends Model
         //$tot = $report_item->
         foreach ($grading_scale->grade_ranges as $v) {
             if (
-                ($tot >= $v->min_mark) &&
-                ($tot <= $v->max_mark)
+                ($report_item->total >= $v->min_mark) &&
+                ($report_item->total <= $v->max_mark)
             ) {
                 return $v;
             }

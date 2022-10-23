@@ -28,11 +28,7 @@ class GradingScaleController extends AdminController
     {
         $grid = new Grid(new GradingScale()); 
 
-        $grid->model()
-            ->orderBy('id', 'Desc')
-            ->where([
-                'enterprise_id' => Admin::user()->enterprise_id, 
-            ]);
+ 
 
         $grid->column('name', __('Name'));
         return $grid;

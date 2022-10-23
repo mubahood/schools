@@ -54,4 +54,9 @@ class Term extends Model
     {
         return $this->belongsTo(AcademicYear::class);
     }
+
+    function exams()
+    {
+        return $this->hasMany(Exam::class);
+    }
 }

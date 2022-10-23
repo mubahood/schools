@@ -1,4 +1,19 @@
 <?php
+$max_bot = 30;
+$max_mot = 40;
+$max_eot = 60;
+foreach ($r->termly_report_card->term->exams as $exam) {
+    if ($exam->type == 'B.O.T') {
+        $max_bot = $exam->max_mark;
+    }
+    if ($exam->type == 'M.O.T') {
+        $max_mot = $exam->max_mark;
+    }
+    if ($exam->type == 'E.O.T') {
+        $max_eot = $exam->max_mark;
+    } 
+} 
+
 $school_name = 'KIIRA JUNIOR PRIMARY SCHOOL';
 $school_address = 'Bwera Kasese Uganda';
 $school_tel = '+256783204665';
@@ -23,24 +38,24 @@ $school_email = 'admin@kjs.com';
         </div>
 
         <div class="col-2 float-right text-right">
-            <img width="120px" class="img-fluid float-right text-right" src="{{ url('assets/student.jpg') }}">
+            <img width="120px" class="img-fluid float-right text-right" src="{{ $r->owner->avatar }}">
         </div>
 
     </div>
 
-    <hr style="border: solid green 1px; " class="m-0 mt-2  mb-2" >
+    <hr style="border: solid green 1px; " class="m-0 mt-2  mb-2">
 
     <div class="container">
-        <div class="row mb-1 d-flex justify-content-between "style="font-size: 14px" >
+        <div class="row mb-1 d-flex justify-content-between "style="font-size: 14px">
 
 
             <span><b>NAME:</b> <span class="value">{{ $r->owner->name }}</span></span>
             <span><b>GENDER:</b> <span class="value">{{ $r->owner->sex }}</span></span>
             <span><b>AGE:</b> <span class="value">{{ '--' }}</span></span>
             <span><b>REG NO.:</b> <span class="value">{{ $r->owner->id }}</span></span>
-      
-        </div>  
-    
+
+        </div>
+
     </div>
 
     <div class="container   ">
@@ -59,41 +74,54 @@ $school_email = 'admin@kjs.com';
                         <table class="table table-bordered marks-table p-0 m-0">
                             <thead class="p-0 m-0 text-center">
                                 <th class="text-left pl-2">SUBJECTS</th>
-                                <th>B.O.T <br> (30)</th>
-                                <th>M.O.T <br> (30)</th>
-                                <th>E.O.T <br> (30)</th>
+                                @if ($r->termly_report_card->has_beginning_term)
+                                    <th>B.O.T <br> ({{ $max_bot }})</th>
+                                @endif
+                                @if ($r->termly_report_card->has_mid_term)
+                                    <th>M.O.T <br> ({{ $max_mot }})</th>
+                                @endif
+                                @if ($r->termly_report_card->has_end_term)
+                                    <th>E.O.T <br> ({{ $max_eot }})</th>
+                                @endif
                                 <th>TOTAL <br> (100%)</th>
                                 <th>Aggr</th>
                                 <th class="remarks">Remarks</th>
                                 <th class="remarks text-center">Initials</th>
                             </thead>
-                            @foreach ($r->items as $v)  
-                             <tr class="marks">
-                                <th>{{$v->subject->subject_name}}</th>
-                                <td>{{$v->bot_mark}}</td> 
-                                <td>{{$v->mot_mark}}</td> 
-                                <td>{{$v->eot_mark}}</td> 
-                                <td>{{ ($v->eot_mark + $v->mot_mark + $v->main_course->bot_mark)  }}</td>
-                                <td>{{ $v->grade_name }}</td> 
-                                <td class="remarks">{{ $v->remarks }}</td>
-                                <td class="remarks text-center">M.K</td>
-                            </tr>
-                         
+                            @foreach ($r->items as $v)
+                                <tr class="marks">
+                                    <th>{{ $v->subject->subject_name }}</th>
+                                    @if ($r->termly_report_card->has_beginning_term)
+                                        <td>{{ $v->bot_mark }}</td>
+                                    @endif
+
+                                    @if ($r->termly_report_card->has_mid_term)
+                                        <td>{{ $v->mot_mark }}</td>
+                                    @endif
+                                    @if ($r->termly_report_card->has_end_term)
+                                        <td>{{ $v->eot_mark }}</td>
+                                    @endif
+                                    <td>{{ $v->total }}</td>
+                                    <td>{{ $v->grade_name }}</td>
+                                    <td class="remarks">{{ $v->remarks }}</td>
+                                    <td class="remarks text-center">M.K</td>
+                                </tr>
                             @endforeach
 
                         </table>
                     </div>
                 </div>
-                
+
                 <div class="p-0 mt-2 mb-2 class-teacher">
-                    <b>CLASS TEACHER'S COMMENT:</b> 
-                <span class="comment">Lorem ipsum dolor sit amet consectetur adipisicing elit. sit amet consectetur adipisicing elit.  Deleniti sit alias veritatis</span>
+                    <b>CLASS TEACHER'S COMMENT:</b>
+                    <span class="comment">Lorem ipsum dolor sit amet consectetur adipisicing elit. sit amet consectetur
+                        adipisicing elit. Deleniti sit alias veritatis</span>
                 </div>
 
- 
+
             </div>
             <div class="col-6 border border-dark pt-1">
-                <h2 class="text-center"  style="font-size: 16px">دراسات اللاهوت</h2>
+                <h2 class="text-center" style="font-size: 16px">دراسات اللاهوت</h2>
                 <hr class="my-1">
                 <div class="row mt-2 d-flex justify-content-between pl-3 pr-3">
                     <span><b>CLASS:</b> <span class="value">P.7</span></span>
@@ -164,21 +192,18 @@ $school_email = 'admin@kjs.com';
                         </table>
                     </div>
                 </div>
-                
+
                 <div class="p-0 mt-2 mb-2 class-teacher">
-                    <b>CLASS TEACHER'S COMMENT:</b> 
-                <span class="comment">Lorem ipsum dolor sit amet consectetur adipisicing elit. sit amet consectetur adipisicing elit.  Deleniti sit alias veritatis</span>
+                    <b>CLASS TEACHER'S COMMENT:</b>
+                    <span class="comment">Lorem ipsum dolor sit amet consectetur adipisicing elit. sit amet consectetur
+                        adipisicing elit. Deleniti sit alias veritatis</span>
                 </div>
             </div>
         </div>
-        
+
         <div class="row mt-3 p-0 -info ">
-            <div class="col-12  text-white"
-            style="background-color: black"
-            >
-                <h2 class="p-1 text-center m-0 "
-                style="font-size: 12px;"
-                >Grading scale</h2>
+            <div class="col-12  text-white" style="background-color: black">
+                <h2 class="p-1 text-center m-0 " style="font-size: 12px;">Grading scale</h2>
             </div>
             <div class="col-12 p-0">
                 <table class="table table-bordered grade-table">
@@ -213,8 +238,9 @@ $school_email = 'admin@kjs.com';
         <div class="row">
             <div class="col-10 p-0">
                 <div class="p-0 mt-0 mb-2 class-teacher">
-                    <b>HEAD TEACHER'S COMMENT:</b> 
-                <span class="comment">Lorem ipsum dolor sit amet consectetur adipisicing lor sit amet consectetur adipisicing elit. sit amet consectetur adipisicing elit.  Deleniti sit alias veritatis</span>
+                    <b>HEAD TEACHER'S COMMENT:</b>
+                    <span class="comment">Lorem ipsum dolor sit amet consectetur adipisicing lor sit amet consectetur
+                        adipisicing elit. sit amet consectetur adipisicing elit. Deleniti sit alias veritatis</span>
                 </div>
             </div>
             <div class="col-2 ">
@@ -224,16 +250,22 @@ $school_email = 'admin@kjs.com';
         <div class="row">
             <div class="col-12 p-0">
                 <div class="p-0 mt-0 mb-2 class-teacher">
-                    <b>HEAD TEACHER'S COMMUNICATION:</b> 
-                <span class="comment">Lorem ipsum dolor sit amet consectetur adipisicing lor sit amet consectetur adipisicing elit. sit amet consectetur adipisicing elit.  Deleniti sit alias veritatis</span>
+                    <b>HEAD TEACHER'S COMMUNICATION:</b>
+                    <span class="comment">Lorem ipsum dolor sit amet consectetur adipisicing lor sit amet consectetur
+                        adipisicing elit. sit amet consectetur adipisicing elit. Deleniti sit alias veritatis</span>
                 </div>
-            </div> 
+            </div>
         </div>
-        <div class="row mt-2 d-flex justify-content-between p-0 border-top pt-2 border-primary" style="font-size: 12px;">
-            <span><b>SCHOOL FEES BALANCE:</b> <span class="value" style="font-size: 12px!important;">UGX 160,000</span></span>
-            <span><b>NEXT TERM TUTION FEE:</b> <span class="value" style="font-size: 12px!important;">UGX 18,000</span></span>
-            <span><b>SCHOOL PAY CODE:</b> <span class="value" style="font-size: 12px!important;">102776152</span></span>
-            <span><b>NEXT TERM BEGINS ON:</b> <span class="value" style="font-size: 12px!important;">16<sup>th</sup> Oct, 2022</span></span> 
+        <div class="row mt-2 d-flex justify-content-between p-0 border-top pt-2 border-primary"
+            style="font-size: 12px;">
+            <span><b>SCHOOL FEES BALANCE:</b> <span class="value" style="font-size: 12px!important;">UGX
+                    160,000</span></span>
+            <span><b>NEXT TERM TUTION FEE:</b> <span class="value" style="font-size: 12px!important;">UGX
+                    18,000</span></span>
+            <span><b>SCHOOL PAY CODE:</b> <span class="value"
+                    style="font-size: 12px!important;">102776152</span></span>
+            <span><b>NEXT TERM BEGINS ON:</b> <span class="value" style="font-size: 12px!important;">16<sup>th</sup>
+                    Oct, 2022</span></span>
         </div>
 
     </div>
