@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Models\AcademicClass;
+use App\Models\StudentHasClass;
 use App\Models\UserBatchImporter;
 use App\Models\Utils;
 use Encore\Admin\Auth\Database\Administrator;
@@ -13,6 +14,8 @@ use Encore\Admin\Grid;
 use Encore\Admin\Show;
 use Maatwebsite\Excel\Facades\Excel;
 use Zebra_Image;
+
+use function PHPUnit\Framework\fileExists;
 
 class UserPhotosBatchImporterController extends AdminController
 {
@@ -33,7 +36,20 @@ class UserPhotosBatchImporterController extends AdminController
 
     protected function grid()
     {
+        $class = "baby";
+        
+        foreach (StudentHasClass::where([
+            'academic_class_id' => 15
+        ])->get() as $key => $v) {
+            $path_1 = Utils::docs_root() . "storage/images/".$v->student->avatar;
+            $path_2 = Utils::docs_root() . "temp/{$class}/".$v->student->avatar;
+            if(file_exists($path_1)){
+                copy($path_1,$path_2); 
+            }
+ 
+        }
 
+        die("done");
 
 
 
@@ -132,7 +148,7 @@ class UserPhotosBatchImporterController extends AdminController
         set_time_limit(-1);
         ini_set('memory_limit', '-1');
         $task = 'compress';
-
+        $class= 'p6';
         if ($task != 'compress') {
             $path = Utils::docs_root() . "temp/{$class}_thumb";
             $path2 = Utils::docs_root() . "temp/{$class}";
@@ -154,15 +170,15 @@ class UserPhotosBatchImporterController extends AdminController
             }
             die("done");
         } else {
-            $path = Utils::docs_root() . "temp/{$class}";
+            $path = Utils::docs_root() . "temp/{$class}_thumb";
             $files = scandir($path, 0);
             $x = 0;
             foreach ($files as $f) {
                 $ext = pathinfo($f, PATHINFO_EXTENSION);
                 if ($ext != 'jpg') {
                     continue;
-                }
-                if (isset($ids[$x])) {
+                } 
+ 
 
                     $image = new Zebra_Image();
                     $image->handle_exif_orientation_tag = false;
@@ -174,25 +190,16 @@ class UserPhotosBatchImporterController extends AdminController
 
                     $image->auto_handle_exif_orientation = true;
                     $image->source_path =  $path . "/" . $f;
-                    $image->target_path =  Utils::docs_root() . 'storage/images/' . $f;
+                    $image->target_path =  Utils::docs_root() .  "temp/{$class}/" . $f;
                     if (!$image->resize(413, 531, ZEBRA_IMAGE_CROP_CENTER)) {
                         // if no errors
                         dd("failed");
                     }
+  
 
-                    $s = Administrator::where([
-                        'school_pay_payment_code' => $id
-                    ])->first();
-                    if ($s == null) {
-                        echo "<hr>{$id}<hr>NOT FOUND<hr>";
-                        continue;
-                    }
-                    $s->avatar = $f;
-                    $s->save();
-
-                    echo '<img src="' . url('temp/' . $class . "/" . $f) . '" width="300" />';
-                    echo '<img src="' . url($s->avatar) . '" width="300"/><hr>';
-                }
+                    echo $x.'<img src="' . url('temp/' . $class . "_thumb/" . $f) . '" width="300" />';
+                    echo '<img src="' . url(url("temp/{$class}/" . $f)) . '" width="300"/><hr>';
+              
                 $x++;
             }
 
