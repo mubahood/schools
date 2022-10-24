@@ -159,7 +159,7 @@ class MarkController extends AdminController
             return $this->class->name;
         })->sortable();
         $grid->column('subject_id', __('Subject'))->display(function () {
-            return $this->subject_id;
+            return $this->subject->subject_name;
         })->sortable();
 
         $grid->column('score', __('Score'))->sortable()->editable();
