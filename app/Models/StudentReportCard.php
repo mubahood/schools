@@ -15,14 +15,35 @@ class StudentReportCard extends Model
         return $this->belongsTo(TermlyReportCard::class);
     }
 
+
+
+    public static function boot()
+    {
+
+        parent::boot();
+        self::updating(function ($m) {
+            if ($m->class_teacher_commented == 10) {
+                $m->class_teacher_commented = 0;
+            }else{
+                $m->class_teacher_commented = 1;
+
+            }
+            if ($m->head_teacher_commented == 10) {
+                $m->head_teacher_commented = 0;
+            }else{
+                $m->head_teacher_commented = 1;
+            }
+        });
+    }
+
     function owner()
     {
-        return $this->belongsTo(Administrator::class,'student_id');
+        return $this->belongsTo(Administrator::class, 'student_id');
     }
 
     function academic_class()
     {
-        return $this->belongsTo(AcademicClass::class,'academic_class_id');
+        return $this->belongsTo(AcademicClass::class, 'academic_class_id');
     }
 
 

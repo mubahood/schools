@@ -14,6 +14,12 @@ class StudentReportCardItem extends Model
         return $this->belongsTo(StudentReportCard::class);
     }
 
+
+    function items()
+    {
+        return $this->hasMany(StudentReportCardItem::class,'student_report_card_id');
+    }
+
     function main_course()
     {
 

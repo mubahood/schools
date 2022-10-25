@@ -4,7 +4,7 @@
         margin-bottom: 0rem;
         width: 100%!important;
     }
-    @page {
+    @page { 
         margin-left: 0.5in;
         margin-right: 0.5in;
         margin-top: 0;
@@ -57,7 +57,7 @@ body {
 
 .value {
     font-family: 'Courier New', Courier, monospace;
-    font-size: 16px;
+    font-size: 14px;
     text-transform: uppercase;
 }
 
@@ -143,4 +143,7 @@ td {
 
 .comment {
     border-bottom: 1px dotted;
+}
+.summary .value{
+    border-bottom: 1px dotted;   
 }

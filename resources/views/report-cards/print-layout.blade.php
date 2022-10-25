@@ -2,6 +2,25 @@
 $max_bot = 30;
 $max_mot = 40;
 $max_eot = 60;
+/* 
+  "id" => 192
+    "created_at" => "2022-10-25 21:03:14"
+    "updated_at" => "2022-10-26 00:36:50"
+    "enterprise_id" => 7
+    "academic_year_id" => 2
+    "term_id" => 6
+    "student_id" => 2704
+    "academic_class_id" => 11
+    "termly_report_card_id" => 3
+    "total_marks" => 154.0
+    "total_aggregates" => 40.0
+    "position" => 1
+    "class_teacher_comment" => "Excelent! Keep it up."
+    "head_teacher_comment" => "Nabakka  Husnah is such a brilliant pupil. Keep it up."
+    "class_teacher_commented" => 0
+    "head_teacher_commented" => 0
+    "total_students" => 77
+*/
 foreach ($r->termly_report_card->term->exams as $exam) {
     if ($exam->type == 'B.O.T') {
         $max_bot = $exam->max_mark;
@@ -46,7 +65,7 @@ $school_email = 'admin@kjs.com';
     <hr style="border: solid green 1px; " class="m-0 mt-2  mb-2">
 
     <div class="container">
-        <div class="row mb-1 d-flex justify-content-between "style="font-size: 14px">
+        <div class="row mb-1 d-flex justify-content-between summary"style="font-size: 14px">
 
 
             <span><b>NAME:</b> <span class="value">{{ $r->owner->name }}</span></span>
@@ -63,11 +82,12 @@ $school_email = 'admin@kjs.com';
             <div class="col-6 border border-dark pt-1">
                 <h2 class="text-center text-uppercase h2" style="font-size: 16px">secular studies</h2>
                 <hr class="my-1">
-                <div class="row mt-2 d-flex justify-content-between pl-3 pr-3" style="font-size: 14px">
+                <div class="row mt-2 d-flex justify-content-between pl-3 pr-3 summary" style="font-size: 12px">
                     <span><b>CLASS:</b> <span class="value">{{ $r->academic_class->name }}</span></span>
-                    <span><b>Aggregates:</b> <span class="value">18</span></span>
-                    <span><b>Grade:</b> <span class="value">B</span></span>
-                    <span><b>Position:</b> <span class="value">B</span></span>
+                    {{-- <span><b class="text-uppercase">Aggre:</b> <span class="value">18</span></span> --}}
+                    <span><b class="text-uppercase">Grade:</b> <span class="value">B</span></span>
+                    <span><b class="text-uppercase">Position in class:</b> <span class="value">{{ $r->position }}<sup class="text-lowercase">{{ date("S", mktime(0, 0, 0, 0, $r->position, 0)) }}</sup></span></span>
+                    <span><b class="text-uppercase">OUT OF:</b> <span class="value">{{ $r->total_students }} 
                 </div>
                 <div class="row mt-2">
                     <div class="col-12">
