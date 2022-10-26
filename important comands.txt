@@ -142,6 +142,7 @@ php artisan make:model TheologyExamHasClass
 php artisan make:model TheologyTermlyReportCard
 php artisan make:model TheologryStudentReportCard
 php artisan make:model TheologyStudentReportCardItem
+php artisan make:model Competence
 
 
 php artisan admin:make TermController --model=App\\Models\\Term
@@ -174,6 +175,8 @@ php artisan make:migration create_theology_marks_table
 php artisan make:migration create_theology_exam_has_classes_table
 php artisan make:migration create_theology_termly_report_cards_table
 php artisan make:migration create_theology_student_report_card_items_table
+php artisan make:migration create_competences_table
+php artisan make:migration create_nursery_termly_report_cards_table
 
 --path=/database/migrations/fileName.php
 

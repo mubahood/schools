@@ -101,6 +101,7 @@ return array(
     'App\\Models\\BookBorrow' => $baseDir . '/app/Models/BookBorrow.php',
     'App\\Models\\BookBorrowBook' => $baseDir . '/app/Models/BookBorrowBook.php',
     'App\\Models\\BooksCategory' => $baseDir . '/app/Models/BooksCategory.php',
+    'App\\Models\\Competence' => $baseDir . '/app/Models/Competence.php',
     'App\\Models\\Course' => $baseDir . '/app/Models/Course.php',
     'App\\Models\\Demo' => $baseDir . '/app/Models/Demo.php',
     'App\\Models\\Enterprise' => $baseDir . '/app/Models/Enterprise.php',

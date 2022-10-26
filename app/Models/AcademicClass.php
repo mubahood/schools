@@ -20,6 +20,8 @@ class AcademicClass extends Model
 
 
 
+
+
         self::created(function ($m) {
             $category = AcademicClass::get_academic_class_category($m->short_name);
             $courses = MainCourse::where([
@@ -58,12 +60,6 @@ class AcademicClass extends Model
                     $s->save();
                 }
             }
-
-
-            
-   
-
-    
         });
         self::creating(function ($m) {
         });
@@ -108,7 +104,7 @@ class AcademicClass extends Model
         }
 
         $fees = $class->academic_class_fees;
-         foreach ($class->students as $student) {
+        foreach ($class->students as $student) {
 
             foreach ($fees as $fee) {
                 $has_fee = StudentHasFee::where([
@@ -116,7 +112,7 @@ class AcademicClass extends Model
                     'academic_class_fee_id' => $fee->id,
                 ])->first();
                 if ($has_fee == null) {
-                   
+
 
                     Transaction::my_create([
                         'academic_year_id' => $class->academic_year_id,
@@ -159,6 +155,11 @@ class AcademicClass extends Model
         return $this->hasMany(AcademicClassFee::class);
     }
 
+    function competences()
+    {
+        return $this->hasMany(Competence::class);
+    }
+
     function academic_class_sctreams()
     {
         return $this->hasMany(AcademicClassSctream::class);
@@ -174,7 +175,7 @@ class AcademicClass extends Model
     }
     function ent()
     {
-        return $this->belongsTo(Enterprise::class,'enterprise_id');
+        return $this->belongsTo(Enterprise::class, 'enterprise_id');
     }
 
     function get_students_subjects($administrator_id)
@@ -277,7 +278,7 @@ class AcademicClass extends Model
         return $this->hasMany(Subject::class, 'academic_class_id');
     }
 
-    function main_subjects() 
+    function main_subjects()
     {
         $my_subs = DB::select("SELECT * FROM subjects WHERE academic_class_id =  $this->id");
         $subs = [];
@@ -300,8 +301,8 @@ class AcademicClass extends Model
     }
 
     function getNameTextAttribute()
-    { 
-        return $this->name;// . " - " . $this->academic_year->name . "";
+    {
+        return $this->name; // . " - " . $this->academic_year->name . "";
     }
     function getOptionalSubjectsItems()
     {
@@ -336,6 +337,8 @@ class AcademicClass extends Model
         }
         return $count;
     }
+
+
 
     protected  $appends = ['name_text'];
 }

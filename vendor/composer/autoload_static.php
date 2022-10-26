@@ -757,6 +757,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Models\\BookBorrow' => __DIR__ . '/../..' . '/app/Models/BookBorrow.php',
         'App\\Models\\BookBorrowBook' => __DIR__ . '/../..' . '/app/Models/BookBorrowBook.php',
         'App\\Models\\BooksCategory' => __DIR__ . '/../..' . '/app/Models/BooksCategory.php',
+        'App\\Models\\Competence' => __DIR__ . '/../..' . '/app/Models/Competence.php',
         'App\\Models\\Course' => __DIR__ . '/../..' . '/app/Models/Course.php',
         'App\\Models\\Demo' => __DIR__ . '/../..' . '/app/Models/Demo.php',
         'App\\Models\\Enterprise' => __DIR__ . '/../..' . '/app/Models/Enterprise.php',

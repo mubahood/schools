@@ -61,6 +61,10 @@ class AcademicClassController extends AdminController
             return count($this->students);
         });
 
+        $grid->column('competences', __('Competences'))->display(function () {
+            return count($this->competences);
+        });
+
         $grid->column('compulsory_subjects', __('Compulsory Subjects'))->hide();
         $grid->column('optional_subjects', __('Optional Subjects'))->hide();
 
@@ -145,6 +149,15 @@ class AcademicClassController extends AdminController
             $form->setWidth(8, 4);
         });
 
+
+        $form->tab('Class streams', function (Form $form) {
+            $form->morphMany('academic_class_sctreams', 'Click on new to add a stream to this class', function (Form\NestedForm $form) {
+                $u = Admin::user();
+                $form->hidden('enterprise_id')->default($u->enterprise_id);
+                $form->text('name', __('Class stream name'))->rules('required');
+            });
+        });
+
         $form->tab('Class Subjects', function (Form $form) {
             $form->morphMany('subjects', 'Click on new to add a subject to this class', function (Form\NestedForm $form) {
                 $u = Admin::user();
@@ -210,13 +223,43 @@ class AcademicClassController extends AdminController
             });
         });
 
-        $form->tab('Class streams', function (Form $form) {
-            $form->morphMany('academic_class_sctreams', 'Click on new to add a stream to this class', function (Form\NestedForm $form) {
+        $form->tab('Competences', function (Form $form) {
+            $form->morphMany('competences', 'Click on new to add a Competence to this class', function (Form\NestedForm $form) {
                 $u = Admin::user();
+
                 $form->hidden('enterprise_id')->default($u->enterprise_id);
-                $form->text('name', __('Class stream name'))->rules('required');
+                $u = Admin::user();
+                $ent = Utils::ent();
+                $teachers = [];
+                foreach (Administrator::where([
+                    'enterprise_id' => $u->enterprise_id,
+                    'user_type' => 'employee',
+                ])->get() as $key => $a) {
+                    if ($a->isRole('teacher')) {
+                        $teachers[$a['id']] = $a['name'] . " #" . $a['id'];
+                    }
+                }
+                $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
+
+                $form->text('name', __('Competence Title'))->rules('required');
+                $form->text('description', __('Description'));
+
+
+                $form->select('teacher_1', 'Competence teacher')
+                    ->options(
+                        $teachers
+                    )->rules('required');
+                $form->select('teacher_2', 'Subject teacher 2')
+                    ->options(
+                        $teachers
+                    );
+                $form->select('teacher_3', 'Subject teacher 3')
+                    ->options(
+                        $teachers
+                    );
             });
         });
+
 
 
         /* $form->tab('Fees', function (Form $form) {
