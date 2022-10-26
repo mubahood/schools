@@ -44,9 +44,9 @@ class TermlyReportCardController extends AdminController
         $grid->column('enterprise_id', __('Enterprise id'));
         $grid->column('academic_year_id', __('Academic year id'));
         $grid->column('term_id', __('Term id'));
-        $grid->column('has_beginning_term', __('Has beginning term'));
-        $grid->column('has_mid_term', __('Has mid term'));
-        $grid->column('has_end_term', __('Has end term'));
+        $grid->column('has_beginning_term', __('Has beginning term'))->bool();
+        $grid->column('has_mid_term', __('Has mid term'))->bool();
+        $grid->column('has_end_term', __('Has end term'))->bool();
         $grid->column('report_title', __('Report title'));
         $grid->column('report_cards', __('Report cards'))->display(function () {
             return count($this->report_cards);
@@ -122,11 +122,12 @@ class TermlyReportCardController extends AdminController
             $form->radio('do_update', __('Do you want to update all related report cards?'))->options([1 => 'Yes', 0 => 'No'])
                 ->default(0);
         }
+
         $form->disableEditingCheck();
         $form->disableCreatingCheck();
         $form->disableReset();
         $form->disableViewCheck();
-        
+
 
 
 

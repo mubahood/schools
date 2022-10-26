@@ -13,6 +13,11 @@ class AcademicYear extends Model
         return $this->belongsTo(Enterprise::class);
     }
 
+    function theology_classes()
+    {
+        return $this->hasMany(TheologyClass::class, 'academic_year_id');
+    }
+
     function classes()
     {
         return $this->hasMany(AcademicClass::class, 'academic_year_id');

@@ -12,12 +12,12 @@
 
 <body>
 
-    @include('report-cards.print-layout',['r' => $r])
+    @include('report-cards.print-layout', ['r' => $r, 'tr' => $tr])
     {{-- @include('report-cards.print-layout')
     @include('report-cards.print-layout') --}}
 
 
 </body>
- 
+
 
 </html>

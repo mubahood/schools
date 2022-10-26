@@ -633,6 +633,39 @@ class Utils  extends Model
         }
     }
 
+    public static function theology_grade_marks($report_item)
+    {
+
+
+
+        $grading_scale = GradingScale::find($report_item->student_report_card->termly_report_card->grading_scale_id);
+        if ($grading_scale == null) {
+            die("No grading scale found.");
+        }
+
+ 
+        $default = new GradeRange();
+        $default->id = 1;
+        $default->grading_scale_id = 1;
+        $default->enterprise_id = 1;
+        $default->name = 'X';
+        $default->min_mark = -1;
+        $default->aggregates = 0;
+
+
+        //$tot = $report_item->
+        foreach ($grading_scale->grade_ranges as $v) {
+            if (
+                ($report_item->total >= $v->min_mark) &&
+                ($report_item->total <= $v->max_mark)
+            ) {
+                return $v;
+            }
+        }
+
+        return $default;
+    }
+
     public static function grade_marks($report_item)
     {
         $grading_scale = GradingScale::find($report_item->student_report_card->termly_report_card->grading_scale_id);

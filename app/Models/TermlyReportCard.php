@@ -16,6 +16,7 @@ class TermlyReportCard extends Model
 
         parent::boot();
         self::deleting(function ($m) {
+            die("You cannot delete this item.");
         });
         self::creating(function ($m) {
             $term = Term::find($m->term_id);

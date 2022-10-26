@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\ReportCard;
 use App\Models\StudentReportCard;
+use App\Models\TheologryStudentReportCard;
+use App\Models\TheologyStudentReportCardItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 
 class PrintController2 extends Controller
 {
-        public static function get_row($t1 = "Title 1", $d1 = "Deatils 1", $t2 = "Title 2", $d2 = "Deatils 2")
+    public static function get_row($t1 = "Title 1", $d1 = "Deatils 1", $t2 = "Title 2", $d2 = "Deatils 2")
     {
         return '<tr>
                     <th class="title-cell" >' . $t1 . '</th>
@@ -19,17 +21,36 @@ class PrintController2 extends Controller
                 </tr>';
     }
 
-    public function index()
+    public function index(Request $req)
     {
-        $id = ((int)($_GET['id']));
+
+
+        $id = ((int)($req->id));
         $r = StudentReportCard::find($id);
+        $tr = null;
+        if ($r == null) {
+            $theo_id = ((int)($req->theo_id));
+            $tr = TheologryStudentReportCard::where([
+                'id' => $theo_id
+            ])->first();
+            if ($tr != null) {
+                $r = StudentReportCard::where([
+                    'student_id' => $tr->owner->id
+                ])->first();
+            }
+        } else {
+            $tr = TheologryStudentReportCard::where([
+                'student_id' => $r->owner->id
+            ])->first();
+        }
+
+
         if ($r == null) {
             die("Report card not found.");
         }
 
+        return view('report-cards.print', ['r' => $r, 'tr' => $tr]);
 
-        return view('report-cards.print',['r' => $r]);
-        
 
         $item = $r;
         $ranges_titles = [];
@@ -85,7 +106,7 @@ class PrintController2 extends Controller
             $rows .= "<td>{$v->aggregates}</td>";
             $rows .= "<td>{$v->remarks}</td>";
             $rows .= "<td>{$v->remarks}</td>";
-            $rows .= "</tr>"; 
+            $rows .= "</tr>";
         }
 
 
@@ -249,7 +270,7 @@ class PrintController2 extends Controller
         $data .= $grading_tabel;
         $data .= $bottom_table;
 
-        return $data.$data;
+        return $data . $data;
         $pdf = App::make('dompdf.wrapper');
         $pdf->loadHTML('romina');
         return $pdf->stream();

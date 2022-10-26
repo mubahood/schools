@@ -46,6 +46,14 @@ class TheologySubject extends Model
         }
         return $this->belongsTo(TheologyCourse::class,'theology_course_id');
     }
+    function theology_course()
+    {
+        $c = TheologyCourse::find($this->theology_course_id);
+        if($c == null){
+            dd("Course not found => ".  $this->theology_course_id);
+        }
+        return $this->belongsTo(TheologyCourse::class,'theology_course_id');
+    }
 
 
     function teacher()

@@ -141,6 +141,7 @@ php artisan make:model TheologyMark
 php artisan make:model TheologyExamHasClass
 php artisan make:model TheologyTermlyReportCard
 php artisan make:model TheologryStudentReportCard
+php artisan make:model TheologyStudentReportCardItem
 
 
 php artisan admin:make TermController --model=App\\Models\\Term
@@ -172,6 +173,7 @@ php artisan make:migration create_theology_exams_table
 php artisan make:migration create_theology_marks_table
 php artisan make:migration create_theology_exam_has_classes_table
 php artisan make:migration create_theology_termly_report_cards_table
+php artisan make:migration create_theology_student_report_card_items_table
 
 --path=/database/migrations/fileName.php
 
@@ -321,5 +323,5 @@ sudo /opt/lampp/lampp restart
 php artisan make:migration add_update --table=termly_report_cards
 php artisan make:migration add_total_students --table=student_report_cards
 php artisan make:migration add_total_students --table=student_report_cards
-php artisan make:migration add_updates --table=exams
+php artisan make:migration add_do_update --table=theology_termly_report_cards
  

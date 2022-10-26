@@ -2,8 +2,11 @@
 
 namespace App\Admin\Controllers;
 
+use App\Models\GradingScale;
+use App\Models\Term;
 use App\Models\TheologyTermlyReportCard;
 use Encore\Admin\Controllers\AdminController;
+use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
@@ -15,7 +18,7 @@ class TheologyTermlyReportCardController extends AdminController
      *
      * @var string
      */
-    protected $title = 'TheologyTermlyReportCard';
+    protected $title = 'Theology Termly Report Cards';
 
     /**
      * Make a grid builder.
@@ -24,19 +27,28 @@ class TheologyTermlyReportCardController extends AdminController
      */
     protected function grid()
     {
+
+        /* $r = TheologyTermlyReportCard::find(1);
+        $r->report_title .= 1;
+        $r->save();
+        die("romina"); */
         $grid = new Grid(new TheologyTermlyReportCard());
 
-        $grid->column('id', __('Id'));
-        $grid->column('created_at', __('Created at'));
-        $grid->column('updated_at', __('Updated at'));
-        $grid->column('grading_scale_id', __('Grading scale id'));
-        $grid->column('enterprise_id', __('Enterprise id'));
-        $grid->column('academic_year_id', __('Academic year id'));
-        $grid->column('term_id', __('Term id'));
-        $grid->column('has_beginning_term', __('Has beginning term'));
-        $grid->column('has_mid_term', __('Has mid term'));
-        $grid->column('has_end_term', __('Has end term'));
+
+        $grid->model()->where([
+            'enterprise_id' => Admin::user()->enterprise_id,
+        ])->orderBy('id', 'DESC');
+
+        $grid->column('id', __('Id'))->sortable();
+        $grid->column('academic_year_id', __('Academic year'));
+        $grid->column('term_id', __('Term'));
+        $grid->column('has_beginning_term', __('Has beginning term'))->bool();
+        $grid->column('has_mid_term', __('Has mid term'))->bool();
+        $grid->column('has_end_term', __('Has end term'))->bool();
         $grid->column('report_title', __('Report title'));
+        $grid->column('report_cards', __('Report cards'))->display(function () {
+            return count($this->report_cards);
+        });
 
         return $grid;
     }
@@ -75,14 +87,54 @@ class TheologyTermlyReportCardController extends AdminController
     {
         $form = new Form(new TheologyTermlyReportCard());
 
-        $form->number('grading_scale_id', __('Grading scale id'));
-        $form->number('enterprise_id', __('Enterprise id'));
-        $form->number('academic_year_id', __('Academic year id'));
-        $form->number('term_id', __('Term id'));
-        $form->switch('has_beginning_term', __('Has beginning term'));
-        $form->switch('has_mid_term', __('Has mid term'));
-        $form->switch('has_end_term', __('Has end term'));
-        $form->textarea('report_title', __('Report title'));
+
+        $u = Admin::user();
+        $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
+        $form->hidden('academic_year_id', __('Academic year id'));
+
+        $_terms = Term::where([
+            'enterprise_id' => $u->enterprise_id
+        ])
+            ->orderBy('id', 'DESC')
+            ->get();
+        $terms = [];
+        foreach ($_terms as  $v) {
+            $terms[$v->id] = $v->academic_year->name . " - " . $v->name;
+        }
+
+        $scales = [];
+        foreach (GradingScale::where([])
+            ->orderBy('id', 'DESC')
+            ->get() as $v) {
+            $scales[$v->id] =  $v->name;
+        }
+
+
+
+        $form->select('term_id', __('Term'))->options($terms)
+            ->creationRules(['required', "unique:theology_termly_report_cards"]);
+
+
+        $form->text('report_title', __('Report title'));
+
+
+        $form->radio('has_beginning_term', __('Include beginning term exams?'))->options([1 => 'Yes', 0 => 'No'])->required();
+        $form->radio('has_mid_term', __('Include Mid term exams?'))->options([1 => 'Yes', 0 => 'No'])->required();
+        $form->radio('has_end_term', __('Include End of term exams?'))->options([1 => 'Yes', 0 => 'No'])->required();
+
+        $form->select('grading_scale_id', __('Grading scale'))->options($scales)->required();
+
+        if ($form->isEditing()) {
+            $form->radio('do_update', __('Do you want to update all related report cards?'))->options([1 => 'Yes', 0 => 'No'])
+                ->default(0);
+        }
+
+
+
+        $form->disableEditingCheck();
+        $form->disableCreatingCheck();
+        $form->disableReset();
+        $form->disableViewCheck();
 
         return $form;
     }

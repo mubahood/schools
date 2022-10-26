@@ -2,6 +2,8 @@
 $max_bot = 30;
 $max_mot = 40;
 $max_eot = 60;
+$tr = isset($tr) ? $tr : null;
+
 $numFormat = new NumberFormatter('en_US', NumberFormatter::ORDINAL);
 foreach ($r->termly_report_card->term->exams as $exam) {
     if ($exam->type == 'B.O.T') {
@@ -16,6 +18,8 @@ foreach ($r->termly_report_card->term->exams as $exam) {
 }
 
 /*
+
+
 
     "id" => 3
     "created_at" => "2022-10-25 21:03:14"
@@ -66,6 +70,28 @@ foreach ($r->termly_report_card->term->exams as $exam) {
 
 */
 
+/*
+
+    "id" => 345
+    "created_at" => "2022-10-26 22:39:36"
+    "updated_at" => "2022-10-26 23:17:47"
+    "enterprise_id" => 7
+    "academic_year_id" => 2
+    "term_id" => 6
+    "student_id" => 3010
+    "theology_class_id" => 8
+    "theology_termly_report_card_id" => 1
+    "total_students" => 68
+    "total_aggregates" => 4
+    "total_marks" => 396.0
+    "position" => 8
+    "class_teacher_comment" => "Tried, Work harder next time."
+    "head_teacher_comment" => "Tasleem  Katumba can do better than this."
+    "class_teacher_commented" => 10
+    "head_teacher_commented" => 10
+    
+    */
+
 $school_name = 'KIIRA JUNIOR PRIMARY SCHOOL';
 $school_address = 'Bwera Kasese Uganda';
 $school_tel = '+256783204665';
@@ -85,7 +111,8 @@ $school_email = 'admin@kjs.com';
             </p>
             <p class="text-center p font-serif mt-0 mb-0 title-2"><b>TEL:</b> +{{ $r->ent->phone_number }}</p>
             <p class="text-center p font-serif mt-0 title-2 mb-2"><b>EMAIL:</b> {{ $r->ent->email }}</p>
-            <p class="text-center p font-serif  fs-3 m-0 p-0"><u><b>{{ $r->termly_report_card->report_title }}</b></u></p>
+            <p class="text-center p font-serif  fs-3 m-0 p-0"><u><b>{{ $r->termly_report_card->report_title }}</b></u>
+            </p>
 
         </div>
 
@@ -189,83 +216,125 @@ $school_email = 'admin@kjs.com';
 
             </div>
             <div class="col-6 border border-dark pt-1">
-                <h2 class="text-center" style="font-size: 16px">دراسات اللاهوت</h2>
+                <h2 class="text-center text-uppercase" style="font-size: 16px">Theology Studies</h2>
                 <hr class="my-1">
-                <div class="row mt-2 d-flex justify-content-between pl-3 pr-3">
-                    <span><b>CLASS:</b> <span class="value">P.7</span></span>
-                    <span><b>Aggregates:</b> <span class="value">18</span></span>
-                    <span><b>Grade:</b> <span class="value">B</span></span>
-                    <span><b>Position:</b> <span class="value">B</span></span>
-                </div>
+                @if ($tr != null)
+                    <div class="row mt-2 d-flex justify-content-between pl-3 pr-3 summary" style="font-size: 12px">
+                        <span><b>CLASS:</b> <span class="value">{{ $tr->theology_class->name }}</span></span>
+                        {{-- <span><b class="text-uppercase">Aggre:</b> <span class="value">18</span></span> --}}
+                        <span><b class="text-uppercase">Grade:</b> <span class="value">B</span></span>
+                        <span><b class="text-uppercase">Position in class:</b> <span
+                                class="value text-lowercase">{{ $numFormat->format($tr->position) }}</span></span>
+                        <span><b class="text-uppercase">OUT OF:</b> <span class="value">{{ $tr->total_students }}
+                    </div>
+                @endif
                 <div class="row mt-2">
                     <div class="col-12">
-                        <table class="table table-bordered marks-table p-0 m-0">
-                            <thead class="p-0 m-0 text-center">
-                                <th class="text-left pl-2">SUBJECTS</th>
-                                <th>B.O.T <br> (30)</th>
-                                <th>M.O.T <br> (30)</th>
-                                <th>E.O.T <br> (30)</th>
-                                <th>TOTAL <br> (100%)</th>
-                                <th>Aggr</th>
-                                <th class="remarks">Remarks</th>
-                                <th class="remarks text-center">Initials</th>
-                            </thead>
-                            <tr class="marks">
-                                <th>Maths</th>
-                                <td>10</td>
-                                <td>43</td>
-                                <td>11</td>
-                                <td>65</td>
-                                <td>D3</td>
-                                <td class="remarks">Fair</td>
-                                <td class="remarks text-center">M.K</td>
-                            </tr>
-                            <tr class="marks">
-                                <th>SCIENCE</th>
-                                <td>10</td>
-                                <td>43</td>
-                                <td>11</td>
-                                <td>65</td>
-                                <td>D3</td>
-                                <td class="remarks">Fair</td>
-                                <td class="remarks text-center">M.K</td>
-                            </tr>
-                            <tr class="marks">
-                                <th>STT</th>
-                                <td>10</td>
-                                <td>43</td>
-                                <td>11</td>
-                                <td>65</td>
-                                <td>D3</td>
-                                <td class="remarks">Fair</td>
-                                <td class="remarks text-center">M.K</td>
-                            </tr>
-                            <tr class="marks">
-                                <th>ENGLISH</th>
-                                <td>10</td>
-                                <td>43</td>
-                                <td>11</td>
-                                <td>65</td>
-                                <td>D3</td>
-                                <td class="remarks">Fair</td>
-                                <td class="remarks text-center">M.K</td>
-                            </tr>
-                            <tr class="marks">
-                                <th><b>TOTAL</b></th>
-                                <td colspan="2"> </td>
-                                <td><b>100</b></td>
-                                <td><b>400</b></td>
-                                <td colspan="3"> </td>
-                            </tr>
-                        </table>
+                        @if ($tr != null)
+                            {{-- 
+        "id" => 1293
+    "created_at" => "2022-10-26 22:39:36"
+    "updated_at" => "2022-10-26 22:39:36"
+    "enterprise_id" => 7
+    "theology_subject_id" => 18
+    "theologry_student_report_card_id" => 345
+    "did_bot" => 0
+    "did_mot" => 1
+    "did_eot" => 0
+    "bot_mark" => 0
+    "mot_mark" => 99
+    "eot_mark" => 0
+    "grade_name" => "D1"
+    "aggregates" => 1
+    "remarks" => "Excellent"
+    "initials" => "L.N"
+    "total" => 99
+    --}}
+
+                            <table class="table table-bordered marks-table p-0 m-0">
+                                <thead class="p-0 m-0 text-center">
+                                    <th class="text-left pl-2">SUBJECTS</th>
+                                    @if ($tr->termly_report_card->has_beginning_term)
+                                        <th>B.O.T <br> ({{ $max_bot }})</th>
+                                    @endif
+                                    @if ($tr->termly_report_card->has_mid_term)
+                                        <th>M.O.T <br> ({{ $max_mot }})</th>
+                                    @endif
+                                    @if ($tr->termly_report_card->has_end_term)
+                                        <th>E.O.T <br> ({{ $max_eot }})</th>
+                                    @endif
+                                    <th>TOTAL <br> (100%)</th>
+                                    <th>Aggr</th>
+                                    <th class="remarks">Remarks</th>
+                                    <th class="remarks text-center">Initials</th>
+                                </thead>
+                                @foreach ($tr->items as $v)
+                                    {{-- 
+                                        "created_at" => "2022-10-20 07:59:02"
+    "updated_at" => "2022-10-20 07:59:02"
+    "enterprise_id" => 7
+    "theology_class_id" => 8
+    "subject_teacher" => 3036
+    "teacher_1" => null
+    "teacher_2" => null
+    "teacher_3" => null
+    "code" => null
+    "details" => null
+    "theology_course_id" => 1
+
+        "id" => 1
+    "created_at" => "2022-10-13 09:40:43"
+    "updated_at" => "2022-10-13 09:41:46"
+    "name" => "QURAN"
+    "short_name" => "QUR"
+    "code" => "QUR"
+                                    --}}
+
+                                    <tr class="marks">
+                                        <th>{{ $v->subject->theology_course->name }}</th>
+                                        @if ($r->termly_report_card->has_beginning_term)
+                                            <td>{{ $v->bot_mark }}</td>
+                                        @endif
+
+                                        @if ($r->termly_report_card->has_mid_term)
+                                            <td>{{ $v->mot_mark }}</td>
+                                        @endif
+                                        @if ($r->termly_report_card->has_end_term)
+                                            <td>{{ $v->eot_mark }}</td>
+                                        @endif
+                                        <td>{{ $v->total }}</td>
+                                        <td>{{ $v->grade_name }}</td>
+                                        <td class="remarks">{{ $v->remarks }}</td>
+                                        <td class="remarks text-center">{{ $v->initials }}</td>
+                                    </tr>
+                                @endforeach
+                                <tr class="marks">
+                                    <th><b>TOTAL</b></th>
+                                    @if ($tr->termly_report_card->has_beginning_term)
+                                        <td></td>
+                                    @endif
+                                    @if ($tr->termly_report_card->has_mid_term)
+                                        <td></td>
+                                    @endif
+                                    @if ($tr->termly_report_card->has_end_term)
+                                        <td></td>
+                                    @endif
+                                    <td><b>{{ $tr->total_marks }}</b></td>
+                                    <td><b>{{ $tr->total_aggregates }}</b></td>
+                                    <td colspan="3"> </td>
+                                </tr>
+                            </table>
+
+                        @endif
                     </div>
                 </div>
 
-                <div class="p-0 mt-2 mb-2 class-teacher">
-                    <b>CLASS TEACHER'S COMMENT:</b>
-                    <span class="comment">Lorem ipsum dolor sit amet consectetur adipisicing elit. sit amet consectetur
-                        adipisicing elit. Deleniti sit alias veritatis</span>
-                </div>
+                @if ($tr != null)
+                    <div class="p-0 mt-2 mb-2 class-teacher">
+                        <b>CLASS TEACHER'S COMMENT:</b>
+                        <span class="comment">{{ $tr->class_teacher_comment }}</span>
+                    </div>
+                @endif
             </div>
         </div>
 
