@@ -17,7 +17,6 @@ class CreateTheologyTermlyReportCardsTable extends Migration
      */
     public function up()
     {
-        Schema::drop('theology_termly_report_cards');
         Schema::create('theology_termly_report_cards', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
