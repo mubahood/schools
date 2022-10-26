@@ -50,6 +50,8 @@ Route::group([
     $router->resource('students-theology-classes', StudentHasTheologyClassController::class);
     $router->resource('theology-exams', TheologyExamCourseController::class);
     $router->resource('theology-marks', TheologyMarkController::class);
+    $router->resource('theology-termly-report-cards', TheologyTermlyReportCardController::class);
+    $router->resource('theologry-student-report-cards', TheologryStudentReportCardController::class); 
 
     //$router->resource('fees', StudentHasFeeController::class);
 

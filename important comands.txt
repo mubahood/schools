@@ -139,6 +139,8 @@ php artisan make:model TheologySubject
 php artisan make:model TheologyExam
 php artisan make:model TheologyMark
 php artisan make:model TheologyExamHasClass
+php artisan make:model TheologyTermlyReportCard
+php artisan make:model TheologryStudentReportCard
 
 
 php artisan admin:make TermController --model=App\\Models\\Term
@@ -148,7 +150,7 @@ php artisan make:migration create_books_categories_table
 php artisan make:migration create_subjects_table
 php artisan make:migration create_academic_class_sctreams_table
 php artisan make:migration create_termly_report_cards_table
-php artisan make:migration create_student_report_cards_table
+php artisan make:migration create_theologry_student_report_cards_table
 php artisan make:migration create_student_report_card_items_table
 php artisan make:migration create_grade_ranges_table
 2022_07_12_193945_create_grading_scales_table
@@ -169,6 +171,7 @@ php artisan make:migration create_theology_courses_table
 php artisan make:migration create_theology_exams_table
 php artisan make:migration create_theology_marks_table
 php artisan make:migration create_theology_exam_has_classes_table
+php artisan make:migration create_theology_termly_report_cards_table
 
 --path=/database/migrations/fileName.php
 
@@ -204,6 +207,8 @@ php artisan admin:make TheologyCourseController --model=App\\Models\\TheologyCou
 php artisan admin:make TheologySubjectCourseController --model=App\\Models\\TheologySubject
 php artisan admin:make TheologyExamCourseController --model=App\\Models\\TheologyExam
 php artisan admin:make TheologyMarkController --model=App\\Models\\TheologyMark
+php artisan admin:make TheologyTermlyReportCardController --model=App\\Models\\TheologyTermlyReportCard
+php artisan admin:make TheologryStudentReportCardController --model=App\\Models\\TheologryStudentReportCard
  
 
 
