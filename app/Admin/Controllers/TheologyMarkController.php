@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Models\StudentHasTheologyClass;
 use App\Models\TheologyClass;
 use App\Models\TheologyExam;
 use App\Models\TheologyMark;
@@ -30,6 +31,25 @@ class TheologyMarkController extends AdminController
 
     protected function grid()
     {
+
+
+        /*         
+
+
+
+
+
+"" => 1
+        "" => 1
+        "" => 1
+        "" => 2891
+        "teacher_id" => 3025
+        "score" => 0.0
+        "remarks" => ""
+        "is_submitted" => 0
+        "is_missed" => 1 
+        
+        */ 
         $grid = new Grid(new TheologyMark());
         $grid->disableActions();
         $grid->disableCreateButton();
@@ -120,7 +140,7 @@ class TheologyMarkController extends AdminController
                 ])
                     ->orderBy('theology_course_id', 'asc')
                     ->get() as $ex) {
-                        $subs[$ex->id] = $ex->course->name . " - " . $ex->theology_class->name;
+                    $subs[$ex->id] = $ex->course->name . " - " . $ex->theology_class->name;
                 }
             } else {
                 foreach (TheologySubject::where([
@@ -132,7 +152,7 @@ class TheologyMarkController extends AdminController
                         $subs[$ex->id] = $ex->course->name . " - " . $ex->theology_class->name;
                     }
                 }
-            } 
+            }
 
             $filter->equal('theology_subject_id', 'Filter by subject')->select($subs);
 
@@ -167,8 +187,8 @@ class TheologyMarkController extends AdminController
             return $this->class->name;
         })->sortable();
         $grid->column('theology_subject_id', __('Subject'))->display(function () {
-            
-            return $this->subject->course->name ;  
+
+            return $this->subject->course->name;
         })->sortable();
 
         $grid->column('score', __('Score'))->sortable()->editable();

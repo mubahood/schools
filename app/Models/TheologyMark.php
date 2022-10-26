@@ -6,6 +6,8 @@ use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use function PHPUnit\Framework\returnValue;
+
 class TheologyMark extends Model
 {
     use HasFactory;
@@ -15,11 +17,24 @@ class TheologyMark extends Model
     public static function boot()
     {
         parent::boot();
- 
+
         self::creating(function ($m) {
             if ($m->subject == null) {
                 die("Main subject not found.");
             }
+
+            $exist = TheologyMark::where([
+                'student_id' => $m->student_id,
+                'theology_exam_id' => $m->theology_exam_id,
+                'theology_subject_id' => $m->theology_subject_id,
+                'theology_class_id' => $m->theology_class_id,
+            ])->first();
+
+            if ($exist != null) {
+                return false;
+            }
+
+
             $m->theology_subject_id = $m->subject->id;
             return $m;
         });

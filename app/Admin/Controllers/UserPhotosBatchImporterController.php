@@ -4,6 +4,8 @@ namespace App\Admin\Controllers;
 
 use App\Models\AcademicClass;
 use App\Models\StudentHasClass;
+use App\Models\StudentHasTheologyClass;
+use App\Models\TheologyMark;
 use App\Models\UserBatchImporter;
 use App\Models\Utils;
 use Encore\Admin\Auth\Database\Administrator;
@@ -36,6 +38,56 @@ class UserPhotosBatchImporterController extends AdminController
 
     protected function grid()
     {
+        $x = 0;
+        $y = 0;
+        foreach (StudentHasTheologyClass::all() as  $s) {
+
+            foreach ($s->class->subjects as  $sub) {
+                $marks = TheologyMark::where([
+                    'student_id' => $s->administrator_id,
+                    'theology_exam_id' => 1,
+                    'theology_subject_id' => $sub->id,
+                    'theology_class_id' => $s->theology_class_id,
+                ])->get();
+                $x++;
+                if ((count($marks)) ==  1) {
+                    continue;
+                }
+                if ((count($marks)) >  1) {
+                    $done_first = false;
+                    foreach ($marks as $mark) {
+                        if (!$done_first) {
+                            $done_first = true;
+                            $mark->is_submitted = 0;
+                            echo (" deleted ==> $mark->score <hr>");
+                            $mark->save();
+                            continue;
+                        }
+                        echo (" deleted ==> $mark->score <hr>");
+                        $mark->delete();
+                    }
+                }
+
+                if ((count($marks)) == 1) {
+                    $new_mark = new TheologyMark();
+                    $new_mark->theology_exam_id     = 1;
+                    $new_mark->enterprise_id     = 7;
+                    $new_mark->theology_class_id     = $s->theology_class_id;
+                    $new_mark->theology_subject_id     = $sub->id;
+                    $new_mark->teacher_id     = $sub->subject_teacher;
+                    $new_mark->student_id     = $s->administrator_id;
+                    $new_mark->score     = 0;
+                    $new_mark->remarks     = '';
+                    $new_mark->is_submitted     = false;
+                    $new_mark->is_missed     = true;
+                    $new_mark->save();
+
+                }
+            }
+        }
+
+        die(" done =>$x<= ==>$y<==");
+
         $class = "baby";
         
         foreach (StudentHasClass::where([

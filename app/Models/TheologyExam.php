@@ -75,7 +75,7 @@ class TheologyExam extends Model
                             $mark->remarks = '';
                         }
                         $mark->theology_class_id = $class->id;
-                        $mark->teacher_id = $subject->subject_teacher;
+                        $mark->teacher_id = $subject->subject_teacher; 
                         $mark->save();
                         $done = true;
                     }

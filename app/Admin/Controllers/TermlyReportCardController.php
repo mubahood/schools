@@ -28,6 +28,7 @@ class TermlyReportCardController extends AdminController
     protected function grid()
     {
 
+
         $grid = new Grid(new TermlyReportCard());
 
         /* $x = TermlyReportCard::find(3);
