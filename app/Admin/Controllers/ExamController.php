@@ -154,7 +154,10 @@ class ExamController extends AdminController
         $form->text('name', __('Exam Name'))->rules('required');
         $form->hidden('marks_generated', __('marks_generated'))->default(0)->value(0) ->rules('required');
         $form->text('max_mark', __('Max mark'))->rules('required|max:100')->attribute('type', 'number');
-
+        if ($form->isEditing()) {
+            $form->radio('do_update', __('Do you want to update all related marks?'))->options([1 => 'Yes', 0 => 'No'])
+                ->default(0);
+        }
         $form->multipleSelect('classes')->options(
             AcademicClass::where([
                 'enterprise_id' => Admin::user()->enterprise_id,

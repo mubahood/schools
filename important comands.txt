@@ -316,4 +316,5 @@ sudo /opt/lampp/lampp restart
 php artisan make:migration add_update --table=termly_report_cards
 php artisan make:migration add_total_students --table=student_report_cards
 php artisan make:migration add_total_students --table=student_report_cards
+php artisan make:migration add_updates --table=exams
  

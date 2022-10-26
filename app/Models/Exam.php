@@ -28,6 +28,11 @@ class Exam extends Model
             die("This item   be deleted.");
         });
 
+        self::updated(function ($m) {
+            if ($m->do_update) {
+                Exam::my_update($m);
+            }
+        });
         self::creating(function ($m) {
             $term = Exam::where([
                 'term_id' => $m->term_id,
