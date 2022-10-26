@@ -42,7 +42,9 @@ class TermlyReportCard extends Model
         });
 
         self::updated(function ($m) {
-            TermlyReportCard::my_update($m);
+            if ($m->do_update) {
+                TermlyReportCard::my_update($m);
+            }
         });
     }
 
@@ -264,7 +266,7 @@ class TermlyReportCard extends Model
                 }
             }
         }
- 
+
         TermlyReportCard::grade_students($m);
     }
 

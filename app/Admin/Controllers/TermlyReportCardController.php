@@ -29,7 +29,7 @@ class TermlyReportCardController extends AdminController
     {
 
         $grid = new Grid(new TermlyReportCard());
-        
+
         /* $x = TermlyReportCard::find(3);
         $x->report_title = rand(1, 10);
         $x->save(); */
@@ -39,7 +39,7 @@ class TermlyReportCardController extends AdminController
             'enterprise_id' => Admin::user()->enterprise_id,
         ])->orderBy('id', 'DESC');
 
-        $grid->column('id', __('Id')); 
+        $grid->column('id', __('Id'));
         $grid->column('enterprise_id', __('Enterprise id'));
         $grid->column('academic_year_id', __('Academic year id'));
         $grid->column('term_id', __('Term id'));
@@ -47,9 +47,9 @@ class TermlyReportCardController extends AdminController
         $grid->column('has_mid_term', __('Has mid term'));
         $grid->column('has_end_term', __('Has end term'));
         $grid->column('report_title', __('Report title'));
-        $grid->column('report_cards', __('Report cards'))->display(function(){
+        $grid->column('report_cards', __('Report cards'))->display(function () {
             return count($this->report_cards);
-        }); 
+        });
 
         return $grid;
     }
@@ -116,6 +116,18 @@ class TermlyReportCardController extends AdminController
         $form->text('report_title', __('Report title'));
 
         $form->select('grading_scale_id', __('Grading scale'))->options($scales)->required();
+
+        if ($form->isEditing()) {
+            $form->radio('do_update', __('Do you want to update all related report cards?'))->options([1 => 'Yes', 0 => 'No'])
+                ->default(0);
+        }
+        $form->disableEditingCheck();
+        $form->disableCreatingCheck();
+        $form->disableReset();
+        $form->disableViewCheck();
+        
+
+
 
         return $form;
     }

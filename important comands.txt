@@ -313,6 +313,7 @@ git reset --hard  b5a0a6e3d9bce48b9ba33751a385acf137c13777
 git revert b5a0a6e3d9bce48b9ba33751a385acf137c13777
 sudo /opt/lampp/lampp restart
 
-php artisan make:migration add_total_students --table=termly_report_cards
+php artisan make:migration add_update --table=termly_report_cards
+php artisan make:migration add_total_students --table=student_report_cards
 php artisan make:migration add_total_students --table=student_report_cards
  
