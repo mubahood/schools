@@ -3,13 +3,16 @@
 namespace App\Admin\Controllers;
 
 use App\Models\AcademicClass;
+use App\Models\AcademicYear;
 use App\Models\StudentReportCard;
+use App\Models\Term;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
 use Encore\Admin\Widgets\Box;
+use NumberFormatter;
 
 class StudentReportCardController extends AdminController
 {
@@ -41,6 +44,16 @@ class StudentReportCardController extends AdminController
         $grid->filter(function ($filter) {
             $filter->disableIdFilter();
 
+
+            $filter->equal('academic_year_id', 'Filter by academic year')->select(AcademicYear::where([
+                'enterprise_id' => Admin::user()->enterprise_id
+            ])->orderBy('id', 'Desc')->get()->pluck('name', 'id'));
+
+            $filter->equal('term_id', 'Filter by term')->select(Term::where([
+                'enterprise_id' => Admin::user()->enterprise_id
+            ])->orderBy('id', 'Desc')->get()->pluck('name', 'id'));
+
+
             $u = Admin::user();
             $filter->equal('academic_class_id', 'Filter by class')->select(AcademicClass::where([
                 'enterprise_id' => $u->enterprise_id
@@ -60,21 +73,38 @@ class StudentReportCardController extends AdminController
         });
 
 
+        $grid->disableBatchActions();
+        $grid->disableActions();
+        $grid->disableCreateButton();
 
-        $grid->column('id', __('#ID'))->sortable();
-        $grid->column('academic_year_id', __('Academic year'))->sortable();
-        $grid->column('term_id', __('Term id'));
+        $grid->column('id', __('#ID'))->sortable()->hide();
+        $grid->column('academic_year_id', __('Academic year'))->sortable()->hide();
+        $grid->column('term_id', __('Term id'))->hide();
+
+
+        $grid->column('owner.avatar', __('Photo'))
+            ->width(80)
+            ->lightbox(['width' => 60, 'height' => 60]);
+
         $grid->column('student_id', __('Student'))->display(function () {
             return $this->owner->name;
         });
-        $grid->column('academic_class_id', __('Academic class id'))
+        $grid->column('academic_class_id', __('Academic'))
             ->display(function () {
                 return $this->academic_class->name;
             })->sortable();
+
+        $grid->column('total_marks', __('Total marks'))->sortable();
+        $grid->column('position', __('Position in class'))->display(function ($position) {
+            $numFormat = new NumberFormatter('en_US', NumberFormatter::ORDINAL);
+            return $numFormat->format($position);
+        })->sortable();
+        $grid->column('class_teacher_comment', __('Class Teacher Remarks'))->editable()->sortable();
+        $grid->column('head_teacher_comment', __('Head Teacher Remarks'))->editable()->sortable();
+
         $grid->column('print', __('Print'))->display(function ($m) {
             return '<a target="_blank" href="' . url('print?id=' . $this->id) . '" >print</a>';
         });
-        $grid->column('termly_report_card_id', __('Termly report card id'));
 
         return $grid;
     }

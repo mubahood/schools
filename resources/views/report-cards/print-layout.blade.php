@@ -2,25 +2,7 @@
 $max_bot = 30;
 $max_mot = 40;
 $max_eot = 60;
-/* 
-  "id" => 192
-    "created_at" => "2022-10-25 21:03:14"
-    "updated_at" => "2022-10-26 00:36:50"
-    "enterprise_id" => 7
-    "academic_year_id" => 2
-    "term_id" => 6
-    "student_id" => 2704
-    "academic_class_id" => 11
-    "termly_report_card_id" => 3
-    "total_marks" => 154.0
-    "total_aggregates" => 40.0
-    "position" => 1
-    "class_teacher_comment" => "Excelent! Keep it up."
-    "head_teacher_comment" => "Nabakka  Husnah is such a brilliant pupil. Keep it up."
-    "class_teacher_commented" => 0
-    "head_teacher_commented" => 0
-    "total_students" => 77
-*/
+$numFormat = new NumberFormatter('en_US', NumberFormatter::ORDINAL);
 foreach ($r->termly_report_card->term->exams as $exam) {
     if ($exam->type == 'B.O.T') {
         $max_bot = $exam->max_mark;
@@ -30,8 +12,59 @@ foreach ($r->termly_report_card->term->exams as $exam) {
     }
     if ($exam->type == 'E.O.T') {
         $max_eot = $exam->max_mark;
-    } 
-} 
+    }
+}
+
+/*
+
+    "id" => 3
+    "created_at" => "2022-10-25 21:03:14"
+    "updated_at" => "2022-10-26 03:25:59"
+    "enterprise_id" => 7
+    "academic_year_id" => 2
+    "term_id" => 6
+    "has_beginning_term" => 0
+    "has_mid_term" => 1
+    "has_end_term" => 0
+    "report_title" => "10"
+    "grading_scale_id" => 7
+
+ "id" => 192
+    "created_at" => "2022-10-25 21:03:14"
+    "updated_at" => "2022-10-26 03:26:05"
+    "enterprise_id" => 7
+    "academic_year_id" => 2
+    "term_id" => 6
+    "student_id" => 2704
+    "academic_class_id" => 11
+    "termly_report_card_id" => 3
+    "total_marks" => 194.0
+    "total_aggregates" => 36.0
+    "position" => 28
+    "class_teacher_comment" => "Tried, Work harder next time."
+    "head_teacher_comment" => "Nabakka  Husnah can do better than this."
+    "class_teacher_commented" => 0
+    "head_teacher_commented" => 0
+    "total_students" => 77
+    
+"id" => 7
+"created_at" => "2022-09-17 04:25:22"
+"updated_at" => "2022-09-17 04:37:05"
+"name" => "Kira Junior School"
+"short_name" => "kjs"
+"details" => "https://kirajuniorschool.ac.ug/"
+"logo" => "kjs.png"
+"phone_number" => "256700869880"
+"email" => "info@kirajuniorschool.ac.ug"
+"address" => null
+"expiry" => "2022-09-16"
+"administrator_id" => 2206
+"subdomain" => "kjs"
+"color" => "#038935"
+"welcome_message" => "<p>"In pursuit of faith and wisdom"</p>"
+"type" => "Primary"
+
+*/
 
 $school_name = 'KIIRA JUNIOR PRIMARY SCHOOL';
 $school_address = 'Bwera Kasese Uganda';
@@ -42,17 +75,17 @@ $school_email = 'admin@kjs.com';
 
     <div class="row">
         <div class="col-2">
-            <img width="120px" class="img-fluid" src="{{ url('assets/logo.jpeg') }}">
+            <img width="120px" class="img-fluid" src="{{ url('storage/' . $r->ent->logo) }}">
         </div>
 
         <div class="col-8">
 
-            <h1 class="text-center h3 p-0 m-0">{{ $school_name }}</h1>
-            <p class="text-center p font-serif  fs-3 m-0 p-0 mt-2 title-2"><b class="m-0 p-0">{{ $school_address }}</b>
+            <h1 class="text-center h3 p-0 m-0 text-uppercase">{{ $r->ent->name }}</h1>
+            <p class="text-center p font-serif  fs-3 m-0 p-0 mt-2 title-2"><b class="m-0 p-0">{{ $r->ent->address }}</b>
             </p>
-            <p class="text-center p font-serif mt-0 mb-0 title-2"><b>TEL:</b> {{ $school_tel }}</p>
-            <p class="text-center p font-serif mt-0 title-2 mb-2"><b>EMAIL:</b> {{ $school_email }}</p>
-            <p class="text-center p font-serif  fs-3 m-0 p-0"><u><b>{{ $report_title }}</b></u></p>
+            <p class="text-center p font-serif mt-0 mb-0 title-2"><b>TEL:</b> +{{ $r->ent->phone_number }}</p>
+            <p class="text-center p font-serif mt-0 title-2 mb-2"><b>EMAIL:</b> {{ $r->ent->email }}</p>
+            <p class="text-center p font-serif  fs-3 m-0 p-0"><u><b>{{ $r->termly_report_card->report_title }}</b></u></p>
 
         </div>
 
@@ -86,8 +119,9 @@ $school_email = 'admin@kjs.com';
                     <span><b>CLASS:</b> <span class="value">{{ $r->academic_class->name }}</span></span>
                     {{-- <span><b class="text-uppercase">Aggre:</b> <span class="value">18</span></span> --}}
                     <span><b class="text-uppercase">Grade:</b> <span class="value">B</span></span>
-                    <span><b class="text-uppercase">Position in class:</b> <span class="value">{{ $r->position }}<sup class="text-lowercase">{{ date("S", mktime(0, 0, 0, 0, $r->position, 0)) }}</sup></span></span>
-                    <span><b class="text-uppercase">OUT OF:</b> <span class="value">{{ $r->total_students }} 
+                    <span><b class="text-uppercase">Position in class:</b> <span
+                            class="value text-lowercase">{{ $numFormat->format($r->position) }}</span></span>
+                    <span><b class="text-uppercase">OUT OF:</b> <span class="value">{{ $r->total_students }}
                 </div>
                 <div class="row mt-2">
                     <div class="col-12">
@@ -124,9 +158,24 @@ $school_email = 'admin@kjs.com';
                                     <td>{{ $v->total }}</td>
                                     <td>{{ $v->grade_name }}</td>
                                     <td class="remarks">{{ $v->remarks }}</td>
-                                    <td class="remarks text-center">M.K</td>
+                                    <td class="remarks text-center">{{ $v->initials }}</td>
                                 </tr>
                             @endforeach
+                            <tr class="marks">
+                                <th><b>TOTAL</b></th>
+                                @if ($r->termly_report_card->has_beginning_term)
+                                    <td></td>
+                                @endif
+                                @if ($r->termly_report_card->has_mid_term)
+                                    <td></td>
+                                @endif
+                                @if ($r->termly_report_card->has_end_term)
+                                    <td></td>
+                                @endif
+                                <td><b>{{ $r->total_marks }}</b></td>
+                                <td><b>{{ $r->total_aggregates }}</b></td>
+                                <td colspan="3"> </td>
+                            </tr>
 
                         </table>
                     </div>
@@ -134,8 +183,7 @@ $school_email = 'admin@kjs.com';
 
                 <div class="p-0 mt-2 mb-2 class-teacher">
                     <b>CLASS TEACHER'S COMMENT:</b>
-                    <span class="comment">Lorem ipsum dolor sit amet consectetur adipisicing elit. sit amet consectetur
-                        adipisicing elit. Deleniti sit alias veritatis</span>
+                    <span class="comment">{{ $r->class_teacher_comment }}</span>
                 </div>
 
 
@@ -259,8 +307,7 @@ $school_email = 'admin@kjs.com';
             <div class="col-10 p-0">
                 <div class="p-0 mt-0 mb-2 class-teacher">
                     <b>HEAD TEACHER'S COMMENT:</b>
-                    <span class="comment">Lorem ipsum dolor sit amet consectetur adipisicing lor sit amet consectetur
-                        adipisicing elit. sit amet consectetur adipisicing elit. Deleniti sit alias veritatis</span>
+                    <span class="comment">{{ $r->head_teacher_comment }}</span>
                 </div>
             </div>
             <div class="col-2 ">

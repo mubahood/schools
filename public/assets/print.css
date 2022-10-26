@@ -41,13 +41,13 @@ html,
 html {
     display: table;
     margin: auto;
-    background-color: rgb(7, 88, 97);
+
 }
 
 body {
     display: table-cell;
     vertical-align: middle;
-    background-color: rgb(7, 88, 97);
+
 }
 
 .title-2 {

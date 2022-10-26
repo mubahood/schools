@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Doctrine\DBAL\Schema\Schema;
+use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -50,6 +51,11 @@ class TermlyReportCard extends Model
         return $this->belongsTo(GradingScale::class);
     }
 
+    function academic_year()
+    {
+        return $this->belongsTo(AcademicYear::class);
+    }
+
     function term()
     {
         return $this->belongsTo(Term::class);
@@ -81,6 +87,7 @@ class TermlyReportCard extends Model
 
     public static function make_reports_for_primary($m)
     {
+
         if (
             ($m->has_beginning_term  != 1)
         ) {
@@ -90,6 +97,10 @@ class TermlyReportCard extends Model
                 }
             }
         }
+
+        set_time_limit(-1);
+        ini_set('memory_limit', '-1');
+
         foreach ($m->term->academic_year->classes as $class) {
             foreach ($class->students as $_student) {
                 if ($_student->administrator_id != 2704) {
@@ -167,6 +178,7 @@ class TermlyReportCard extends Model
                                         $bot_avg_count++;
                                         $bot_avg_score +=  $my_mark->score;
                                         $regular_total += $my_mark->exam->max_mark;
+                                        $tot += $my_mark->score;
                                     }
 
                                     if (
@@ -176,6 +188,7 @@ class TermlyReportCard extends Model
                                         $regular_total += $my_mark->exam->max_mark;
                                         $mot_avg_count++;
                                         $mot_avg_score +=  $my_mark->score;
+                                        $tot += $my_mark->score;
                                     }
 
                                     if (
@@ -186,10 +199,13 @@ class TermlyReportCard extends Model
                                         $regular_total += $my_mark->exam->max_mark;
                                         $eot_avg_count++;
                                         $eot_avg_score +=  $my_mark->score;
+                                        $tot += $my_mark->score;
                                     }
-                                    $tot += $my_mark->score;
                                 }
-                                $avg_score = ($tot / $num);
+                                if ($num > 0) {
+                                    $tot = ($tot / $num);
+                                }
+
                                 if ($bot_avg_count > 0) {
                                     $report_item->did_bot = 1;
                                     $report_item->bot_mark = ($bot_avg_score / $bot_avg_count);
@@ -215,7 +231,7 @@ class TermlyReportCard extends Model
                                 $report_item->did_mot = 0;
                                 $report_item->did_bot = 0;
                             }
- 
+
                             if ($regular_total > 0) {
                                 $tot = 0;
                                 $tot += $report_item->bot_mark;
@@ -224,6 +240,19 @@ class TermlyReportCard extends Model
                                 $perecante  = (($tot / $regular_total) * 100);
                                 $perecante = round($perecante, 2);
                                 $report_item->total = $perecante;
+
+                                $report_item->remarks = Utils::get_automaic_mark_remarks($report_item->total);
+                                $u = Administrator::find($my_mark->subject->subject_teacher);
+                                $initial = "";
+                                if ($u != null) {
+                                    if (strlen($u->first_name) > 0) {
+                                        $initial = substr($u->first_name, 0, 1);
+                                    }
+                                    if (strlen($u->last_name) > 0) {
+                                        $initial .= "." . substr($u->last_name, 0, 1);
+                                    }
+                                }
+                                $report_item->initials = $initial;
 
                                 $scale = Utils::grade_marks($report_item);
                                 $report_item->grade_name = $scale->name;
@@ -235,7 +264,8 @@ class TermlyReportCard extends Model
                 }
             }
         }
-        TermlyReportCard::grade_students($m); 
+ 
+        TermlyReportCard::grade_students($m);
     }
 
 
@@ -246,10 +276,10 @@ class TermlyReportCard extends Model
             $total_marks = 0;
             $total_aggregates = 0;
             $total_students = count($report_card->academic_class->students);
-            
+
             foreach ($report_card->items as $student_report_card) {
                 $total_marks += ((int)($student_report_card->total));
-                $total_aggregates += ((int)($student_report_card->aggregates)); 
+                $total_aggregates += ((int)($student_report_card->aggregates));
             }
             $report_card->total_marks = $total_marks;
             $report_card->total_aggregates = $total_aggregates;
@@ -257,46 +287,50 @@ class TermlyReportCard extends Model
             $report_card->save();
         }
 
-        
-        foreach (StudentReportCard::where([
-            'termly_report_card_id' => $m->id
-        ])
-        ->orderBy('total_marks','Desc')
-        ->get() as $key => $report_card) {
-            $report_card->position = ($key+1);
-            $report_card->save();
-            TermlyReportCard::get_teachers_remarks($report_card);
+
+        foreach ($m->academic_year->classes as $class) {
+            foreach (StudentReportCard::where([
+                'academic_class_id' => $class->id,
+                'termly_report_card_id' => $m->id
+            ])
+                ->orderBy('total_marks', 'Desc')
+                ->get() as $key => $report_card) {
+                $report_card->position = ($key + 1);
+                $report_card->save();
+                TermlyReportCard::get_teachers_remarks($report_card);
+            }
         }
     }
 
-    public static function get_teachers_remarks($report_card){
+    public static function get_teachers_remarks($report_card)
+    {
         $percentage = 0;
-        if($report_card->total_students>0){
-            $percentage = (($report_card->position/$report_card->total_students)*100);
+        if ($report_card->total_students > 0) {
+            $percentage = (($report_card->position / $report_card->total_students) * 100);
         }
 
 
-        if($percentage<5){
+        if ($percentage < 5) {
             $report_card->class_teacher_commented = 10;
             $report_card->head_teacher_commented = 10;
             $report_card->class_teacher_comment = "Excelent! Keep it up.";
             $report_card->head_teacher_comment = "{$report_card->owner->name} is such a brilliant pupil. Keep it up.";
-        }else if($percentage<10){
+        } else if ($percentage < 10) {
             $report_card->class_teacher_commented = 10;
             $report_card->head_teacher_commented = 10;
             $report_card->class_teacher_comment = "Very good! Keep it up.";
             $report_card->head_teacher_comment = "{$report_card->owner->name} is such a brilliant pupil. Keep it up.";
-        }else{
+        } else {
             $report_card->class_teacher_commented = 10;
             $report_card->head_teacher_commented = 10;
             $report_card->class_teacher_comment = "Tried, Work harder next time.";
             $report_card->head_teacher_comment = "{$report_card->owner->name} can do better than this.";
         }
-        $report_card->save(); 
+        $report_card->save();
     }
 
 
-/* 
+    /* 
     
     $table->float('total_marks')->default(0)->nullable();
     $table->float('total_aggregates')->default(0)->nullable();
