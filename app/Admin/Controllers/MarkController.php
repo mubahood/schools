@@ -6,6 +6,7 @@ use App\Models\AcademicClass;
 use App\Models\Exam;
 use App\Models\Mark;
 use App\Models\Subject;
+use App\Models\Utils;
 use Carbon\Carbon;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -31,6 +32,15 @@ class MarkController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Mark());
+
+
+        $grid->export(function ($export) { 
+            $export->filename('School dynamics.csv'); 
+            $export->except(['is_submitted']); 
+            $export->originalValue(['score', 'remarks']); 
+        });
+
+
         /* foreach (Mark::where([
             'exam_id' => 5
         ])->get() as $key => $v) {
@@ -47,7 +57,6 @@ class MarkController extends AdminController
             $grid->model()->where([
                 'teacher_id' => Admin::user()->id,
             ]);
-
         }
 
         $grid->disableCreateButton();
@@ -87,7 +96,7 @@ class MarkController extends AdminController
                     (((int)($_GET['exam_id'])) < 1) ||
                     (((int)($_GET['class_id'])) < 1))
             ) {
-                $filter->expand(); 
+                $filter->expand();
             }
 
 
@@ -179,8 +188,8 @@ class MarkController extends AdminController
         }
 
 
-        $grid->column('updated_at', __('Updated'))->display(function ($v) {
-            return Carbon::parse($v)->format('d-M-Y');
+        $grid->column('updated_at', __('Last Updat'))->display(function ($v) {
+            return Utils::my_date_time($v);
         })->sortable();
 
         return $grid;

@@ -7,6 +7,7 @@ use App\Models\TheologyClass;
 use App\Models\TheologyExam;
 use App\Models\TheologyMark;
 use App\Models\TheologySubject;
+use App\Models\Utils;
 use Carbon\Carbon;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -31,6 +32,8 @@ class TheologyMarkController extends AdminController
 
     protected function grid()
     {
+
+        
 
 
         /*         
@@ -76,7 +79,11 @@ class TheologyMarkController extends AdminController
 
         $grid->disableBatchActions();
 
-
+        $grid->export(function ($export) { 
+            $export->filename('School dynamics.csv'); 
+            $export->except(['is_submitted']); 
+            $export->originalValue(['score', 'remarks']); 
+        });
 
         if (
             (!Admin::user()->isRole('dos')) &&
@@ -208,8 +215,8 @@ class TheologyMarkController extends AdminController
         }
 
 
-        $grid->column('updated_at', __('Updated'))->display(function ($v) {
-            return Carbon::parse($v)->format('d-M-Y');
+        $grid->column('updated_at', __('Last Updat'))->display(function ($v) {
+            return Utils::my_date_time($v);
         })->sortable();
 
         return $grid;
