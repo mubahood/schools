@@ -158,7 +158,7 @@ class MarkController extends AdminController
                 return "-";
             }
             return $this->student->name;
-        })->sortable();
+        })->sortable(); 
         $grid->column('exam_id', __('Exam'))
             ->display(function () {
                 return $this->exam->name_text;
