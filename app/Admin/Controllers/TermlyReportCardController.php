@@ -30,16 +30,17 @@ class TermlyReportCardController extends AdminController
 
 
         $grid = new Grid(new TermlyReportCard());
-
-        /*
+ /*
+        
         $x = TermlyReportCard::find(1);
+        TermlyReportCard::grade_students($x);
+        dd("remove"); 
+        
+       
         $x->report_title = rand(1, 10);
         $x->save();
-        dd("remove"); 
-        TermlyReportCard::grade_students($x);*
      
-       
-     /*
+        
         die("Anjane"); */
 
         $grid->model()->where([

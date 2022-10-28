@@ -345,8 +345,8 @@ class TheologyTermlyReportCard extends Model
         } else  if ($report_card->average_aggregates <= 12) {
 
             $comments = [
-                "Strive for first grade.",
-                "We expect a first grade from you.",
+                "We expect the best from you.",
+                "We expect the best from you.",
                 "Aim higher for better performance.",
             ];
             shuffle($comments);

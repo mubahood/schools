@@ -75,10 +75,10 @@ class StudentReportCardController extends AdminController
                 ->orderBy('id', 'Desc')
                 ->get()->pluck('name_text', 'id'));
             $filter->equal('grade', 'Filter by grade')->select([
-                'A' => "A (First grade)",
-                'B' => "B (Second grade)",
-                'C' => "C (Third grade)",
-                'D' => "D (Fourth grade)",
+                '1' => "First grade",
+                '2' => "Second grade",
+                '3' => "Third grade",
+                '4' => "Fourth grade",
                 'U' => "U (Failure)",
             ]);
         });

@@ -249,7 +249,7 @@ class PrintController2 extends Controller
                     <tr>
                         <td class="fs-5">CLASS: <b>S.6 Lion</b></td>
                         <td class="fs-5">Aggregates.: <b>12</b> </td>
-                        <td class="fs-5 text-right">Grade: <b>B</b></td> 
+                        <td class="fs-5 text-right">DIV: <b>B</b></td> 
                     </tr>    
                 </table>';
 

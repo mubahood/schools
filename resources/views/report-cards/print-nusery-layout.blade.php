@@ -160,7 +160,7 @@ $school_email = 'admin@kjs.com';
                     {{-- span><b class="text-uppercase">Aggregates:</b> <span
                             class="value text-lowercase">{{ $r->average_aggregates }}</span></span> --}}
 
-                    {{-- <span><b class="text-uppercase">Grade:</b> <span class="value">{{ $r->grade }}</span></span>
+                    {{-- <span><b class="text-uppercase">DIV:</b> <span class="value">{{ $r->grade }}</span></span>
                     <span><b class="text-uppercase">Position:</b> <span
                             class="value text-lowercase">{{ $numFormat->format($r->position) }}</span></span>
 
@@ -200,17 +200,16 @@ $school_email = 'admin@kjs.com';
             </div>
             <div class="col-6 border border-dark pt-1">
                 <h2 class="text-center text-uppercase" style="font-size: 16px">Theology Studies</h2>
-                <hr class="my-1">
+            <hr class="my-1">
                 @if ($tr != null)
-                    <div class="row mt-2 d-flex justify-content-between pl-3 pr-3 summary" style="font-size: 12px">
-                        <span><b>CLASS:</b> <span class="value">{{ $tr->theology_class->name }}</span></span>
-                        {{-- <span><b class="text-uppercase">Aggre:</b> <span class="value">18</span></span> --}}
-                        <span><b class="text-uppercase">Grade:</b> <span
+                    {{-- <div class="row mt-2 d-flex justify-content-between pl-3 pr-3 summary" style="font-size: 12px">
+                        <span><b>CLASS:</b> <span class="value">{{ $tr->theology_class->name }}</span></span> 
+                        <span><b class="text-uppercase">DIV:</b> <span
                                 class="value">{{ $tr->grade }}</span></span>
                         <span><b class="text-uppercase">Position in class:</b> <span
                                 class="value text-lowercase">{{ $numFormat->format($tr->position) }}</span></span>
                         <span><b class="text-uppercase">OUT OF:</b> <span class="value">{{ $tr->total_students }}
-                    </div>
+                    </div> --}}
                 @endif
                 <div class="row mt-2">
                     <div class="col-12">
