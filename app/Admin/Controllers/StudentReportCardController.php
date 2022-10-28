@@ -55,11 +55,8 @@ class StudentReportCardController extends AdminController
 
 
             $u = Admin::user();
-            $filter->equal('academic_class_id', 'Filter by class')->select(AcademicClass::where([
-                'enterprise_id' => $u->enterprise_id
-            ])
-                ->orderBy('id', 'Desc')
-                ->get()->pluck('name_text', 'id'));
+
+
 
             $u = Admin::user();
             $ajax_url = url(
@@ -70,7 +67,22 @@ class StudentReportCardController extends AdminController
                     . "&model=User"
             );
             $filter->equal('student_id', 'Student')->select()->ajax($ajax_url);
+
+
+            $filter->equal('academic_class_id', 'Filter by class')->select(AcademicClass::where([
+                'enterprise_id' => $u->enterprise_id
+            ])
+                ->orderBy('id', 'Desc')
+                ->get()->pluck('name_text', 'id'));
+            $filter->equal('grade', 'Filter by grade')->select([
+                'A' => "A (First grade)",
+                'B' => "B (Second grade)",
+                'C' => "C (Third grade)",
+                'D' => "D (Fourth grade)",
+                'U' => "U (Failure)",
+            ]);
         });
+
 
 
         $grid->disableBatchActions();
