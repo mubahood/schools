@@ -18,11 +18,21 @@ class Mark extends Model
             if ($m->subject == null) {
                 die("Main subject not found.");
             }
+            if($m->subject->course_id == 74){
+                return false;
+            }
+            
             $m->main_course_id = $m->subject->main_course_id;
             return $m;
         });
 
         self::updating(function ($m) {
+
+            if($m->subject->course_id == 74){
+                $m->delete();
+                return false;
+            }
+
             if (($m->exam->max_mark < 0) || ($m->score > $m->exam->max_mark)) {
                 return false;
             }
@@ -53,7 +63,7 @@ class Mark extends Model
 
     public function subject()
     {
-        return $this->belongsTo(Subject::class, 'subject_id');
+        return $this->belongsTo(Subject::class, 'subject_id'); 
     }
 
     function student()

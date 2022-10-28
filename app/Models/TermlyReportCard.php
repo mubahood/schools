@@ -136,6 +136,16 @@ class TermlyReportCard extends Model
                 if ($report_card != null) {
                     if ($report_card->id > 0) {
                         foreach ($class->get_students_subjects($student->id) as $main_course) {
+
+
+                            if ($main_course->course_id == 74) {
+                                StudentReportCardItem::where([
+                                    'main_course_id' => $main_course->id
+                                ])->delete(); 
+                            }
+
+
+
                             $report_item =  StudentReportCardItem::where([
                                 'main_course_id' => $main_course->id,
                                 'student_report_card_id' => $report_card->id,
@@ -262,6 +272,10 @@ class TermlyReportCard extends Model
                                 $report_item->aggregates = $scale->aggregates;
                                 $report_item->save();
                             }
+
+                            StudentReportCardItem::where([
+                                'main_course_id' => 74
+                            ])->delete();
                         }
                     }
                 }
@@ -279,7 +293,7 @@ class TermlyReportCard extends Model
         foreach ($m->report_cards as  $report_card) {
             /* if ($report_card->id != 650) {
                 continue;
-            } */ 
+            } */
 
             $total_marks = 0;
             $number_of_marks = 0;
@@ -294,7 +308,7 @@ class TermlyReportCard extends Model
             if ($number_of_marks < 1) {
                 continue;
             }
-            
+
             $report_card->average_aggregates = ($total_aggregates / $number_of_marks) * 4;
 
 
@@ -335,7 +349,7 @@ class TermlyReportCard extends Model
     {
         set_time_limit(-1);
         ini_set('memory_limit', '-1');
-        
+
         $name = $report_card->owner->name;
         $sex = 'He/she';
         if (strtolower($report_card->owner->sex) == 'female') {

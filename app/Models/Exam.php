@@ -82,6 +82,15 @@ class Exam extends Model
             if ($class->students != null) {
                 foreach ($class->students as $student) {
                     foreach ($class->subjects as $subject) {
+
+                        if ($subject->course_id == 74) {
+                            Mark::where([
+                                'subject_id' => $subject->id,
+                            ])->delete();
+                            continue;
+                        }
+
+
                         $mark = Mark::where([
                             'exam_id' => $exam->id,
                             'student_id' => $student->administrator_id,
