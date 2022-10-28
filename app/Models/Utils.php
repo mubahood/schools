@@ -692,7 +692,7 @@ class Utils  extends Model
         foreach ($grading_scale->grade_ranges as $v) {
             if (
                 ($report_item->total >= $v->min_mark) &&
-                ($report_item->total < $v->max_mark)
+                ($report_item->total <= $v->max_mark)
             ) {
                 return $v;
             }

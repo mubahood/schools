@@ -335,3 +335,4 @@ php artisan make:migration add_total_students --table=student_report_cards
 php artisan make:migration add_total_students --table=student_report_cards
 php artisan make:migration add_do_update --table=theology_termly_report_cards
  
+php artisan admin:action Post\\BatchPrint --grid-batch --name="batch print"
