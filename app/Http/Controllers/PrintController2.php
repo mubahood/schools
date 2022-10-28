@@ -24,6 +24,9 @@ class PrintController2 extends Controller
     public function index(Request $req)
     {
 
+        ini_set('max_execution_time', '-1');
+        ini_set('memory_limit', '-1');
+
         ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
