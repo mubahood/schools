@@ -86,6 +86,7 @@ class TheologryStudentReportCardController extends AdminController
             return $this->owner->name;
         });
 
+
         $grid->column('theology_class_id', __('Class'))
             ->display(function () {
                 return $this->theology_class->name;
@@ -96,11 +97,21 @@ class TheologryStudentReportCardController extends AdminController
             return $numFormat->format($position);
         })->sortable();
         $grid->column('total_marks', __('Total marks'))->sortable();
-        $grid->column('total_aggregates', __('Total aggregates'))->sortable();
-        $grid->column('total_students', __('Total students'))->sortable();
+        $grid->column('average_aggregates', __('Average aggregates'))->sortable();
+        $grid->column('grade', __('Grade'))->sortable();
+
+        $grid->column('total_aggregates', __('Total aggregates'))->hide()->sortable();
+        $grid->column('total_students', __('Total students'))->hide()->sortable();
+        $grid->column('position', __('Position in class'))->display(function ($position) {
+            if ($position < 1) {
+                return "-";
+            }
+            $numFormat = new NumberFormatter('en_US', NumberFormatter::ORDINAL);
+            return $numFormat->format(((int)($position)));
+        })->sortable();
         $grid->column('class_teacher_comment', __('Class Teacher Remarks'))->editable()->sortable();
         $grid->column('head_teacher_comment', __('Head Teacher Remarks'))->editable()->sortable();
- 
+
         $grid->column('print', __('Print'))->display(function ($m) {
             return '<a target="_blank" href="' . url('print?theo_id=' . $this->id) . '" >print</a>';
         });

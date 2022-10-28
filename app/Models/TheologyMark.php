@@ -47,9 +47,9 @@ class TheologyMark extends Model
                 $m->is_submitted = 1;
             }else{
                 $m->is_submitted = 0;
-            }
+            } 
             if ($m->remarks == null || (strlen($m->remarks) < 3)) {
-                $m->remarks = Utils::get_automaic_mark_remarks(
+                $m->remarks = Utils::get_automaic_mark_remarks( 
                     Utils::convert_to_percentage($m->score, $m->exam->max_mark)
                 );
             }

@@ -236,7 +236,7 @@ $school_email = 'admin@kjs.com';
                     <div class="row mt-2 d-flex justify-content-between pl-3 pr-3 summary" style="font-size: 12px">
                         <span><b>CLASS:</b> <span class="value">{{ $tr->theology_class->name }}</span></span>
                         {{-- <span><b class="text-uppercase">Aggre:</b> <span class="value">18</span></span> --}}
-                        <span><b class="text-uppercase">Grade:</b> <span class="value">B</span></span>
+                        <span><b class="text-uppercase">Grade:</b> <span class="value">{{ $tr->grade }}</span></span>
                         <span><b class="text-uppercase">Position in class:</b> <span
                                 class="value text-lowercase">{{ $numFormat->format($tr->position) }}</span></span>
                         <span><b class="text-uppercase">OUT OF:</b> <span class="value">{{ $tr->total_students }}

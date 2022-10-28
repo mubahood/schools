@@ -279,7 +279,7 @@ class TermlyReportCard extends Model
         foreach ($m->report_cards as  $report_card) {
             /* if ($report_card->id != 650) {
                 continue;
-            } */
+            } */ 
 
             $total_marks = 0;
             $number_of_marks = 0;
@@ -291,6 +291,10 @@ class TermlyReportCard extends Model
                 $total_aggregates += ((int)($student_report_card->aggregates));
                 $number_of_marks++;
             }
+            if ($number_of_marks < 1) {
+                continue;
+            }
+            
             $report_card->average_aggregates = ($total_aggregates / $number_of_marks) * 4;
 
 

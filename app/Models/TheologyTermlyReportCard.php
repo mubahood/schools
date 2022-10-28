@@ -248,23 +248,48 @@ class TheologyTermlyReportCard extends Model
     {
 
 
-
         foreach ($m->report_cards as  $report_card) {
+            /* if ($report_card->id != 585) {
+                continue;
+            } */
+
             $total_marks = 0;
             $total_aggregates = 0;
+            $number_of_marks = 0;
 
             $total_students = count($report_card->theology_class->students);
             foreach ($report_card->items as $student_report_card) {
                 $total_marks += ((int)($student_report_card->total));
                 $total_aggregates += ((int)($student_report_card->aggregates));
+                $number_of_marks++;
             }
+
+            if ($number_of_marks < 1) {
+                continue;
+            }
+
+
+            $report_card->average_aggregates = ($total_aggregates / $number_of_marks) * 4;
+
+
+            if ($report_card->average_aggregates <= 12) {
+                $report_card->grade = 'A';
+            } else if ($report_card->average_aggregates <= 23) {
+                $report_card->grade = 'B';
+            } else if ($report_card->average_aggregates <= 29) {
+                $report_card->grade = 'C';
+            } else if ($report_card->average_aggregates <= 34) {
+                $report_card->grade = 'D';
+            } else {
+                $report_card->grade = 'U';
+            }
+            $report_card->average_aggregates = round($report_card->average_aggregates, 2);
             $report_card->total_marks = $total_marks;
             $report_card->total_aggregates = $total_aggregates;
             $report_card->total_students = $total_students;
             $report_card->save();
+            TheologyTermlyReportCard::get_teachers_remarks($report_card);
         }
-
-
 
 
         foreach ($m->academic_year->theology_classes as $class) {
@@ -284,31 +309,107 @@ class TheologyTermlyReportCard extends Model
 
 
 
+
     public static function get_teachers_remarks($report_card)
     {
-        $percentage = 0;
-        if ($report_card->total_students > 0) {
-            $percentage = (($report_card->position / $report_card->total_students) * 100);
+        set_time_limit(-1);
+        ini_set('memory_limit', '-1');
+
+        $name = $report_card->owner->name;
+        $sex = 'He/she';
+        if (strtolower($report_card->owner->sex) == 'female') {
+            $sex = "She";
+        }
+        if (strtolower($report_card->owner->sex) == 'male') {
+            $sex = "He";
         }
 
-        if ($percentage < 5) {
-            $report_card->class_teacher_commented = 10;
-            $report_card->head_teacher_commented = 10;
-            $report_card->class_teacher_comment = "Excelent! Keep it up.";
-            $report_card->head_teacher_comment = "{$report_card->owner->name} is such a brilliant pupil. Keep it up.";
-        } else if ($percentage < 10) {
-            $report_card->class_teacher_commented = 10;
-            $report_card->head_teacher_commented = 10;
-            $report_card->class_teacher_comment = "Very good! Keep it up.";
-            $report_card->head_teacher_comment = "{$report_card->owner->name} is such a brilliant pupil. Keep it up.";
+        if ($report_card->average_aggregates <= 4) {
+            $comments = [
+                "Good work, thank you.",
+                "We congratulate you upon this great performance.",
+                "Thank you for your performance.",
+            ];
+            shuffle($comments);
+            $report_card->class_teacher_comment = $comments[1];
+
+            $comments = [
+                "Excellent performance reflected, Thank you.",
+                "Excellent results displayed. Keep the spirit up.",
+                "Very good and encouraging performance. Keep it up.",
+                "Wonderful results reflected, ought to be rewarded.",
+                "Thank you for the wonderful and excellent performance keep it up.",
+            ];
+            shuffle($comments);
+            $report_card->head_teacher_comment = $comments[1];
+        } else  if ($report_card->average_aggregates <= 12) {
+
+            $comments = [
+                "Strive for first grade.",
+                "We expect a first grade from you.",
+                "Aim higher for better performance.",
+            ];
+            shuffle($comments);
+            $report_card->class_teacher_comment = $comments[1];
+
+            $comments = [
+                "Promising performance displayed, keep working harder to attain the best.",
+                "Steady progress reflected, keep it up to attain the best next time.",
+                'Encouraging results shown, do not relax.',
+                "Positive progress observed, continue with the energy for a better grade.",
+                "Promising performance displayed, though more is still needed to attain the best aggregate."
+            ];
+            shuffle($comments);
+            $report_card->head_teacher_comment = $comments[1];
         } else {
-            $report_card->class_teacher_commented = 10;
-            $report_card->head_teacher_commented = 10;
-            $report_card->class_teacher_comment = "Tried, Work harder next time.";
-            $report_card->head_teacher_comment = "{$report_card->owner->name} can do better than this.";
+
+            $comments = [
+                "Revise more than this.",
+                "Consultation is the key to excellence.",
+                "Befriend excellent students",
+                "More effort is still needed.",
+                "Double your effort in all subjects"
+            ];
+            shuffle($comments);
+            $report_card->class_teacher_comment = $comments[1];
+
+            $comments = [
+                "Work harder than this to attain a better aggregate.",
+                "Aim higher than thus to better your performance.",
+                'Steady progress reflected, aim higher than this next time.',
+                'Positive progress observed do not relax.',
+                'Steady progress though more is still desired to attain the best.'
+            ];
+            shuffle($comments);
+            $report_card->head_teacher_comment = $comments[1];
+        }
+
+        if ($report_card->average_aggregates > 30) {
+            if ($report_card->average_aggregates <= 34) {
+                $comments = [
+                    "You need to concentrate more weaker areas to better your performance next time.",
+                    "Double your energy and concentration to better your results.",
+                    "A lot more is still desired from for a better performance next time",
+                    "You are encouraged to concentrate in class for a better performance.",
+                    "Slight improvement reflected; you are encouraged to continue working harder."
+                ];
+                shuffle($comments);
+                $report_card->head_teacher_comment = $comments[1];
+            } else {
+                $comments = [
+                    "Double your energy in all areas for a better grade.",
+                    "Concentration in class at all times to better your performance next time.",
+                    "Always consult your teachers in class to better aim higher than this.",
+                    "Always aim higher than this.",
+                    'Teacher- parent relationship is needed to help the learner improve.'
+                ];
+                shuffle($comments);
+                $report_card->head_teacher_comment = $comments[1];
+            }
         }
         $report_card->save();
     }
+
 
 
 
