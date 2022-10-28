@@ -37,9 +37,9 @@ class TheologyExam extends Model
         });
 
 
- 
 
-    
+
+
         self::deleting(function ($m) {
             Mark::where([
                 'exam_id' => $m->id
@@ -50,8 +50,8 @@ class TheologyExam extends Model
 
 
     public static function my_update($exam)
-    { 
- 
+    {
+
         ini_set('max_execution_time', -1); //unlimit
         $done = false;
         foreach ($exam->classes as $class) {
@@ -73,9 +73,13 @@ class TheologyExam extends Model
                             $mark->is_submitted = false;
                             $mark->is_missed = true;
                             $mark->remarks = '';
+                        } else {
+                            $mark->remarks = Utils::get_automaic_mark_remarks(
+                                Utils::convert_to_percentage($mark->score, $mark->exam->max_mark)
+                            );
                         }
                         $mark->theology_class_id = $class->id;
-                        $mark->teacher_id = $subject->subject_teacher; 
+                        $mark->teacher_id = $subject->subject_teacher;
                         $mark->save();
                         $done = true;
                     }
@@ -83,8 +87,8 @@ class TheologyExam extends Model
             }
         }
 
-        if($done){ 
-            DB::update("UPDATE theology_exams SET marks_generated = 1 WHERE id = $exam->id"); 
+        if ($done) {
+            DB::update("UPDATE theology_exams SET marks_generated = 1 WHERE id = $exam->id");
         }
     }
 

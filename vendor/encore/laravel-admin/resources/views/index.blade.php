@@ -16,7 +16,7 @@
 {{--     @if (!is_null($favicon = Admin::favicon()))
     <link rel="shortcut icon" href="{{ $favicon }}">
     @endif --}}
-    <link rel="shortcut icon" href="https://schooldynamics.ug/storage/25e4968d007f840581bc7cd19605f443.png">
+    <link rel="shortcut icon" href="https://schooldynamics.ug/assets/logo.png">
 
     {!! Admin::css() !!}
 

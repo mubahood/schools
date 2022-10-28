@@ -95,10 +95,14 @@ class StudentReportCardController extends AdminController
             })->sortable();
 
         $grid->column('total_marks', __('Total marks'))->sortable();
+        $grid->column('average_aggregates', __('Average aggregates'))->sortable();
+        $grid->column('grade', __('Grade'))->sortable();
+
         $grid->column('position', __('Position in class'))->display(function ($position) {
             $numFormat = new NumberFormatter('en_US', NumberFormatter::ORDINAL);
             return $numFormat->format($position);
         })->sortable();
+
         $grid->column('class_teacher_comment', __('Class Teacher Remarks'))->editable()->sortable();
         $grid->column('head_teacher_comment', __('Head Teacher Remarks'))->editable()->sortable();
 

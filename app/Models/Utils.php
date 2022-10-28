@@ -191,10 +191,10 @@ class Utils  extends Model
     }
 
     public static function docs_root()
-    { 
+    {
         $r = env('DOCUMENT_ROOT');
-        $r = str_replace('public/','',$r);
-        $r = str_replace('public','',$r);
+        $r = str_replace('public/', '', $r);
+        $r = str_replace('public', '', $r);
         $r .= 'public/';
         return $r;
     }
@@ -202,7 +202,7 @@ class Utils  extends Model
     public static function system_boot($u)
     {
 
-     
+
         $subs = Exam::where('marks_generated', '!=', true)->get();
         foreach ($subs as $m) {
             Exam::my_update($m);
@@ -211,7 +211,7 @@ class Utils  extends Model
         $_subs = TheologyExam::where('marks_generated', '!=', true)->get();
         foreach ($_subs as $m) {
             TheologyExam::my_update($m);
-        }      
+        }
 
         Utils::financial_accounts_creation();
     }
@@ -593,15 +593,19 @@ class Utils  extends Model
         return true;
     }
     public static function get_automaic_mark_remarks($score)
-    {
-        $remarks = "Fair";
-        if ($score < 20) {
-            $remarks = 'Tried';
-        } else if ($score < 30) {
+    { 
+        $remarks = "Improve";
+        if ($score < 39) {
+            $remarks = 'Improve';
+        } else if ($score < 49) {
             $remarks = 'Fair';
-        } else if ($score < 50) {
+        } else if ($score < 59) {
+            $remarks = 'F.Good';
+        } else if ($score < 69) {
+            $remarks = 'Q.Good';
+        } else if ($score < 79) {
             $remarks = 'Good';
-        } else if ($score < 70) {
+        } else if ($score < 89) {
             $remarks = 'V.Good';
         } else {
             $remarks = 'Excellent';
@@ -643,7 +647,7 @@ class Utils  extends Model
             die("No grading scale found.");
         }
 
- 
+
         $default = new GradeRange();
         $default->id = 1;
         $default->grading_scale_id = 1;
@@ -673,7 +677,7 @@ class Utils  extends Model
             die("No grading scale found.");
         }
 
- 
+
         $default = new GradeRange();
         $default->id = 1;
         $default->grading_scale_id = 1;

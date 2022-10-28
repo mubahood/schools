@@ -46,7 +46,7 @@ class Exam extends Model
                 die("Maximum exam mark must be less than 100.");
             }
             $m->marks_generated = false;
-        });  
+        });
 
         self::deleting(function ($m) {
             Mark::where([
@@ -65,7 +65,7 @@ class Exam extends Model
     public static function my_update($exam)
     {
 
- 
+
         if ($exam == null) {
             return false;
         }
@@ -98,6 +98,10 @@ class Exam extends Model
                             $mark->is_submitted = false;
                             $mark->is_missed = true;
                             $mark->remarks = '';
+                        } else {
+                            $mark->remarks = Utils::get_automaic_mark_remarks(
+                                Utils::convert_to_percentage($mark->score, $mark->exam->max_mark)
+                            );
                         }
                         $mark->class_id = $class->id;
                         $mark->teacher_id = $subject->subject_teacher;
@@ -107,10 +111,9 @@ class Exam extends Model
                 }
             }
         }
-        if($done){ 
-            DB::update("UPDATE exams SET marks_generated = 1 WHERE id = $exam->id"); 
+        if ($done) {
+            DB::update("UPDATE exams SET marks_generated = 1 WHERE id = $exam->id");
         }
- 
     }
 
 

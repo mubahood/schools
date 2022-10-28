@@ -32,7 +32,7 @@ class AcademicClassController extends AdminController
     {
 
 
-        Utils::display_system_checklist();
+        //Utils::display_system_checklist();
 
         $grid = new Grid(new AcademicClass());
         $grid->model()
@@ -101,7 +101,7 @@ class AcademicClassController extends AdminController
     {
         $form = new Form(new AcademicClass());
 
-        Utils::display_system_checklist();
+        //Utils::display_system_checklist();
 
         $form->disableCreatingCheck();
         $form->disableReset();
@@ -124,6 +124,13 @@ class AcademicClassController extends AdminController
 
 
             $form->text('name', __('Class Name'))->rules('required');
+            $form->select('class_type', __('Class category'))
+                ->options([
+                    'Nursery' => 'Nursery class',
+                    'Primary' => 'Primary class',
+                ])
+                ->help("How this class should be treated")
+                ->rules('required');
             $form->text('short_name', __('Class short name'))->rules('required');
 
             $teachers = [];

@@ -26,7 +26,11 @@ class Mark extends Model
             if (($m->exam->max_mark < 0) || ($m->score > $m->exam->max_mark)) {
                 return false;
             }
-            $m->is_submitted = 1;
+            if (((int)($m->score)) > 0) {
+                $m->is_submitted = 1;
+            } else {
+                $m->is_submitted = 0;
+            }
             if ($m->remarks == null || (strlen($m->remarks) < 3)) {
                 $m->remarks = Utils::get_automaic_mark_remarks(
                     Utils::convert_to_percentage($m->score, $m->exam->max_mark)
