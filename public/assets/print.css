@@ -18,6 +18,9 @@
     .scale-title{
         background-color: black!important;
     }
+    body{
+        background-color: white; 
+    }
 }
 
 @page {
@@ -50,7 +53,7 @@ html {
 body {
     display: table-cell;
     vertical-align: middle;
-     background-color: #222A2A; 
+    background-color: #222A2A; 
 } 
 
 .title-2 {
