@@ -24,6 +24,11 @@ class PrintController2 extends Controller
     public function index(Request $req)
     {
 
+        ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+
         if (isset($_GET['calss_id'])) {
             $icalss_id = ((int)($_GET['calss_id']));
             $reps  = [];
@@ -32,7 +37,7 @@ class PrintController2 extends Controller
             ])->get() as $r) {
 
                 $tr = TheologryStudentReportCard::where([
-                    'student_id' => $r->student_id,
+                    'student_id' => $r->student_id, 
                     'term_id' => $r->term_id,
                 ])->first();
 
