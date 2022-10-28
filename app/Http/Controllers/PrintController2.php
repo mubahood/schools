@@ -42,7 +42,11 @@ class PrintController2 extends Controller
                 ];
             }
 
-            return view('report-cards.print', ['recs' => $reps]);
+            //return view('report-cards.print', ['recs' => $reps]);
+            //return $data . $data;
+            $pdf = App::make('dompdf.wrapper');
+            $pdf->loadHTML(view('report-cards.print', ['recs' => $reps]));
+            return $pdf->stream();
         }
 
         $id = ((int)($req->id));
