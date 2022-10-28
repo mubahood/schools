@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\Post\BatchPrint;
 use App\Models\AcademicClass;
 use App\Models\AcademicYear;
 use App\Models\StudentReportCard;
@@ -31,6 +32,10 @@ class StudentReportCardController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new StudentReportCard());
+
+        $grid->batchActions(function ($batch) {
+            $batch->add(new BatchPrint());
+        });
 
 
         /*  $grid->header(function ($query) {
@@ -85,7 +90,7 @@ class StudentReportCardController extends AdminController
 
 
 
-        $grid->disableBatchActions();
+        //$grid->disableBatchActions();
         $grid->disableActions();
         $grid->disableCreateButton();
 
