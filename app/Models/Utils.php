@@ -87,7 +87,7 @@ class Utils  extends Model
     {
         $excel = Utils::docs_root() . "/temp/school_pay.xlsx";
         if (!file_exists($excel)) {
-            dd("D.N.E ==>$excel<=== ");
+            dd("D.N.E ==>$excel<== ");
         }
 
         $u = Auth::user();
@@ -660,8 +660,8 @@ class Utils  extends Model
         //$tot = $report_item->
         foreach ($grading_scale->grade_ranges as $v) {
             if (
-                ($report_item->total >= $v->min_mark) &&
-                ($report_item->total <= $v->max_mark)
+                (((int)($report_item->total))  > $v->min_mark) &&
+                (((int)($report_item->total)) < $v->max_mark)
             ) {
                 return $v;
             }
@@ -689,8 +689,8 @@ class Utils  extends Model
         //$tot = $report_item->
         foreach ($grading_scale->grade_ranges as $v) {
             if (
-                ($report_item->total >= $v->min_mark) &&
-                ($report_item->total <= $v->max_mark)
+                (((int) ($report_item->total)) > $v->min_mark) &&
+                ($report_item->total < $v->max_mark)
             ) {
                 return $v;
             }
@@ -1018,15 +1018,16 @@ class Utils  extends Model
         }
 
 
-        if ($r->total <= 44) {
+
+        if ($r->total < 44) {
             $data['grade'] = "F";
-        } else if ($r->total <= 54) {
+        } else if ($r->total < 54) {
             $data['grade'] = "W";
-        } else if ($r->total <= 64) {
+        } else if ($r->total < 64) {
             $data['grade'] = "G";
-        } else if ($r->total <= 74) {
+        } else if ($r->total < 74) {
             $data['grade'] = "V.G";
-        } else if ($r->total <= 100) {
+        } else if ($r->total < 100) {
             $data['grade'] = "E";
         }
         return $data;
@@ -1051,15 +1052,16 @@ class Utils  extends Model
         }
 
 
-        if ($r->total <= 44) {
+        $r->total = ((int)($r->total));
+        if ($r->total < 44) {
             $data['grade'] = "F";
-        } else if ($r->total <= 54) {
+        } else if ($r->total < 54) {
             $data['grade'] = "W";
-        } else if ($r->total <= 64) {
+        } else if ($r->total < 64) {
             $data['grade'] = "G";
-        } else if ($r->total <= 74) {
+        } else if ($r->total < 74) {
             $data['grade'] = "V.G";
-        } else if ($r->total <= 100) {
+        } else if ($r->total < 100) {
             $data['grade'] = "E";
         }
         return $data;
