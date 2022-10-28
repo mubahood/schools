@@ -36,8 +36,10 @@ class TermlyReportCardController extends AdminController
         $x->report_title = rand(1, 10);
         $x->save();
         dd("remove"); 
+        TermlyReportCard::grade_students($x);*
      
-        TermlyReportCard::grade_students($x);
+       
+     /*
         die("Anjane"); */
 
         $grid->model()->where([

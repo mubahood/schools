@@ -251,7 +251,7 @@ class TermlyReportCard extends Model
                                 $tot += $report_item->mot_mark;
                                 $tot += $report_item->eot_mark;
                                 $perecante  = (($tot / $regular_total) * 100);
-                                $perecante = ((int)($perecante));
+                                $perecante = (int)($perecante);
                                 $report_item->total = $perecante;
 
                                 $report_item->remarks = Utils::get_automaic_mark_remarks($report_item->total);
