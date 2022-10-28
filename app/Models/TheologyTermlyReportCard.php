@@ -273,13 +273,13 @@ class TheologyTermlyReportCard extends Model
 
 
             if ($report_card->average_aggregates <= 12) {
-                $report_card->grade = 'A';
+                $report_card->grade = '1';
             } else if ($report_card->average_aggregates <= 23) {
-                $report_card->grade = 'B';
+                $report_card->grade = '2';
             } else if ($report_card->average_aggregates <= 29) {
-                $report_card->grade = 'C';
+                $report_card->grade = '3';
             } else if ($report_card->average_aggregates <= 34) {
-                $report_card->grade = 'D';
+                $report_card->grade = '4';
             } else {
                 $report_card->grade = 'U';
             }

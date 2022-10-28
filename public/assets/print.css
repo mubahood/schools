@@ -18,8 +18,8 @@
     .scale-title{
         background-color: black!important;
     }
-    body{
-        background-color: white; 
+    body,html{
+        background-color: white!important;
     }
 }
 
