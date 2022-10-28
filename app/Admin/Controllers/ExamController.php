@@ -84,7 +84,7 @@ class ExamController extends AdminController
                 $percentage = ($submitted / $tot) * 100;
             }
 
-            return round($percentage,2) . "%";
+            return round($percentage,0) . "%";
         });
 
         return $grid;
