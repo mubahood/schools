@@ -338,6 +338,11 @@ class AcademicClass extends Model
         return $count;
     }
 
+    function report_cards()
+    {
+        return $this->hasMany(StudentReportCard::class);
+    }
+
 
 
     protected  $appends = ['name_text'];

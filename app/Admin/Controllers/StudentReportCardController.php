@@ -49,11 +49,12 @@ class StudentReportCardController extends AdminController
                         $rows[] = [
                             $v->id,
                             $v->name_text,
+                            count($v->report_cards),
                             '<a target="_blank" href="' . url('print?calss_id=' . $v->id) . '">PRINT</a>'
                         ];
                     }
 
-                    $headers = ['Id', 'Class', 'Print'];
+                    $headers = ['Id', 'Class', 'Report cards', 'Print'];
 
 
                     $table = new Table($headers, $rows);

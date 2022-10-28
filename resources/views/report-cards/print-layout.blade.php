@@ -4,7 +4,6 @@ $max_mot = 40;
 $max_eot = 60;
 $tr = isset($tr) ? $tr : null;
 $bal = ((int) $r->owner->account->balance);
-
 $bal_text = '';
 if ($bal == 0) {
     $bal_text = 'NIL BALANCE';
@@ -14,6 +13,11 @@ if ($bal == 0) {
     }
     $bal_text = 'UGX ' . number_format($bal);
 }
+
+if (!$r->owner->account->status) {
+    $bal_text = '...................';
+}
+
 $numFormat = new NumberFormatter('en_US', NumberFormatter::ORDINAL);
 foreach ($r->termly_report_card->term->exams as $exam) {
     if ($exam->type == 'B.O.T') {
@@ -236,8 +240,7 @@ $school_email = 'admin@kjs.com';
                     <div class="row mt-2 d-flex justify-content-between pl-3 pr-3 summary" style="font-size: 12px">
                         <span><b>CLASS:</b> <span class="value">{{ $tr->theology_class->name }}</span></span>
                         {{-- <span><b class="text-uppercase">Aggre:</b> <span class="value">18</span></span> --}}
-                        <span><b class="text-uppercase">DIV:</b> <span
-                                class="value">{{ $tr->grade }}</span></span>
+                        <span><b class="text-uppercase">DIV:</b> <span class="value">{{ $tr->grade }}</span></span>
                         <span><b class="text-uppercase">Position in class:</b> <span
                                 class="value text-lowercase">{{ $numFormat->format($tr->position) }}</span></span>
                         <span><b class="text-uppercase">OUT OF:</b> <span class="value">{{ $tr->total_students }}
@@ -409,11 +412,11 @@ $school_email = 'admin@kjs.com';
                                     <th>34 - 36</th>
                                 </tr>
                                 <tr>
-                                    <th class="text-left">GRADE</th>
-                                    <td class="bordered-table text-center value ">A</td>
-                                    <td class="bordered-table text-center value ">B</td>
-                                    <td class="bordered-table text-center value ">C</td>
-                                    <td class="bordered-table text-center value ">D</td>
+                                    <th class="text-left">DIVISION</th>
+                                    <td class="bordered-table text-center value ">1</td>
+                                    <td class="bordered-table text-center value ">2</td>
+                                    <td class="bordered-table text-center value ">3</td>
+                                    <td class="bordered-table text-center value ">4</td>
                                     <td class="bordered-table text-center value ">U</td>
                                 </tr>
                             </tbody>
@@ -437,7 +440,9 @@ $school_email = 'admin@kjs.com';
                     <div class="col-12 p-0">
                         <div class="p-0 mt-0 mb-2 class-teacher">
                             <b>HEAD TEACHER'S COMMUNICATION:</b>
-                            <span class="comment">General Mesage</span>
+                            <span class="comment">Dear parents, primary seven candidates duwa will be there on the 4th
+                                November 2022, 2pm.
+                                Graduation for top class and Theology day will be on 2nd December 2022.</span>
                         </div>
                     </div>
                 </div>
@@ -455,7 +460,7 @@ $school_email = 'admin@kjs.com';
                     18,000</span></span> --}}
             <span><b>SCHOOL PAY CODE:</b> <span class="value"
                     style="font-size: 12px!important;">{{ $r->owner->school_pay_payment_code }}</span></span>
-            <span><b>NEXT TERM BEGINS ON:</b> <span class="value" style="font-size: 12px!important;">10<sup>th</sup>
+            <span><b>NEXT TERM ENDS ON:</b> <span class="value" style="font-size: 12px!important;">10<sup>th</sup>
                     Jan, 2023</span></span>
         </div>
 
