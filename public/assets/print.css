@@ -50,7 +50,7 @@ html {
 body {
     display: table-cell;
     vertical-align: middle;
-
+     background-color: #222A2A; 
 } 
 
 .title-2 {
@@ -93,7 +93,7 @@ h2,
     padding-bottom: 3px;
 }
 
-.marks th {
+.marks th,.marks-1 th {
     font-size: 12px;
     padding: 0%;
     margin: 0%;
@@ -106,6 +106,14 @@ h2,
     text-align: center;
     font-size: 12px;
     font-family: monospace;
+}
+
+.marks-1 td {
+    padding: 0%;
+    margin: 0%;
+    text-align: start;
+    font-size: 12px;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 .marks .remarks {
@@ -149,4 +157,11 @@ td {
 }
 .summary .value{
     border-bottom: 1px dotted;   
+}
+
+article { 
+    box-shadow: 0px 1px 5px 3px rgba(255,255,255,0.69);
+    -webkit-box-shadow: 0px 1px 5px 3px rgba(255,255,255,0.69);
+    -moz-box-shadow: 0px 1px 5px 3px rgba(255,255,255,0.69);
+    margin-bottom: 1.5rem;
 }

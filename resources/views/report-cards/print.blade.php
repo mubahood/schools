@@ -12,10 +12,17 @@
 
 <body>
 
-    @include('report-cards.print-layout', ['r' => $r, 'tr' => $tr])
+
+    @foreach ($recs as $item)
+        @if ($item['r']->academic_class->class_type == 'Nursery')
+            @include('report-cards.print-nusery-layout', $item)
+        @else
+            @include('report-cards.print-layout', $item)
+        @endif
+    @endforeach
+
     {{-- @include('report-cards.print-layout')
     @include('report-cards.print-layout') --}}
-
 
 </body>
 

@@ -593,7 +593,7 @@ class Utils  extends Model
         return true;
     }
     public static function get_automaic_mark_remarks($score)
-    { 
+    {
         $remarks = "Improve";
         if ($score < 39) {
             $remarks = 'Improve';
@@ -987,5 +987,81 @@ class Utils  extends Model
 
         $phone_number = "+256" . $phone_number;
         return $phone_number;
+    }
+
+    public static function compute_competance($r)
+    {
+
+
+
+        $data['competance'] = $r->subject->subject_name;
+        $data['comment'] = $r->remarks;
+        $data['grade'] = "-";
+        if ($r->subject->main_course_id == 38) {
+            $data['competance'] = 'L.A 6';
+            $data['comment'] = 'Using my language appropriately';
+        } else if ($r->subject->main_course_id == 42) {
+            $data['competance'] = 'L.A 5';
+            $data['comment'] = 'Developing my language';
+        } else if ($r->subject->main_course_id == 39 || $r->subject->main_course_id == 49) {
+            $data['competance'] = 'L.A 4';
+            $data['comment'] = 'Developing and using mathematical concempts in day to day expieince';
+        } else if ($r->subject->main_course_id == 50) {
+            $data['competance'] = 'L.A 3';
+            $data['comment'] = 'Taking care of myself for proper growth and development';
+        } else if ($r->subject->main_course_id == 47) {
+            $data['competance'] = 'L.A 2';
+            $data['comment'] = 'Enterting with, exploring knowing and using my enviroment.';
+        } else if ($r->subject->main_course_id == 46) {
+            $data['competance'] = 'L.A 1';
+            $data['comment'] = 'Relating with others in an acceptable way.';
+        }
+
+
+        if ($r->total <= 44) {
+            $data['grade'] = "F";
+        } else if ($r->total <= 54) {
+            $data['grade'] = "W";
+        } else if ($r->total <= 64) {
+            $data['grade'] = "G";
+        } else if ($r->total <= 74) {
+            $data['grade'] = "V.G";
+        } else if ($r->total <= 100) {
+            $data['grade'] = "E";
+        }
+        return $data;
+    }
+    public static function compute_competance_theology($r)
+    {
+
+
+
+
+        $data['competance'] = $r->subject->theology_course->name;
+        $data['comment'] = $r->remarks;
+        $data['grade'] = "-";
+        if ($r->subject->theology_course->id == 1) {
+            $data['comment'] = 'Reading some Suras like Alfatha, Naas, Masad, Kauthar, Quraish, Fil, and Aswir';
+        } else if ($r->subject->theology_course->id == 4) {
+            $data['comment'] = 'Knowing the arabic alphabets, reading arabic letters, mentioning things found in class and at home';
+        } else if ($r->subject->theology_course->id == 3) {
+            $data['comment'] = 'Knowing hadith about lying, sharing, table manners, salam and bbrotherhood. Knowing about the life of prophet';
+        } else if ($r->subject->theology_course->id == 2) {
+            $data['comment'] = 'Knowing some duas like for eating, sleeping, toilet, sneezing, Adhan, entering mosque, dua for parents and for the sick people';
+        }
+
+
+        if ($r->total <= 44) {
+            $data['grade'] = "F";
+        } else if ($r->total <= 54) {
+            $data['grade'] = "W";
+        } else if ($r->total <= 64) {
+            $data['grade'] = "G";
+        } else if ($r->total <= 74) {
+            $data['grade'] = "V.G";
+        } else if ($r->total <= 100) {
+            $data['grade'] = "E";
+        }
+        return $data;
     }
 }
