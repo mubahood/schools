@@ -656,12 +656,14 @@ class Utils  extends Model
         $default->min_mark = -1;
         $default->aggregates = 0;
 
+        $report_item->total = ((int)($report_item->total));
+
 
         //$tot = $report_item->
         foreach ($grading_scale->grade_ranges as $v) {
             if (
-                (((int)($report_item->total))  > $v->min_mark) &&
-                (((int)($report_item->total)) < $v->max_mark)
+                ($report_item->total > $v->min_mark) &&
+                ($report_item->total < $v->max_mark)
             ) {
                 return $v;
             }
@@ -686,10 +688,11 @@ class Utils  extends Model
         $default->min_mark = -1;
         $default->aggregates = 0;
 
+        $report_item->total = ((int)($report_item->total));
         //$tot = $report_item->
         foreach ($grading_scale->grade_ranges as $v) {
             if (
-                (((int) ($report_item->total)) > $v->min_mark) &&
+                ($report_item->total >= $v->min_mark) &&
                 ($report_item->total < $v->max_mark)
             ) {
                 return $v;
@@ -1018,7 +1021,6 @@ class Utils  extends Model
         }
 
 
-
         if ($r->total < 44) {
             $data['grade'] = "F";
         } else if ($r->total < 54) {
@@ -1052,7 +1054,6 @@ class Utils  extends Model
         }
 
 
-        $r->total = ((int)($r->total));
         if ($r->total < 44) {
             $data['grade'] = "F";
         } else if ($r->total < 54) {

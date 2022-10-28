@@ -346,8 +346,8 @@ $school_email = 'admin@kjs.com';
                     18,000</span></span> --}}
             <span><b>SCHOOL PAY CODE:</b> <span class="value"
                     style="font-size: 12px!important;">{{ $r->owner->school_pay_payment_code }}</span></span>
-            <span><b>NEXT TERM BEGINS ON:</b> <span class="value" style="font-size: 12px!important;">16<sup>th</sup>
-                    Oct, 2022</span></span>
+            <span><b>NEXT TERM BEGINS ON:</b> <span class="value" style="font-size: 12px!important;">10<sup>th</sup>
+                    Jan, 2023</span></span>
         </div>
 
     </div>
