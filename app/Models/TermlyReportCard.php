@@ -106,9 +106,9 @@ class TermlyReportCard extends Model
 
         foreach ($m->term->academic_year->classes as $class) {
             foreach ($class->students as $_student) {
-                /* if ($_student->administrator_id != 2704) {
-                    //continue;
-                } */
+                if ($_student->administrator_id != 2774) {
+                    continue;
+                }
                 $student = $_student->student;
                 if ($student == null) {
                     die("Failed because Student {$student->id} was not found");
@@ -141,8 +141,24 @@ class TermlyReportCard extends Model
                             if ($main_course->course_id == 74) {
                                 StudentReportCardItem::where([
                                     'main_course_id' => $main_course->id
-                                ])->delete(); 
+                                ])->delete();
                             }
+                            if ($main_course->main_course_id == 45 && $class->id == 11) {
+
+                                StudentReportCardItem::where([
+                                    'main_course_id' => $main_course->id,
+                                    'student_report_card_id' => $report_card->id,
+                                ])->delete();
+
+                                Mark::where([
+                                    'main_course_id' => 45,
+                                    'class_id' => 11
+                                ])->delete();
+                                continue;
+                            }
+
+
+
 
 
 
@@ -159,103 +175,19 @@ class TermlyReportCard extends Model
                             } else {
                                 //die("Updating...");
                             }
-                            $marks = Mark::where([
+                            $mark = Mark::where([
                                 'main_course_id' => $main_course->main_course_id,
                                 'student_id' => $student->id,
                                 'class_id' => $class->id
-                            ])->get();
+                            ])->first();
 
- 
-                            /* $bot_avg_score = 0;
-                            $bot_avg_count = 0; */
 
-                            $mot_avg_score = 0;
-                            //$mot_avg_count = 0;
+                            if ($mark != null) {
 
-                            /* $eot_avg_score = 0;
-                            $eot_avg_count = 0;
-                            $regular_total = 0;
- */
-
-                            if (count($marks) > 0) {
-                                $num = count($marks);
-                                $tot = 0;
-                                //$regular_total = 0;
-                                foreach ($marks as $my_mark) {
-                                    //$regular_total = 0;
-                                    /* if (
-                                        $my_mark->exam->type == 'B.O.T' &&
-                                        $m->has_beginning_term
-                                    ) {
-                                        $bot_avg_count++;
-                                        $bot_avg_score +=  $my_mark->score;
-                                        $regular_total += $my_mark->exam->max_mark;
-                                        $tot += $my_mark->score;
-                                    } */
-
-                                    if (
-                                        $my_mark->exam->type == 'M.O.T'  
-                                    ) {
-                                        //$regular_total += $my_mark->exam->max_mark;
-                                        //$mot_avg_count++;
-                                        $mot_avg_score =  $my_mark->score;
-                                        $tot = $my_mark->score;
-                                    }
-
-                                    /* if (
-                                        $my_mark->exam->type == 'E.O.T' &&
-                                        $m->has_end_term
-
-                                    ) {
-                                        $regular_total += $my_mark->exam->max_mark;
-                                        $eot_avg_count++;
-                                        $eot_avg_score +=  $my_mark->score;
-                                        $tot += $my_mark->score;
-                                    } */
-                                }
-                                /* if ($num > 0) {
-                                    $tot = ($tot / $num);
-                                }
-
-                                if ($bot_avg_count > 0) {
-                                    $report_item->did_bot = 1;
-                                    $report_item->bot_mark = ($bot_avg_score / $bot_avg_count);
-                                } else {
-                                    $report_item->did_bot = 0;
-                                }
- */
-                                $report_item->mot_mark = $mot_avg_score;
-
-                                /* if ($mot_avg_count > 0) {
-                                    
-                                    $report_item->did_mot = 1;
-                                } else {
-                                    $report_item->did_mot = 0;
-                                }
-
-                                if ($eot_avg_count > 0) {
-                                    $report_item->eot_mark = ($mot_avg_score / $eot_avg_count);
-                                    $report_item->did_eot = 1;
-                                } else {
-                                    $report_item->did_eot = 0;
-                                } */
-                            } else {
-                                $report_item->did_eot = 0;
-                                $report_item->did_mot = 0;
-                                $report_item->did_bot = 0;
-                            }
-
-                            if ($report_item->mot_mark > 0) {
-                                $tot = 0;
-                                $tot += $report_item->bot_mark;
-                                $tot += $report_item->mot_mark;
-                                $tot += $report_item->eot_mark;
-                                $perecante  = $report_item->mot_mark;
-                                $perecante = (int)($perecante);
-                                $report_item->total = $perecante;
-
+                                $report_item->total = $mark->score;
                                 $report_item->remarks = Utils::get_automaic_mark_remarks($report_item->total);
-                                $u = Administrator::find($my_mark->subject->subject_teacher);
+                                $u = Administrator::find($mark->subject->subject_teacher);
+
                                 $initial = "";
                                 if ($u != null) {
                                     if (strlen($u->first_name) > 0) {
@@ -266,12 +198,12 @@ class TermlyReportCard extends Model
                                     }
                                 }
                                 $report_item->initials = $initial;
-
                                 $scale = Utils::grade_marks($report_item);
                                 $report_item->grade_name = $scale->name;
                                 $report_item->aggregates = $scale->aggregates;
                                 $report_item->save();
                             }
+ 
 
                             StudentReportCardItem::where([
                                 'main_course_id' => 74
@@ -281,6 +213,7 @@ class TermlyReportCard extends Model
                 }
             }
         }
+
 
         TermlyReportCard::grade_students($m);
     }
@@ -583,7 +516,7 @@ class TermlyReportCard extends Model
                             $eot_avg_score = 0;
                             $eot_avg_count = 0;
 
-                            if (count($marks) > 0) { 
+                            if (count($marks) > 0) {
                                 $tot = 0;
                                 foreach ($marks as $my_mark) {
                                     /* if ($my_mark->exam->type == 'B.O.T') {
@@ -603,7 +536,7 @@ class TermlyReportCard extends Model
 
                                     $tot += $my_mark->score;
                                 }
-                          
+
                                 /* if ($bot_avg_count > 0) {
                                     $report_item->did_bot = 1;
                                     $report_item->bot_mark = ($bot_avg_score / $bot_avg_count);
@@ -611,7 +544,7 @@ class TermlyReportCard extends Model
                                     $report_item->did_bot = 0;
                                 } */
 
-                                $report_item->mot_mark = $mot_avg_score;// ($mot_avg_score / $mot_avg_count);
+                                $report_item->mot_mark = $mot_avg_score; // ($mot_avg_score / $mot_avg_count);
                                 /* if ($mot_avg_count > 0) {
                                     $report_item->did_mot = 1;
                                 } else {
