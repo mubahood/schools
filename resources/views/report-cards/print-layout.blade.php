@@ -129,6 +129,7 @@ $school_email = 'admin@kjs.com';
             </p>
 
         </div> 
+        {{-- 19.9 --}}
 
         <div class="col-2 float-right text-right">
             <img width="100px" class="img-fluid float-right text-right" src="{{ $r->owner->avatar }}">
