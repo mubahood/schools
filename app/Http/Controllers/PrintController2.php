@@ -28,8 +28,8 @@ class PrintController2 extends Controller
         ini_set('memory_limit', '-1');
 
         ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+        ini_set('display_startup_errors', 1);
+        error_reporting(E_ALL);
 
 
         if (isset($_GET['calss_id'])) {
@@ -40,7 +40,7 @@ error_reporting(E_ALL);
             ])->get() as $r) {
 
                 $tr = TheologryStudentReportCard::where([
-                    'student_id' => $r->student_id, 
+                    'student_id' => $r->student_id,
                     'term_id' => $r->term_id,
                 ])->first();
 
@@ -50,11 +50,7 @@ error_reporting(E_ALL);
                 ];
             }
 
-            //return view('report-cards.print', ['recs' => $reps]);
-            //return $data . $data;
-            $pdf = App::make('dompdf.wrapper');
-            $pdf->loadHTML(view('report-cards.print', ['recs' => $reps]));
-            return $pdf->stream();
+            return view('report-cards.print', ['recs' => $reps]);
         }
 
         $id = ((int)($req->id));
