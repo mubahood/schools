@@ -35,11 +35,11 @@
 article {
     page-break-before: always;
     border: 2px solid green;
-    height: 20cm;
+    height: 19.9cm;
     width: 29cm;
     background-color: white;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
+    margin-top: .5rem;
+    margin-bottom: .5rem;
     padding: 10px;
 }
 
