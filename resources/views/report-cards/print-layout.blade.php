@@ -115,7 +115,7 @@ $school_email = 'admin@kjs.com';
 
     <div class="row">
         <div class="col-2">
-            <img width="120px" class="img-fluid" src="{{ url('storage/' . $r->ent->logo) }}">
+            <img width="100px" class="img-fluid" src="{{ url('storage/' . $r->ent->logo) }}">
         </div>
 
         <div class="col-8">
@@ -128,15 +128,15 @@ $school_email = 'admin@kjs.com';
             <p class="text-center p font-serif  fs-3 m-0 p-0"><u><b>{{ $r->termly_report_card->report_title }}</b></u>
             </p>
 
-        </div>
+        </div> 
 
         <div class="col-2 float-right text-right">
-            <img width="120px" class="img-fluid float-right text-right" src="{{ $r->owner->avatar }}">
+            <img width="100px" class="img-fluid float-right text-right" src="{{ $r->owner->avatar }}">
         </div>
 
     </div>
 
-    <hr style="border: solid green 1px; " class="m-0 mt-2  mb-2">
+    <hr style="border: solid green 1px; " class="m-0 mt-1  mb-1">
 
     <div class="container">
         <div class="row mb-1 d-flex justify-content-between summary"style="font-size: 14px">
@@ -189,7 +189,7 @@ $school_email = 'admin@kjs.com';
                             </thead>
                             @foreach ($r->items as $v)
                                 <tr class="marks">
-                                    <th>{{ $v->subject->subject_name." ".$v->subject->main_course_id }}</th>
+                                    <th>{{ $v->subject->subject_name . ' ' . $v->subject->main_course_id }}</th>
                                     @if ($r->termly_report_card->has_beginning_term)
                                         <td>{{ $v->bot_mark }}</td>
                                     @endif
@@ -212,7 +212,7 @@ $school_email = 'admin@kjs.com';
                                     <td></td>
                                 @endif
                                 @if ($r->termly_report_card->has_mid_term)
-                                  {{--   <td></td> --}}
+                                    {{--   <td></td> --}}
                                 @endif
                                 @if ($r->termly_report_card->has_end_term)
                                     <td></td>
@@ -276,7 +276,7 @@ $school_email = 'admin@kjs.com';
                                         <th>B.O.T <br> ({{ $max_bot }})</th>
                                     @endif
                                     @if ($tr->termly_report_card->has_mid_term)
-                                       {{--  <th>M.O.T <br> ({{ $max_mot }})</th> --}}
+                                        {{--  <th>M.O.T <br> ({{ $max_mot }})</th> --}}
                                     @endif
                                     @if ($tr->termly_report_card->has_end_term)
                                         <th>E.O.T <br> ({{ $max_eot }})</th>
@@ -315,7 +315,7 @@ $school_email = 'admin@kjs.com';
                                         @endif
 
                                         @if ($r->termly_report_card->has_mid_term)
-                                           {{--  <td>{{ $v->mot_mark }}</td> --}}
+                                            {{--  <td>{{ $v->mot_mark }}</td> --}}
                                         @endif
                                         @if ($r->termly_report_card->has_end_term)
                                             <td>{{ $v->eot_mark }}</td>
