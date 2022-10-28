@@ -12,11 +12,19 @@ class BatchPrint extends BatchAction
     public function handle(Collection $collection)
     {
         $x = 0;
+        $jds = [];
         foreach ($collection as $model) {
-            $x++;
+            $jds[] = $model->id;
         }
 
+        
+        return redirect(url('print?ids='.json_encode($jds)));
         return $this->response()->success('Success message... '.$x)->refresh();
+    }
+
+    public function html()
+    {
+        return "<a class='report-posts btn btn-sm btn-danger'><i class='fa fa-info-circle'></i>Report</a>";
     }
 
 }

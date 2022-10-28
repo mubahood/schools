@@ -2,7 +2,6 @@
 
 namespace App\Admin\Controllers;
 
-use App\Admin\Actions\Post\BatchPrint;
 use App\Models\AcademicClass;
 use App\Models\AcademicYear;
 use App\Models\StudentReportCard;
@@ -10,10 +9,16 @@ use App\Models\Term;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
+use Encore\Admin\Layout\Row;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
 use Encore\Admin\Widgets\Box;
 use NumberFormatter;
+use Encore\Admin\Layout\Content;
+use Encore\Admin\Layout\Column;
+use Encore\Admin\Widgets\Form as WidgetsForm;
+use Encore\Admin\Widgets\InfoBox;
+use Encore\Admin\Widgets\Table;
 
 class StudentReportCardController extends AdminController
 {
@@ -24,6 +29,43 @@ class StudentReportCardController extends AdminController
      */
     protected $title = 'Students report cards';
 
+    protected function print(Content $content)
+    {
+        return $content
+            ->title('Batch report card printing')
+            ->description('Dashboard')
+            ->row(function (Row $row) {
+
+                $row->column(4, function (Column $column) {
+
+                    $u = Admin::user();
+
+                    $rows = [];
+                    foreach (AcademicClass::where([
+                        'enterprise_id' => $u->enterprise_id
+                    ])
+                        ->orderBy('id', 'Desc')
+                        ->get() as $v) {
+                        $rows[] = [
+                            $v->id,
+                            $v->name_text,
+                            '<a target="_blank" href="' . url('print?calss_id=' . $v->id) . '">PRINT</a>'
+                        ];
+                    }
+
+                    $headers = ['Id', 'Class', 'Print'];
+
+
+                    $table = new Table($headers, $rows);
+
+                    $box = new Box('Class IDs', $table);
+
+                    $box->style('success');
+
+                    $column->append($box);
+                });
+            });
+    }
     /**
      * Make a grid builder.
      *
@@ -33,9 +75,6 @@ class StudentReportCardController extends AdminController
     {
         $grid = new Grid(new StudentReportCard());
 
-        $grid->batchActions(function ($batch) {
-            $batch->add(new BatchPrint());
-        });
 
 
         /*  $grid->header(function ($query) {
@@ -90,7 +129,7 @@ class StudentReportCardController extends AdminController
 
 
 
-        //$grid->disableBatchActions();
+        $grid->disableBatchActions();
         $grid->disableActions();
         $grid->disableCreateButton();
 

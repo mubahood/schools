@@ -24,6 +24,26 @@ class PrintController2 extends Controller
     public function index(Request $req)
     {
 
+        if (isset($_GET['calss_id'])) {
+            $icalss_id = ((int)($_GET['calss_id']));
+            $reps  = [];
+            foreach (StudentReportCard::where([
+                'academic_class_id' => $icalss_id
+            ])->get() as $r) {
+
+                $tr = TheologryStudentReportCard::where([
+                    'student_id' => $r->student_id,
+                    'term_id' => $r->term_id,
+                ])->first();
+
+                $reps[] = [
+                    'r' => $r,
+                    'tr' => $tr,
+                ];
+            }
+
+            return view('report-cards.print', ['recs' => $reps]);
+        }
 
         $id = ((int)($req->id));
         $r = StudentReportCard::find($id);
@@ -50,7 +70,7 @@ class PrintController2 extends Controller
         }
 
         //return view('report-cards.print', ['recs' => [['r' => $r, 'tr' => $tr], ['r' => $r, 'tr' => $tr]]]);
-        return view('report-cards.print', ['recs' => [['r' => $r, 'tr' => $tr] ]]);
+        return view('report-cards.print', ['recs' => [['r' => $r, 'tr' => $tr]]]);
 
         /* if ($r->academic_class->class_type == 'Nursery') { 
             return view('report-cards.print', ['r' => $r, 'tr' => $tr]);
