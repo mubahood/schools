@@ -42,8 +42,11 @@ class TermlyReportCard extends Model
             TermlyReportCard::my_update($m);
         });
 
-        self::updated(function ($m) {
-            TermlyReportCard::my_update($m);
+        self::updated(function ($m) { 
+            if($m->do_update){
+                TermlyReportCard::my_update($m);
+
+            }
         });
     }
 
