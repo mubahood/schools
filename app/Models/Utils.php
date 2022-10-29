@@ -1064,7 +1064,7 @@ class Utils  extends Model
         } else if ($r->subject->theology_course->id == 4) {
             $data['comment'] = 'Knowing the arabic alphabets, reading arabic letters, mentioning things found in class and at home';
         } else if ($r->subject->theology_course->id == 3) {
-            $data['comment'] = 'Knowing hadith about lying, sharing, table manners, salam and bbrotherhood. Knowing about the life of prophet';
+            $data['comment'] = 'Knowing hadith about lying, sharing, table manners, salam and brotherhood. Knowing about the life of prophet';
         } else if ($r->subject->theology_course->id == 2) {
             $data['comment'] = 'Knowing some duas like for eating, sleeping, toilet, sneezing, Adhan, entering mosque, dua for parents and for the sick people';
         }
