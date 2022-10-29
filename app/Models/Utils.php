@@ -671,15 +671,7 @@ class Utils  extends Model
                 return $v;
             }
         }
-
-        foreach ($grading_scale->grade_ranges as $v) {
-            if (
-                ($report_item->total <= $v->max_mark)
-            ) {
-                return $v;
-            }
-        }
-
+ 
         
 
         return $default;
