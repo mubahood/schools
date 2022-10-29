@@ -106,9 +106,10 @@ class TermlyReportCard extends Model
 
         foreach ($m->term->academic_year->classes as $class) {
             foreach ($class->students as $_student) {
-                if ($_student->administrator_id != 2774) {
+               /*  if ($_student->administrator_id != 2703) {
                     continue;
-                }
+                } */
+
                 $student = $_student->student;
                 if ($student == null) {
                     die("Failed because Student {$student->id} was not found");
@@ -197,13 +198,34 @@ class TermlyReportCard extends Model
                                         $initial .= "." . substr($u->last_name, 0, 1);
                                     }
                                 }
-                                $report_item->initials = $initial;
-                                $scale = Utils::grade_marks($report_item);
-                                $report_item->grade_name = $scale->name;
-                                $report_item->aggregates = $scale->aggregates;
+
+                                if ($class->class_type != 'Nursery') {
+                                    if (
+                                        $report_item->subject->main_course_id == 42 ||
+                                        $report_item->subject->main_course_id == 44 ||
+                                        $report_item->subject->main_course_id == 43 ||
+                                        $report_item->subject->main_course_id == 45 ||
+                                        $report_item->subject->main_course_id == 42
+                                    ) {
+                                        $report_item->grade_name = '';
+                                        $report_item->aggregates = 0;
+                                    } else {
+
+                                        $report_item->initials = $initial;
+                                        $scale = Utils::grade_marks($report_item);
+                                        $report_item->grade_name = $scale->name;
+                                        $report_item->aggregates = $scale->aggregates;
+                                    }
+                                } else {
+                                    $report_item->initials = $initial;
+                                    $scale = Utils::grade_marks($report_item);
+                                    $report_item->grade_name = $scale->name;
+                                    $report_item->aggregates = $scale->aggregates;
+                                }
+
                                 $report_item->save();
                             }
- 
+
 
                             StudentReportCardItem::where([
                                 'main_course_id' => 74
@@ -223,11 +245,13 @@ class TermlyReportCard extends Model
     {
 
 
+
         foreach ($m->report_cards as  $report_card) {
-            /*  if ($report_card->id != 304) {
+
+            /* if ($report_card->id != 234) {
                 continue;
-            }   
-            dd("{$report_card->owner->name}"); */
+            } */
+            //dd("{$report_card->owner->name}"); */
 
             $total_marks = 0;
             $number_of_marks = 0;
@@ -235,8 +259,11 @@ class TermlyReportCard extends Model
             $total_students = count($report_card->academic_class->students);
 
             foreach ($report_card->items as $student_report_card) {
-                $total_marks += ((int)($student_report_card->total));
+                if ((int)($student_report_card->aggregates) < 1) {
+                    continue;
+                }
                 $total_aggregates += ((int)($student_report_card->aggregates));
+                $total_marks += ((int)($student_report_card->total));
                 $number_of_marks++;
             }
             if ($number_of_marks < 1) {
@@ -262,7 +289,7 @@ class TermlyReportCard extends Model
             $report_card->total_aggregates = $total_aggregates;
             $report_card->total_students = $total_students;
             $report_card->save();
-            TermlyReportCard::get_teachers_remarks($report_card);
+            //TermlyReportCard::get_teachers_remarks($report_card);
         }
 
 

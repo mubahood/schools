@@ -674,6 +674,7 @@ class Utils  extends Model
 
     public static function grade_marks($report_item)
     {
+
         $grading_scale = GradingScale::find($report_item->student_report_card->termly_report_card->grading_scale_id);
         if ($grading_scale == null) {
             die("No grading scale found.");
