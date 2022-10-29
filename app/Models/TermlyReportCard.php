@@ -43,9 +43,7 @@ class TermlyReportCard extends Model
         });
 
         self::updated(function ($m) {
-            if ($m->do_update) {
-                TermlyReportCard::my_update($m);
-            }
+            TermlyReportCard::my_update($m);
         });
     }
 
@@ -106,9 +104,10 @@ class TermlyReportCard extends Model
 
         foreach ($m->term->academic_year->classes as $class) {
             foreach ($class->students as $_student) {
-                /*  if ($_student->administrator_id != 2703) {
+   
+                if ($_student->administrator_id != 2831) {
                     continue;
-                } */
+                } 
 
                 $student = $_student->student;
                 if ($student == null) {
@@ -158,11 +157,7 @@ class TermlyReportCard extends Model
                                 continue;
                             }
 
-
-
-
-
-
+ 
                             $report_item =  StudentReportCardItem::where([
                                 'main_course_id' => $main_course->id,
                                 'student_report_card_id' => $report_card->id,
@@ -199,6 +194,7 @@ class TermlyReportCard extends Model
                                     }
                                 }
 
+
                                 if ($class->class_type != 'Nursery') {
                                     if (
                                         $report_item->subject->main_course_id == 42 ||
@@ -213,10 +209,13 @@ class TermlyReportCard extends Model
 
                                         $report_item->initials = $initial;
                                         $scale = Utils::grade_marks($report_item);
+
                                         $report_item->grade_name = $scale->name;
                                         $report_item->aggregates = $scale->aggregates;
                                     }
+ 
                                 } else {
+ 
                                     $report_item->initials = $initial;
                                     $scale = Utils::grade_marks($report_item);
                                     $report_item->grade_name = $scale->name;
@@ -289,7 +288,7 @@ class TermlyReportCard extends Model
             $report_card->total_aggregates = $total_aggregates;
             $report_card->total_students = $total_students;
             $report_card->save();
-            TermlyReportCard::get_teachers_remarks($report_card);
+            //TermlyReportCard::get_teachers_remarks($report_card);
         }
 
 
