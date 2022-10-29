@@ -190,7 +190,7 @@ $school_email = 'admin@kjs.com';
                             </thead>
                             @foreach ($r->items as $v)
                                 <tr class="marks">
-                                    <th>{{ $v->subject->subject_name   . ' ' . $v->subject->id  }}</th>
+                                    <th>{{ $v->subject->subject_name /* . ' ' . $v->subject->main_course_id */ }}</th>
                                     @if ($r->termly_report_card->has_beginning_term)
                                         <td>{{ $v->bot_mark }}</td>
                                     @endif
