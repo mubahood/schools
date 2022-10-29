@@ -198,7 +198,7 @@ $school_email = 'admin@kjs.com';
 
                 <div class="p-0 mt-2 mb-2 class-teacher">
                     <b>CLASS TEACHER'S COMMENT:</b>
-                    <span class="comment">{{ $r->class_teacher_comment }}</span>
+                    <span class="comment">{{-- {{ $r->class_teacher_comment }} --}}</span>
                 </div>
 
 

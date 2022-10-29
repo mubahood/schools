@@ -662,12 +662,22 @@ class Utils  extends Model
         //$tot = $report_item->
         foreach ($grading_scale->grade_ranges as $v) {
             if (
-                ($report_item->total > $v->min_mark) &&
+                ($report_item->total >= $v->min_mark) &&
                 ($report_item->total <= $v->max_mark)
             ) {
                 return $v;
             }
         }
+
+        foreach ($grading_scale->grade_ranges as $v) {
+            if (
+                ($report_item->total <= $v->max_mark)
+            ) {
+                return $v;
+            }
+        }
+
+        
 
         return $default;
     }
@@ -692,11 +702,11 @@ class Utils  extends Model
         $report_item->total = (int)($report_item->total);
         //$tot = $report_item->
         foreach ($grading_scale->grade_ranges as $v) {
-            if (
+            /*             if (
                 $report_item->total < $v->max_mark
             ) {
                 return $v;
-            }
+            } */
             if (
                 ($report_item->total > $v->min_mark) &&
                 ($report_item->total < $v->max_mark)
@@ -1008,19 +1018,19 @@ class Utils  extends Model
         $data['grade'] = "-";
         if ($r->subject->main_course_id == 38) {
             //$data['competance'] = 'L.A 6';
-            $data['comment'] = 'Using my language appropriately';
+            $data['comment'] = 'Using my language appropriately.';
         } else if ($r->subject->main_course_id == 42) {
             //$data['competance'] = 'L.A 5';
-            $data['comment'] = 'Developing my language';
+            $data['comment'] = 'Developing my language.';
         } else if ($r->subject->main_course_id == 39 || $r->subject->main_course_id == 49) {
             //$data['competance'] = 'L.A 4';
-            $data['comment'] = 'Developing and using mathematical concempts in day to day expieince';
+            $data['comment'] = 'Developing and using mathematical concepts in my day to day expiriences.';
         } else if ($r->subject->main_course_id == 50) {
             //$data['competance'] = 'L.A 3';
-            $data['comment'] = 'Taking care of myself for proper growth and development';
+            $data['comment'] = 'Taking care of myself for proper growth and development.';
         } else if ($r->subject->main_course_id == 47) {
             //$data['competance'] = 'L.A 2';
-            $data['comment'] = 'Enterting with, exploring knowing and using my enviroment.';
+            $data['comment'] = 'interacting with, exploring knowing and using my enviroment.';
         } else if ($r->subject->main_course_id == 46) {
             //$data['competance'] = 'L.A 1';
             $data['comment'] = 'Relating with others in an acceptable way.';
