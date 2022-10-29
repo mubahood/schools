@@ -108,9 +108,11 @@ class TermlyReportCard extends Model
         foreach ($m->term->academic_year->classes as $class) {
             foreach ($class->students as $_student) {
    
-                /* if ($_student->administrator_id != 2831) {
-                    continue;
-                }  */
+                 if ($_student->administrator_id != 2846) {
+                    
+                } 
+
+
 
                 $student = $_student->student;
                 if ($student == null) {
@@ -138,51 +140,36 @@ class TermlyReportCard extends Model
 
                 if ($report_card != null) {
                     if ($report_card->id > 0) {
-                        foreach ($class->get_students_subjects($student->id) as $main_course) {
 
 
-                            if ($main_course->course_id == 74) {
-                                StudentReportCardItem::where([
-                                    'main_course_id' => $main_course->id
-                                ])->delete();
-                            }
-                            if ($main_course->main_course_id == 45 && $class->id == 11) {
-
-                                StudentReportCardItem::where([
-                                    'main_course_id' => $main_course->id,
-                                    'student_report_card_id' => $report_card->id,
-                                ])->delete();
-
-                                Mark::where([
-                                    'main_course_id' => 45,
-                                    'class_id' => 11
-                                ])->delete();
-                                continue;
-                            }
-
- 
+                        $marks = Mark::where([ 
+                            'student_id' => $student->id,
+                            'class_id' => $class->id
+                        ])->get(); 
+                        foreach ($marks as $mark) {
+                            
+                       
+                            
                             $report_item =  StudentReportCardItem::where([
-                                'main_course_id' => $main_course->id,
+                                'main_course_id' => $mark->subject_id,
                                 'student_report_card_id' => $report_card->id,
                             ])->first();
+
                             //did_bot	did_mot	did_eot	bot_mark	mot_mark	eot_mark	grade_name	aggregates	remarks	initials
                             if ($report_item == null) {
                                 $report_item = new StudentReportCardItem();
                                 $report_item->enterprise_id = $m->enterprise_id;
-                                $report_item->main_course_id = $main_course->id;
+                                $report_item->main_course_id = $mark->subject_id;
                                 $report_item->student_report_card_id = $report_card->id;
                             } else {
                                 //die("Updating...");
+                             
                             }
-                            $mark = Mark::where([
-                                'main_course_id' => $main_course->main_course_id,
-                                'student_id' => $student->id,
-                                'class_id' => $class->id
-                            ])->first();
-
+ 
+ 
 
                             if ($mark != null) {
-
+ 
                                 $report_item->total = $mark->score;
                                 $report_item->remarks = Utils::get_automaic_mark_remarks($report_item->total);
                                 $u = Administrator::find($mark->subject->subject_teacher);
@@ -236,8 +223,7 @@ class TermlyReportCard extends Model
                     }
                 }
             }
-        }
-
+        } 
 
         TermlyReportCard::grade_students($m);
     }
