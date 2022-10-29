@@ -259,14 +259,14 @@ $school_email = 'admin@kjs.com';
             <div class="col-12">
                 <div class="row mt-3 p-0 -info ">
                     <div class="col-12  text-white scale-title" style="background-color: black">
-                        <h2 class="p-1 text-center m-0 " style="font-size: 12px;">Abbreviations</h2>
+                        <h2 class="p-1 text-center m-0 " style="font-size: 12px;">Grading</h2>
                     </div>
                     <div class="col-12 p-0">
                         <table class="table table-bordered grade-table">
                             <tbody>
                                 <tr class="text-center">
-                                    <th class="text-left">Abbreviation</th>
-                                    <th>LA</th>
+                                    <th class="text-left">Grade</th>
+                                    {{-- <th>LA</th> --}}
                                     <th>E</th>
                                     <th>W</th>
                                     <th>V.G</th>
@@ -275,7 +275,7 @@ $school_email = 'admin@kjs.com';
                                 </tr>
                                 <tr>
                                     <th class="text-left">Meaning</th>
-                                    <td class="bordered-table text-center  ">Learning area</td>
+                                    {{-- <td class="bordered-table text-center  ">Learning area</td> --}}
                                     <td class="bordered-table text-center  ">Excellent</td>
                                     <td class="bordered-table text-center  ">Working on skills</td>
                                     <td class="bordered-table text-center  ">Very Good</td>
@@ -355,7 +355,5 @@ $school_email = 'admin@kjs.com';
             <span><b>THIS TERM ENDS ON:</b> <span class="value" style="font-size: 12px!important;">2<sup>nd</sup> Dec,
                     2022</span></span>
         </div>
-
     </div>
-
 </article>
