@@ -73,7 +73,7 @@ class TheologyExam extends Model
                             $mark->is_submitted = false;
                             $mark->is_missed = true;
                             $mark->remarks = '';
-                        } else {
+                        } else {    
                             $mark->remarks = Utils::get_automaic_mark_remarks(
                                 Utils::convert_to_percentage($mark->score, $mark->exam->max_mark)
                             );

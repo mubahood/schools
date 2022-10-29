@@ -84,7 +84,7 @@ class TermlyReportCard extends Model
         } else if ($ent->type == 'Secondary') {
             TermlyReportCard::make_reports_for_secondary($m);
         } else {
-            die("School typr not found.");
+            die("School type not found.");
         }
     }
 
@@ -107,11 +107,7 @@ class TermlyReportCard extends Model
 
         foreach ($m->term->academic_year->classes as $class) {
             foreach ($class->students as $_student) {
-   
-                 if ($_student->administrator_id != 2846) {
-                    
-                } 
-
+    
 
 
                 $student = $_student->student;
