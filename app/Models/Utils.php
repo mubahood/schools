@@ -700,7 +700,7 @@ class Utils  extends Model
 
             $mark = ((int)($report_item->total));
             if (
-                $mark >= $v->min_mark && $mark <= $v->max_mark
+                $mark > $v->min_mark && $mark <= $v->max_mark
             ) {
                 return $v;
             }
