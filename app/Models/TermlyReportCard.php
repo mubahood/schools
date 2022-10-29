@@ -106,7 +106,7 @@ class TermlyReportCard extends Model
 
         foreach ($m->term->academic_year->classes as $class) {
             foreach ($class->students as $_student) {
-               /*  if ($_student->administrator_id != 2703) {
+                /*  if ($_student->administrator_id != 2703) {
                     continue;
                 } */
 
@@ -289,7 +289,7 @@ class TermlyReportCard extends Model
             $report_card->total_aggregates = $total_aggregates;
             $report_card->total_students = $total_students;
             $report_card->save();
-            //TermlyReportCard::get_teachers_remarks($report_card);
+            TermlyReportCard::get_teachers_remarks($report_card);
         }
 
 
@@ -368,7 +368,7 @@ class TermlyReportCard extends Model
             } else {
                 $comments = [
                     "Wonderful results. Don’t relax",
-                    "Promising performance. Keep working hard for first grade.",
+                    "Promising performance. Keep working hard!",
                     "Encouraging results, Continue reading hard.",
                 ];
                 shuffle($comments);
