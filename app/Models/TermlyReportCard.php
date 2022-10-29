@@ -105,9 +105,9 @@ class TermlyReportCard extends Model
         foreach ($m->term->academic_year->classes as $class) {
             foreach ($class->students as $_student) {
    
-                if ($_student->administrator_id != 2831) {
+                /* if ($_student->administrator_id != 2831) {
                     continue;
-                } 
+                }  */
 
                 $student = $_student->student;
                 if ($student == null) {
