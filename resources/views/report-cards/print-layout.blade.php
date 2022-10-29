@@ -190,7 +190,7 @@ $school_email = 'admin@kjs.com';
                             </thead>
                             @foreach ($r->items as $v)
                                 <tr class="marks">
-                                    <th>{{ $v->subject->subject_name . ' ' . $v->subject->main_course_id }}</th>
+                                    <th>{{ $v->subject->subject_name /* . ' ' . $v->subject->main_course_id */ }}</th>
                                     @if ($r->termly_report_card->has_beginning_term)
                                         <td>{{ $v->bot_mark }}</td>
                                     @endif
@@ -461,8 +461,8 @@ $school_email = 'admin@kjs.com';
                     18,000</span></span> --}}
             <span><b>SCHOOL PAY CODE:</b> <span class="value"
                     style="font-size: 12px!important;">{{ $r->owner->school_pay_payment_code }}</span></span>
-            <span><b>NEXT TERM ENDS ON:</b> <span class="value" style="font-size: 12px!important;">10<sup>th</sup>
-                    Jan, 2023</span></span>
+            <span><b>THIS TERM ENDS ON:</b> <span class="value" style="font-size: 12px!important;">2<sup>nd</sup>
+                    Dec, 2022</span></span>
         </div>
 
     </div>
