@@ -5,6 +5,7 @@ namespace App\Admin\Controllers;
 use App\Models\Account;
 use App\Models\Enterprise;
 use App\Models\Utils;
+use Dflydev\DotAccessData\Util;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -37,12 +38,16 @@ class AccountController extends AdminController
         Utils::reconcile_in_background(Admin::user()->enterprise_id);
         $grid = new Grid(new Account());
 
+
+
+
         $grid->model()
             ->orderBy('id', 'Desc')
             ->where([
                 'enterprise_id' => Admin::user()->enterprise_id,
-                'type' => 'STUDENT_ACCOUNT'
+                /*   'type' => 'STUDENT_ACCOUNT' */
             ]);
+
 
 
         $grid->filter(function ($filter) {
@@ -59,6 +64,14 @@ class AccountController extends AdminController
             );
 
             $filter->equal('id', 'Student')->select()->ajax($ajax_url);
+            $filter->equal('type', 'Account type')->select(
+                [
+                    'STUDENT_ACCOUNT' => 'Students\' accounts',
+                    'EMPLOYEE_ACCOUNT' => 'Employees\' accounts',
+                    'BANK_ACCOUNT' => 'Bank accounts',
+                    'CASH_ACCOUNT' => 'Cash accounts',
+                ]
+            );
 
             $filter->group('balance', function ($group) {
                 $group->gt('greater than');
@@ -86,13 +99,7 @@ class AccountController extends AdminController
 
 
         $grid->column('created_at', __('Created'))->hide()->sortable();
-        /* $grid->column('type', __('Account Category'))
-            ->filter([
-                'STUDENT_ACCOUNT' => 'Student\'s accounts',
-                'EMPLOYEE_ACCOUNT' => 'Employees accounts',
-                'BANK_ACCOUNT' => 'Bank accounts',
-                'CASH_ACCOUNT' => 'Cash accounts',
-            ]); */
+        $grid->column('type', __('Account type'))->sortable();
 
         /*  $grid->column('name', __('Account Name'))
             ->link()
@@ -126,6 +133,32 @@ class AccountController extends AdminController
                 1 => 'success',
             ])
             ->sortable();
+
+
+
+        $grid->export(function ($export) {
+
+            $export->filename('Accounts.csv');
+
+            $export->except(['enterprise_id', 'type', 'owner.avatar']);
+
+            //$export->only(['column3', 'column4']);
+            $export->originalValue(['name', 'balance']);
+            $export->column('balance', function ($value, $original) {
+                return $original;
+            });
+            $export->column('status', function ($value, $original) {
+                if ($original) {
+                    return "Verified";
+                } else {
+                    return "Pending";
+                }
+            });
+            /*
+            $export->column('balance', function ($value, $original) {
+                return $original;
+            }); */
+        });
 
         return $grid;
     }
@@ -265,14 +298,24 @@ class AccountController extends AdminController
                 ->rules('required');
         }
 
-        if (!$form->isEditing()) {
-            $form->radio('type', "Account type")
-                ->options([
-                    'BANK_ACCOUNT' => 'Bank account',
-                    'OTHER_ACCOUNT' => 'Other account',
-                ])->default(-1)
+        if ($form->isEditing()) {
+            $form->radio('category', "Account type")
+                ->options(Utils::account_categories())
+                ->readonly()
+                ->rules('required');
+        } else {
+            $form->hidden('type', "Account type")
+                ->default('OTHER_ACCOUNT')
+                ->rules('required');
+
+            $form->radio('category', "Account type")
+                ->options(Utils::account_categories())
+                ->readonly()
                 ->rules('required');
         }
+
+        $form->textarea('description', __('Account description'));
+
 
         /*
             ->when('OTHER_ACCOUNT', function ($f) {

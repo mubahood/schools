@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 class Transaction extends Model
 {
-    use HasFactory;
+    use HasFactory; 
     public static function my_create($data)
     {
 

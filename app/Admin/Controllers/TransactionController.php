@@ -129,7 +129,32 @@ class TransactionController extends AdminController
     {
         $form = new Form(new Transaction());
         $u = Admin::user();
+        $accs = Account::where([
+            'enterprise_id' => $u->enterprise_id,
+            'type' => 'CASH_ACCOUNT'
+        ])->get();
+        $accs_2 = Account::where([
+            'enterprise_id' => $u->enterprise_id,
+            'type' => 'BANK_ACCOUNT'
+        ])
+            ->get();
+
+        foreach ($accs_2 as $acc) {
+            $accs[] = $acc;
+        }
+        $_accs = [];
+        foreach ($accs as $acc) {
+            $_accs[$acc->id] = $acc->name;
+        }
+
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
+
+        $form->radio('is_debit', "Transaction type")
+            ->options([
+                1 => 'Debit (+)',
+                0 => 'Credit (-)',
+            ])->default(-1)
+            ->rules('required');
 
         $ajax_url = url(
             '/api/ajax?'
@@ -149,17 +174,22 @@ class TransactionController extends AdminController
             })
             ->ajax($ajax_url)->rules('required');
 
-        $form->radio('is_debit', "Transaction type")
-            ->options([
-                1 => 'Debit (+)',
-                0 => 'Credit (-)',
-            ])->default(-1)
-            ->rules('required');;
 
-        $form->text('amount', __('Amount'))
+        $form->decimal('amount', __('Amount'))
             ->attribute('type', 'number')
             ->rules('required|int');
+
+        $form->date('payment_date', __('Date'))
+            ->rules('required');
+
         $form->textarea('description', __('Description'))->rules('required');
+
+        $form->divider();
+
+        $form->select('contra_entry_account_id', "Contra-entry Account")
+            ->options($_accs)
+            ->help("Source/Destination of the funds.")
+            ->rules('required');
 
         $form->disableCreatingCheck();
         $form->disableReset();

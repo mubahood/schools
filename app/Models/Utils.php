@@ -691,7 +691,7 @@ class Utils  extends Model
         $default->grading_scale_id = 1;
         $default->enterprise_id = 1;
         $default->name = 'X';
-        $default->min_mark = -1; 
+        $default->min_mark = -1;
         $default->aggregates = 0;
 
         $report_item->total = (int)($report_item->total);
@@ -876,6 +876,18 @@ class Utils  extends Model
                 'name' => 'Secondary Six',
                 'short_name' => 'S6',
             ],
+        ];
+    }
+
+
+    public static function account_categories()
+    {
+        return [
+            'asset' => 'Asset account',
+            'expense' => 'Expense account',
+            'liability' => 'Liability account',
+            'equity' => 'Equity account',
+            'revenue' => 'Revenue account',
         ];
     }
 
