@@ -111,6 +111,24 @@ class AccountController extends AdminController
                     '<a class="text-dark" href="' . admin_url('students/' . $this->administrator_id) . '">' . $this->name . "</a>";;
             });
 
+        $grid->column('class', __('Class'))
+            ->display(function () {
+
+                if ($this->owner == null) {
+                    return "-";
+                }
+                if ($this->owner->current_class == null) {
+                    return "-";
+                }
+                if ($this->owner->current_class->name == null) {
+                    return "-";
+                }
+                if ($this->owner->current_class->short_name != null) {
+                    return $this->owner->current_class->short_name;
+                }
+                return "-";
+            });
+
         $grid->column('school', __('School pay'))
             ->display(function () {
                 if ($this->owner->school_pay_payment_code == null) {
@@ -138,9 +156,9 @@ class AccountController extends AdminController
 
         $grid->export(function ($export) {
 
-            $export->filename('Accounts.csv');
+            $export->filename('Accounts');
 
-            $export->except(['enterprise_id', 'type', 'owner.avatar']);
+            $export->except(['enterprise_id', 'type', 'owner.avatar','id']);
 
             //$export->only(['column3', 'column4']);
             $export->originalValue(['name', 'balance']);
