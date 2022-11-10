@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 class Transaction extends Model
 {
-    use HasFactory; 
+    use HasFactory;
     public static function my_create($data)
     {
 
@@ -138,6 +138,10 @@ class Transaction extends Model
                         }
                     }
                 }
+            }
+
+            if (!isset($m->type)) {
+                $m->type = 'other';
             }
 
             $ent = Enterprise::find($m->enterprise_id);
