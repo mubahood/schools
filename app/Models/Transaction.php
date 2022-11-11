@@ -134,6 +134,7 @@ class Transaction extends Model
                     $min_data = Carbon::parse('15-08-2022');
                     if ($d != null) {
                         if ($d->isBefore($min_data)) {
+                            die("is before");
                             return false;
                         }
                     }
@@ -153,6 +154,7 @@ class Transaction extends Model
                             'is_contra_entry' => 1,
                         ])->first();
                         if ($trans != null) {
+                            die("is contra");
                             return false;
                         }
                     }
@@ -166,6 +168,7 @@ class Transaction extends Model
                             'is_contra_entry' => 0,
                         ])->first();
                         if ($trans != null) {
+                            die("is not contra");
                             return false;
                         }
                     }
