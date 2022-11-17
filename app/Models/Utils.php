@@ -58,6 +58,7 @@ class Utils  extends Model
         }
         return $resp;
     }
+    
     public static function reset_account_names()
     {
         $accs = Administrator::all();
