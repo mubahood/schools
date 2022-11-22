@@ -6,10 +6,12 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'App\\Admin\\Actions\\Post\\BatchPrint' => $baseDir . '/app/Admin/Actions/Post/BatchPrint.php',
     'App\\Admin\\Controllers\\AcademicClassController' => $baseDir . '/app/Admin/Controllers/AcademicClassController.php',
     'App\\Admin\\Controllers\\AcademicClassFeeController' => $baseDir . '/app/Admin/Controllers/AcademicClassFeeController.php',
     'App\\Admin\\Controllers\\AcademicYearController' => $baseDir . '/app/Admin/Controllers/AcademicYearController.php',
     'App\\Admin\\Controllers\\AccountController' => $baseDir . '/app/Admin/Controllers/AccountController.php',
+    'App\\Admin\\Controllers\\AccountParentController' => $baseDir . '/app/Admin/Controllers/AccountParentController.php',
     'App\\Admin\\Controllers\\AuthController' => $baseDir . '/app/Admin/Controllers/AuthController.php',
     'App\\Admin\\Controllers\\BookAuthorController' => $baseDir . '/app/Admin/Controllers/BookAuthorController.php',
     'App\\Admin\\Controllers\\BookBorrowController' => $baseDir . '/app/Admin/Controllers/BookBorrowController.php',
@@ -97,6 +99,7 @@ return array(
     'App\\Models\\AcademicClassSctream' => $baseDir . '/app/Models/AcademicClassSctream.php',
     'App\\Models\\AcademicYear' => $baseDir . '/app/Models/AcademicYear.php',
     'App\\Models\\Account' => $baseDir . '/app/Models/Account.php',
+    'App\\Models\\AccountParent' => $baseDir . '/app/Models/AccountParent.php',
     'App\\Models\\AdminRole' => $baseDir . '/app/Models/AdminRole.php',
     'App\\Models\\AdminRoleUser' => $baseDir . '/app/Models/AdminRoleUser.php',
     'App\\Models\\Book' => $baseDir . '/app/Models/Book.php',

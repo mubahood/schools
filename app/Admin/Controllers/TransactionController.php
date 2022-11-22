@@ -50,15 +50,7 @@ class TransactionController extends AdminController
         $grid->disableBatchActions();
         $grid->disableActions();
 
-        $grid->quickSearch(function ($model, $query) {
-            $acc = Account::where('name', 'like', "%$query%")
-                ->where('enterprise_id', Admin::user()->enterprise_id)
-                ->first();
-
-            if ($acc != null) {
-                $model->where('account_id', $acc->id);
-            }
-        });
+        $grid->quickSearch('description');
 
 
         $grid->model()->where([

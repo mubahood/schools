@@ -92,6 +92,8 @@ php artisan make:migration create_user_batch_importers_table
 php artisan make:migration create_stock_records_table
 php artisan make:migration create_theology_subjects_table
 php artisan make:migration create_student_has_theology_classes_table
+php artisan make:migration create_account_parents_table
+
 
 
 php artisan make:model StudentHasTheologyClass
@@ -146,6 +148,7 @@ php artisan make:model Competence
 php artisan make:model NurseryTermlyReportCard
 php artisan make:model NurseryStudentReportCard
 php artisan make:model NurseryStudentReportCardItem
+php artisan make:model AccountParent
 
 
 php artisan admin:make TermController --model=App\\Models\\Term
@@ -221,6 +224,7 @@ php artisan admin:make TheologryStudentReportCardController --model=App\\Models\
 php artisan admin:make NurseryTermlyReportCardController --model=App\\Models\\NurseryTermlyReportCard
 php artisan admin:make NurseryStudentReportCardController --model=App\\Models\\NurseryStudentReportCard
 php artisan admin:make NurseryStudentReportCardItemController --model=App\\Models\\NurseryStudentReportCardItem 
+php artisan admin:make AccountParentController --model=App\\Models\\AccountParent 
 
 
 enterprise_id
@@ -290,6 +294,8 @@ php artisan make:migration add_created_by --table=stock_records
 php artisan make:migration add_current_class_id --table=admin_users
 php artisan make:migration add_total --table=student_report_card_items
 php artisan make:migration add_average_to_aggregates_theology --table=theologry_student_report_cards
+php artisan make:migration add_account_parent_id --table=accounts
+php artisan make:migration add_transfer_keyword --table=accounts
 
 
 git add --all 

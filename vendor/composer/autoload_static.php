@@ -662,10 +662,12 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
     );
 
     public static $classMap = array (
+        'App\\Admin\\Actions\\Post\\BatchPrint' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/BatchPrint.php',
         'App\\Admin\\Controllers\\AcademicClassController' => __DIR__ . '/../..' . '/app/Admin/Controllers/AcademicClassController.php',
         'App\\Admin\\Controllers\\AcademicClassFeeController' => __DIR__ . '/../..' . '/app/Admin/Controllers/AcademicClassFeeController.php',
         'App\\Admin\\Controllers\\AcademicYearController' => __DIR__ . '/../..' . '/app/Admin/Controllers/AcademicYearController.php',
         'App\\Admin\\Controllers\\AccountController' => __DIR__ . '/../..' . '/app/Admin/Controllers/AccountController.php',
+        'App\\Admin\\Controllers\\AccountParentController' => __DIR__ . '/../..' . '/app/Admin/Controllers/AccountParentController.php',
         'App\\Admin\\Controllers\\AuthController' => __DIR__ . '/../..' . '/app/Admin/Controllers/AuthController.php',
         'App\\Admin\\Controllers\\BookAuthorController' => __DIR__ . '/../..' . '/app/Admin/Controllers/BookAuthorController.php',
         'App\\Admin\\Controllers\\BookBorrowController' => __DIR__ . '/../..' . '/app/Admin/Controllers/BookBorrowController.php',
@@ -753,6 +755,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Models\\AcademicClassSctream' => __DIR__ . '/../..' . '/app/Models/AcademicClassSctream.php',
         'App\\Models\\AcademicYear' => __DIR__ . '/../..' . '/app/Models/AcademicYear.php',
         'App\\Models\\Account' => __DIR__ . '/../..' . '/app/Models/Account.php',
+        'App\\Models\\AccountParent' => __DIR__ . '/../..' . '/app/Models/AccountParent.php',
         'App\\Models\\AdminRole' => __DIR__ . '/../..' . '/app/Models/AdminRole.php',
         'App\\Models\\AdminRoleUser' => __DIR__ . '/../..' . '/app/Models/AdminRoleUser.php',
         'App\\Models\\Book' => __DIR__ . '/../..' . '/app/Models/Book.php',

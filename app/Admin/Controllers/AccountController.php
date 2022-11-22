@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Models\Account;
+use App\Models\AccountParent;
 use App\Models\Enterprise;
 use App\Models\Utils;
 use Dflydev\DotAccessData\Util;
@@ -29,13 +30,12 @@ class AccountController extends AdminController
      */
     protected function grid()
     {
-        /* $ac = Account::find(810);
-        $ac->name .= "11";
-        $ac->new_balance = 1;
-        $ac->new_balance_amount = 10000;
+       /*  $ac = Account::find(881);
+        $ac->name .= "1"; 
+        $ac->want_to_transfer = 'Soap';
+        $ac->transfer_keyword = 1;
         $ac->save();
-        dd("done"); */
-        Utils::reconcile_in_background(Admin::user()->enterprise_id);
+        die("done"); */
         $grid = new Grid(new Account());
 
 
@@ -73,6 +73,7 @@ class AccountController extends AdminController
                 ]
             );
 
+
             $filter->group('balance', function ($group) {
                 $group->gt('greater than');
                 $group->lt('less than');
@@ -99,7 +100,18 @@ class AccountController extends AdminController
 
 
         $grid->column('created_at', __('Created'))->hide()->sortable();
-        $grid->column('type', __('Account type'))->sortable();
+        $grid->column('type', __('Account type'))->hide()->sortable();
+
+        $grid->column('name', __('Account name'));
+        $grid->column('account_parent_id', __('Account category'))
+            ->display(function () {
+                $acc =  Utils::getObject(AccountParent::class, $this->account_parent_id);
+                if ($acc == null) {
+                    return "None";
+                }
+                return $acc->name;
+            })
+            ->sortable();
 
         /*  $grid->column('name', __('Account Name'))
             ->link()
@@ -152,13 +164,13 @@ class AccountController extends AdminController
             ])
             ->sortable();
 
-                //anjane
+        //anjane
 
         $grid->export(function ($export) {
 
             $export->filename('Accounts');
 
-            $export->except(['enterprise_id', 'type', 'owner.avatar','id']);
+            $export->except(['enterprise_id', 'type', 'owner.avatar', 'id']);
 
             //$export->only(['column3', 'column4']);
             $export->originalValue(['name', 'balance']);
@@ -293,6 +305,16 @@ class AccountController extends AdminController
         $form->text('name', __('Account name'))
             ->rules('required');
 
+        $form->select('account_parent_id', "Account category")
+            ->options(
+                AccountParent::where([
+                    'enterprise_id' => Admin::user()->enterprise_id
+                ])->orderBy('name', 'Asc')->get()->pluck('name', 'id')
+            )
+            ->rules('required');
+
+
+
         if ($form->isEditing()) {
             $form->radio('status', "Account verification")
                 ->options([
@@ -331,6 +353,17 @@ class AccountController extends AdminController
                 ->readonly()
                 ->rules('required');
         }
+
+
+        $form->radio('transfer_keyword', "Do you want to transfer trannsactions to this account?")
+            ->options([
+                1 => 'Yes',
+                0 => 'No',
+            ])->when(1, function ($f) {
+                $f->text('want_to_transfer', "Transfer keyword")
+                    ->rules('required')
+                    ->help("Any transaction containing mentioned keyword in its description should be transfered to this account.");
+            })->rules('required');
 
         $form->textarea('description', __('Account description'));
 

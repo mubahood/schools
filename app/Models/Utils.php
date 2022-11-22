@@ -58,7 +58,7 @@ class Utils  extends Model
         }
         return $resp;
     }
-    
+
     public static function reset_account_names()
     {
         $accs = Administrator::all();
@@ -204,6 +204,7 @@ class Utils  extends Model
     {
 
 
+
         $subs = Exam::where('marks_generated', '!=', true)->get();
         foreach ($subs as $m) {
             Exam::my_update($m);
@@ -219,8 +220,10 @@ class Utils  extends Model
 
     public static function financial_accounts_creation()
     {
+
         $ent_id  = null;
-        $u = Admin::user();
+        $u = Auth::user();
+
         if ($u != null) {
             $ent_id = ((int)($u->enterprise_id));
         }
@@ -229,7 +232,45 @@ class Utils  extends Model
             return null;
         }
 
+
         Enterprise::my_update($ent);
+        Utils::generate_account_categories($u);
+    }
+    public static function generate_account_categories($u)
+    {
+
+
+        $cat = AccountParent::where([
+            'enterprise_id' => $u->enterprise_id,
+            'name' => 'Other'
+        ])->first();
+
+        if ($cat == null) {
+            $acc_cat = new AccountParent();
+            $acc_cat->enterprise_id = $u->enterprise_id;
+            $acc_cat->name = 'Other';
+            $acc_cat->description = 'Default account category.';
+            $acc_cat->save();
+        }
+        $cat = AccountParent::where([
+            'enterprise_id' => $u->enterprise_id,
+            'name' => 'Other'
+        ])->first();
+        if ($cat == null) {
+            die("Failed to create other category.");
+        }
+
+        foreach (Utils::account_categories() as $key => $category) {
+            $accs = Account::where([
+                'category' => $key,
+                'account_parent_id' => null,
+            ])->get(); 
+            foreach ($accs as $key1 => $accountUpdate) {
+                $accountUpdate->account_parent_id = $cat->id;
+                $accountUpdate->save();
+            }
+        }
+
     }
     public static function system_checklist($u)
     {
@@ -1086,5 +1127,14 @@ class Utils  extends Model
             $data['grade'] = "E";
         }
         return $data;
+    }
+
+    public static function getObject($class, $id)
+    {
+        $data = $class::find($id);
+        if ($data != null) {
+            return $data;
+        }
+        return new $class();
     }
 }

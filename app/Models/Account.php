@@ -13,9 +13,69 @@ class Account extends Model
     use HasFactory;
 
 
+    public static function doTransfer($m)
+    {
+        $m->transfer_keyword = trim($m->want_to_transfer);
+
+        $cats = [];
+        foreach (Utils::account_categories() as $key => $category) {
+            $cats[] = $key;
+        }
+
+
+        if (
+            $m->want_to_transfer != null &&
+            $m->transfer_keyword != null &&
+            (strlen($m->want_to_transfer) > 2) &&
+            $m->transfer_keyword == true
+        ) {
+            $transactions = Transaction::where([
+                'enterprise_id' => $m->enterprise_id
+            ])
+                ->where('description', 'like', '%' . $m->transfer_keyword . '%')
+                ->get();
+
+            foreach ($transactions as $key => $transaction) {
+                if ($transaction->account == null) {
+                    continue;
+                }
+
+                if (!in_array($transaction->account->category, $cats)) {
+                    continue;
+                }
+                if ($transaction->account->type == 'BANK_ACCOUNT') {
+                    continue;
+                }
+                if ($transaction->account->type == 'CASH_ACCOUNT') {
+                    continue;
+                }
+                if ($transaction->account->type == 'STUDENT_ACCOUNT') {
+                    continue;
+                }
+                if ($transaction->is_contra_entry == true) {
+                    continue;
+                }
+                $transaction->account_id = $m->id;
+                $transaction->save();
+            }
+
+            $m->balance =  Transaction::where([
+                'account_id' => $m->id
+            ])->sum('amount');
+            $m->want_to_transfer = null;
+            $m->transfer_keyword = null;
+            $m->save();
+        }
+    }
     public static function boot()
     {
         parent::boot();
+        self::updated(function ($m) {
+            Account::doTransfer($m);
+        });
+        self::updated(function ($m) {
+            Account::doTransfer($m);
+        });
         self::updating(function ($m) {
             if (isset($m->new_balance)) {
                 if ($m->new_balance == 1) {
@@ -84,10 +144,10 @@ class Account extends Model
                 }
             }
             self::deleting(function ($m) {
-                Transaction::where('account_id',$m->id)
-                ->orWhere('contra_entry_account_id',$m->id)
-                ->orWhere('contra_entry_transaction_id',$m->id)
-                ->delete();
+                Transaction::where('account_id', $m->id)
+                    ->orWhere('contra_entry_account_id', $m->id)
+                    ->orWhere('contra_entry_transaction_id', $m->id)
+                    ->delete();
             });
         });
     }
