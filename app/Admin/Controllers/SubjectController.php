@@ -76,7 +76,7 @@ class SubjectController extends AdminController
         $grid->column('academic_class_id', __('Class'))
             ->display(function ($t) {
                 if( $this->academic_class == null){
-                    return "-";
+                    return "#{$this->id}";
                 }
                 return $this->academic_class->name 
                     . " - " .
