@@ -50,6 +50,7 @@ class StudentHasClass extends Model
 
         self::created(function ($m) {
             Utils::sync_classes($m->enterprise_id);
+            AcademicClass::update_fees($m->academic_class_id);
         });
 
         self::updated(function ($m) {

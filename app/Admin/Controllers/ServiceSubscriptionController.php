@@ -13,6 +13,7 @@ use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
+use Illuminate\Support\Facades\Auth;
 
 class ServiceSubscriptionController extends AdminController
 {
@@ -29,7 +30,6 @@ class ServiceSubscriptionController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new ServiceSubscription());
-
 
         $grid->column('created_at', __('Date'))
             ->display(function () {
@@ -94,6 +94,10 @@ class ServiceSubscriptionController extends AdminController
         })->placeholder('Search...');
 
 
+        $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
+        ->orderBy('id', 'Desc');
+        
+
         $grid->column('administrator_id', __('Subscriber'))
             ->display(function () {
                 if ($this->sub == null) {
@@ -101,7 +105,7 @@ class ServiceSubscriptionController extends AdminController
                 }
                 return $this->sub->name;
             });
- 
+
         $grid->column('service_id', __('Service'))->display(function () {
             return $this->service->name;
         })->sortable();
