@@ -73,7 +73,7 @@ use App\Models\Utils;
             pink: 'pink'
         };
 
-        var config = {
+        var config = { 
             type: 'bar',
             data: {
                 datasets: [{
