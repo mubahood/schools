@@ -74,7 +74,7 @@ use App\Models\Utils;
         };
 
         var config = {
-            type: 'pie',
+            type: 'bar',
             data: {
                 datasets: [{
                     data: JSON.parse('<?php echo json_encode($amounts); ?>'),
