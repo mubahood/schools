@@ -121,7 +121,9 @@ class Dashboard
 
         $s = new AcademicClass();
         $s->name = "Services";
-        foreach (Service::all() as $key => $val) {
+        foreach (Service::where([
+            'enterprise_id' => $u->enterprise_id
+        ])->get() as $key => $val) {
             $amount = $val->fee;
             $subs = count($val->subs);
             $s->amount += ($amount * $subs);
