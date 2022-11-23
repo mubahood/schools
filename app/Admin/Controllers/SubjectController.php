@@ -75,7 +75,7 @@ class SubjectController extends AdminController
         $grid->column('subject_name', __('SUBJECT'))->sortable();
         $grid->column('academic_class_id', __('Class'))
             ->display(function ($t) {
-                return $this->academic_class->name
+                return $this->academic_class->name 
                     . " - " .
                     $this->academic_class->academic_year->name;
             })->sortable();

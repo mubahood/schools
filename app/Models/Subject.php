@@ -80,7 +80,7 @@ class Subject extends Model
 
     function academic_class()
     {
-        return $this->belongsTo(AcademicClass::class);
+        return $this->belongsTo(AcademicClass::class,'academic_class_id');
     }
 
     function course()
