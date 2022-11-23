@@ -152,7 +152,7 @@ class MarkController extends AdminController
 
 
 
-        $grid->column('id', __('#ID'))->sortable();
+        $grid->column('id', __('#ID'))->hide()->sortable();
         $grid->column('student_id', __('Student'))->display(function () {
             if ($this->student == null) {
                 return "-";
@@ -162,14 +162,14 @@ class MarkController extends AdminController
         $grid->column('exam_id', __('Exam'))
             ->display(function () {
                 return $this->exam->name_text;
-            })->sortable();
+            })->hide() ->sortable();
 
         $grid->column('class_id', __('Class'))->display(function () {
             return $this->class->name;
-        })->sortable();
+        })->hide()->sortable();
         $grid->column('subject_id', __('Subject'))->display(function () {
             return $this->subject->subject_name;
-        })->sortable();
+        })->hide()->sortable();
 
         $grid->column('score', __('Score'))->sortable()->editable();
         $grid->column('remarks', __('Remarks'))->editable();

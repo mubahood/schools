@@ -38,6 +38,7 @@ return array(
     'App\\Admin\\Controllers\\StockBatchController' => $baseDir . '/app/Admin/Controllers/StockBatchController.php',
     'App\\Admin\\Controllers\\StockItemCategoryController' => $baseDir . '/app/Admin/Controllers/StockItemCategoryController.php',
     'App\\Admin\\Controllers\\StockRecordController' => $baseDir . '/app/Admin/Controllers/StockRecordController.php',
+    'App\\Admin\\Controllers\\StudentFinancialAccountController' => $baseDir . '/app/Admin/Controllers/StudentFinancialAccountController.php',
     'App\\Admin\\Controllers\\StudentHasClassController' => $baseDir . '/app/Admin/Controllers/StudentHasClassController.php',
     'App\\Admin\\Controllers\\StudentHasFeeController' => $baseDir . '/app/Admin/Controllers/StudentHasFeeController.php',
     'App\\Admin\\Controllers\\StudentHasTheologyClassController' => $baseDir . '/app/Admin/Controllers/StudentHasTheologyClassController.php',

@@ -694,6 +694,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Admin\\Controllers\\StockBatchController' => __DIR__ . '/../..' . '/app/Admin/Controllers/StockBatchController.php',
         'App\\Admin\\Controllers\\StockItemCategoryController' => __DIR__ . '/../..' . '/app/Admin/Controllers/StockItemCategoryController.php',
         'App\\Admin\\Controllers\\StockRecordController' => __DIR__ . '/../..' . '/app/Admin/Controllers/StockRecordController.php',
+        'App\\Admin\\Controllers\\StudentFinancialAccountController' => __DIR__ . '/../..' . '/app/Admin/Controllers/StudentFinancialAccountController.php',
         'App\\Admin\\Controllers\\StudentHasClassController' => __DIR__ . '/../..' . '/app/Admin/Controllers/StudentHasClassController.php',
         'App\\Admin\\Controllers\\StudentHasFeeController' => __DIR__ . '/../..' . '/app/Admin/Controllers/StudentHasFeeController.php',
         'App\\Admin\\Controllers\\StudentHasTheologyClassController' => __DIR__ . '/../..' . '/app/Admin/Controllers/StudentHasTheologyClassController.php',

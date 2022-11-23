@@ -125,6 +125,11 @@ class Account extends Model
             //new_balance
         });
         self::creating(function ($m) {
+            $u = Administrator::find($m->administrator_id);
+            if ($u == null) {
+                return false;
+            }
+            //die("Creatoing.... {$m->administrator_id}");
             if ($m->type == 'CASH_ACCOUNT') {
                 $cash_acc = Account::where([
                     'type' => 'CASH_ACCOUNT',
@@ -189,12 +194,23 @@ class Account extends Model
 
     function owner()
     {
+
+
+        $u = Administrator::find($this->administrator_id);
+        if ($u == null) {
+            $this->delete();
+        }
         return $this->belongsTo(Administrator::class, 'administrator_id');
     }
 
     public function transactions()
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    public function academic_class()
+    {
+        return $this->belongsTo(AcademicClass::class);
     }
 
     public function balance()

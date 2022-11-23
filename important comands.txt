@@ -93,6 +93,7 @@ php artisan make:migration create_stock_records_table
 php artisan make:migration create_theology_subjects_table
 php artisan make:migration create_student_has_theology_classes_table
 php artisan make:migration create_account_parents_table
+php artisan make:migration create_academic_class_id_table
 
 
 
@@ -296,7 +297,7 @@ php artisan make:migration add_total --table=student_report_card_items
 php artisan make:migration add_average_to_aggregates_theology --table=theologry_student_report_cards
 php artisan make:migration add_account_parent_id --table=accounts
 php artisan make:migration add_transfer_keyword --table=accounts
-
+php artisan make:migration add_academic_class_id --table=accounts
 
 git add --all 
 git commit -am "Your commit message"

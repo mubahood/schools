@@ -46,17 +46,67 @@ class Administrator extends Model implements AuthenticatableContract
 
         self::deleting(function ($m) {
  
+
+
+            if($m->account!= null){ 
+                $m->account->delete(); 
+            }
+
+
             $x = DB::delete("DELETE FROM academic_classes WHERE class_teahcer_id = $m->id ");
             $x = DB::delete("DELETE FROM admin_role_users WHERE user_id = $m->id ");
             $x = DB::delete("DELETE FROM fee_deposit_confirmations WHERE administrator_id = $m->id ");
-            $x = DB::delete("DELETE FROM fund_requisitions WHERE administrator_id = $m->id ");
-            $m->account->delete();
+            $x = DB::delete("DELETE FROM fund_requisitions WHERE applied_by = $m->id ");
+            $x = DB::delete("DELETE FROM fund_requisitions WHERE approved_by = $m->id ");
+            $x = DB::delete("DELETE FROM accounts WHERE administrator_id = $m->id ");
+            $x = DB::delete("DELETE FROM admin_role_users WHERE user_id = $m->id ");
+            $x = DB::delete("DELETE FROM admin_user_permissions WHERE user_id = $m->id ");
+            $x = DB::delete("DELETE FROM book_borrow_books WHERE borrowed_by = $m->id ");
+            $x = DB::delete("DELETE FROM marks WHERE teacher_id = $m->id ");
+            $x = DB::delete("DELETE FROM marks WHERE student_id = $m->id ");
+            $x = DB::delete("DELETE FROM nursery_student_report_cards WHERE student_id = $m->id ");
+            $x = DB::delete("DELETE FROM nursery_student_report_card_items WHERE student_id = $m->id ");
+            $x = DB::delete("DELETE FROM nursery_student_report_card_items WHERE teacher_id = $m->id ");
+            $x = DB::delete("DELETE FROM service_subscriptions WHERE administrator_id = $m->id "); 
+            $x = DB::delete("DELETE FROM stock_batches WHERE supplier_id = $m->id ");
+            $x = DB::delete("DELETE FROM stock_batches WHERE manager = $m->id "); 
+            $x = DB::delete("DELETE FROM stock_records WHERE created_by = $m->id ");
+            $x = DB::delete("DELETE FROM stock_records WHERE received_by = $m->id ");
+            $x = DB::delete("DELETE FROM student_has_classes WHERE administrator_id = $m->id ");
+            $x = DB::delete("DELETE FROM student_has_fees WHERE administrator_id = $m->id ");
+            $x = DB::delete("DELETE FROM student_has_optional_subjects WHERE administrator_id = $m->id ");
+            $x = DB::delete("DELETE FROM student_has_theology_classes WHERE administrator_id = $m->id ");
+            $x = DB::delete("DELETE FROM student_report_cards WHERE student_id = $m->id "); 
+            $x = DB::delete("DELETE FROM theologry_student_report_cards WHERE student_id = $m->id ");
+            $x = DB::delete("DELETE FROM theology_classes WHERE class_teahcer_id = $m->id ");
+            $x = DB::delete("DELETE FROM theology_marks WHERE student_id = $m->id ");
+            $x = DB::delete("DELETE FROM theology_marks WHERE teacher_id = $m->id "); 
+            $x = DB::delete("DELETE FROM theology_subjects WHERE teacher_1 = $m->id ");
+            $x = DB::delete("DELETE FROM theology_subjects WHERE teacher_2 = $m->id ");
+            $x = DB::delete("DELETE FROM theology_subjects WHERE teacher_3 = $m->id ");
+            $x = DB::delete("DELETE FROM theology_subjects WHERE subject_teacher = $m->id ");  
+            DB::delete("DELETE FROM admin_users WHERE id = $m->id "); 
+
+ 
+            return false;
+            
+            dd("=====DELETING====");
+            //$m->account->delete(); 
 
             Transaction::where('account_id',$m->id)
             ->orWhere('contra_entry_account_id',$m->id)
             ->orWhere('contra_entry_transaction_id',$m->id)
             ->delete();
+/* 
 
+ 
+	
+	            $x = DB::delete("DELETE FROM admin_users WHERE id = $m->id ");
+	
+		 	Browse Browse	Structure Structure	Search Search	Insert Insert	Empty Empty	Drop Drop	0	InnoDB	utf8mb4_unicode_ci	16.0 KiB	-
+	user_batch_importers	 	Browse Browse	Structure Structure	Search Search	Insert Insert	Empty Empty	Drop Drop	23	InnoDB	utf8mb4_unicode_ci	16.0 KiB	-
+	_mark_has_classes	 
+*/
 
             echo $x."<hr>";
             die("time to delete");
@@ -329,6 +379,15 @@ class Administrator extends Model implements AuthenticatableContract
             $this->save();
         }
         return $this->belongsTo(Enterprise::class);
+    }
+    public function ent()
+    {
+        $e = Enterprise::find($this->enterprise_id);
+        if ($e == null) {
+            $this->enterprise_id = 1;
+            $this->save();
+        }
+        return $this->belongsTo(Enterprise::class,'enterprise_id');
     }
 
 

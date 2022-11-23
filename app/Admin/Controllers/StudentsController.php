@@ -19,6 +19,8 @@ use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
 use Encore\Admin\Widgets\Tab;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
 
@@ -40,14 +42,30 @@ class StudentsController extends AdminController
     protected function grid()
     {
 
-        /*$u = Administrator::find(3021);
+        /*         $u = Administrator::find(2318);
+        $u->delete(); */
+
+        /*  $u = Administrator::find(2317);
         $u->delete();
-        dd("done");*/
+        
+        die("done");
+        DB::delete("DELETE FROM admin_users WHERE id = 2317 ");
+
+        dd("ashjghjasj"); 
+        $u = new Administrator();
+        $u->id = 2317;
+        $u->enterprise_id = Auth::user()->enterprise_id;
+        $u->save(); */
+
+        /*    $u->delete();
+        dd("done"); */
         $grid = new Grid(new Administrator());
         $grid->disableBatchActions();
         $grid->actions(function ($actions) {
-            $actions->disableDelete();
-            $actions->disableView();
+
+            if (!Auth::user()->isRole('admin')) {
+                $actions->disableDelete();
+            }
         });
 
 

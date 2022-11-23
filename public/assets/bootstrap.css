@@ -10645,3 +10645,84 @@ a.text-dark:hover {
 .dropdown-toggle::after {
     content: none;
 }
+
+
+.dropdown-toggle::after {
+    content: none;
+}
+.img-thumbnail{
+    border-width: 0px!important;
+    margin: 0px!important;
+}
+.card{
+    border-radius: 10px;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+.box-info{
+    background-color: red;
+}
+.btn-default{
+    background-color: #6B3B00!important;
+}
+.help-block{ 
+    margin-bottom: 0px!important;
+    padding-bottom: 0px!important;
+}
+ 
+.fw-100{
+    font-weight: 100;
+}
+.fw-200{
+    font-weight: 200;
+}
+.fw-300{
+    font-weight: 300;
+}
+.fw-400{
+    font-weight: 400;
+}
+.fw-500{
+    font-weight: 500;
+}
+.fw-600{
+    font-weight: 600;
+}
+.fw-700{
+    font-weight: 700;
+}
+.fw-800{
+    font-weight: 800;
+}
+.fw-900{
+    font-weight: 900;
+}
+.fc-gray{
+    color: var(--gray);
+}
+.fc-gray-dark{
+    color: var(--gray-dark);
+}
+.fc-100{
+    color: var(--gray);
+}
+.fs-14{
+    font-size: 14px;
+}
+.fs-15{
+    font-size: 15px;
+}
+.fs-16{
+    font-size: 16px;
+}
+.fs-17{
+    font-size: 17px;
+}
+.fs-18{
+    font-size: 18px;
+}
+.fs-20{
+    font-size: 20px;
+}
+.fs-22{
+    font-size: 22px;
+}

@@ -55,6 +55,7 @@ Route::group([
     $router->resource('nursery-termly-report-cards', NurseryTermlyReportCardController::class);
     $router->resource('nursery-student-report-cards', NurseryStudentReportCardController::class);
     $router->resource('nursery-student-report-card-items', NurseryStudentReportCardItemController::class);
+    $router->resource('students-financial-accounts', StudentFinancialAccountController::class);
     $router->get('/batch-print', 'StudentReportCardController@print')->name('print'); 
     $router->resource('account-parents', AccountParentController::class);
 

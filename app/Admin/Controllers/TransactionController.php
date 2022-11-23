@@ -43,7 +43,13 @@ class TransactionController extends AdminController
                     . "&search_by_2=id"
                     . "&model=Account"
             );
-            $filter->equal('account_id', 'Student')->select()->ajax($ajax_url);
+            $filter->equal('account_id', 'Filter by account')
+                ->select(function ($id) {
+                    $a = Account::find($id);
+                    if ($a) {
+                        return [$a->id => $a->name];
+                    }
+                })->ajax($ajax_url);
             $filter->between('payment_date', 'Created between')->date();
         });
 

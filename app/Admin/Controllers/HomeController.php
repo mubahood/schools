@@ -22,8 +22,9 @@ class HomeController extends Controller
 {
     public function index(Content $content)
     {
-        
-   /*
+
+
+        /*
         set_time_limit(-1);
         $x = 0;
          foreach (StudentHasClass::where('academic_class_id', 17)->get() as $key => $s) {
@@ -133,6 +134,37 @@ class HomeController extends Controller
     public function stats(Content $content)
     {
 
+        $u = Admin::user();
+
+        if (
+            $u->isRole('admin') ||
+            $u->isRole('bursar')
+        ) {
+            $u = Admin::user();
+
+            $content
+                ->title($u->ent->short_name . ' - Dashboard')
+                ->description('Hello ' . $u->name . "!");
+
+            $content->row(function (Row $row) {
+                $u = Admin::user();
+                if (
+                    $u->isRole('admin') ||
+                    $u->isRole('bursar')
+                ) {
+                    $row->column(6, function (Column $column) {
+                        $column->append(Dashboard::bursarFeesExpected());
+                    });
+                    $row->column(6, function (Column $column) {
+                        $column->append(Dashboard::bursarFeesPaid());
+                    });
+                }
+            });
+
+            return $content;
+        }
+
+
         Admin::style('.content-header {display: none;}');
         $ent = Utils::ent();
         Utils::reconcile_in_background(Admin::user()->enterprise_id);
@@ -143,7 +175,7 @@ class HomeController extends Controller
             ->row(function (Row $row) {
                 $u = Admin::user();
 
-                if($u->isRole('teacher')){
+                if ($u->isRole('teacher')) {
                     $row->column(3, function (Column $column) {
                         $column->append(Dashboard::teacher_marks());
                     });
@@ -172,7 +204,7 @@ class HomeController extends Controller
 
                 if (
                     $u->isRole('admin') ||
-                    $u->isRole('bursar')  
+                    $u->isRole('bursar')
                 ) {
                     $row->column(3, function (Column $column) {
                         $column->append(Dashboard::students());
@@ -187,8 +219,6 @@ class HomeController extends Controller
                     $row->column(3, function (Column $column) {
                         $column->append(Dashboard::fees());
                     });
-
-                    
                 }
 
                 if (
@@ -205,9 +235,6 @@ class HomeController extends Controller
                         $column->append(Dashboard::help_videos());
                     });
                 }
-
-             
-
             });
     }
 }

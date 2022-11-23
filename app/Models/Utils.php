@@ -233,6 +233,20 @@ class Utils  extends Model
         }
 
 
+        $accs = Account::where([
+            'type' => 'STUDENT_ACCOUNT',
+            'academic_class_id' => null,
+        ])->get();
+
+        foreach ($accs as $key => $acc) {
+            if ($acc->owner != null) {
+                $acc->academic_class_id = $acc->owner->current_class_id;
+                $acc->save();
+            }
+        }
+
+        //academic_class_id
+
         Enterprise::my_update($ent);
         Utils::generate_account_categories($u);
     }
@@ -264,13 +278,12 @@ class Utils  extends Model
             $accs = Account::where([
                 'category' => $key,
                 'account_parent_id' => null,
-            ])->get(); 
+            ])->get();
             foreach ($accs as $key1 => $accountUpdate) {
                 $accountUpdate->account_parent_id = $cat->id;
                 $accountUpdate->save();
             }
         }
-
     }
     public static function system_checklist($u)
     {

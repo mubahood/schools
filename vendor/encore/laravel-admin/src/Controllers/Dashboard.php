@@ -2,8 +2,12 @@
 
 namespace Encore\Admin\Controllers;
 
+use App\Models\AcademicClass;
+use App\Models\AcademicClassFee;
+use App\Models\Account;
 use App\Models\Enterprise;
 use App\Models\Mark;
+use App\Models\Service;
 use App\Models\StudentHasClass;
 use App\Models\TheologyExam;
 use App\Models\TheologyMark;
@@ -16,6 +20,96 @@ use Illuminate\Support\Facades\Auth;
 
 class Dashboard
 {
+
+    public static function bursarFeesExpected()
+    {
+        $u = Auth::user();
+        $classes = [];
+        $labels = [];
+        $amounts = [];
+        $total = 0;
+
+        foreach (AcademicClass::where([
+            'enterprise_id' => $u->enterprise_id
+        ])->orderBy('id', 'Asc')->get() as $key => $value) {
+            $value->amount = AcademicClassFee::where([
+                'academic_class_id' => $value->id
+            ])->sum('amount');
+            $value->amount = $value->amount * count($value->students);
+            $labels[] = $value->name;
+            $classes[] = $value;
+            $amounts[] = $value->amount;
+            $total += $value->amount;
+        }
+
+        $s = new AcademicClass();
+        $s->name = "Services";
+        foreach (Service::all() as $key => $val) {
+            $amount = $val->fee;
+            $subs = count($val->subs);
+            $s->amount += ($amount * $subs);
+        }
+        $labels[] = 'Services';
+        $classes[] = $s;
+        $amounts[] = $s->amount;
+
+        return view('dashboard.bursarFeesExpected', [
+            'classes' => $classes,
+            'labels' => $labels,
+            'amounts' => $amounts,
+            'total' => $total,
+        ]);
+        /* foreach (AcademicClass::where([
+            'enterprise_id' => $u->enterprise_id
+        ])->orderBy('id', 'Asc')->get() as $key => $value) {
+            $value->amount = Account::where([
+                'academic_class_id' => $value->id
+            ])->sum('balance');
+            $labels[] = $value->name;
+            $classes[] = $value;
+            $amounts[] = $value->amount;
+            $total += $value->amount;
+        }
+
+        return view('dashboard.bursarFeesExpected', [
+            'classes' => $classes,
+            'labels' => $labels,
+            'amounts' => $amounts,
+            'total' => $total,
+        ]); */
+    }
+
+
+
+    public static function bursarFeesPaid()
+    {
+        $u = Auth::user();
+        $classes = [];
+        $labels = [];
+        $amounts = [];
+        $total = 0;
+
+
+        foreach (AcademicClass::where([
+            'enterprise_id' => $u->enterprise_id
+        ])->orderBy('id', 'Asc')->get() as $key => $value) {
+            $value->amount = Account::where([
+                'academic_class_id' => $value->id
+            ])->sum('balance');
+            $labels[] = $value->name;
+            $classes[] = $value;
+            $amounts[] = $value->amount;
+            $total += $value->amount;
+        }
+
+        return view('dashboard.bursarFeesPaid', [
+            'classes' => $classes,
+            'labels' => $labels,
+            'amounts' => $amounts,
+            'total' => $total,
+        ]);
+    }
+
 
     public static function help_videos()
     {
@@ -115,7 +209,7 @@ class Dashboard
         $sub_title .= number_format($number_2) . ' Not Submitted.';
 
         $style = 'success';
-        if($number_2>0){
+        if ($number_2 > 0) {
             $style = 'danger';
         }
 
@@ -152,7 +246,7 @@ class Dashboard
         $sub_title .= number_format($number_2) . ' Not Submitted.';
 
         $style = 'success';
-        if($number_2>0){
+        if ($number_2 > 0) {
             $style = 'danger';
         }
 

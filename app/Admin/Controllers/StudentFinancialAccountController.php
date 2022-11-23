@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Models\AcademicClass;
 use App\Models\Account;
 use App\Models\AccountParent;
 use App\Models\Enterprise;
@@ -15,14 +16,15 @@ use Encore\Admin\Show;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\MessageBag;
 
-class AccountController extends AdminController
+class StudentFinancialAccountController extends AdminController
 {
+
     /**
      * Title for current resource.
      *
-     * @var string 
+     * @var string
      */
-    protected $title = 'Financial Accounts';
+    protected $title = 'Students Accounts';
     /**
      * Make a grid builder.
      *
@@ -44,7 +46,7 @@ class AccountController extends AdminController
             ->orderBy('id', 'Desc')
             ->where([
                 'enterprise_id' => Admin::user()->enterprise_id,
-                /*   'type' => 'STUDENT_ACCOUNT' */
+                'type' => 'STUDENT_ACCOUNT'
             ]);
 
 
@@ -53,26 +55,45 @@ class AccountController extends AdminController
             // Remove the default id filter
             $filter->disableIdFilter();
 
+            $u = Admin::user();
+            $ajax_url = url(
+                '/api/ajax?'
+                    . 'enterprise_id=' . $u->enterprise_id
+                    . "&search_by_1=name"
+                    . "&search_by_2=id"
+                    . "&model=Account"
+            );
+            $filter->equal('id', 'Student')
+                ->select(function ($id) {
+                    $a = Account::find($id);
+                    if ($a) {
+                        return [$a->id => $a->name];
+                    }
+                })->ajax($ajax_url);
 
 
-            $filter->equal('account_parent_id', 'Filter by account category')
-                ->select(
-                    AccountParent::where([
-                        'enterprise_id' => Admin::user()->enterprise_id,
-                    ])->orderBy('name', 'Asc')->get()->pluck('name', 'id')
-                );
+            //academic_class_id
+            $classes = [];
+            foreach (AcademicClass::where([
+                'enterprise_id' => $u->enterprise_id
+            ])->get() as $key => $v) {
+                $classes[$v->id] =  $v->name;
+            }
 
-            /*             $filter->equal('type', 'Account type')->select(
+            $filter->equal('academic_class_id', 'Class')
+                ->select($classes);
+
+
+
+
+            /* $filter->equal('type', 'Account type')->select(
                 [
                     'STUDENT_ACCOUNT' => 'Students\' accounts',
                     'EMPLOYEE_ACCOUNT' => 'Employees\' accounts',
                     'BANK_ACCOUNT' => 'Bank accounts',
                     'CASH_ACCOUNT' => 'Cash accounts',
                 ]
-            ); 
-            
-            */
-
+            );*/
 
             $filter->group('balance', function ($group) {
                 $group->gt('greater than');
@@ -89,28 +110,22 @@ class AccountController extends AdminController
         });
 
 
-
-        $ent = Enterprise::find(Admin::user()->enterprise_id);
-        $grid->model()->where([
-            'enterprise_id' => Admin::user()->enterprise_id,
-            'administrator_id' => $ent->administrator_id,
-        ])
+        $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
             ->orderBy('id', 'Desc');
 
-        $grid->quickSearch('name')->placeholder('Search by account name');
         $grid->column('id', __('#ID'));
 
         $grid->column('owner.avatar', __('Photo'))
             ->width(80)
-            ->hide()
             ->lightbox(['width' => 60, 'height' => 60]);
 
 
         $grid->column('created_at', __('Created'))->hide()->sortable();
         $grid->column('type', __('Account type'))->hide()->sortable();
 
-        $grid->column('name', __('Account name'))->sortable();
+        $grid->column('name', __('Account name'));
         $grid->column('account_parent_id', __('Account category'))
+            ->hide()
             ->display(function () {
                 $acc =  Utils::getObject(AccountParent::class, $this->account_parent_id);
                 if ($acc == null) {
@@ -124,15 +139,64 @@ class AccountController extends AdminController
             ->link()
             ->sortable(); */
 
+        $grid->quickSearch('name')->placeholder('Search by account name');
+        $grid->column('name', __('Account owner'))
+            ->display(function () {
+                return
+                    '<a class="text-dark" href="' . admin_url('students/' . $this->administrator_id) . '">' . $this->name . "</a>";;
+            });
 
+        $grid->column('academic_class_id', __('Class'))
+            ->sortable()
+            ->display(function () {
+
+                if ($this->academic_class == null) {
+                    return "-";
+                }
+
+                return $this->academic_class->short_name;
+
+                if ($this->owner == null) {
+                    return "-";
+                }
+                if ($this->owner->current_class == null) {
+                    return "-";
+                }
+                if ($this->owner->current_class->name == null) {
+                    return "-";
+                }
+                if ($this->owner->current_class->short_name != null) {
+                    return $this->owner->current_class->short_name;
+                }
+                return "-";
+            });
+
+        $grid->column('school', __('School pay'))
+            ->display(function () {
+                if ($this->owner->school_pay_payment_code == null) {
+                    return "-";
+                }
+                if (strlen($this->owner->school_pay_payment_code) < 2) {
+                    return "-";
+                }
+                return $this->owner->school_pay_payment_code;
+            });
 
         $grid->column('balance', __('Account balance'))->display(function () {
             return "UGX " . number_format($this->balance);
-        })->sortable()
+        })
             ->totalRow(function ($amount) {
                 return  "UGX " . number_format($amount);
-            });
-
+            })
+            ->sortable();
+        $grid->column('status', __('Verification'))
+            ->filter([0 => 'Pending', 1 => 'Verified'])
+            ->using([0 => 'Pending', 1 => 'Verified'])
+            ->label([
+                0 => 'danger',
+                1 => 'success',
+            ])
+            ->sortable();
 
         //anjane
 
