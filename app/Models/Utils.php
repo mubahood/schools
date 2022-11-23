@@ -203,14 +203,14 @@ class Utils  extends Model
     public static function system_boot($u)
     {
 
-        foreach (Account::all() as $key => $acc) {
+      /*   foreach (Account::all() as $key => $acc) {
             $acc->balance =  Transaction::where([
                 'account_id' => $acc->id
             ])->sum('amount');
             $acc->save();
         }
 
-
+ */
         $subs = Exam::where('marks_generated', '!=', true)->get();
         foreach ($subs as $m) {
             Exam::my_update($m);

@@ -35,6 +35,9 @@ class Dashboard
             'enterprise_id' => $u->enterprise_id
         ])->orderBy('id', 'Asc')->get() as $key => $value) {
             $value->amount = 0;
+            if ($value->name == 'Others') {
+                continue;
+            }
             foreach (Service::where([
                 'service_category_id' => $value->id
             ])->get() as $s) {
@@ -43,7 +46,7 @@ class Dashboard
                 ])->sum('total');
             }
 
-            $value->amount = $value->amount ;
+            $value->amount = $value->amount;
             $labels[] = $value->name;
             $classes[] = $value;
             $amounts[] = $value->amount;
