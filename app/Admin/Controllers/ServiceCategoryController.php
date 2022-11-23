@@ -74,7 +74,6 @@ class ServiceCategoryController extends AdminController
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
         $form->text('name', __('Name'))->rules('required');
 
-
         $form->radio('want_to_transfer', "Do you want to transfer serfices tom this category?")
             ->options([
                 1 => 'Yes',

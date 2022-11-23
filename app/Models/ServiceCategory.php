@@ -25,7 +25,6 @@ class ServiceCategory extends Model
                 ->get();
 
             foreach ($services as $key => $service) {
-
                 $service->service_category_id = $m->id;
                 $service->save();
             }

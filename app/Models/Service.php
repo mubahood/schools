@@ -36,53 +36,7 @@ class Service extends Model
 
     public static function update_fees($m)
     {
-
-        if (
-            $m->want_to_transfer != null &&
-            $m->transfer_keyword != null &&
-            (strlen($m->want_to_transfer) > 2) &&
-            $m->transfer_keyword == true
-        ) {
-            $transactions = Transaction::where([
-                'enterprise_id' => $m->enterprise_id
-            ])
-                ->where('description', 'like', '%' . $m->transfer_keyword . '%')
-                ->get();
-
-            foreach ($transactions as $key => $transaction) {
-                if ($transaction->account == null) {
-                    continue;
-                }
-
-                if (!in_array($transaction->account->category, $cats)) {
-                    continue;
-                }
-                if ($transaction->account->type == 'BANK_ACCOUNT') {
-                    continue;
-                }
-                if ($transaction->account->type == 'CASH_ACCOUNT') {
-                    continue;
-                }
-                if ($transaction->account->type == 'STUDENT_ACCOUNT') {
-                    continue;
-                }
-                if ($transaction->is_contra_entry == true) {
-                    continue;
-                }
-                $transaction->account_id = $m->id;
-                $transaction->save();
-            }
-
-            $m->balance =  Transaction::where([
-                'account_id' => $m->id
-            ])->sum('amount');
-            $m->want_to_transfer = null;
-            $m->transfer_keyword = null;
-            $m->save();
-        }
-
-
-
+        
         foreach ($m->subs as  $s) {
             $fd = FeeDepositConfirmation::where([
                 'fee_id' => $s->id,

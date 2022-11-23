@@ -118,17 +118,20 @@ class ServiceController extends AdminController
         $form = new Form(new Service());
         $u = Admin::user();
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
-
         $form->text('name', __('Name'))->rules('required');
+
+        $form->select('service_category_id', 'Service category')
+            ->options(ServiceCategory::where([
+                'enterprise_id' => $u->enterprise_id
+            ])->get()->pluck('name', 'id'));
         $form->text('fee', __('Fee'))->attribute('type', 'number')->rules('required');
 
-        
         $form->textarea('description', __('Description'));
 
-         
+
 
         $form->disableCreatingCheck();
-        $form->disableEditingCheck(); 
+        $form->disableEditingCheck();
         $form->disableViewCheck();
         $form->disableReset();
 
