@@ -132,7 +132,7 @@ class HomeController extends Controller
         ]);
     }
     public function stats(Content $content)
-    {
+    { 
 
         $u = Admin::user();
 

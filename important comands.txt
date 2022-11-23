@@ -76,6 +76,7 @@ composer install --ignore-platform-reqs
 
 php artisan make:migration create_enterprises_table
 php artisan make:migration create_service_subscriptions_table
+php artisan make:migration create_service_categories_table
 php artisan make:migration create_main_courses_table
 php artisan make:migration create_academic_years_table
 php artisan make:model Banner 
@@ -150,6 +151,7 @@ php artisan make:model NurseryTermlyReportCard
 php artisan make:model NurseryStudentReportCard
 php artisan make:model NurseryStudentReportCardItem
 php artisan make:model AccountParent
+php artisan make:model ServiceCategory
 
 
 php artisan admin:make TermController --model=App\\Models\\Term
@@ -226,6 +228,7 @@ php artisan admin:make NurseryTermlyReportCardController --model=App\\Models\\Nu
 php artisan admin:make NurseryStudentReportCardController --model=App\\Models\\NurseryStudentReportCard
 php artisan admin:make NurseryStudentReportCardItemController --model=App\\Models\\NurseryStudentReportCardItem 
 php artisan admin:make AccountParentController --model=App\\Models\\AccountParent 
+php artisan admin:make ServiceCategoryController --model=App\\Models\\ServiceCategory  
 
 
 enterprise_id
@@ -275,8 +278,6 @@ git commit -m "Stopped tracking .vendor File"git
 
 
 
-
-
 SHA256:UsVYuccvX03M/ptzLE6Z/DFAbwGTunWGP988PEMaHc4.
 
 Add correct host key in /Users/mac/.ssh/known_hosts to get rid of this message.
@@ -298,6 +299,7 @@ php artisan make:migration add_average_to_aggregates_theology --table=theologry_
 php artisan make:migration add_account_parent_id --table=accounts
 php artisan make:migration add_transfer_keyword --table=accounts
 php artisan make:migration add_academic_class_id --table=accounts
+php artisan make:migration add_want_to_transfer_keywords --table=service_categories
 
 git add --all 
 git commit -am "Your commit message"
@@ -341,5 +343,6 @@ php artisan make:migration add_update --table=termly_report_cards
 php artisan make:migration add_total_students --table=student_report_cards
 php artisan make:migration add_total_students --table=student_report_cards
 php artisan make:migration add_do_update --table=theology_termly_report_cards
+php artisan make:migration add_total --table=service_subscriptions
  
 php artisan admin:action Post\\BatchPrint --grid-batch --name="batch print"

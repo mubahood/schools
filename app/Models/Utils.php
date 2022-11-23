@@ -233,6 +233,14 @@ class Utils  extends Model
         }
 
 
+        $subs = ServiceSubscription::where([
+            'total' => null,
+        ])->get();
+        foreach ($subs as $key => $sub) {
+            $sub->total = $sub->quantity * $sub->service->fee;
+            $sub->save();
+        }
+
         $accs = Account::where([
             'type' => 'STUDENT_ACCOUNT',
             'academic_class_id' => null,
@@ -252,6 +260,39 @@ class Utils  extends Model
     }
     public static function generate_account_categories($u)
     {
+
+        $serviceCat = ServiceCategory::where([
+            'enterprise_id' => $u->enterprise_id,
+            'name' => 'Others'
+        ])->first();
+
+        if ($serviceCat == null) {
+            $serv = new ServiceCategory();
+            $serv->enterprise_id = $u->enterprise_id;
+            $serv->name = 'Others';
+            $serv->description = 'Default service category.';
+            $serv->save();
+        }
+
+        $serviceCat = ServiceCategory::where([
+            'enterprise_id' => $u->enterprise_id,
+            'name' => 'Others'
+        ])->first();
+        if ($serviceCat == null) {
+            die("Failed to create service category.");
+        }
+
+
+        foreach (Service::where([
+            'enterprise_id' => $u->enterprise_id,
+            'service_category_id' => null
+        ])->get() as $key => $service) {
+            $service->service_category_id = $serviceCat->id;
+            $service->save(); 
+        }
+
+
+
 
 
         $cat = AccountParent::where([

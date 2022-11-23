@@ -2,8 +2,10 @@
 
 namespace App\Admin\Controllers;
 
+use App\Models\Account;
 use App\Models\Service;
 use App\Models\ServiceSubscription;
+use App\Models\User;
 use App\Models\Utils;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
@@ -28,6 +30,7 @@ class ServiceSubscriptionController extends AdminController
     {
         $grid = new Grid(new ServiceSubscription());
 
+
         $grid->column('created_at', __('Date'))
             ->display(function () {
                 return Utils::my_date_time($this->created_at);
@@ -39,10 +42,45 @@ class ServiceSubscriptionController extends AdminController
             $actions->disableEdit();
         });
 
-        $grid->disableFilter();
-        $grid->disableBatchActions();
-        $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
-            ->orderBy('id', 'Desc');
+
+
+
+        $grid->filter(function ($filter) {
+            // Remove the default id filter
+            $filter->disableIdFilter();
+
+            $u = Admin::user();
+            $ajax_url = url(
+                '/api/ajax?'
+                    . 'enterprise_id=' . $u->enterprise_id
+                    . "&search_by_1=name"
+                    . "&search_by_2=id"
+                    . "&model=User"
+            );
+            $filter->equal('administrator_id', 'Filter by subscriber')
+                ->select(function ($id) {
+                    $a = User::find($id);
+                    if ($a) {
+                        return [$a->id => $a->name];
+                    }
+                })->ajax($ajax_url);
+
+
+            $services = [];
+            foreach (Service::where(
+                'enterprise_id',
+                Admin::user()->enterprise_id
+            )->get() as $v) {
+                $services[$v->id] = $v->name;
+            }
+
+            $filter->equal('service_id', 'Filter by service')
+                ->select($services);
+        });
+
+
+
+
 
 
         $grid->quickSearch(function ($model, $query) {
@@ -63,24 +101,15 @@ class ServiceSubscriptionController extends AdminController
                 }
                 return $this->sub->name;
             });
-
-        $services = [];
-        foreach (Service::where(
-            'enterprise_id',
-            Admin::user()->enterprise_id
-        )->get() as $v) {
-            $services[$v->id] = $v->name;
-        }
-
-
-
-
+ 
         $grid->column('service_id', __('Service'))->display(function () {
             return $this->service->name;
-        })->filter($services);
+        })->sortable();
         $grid->column('quantity', __('Quantity'))->sortable();
-        $grid->column('fee', __('Total fee'))->display(function () {
-            return "UGX " . number_format(((int)($this->quantity * $this->service->fee)));
+        $grid->column('total', __('Total fee'))->display(function () {
+            return "UGX " . number_format(((int)($this->total)));
+        })->totalRow(function ($amount) {
+            return  "UGX " . number_format($amount);
         });
 
 

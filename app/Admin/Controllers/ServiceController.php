@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Models\Service;
+use App\Models\ServiceCategory;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -29,10 +30,9 @@ class ServiceController extends AdminController
         $x->fee = rand(1000, 100000);
         $x->save();
         die("Anjane"); */
- 
+
         $grid = new Grid(new Service());
         $grid->disableBatchActions();
-        $grid->disableFilter();
         $grid->disableExport();
 
         $grid->actions(function ($actions) {
@@ -40,13 +40,40 @@ class ServiceController extends AdminController
             $actions->disableDelete();
         });
 
+
+
+        $grid->filter(function ($filter) {
+            // Remove the default id filter
+            $filter->disableIdFilter();
+
+            $u = Admin::user();
+
+
+            $cats = [];
+            foreach (ServiceCategory::where(
+                'enterprise_id',
+                Admin::user()->enterprise_id
+            )->get() as $v) {
+                $cats[$v->id] = $v->name;
+            }
+
+            $filter->equal('service_category_id', 'Filter by service category')
+                ->select($cats);
+        });
+
+
         $grid->quickSearch('name')->placeholder("Search...");
-        
+
         $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
             ->orderBy('id', 'Desc');
 
         $grid->column('id', __('Service #ID'));
-        $grid->column('name', __('Name'));
+        $grid->column('name', __('Name'))->sortable();
+        $grid->column('service_category_id', __('Category'))
+            ->sortable()
+            ->display(function () {
+                return $this->service_category->name;
+            });
         $grid->column('fee', __('Fee'))->display(function () {
             return "UGX " . number_format($this->fee);
         });
@@ -94,10 +121,14 @@ class ServiceController extends AdminController
 
         $form->text('name', __('Name'))->rules('required');
         $form->text('fee', __('Fee'))->attribute('type', 'number')->rules('required');
+
+        
         $form->textarea('description', __('Description'));
 
+         
+
         $form->disableCreatingCheck();
-        $form->disableEditingCheck();
+        $form->disableEditingCheck(); 
         $form->disableViewCheck();
         $form->disableReset();
 

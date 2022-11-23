@@ -34,10 +34,10 @@ class MarkController extends AdminController
         $grid = new Grid(new Mark());
 
 
-        $grid->export(function ($export) { 
-            $export->filename('School dynamics.csv'); 
-            $export->except(['is_submitted']); 
-            $export->originalValue(['score', 'remarks']); 
+        $grid->export(function ($export) {
+            $export->filename('School dynamics.csv');
+            $export->except(['is_submitted']);
+            $export->originalValue(['score', 'remarks']);
         });
 
 
@@ -158,21 +158,24 @@ class MarkController extends AdminController
                 return "-";
             }
             return $this->student->name;
-        })->sortable(); 
-        $grid->column('exam_id', __('Exam'))
-            ->display(function () {
-                return $this->exam->name_text;
-            })->hide() ->sortable();
-
-        $grid->column('class_id', __('Class'))->display(function () {
-            return $this->class->name;
-        })->hide()->sortable();
-        $grid->column('subject_id', __('Subject'))->display(function () {
-            return $this->subject->subject_name;
-        })->hide()->sortable();
+        })->sortable();
 
         $grid->column('score', __('Score'))->sortable()->editable();
         $grid->column('remarks', __('Remarks'))->editable();
+
+        $grid->column('exam_id', __('Exam'))
+            ->display(function () {
+                return $this->exam->name_text;
+            })->sortable();
+
+        $grid->column('class_id', __('Class'))->display(function () {
+            return $this->class->name;
+        })->sortable();
+        $grid->column('subject_id', __('Subject'))->display(function () {
+            return $this->subject->subject_name;
+        })->sortable();
+
+
         /*  $grid->column('is_missed', __('Missed')); */
         $grid->column('is_submitted', __('Submitted'))->display(function ($st) {
             if ($st)

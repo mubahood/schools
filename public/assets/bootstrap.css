@@ -10662,7 +10662,7 @@ a.text-dark:hover {
     background-color: red;
 }
 .btn-default{
-    background-color: #6B3B00!important;
+
 }
 .help-block{ 
     margin-bottom: 0px!important;
@@ -10721,8 +10721,8 @@ a.text-dark:hover {
     font-size: 18px;
 }
 .fs-20{
-    font-size: 20px;
+    font-size: 18px;
 }
 .fs-22{
-    font-size: 22px;
+    font-size: 18px;
 }
