@@ -33,6 +33,7 @@ class Subject extends Model
 
         parent::boot();
         static::deleting(function ($m) {
+            return $m;
             die("You cannot delete this item.");
         });
         static::creating(function ($m) {
