@@ -8,6 +8,8 @@ use App\Models\Account;
 use App\Models\Enterprise;
 use App\Models\Mark;
 use App\Models\Service;
+use App\Models\ServiceCategory;
+use App\Models\ServiceSubscription;
 use App\Models\StudentHasClass;
 use App\Models\TheologyExam;
 use App\Models\TheologyMark;
@@ -20,6 +22,78 @@ use Illuminate\Support\Facades\Auth;
 
 class Dashboard
 {
+
+    public static function bursarServices()
+    {
+        $u = Auth::user();
+        $classes = [];
+        $labels = [];
+        $amounts = [];
+        $total = 0;
+
+        foreach (ServiceCategory::where([
+            'enterprise_id' => $u->enterprise_id
+        ])->orderBy('id', 'Asc')->get() as $key => $value) {
+            $value->amount = 0;
+            foreach (Service::where([
+                'service_category_id' => $value->id
+            ])->get() as $s) {
+                $value->amount = ServiceSubscription::where([
+                    'service_id' => $value->id
+                ])->sum('total');
+            }
+
+            $value->amount = $value->amount ;
+            $labels[] = $value->name;
+            $classes[] = $value;
+            $amounts[] = $value->amount;
+            $total += $value->amount;
+        }
+
+        return view('dashboard.bursarServices', [
+            'classes' => $classes,
+            'labels' => $labels,
+            'amounts' => $amounts,
+            'total' => $total,
+        ]);
+
+
+        $s = new AcademicClass();
+        $s->name = "Services";
+        foreach (Service::all() as $key => $val) {
+            $amount = $val->fee;
+            $subs = count($val->subs);
+            $s->amount += ($amount * $subs);
+        }
+        $labels[] = 'Services';
+        $classes[] = $s;
+        $amounts[] = $s->amount;
+
+        return view('dashboard.bursarServices', [
+            'classes' => $classes,
+            'labels' => $labels,
+            'amounts' => $amounts,
+            'total' => $total,
+        ]);
+        /* foreach (AcademicClass::where([
+            'enterprise_id' => $u->enterprise_id
+        ])->orderBy('id', 'Asc')->get() as $key => $value) {
+            $value->amount = Account::where([
+                'academic_class_id' => $value->id
+            ])->sum('balance');
+            $labels[] = $value->name;
+            $classes[] = $value;
+            $amounts[] = $value->amount;
+            $total += $value->amount;
+        }
+
+        return view('dashboard.bursarFeesExpected', [
+            'classes' => $classes,
+            'labels' => $labels,
+            'amounts' => $amounts,
+            'total' => $total,
+        ]); */
+    }
 
     public static function bursarFeesExpected()
     {

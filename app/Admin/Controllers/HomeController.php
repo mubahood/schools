@@ -161,6 +161,18 @@ class HomeController extends Controller
                 }
             });
 
+            $content->row(function (Row $row) {
+                $u = Admin::user();
+                if (
+                    $u->isRole('admin') ||
+                    $u->isRole('bursar')
+                ) {
+                    $row->column(6, function (Column $column) {
+                        $column->append(Dashboard::bursarServices());
+                    }); 
+                }
+            });
+
             return $content;
         }
 
