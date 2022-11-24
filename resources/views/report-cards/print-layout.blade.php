@@ -1,8 +1,143 @@
 <?php
-use App\Models\Utils;
 
-Utils::getClassTeacherComment($r)
-die();
+function getClassTeacherComment($r)
+{
+    $position = ((int) $r->position);
+    $total_students = ((int) $r->total_students);
+
+    $percentage = 0;
+    if ($total_students > 0) {
+        $percentage = ($position / $total_students) * 100;
+    } else {
+        $position = 0;
+    }
+
+    $Comment1 = getClassTeacherComment1();
+    $Comment2 = getClassTeacherComment2();
+    $Comment3 = getClassTeacherComment3();
+
+    $theologyComments1 = theologyComments1();
+    $theologyComments2 = theologyComments2();
+    $theologyComments3 = theologyComments3();
+
+    $hmComment1 = hmComment1();
+    $hmComment2 = hmComment2();
+    $hmComment3 = hmComment3();
+    $hmComment4 = hmComment4();
+    $hmComment5 = hmComment5();
+
+    shuffle($Comment1);
+    shuffle($Comment2);
+    shuffle($Comment3);
+
+    shuffle($hmComment1);
+    shuffle($hmComment2);
+    shuffle($hmComment3);
+    shuffle($hmComment4);
+    shuffle($hmComment5);
+
+    shuffle($theologyComments1);
+    shuffle($theologyComments2);
+    shuffle($theologyComments3);
+
+    $comment['teacher'] = '-';
+    $comment['hm'] = '-';
+    if ($percentage < 40) {
+        $comment['teacher'] = $Comment1[1];
+        $comment['theo'] = $theologyComments1[1];
+    } elseif ($percentage < 60) {
+        $comment['theo'] = $theologyComments2[1];
+        $comment['teacher'] = $Comment2[1];
+    } elseif ($percentage < 101) {
+        $comment['theo'] = $theologyComments3[1];
+        $comment['teacher'] = $Comment3[2];
+    }
+
+    if ($percentage < 20) {
+        $comment['hm'] = $hmComment1[1];
+    } elseif ($percentage < 40) {
+        $comment['hm'] = $hmComment2[1];
+    } elseif ($percentage < 60) {
+        $comment['hm'] = $hmComment3[2];
+    } elseif ($percentage < 80) {
+        $comment['hm'] = $hmComment4[2];
+    } elseif ($percentage < 101) {
+        $comment['hm'] = $hmComment5[2];
+    }
+    return $comment;
+}
+
+function getClassTeacherComment2()
+{
+    return ['Wonderful results. Don’t relax', 'Promising performance. Keep working hard for first grade.', 'Encouraging results, Continue reading hard.'];
+}
+
+function getClassTeacherComment1()
+{
+    return ['An excellent performance. Keep it up.', 'You are an academician. Keep shining.', 'A remarkable performance observed. Keep excelling.', 'You have exhibited excellent results.'];
+}
+
+function getClassTeacherComment3()
+{
+    return ['Work hard in all subjects.', 'More effort still needed for better performance,', 'There is still room for improvement.', 'Double your effort in all subjects.', 'You need to concentrate more during exams.'];
+}
+
+function theologyComments1()
+{
+    return ['Good work, thank you', 'We congratulate you upon this great performance.', 'Thank you for your performance'];
+}
+
+function theologyComments2()
+{
+    return ['Strive for first grade.', 'We expect a first grade from you.', 'Aim higher for better performance.'];
+}
+
+function theologyComments3()
+{
+    return ['Revise more than this.', 'Consultation is the key to excellence.', 'Befriend excellent students.', 'More effort is still needed.', 'Double your effort in all subjects.'];
+}
+
+function nurseryComments1($Sex)
+{
+    return ['His/her performance has greatly improved; she produces attractive work.', 'In all the fundamental subjects, he is performing admirably well.', 'She/He is focused and enthusiastic learner with much determination.', 'She/He has produced an excellent report She/He shouldn’t relax.', 'His/her performance is very good. He just needs more encouragement.', 'She is hardworking, determined, co-operative and well disciplined.'];
+}
+
+function nurseryComments2($Sex)
+{
+    return ['She has a lot of potential and is working hard to realize it.', 'She is a focused and enthusiastic learner with much determination.', 'He is self-confident and has excellent manners. Thumbs up.', 'She has done some good work, but it hasn’t been consistent because of her frequent relaxation.', 'He can produce considerably better results. Though she frequently seeks the attention and help from peers.', 'He has troubles focusing in class which hinders his or her ability to participate fully in class activities and tasks.', 'She is genuinely interested in everything we do, though experiencing some difficulties.'];
+}
+
+function nurseryComments3($Sex)
+{
+    return ['He has demonstrated a positive attitude towards wanting to improve.', 'Directions are still tough for him to follow.', 'She can do better than this, but more effort is needed in reading.', 'He is an exceptionally thoughtful student.'];
+}
+function hmCommunication()
+{
+    return 'Assalam Alaikum Warahmatullah Wabarakatuhu. We are informing our beloved parents that the Quran competition for this term three is postponed to Saturday 9/4/2023 next term.';
+}
+
+function hmComment1()
+{
+    return ['Excellent performance reflected, thank you.', 'Excellent results displayed; keep the spirit up.', 'Very good and encouraging performance, keep it up.', 'Wonderful results reflected, ought to be rewarded.', 'Thank you for the wonderful and excellent performance keep it up.'];
+}
+
+function hmComment2()
+{
+    return ['Promising performance displayed, keep working harder to attain the best.', 'Steady progress reflected, keep it up to attain the best next time.', 'Encouraging results shown, do not relax.', 'Positive progress observed, continue with the energy for a better grade.', 'Promising performance displayed, though more is still needed to attain the best aggregate.'];
+}
+function hmComment3()
+{
+    return ['Work harder than this to attain a better aggregate.', 'Aim higher than thus to better your performance.', 'Steady progress reflected, aim higher than this next time.', 'Positive progress observed do not relax.', 'Steady progress though more is still desired to attain the best.'];
+}
+function hmComment4()
+{
+    return ['You need to concentrate more weaker areas to better your performance next time.', 'Double your energy and concentration to better your results.', 'A lot more is still desired from for a better performance next time.', 'You are encouraged to concentrate in class for a better performance.', 'Slight improvement reflected; you are encouraged to continue working harder.'];
+}
+function hmComment5()
+{
+    return ['Double your energy in all areas for a better grade.', 'Concentration in class at all times to better your performance next time.', 'Always consult your teachers in class to better aim higher than this.', 'Always aim higher than this.', 'Teacher- parent relationship is needed to help the learner improve.'];
+}
+
 $max_bot = 30;
 $max_mot = 40;
 $max_eot = 60;
@@ -132,7 +267,7 @@ $school_email = 'admin@kjs.com';
             <p class="text-center p font-serif  fs-3 m-0 p-0"><u><b>{{ $r->termly_report_card->report_title }}</b></u>
             </p>
 
-        </div> 
+        </div>
         {{-- 19.9 --}}
 
         <div class="col-2 float-right text-right">
@@ -185,7 +320,7 @@ $school_email = 'admin@kjs.com';
                                     {{-- <th>M.O.T <br> ({{ $max_mot }})</th> --}}
                                 @endif
                                 @if ($r->termly_report_card->has_end_term)
-                                  {{--   <th>E.O.T <br> ({{ $max_eot }})</th> --}}
+                                    {{--   <th>E.O.T <br> ({{ $max_eot }})</th> --}}
                                 @endif
                                 <th>Marks <br> (100%)</th>
                                 <th>Aggr</th>
@@ -194,7 +329,7 @@ $school_email = 'admin@kjs.com';
                             </thead>
                             @foreach ($r->items as $v)
                                 <tr class="marks">
-                                    <th>{{ $v->subject->subject_name /* . ' ' . $v->subject->main_course_id */ }}</th>
+                                    <th>{{ $v->subject->subject_name }}</th>
                                     @if ($r->termly_report_card->has_beginning_term)
                                         <td>{{ $v->bot_mark }}</td>
                                     @endif
@@ -203,7 +338,7 @@ $school_email = 'admin@kjs.com';
                                         {{-- <td>{{ $v->mot_mark }}</td> --}}
                                     @endif
                                     @if ($r->termly_report_card->has_end_term)
-                                      {{--   <td>{{ $v->eot_mark }}</td> --}}
+                                        {{--   <td>{{ $v->eot_mark }}</td> --}}
                                     @endif
                                     <td>{{ $v->total }}</td>
                                     <td>{{ $v->grade_name }}</td>
@@ -214,13 +349,13 @@ $school_email = 'admin@kjs.com';
                             <tr class="marks">
                                 <th><b>TOTAL</b></th>
                                 @if ($r->termly_report_card->has_beginning_term)
-                                    <td></td>
+                                    {{--           <td></td> --}}
                                 @endif
                                 @if ($r->termly_report_card->has_mid_term)
                                     {{--   <td></td> --}}
                                 @endif
                                 @if ($r->termly_report_card->has_end_term)
-                                    <td></td>
+                                    {{--           <td></td> --}}
                                 @endif
                                 <td><b>{{ $r->total_marks }}</b></td>
                                 <td><b>{{ $r->total_aggregates }}</b></td>
@@ -233,7 +368,7 @@ $school_email = 'admin@kjs.com';
 
                 <div class="p-0 mt-2 mb-2 class-teacher">
                     <b>CLASS TEACHER'S COMMENT:</b>
-                    <span class="comment">{{ Utils::getClassTeacherComment($r) }}</span> 
+                    <span class="comment">{{ getClassTeacherComment($tr)['teacher'] }}</span>
                     {{-- <span class="comment">{{  }}</span> --}}
                 </div>
 
@@ -285,7 +420,7 @@ $school_email = 'admin@kjs.com';
                                         {{--  <th>M.O.T <br> ({{ $max_mot }})</th> --}}
                                     @endif
                                     @if ($tr->termly_report_card->has_end_term)
-                                      {{--   <th>E.O.T <br> ({{ $max_eot }})</th> --}}
+                                        {{--   <th>E.O.T <br> ({{ $max_eot }})</th> --}}
                                     @endif
                                     <th>MARKS <br> (100%)</th>
                                     <th>Aggr</th>
@@ -324,7 +459,7 @@ $school_email = 'admin@kjs.com';
                                             {{--  <td>{{ $v->mot_mark }}</td> --}}
                                         @endif
                                         @if ($r->termly_report_card->has_end_term)
-                                          {{--   <td>{{ $v->eot_mark }}</td> --}}
+                                            {{--   <td>{{ $v->eot_mark }}</td> --}}
                                         @endif
                                         <td>{{ $v->total }}</td>
                                         <td>{{ $v->grade_name }}</td>
@@ -341,7 +476,7 @@ $school_email = 'admin@kjs.com';
                                         {{-- <td></td> --}}
                                     @endif
                                     @if ($tr->termly_report_card->has_end_term)
-                                   {{--      <td></td> --}}
+                                        {{--      <td></td> --}}
                                     @endif
                                     <td><b>{{ $tr->total_marks }}</b></td>
                                     <td><b>{{ $tr->total_aggregates }}</b></td>
@@ -356,7 +491,7 @@ $school_email = 'admin@kjs.com';
                 @if ($tr != null)
                     <div class="p-0 mt-2 mb-2 class-teacher">
                         <b>CLASS TEACHER'S COMMENT:</b>
-                        <span class="comment">{{ $tr->class_teacher_comment }}</span>
+                        <span class="comment">{{ getClassTeacherComment($r)['theo'] }}</span>
                     </div>
                 @endif
             </div>
@@ -438,7 +573,7 @@ $school_email = 'admin@kjs.com';
                     <div class="col-12 p-0">
                         <div class="p-0 mt-0 mb-2 class-teacher">
                             <b>HEAD TEACHER'S COMMENT:</b>
-                            <span class="comment">{{ $r->head_teacher_comment }}</span>
+                            <span class="comment">{{ getClassTeacherComment($r)['hm'] }}</span>
                         </div>
                     </div>
                 </div>
@@ -446,9 +581,9 @@ $school_email = 'admin@kjs.com';
                     <div class="col-12 p-0">
                         <div class="p-0 mt-0 mb-2 class-teacher">
                             <b>HEAD TEACHER'S COMMUNICATION:</b>
-                            <span class="comment">Dear parents, primary seven candidates duwa will be there on the 4th
-                                November 2022, 2pm.
-                                Graduation for top class and Theology day will be on 2nd December 2022.</span>
+                            <span class="comment">Assalam Alaikum Warahmatullah Wabarakatuhu. We are informing our
+                                beloved parents that the Quran competition for this term three is postponed to Saturday
+                                9/4/2023 next term.</span>
                         </div>
                     </div>
                 </div>

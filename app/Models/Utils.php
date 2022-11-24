@@ -1200,8 +1200,9 @@ class Utils  extends Model
         return new $class();
     }
 
+
     public static function getClassTeacherComment($r)
-    {
+    { 
         $Comment1 = Utils::getClassTeacherComment1();
         $Comment2 = Utils::getClassTeacherComment2();
         $Comment3 = Utils::getClassTeacherComment3();
