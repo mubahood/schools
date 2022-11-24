@@ -247,7 +247,7 @@ $school_email = 'admin@kjs.com';
                         <span><b class="text-uppercase">DIV:</b> <span class="value">{{ $tr->grade }}</span></span>
                         <span><b class="text-uppercase">Position in class:</b> <span
                                 class="value text-lowercase">{{ $numFormat->format($tr->position) }}</span></span>
-                        
+
                     </div>
                 @endif
                 <div class="row mt-2">
@@ -372,7 +372,7 @@ $school_email = 'admin@kjs.com';
                             <tbody>
                                 <tr class="text-center">
                                     <th class="text-left">Mark</th>
-                                    <th>0 - 39</th>
+                                    <th>00 - 39</th>
                                     <th>40 - 44</th>
                                     <th>45 - 49</th>
                                     <th>50 - 54</th>
