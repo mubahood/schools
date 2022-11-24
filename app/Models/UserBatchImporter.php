@@ -142,9 +142,6 @@ class UserBatchImporter extends Model
     public static function students_batch_import($m)
     {
 
-
-
-
         if ($m->type == 'photos') {
             UserBatchImporter::user_photos_batch_import($m);
             return $m;
@@ -152,6 +149,7 @@ class UserBatchImporter extends Model
         set_time_limit(-1);
 
         $file_path = Utils::docs_root() . 'storage/' . $m->file_path;
+
 
 
         $cla = AcademicClass::find($m->academic_class_id);
@@ -162,6 +160,7 @@ class UserBatchImporter extends Model
         if (!file_exists($file_path)) {
             die("$file_path File does not exist.");
         }
+
         $array = Excel::toArray([], $file_path);
 
         $i = 0;
@@ -175,6 +174,7 @@ class UserBatchImporter extends Model
                 $is_first = false;
                 continue;
             }
+
 
             $i++;
             if (
@@ -191,9 +191,11 @@ class UserBatchImporter extends Model
                 'user_id' => $user_id
             ])->first();
 
+
             $is_updating = false;
 
             if ($u != null) {
+                dd("upading...");
                 //time to update
                 $_duplicates .= " $user_id, ";
                 $is_updating = true;
@@ -204,18 +206,18 @@ class UserBatchImporter extends Model
                 $u = new Administrator();
                 $u->user_id = $user_id;
                 $u->school_pay_account_id = $user_id;
+                $u->school_pay_payment_code = $user_id;
                 $u->username = $user_id;
                 $u->password = password_hash('4321', PASSWORD_DEFAULT);
                 $u->enterprise_id = $enterprise_id;
-                $u->school_pay_payment_code = trim($v[1]);
                 $u->avatar = url('user.png');
             }
 
 
-            $u->first_name = trim($v[2]);
-            $u->given_name = trim($v[3]);
-            $u->last_name = trim($v[4]);
-            $u->sex = trim($v[5]);
+            $u->first_name = trim($v[1]);
+            $u->given_name = trim($v[2]);
+            $u->last_name = trim($v[3]);
+            $u->sex = trim($v[4]);
             if ($u->sex != null) {
                 if (strlen($u->sex) > 0) {
                     if (strtoupper(substr($u->sex, 0, 1)) == 'M') {
@@ -226,33 +228,9 @@ class UserBatchImporter extends Model
                 }
             }
 
-            $u->residential_type = trim($v[6]);
-            $u->home_address = trim($v[7]);
-            $u->swimming = trim($v[8]);
-            $u->transportation = trim($v[9]);
-            $u->emergency_person_name = trim($v[10]);
-            $u->emergency_person_phone = trim($v[11]);
-            $u->phone_number_2 = trim($v[12]);
-            $u->guardian_relation = trim($v[13]);
-            $u->date_of_birth = trim($v[14]);
-            $u->referral = trim($v[15]);
-            $u->father_phone = trim($v[16]);
-            $u->previous_school = trim($v[17]);
-            $u->nationality = trim($v[18]);
-            $u->religion = trim($v[19]);
 
-            $u->place_of_birth = $u->home_address;
-            $u->current_address = $u->home_address;
-            $u->phone_number_1 = $u->emergency_person_phone;
-            $u->user_batch_importer_id = $m->id;
 
-            $u->spouse_name = '-';
-            $u->spouse_phone = '-';
-            $u->languages = '-';
-            $u->national_id_number = '-';
-            $u->passport_number = '-';
-
-            $u->name = $u->first_name . " " . $u->last_name;
+            $u->name = $u->first_name . " " . $u->given_name . " " . $u->last_name;
 
             $u->user_type = 'student';
 
@@ -274,6 +252,80 @@ class UserBatchImporter extends Model
         $m->description = "Imported $import_count new students and Updated $update_count students.";
         $m->save();
     }
+
+
+
+    public static function marks_batch_import($m)
+    {
+
+
+        set_time_limit(-1);
+        $file_path = Utils::docs_root() . 'storage/' . $m->file_path;
+
+        $cla = AcademicClass::find($m->academic_class_id);
+        if ($cla == null) {
+            die("Class not found.");
+        }
+
+        if (!file_exists($file_path)) {
+            die("$file_path File does not exist.");
+        }
+
+        $array = Excel::toArray([], $file_path);
+
+        $i = 0;
+        $enterprise_id = $m->enterprise_id;
+        $_duplicates = '';
+        $update_count = 0;
+        $import_count = 0;
+        $is_first = true;
+        foreach ($array[0] as $key => $v) {
+            if ($is_first) {
+                $is_first = false;
+                continue;
+            }
+            $i++;
+            if (
+                (count($v) < 3) ||
+                (!isset($v[0])) ||
+                (!isset($v[1])) ||
+                ($v[0] == null)
+            ) {
+                continue;
+            }
+            $user_id = trim($v[0]);
+            $u = Administrator::where([
+                'enterprise_id' => $enterprise_id,
+                'user_id' => $user_id
+            ])->first();
+
+
+            $is_updating = false;
+
+            if ($u == null) {
+                dd("Student not found...");
+            }
+
+
+            $math = Mark::where([
+                'enterprise_id' => $enterprise_id,
+                'student_id' => $u->id,
+                'subject_id' => 4
+            ])->first();
+            if ($math == null) {
+                die("Math not found");
+            }
+
+            $math->score = ((int)trim($v[10]));
+            $math->save();
+       
+            continue; 
+        }
+        $m->description = "Imported $import_count new students and Updated $update_count students.";
+        dd($m->description);
+    }
+
+
 
     public static function employees_batch_import($m)
     {

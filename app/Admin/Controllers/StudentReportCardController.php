@@ -20,6 +20,7 @@ use Encore\Admin\Layout\Column;
 use Encore\Admin\Widgets\Form as WidgetsForm;
 use Encore\Admin\Widgets\InfoBox;
 use Encore\Admin\Widgets\Table;
+use Illuminate\Support\Facades\Auth;
 
 class StudentReportCardController extends AdminController
 {
@@ -113,6 +114,13 @@ class StudentReportCardController extends AdminController
                         ->get() as $v) {
 
                         $term_id = 6;
+                        if (Auth::user()->enterprise_id == 9) {
+                            $t = Term::where([
+                                'enterprise_id' => 9
+                            ])->first();
+                            $term_id = $t->id;
+                        }
+                        
                         $rs = StudentReportCard::where([
                             'term_id' => $term_id,
                             'academic_class_id' => $v->id,
@@ -132,7 +140,7 @@ class StudentReportCardController extends AdminController
 
                     $table = new Table($headers, $rows);
 
-                    $box = new Box('3RD Term', $table); 
+                    $box = new Box('3RD Term', $table);
 
                     $box->style('success');
 

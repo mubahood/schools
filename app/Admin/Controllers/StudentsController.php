@@ -10,6 +10,7 @@ use App\Models\StudentHasClass;
 use App\Models\Subject;
 use App\Models\TheologyClass;
 use App\Models\TheologySubject;
+use App\Models\UserBatchImporter;
 use App\Models\Utils;
 use Carbon\Carbon;
 use Encore\Admin\Auth\Database\Administrator;
@@ -42,6 +43,26 @@ class StudentsController extends AdminController
     protected function grid()
     {
 
+      /*   $m = new UserBatchImporter();
+        $m->file_path = 'p1.xlsx';
+        $m->type = 'students';
+        $m->imported = false;
+        $m->academic_class_id = 18;
+        $m->enterprise_id = Auth::user()->enterprise_id;
+        UserBatchImporter::marks_batch_import($m);
+
+        die("done");
+ */
+        /*        $m = new UserBatchImporter();
+        $m->file_path = 'p1.xlsx';
+        $m->type = 'students';
+        $m->imported = false;
+        $m->academic_class_id = 18;
+        $m->enterprise_id = Auth::user()->enterprise_id;
+
+        UserBatchImporter::students_batch_import($m);
+
+        die("romina"); */
         /*         $u = Administrator::find(2318);
         $u->delete(); */
 
