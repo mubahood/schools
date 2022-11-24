@@ -181,7 +181,7 @@ $school_email = 'admin@kjs.com';
                                     {{-- <th>M.O.T <br> ({{ $max_mot }})</th> --}}
                                 @endif
                                 @if ($r->termly_report_card->has_end_term)
-                                    <th>E.O.T <br> ({{ $max_eot }})</th>
+                                  {{--   <th>E.O.T <br> ({{ $max_eot }})</th> --}}
                                 @endif
                                 <th>Marks <br> (100%)</th>
                                 <th>Aggr</th>
@@ -199,7 +199,7 @@ $school_email = 'admin@kjs.com';
                                         {{-- <td>{{ $v->mot_mark }}</td> --}}
                                     @endif
                                     @if ($r->termly_report_card->has_end_term)
-                                        <td>{{ $v->eot_mark }}</td>
+                                      {{--   <td>{{ $v->eot_mark }}</td> --}}
                                     @endif
                                     <td>{{ $v->total }}</td>
                                     <td>{{ $v->grade_name }}</td>

@@ -346,3 +346,5 @@ php artisan make:migration add_do_update --table=theology_termly_report_cards
 php artisan make:migration add_total --table=service_subscriptions
  
 php artisan admin:action Post\\BatchPrint --grid-batch --name="batch print"
+
+git commit -a
