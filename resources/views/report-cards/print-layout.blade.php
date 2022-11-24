@@ -169,7 +169,7 @@ $school_email = 'admin@kjs.com';
                     <span><b class="text-uppercase">Position:</b> <span
                             class="value text-lowercase">{{ $numFormat->format($r->position) }}</span></span>
 
-                    <span><b class="text-uppercase">OUT OF :</b> <span class="value">{{ $r->total_students }}
+
                 </div>
                 <div class="row mt-2">
                     <div class="col-12">
