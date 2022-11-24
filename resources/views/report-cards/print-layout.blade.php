@@ -1,4 +1,8 @@
 <?php
+use App\Models\Utils;
+
+Utils::getClassTeacherComment($r)
+die();
 $max_bot = 30;
 $max_mot = 40;
 $max_eot = 60;
@@ -229,7 +233,8 @@ $school_email = 'admin@kjs.com';
 
                 <div class="p-0 mt-2 mb-2 class-teacher">
                     <b>CLASS TEACHER'S COMMENT:</b>
-                    <span class="comment">{{ $r->class_teacher_comment }}</span>
+                    <span class="comment">{{ Utils::getClassTeacherComment($r) }}</span> 
+                    {{-- <span class="comment">{{  }}</span> --}}
                 </div>
 
 

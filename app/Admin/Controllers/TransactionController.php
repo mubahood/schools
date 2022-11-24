@@ -54,7 +54,6 @@ class TransactionController extends AdminController
         });
 
         $grid->disableBatchActions();
-        $grid->disableActions();
 
         $grid->quickSearch('description');
 

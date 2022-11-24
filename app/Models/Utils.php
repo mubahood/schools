@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Dflydev\DotAccessData\Util;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Facades\Admin;
 use Exception;
@@ -203,7 +204,7 @@ class Utils  extends Model
     public static function system_boot($u)
     {
 
-      /*   foreach (Account::all() as $key => $acc) {
+        /*   foreach (Account::all() as $key => $acc) {
             $acc->balance =  Transaction::where([
                 'account_id' => $acc->id
             ])->sum('amount');
@@ -1189,6 +1190,7 @@ class Utils  extends Model
         return $data;
     }
 
+
     public static function getObject($class, $id)
     {
         $data = $class::find($id);
@@ -1196,5 +1198,167 @@ class Utils  extends Model
             return $data;
         }
         return new $class();
+    }
+
+    public static function getClassTeacherComment($r)
+    {
+        $Comment1 = Utils::getClassTeacherComment1();
+        $Comment2 = Utils::getClassTeacherComment2();
+        $Comment3 = Utils::getClassTeacherComment3();
+        shuffle($Comment1);
+        shuffle($Comment2);
+        shuffle($Comment3);
+    }
+
+
+    public static function getClassTeacherComment2()
+    {
+        return [
+            'Wonderful results. Don’t relax',
+            'Promising performance. Keep working hard for first grade.',
+            'Encouraging results, Continue reading hard.'
+        ];
+    }
+
+    public static function getClassTeacherComment1()
+    {
+        return [
+            'An excellent performance. Keep it up.',
+            'You are an academician. Keep shining.',
+            'A remarkable performance observed. Keep excelling.',
+            'You have exhibited excellent results.',
+        ];
+    }
+
+    public static function getClassTeacherComment3()
+    {
+        return [
+            'Work hard in all subjects.',
+            'More effort still needed for better performance,',
+            'There is still room for improvement.',
+            'Double your effort in all subjects.',
+            'You need to concentrate more during exams.'
+        ];
+    }
+
+    public static function theologyComments1()
+    {
+        return [
+            'Good work, thank you',
+            'We congratulate you upon this great performance.',
+            'Thank you for your performance'
+        ];
+    }
+
+    public static function theologyComments2()
+    {
+        return [
+            'Strive for first grade.',
+            'We expect a first grade from you.',
+            'Aim higher for better performance.'
+        ];
+    }
+
+    public static function theologyComments3()
+    {
+        return [
+            'Revise more than this.',
+            'Consultation is the key to excellence.',
+            'Befriend excellent students.',
+            'More effort is still needed.',
+            'Double your effort in all subjects.'
+        ];
+    }
+
+
+    public static function nurseryComments1($Sex)
+    {
+        return [
+            'His/her performance has greatly improved; she produces attractive work.',
+            'In all the fundamental subjects, he is performing admirably well.',
+            'She/He is focused and enthusiastic learner with much determination.',
+            'She/He has produced an excellent report She/He shouldn’t relax.',
+            'His/her performance is very good. He just needs more encouragement.',
+            'She is hardworking, determined, co-operative and well disciplined.'
+        ];
+    }
+
+    public static function nurseryComments2($Sex)
+    {
+        return [
+            'She has a lot of potential and is working hard to realize it.',
+            'She is a focused and enthusiastic learner with much determination.',
+            'He is self-confident and has excellent manners. Thumbs up.',
+            'She has done some good work, but it hasn’t been consistent because of her frequent relaxation.',
+            'He can produce considerably better results. Though she frequently seeks the attention and help from peers.',
+            'He has troubles focusing in class which hinders his or her ability to participate fully in class activities and tasks.',
+            'She is genuinely interested in everything we do, though experiencing some difficulties.'
+        ];
+    }
+
+    public static function nurseryComments3($Sex)
+    {
+        return [
+            'He has demonstrated a positive attitude towards wanting to improve.',
+            'Directions are still tough for him to follow.',
+            'She can do better than this, but more effort is needed in reading.',
+            'He is an exceptionally thoughtful student.'
+        ];
+    }
+    public static function hmCommunication()
+    {
+        return 'Assalam Alaikum Warahmatullah Wabarakatuhu. We are informing our beloved parents that the Quran competition for this term three is postponed to Saturday 9/4/2023 next term.';
+    }
+
+    public static function hmComment1()
+    {
+        return [
+            'Excellent performance reflected, thank you.',
+            'Excellent results displayed; keep the spirit up.',
+            'Very good and encouraging performance, keep it up.',
+            'Wonderful results reflected, ought to be rewarded.',
+            'Thank you for the wonderful and excellent performance keep it up.'
+        ];
+    }
+
+    public static function hmComment2()
+    {
+        return [
+            'Promising performance displayed, keep working harder to attain the best.',
+            'Steady progress reflected, keep it up to attain the best next time.',
+            'Encouraging results shown, do not relax.',
+            'Positive progress observed, continue with the energy for a better grade.',
+            'Promising performance displayed, though more is still needed to attain the best aggregate.'
+        ];
+    }
+    public static function hmComment3()
+    {
+        return [
+            'Work harder than this to attain a better aggregate.',
+            'Aim higher than thus to better your performance.',
+            'Steady progress reflected, aim higher than this next time.',
+            'Positive progress observed do not relax.',
+            'Steady progress though more is still desired to attain the best.'
+        ];
+    }
+    public static function hmComment4()
+    {
+        return [
+            'You need to concentrate more weaker areas to better your performance next time.',
+            'Double your energy and concentration to better your results.',
+            'A lot more is still desired from for a better performance next time.',
+            'You are encouraged to concentrate in class for a better performance.',
+            'Slight improvement reflected; you are encouraged to continue working harder.'
+        ];
+    }
+    public static function hmComment5()
+    {
+        return [
+            'Double your energy in all areas for a better grade.',
+            'Concentration in class at all times to better your performance next time.',
+            'Always consult your teachers in class to better aim higher than this.',
+            'Always aim higher than this.',
+            'Teacher- parent relationship is needed to help the learner improve.'
+        ];
     }
 }
