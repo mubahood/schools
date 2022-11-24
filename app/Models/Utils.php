@@ -1166,13 +1166,13 @@ class Utils  extends Model
         $data['comment'] = $r->remarks;
         $data['grade'] = "-";
         if ($r->subject->theology_course->id == 1) {
-            $data['comment'] = 'Reading some Suras like Alfatha, Naas, Masad, Kauthar, Quraish, Fil, and Aswir';
+            $data['comment'] = 'How to recite and memorize the holy Quran perfectly.';
         } else if ($r->subject->theology_course->id == 4) {
-            $data['comment'] = 'Knowing the arabic alphabets, reading arabic letters, mentioning things found in class and at home';
+            $data['comment'] = 'Reading, speaking and writing Arabic language.';
         } else if ($r->subject->theology_course->id == 3) {
-            $data['comment'] = 'Knowing hadith about lying, sharing, table manners, salam and brotherhood. Knowing about the life of prophet';
+            $data['comment'] = 'The theory or philosophy of Islamic law and Islamic practices.';
         } else if ($r->subject->theology_course->id == 2) {
-            $data['comment'] = 'Knowing some duas like for eating, sleeping, toilet, sneezing, Adhan, entering mosque, dua for parents and for the sick people';
+            $data['comment'] = 'Worshipping Allah, Islamic history, actions and words of the prophet.';
         }
 
 
