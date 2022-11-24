@@ -1292,12 +1292,16 @@ class Utils  extends Model
 
         if ($r->grade < 2) {
             $comment['teacher'] = $Comment1[1];
+            $comment['theo'] = $Comment1[0];
         } else if ($r->grade < 3) {
             $comment['teacher'] = $Comment2[1];
+            $comment['theo'] = $Comment2[0];
         } else if ($r->grade < 4) {
             $comment['teacher'] = $Comment3[1];
+            $comment['theo'] = $Comment3[0];
         } else {
             $comment['teacher'] = $Comment4[1];
+            $comment['theo'] = $Comment4[0];
         }
 
 
