@@ -6,6 +6,7 @@ use App\Models\AcademicClass;
 use App\Models\AcademicYear;
 use App\Models\StudentReportCard;
 use App\Models\Term;
+use App\Models\User;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -111,7 +112,15 @@ class StudentReportCardController extends AdminController
                     . "&search_by_2=id"
                     . "&model=User"
             );
-            $filter->equal('student_id', 'Student')->select()->ajax($ajax_url);
+
+            $filter->equal('student_id', 'Student')
+                ->select(function ($id) {
+                    $a = User::find($id);
+                    if ($a) {
+                        return [$a->id => $a->name];
+                    }
+                })
+                ->ajax($ajax_url);
 
 
             $filter->equal('academic_class_id', 'Filter by class')->select(AcademicClass::where([
@@ -134,7 +143,7 @@ class StudentReportCardController extends AdminController
         $grid->disableActions();
         $grid->disableCreateButton();
 
-        $grid->column('id', __('#ID'))->sortable()->hide();
+        $grid->column('id', __('#ID'))->sortable();
         $grid->column('academic_year_id', __('Academic year'))->sortable()->hide();
         $grid->column('term_id', __('Term id'))->hide();
 

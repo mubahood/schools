@@ -39,8 +39,9 @@ class PrintController2 extends Controller
                 'academic_class_id' => $icalss_id
             ])->get() as $r) {
 
+
                 $tr = TheologryStudentReportCard::where([
-                    'student_id' => $r->student_id,
+                    'student_id' => $r->student_id, 
                     'term_id' => $r->term_id,
                 ])->first();
 
@@ -58,17 +59,22 @@ class PrintController2 extends Controller
         $tr = null;
         if ($r == null) {
             $theo_id = ((int)($req->theo_id));
+
+
             $tr = TheologryStudentReportCard::where([
-                'id' => $theo_id
+                'id' => $theo_id,
+                'term_id' => $r->term_id,
             ])->first();
             if ($tr != null) {
                 $r = StudentReportCard::where([
-                    'student_id' => $tr->owner->id
+                    'student_id' => $tr->owner->id,
+                    'term_id' => $tr->term_id,
                 ])->first();
             }
-        } else {
+        } else { 
             $tr = TheologryStudentReportCard::where([
-                'student_id' => $r->owner->id
+                'student_id' => $r->owner->id,
+                'term_id' => $r->term_id,
             ])->first();
         }
 
