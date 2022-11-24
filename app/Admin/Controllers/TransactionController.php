@@ -63,7 +63,7 @@ class TransactionController extends AdminController
         ])
             ->orderBy('id', 'Desc');
 
-        $grid->column('id', __('Id'))->sortable()->hide();
+        $grid->column('id', __('Id'))->sortable();
 
         $grid->column('payment_date', __('Created'))->display(function () {
             return Utils::my_date_time($this->payment_date);
@@ -146,12 +146,15 @@ class TransactionController extends AdminController
 
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
 
-        $form->radio('is_debit', "Transaction type")
-            ->options([
-                1 => 'Debit (+)',
-                0 => 'Credit (-)',
-            ])->default(-1)
-            ->rules('required');
+
+        if ($form->isCreating()) {
+            $form->radio('is_debit', "Transaction type")
+                ->options([
+                    1 => 'Debit (+)',
+                    0 => 'Credit (-)',
+                ])->default(-1)
+                ->rules('required');
+        }
 
         $ajax_url = url(
             '/api/ajax?'
@@ -181,12 +184,14 @@ class TransactionController extends AdminController
 
         $form->textarea('description', __('Description'))->rules('required');
 
-        $form->divider();
+        if ($form->isCreating()) {
+            $form->divider();
 
-        $form->select('contra_entry_account_id', "Contra-entry Account")
-            ->options($_accs)
-            ->help("Source/Destination of the funds.")
-            ->rules('required');
+            $form->select('contra_entry_account_id', "Contra-entry Account")
+                ->options($_accs)
+                ->help("Source/Destination of the funds.")
+                ->rules('required');
+        }
 
         $form->disableCreatingCheck();
         $form->disableReset();
