@@ -330,17 +330,17 @@ $school_email = 'admin@kjs.com';
                                 <tr class="marks">
                                     <th><b>TOTAL</b></th>
                                     @if ($tr->termly_report_card->has_beginning_term)
-                                        <td></td>
+                                        {{-- <td></td> --}}
                                     @endif
                                     @if ($tr->termly_report_card->has_mid_term)
                                         {{-- <td></td> --}}
                                     @endif
                                     @if ($tr->termly_report_card->has_end_term)
-                                        <td></td>
+                                   {{--      <td></td> --}}
                                     @endif
                                     <td><b>{{ $tr->total_marks }}</b></td>
                                     <td><b>{{ $tr->total_aggregates }}</b></td>
-                                    <td colspan="3"> </td>
+                                    <td colspan="1"> </td>
                                 </tr>
                             </table>
 
