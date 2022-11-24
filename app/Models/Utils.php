@@ -1383,12 +1383,22 @@ class Utils  extends Model
 
     public static   function nurseryComments1($Sex)
     {
-        return [$Sex . ' performance has greatly improved; she produces attractive work.', 'In all the fundamental subjects, he is performing admirably well.', $Sex . ' is focused and enthusiastic learner with much determination.', $Sex . ' has produced an excellent report ' . $Sex . ' shouldn’t relax.', $Sex . ' performance is very good. He just needs more encouragement.', $Sex . ' is hardworking, determined, co-operative and well disciplined.'];
+        return [$Sex . ' performance has greatly improved; '.$Sex.' produces attractive work.', 'In all the fundamental subjects, '.$Sex.' is performing admirably well.', $Sex . ' is focused and enthusiastic learner with much determination.', $Sex . ' has produced an excellent report ' . $Sex . ' shouldn’t relax.', $Sex . ' performance is very good. He just needs more encouragement.', $Sex . ' is hardworking, determined, co-operative and well disciplined.'];
     }
 
     public static   function nurseryComments2($Sex)
     {
-        return [$Sex . ' has a lot of potential and is working hard to realize it.', $Sex . ' is a focused and enthusiastic learner with much determination.', $Sex . ' is self-confident and has excellent manners. Thumbs up.', $Sex . ' has done some good work, but it hasn’t been consistent because of her frequent relaxation.', $Sex . ' can produce considerably better results. Though she frequently seeks the attention and help from peers.', $Sex . ' has troubles focusing in class which hinders his or her ability to participate fully in class activities and tasks.', $Sex . ' is genuinely interested in everything we do, though experiencing some difficulties.'];
+        $Sex2 = ' his/her ';
+        if ($Sex == 'He') {
+            $Sex2 = ' his ';
+        } else {
+            $Sex2 = ' her ';
+        }
+        return [
+            $Sex . ' has a lot of potential and is working hard to realize it.',
+             $Sex . ' is a focused and enthusiastic learner with much determination.', $Sex . ' is self-confident and has excellent manners. Thumbs up.', $Sex . ' has done some good work, but it hasn’t been consistent because of '.$Sex2.' frequent relaxation.', $Sex . ' can produce considerably better results. Though '.$Sex.' frequently seeks the attention and help from peers.',
+            $Sex . ' has troubles focusing in class which hinders '.$Sex2.' ability to participate fully in class activities and tasks.', $Sex . ' is genuinely interested in everything we do, though experiencing some difficulties.'
+        ];
     }
 
     public static    function nurseryComments3($Sex)
