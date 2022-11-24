@@ -37,21 +37,54 @@ class StudentReportCardController extends AdminController
             ->description('Dashboard')
             ->row(function (Row $row) {
 
+
+
+                /* 
+                    "id" => 1
+    "created_at" => "2022-10-26 12:31:36"
+    "updated_at" => "2022-11-24 17:17:23"
+    "enterprise_id" => 7
+    "academic_year_id" => 2
+    "term_id" => 6
+    "student_id" => 2704
+    "academic_class_id" => 11
+    "termly_report_card_id" => 1
+    "total_marks" => 299.0
+    "total_aggregates" => 13.0
+    "position" => 44
+    "class_teacher_comment" => "Encouraging results, Continue reading hard."
+    "head_teacher_comment" => "Positive progress observed, continue with the energy for a better grade."
+    "class_teacher_commented" => 1
+    "head_teacher_commented" => 1
+    "total_students" => 77
+    "average_aggregates" => 13.0
+    "grade" => "2"
+                
+                */
+
                 $row->column(4, function (Column $column) {
 
                     $u = Admin::user();
-
                     $rows = [];
+
                     foreach (AcademicClass::where([
                         'enterprise_id' => $u->enterprise_id
                     ])
                         ->orderBy('id', 'Desc')
                         ->get() as $v) {
+
+                        $term_id = 5;
+                        $rs = StudentReportCard::where([
+                            'term_id' => $term_id,
+                            'academic_class_id' => $v->id,
+                        ])->get();
+
+
                         $rows[] = [
                             $v->id,
                             $v->name_text,
-                            count($v->report_cards),
-                            '<a target="_blank" href="' . url('print?calss_id=' . $v->id) . '">PRINT</a>'
+                            count($rs),
+                            '<a target="_blank" href="' . url('print?calss_id=' . $v->id) . '&term_id=' . $term_id . '">PRINT</a>'
                         ];
                     }
 
@@ -60,7 +93,46 @@ class StudentReportCardController extends AdminController
 
                     $table = new Table($headers, $rows);
 
-                    $box = new Box('Class IDs', $table);
+                    $box = new Box('2nd Term', $table);
+
+                    $box->style('success');
+
+                    $column->append($box);
+                });
+
+
+                $row->column(4, function (Column $column) {
+
+                    $u = Admin::user();
+                    $rows = [];
+
+                    foreach (AcademicClass::where([
+                        'enterprise_id' => $u->enterprise_id
+                    ])
+                        ->orderBy('id', 'Desc')
+                        ->get() as $v) {
+
+                        $term_id = 6;
+                        $rs = StudentReportCard::where([
+                            'term_id' => $term_id,
+                            'academic_class_id' => $v->id,
+                        ])->get();
+
+
+                        $rows[] = [
+                            $v->id,
+                            $v->name_text,
+                            count($rs),
+                            '<a target="_blank" href="' . url('print?calss_id=' . $v->id) . '&term_id=' . $term_id . '">PRINT</a>'
+                        ];
+                    }
+
+                    $headers = ['Id', 'Class', 'Report cards', 'Print'];
+
+
+                    $table = new Table($headers, $rows);
+
+                    $box = new Box('3RD Term', $table); 
 
                     $box->style('success');
 

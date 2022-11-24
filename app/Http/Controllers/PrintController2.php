@@ -31,17 +31,22 @@ class PrintController2 extends Controller
         ini_set('display_startup_errors', 1);
         error_reporting(E_ALL);
 
+        $term_id = 6;
+        if (isset($term_id)) {
+            $term_id = (int)($_GET['term_id']);
+        }
 
         if (isset($_GET['calss_id'])) {
             $icalss_id = ((int)($_GET['calss_id']));
             $reps  = [];
             foreach (StudentReportCard::where([
-                'academic_class_id' => $icalss_id
+                'academic_class_id' => $icalss_id,
+                'term_id' => $term_id,
             ])->get() as $r) {
 
 
                 $tr = TheologryStudentReportCard::where([
-                    'student_id' => $r->student_id, 
+                    'student_id' => $r->student_id,
                     'term_id' => $r->term_id,
                 ])->first();
 
@@ -63,14 +68,15 @@ class PrintController2 extends Controller
 
             $tr = TheologryStudentReportCard::where([
                 'id' => $theo_id,
+                'term_id' => $term_id,
             ])->first();
             if ($tr != null) {
                 $r = StudentReportCard::where([
                     'student_id' => $tr->owner->id,
                     'term_id' => $tr->term_id,
-                ])->first(); 
+                ])->first();
             }
-        } else { 
+        } else {
             $tr = TheologryStudentReportCard::where([
                 'student_id' => $r->owner->id,
                 'term_id' => $r->term_id,
@@ -81,7 +87,7 @@ class PrintController2 extends Controller
         if ($r == null) {
             die("Report card not found.");
         }
- 
+
         //return view('report-cards.print', ['recs' => [['r' => $r, 'tr' => $tr], ['r' => $r, 'tr' => $tr]]]);
         return view('report-cards.print', ['recs' => [['r' => $r, 'tr' => $tr]]]);
 
