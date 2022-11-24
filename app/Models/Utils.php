@@ -1202,164 +1202,163 @@ class Utils  extends Model
 
 
     public static function getClassTeacherComment($r)
-    { 
+    {
+        $position = $r->average_aggregates;
+        $total_students = $r->total_aggregates;
+
+        $percentage = 0;
+        if ($total_students > 0) {
+            $percentage = ($position / $total_students) * 100;
+        } else {
+            $position = 0;
+        }
+
         $Comment1 = Utils::getClassTeacherComment1();
         $Comment2 = Utils::getClassTeacherComment2();
         $Comment3 = Utils::getClassTeacherComment3();
+
+        $theologyComments1 = Utils::theologyComments1();
+        $theologyComments2 = Utils::theologyComments2();
+        $theologyComments3 = Utils::theologyComments3();
+
+        $hmComment1 = Utils::hmComment1();
+        $hmComment2 = Utils::hmComment2();
+        $hmComment3 = Utils::hmComment3();
+        $hmComment4 = Utils::hmComment4();
+        $hmComment5 = Utils::hmComment5();
+
+        $sex = 'He ';
+        if (strtolower($r->owner->sex) == 'male') {
+            $sex = 'He ';
+        } else {
+            $sex = 'She ';
+        }
+        $nurseryComments1 = Utils::nurseryComments1($sex);
+        $nurseryComments2 = Utils::nurseryComments2($sex);
+        $nurseryComments3 = Utils::nurseryComments3($sex);
+
         shuffle($Comment1);
         shuffle($Comment2);
         shuffle($Comment3);
-    }
 
+        shuffle($hmComment1);
+        shuffle($hmComment2);
+        shuffle($hmComment3);
+        shuffle($hmComment4);
+        shuffle($hmComment5);
+
+        shuffle($theologyComments1);
+        shuffle($theologyComments2);
+        shuffle($theologyComments3);
+
+        shuffle($nurseryComments1);
+        shuffle($nurseryComments2);
+        shuffle($nurseryComments3);
+
+        $comment['teacher'] = '-';
+        $comment['hm'] = '-';
+        $comment['theo'] = '-';
+        $comment['n'] = '-';
+        if ($percentage < 40) {
+            $comment['teacher'] = $Comment1[1];
+            $comment['theo'] = $theologyComments1[1];
+            $comment['n'] = $nurseryComments1[1];
+        } elseif ($percentage < 60) {
+            $comment['theo'] = $theologyComments2[1];
+            $comment['teacher'] = $Comment2[1];
+            $comment['n'] = $nurseryComments2[1];
+        } elseif ($percentage < 101) {
+            $comment['theo'] = $theologyComments3[1];
+            $comment['teacher'] = $Comment3[2];
+            $comment['n'] = $nurseryComments3[1];
+        }
+
+        if ($percentage < 20) {
+            $comment['hm'] = $hmComment1[1];
+        } elseif ($percentage < 40) {
+            $comment['hm'] = $hmComment2[1];
+        } elseif ($percentage < 60) {
+            $comment['hm'] = $hmComment3[2];
+        } elseif ($percentage < 80) {
+            $comment['hm'] = $hmComment4[2];
+        } elseif ($percentage < 101) {
+            $comment['hm'] = $hmComment5[2];
+        }
+
+        if ($r->average_aggregates > 34) {
+        }
+
+        return $comment;
+    }
 
     public static function getClassTeacherComment2()
     {
-        return [
-            'Wonderful results. Don’t relax',
-            'Promising performance. Keep working hard for first grade.',
-            'Encouraging results, Continue reading hard.'
-        ];
+        return ['Wonderful results. Don’t relax', 'Promising performance. Keep working hard for first grade.', 'Encouraging results, Continue reading hard.'];
     }
 
-    public static function getClassTeacherComment1()
+    public static  function getClassTeacherComment1()
     {
-        return [
-            'An excellent performance. Keep it up.',
-            'You are an academician. Keep shining.',
-            'A remarkable performance observed. Keep excelling.',
-            'You have exhibited excellent results.',
-        ];
+        return ['An excellent performance. Keep it up.', 'You are an academician. Keep shining.', 'A remarkable performance observed. Keep excelling.', 'You have exhibited excellent results.'];
     }
 
-    public static function getClassTeacherComment3()
+    public static   function getClassTeacherComment3()
     {
-        return [
-            'Work hard in all subjects.',
-            'More effort still needed for better performance,',
-            'There is still room for improvement.',
-            'Double your effort in all subjects.',
-            'You need to concentrate more during exams.'
-        ];
+        return ['Work hard in all subjects.', 'More effort still needed for better performance,', 'There is still room for improvement.', 'Double your effort in all subjects.', 'You need to concentrate more during exams.'];
     }
 
-    public static function theologyComments1()
+    public static   function theologyComments1()
     {
-        return [
-            'Good work, thank you',
-            'We congratulate you upon this great performance.',
-            'Thank you for your performance'
-        ];
+        return ['Good work, thank you', 'We congratulate you upon this great performance.', 'Thank you for your performance'];
     }
 
-    public static function theologyComments2()
+    public static   function theologyComments2()
     {
-        return [
-            'Strive for first grade.',
-            'We expect a first grade from you.',
-            'Aim higher for better performance.'
-        ];
+        return ['Strive for first grade.', 'We expect a first grade from you.', 'Aim higher for better performance.'];
     }
 
-    public static function theologyComments3()
+    public static   function theologyComments3()
     {
-        return [
-            'Revise more than this.',
-            'Consultation is the key to excellence.',
-            'Befriend excellent students.',
-            'More effort is still needed.',
-            'Double your effort in all subjects.'
-        ];
+        return ['Revise more than this.', 'Consultation is the key to excellence.', 'Befriend excellent students.', 'More effort is still needed.', 'Double your effort in all subjects.'];
     }
 
-
-    public static function nurseryComments1($Sex)
+    public static   function nurseryComments1($Sex)
     {
-        return [
-            'His/her performance has greatly improved; she produces attractive work.',
-            'In all the fundamental subjects, he is performing admirably well.',
-            'She/He is focused and enthusiastic learner with much determination.',
-            'She/He has produced an excellent report She/He shouldn’t relax.',
-            'His/her performance is very good. He just needs more encouragement.',
-            'She is hardworking, determined, co-operative and well disciplined.'
-        ];
+        return [$Sex . ' performance has greatly improved; she produces attractive work.', 'In all the fundamental subjects, he is performing admirably well.', $Sex . ' is focused and enthusiastic learner with much determination.', $Sex . ' has produced an excellent report ' . $Sex . ' shouldn’t relax.', $Sex . ' performance is very good. He just needs more encouragement.', $Sex . ' is hardworking, determined, co-operative and well disciplined.'];
     }
 
-    public static function nurseryComments2($Sex)
+    public static   function nurseryComments2($Sex)
     {
-        return [
-            'She has a lot of potential and is working hard to realize it.',
-            'She is a focused and enthusiastic learner with much determination.',
-            'He is self-confident and has excellent manners. Thumbs up.',
-            'She has done some good work, but it hasn’t been consistent because of her frequent relaxation.',
-            'He can produce considerably better results. Though she frequently seeks the attention and help from peers.',
-            'He has troubles focusing in class which hinders his or her ability to participate fully in class activities and tasks.',
-            'She is genuinely interested in everything we do, though experiencing some difficulties.'
-        ];
+        return [$Sex . ' has a lot of potential and is working hard to realize it.', $Sex . ' is a focused and enthusiastic learner with much determination.', $Sex . ' is self-confident and has excellent manners. Thumbs up.', $Sex . ' has done some good work, but it hasn’t been consistent because of her frequent relaxation.', $Sex . ' can produce considerably better results. Though she frequently seeks the attention and help from peers.', $Sex . ' has troubles focusing in class which hinders his or her ability to participate fully in class activities and tasks.', $Sex . ' is genuinely interested in everything we do, though experiencing some difficulties.'];
     }
 
-    public static function nurseryComments3($Sex)
+    public static    function nurseryComments3($Sex)
     {
-        return [
-            'He has demonstrated a positive attitude towards wanting to improve.',
-            'Directions are still tough for him to follow.',
-            'She can do better than this, but more effort is needed in reading.',
-            'He is an exceptionally thoughtful student.'
-        ];
+        return [$Sex . ' has demonstrated a positive attitude towards wanting to improve.', 'Directions are still tough for him to follow.', $Sex . ' can do better than this, but more effort is needed in reading.', $Sex . ' is an exceptionally thoughtful student.'];
     }
-    public static function hmCommunication()
+    public static   function hmCommunication()
     {
         return 'Assalam Alaikum Warahmatullah Wabarakatuhu. We are informing our beloved parents that the Quran competition for this term three is postponed to Saturday 9/4/2023 next term.';
     }
 
-    public static function hmComment1()
+    public static  function hmComment1()
     {
-        return [
-            'Excellent performance reflected, thank you.',
-            'Excellent results displayed; keep the spirit up.',
-            'Very good and encouraging performance, keep it up.',
-            'Wonderful results reflected, ought to be rewarded.',
-            'Thank you for the wonderful and excellent performance keep it up.'
-        ];
+        return ['Excellent performance reflected, thank you.', 'Excellent results displayed; keep the spirit up.', 'Very good and encouraging performance, keep it up.', 'Wonderful results reflected, ought to be rewarded.', 'Thank you for the wonderful and excellent performance keep it up.'];
     }
 
-    public static function hmComment2()
+    public static   function hmComment2()
     {
-        return [
-            'Promising performance displayed, keep working harder to attain the best.',
-            'Steady progress reflected, keep it up to attain the best next time.',
-            'Encouraging results shown, do not relax.',
-            'Positive progress observed, continue with the energy for a better grade.',
-            'Promising performance displayed, though more is still needed to attain the best aggregate.'
-        ];
+        return ['Promising performance displayed, keep working harder to attain the best.', 'Steady progress reflected, keep it up to attain the best next time.', 'Encouraging results shown, do not relax.', 'Positive progress observed, continue with the energy for a better grade.', 'Promising performance displayed, though more is still needed to attain the best aggregate.'];
     }
-    public static function hmComment3()
+    public static   function hmComment3()
     {
-        return [
-            'Work harder than this to attain a better aggregate.',
-            'Aim higher than thus to better your performance.',
-            'Steady progress reflected, aim higher than this next time.',
-            'Positive progress observed do not relax.',
-            'Steady progress though more is still desired to attain the best.'
-        ];
+        return ['Work harder than this to attain a better aggregate.', 'Aim higher than thus to better your performance.', 'Steady progress reflected, aim higher than this next time.', 'Positive progress observed do not relax.', 'Steady progress though more is still desired to attain the best.'];
     }
-    public static function hmComment4()
+    public static   function hmComment4()
     {
-        return [
-            'You need to concentrate more weaker areas to better your performance next time.',
-            'Double your energy and concentration to better your results.',
-            'A lot more is still desired from for a better performance next time.',
-            'You are encouraged to concentrate in class for a better performance.',
-            'Slight improvement reflected; you are encouraged to continue working harder.'
-        ];
+        return ['You need to concentrate more weaker areas to better your performance next time.', 'Double your energy and concentration to better your results.', 'A lot more is still desired from for a better performance next time.', 'You are encouraged to concentrate in class for a better performance.', 'Slight improvement reflected; you are encouraged to continue working harder.'];
     }
-    public static function hmComment5()
+    public static    function hmComment5()
     {
-        return [
-            'Double your energy in all areas for a better grade.',
-            'Concentration in class at all times to better your performance next time.',
-            'Always consult your teachers in class to better aim higher than this.',
-            'Always aim higher than this.',
-            'Teacher- parent relationship is needed to help the learner improve.'
-        ];
+        return ['Double your energy in all areas for a better grade.', 'Concentration in class at all times to better your performance next time.', 'Always consult your teachers in class to better aim higher than this.', 'Always aim higher than this.', 'Teacher- parent relationship is needed to help the learner improve.'];
     }
 }

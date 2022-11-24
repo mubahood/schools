@@ -32,8 +32,12 @@ class PrintController2 extends Controller
         error_reporting(E_ALL);
 
         $term_id = 6;
+        $termly_report_card_id = 2;
         if (isset($_GET['term_id'])) {
             $term_id = (int)($_GET['term_id']);
+        }
+        if (isset($_GET['termly_report_card_id'])) {
+            $termly_report_card_id = (int)($_GET['termly_report_card_id']);
         }
 
         if (isset($_GET['calss_id'])) {
@@ -42,12 +46,13 @@ class PrintController2 extends Controller
             foreach (StudentReportCard::where([
                 'academic_class_id' => $icalss_id,
                 'term_id' => $term_id,
+                'termly_report_card_id' => $termly_report_card_id,
             ])->get() as $r) {
 
 
                 $tr = TheologryStudentReportCard::where([
                     'student_id' => $r->student_id,
-                    'term_id' => $r->term_id,
+                    'term_id' => $term_id,
                 ])->first();
 
                 $reps[] = [
@@ -74,6 +79,7 @@ class PrintController2 extends Controller
                 $r = StudentReportCard::where([
                     'student_id' => $tr->owner->id,
                     'term_id' => $tr->term_id,
+                    'termly_report_card_id' => $termly_report_card_id,
                 ])->first();
             }
         } else {
