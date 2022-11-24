@@ -32,7 +32,7 @@ class PrintController2 extends Controller
         error_reporting(E_ALL);
 
         $term_id = 6;
-        if (isset($term_id)) {
+        if (isset($_GET['term_id'])) {
             $term_id = (int)($_GET['term_id']);
         }
 
