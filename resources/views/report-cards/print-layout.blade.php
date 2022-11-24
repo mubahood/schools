@@ -449,7 +449,7 @@ $school_email = 'admin@kjs.com';
                 </div>
             </div>
             <div class="col-2 p-0">
-                <img width="140px" style="margin-top: -30px;" class="img-fluid"
+                <img width="140px" style="margin-top: -10px;" class="img-fluid"
                     src="https://schooldynamics.ug/assets/kira-hm.png">
             </div>
         </div>
