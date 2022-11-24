@@ -93,15 +93,10 @@ class PrintController2 extends Controller
         if ($r == null) {
             die("Report card not found.");
         }
-
-        //return view('report-cards.print', ['recs' => [['r' => $r, 'tr' => $tr], ['r' => $r, 'tr' => $tr]]]);
+ 
         return view('report-cards.print', ['recs' => [['r' => $r, 'tr' => $tr]]]);
 
-        /* if ($r->academic_class->class_type == 'Nursery') { 
-            return view('report-cards.print', ['r' => $r, 'tr' => $tr]);
-        } else {
-            return view('report-cards.print', ['r' => $r, 'tr' => $tr]); //
-        } */
+      
 
 
 

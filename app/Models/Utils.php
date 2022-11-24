@@ -1216,6 +1216,8 @@ class Utils  extends Model
         $Comment1 = Utils::getClassTeacherComment1();
         $Comment2 = Utils::getClassTeacherComment2();
         $Comment3 = Utils::getClassTeacherComment3();
+        $Comment4 = Utils::getClassTeacherComment4();
+        $Comment5 = Utils::getClassTeacherComment5();
 
         $theologyComments1 = Utils::theologyComments1();
         $theologyComments2 = Utils::theologyComments2();
@@ -1240,6 +1242,8 @@ class Utils  extends Model
         shuffle($Comment1);
         shuffle($Comment2);
         shuffle($Comment3);
+        shuffle($Comment4);
+        shuffle($Comment5);
 
         shuffle($hmComment1);
         shuffle($hmComment2);
@@ -1285,25 +1289,77 @@ class Utils  extends Model
             $comment['hm'] = $hmComment5[2];
         }
 
-        if ($r->average_aggregates > 34) {
+
+        if ($r->grade < 2) {
+            $comment['teacher'] = $Comment1[1];
+        } else if ($r->grade < 3) {
+            $comment['teacher'] = $Comment2[1];
+        } else if ($r->grade < 4) {
+            $comment['teacher'] = $Comment3[1];
+        } else {
+            $comment['teacher'] = $Comment4[1];
         }
+
 
         return $comment;
     }
 
-    public static function getClassTeacherComment2()
+    public static function getClassTeacherComment5()
     {
-        return ['Wonderful results. Don’t relax', 'Promising performance. Keep working hard for first grade.', 'Encouraging results, Continue reading hard.'];
+        return [
+            'The child still has a lot to do, so, a parent-teacher joint assistance is needed',
+            'The child needs a lot of parental motivation and encouragement so as to change',
+            'Direct parent supervision is needed both at home and \'school so as to help more.',
+            'There is still more parental help needed to help the child change performance.',
+            'A lot of effort is needed through guidance and motivation.',
+            'A lot more parental involvement is still needed to improve in all areas.',
+            'Parental involvement and encouragement will help to motivate the child.',
+            'A parent-teacher joint assistance is needed so as to help the pupil.',
+            'A lot of parental guidance and one-on-one assistance is needed'
+        ];
+    }
+
+    public static function getClassTeacherComment4()
+    {
+        return [
+            'This child needs a lot of parental help so as to concentrate more in class.',
+            'There is still a long way to go, please parent, help the child through motivation',
+            'The child will do better with close continuous parental supervision.',
+            'There is need for direct parental involvement to help the child concentrate more'
+        ];
+    }
+
+    public static function getClassTeacherComment3()
+    {
+        return [
+            'The child is continuously improving, however, parental involvement will help',
+            'There-is some progress displayed, but continue motivating and encouraging them.',
+            'A slight improvement has been shown, however, concentrate more next term.',
+            'There is still need for more effort to be put in, continue working hard',
+            'A slight gradual progress is shown, but doubles the effort for better results.'
+        ];
     }
 
     public static  function getClassTeacherComment1()
     {
-        return ['An excellent performance. Keep it up.', 'You are an academician. Keep shining.', 'A remarkable performance observed. Keep excelling.', 'You have exhibited excellent results.'];
+        return [
+            'This child deserves to be rewarded by the parent for the excellent work done',
+            'Very encouraging results displayed, do not relax, continue excelling.',
+            'Thank you for this excellent work reflected, work even harder to stay shining.',
+            'You have reflected the shining colors in you results, thank you, keep it up'
+        ];
     }
 
-    public static   function getClassTeacherComment3()
+    public static   function getClassTeacherComment2()
     {
-        return ['Work hard in all subjects.', 'More effort still needed for better performance,', 'There is still room for improvement.', 'Double your effort in all subjects.', 'You need to concentrate more during exams.'];
+        return [
+            'Very good work, thank you so much, however, keep working hard',
+            'A steady progress has been shown, however, more effort is sti',
+            'Thank you for improving, but more effort is required to do ev',
+            'Well done with your continuous improvement, however, read eve',
+            'Thank you for the improvement, however, double your effort fos',
+            'Good progress reflected, continue reading hard for the better',
+        ];
     }
 
     public static   function theologyComments1()
