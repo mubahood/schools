@@ -42,6 +42,7 @@ function getClassTeacherComment($r)
 
     $comment['teacher'] = '-';
     $comment['hm'] = '-';
+    $comment['theo'] = '-';
     if ($percentage < 40) {
         $comment['teacher'] = $Comment1[1];
         $comment['theo'] = $theologyComments1[1];
@@ -585,7 +586,7 @@ $school_email = 'admin@kjs.com';
                                 beloved parents that the Quran competition for this term three is postponed to Saturday
                                 9/4/2023 next term.</span>
                         </div>
-                    </div>
+                    </div> 
                 </div>
             </div>
             <div class="col-2 p-0">
@@ -601,8 +602,8 @@ $school_email = 'admin@kjs.com';
                     18,000</span></span> --}}
             <span><b>SCHOOL PAY CODE:</b> <span class="value"
                     style="font-size: 12px!important;">{{ $r->owner->school_pay_payment_code }}</span></span>
-            <span><b>THIS TERM ENDS ON:</b> <span class="value" style="font-size: 12px!important;">2<sup>nd</sup>
-                    Dec, 2022</span></span>
+            <span><b>TERM BEGINS ON:</b> <span class="value" style="font-size: 12px!important;">6<sup>th</sup> FEB,
+                    2023</span></span>
         </div>
 
     </div>
