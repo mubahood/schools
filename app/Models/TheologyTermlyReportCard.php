@@ -54,6 +54,7 @@ class TheologyTermlyReportCard extends Model
             }
         }
 
+
         set_time_limit(-1);
         ini_set('memory_limit', '-1');
 
@@ -94,8 +95,11 @@ class TheologyTermlyReportCard extends Model
 
 
 
+
                 if ($report_card != null) {
+
                     if ($report_card->id > 0) {
+
                         foreach ($class->subjects as $main_course) {
 
 
@@ -112,15 +116,24 @@ class TheologyTermlyReportCard extends Model
                                 $report_item->theology_subject_id = $main_course->id;
                                 $report_item->theologry_student_report_card_id = $report_card->id;
                             } else {
-                                //die("Updating...");
+                                //die("Updating..."); 
                             }
 
-
+                            if ($main_course->course == null) {
+                                die("course not found");
+                            }
                             $marks = TheologyMark::where([
                                 'theology_subject_id' => $main_course->id,
                                 'student_id' => $student->id,
                                 'theology_class_id' => $class->id
                             ])->get();
+
+                            if (count($marks) < 1) {
+                                continue;
+                            }
+
+
+
 
 
 
@@ -141,8 +154,21 @@ class TheologyTermlyReportCard extends Model
                                 $tot = 0;
                                 $regular_total = 0;
                                 foreach ($marks as $my_mark) {
+
+
+                                    /* $xam = TheologyExam::find($my_mark->theology_exam_id);
+
+                                    if ($xam == null) {
+                                        continue;
+                                    }
+
+
+                                    if ($xam->term->id != $m->term->id) {
+                                        continue;
+                                    } */
+
                                     $regular_total = 0;
-                                    if (
+                                    /* if (
                                         $my_mark->exam->type == 'B.O.T' &&
                                         $m->has_beginning_term
                                     ) {
@@ -160,81 +186,41 @@ class TheologyTermlyReportCard extends Model
                                         $mot_avg_count++;
                                         $mot_avg_score +=  $my_mark->score;
                                         $tot += $my_mark->score;
+                                    } */
+
+                                    if ($my_mark->exam->type != 'E.O.T') {
+                                        continue;
                                     }
-
-                                    if (
-                                        $my_mark->exam->type == 'E.O.T' &&
-                                        $m->has_end_term
-
-                                    ) {
-                                        $regular_total += $my_mark->exam->max_mark;
-                                        $eot_avg_count++;
-                                        $eot_avg_score +=  $my_mark->score;
-                                        $tot += $my_mark->score;
-                                    }
+                                    $report_item->total =  $my_mark->score;
                                 }
-                                if ($num > 0) {
-                                    $tot = ($tot / $num);
-                                }
-
-                                if ($bot_avg_count > 0) {
-                                    $report_item->did_bot = 1;
-                                    $report_item->bot_mark = ($bot_avg_score / $bot_avg_count);
-                                } else {
-                                    $report_item->did_bot = 0;
-                                }
-
-                                if ($mot_avg_count > 0) {
-                                    $report_item->mot_mark = ($mot_avg_score / $mot_avg_count);
-                                    $report_item->did_mot = 1;
-                                } else {
-                                    $report_item->did_mot = 0;
-                                }
-
-                                if ($eot_avg_count > 0) {
-                                    $report_item->eot_mark = ($mot_avg_score / $eot_avg_count);
-                                    $report_item->did_eot = 1;
-                                } else {
-                                    $report_item->did_eot = 0;
-                                }
-                            } else {
-                                $report_item->did_eot = 0;
-                                $report_item->did_mot = 0;
-                                $report_item->did_bot = 0;
                             }
 
-                            if ($regular_total > 0) {
-                                $tot = 0;
-                                $tot += $report_item->bot_mark;
-                                $tot += $report_item->mot_mark;
-                                $tot += $report_item->eot_mark;
-                                $perecante  = (($tot / $regular_total) * 100);
-                                $perecante = round($perecante, 2);
-                                $report_item->total = $perecante;
 
-
-                                $report_item->remarks = Utils::get_automaic_mark_remarks($report_item->total);
-                                $u = Administrator::find($my_mark->subject->subject_teacher);
-                                $initial = "";
-                                if ($u != null) {
-                                    if (strlen($u->first_name) > 0) {
-                                        $initial = substr($u->first_name, 0, 1);
-                                    }
-                                    if (strlen($u->last_name) > 0) {
-                                        $initial .= "." . substr($u->last_name, 0, 1);
-                                    }
+                            $report_item->remarks = Utils::get_automaic_mark_remarks($report_item->total);
+                            $u = Administrator::find($my_mark->subject->subject_teacher);
+                            $initial = "";
+                            if ($u != null) {
+                                if (strlen($u->first_name) > 0) {
+                                    $initial = substr($u->first_name, 0, 1);
                                 }
-                                $report_item->initials = $initial;
-
-
-                                $scale = Utils::theology_grade_marks($report_item);
-
-                                $report_item->grade_name = $scale->name;
-                                $report_item->aggregates = $scale->aggregates;
-                                $report_item->save();
+                                if (strlen($u->last_name) > 0) {
+                                    $initial .= "." . substr($u->last_name, 0, 1);
+                                }
                             }
+                            $report_item->initials = $initial;
+
+
+                            $scale = Utils::theology_grade_marks($report_item);
+
+                            $report_item->grade_name = $scale->name;
+                            $report_item->aggregates = $scale->aggregates;
+                            $report_item->save(); 
                         }
+                    } else {
+                        die("noo..."); 
                     }
+                } else {
+                    die("is not null");
                 }
             }
         }

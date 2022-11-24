@@ -63,13 +63,12 @@ class PrintController2 extends Controller
 
             $tr = TheologryStudentReportCard::where([
                 'id' => $theo_id,
-                'term_id' => $r->term_id,
             ])->first();
             if ($tr != null) {
                 $r = StudentReportCard::where([
                     'student_id' => $tr->owner->id,
                     'term_id' => $tr->term_id,
-                ])->first();
+                ])->first(); 
             }
         } else { 
             $tr = TheologryStudentReportCard::where([
@@ -82,7 +81,7 @@ class PrintController2 extends Controller
         if ($r == null) {
             die("Report card not found.");
         }
-
+ 
         //return view('report-cards.print', ['recs' => [['r' => $r, 'tr' => $tr], ['r' => $r, 'tr' => $tr]]]);
         return view('report-cards.print', ['recs' => [['r' => $r, 'tr' => $tr]]]);
 

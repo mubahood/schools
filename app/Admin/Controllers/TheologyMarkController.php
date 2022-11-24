@@ -194,8 +194,7 @@ class TheologyMarkController extends AdminController
             return $this->class->name;
         })->sortable();
         $grid->column('theology_subject_id', __('Subject'))->display(function () {
-
-            return $this->subject->course->name;
+            return $this->subject->course->name; 
         })->sortable();
 
         $grid->column('score', __('Score'))->sortable()->editable();

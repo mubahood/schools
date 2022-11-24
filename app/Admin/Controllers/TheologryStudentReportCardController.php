@@ -29,6 +29,8 @@ class TheologryStudentReportCardController extends AdminController
      */
     protected function grid()
     {
+
+
         $grid = new Grid(new TheologryStudentReportCard());
 
         $grid->model()->where([
@@ -71,12 +73,13 @@ class TheologryStudentReportCardController extends AdminController
         $grid->disableBatchActions();
         $grid->disableActions();
         $grid->disableCreateButton();
+        $grid->column('id', __('#ID'))->sortable();
 
         $grid->column('owner.avatar', __('Photo'))
             ->width(80)
             ->lightbox(['width' => 60, 'height' => 60]);
 
-        $grid->column('id', __('#ID'))->sortable()->hide();
+
         $grid->column('academic_year_id', __('Academic year'))->sortable()->hide();
         $grid->column('term_id', __('Term'))->display(function () {
             return $this->term->name;
@@ -84,7 +87,7 @@ class TheologryStudentReportCardController extends AdminController
 
         $grid->column('student_id', __('Student'))->display(function () {
             return $this->owner->name;
-        });
+        })->sortable();
 
 
         $grid->column('theology_class_id', __('Class'))
