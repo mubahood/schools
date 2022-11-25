@@ -41,8 +41,8 @@ $school_email = 'admin@kjs.com';
 ?><article>
 
     <div class="row" >
-        <div  style="width: 120px" class="">
-            <img width="140px" class="img-fluid" src="{{ url('assets/bjs.png') }}">
+        <div  style="width: 18%;" >
+            <img  class="img-fluid"  src="{{ url('assets/bjs.png') }}">
         </div>
 
         <div class="col p-0">
@@ -59,9 +59,7 @@ $school_email = 'admin@kjs.com';
         </div>
         {{-- 19.9 --}}
 
-        <div style="width: 120px" class=" float-right text-right">
-            <img width="120px" class="img-fluid float-right text-right" src="{{ $r->owner->avatar }}">
-        </div>
+  
 
     </div>
 
