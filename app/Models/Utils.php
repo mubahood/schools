@@ -205,43 +205,6 @@ class Utils  extends Model
     {
 
 
-        foreach (AcademicClass::all() as $key => $class) {
-            echo $class->short_name . "<hr>";
-
-            $level = AcademicClassLevel::where([
-                'short_name' => $class->short_name,
-            ])->first();
-
-            if ($level != null) {
-                $class->academic_class_level_id = $level->id;
-                $class->save(); 
-            }
-/* 
-    "name" => "P.1 - Muhindo Mubaraka"
-    "short_name" => "P.1"
-    "details" => "P.1 - Muhindo Mubaraka"
-    "demo_id" => 0
-    "compulsory_subjects" => 0
-    "optional_subjects" => 0
-    "class_type" => "Secondary"
-    "academic_class_level_id" => 4
-*/
-
-            //academic_class_level_id
-        }
-        die("Done");
-        /*   
-            "" => "P.1 - Muhindo Mubaraka"
-            "short_name" => "P.1"
-            "details" => "P.1 - Muhindo Mubaraka"
-            "demo_id" => 0
-            "compulsory_subjects" => 0
-            "optional_subjects" => 0
-            "class_type" => "Secondary"
-            "academic_class_level_id" => 0
-        */
-        die("");
-        //dd($class);
         $subs = Exam::where('marks_generated', '!=', true)->get();
         foreach ($subs as $m) {
             Exam::my_update($m);

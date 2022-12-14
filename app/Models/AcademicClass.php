@@ -64,17 +64,7 @@ class AcademicClass extends Model
         });
         self::updating(function ($m) {
 
-            $_class = AcademicClass::where([
-                'enterprise_id' => $m->enterprise_id,
-                'academic_year_id' => $m->academic_year_id,
-                'academic_class_level_id' => $m->academic_class_level_id,
-            ])->first();
 
-            if ($_class != null) {
-                if ($_class->id != $m->id) {
-                    throw new Exception("A school cannot have same class level twice in same academic year.", 1);
-                }
-            }
 
             return AcademicClass::my_update($m);
         });
@@ -83,6 +73,33 @@ class AcademicClass extends Model
     public static function my_update($class)
     {
 
+
+        $_class = AcademicClass::where([
+            'enterprise_id' => $class->enterprise_id,
+            'academic_year_id' => $class->academic_year_id,
+            'academic_class_level_id' => $class->academic_class_level_id,
+        ])->first();
+ 
+        if ($_class != null) {
+            if ($_class->id != $class->id) {
+                throw new Exception("A school cannot have same class level twice in same academic year.", 1);
+            }
+        }
+
+
+        /* 
+ 
+
+    "name" => "P.1 - Muhindo Mubaraka"
+    "short_name" => "P.1"
+    "details" => "P.1 - Muhindo Mubaraka"
+    "demo_id" => 0
+    "compulsory_subjects" => 0
+    "optional_subjects" => 0
+    "class_type" => "Secondary"
+    "academic_class_level_id" => 4
+        
+        */
 
         $level = AcademicClassLevel::find($class->academic_class_level_id);
         if ($level == null) {
@@ -94,7 +111,21 @@ class AcademicClass extends Model
         $class->class_type = $level->category;
         return $class;
     }
-
+    /* 
+    "created_at" => "2022-09-17 06:33:43"
+    "updated_at" => "2022-09-17 06:33:43"
+    "enterprise_id" => 8
+    "academic_year_id" => 1
+    "class_teahcer_id" => 2207
+    "name" => "P.1 - Muhindo Mubaraka"
+    "short_name" => "P.1"
+    "details" => "P.1 - Muhindo Mubaraka"
+    "demo_id" => 0
+    "compulsory_subjects" => 0
+    "optional_subjects" => 0
+    "class_type" => "Secondary"
+    "academic_class_level_id" => 4
+*/
     public static function get_academic_class_category($class)
     {
         if (
@@ -150,6 +181,23 @@ class AcademicClass extends Model
                         'description' => "Debited {$fee->amount} for $fee->name",
                         'amount' => ((-1) * ($fee->amount))
                     ]);
+
+                    /* $bank_acc = Account::where([
+                        'type' => 'FEES_ACCOUNT',
+                        'enterprise_id' => $student->enterprise_id,
+                    ])->first();
+
+                    if ($bank_acc != null) {
+                        $trans = new Transaction();
+                        $trans->enterprise_id = $student->enterprise_id;
+                        $trans->amount = $fee->amount;
+                        $trans->account_id = $bank_acc->id;
+                        $trans->term_id = 1;
+                        $trans->academic_year_id = $class->academic_year_id;
+                        $trans->description = "Fee debited $fee->amount on {$student->name}'s account for $fee->name";
+                        $trans->save();
+                    } */
+
 
 
                     $has_fee =  new StudentHasFee();
