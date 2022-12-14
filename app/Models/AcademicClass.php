@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Encore\Admin\Auth\Database\Administrator;
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -17,9 +18,6 @@ class AcademicClass extends Model
         parent::boot();
         self::deleting(function ($m) {
         });
-
-
-
 
 
         self::created(function ($m) {
@@ -62,9 +60,40 @@ class AcademicClass extends Model
             }
         });
         self::creating(function ($m) {
+            return AcademicClass::my_update($m);
+        });
+        self::updating(function ($m) {
+
+            $_class = AcademicClass::where([
+                'enterprise_id' => $m->enterprise_id,
+                'academic_year_id' => $m->academic_year_id,
+                'academic_class_level_id' => $m->academic_class_level_id,
+            ])->first();
+
+            if ($_class != null) {
+                if ($_class->id != $m->id) {
+                    throw new Exception("A school cannot have same class level twice in same academic year.", 1);
+                }
+            }
+
+            return AcademicClass::my_update($m);
         });
     }
 
+    public static function my_update($class)
+    {
+
+
+        $level = AcademicClassLevel::find($class->academic_class_level_id);
+        if ($level == null) {
+            throw new Exception("Academic class level not found.", 1);
+        }
+
+        $class->name = $level->name;
+        $class->short_name = $level->short_name;
+        $class->class_type = $level->category;
+        return $class;
+    }
 
     public static function get_academic_class_category($class)
     {
@@ -121,23 +150,6 @@ class AcademicClass extends Model
                         'description' => "Debited {$fee->amount} for $fee->name",
                         'amount' => ((-1) * ($fee->amount))
                     ]);
-
-                    /* $bank_acc = Account::where([
-                        'type' => 'FEES_ACCOUNT',
-                        'enterprise_id' => $student->enterprise_id,
-                    ])->first();
-
-                    if ($bank_acc != null) {
-                        $trans = new Transaction();
-                        $trans->enterprise_id = $student->enterprise_id;
-                        $trans->amount = $fee->amount;
-                        $trans->account_id = $bank_acc->id;
-                        $trans->term_id = 1;
-                        $trans->academic_year_id = $class->academic_year_id;
-                        $trans->description = "Fee debited $fee->amount on {$student->name}'s account for $fee->name";
-                        $trans->save();
-                    } */
-
 
 
                     $has_fee =  new StudentHasFee();

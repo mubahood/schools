@@ -32,9 +32,8 @@ class AcademicYear extends Model
     {
         parent::boot();
         self::deleting(function ($m) {
+            die("You cannot delete this item.");
         });
-
-
 
         self::created(function ($m) {
 
@@ -122,5 +121,19 @@ class AcademicYear extends Model
                 }
             }
         });
+
+        self::updated(function ($m) {
+
+            if (((int)($m->is_active)) != 1) {
+                foreach ($m->classes as $class) {
+                    foreach ($class->students as $student) {
+                        $a = $student->student;
+                        dd($a->current_class);  
+                    }
+                }
+                die("updaitng...");
+            }
+            die("====anjane====");
+        }); 
     }
 }

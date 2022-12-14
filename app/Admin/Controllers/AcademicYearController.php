@@ -8,6 +8,7 @@ use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
+use Illuminate\Support\Facades\Auth;
 
 class AcademicYearController extends AdminController
 {
@@ -25,7 +26,13 @@ class AcademicYearController extends AdminController
      */
     protected function grid()
     {
+        $ac = Academicyear::find(2);
+        $ac->details .= '1';
+        $ac->is_active = 0;
+        $ac->save();
+        die("romina");
         $grid = new Grid(new AcademicYear());
+        $grid->disableBatchActions();
         $grid->model()->where('enterprise_id', Admin::user()->enterprise_id);
 
         $grid->column('name', __('Name'));
@@ -94,9 +101,41 @@ class AcademicYearController extends AdminController
         $form->textarea('details', __('Details'));
         $form->radio('is_active', __('is_active'))->options([
             1 => 'Set as current year',
-            0 => 'Not current year',
+            0 => 'Set as Not current year',
         ]);
 
-        return $form; 
+        $form->password(
+            'password',
+            'Enter your  password to confirm this process.'
+        )
+            ->help('You cannot reverse this proess.')
+            ->rules('required');
+
+
+        $form->saving(function (Form $f) {
+
+
+            $u = Auth::user();
+            $errors = [];
+            if (
+                (!$u->isRole('admin')) ||
+                (!$u->isRole('dos'))
+            ) {
+                $errors['password'] = 'Only system admin can perform this action.';
+            }
+
+            if (
+                !password_verify($_POST['password'], $u->password)
+            ) {
+                $errors['password'] = 'You entered wrong password. Enter correct pasword and try again.';
+            }
+
+            if (!empty($errors)) {
+                return back()->withInput()->withErrors($errors);
+            }
+        });
+
+        $form->ignore(['password']);
+        return $form;
     }
 }

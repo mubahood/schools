@@ -204,14 +204,44 @@ class Utils  extends Model
     public static function system_boot($u)
     {
 
-        /*   foreach (Account::all() as $key => $acc) {
-            $acc->balance =  Transaction::where([
-                'account_id' => $acc->id
-            ])->sum('amount');
-            $acc->save();
-        }
 
- */
+        foreach (AcademicClass::all() as $key => $class) {
+            echo $class->short_name . "<hr>";
+
+            $level = AcademicClassLevel::where([
+                'short_name' => $class->short_name,
+            ])->first();
+
+            if ($level != null) {
+                $class->academic_class_level_id = $level->id;
+                $class->save(); 
+            }
+/* 
+    "name" => "P.1 - Muhindo Mubaraka"
+    "short_name" => "P.1"
+    "details" => "P.1 - Muhindo Mubaraka"
+    "demo_id" => 0
+    "compulsory_subjects" => 0
+    "optional_subjects" => 0
+    "class_type" => "Secondary"
+    "academic_class_level_id" => 4
+*/
+
+            //academic_class_level_id
+        }
+        die("Done");
+        /*   
+            "" => "P.1 - Muhindo Mubaraka"
+            "short_name" => "P.1"
+            "details" => "P.1 - Muhindo Mubaraka"
+            "demo_id" => 0
+            "compulsory_subjects" => 0
+            "optional_subjects" => 0
+            "class_type" => "Secondary"
+            "academic_class_level_id" => 0
+        */
+        die("");
+        //dd($class);
         $subs = Exam::where('marks_generated', '!=', true)->get();
         foreach ($subs as $m) {
             Exam::my_update($m);
@@ -1383,7 +1413,7 @@ class Utils  extends Model
 
     public static   function nurseryComments1($Sex)
     {
-        return [$Sex . ' performance has greatly improved; '.$Sex.' produces attractive work.', 'In all the fundamental subjects, '.$Sex.' is performing admirably well.', $Sex . ' is focused and enthusiastic learner with much determination.', $Sex . ' has produced an excellent report ' . $Sex . ' shouldn’t relax.', $Sex . ' performance is very good. He just needs more encouragement.', $Sex . ' is hardworking, determined, co-operative and well disciplined.'];
+        return [$Sex . ' performance has greatly improved; ' . $Sex . ' produces attractive work.', 'In all the fundamental subjects, ' . $Sex . ' is performing admirably well.', $Sex . ' is focused and enthusiastic learner with much determination.', $Sex . ' has produced an excellent report ' . $Sex . ' shouldn’t relax.', $Sex . ' performance is very good. He just needs more encouragement.', $Sex . ' is hardworking, determined, co-operative and well disciplined.'];
     }
 
     public static   function nurseryComments2($Sex)
@@ -1396,8 +1426,8 @@ class Utils  extends Model
         }
         return [
             $Sex . ' has a lot of potential and is working hard to realize it.',
-             $Sex . ' is a focused and enthusiastic learner with much determination.', $Sex . ' is self-confident and has excellent manners. Thumbs up.', $Sex . ' has done some good work, but it hasn’t been consistent because of '.$Sex2.' frequent relaxation.', $Sex . ' can produce considerably better results. Though '.$Sex.' frequently seeks the attention and help from peers.',
-            $Sex . ' has troubles focusing in class which hinders '.$Sex2.' ability to participate fully in class activities and tasks.', $Sex . ' is genuinely interested in everything we do, though experiencing some difficulties.'
+            $Sex . ' is a focused and enthusiastic learner with much determination.', $Sex . ' is self-confident and has excellent manners. Thumbs up.', $Sex . ' has done some good work, but it hasn’t been consistent because of ' . $Sex2 . ' frequent relaxation.', $Sex . ' can produce considerably better results. Though ' . $Sex . ' frequently seeks the attention and help from peers.',
+            $Sex . ' has troubles focusing in class which hinders ' . $Sex2 . ' ability to participate fully in class activities and tasks.', $Sex . ' is genuinely interested in everything we do, though experiencing some difficulties.'
         ];
     }
 
