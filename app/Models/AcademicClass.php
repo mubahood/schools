@@ -72,14 +72,12 @@ class AcademicClass extends Model
 
     public static function my_update($class)
     {
-
-
         $_class = AcademicClass::where([
             'enterprise_id' => $class->enterprise_id,
             'academic_year_id' => $class->academic_year_id,
             'academic_class_level_id' => $class->academic_class_level_id,
         ])->first();
- 
+
         if ($_class != null) {
             if ($_class->id != $class->id) {
                 throw new Exception("A school cannot have same class level twice in same academic year.", 1);
