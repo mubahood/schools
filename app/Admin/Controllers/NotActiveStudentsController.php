@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
 
 
-class StudentsController extends AdminController
+class NotActiveStudentsController extends AdminController
 {
     /**
      * Title for current resource.
@@ -216,7 +216,7 @@ class StudentsController extends AdminController
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
             'user_type' => 'student',
-            'status' => 1
+            'status' => 0 
         ]);
 
 

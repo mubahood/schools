@@ -16,9 +16,13 @@ use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Str;
 
+define('STATUS_NOT_ACTIVE', 0);
+define('STATUS_ACTIVE', 1);
+define('STATUS_PENDING', 2);
 
 class Utils  extends Model
 {
+
 
     public static function my_date($t)
     {
@@ -89,7 +93,7 @@ class Utils  extends Model
     {
         $excel = Utils::docs_root() . "/temp/school_pay.xlsx";
         if (!file_exists($excel)) {
-            dd("D.N.E ==>$excel<== ");
+            die("D.N.E ==>$excel<== ");
         }
 
         $u = Auth::user();
@@ -184,12 +188,6 @@ class Utils  extends Model
 
             $trans->save();
         }
-
-        echo "<hr>" . number_format($tot);
-        die();
-
-
-        dd("good to go with ... ");
     }
 
     public static function docs_root()
@@ -203,7 +201,31 @@ class Utils  extends Model
 
     public static function system_boot($u)
     {
-
+        /* foreach (AcademicClass::all() as $key => $class) {
+            $level = AcademicClassLevel::where([
+                'short_name' => $class->short_name
+            ])->first();
+            if ($level != null) {
+                $class->academic_class_level_id = $level->id;
+                $class->save();
+                echo "FOUND ==> {$class->name}<hr>";
+            }else{
+                echo "NOT FOUND ==> {$class->name}<hr>";
+            }
+        }
+        dd("as");
+      
+        $year = new AcademicYear();
+        $year->enterprise_id = $u->enterprise_id;
+        $year->name = '2021';
+        $year->starts = Carbon::now();
+        $year->ends = Carbon::now();
+        $year->details = '2021';
+        $year->is_active = 1;
+        $year->demo_id = 0;
+        $year->save();   
+        
+        die("romina"); */
 
         $subs = Exam::where('marks_generated', '!=', true)->get();
         foreach ($subs as $m) {

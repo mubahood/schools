@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Models\AcademicClass;
 use App\Models\AcademicClassFee;
+use App\Models\AcademicClassLevel;
 use App\Models\AcademicYear;
 use App\Models\Course;
 use App\Models\Utils;
@@ -35,6 +36,8 @@ class AcademicClassController extends AdminController
         //Utils::display_system_checklist();
 
         $grid = new Grid(new AcademicClass());
+        $grid->disableCreateButton();
+        $grid->disableBatchActions();
         $grid->model()
             ->orderBy('id', 'Desc')
             ->where('enterprise_id', Admin::user()->enterprise_id);
@@ -117,21 +120,35 @@ class AcademicClassController extends AdminController
                 ->options(
                     AcademicYear::where([
                         'enterprise_id' => $u->enterprise_id,
-                        'is_active' => 1,
                     ])->get()
                         ->pluck('name', 'id')
                 )->rules('required');
 
 
-            $form->text('name', __('Class Name'))->rules('required');
-            $form->select('class_type', __('Class category'))
-                ->options([
-                    'Nursery' => 'Nursery class',
-                    'Primary' => 'Primary class',
-                ])
-                ->help("How this class should be treated")
+            $class_levels = [];
+            foreach (AcademicClassLevel::all() as $level) {
+                if ($u->ent->type == 'Primary') {
+                    if (
+                        $level->category == 'Nursery' ||
+                        $level->category == 'Primary'
+                    ) {
+                        $class_levels[$level->id] = $level->name . " - ($level->short_name)";
+                    }
+                } else if ($u->ent->type == 'Secondary') {
+                    if (
+                        $level->category == 'Secondary'
+                    ) {
+                        $class_levels[$level->id] = $level->name . " - ($level->short_name)";
+                    }
+                } else if ($u->ent->type == 'Advanced') {
+                    $class_levels[$level->id] = $level->name . " - ($level->short_name)";
+                }
+            }
+
+
+            $form->select('academic_class_level_id', __('Class'))
+                ->options($class_levels)
                 ->rules('required');
-            $form->text('short_name', __('Class short name'))->rules('required');
 
             $teachers = [];
             foreach (Administrator::where([

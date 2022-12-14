@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -36,7 +37,6 @@ class AcademicYear extends Model
         });
 
         self::created(function ($m) {
-
             $terms = [1, 2, 3];
             foreach ($terms as $t) {
                 $term = new Term();
@@ -55,55 +55,19 @@ class AcademicYear extends Model
                 $term->save();
             }
 
-            $ent = Enterprise::find($m->enterprise_id);
-            if ($ent == null) {
-                die("Ent not found");
-            }
-            $classes = [];
 
-            if ($ent->type == 'Primary') {
-                $classes[] = 'P.1';
-                $classes[] = 'P.2';
-                $classes[] = 'P.3';
-                $classes[] = 'P.4';
-                $classes[] = 'P.5';
-                $classes[] = 'P.6';
-                $classes[] = 'P.7';
-            } else if ($ent->type == 'Secondary') {
-                $classes[] = 'S.1';
-                $classes[] = 'S.2';
-                $classes[] = 'S.3';
-                $classes[] = 'S.4';
-            } else if ($ent->type == 'Advanced') {
-                $classes[] = 'S.1';
-                $classes[] = 'S.2';
-                $classes[] = 'S.3';
-                $classes[] = 'S.4';
-                $classes[] = 'S.5';
-                $classes[] = 'S.6';
-            }
-
-            foreach ($classes as $class) {
-
-                $c = new AcademicClass();
-                $c->enterprise_id = $ent->id;
-                $c->academic_year_id = $m->id;
-                $c->class_teahcer_id = $ent->administrator_id;
-                $c->name = $class . " - " . $m->name;
-                $c->short_name = $class;
-                $c->details = $class . " - " . $m->name;
-                $c->save();
-            }
+            AcademicYear::generate_classes($m);
         });
 
 
         self::creating(function ($m) {
+
             $_m = AcademicYear::where([
                 'enterprise_id' => $m->enterprise_id,
                 'is_active' => 1,
             ])->first();
             if ($_m != null) {
-                $m->is_active = 0;
+                throw new Exception("You cannot have to active academic years.", 1);
             }
         });
 
@@ -123,17 +87,88 @@ class AcademicYear extends Model
         });
 
         self::updated(function ($m) {
-
             if (((int)($m->is_active)) != 1) {
                 foreach ($m->classes as $class) {
                     foreach ($class->students as $student) {
                         $a = $student->student;
-                        dd($a->current_class);  
+                        $is_final = false;
+                        if ($a->current_class != null) {
+                            if ($a->current_class->level != null) {
+                                $is_final = $a->current_class->level->is_final_class;
+                            }
+                        }
+
+                        if ($is_final) {
+                            $a->status = STATUS_NOT_ACTIVE;
+                        } else {
+                            $a->status = STATUS_PENDING;
+                        }
+                        $a->save();
                     }
                 }
-                die("updaitng...");
             }
-            die("====anjane====");
-        }); 
+        });
+    }
+    /* 
+
+  "id" => 4
+    "created_at" => "2022-12-14 20:51:40"
+    "updated_at" => "2022-12-14 20:51:40"
+    "name" => "Primary one"
+    "category" => "Primary"
+    "details" => "Primary one"
+    "short_name" => "P.1"
+    "is_final_class" => 0
+    
+    */
+
+    public static function generate_classes($m)
+    {
+
+        $ent = Enterprise::find($m->enterprise_id);
+        if ($ent == null) {
+            die("Ent not found");
+        }
+        $classes = [];
+
+        if ($ent->type == 'Primary') {
+            foreach (AcademicClassLevel::where(
+                'category',
+                'Primary'
+            )->orwhere(
+                'category',
+                'Nursery'
+            )->get() as $level) {
+                $classes[] = $level;
+            }
+        } else if ($ent->type == 'Secondary') {
+            foreach (AcademicClassLevel::where(
+                'category',
+                'Secondary'
+            )->get() as $level) {
+                $classes[] = $level;
+            }
+        } else if ($ent->type == 'Advanced') {
+            foreach (AcademicClassLevel::where(
+                'category',
+                'Secondary'
+            )->orwhere(
+                'category',
+                'A-Level'
+            )->get() as $level) {
+                $classes[] = $level;
+            }
+        }
+        foreach ($classes as $class) {
+            $c = new AcademicClass();
+            $c->enterprise_id = $ent->id;
+            $c->academic_year_id = $m->id;
+            $c->class_teahcer_id = $ent->administrator_id;
+            $c->name = $class->name;
+            $c->short_name = $class->short_name;
+            $c->academic_class_level_id = $class->id;
+            $c->details = $class->name;
+            $c->save();
+        }
     }
 }

@@ -26,14 +26,21 @@ class AcademicYearController extends AdminController
      */
     protected function grid()
     {
-        $ac = Academicyear::find(2);
+        /*  $ac = Academicyear::find(3);
+        Academicyear::generate_classes($ac);
+        dd($ac); */
+        /* $ac = Academicyear::find(2);
         $ac->details .= '1';
         $ac->is_active = 0;
         $ac->save();
-        die("romina");
+        die("romina"); */
         $grid = new Grid(new AcademicYear());
         $grid->disableBatchActions();
-        $grid->model()->where('enterprise_id', Admin::user()->enterprise_id);
+        $grid->model()->where([
+            'enterprise_id' => Admin::user()->enterprise_id,
+   
+        ])
+            ->orderBY('id', 'desc');
 
         $grid->column('name', __('Name'));
         $grid->column('starts', __('Starts'));

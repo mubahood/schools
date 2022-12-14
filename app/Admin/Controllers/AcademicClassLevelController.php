@@ -27,12 +27,13 @@ class AcademicClassLevelController extends AdminController
         $grid = new Grid(new AcademicClassLevel());
 
         /* $c = new AcademicClassLevel();
-        $c->name = 'Secondary six';
+        $c->name = 'Senior six';
         $c->short_name = 'S.6';
         $c->is_final_class = 1;
-        $c->category = 'Secondary';
+        $c->category = 'A-Level';
         $c->details = $c->name;
         $c->save(); */
+
         $grid->disableBatchActions();
         $grid->model()->orderBy('id', 'Desc');
         $grid->column('id', __('Id'))->sortable();

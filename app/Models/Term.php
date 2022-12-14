@@ -20,6 +20,7 @@ class Term extends Model
                 'name' => $m->name,
                 'academic_year_id' => $m->academic_year_id,
             ])->first();
+        
             if ($_m_1 != null) {
                 die("Same term cannot be twice in a year.");
             }

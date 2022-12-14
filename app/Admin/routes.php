@@ -60,6 +60,8 @@ Route::group([
     $router->resource('account-parents', AccountParentController::class);
     $router->resource('service-categories', ServiceCategoryController::class);
     $router->resource('academic-class-levels', AcademicClassLevelController::class);
+    $router->resource('not-active-students', NotActiveStudentsController::class);
+    $router->resource('pending-students', PendingStudentsController::class);
 
     //$router->resource('fees', StudentHasFeeController::class);
 

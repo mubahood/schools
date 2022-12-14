@@ -59,6 +59,9 @@ class AcademicClass extends Model
                 }
             }
         });
+        self::deleting(function ($m) {
+            die("You cannot delete this item.");
+        });
         self::creating(function ($m) {
             return AcademicClass::my_update($m);
         });
@@ -226,6 +229,11 @@ class AcademicClass extends Model
     function academic_year()
     {
         return $this->belongsTo(AcademicYear::class, 'academic_year_id');
+    }
+
+    function level()
+    {
+        return $this->belongsTo(AcademicClassLevel::class, 'academic_class_level_id');
     }
     function class_teacher()
     {
