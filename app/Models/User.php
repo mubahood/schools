@@ -49,8 +49,7 @@ class User extends Authenticatable
     }
     public function ent()
     {
-  
-        return $this->belongsTo(Enterprise::class,'enterprise_id');
+        return $this->belongsTo(Enterprise::class, 'enterprise_id');
     }
 
     public function services()
