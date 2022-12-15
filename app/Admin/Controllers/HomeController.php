@@ -142,7 +142,7 @@ class HomeController extends Controller
             $u->isRole('bursar')
         ) {
             $u = Auth::user();
-            dd($u->ent);
+            dd($u->enterprise_id);
             $content
                 ->title($u->ent->short_name . ' - Dashboard')
                 ->description('Hello ' . $u->name . "!");
