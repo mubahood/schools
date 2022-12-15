@@ -13,11 +13,7 @@ class AddEnterpriseId extends Migration
      */
     public function up()
     {
-        Schema::table('promotions', function (Blueprint $table) {
-            $table->bigInteger('enterprise_id')->null;
-            $table->text('details')->null;
-            //
-        });
+       
     }
 
     /**

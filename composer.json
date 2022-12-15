@@ -6,7 +6,7 @@
     "license": "MIT",
     "require": {
         "php": "^7.3|^8.0",
-        "barryvdh/laravel-dompdf": "^1.0",
+        "barryvdh/laravel-dompdf": "^2.0",
         "binarytorch/larecipe": "^2.5",
         "encore/laravel-admin": "1.*",
         "fruitcake/laravel-cors": "^3.0",

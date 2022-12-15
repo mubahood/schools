@@ -97,7 +97,8 @@ php artisan make:migration create_account_parents_table
 php artisan make:migration create_academic_class_id_table
 php artisan make:migration create_academic_class_levels_table
 php artisan make:migration create_promotions_table
-
+php artisan make:migration create_documents_table
+    
 
 
 php artisan make:model StudentHasTheologyClass
@@ -156,6 +157,7 @@ php artisan make:model AccountParent
 php artisan make:model ServiceCategory
 php artisan make:model AcademicClassLevel
 php artisan make:model Promotion
+php artisan make:model Document
 
 
 php artisan admin:make TermController --model=App\\Models\\Term
@@ -235,6 +237,9 @@ php artisan admin:make AccountParentController --model=App\\Models\\AccountParen
 php artisan admin:make ServiceCategoryController --model=App\\Models\\ServiceCategory  
 php artisan admin:make AcademicClassLevelController --model=App\\Models\\AcademicClassLevel  
 php artisan admin:make PromotionController --model=App\\Models\\Promotion  
+php artisan admin:make DocumentController --model=App\\Models\\Document  
+
+  
 
 
 enterprise_id
@@ -311,6 +316,8 @@ php artisan make:migration add_short_name_academic_class_levels --table=academic
 php artisan make:migration add_is_final_class_class_levels --table=academic_class_levels
 php artisan make:migration add_is_academic_class_level_academic_classes --table=academic_classes
 php artisan make:migration add_enterprise_id --table=promotions
+php artisan make:migration add_body_to_documents --table=documents
+php artisan make:migration add_school_phone_number_2 --table=enterprises
 
 git add --all 
 git commit -am "Your commit message"

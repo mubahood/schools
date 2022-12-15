@@ -63,6 +63,8 @@ Route::group([
     $router->resource('not-active-students', NotActiveStudentsController::class);
     $router->resource('pending-students', PendingStudentsController::class);
     $router->resource('promotions', PromotionController::class);
+    $router->resource('documents', DocumentController::class);
+    $router->resource('configuration', ConfigurationController::class);
 
     //$router->resource('fees', StudentHasFeeController::class);
 

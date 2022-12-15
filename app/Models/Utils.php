@@ -19,11 +19,10 @@ use Illuminate\Support\Str;
 define('STATUS_NOT_ACTIVE', 0);
 define('STATUS_ACTIVE', 1);
 define('STATUS_PENDING', 2);
+define('DOCUMENT_ADMISSION', 'Admission letter');
 
 class Utils  extends Model
 {
-
-
     public static function my_date($t)
     {
         $c = Carbon::parse($t);
@@ -227,6 +226,8 @@ class Utils  extends Model
         
         die("romina"); */
 
+
+        Utils::create_documents($u);
         $subs = Exam::where('marks_generated', '!=', true)->get();
         foreach ($subs as $m) {
             Exam::my_update($m);
@@ -238,6 +239,23 @@ class Utils  extends Model
         }
 
         Utils::financial_accounts_creation();
+    }
+
+    public static function create_documents($u)
+    {
+        $admission_letter = Document::where([
+            'enterprise_id' => $u->enterprise_id,
+            'name' => DOCUMENT_ADMISSION
+        ])->first();
+        if ($admission_letter == null) {
+            $admission_letter = new Document();
+            $admission_letter->name = DOCUMENT_ADMISSION;
+            $admission_letter->enterprise_id = $u->enterprise_id;
+            $admission_letter->print_hearder = 1;
+            $admission_letter->print_water_mark = 1;
+            $admission_letter->body = file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/templates/admission-letter.html');
+            $admission_letter->save();
+        }
     }
 
     public static function financial_accounts_creation()

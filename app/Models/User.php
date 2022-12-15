@@ -42,4 +42,14 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function bills()
+    {
+        return $this->hasMany(StudentHasFee::class,'administrator_id');
+    }
+
+    public function services()
+    {
+        return $this->hasMany(ServiceSubscription::class, 'administrator_id');
+    }
 }

@@ -11,6 +11,7 @@ use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Support\Facades\Route;
 use Mockery\Matcher\Subset;
 use Faker\Factory as Faker;
+use Illuminate\Support\Facades\App;
 
 /*
 |--------------------------------------------------------------------------
@@ -88,4 +89,13 @@ Route::get('/', function () {
   return view('welcome');
 });
  */
+
 Route::match(['get', 'post'], '/print', [PrintController2::class, 'index']);
+Route::get('print-admission-letter', function () {
+  //return view('print/print-admission-letter'); 
+  $pdf = App::make('dompdf.wrapper'); 
+  //$pdf->setOption(['DOMPDF_ENABLE_REMOTE' => false]);
+
+  $pdf->loadHTML(view('print/print-admission-letter'));
+  return $pdf->stream();
+});

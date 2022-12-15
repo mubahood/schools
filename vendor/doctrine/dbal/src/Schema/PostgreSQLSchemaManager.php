@@ -58,9 +58,18 @@ class PostgreSQLSchemaManager extends AbstractSchemaManager
 
     /**
      * {@inheritDoc}
+     *
+     * @deprecated Use {@see introspectTable()} instead.
      */
     public function listTableDetails($name)
     {
+        Deprecation::trigger(
+            'doctrine/dbal',
+            'https://github.com/doctrine/dbal/pull/5595',
+            '%s is deprecated. Use introspectTable() instead.',
+            __METHOD__,
+        );
+
         return $this->doListTableDetails($name);
     }
 
@@ -744,22 +753,20 @@ SQL;
     private function buildQueryConditions($tableName): array
     {
         $conditions = [];
-        $schemaName = null;
 
         if ($tableName !== null) {
             if (strpos($tableName, '.') !== false) {
                 [$schemaName, $tableName] = explode('.', $tableName);
+                $conditions[]             = 'n.nspname = ' . $this->_platform->quoteStringLiteral($schemaName);
+            } else {
+                $conditions[] = 'n.nspname = ANY(current_schemas(false))';
             }
 
             $identifier   = new Identifier($tableName);
             $conditions[] = 'c.relname = ' . $this->_platform->quoteStringLiteral($identifier->getName());
         }
 
-        if ($schemaName !== null) {
-            $conditions[] = 'n.nspname = ' . $this->_platform->quoteStringLiteral($schemaName);
-        } else {
-            $conditions[] = "n.nspname NOT IN ('pg_catalog', 'information_schema', 'pg_toast')";
-        }
+        $conditions[] = "n.nspname NOT IN ('pg_catalog', 'information_schema', 'pg_toast')";
 
         return $conditions;
     }

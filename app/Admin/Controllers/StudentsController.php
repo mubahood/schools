@@ -311,6 +311,11 @@ class StudentsController extends AdminController
         $grid->column('swimming', __('Swimming'))->hide();
         $grid->column('referral', __('Referral'))->hide();
         $grid->column('school_pay_payment_code', __('School pay payment code'))->sortable();
+        $grid->column('documents', __('Print Documents'))
+            ->display(function () {
+                $admission_letter = url('print-admission-letter?id=' . $this->id);
+                return '<a title="Print admission letter" href="' . $admission_letter . '" target="_blank">Admission letter</a>';
+            });
 
 
 
