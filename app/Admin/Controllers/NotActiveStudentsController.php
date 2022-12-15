@@ -216,7 +216,7 @@ class NotActiveStudentsController extends AdminController
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
             'user_type' => 'student',
-            'status' => 0 
+            'status' => 0
         ]);
 
 
@@ -245,7 +245,7 @@ class NotActiveStudentsController extends AdminController
         } */
 
         $grid->column('status', __('Status'))
-            ->using([0 => 'Pending', 1 => 'Active', 2 => 'Not Active',])
+            ->using([0 => 'Not Active', 1 => 'Active', 2 => 'Pending',])
             ->width(100)
             ->label([
                 0 => 'danger',

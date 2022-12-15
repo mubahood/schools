@@ -244,15 +244,30 @@ class PendingStudentsController extends AdminController
                 ->sortable();
         } */
 
-        $grid->column('status', __('Status'))
-            ->using([0 => 'Pending', 1 => 'Active', 2 => 'Not Active',])
-            ->width(100)
-            ->label([
-                0 => 'danger',
-                1 => 'success',
-                2 => 'default',
-            ])
-            ->sortable();
+
+        if (Admin::user()->isRole('dos')) {
+            $states = [
+                'on' => ['value' => 1, 'text' => 'Active', 'color' => 'success'],
+                'off' => ['value' => 2, 'text' => 'Pending', 'color' => 'warning'],
+            ];
+            $grid->column('status', 'Status')
+                ->filter([
+                    2 => 'Pending',
+                    1 => 'Active',
+                ])
+                ->switch($states)
+                ->sortable();
+        } else {
+            $grid->column('status', __('Status'))
+                ->using([0 => 'Not Active', 1 => 'Active', 2 => 'Pending',])
+                ->width(100)
+                ->label([
+                    0 => 'danger',
+                    1 => 'success',
+                    2 => 'default',
+                ])
+                ->sortable();
+        }
 
 
         $grid->column('id', __('ID'))
@@ -438,7 +453,7 @@ class PendingStudentsController extends AdminController
                 'on' => ['value' => 1, 'text' => 'Verified', 'color' => 'success'],
                 'off' => ['value' => 0, 'text' => 'Pending', 'color' => 'danger'],
             ];
-            $form->switch('verification')->states($states)
+            $form->switch('status')->states($states)
                 ->rules('required')->default(0);
         });
 

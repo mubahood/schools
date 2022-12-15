@@ -245,7 +245,7 @@ class StudentsController extends AdminController
         } */
 
         $grid->column('status', __('Status'))
-            ->using([0 => 'Pending', 1 => 'Active', 2 => 'Not Active',])
+            ->using([0 => 'Not Active', 1 => 'Active', 2 => 'Pending',])
             ->width(100)
             ->label([
                 0 => 'danger',

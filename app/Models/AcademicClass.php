@@ -368,7 +368,7 @@ class AcademicClass extends Model
 
     function getNameTextAttribute()
     {
-        return $this->name; // . " - " . $this->academic_year->name . "";
+        return $this->name . " - " . $this->academic_year->name . "";
     }
     function getOptionalSubjectsItems()
     {

@@ -3,6 +3,7 @@
 use App\Models\AcademicClass;
 use App\Models\AcademicClassSctream;
 use App\Models\Book;
+use App\Models\TermlyReportCard;
 use App\Models\Utils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -59,6 +60,69 @@ Route::get('classes', function (Request $r) {
         $data[] = [
             'id' => $v->id . "",
             'text' => $v->name
+        ];
+    }
+    return [
+        'data' => $data
+    ];
+});
+
+
+Route::get('promotion-to-class', function (Request $r) {
+    $from_class = AcademicClass::find((int)($r->get('q')));
+    $enterprise_id = $r->get('enterprise_id');
+
+    $academic_year_id = 0;
+    if ($from_class != null) {
+        $academic_year_id = $from_class->academic_year_id;
+    }
+
+    $classes = AcademicClass::where(
+        'enterprise_id',
+        '=',
+        $enterprise_id,
+    )->where(
+        'academic_year_id',
+        '!=',
+        $academic_year_id
+    )->limit(100)->get();
+
+    $data = [];
+    foreach ($classes as $key => $v) {
+        $data[] = [
+            'id' => $v->id . "",
+            'text' => $v->name_text . ""
+        ];
+    }
+    return [
+        'data' => $data
+    ];
+});
+
+Route::get('promotion-termly-report-cards', function (Request $r) {
+    $from_class = AcademicClass::find((int)($r->get('q')));
+    $enterprise_id = $r->get('enterprise_id');
+
+    $academic_year_id = 0;
+    if ($from_class != null) {
+        $academic_year_id = $from_class->academic_year_id;
+    }
+
+    $report_cards = TermlyReportCard::where(
+        'enterprise_id',
+        '=',
+        $enterprise_id,
+    )->where(
+        'academic_year_id',
+        '!=',
+        $academic_year_id
+    )->limit(100)->get();
+
+    $data = [];
+    foreach ($report_cards as $key => $v) {
+        $data[] = [
+            'id' => $v->id . "",
+            'text' => $v->report_title . ""
         ];
     }
     return [
@@ -148,7 +212,7 @@ Route::get('ajax', function (Request $r) {
 });
 
 Route::get('reconcile', function (Request $r) {
-    Utils::reconcile($r); 
+    Utils::reconcile($r);
 });
 
 Route::get('books', function (Request $r) {

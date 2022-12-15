@@ -62,6 +62,7 @@ Route::group([
     $router->resource('academic-class-levels', AcademicClassLevelController::class);
     $router->resource('not-active-students', NotActiveStudentsController::class);
     $router->resource('pending-students', PendingStudentsController::class);
+    $router->resource('promotions', PromotionController::class);
 
     //$router->resource('fees', StudentHasFeeController::class);
 
