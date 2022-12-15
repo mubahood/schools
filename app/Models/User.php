@@ -45,7 +45,12 @@ class User extends Authenticatable
 
     public function bills()
     {
-        return $this->hasMany(StudentHasFee::class,'administrator_id');
+        return $this->hasMany(StudentHasFee::class);
+    }
+    public function ent()
+    {
+  
+        return $this->belongsTo(Enterprise::class,'enterprise_id');
     }
 
     public function services()
