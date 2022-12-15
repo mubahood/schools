@@ -193,10 +193,7 @@ class Utils  extends Model
     {
         $r = env('DOCUMENT_ROOT');
         $r = str_replace('public/', '', $r);
-        $r = str_replace('public_html/', '', $r);
-        $r = str_replace('public_html/', '', $r);
         $r = str_replace('public', '', $r);
-        $r = str_replace('_html', '', $r);
         $r .= 'public/';
         return $r;
     }
@@ -257,8 +254,9 @@ class Utils  extends Model
             $admission_letter->print_hearder = 1;
             $admission_letter->print_water_mark = 1;
             $admission_letter->body = file_get_contents( 'public/templates/admission-letter.html');
-            $admission_letter->save();
+            $admission_letter->save(); 
         }
+ 
     }
 
     public static function financial_accounts_creation()
