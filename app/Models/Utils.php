@@ -253,7 +253,7 @@ class Utils  extends Model
             $admission_letter->enterprise_id = $u->enterprise_id;
             $admission_letter->print_hearder = 1;
             $admission_letter->print_water_mark = 1;
-            $admission_letter->body = file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/templates/admission-letter.html');
+            $admission_letter->body = file_get_contents(Utils::docs_root() . '/templates/admission-letter.html');
             $admission_letter->save();
         }
     }
