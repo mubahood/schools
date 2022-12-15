@@ -17,7 +17,6 @@ use Encore\Admin\Layout\Column;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Layout\Row;
 use Encore\Admin\Widgets\Box;
-use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
@@ -142,7 +141,7 @@ class HomeController extends Controller
             $u->isRole('bursar')
         ) {
             $u = Admin::user();
-            dd($u->ent); 
+
             $content
                 ->title($u->ent->short_name . ' - Dashboard')
                 ->description('Hello ' . $u->name . "!");

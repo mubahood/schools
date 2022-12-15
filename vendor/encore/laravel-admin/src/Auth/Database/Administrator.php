@@ -387,6 +387,7 @@ class Administrator extends Model implements AuthenticatableContract
             $this->enterprise_id = 1;
             $this->save();
         }
+        dd($e);
         return $this->belongsTo(Enterprise::class,'enterprise_id');
     }
 
