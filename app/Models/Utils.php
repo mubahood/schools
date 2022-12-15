@@ -193,7 +193,10 @@ class Utils  extends Model
     {
         $r = env('DOCUMENT_ROOT');
         $r = str_replace('public/', '', $r);
+        $r = str_replace('public_html/', '', $r);
+        $r = str_replace('public_html', '', $r);
         $r = str_replace('public', '', $r);
+        $r = str_replace('_html', '', $r);
         $r .= 'public/';
         return $r;
     }
