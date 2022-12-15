@@ -243,6 +243,9 @@ class Utils  extends Model
 
     public static function create_documents($u)
     {
+        if($u == null){
+            return;
+        }
         $admission_letter = Document::where([
             'enterprise_id' => $u->enterprise_id,
             'name' => DOCUMENT_ADMISSION
