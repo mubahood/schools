@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Models\AcademicClass;
 use App\Models\Promotion;
+use Carbon\Carbon;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
@@ -27,18 +28,33 @@ class PromotionController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Promotion());
+        $grid->model()->where([
+            'enterprise_id' => Auth::user()->id
+        ])->orderBy('id', 'desc');
+        $grid->disableBatchActions();
+        $grid->disableActions();
+        /* $pro = Promotion::find(4);
+        $pro->updated_at = Carbon::now();
+        $pro->save(); */
 
-        $grid->column('id', __('Id'));
-        $grid->column('created_at', __('Created at'));
-        $grid->column('updated_at', __('Updated at'));
-        $grid->column('from_class', __('From class'));
-        $grid->column('to_class', __('To class'));
-        $grid->column('method', __('Method'));
-        $grid->column('student_id', __('Student id'));
-        $grid->column('report_card_id', __('Report card id'));
-        $grid->column('mark', __('Mark'));
-        $grid->column('grade', __('Grade'));
-        $grid->column('position', __('Position'));
+        $grid->column('id', __('Id'))->sortable();
+        $grid->column('from_class', __('Promoted from'))
+            ->display(function () {
+                return $this->fromClass->name_text;
+            })->sortable();
+        $grid->column('to_class', __('Promoted to'))
+            ->display(function () {
+                return $this->fromClass->name_text;
+            })->sortable();
+        $grid->column('method', __('Promotion Method'));
+        $grid->column('report_card_id', __('Report card'))
+            ->display(function () {
+                return $this->report->report_title;
+            })->sortable();
+        $grid->column('mark', __('Pass Mark'))->sortable();
+        $grid->column('grade', __('Grade'))->sortable();
+        $grid->column('position', __('Position'))->sortable();
+        $grid->column('details', __('Details'))->sortable();
 
         return $grid;
     }

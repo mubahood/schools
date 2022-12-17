@@ -20,6 +20,7 @@ use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
 use Encore\Admin\Widgets\Tab;
+use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -43,44 +44,28 @@ class StudentsController extends AdminController
     protected function grid()
     {
 
-        /*   $m = new UserBatchImporter();
-        $m->file_path = 'p1.xlsx';
-        $m->type = 'students';
-        $m->imported = false;
-        $m->academic_class_id = 18;
-        $m->enterprise_id = Auth::user()->enterprise_id;
-        UserBatchImporter::marks_batch_import($m);
 
-        die("done");
- */
-        /*        $m = new UserBatchImporter();
-        $m->file_path = 'p1.xlsx';
-        $m->type = 'students';
-        $m->imported = false;
-        $m->academic_class_id = 18;
-        $m->enterprise_id = Auth::user()->enterprise_id;
+        $u = Administrator::find(2317);
+        /* $u->current_class_id = 19;
+        $u->first_name .= '.';
+        $u->save();
+        dd($u);
+        dd("done");  */
+        $segments = request()->segments();
+        $status = 0;
 
-        UserBatchImporter::students_batch_import($m);
+        if (in_array('students', $segments)) {
+            $status = 1;
+        } else 
+        if (in_array('pending-students', $segments)) {
+            $status = 2;
+        } else if (in_array('not-active-students', $segments)) {
+            $status = 0;
+        }
 
-        die("romina"); */
-        /*         $u = Administrator::find(2318);
-        $u->delete(); */
-
-        /*  $u = Administrator::find(2317);
-        $u->delete();
-        
-        die("done");
-        DB::delete("DELETE FROM admin_users WHERE id = 2317 ");
-
-        dd("ashjghjasj"); 
-        $u = new Administrator();
-        $u->id = 2317;
-        $u->enterprise_id = Auth::user()->enterprise_id;
-        $u->save(); */
-
-        /*    $u->delete();
-        dd("done"); */
         $grid = new Grid(new Administrator());
+
+        
         $grid->disableBatchActions();
         $grid->actions(function ($actions) {
 
@@ -89,11 +74,10 @@ class StudentsController extends AdminController
             }
         });
 
+        
 
         Utils::display_checklist(Utils::students_checklist(Admin::user()));
         Utils::display_checklist(Utils::students_optional_subjects_checklist(Admin::user()));
-
-
 
         $teacher_subjects = Subject::where([
             'subject_teacher' => Admin::user()->id
@@ -109,9 +93,12 @@ class StudentsController extends AdminController
             ])
             ->get();
 
+            
+
         $teacher_theology_subjects = TheologySubject::where([
             'subject_teacher' => Admin::user()->id
         ])
+        
             ->orWhere([
                 'teacher_1' => Admin::user()->id
             ])
@@ -123,6 +110,7 @@ class StudentsController extends AdminController
             ])
             ->get();
 
+            
 
         $grid->filter(function ($filter) {
 
@@ -160,11 +148,11 @@ class StudentsController extends AdminController
                     ])
                     ->get();
 
-                if ($teacher_subjects->count() > 0) {
+                /* if ($teacher_subjects->count() > 0) {
                     $filter->equal('current_class_id', 'Filter by class')->select(AcademicClass::where([
                         'enterprise_id' => $u->enterprise_id
                     ])->where('id', $teacher_subjects->pluck('academic_class_id'))->orderBy('id', 'Desc')->get()->pluck('name_text', 'id'));
-                }
+                } */
 
 
                 if ($teacher_theology_subjects->count() > 0) {
@@ -194,6 +182,9 @@ class StudentsController extends AdminController
             $filter->disableIdFilter();
         });
 
+        
+
+        
         $grid->quickSearch('name')->placeholder("Search by name...");
 
 
@@ -202,13 +193,13 @@ class StudentsController extends AdminController
             $grid->disableExport();
             $grid->disableCreateButton();
 
-            $grid->model()->where(
+           /*  $grid->model()->where(
                 'current_class_id',
                 $teacher_subjects->pluck('academic_class_id'),
             )->orWhereIn(
                 'current_theology_class_id',
                 $teacher_theology_subjects->pluck('theology_class_id'),
-            );
+            ); */
         } else {
         }
 
@@ -216,7 +207,7 @@ class StudentsController extends AdminController
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
             'user_type' => 'student',
-            'status' => 1
+            'status' => $status
         ]);
 
 
@@ -258,6 +249,7 @@ class StudentsController extends AdminController
         $grid->column('id', __('ID'))
             ->sortable();
 
+           
 
         $grid->column('avatar', __('Photo'))
             ->lightbox(['width' => 60, 'height' => 60])
@@ -319,33 +311,6 @@ class StudentsController extends AdminController
 
 
 
-        // $grid->column('religion', __('Religion'))->hide();
-        // $grid->column('spouse_name', __('Spouse name'))->hide();
-        // $grid->column('spouse_phone', __('Spouse phone'))->hide();
-        // $grid->column('father_name')->hide();
-        // $grid->column('father_phone')->hide();
-        // $grid->column('mother_name')->hide();
-        // $grid->column('mother_phone')->hide();
-        // $grid->column('national_id_number', 'N.I.N')->hide();
-        // $grid->column('passport_number')->hide();
-        // $grid->column('tin', 'TIN')->hide();
-        // $grid->column('nssf_number')->hide();
-        // $grid->column('bank_name')->hide();
-        // $grid->column('bank_account_number')->hide();
-        //$grid->column('primary_school_name')->hide();
-        //$grid->column('primary_school_year_graduated')->hide();
-        //$grid->column('seconday_school_name')->hide();
-        //$grid->column('seconday_school_year_graduated')->hide();
-        //$grid->column('high_school_name')->hide();
-        //$grid->column('high_school_year_graduated')->hide();
-        //$grid->column('degree_university_name')->hide();
-        //$grid->column('degree_university_year_graduated')->hide();
-        //$grid->column('masters_university_name')->hide();
-        //$grid->column('masters_university_year_graduated')->hide();
-        //$grid->column('phd_university_name')->hide();
-        //$grid->column('phd_university_year_graduated')->hide();
-
-
 
         $grid->column('created_at', __('Admitted'))
             ->display(function ($date) {
@@ -394,6 +359,7 @@ class StudentsController extends AdminController
     {
         $u = Admin::user();
 
+
         $form = new Form(new Administrator());
 
 
@@ -402,7 +368,7 @@ class StudentsController extends AdminController
 
             if (!$form->isEditing()) {
                 if (Admin::user()->isRole('dos')) {
-                    $form->multipleSelect('roles', trans('admin.roles'))
+                    $form->multipleSelect('roles', 'Role')
                         ->attribute([
                             'autocomplete' => 'off'
                         ])
@@ -414,6 +380,7 @@ class StudentsController extends AdminController
                                 ->get()
                                 ->pluck('name', 'id')
                         )
+                        ->readOnly()
                         ->rules('required');
                 }
             }
@@ -434,17 +401,36 @@ class StudentsController extends AdminController
 
             $form->text('school_pay_payment_code')->rules('required');
             $form->text('school_pay_account_id')->rules('required');
-            $form->select('sex', 'Gender')->options(['Male' => 'Male', 'Female' => 'Female'])->rules('required');
+            $form->radio('sex', 'Gender')->options(['Male' => 'Male', 'Female' => 'Female'])->rules('required');
 
 
 
+            $classes = [];
+            foreach (AcademicClass::all() as $class) {
+                if (((int)($class->academic_year->is_active)) != 1) {
+                    continue;
+                }
+                $classes[$class->id] = $class->name_text;
+            }
 
-            $states = [
+            $form->select('current_class_id', 'Class')->options($classes)->rules('required');
+
+            $form->image('avatar', 'Student\'s photo');
+
+            $form->divider();
+            $form->radio('status')->options([
+                2 => 'Pending',
+                1 => 'Active',
+                0 => 'Not active',
+            ])
+                ->rules('required')->default(2);
+
+            /* $states = [
                 'on' => ['value' => 1, 'text' => 'Verified', 'color' => 'success'],
                 'off' => ['value' => 0, 'text' => 'Pending', 'color' => 'danger'],
             ];
             $form->switch('verification')->states($states)
-                ->rules('required')->default(0);
+                ->rules('required')->default(0); */
         });
 
 
@@ -517,22 +503,13 @@ class StudentsController extends AdminController
         if (Admin::user()->isRole('dos')) {
             $form->tab('SYSTEM ACCOUNT', function (Form $form) {
 
-                $form->image('avatar', 'Student\'s photo');
-
-                $form->text('email', 'Email address')
-                    ->creationRules(["unique:admin_users"])
-                    ->updateRules(["unique:admin_users,username,{{id}}"]);
+                $form->text('email', 'Email address');
                 $form->text('username', 'Username')
                     ->creationRules(["unique:admin_users"])
                     ->updateRules(["unique:admin_users,username,{{id}}"]);
 
-                $form->password('password', trans('admin.password'))->rules('confirmed');
-                $form->password('password_confirmation', trans('admin.password_confirmation'))
-                    ->default(function ($form) {
-                        return $form->model()->password;
-                    });
+                $form->password('password', trans('admin.password'));
 
-                $form->ignore(['password_confirmation']);
                 $form->saving(function (Form $form) {
                     if ($form->password && $form->model()->password != $form->password) {
                         $form->password = Hash::make($form->password);

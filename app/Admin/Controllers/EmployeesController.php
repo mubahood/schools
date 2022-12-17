@@ -315,8 +315,7 @@ class EmployeesController extends AdminController
                     ->options(
                         $roleModel::where('slug', '!=', 'super-admin')
                             ->where('slug', '!=', 'student')
-                            ->where('slug', '!=', 'librarian')
-                            ->where('slug', '!=', 'admin')
+                            ->where('slug', '!=', 'librarian') 
                             ->where('slug', '!=', 'supplier')
                             ->get()
                             ->pluck('name', 'id')

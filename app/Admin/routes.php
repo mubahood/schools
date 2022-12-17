@@ -59,12 +59,12 @@ Route::group([
     $router->get('/batch-print', 'StudentReportCardController@print')->name('print');
     $router->resource('account-parents', AccountParentController::class);
     $router->resource('service-categories', ServiceCategoryController::class);
-    $router->resource('academic-class-levels', AcademicClassLevelController::class);
-    $router->resource('not-active-students', NotActiveStudentsController::class);
-    $router->resource('pending-students', PendingStudentsController::class);
+    $router->resource('academic-class-levels', AcademicClassLevelController::class); 
+    $router->resource('pending-students', StudentsController::class);
+    $router->resource('not-active-students', StudentsController::class);
     $router->resource('promotions', PromotionController::class);
     $router->resource('documents', DocumentController::class);
-    $router->resource('configuration', ConfigurationController::class);
+    $router->resource('configuration', ConfigurationController::class); 
 
     //$router->resource('fees', StudentHasFeeController::class);
 

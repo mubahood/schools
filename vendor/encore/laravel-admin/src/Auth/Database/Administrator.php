@@ -45,13 +45,9 @@ class Administrator extends Model implements AuthenticatableContract
         parent::boot();
 
         self::deleting(function ($m) {
- 
-
-
-            if($m->account!= null){ 
-                $m->account->delete(); 
+            if ($m->account != null) {
+                $m->account->delete();
             }
-
 
             $x = DB::delete("DELETE FROM academic_classes WHERE class_teahcer_id = $m->id ");
             $x = DB::delete("DELETE FROM admin_role_users WHERE user_id = $m->id ");
@@ -67,37 +63,37 @@ class Administrator extends Model implements AuthenticatableContract
             $x = DB::delete("DELETE FROM nursery_student_report_cards WHERE student_id = $m->id ");
             $x = DB::delete("DELETE FROM nursery_student_report_card_items WHERE student_id = $m->id ");
             $x = DB::delete("DELETE FROM nursery_student_report_card_items WHERE teacher_id = $m->id ");
-            $x = DB::delete("DELETE FROM service_subscriptions WHERE administrator_id = $m->id "); 
+            $x = DB::delete("DELETE FROM service_subscriptions WHERE administrator_id = $m->id ");
             $x = DB::delete("DELETE FROM stock_batches WHERE supplier_id = $m->id ");
-            $x = DB::delete("DELETE FROM stock_batches WHERE manager = $m->id "); 
+            $x = DB::delete("DELETE FROM stock_batches WHERE manager = $m->id ");
             $x = DB::delete("DELETE FROM stock_records WHERE created_by = $m->id ");
             $x = DB::delete("DELETE FROM stock_records WHERE received_by = $m->id ");
             $x = DB::delete("DELETE FROM student_has_classes WHERE administrator_id = $m->id ");
             $x = DB::delete("DELETE FROM student_has_fees WHERE administrator_id = $m->id ");
             $x = DB::delete("DELETE FROM student_has_optional_subjects WHERE administrator_id = $m->id ");
             $x = DB::delete("DELETE FROM student_has_theology_classes WHERE administrator_id = $m->id ");
-            $x = DB::delete("DELETE FROM student_report_cards WHERE student_id = $m->id "); 
+            $x = DB::delete("DELETE FROM student_report_cards WHERE student_id = $m->id ");
             $x = DB::delete("DELETE FROM theologry_student_report_cards WHERE student_id = $m->id ");
             $x = DB::delete("DELETE FROM theology_classes WHERE class_teahcer_id = $m->id ");
             $x = DB::delete("DELETE FROM theology_marks WHERE student_id = $m->id ");
-            $x = DB::delete("DELETE FROM theology_marks WHERE teacher_id = $m->id "); 
+            $x = DB::delete("DELETE FROM theology_marks WHERE teacher_id = $m->id ");
             $x = DB::delete("DELETE FROM theology_subjects WHERE teacher_1 = $m->id ");
             $x = DB::delete("DELETE FROM theology_subjects WHERE teacher_2 = $m->id ");
             $x = DB::delete("DELETE FROM theology_subjects WHERE teacher_3 = $m->id ");
-            $x = DB::delete("DELETE FROM theology_subjects WHERE subject_teacher = $m->id ");  
-            DB::delete("DELETE FROM admin_users WHERE id = $m->id "); 
+            $x = DB::delete("DELETE FROM theology_subjects WHERE subject_teacher = $m->id ");
+            DB::delete("DELETE FROM admin_users WHERE id = $m->id ");
 
- 
+
             return false;
-            
+
             dd("=====DELETING====");
             //$m->account->delete(); 
 
-            Transaction::where('account_id',$m->id)
-            ->orWhere('contra_entry_account_id',$m->id)
-            ->orWhere('contra_entry_transaction_id',$m->id)
-            ->delete();
-/* 
+            Transaction::where('account_id', $m->id)
+                ->orWhere('contra_entry_account_id', $m->id)
+                ->orWhere('contra_entry_transaction_id', $m->id)
+                ->delete();
+            /* 
 
  
 	
@@ -108,7 +104,7 @@ class Administrator extends Model implements AuthenticatableContract
 	_mark_has_classes	 
 */
 
-            echo $x."<hr>";
+            echo $x . "<hr>";
             die("time to delete");
 
             die("You cannot delete a user");
@@ -160,9 +156,8 @@ class Administrator extends Model implements AuthenticatableContract
                 strlen($model->email) < 3
             ) {
                 $model->username = null;
-                $model->email = null;
-
-
+                $model->email = null; 
+                
                 if (
                     $model->school_pay_payment_code == null ||
                     strlen($model->school_pay_payment_code) < 4
@@ -198,6 +193,7 @@ class Administrator extends Model implements AuthenticatableContract
 
         self::created(function ($m) {
             Account::create($m->id);
+            Administrator::my_update($m);
             //created Administrator
         });
 
@@ -289,16 +285,37 @@ class Administrator extends Model implements AuthenticatableContract
             return $model;
         });
 
-        self::updated(function ($model) {
-            // ... code here
+        self::updated(function ($m) {
+            Administrator::my_update($m);
         });
- 
+
+
+
 
         self::deleted(function ($model) {
             // ... code here
         });
     }
 
+    public static function my_update($m)
+    {
+        if ($m->user_type == 'student') {
+            $current_class_id = ((int)($m->current_class_id));
+            $class = AcademicClass::find($current_class_id);
+            if ($class != null) {
+                $hasClass = StudentHasClass::where([
+                    'administrator_id' => $m->id,
+                    'academic_class_id' => $current_class_id
+                ])->first();
+                if ($hasClass == null) {
+                    $class = new StudentHasClass();
+                    $class->administrator_id = $m->id;
+                    $class->academic_class_id = $current_class_id;
+                    $class->save();
+                }
+            }
+        }
+    }
 
     /** 
      * Create a new Eloquent model instance.
@@ -387,7 +404,7 @@ class Administrator extends Model implements AuthenticatableContract
             $this->enterprise_id = 1;
             $this->save();
         }
-        return $this->belongsTo(Enterprise::class,'enterprise_id');
+        return $this->belongsTo(Enterprise::class, 'enterprise_id');
     }
 
 
