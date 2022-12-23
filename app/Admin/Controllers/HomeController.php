@@ -17,6 +17,8 @@ use Encore\Admin\Layout\Column;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Layout\Row;
 use Encore\Admin\Widgets\Box;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
@@ -132,13 +134,38 @@ class HomeController extends Controller
         ]);
     }
     public function stats(Content $content)
-    { 
+    {
 
         $u = Admin::user();
 
         if (
-            $u->isRole('admin') ||
-            $u->isRole('bursar')
+            $u->isRole('admin') || 
+            $u->isRole('dos')
+        ) {
+            $content->row(function (Row $row) {
+
+           
+
+                $row->column(3, function (Column $column) {
+                    $column->append(Dashboard::students());
+                });
+                $row->column(3, function (Column $column) {
+                    $column->append(Dashboard::teachers());
+                });
+                $row->column(3, function (Column $column) {
+                    $column->append(Dashboard::staff());
+                });
+                $row->column(3, function (Column $column) {
+                    $column->append(Dashboard::school_population());
+                });
+            });
+        }
+
+
+
+
+        /*       if (
+            $u->isRole('bursar') ||
         ) {
             $u = Admin::user();
 
@@ -169,33 +196,23 @@ class HomeController extends Controller
                 ) {
                     $row->column(6, function (Column $column) {
                         $column->append(Dashboard::bursarServices());
-                    }); 
+                    });
                 }
             });
 
             return $content;
         }
-
+ */
 
         Admin::style('.content-header {display: none;}');
         $ent = Utils::ent();
         Utils::reconcile_in_background(Admin::user()->enterprise_id);
 
-        return $content
+        /*       $content
             ->title($ent->name)
             ->description('Dashboard')
             ->row(function (Row $row) {
                 $u = Admin::user();
-
-                if ($u->isRole('teacher')) {
-                    $row->column(3, function (Column $column) {
-                        $column->append(Dashboard::teacher_marks());
-                    });
-                    $row->column(3, function (Column $column) {
-                        $column->append(Dashboard::theology_teacher_marks());
-                    });
-                }
-
 
                 if (
                     $u->isRole('super-admin')
@@ -248,5 +265,76 @@ class HomeController extends Controller
                     });
                 }
             });
+ */
+
+
+        if (
+            $u->isRole('admin') ||
+            $u->isRole('bursar')
+        ) {
+            $content->row(function (Row $row) {
+
+                $row->column(3, function (Column $column) {
+                    $column->append(Dashboard::count_expected_fees());
+                });
+                $row->column(3, function (Column $column) {
+                    $column->append(Dashboard::count_paid_fees());
+                });
+                $row->column(3, function (Column $column) {
+                    $column->append(Dashboard::count_unpaid_fees());
+                });
+
+                $row->column(3, function (Column $column) {
+                    $column->append(Dashboard::count_percentage_paid_fees());
+                });
+
+
+                /*    $row->column(3, function (Column $column) {
+                    $column->append(Dashboard::students());
+                });
+                $row->column(3, function (Column $column) {
+                    $column->append(Dashboard::teachers());
+                });
+                $row->column(3, function (Column $column) {
+                    $column->append(Dashboard::staff());
+                });
+                $row->column(3, function (Column $column) {
+                    $column->append(Dashboard::school_population());
+                }); */
+            });
+        }
+
+
+        if (
+            $u->isRole('bursar')  
+        ) {
+
+            $content->row(function (Row $row) {
+            $row->column(6, function (Column $column) {
+                $column->append(Dashboard::bursarFeesExpected()); 
+            });
+            $row->column(6, function (Column $column) { 
+                $column->append(Dashboard::bursarFeesPaid());
+            });
+
+        });
+
+        }
+
+
+
+
+        if ($u->isRole('teacher')) {
+            $content->row(function (Row $row) {
+                $row->column(3, function (Column $column) {
+                    $column->append(Dashboard::teacher_marks());
+                });
+                $row->column(3, function (Column $column) {
+                    $column->append(Dashboard::theology_teacher_marks());
+                });
+            });
+        }
+
+        return $content;
     }
 }

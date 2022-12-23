@@ -49,6 +49,14 @@ class Enterprise extends Model
         ])->first();
         return $t;
     }
+    public function active_academic_year()
+    {   
+        $t = AcademicYear::where([
+            'enterprise_id' => $this->id,
+            'is_active' => 1,
+        ])->first();
+        return $t;
+    }
 
     public static function main_bank_account($m)
     {

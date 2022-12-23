@@ -19,6 +19,7 @@ use App\Models\Utils;
 use Encore\Admin\Admin;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class Dashboard
 {
@@ -104,10 +105,18 @@ class Dashboard
         $classes = [];
         $labels = [];
         $amounts = [];
-        $total = 0;
+        $total = 0; 
 
+        $academic_year_id = 0;
+
+        $active_academic_year = $u->ent->active_academic_year();
+        if($active_academic_year != null){
+            $academic_year_id = $active_academic_year->id;
+        }
+ 
         foreach (AcademicClass::where([
-            'enterprise_id' => $u->enterprise_id
+            'enterprise_id' => $u->enterprise_id,
+            'academic_year_id' => $academic_year_id
         ])->orderBy('id', 'Asc')->get() as $key => $value) {
             $value->amount = AcademicClassFee::where([
                 'academic_class_id' => $value->id
@@ -120,17 +129,17 @@ class Dashboard
         }
 
         $s = new AcademicClass();
-        $s->name = "Services";
+       /*  $s->name = "Services";
         foreach (Service::where([
             'enterprise_id' => $u->enterprise_id
         ])->get() as $key => $val) {
             $amount = $val->fee;
             $subs = count($val->subs);
             $s->amount += ($amount * $subs);
-        }
-        $labels[] = 'Services';
-        $classes[] = $s;
-        $amounts[] = $s->amount;
+        } */
+      /*   $labels[] = 'Services'; */
+     /*    $classes[] = $s; */
+        /* $amounts[] = $s->amount; */
 
         return view('dashboard.bursarFeesExpected', [
             'classes' => $classes,
@@ -167,10 +176,16 @@ class Dashboard
         $labels = [];
         $amounts = [];
         $total = 0;
+        $academic_year_id = 0;
 
+        $active_academic_year = $u->ent->active_academic_year();
+        if($active_academic_year != null){
+            $academic_year_id = $active_academic_year->id;
+        }
 
         foreach (AcademicClass::where([
-            'enterprise_id' => $u->enterprise_id
+            'enterprise_id' => $u->enterprise_id,
+            'academic_year_id' => $academic_year_id,
         ])->orderBy('id', 'Asc')->get() as $key => $value) {
             $value->amount = Account::where([
                 'academic_class_id' => $value->id
@@ -341,18 +356,169 @@ class Dashboard
 
 
 
+    public static function count_expected_fees()
+    {
+
+        $enterprise_id = Auth::user()->enterprise_id;
+
+        $active_students_condition = " admin_users.id = accounts.administrator_id 
+        AND admin_users.enterprise_id = $enterprise_id AND admin_users.status = 1 ";
+
+
+        $sql = DB::select("SELECT count(admin_users.id) as count FROM accounts,admin_users WHERE $active_students_condition");
+        $studebts_count = $sql[0]->count;
+
+        $active_students_accounts = "SELECT accounts.id FROM accounts,admin_users WHERE $active_students_condition";
+
+        $sql = DB::select("SELECT sum(amount) as sum FROM transactions WHERE amount < 0 AND transactions.enterprise_id = $enterprise_id AND account_id in ($active_students_accounts)");
+        $expected_fees = $sql[0]->sum;
+
+        $sql = DB::select("SELECT sum(amount) as sum FROM transactions WHERE amount > 0 AND transactions.enterprise_id = $enterprise_id AND account_id in ($active_students_accounts)");
+        $paid_fees = $sql[0]->sum;
+
+
+        if ($expected_fees < 0) {
+            $expected_fees = -1 * $expected_fees;
+        }
+
+        $sub_title =  "To be paid by $studebts_count active students.";
+        return view('widgets.box-5', [
+            'is_dark' => false,
+            'title' => 'Expected school fees',
+            'sub_title' => $sub_title,
+            'number' => "UGX " . number_format($expected_fees),
+            'link' => admin_url('students')
+        ]);
+    }
+
+
+
+
+    public static function count_paid_fees()
+    {
+
+        $enterprise_id = Auth::user()->enterprise_id;
+
+        $active_students_condition = " admin_users.id = accounts.administrator_id 
+        AND admin_users.enterprise_id = $enterprise_id AND admin_users.status = 1 ";
+
+
+        $sql = DB::select("SELECT count(admin_users.id) as count FROM accounts,admin_users WHERE $active_students_condition");
+        $studebts_count = $sql[0]->count;
+
+        $active_students_accounts = "SELECT accounts.id FROM accounts,admin_users WHERE $active_students_condition";
+
+        $sql = DB::select("SELECT sum(amount) as sum FROM transactions WHERE amount < 0 AND transactions.enterprise_id = $enterprise_id AND account_id in ($active_students_accounts)");
+        $expected_fees = $sql[0]->sum;
+
+        $sql = DB::select("SELECT sum(amount) as sum FROM transactions WHERE amount > 0 AND transactions.enterprise_id = $enterprise_id AND account_id in ($active_students_accounts)");
+        $paid_fees = $sql[0]->sum;
+
+        $sub_title =  "To be paid by $studebts_count active students.";
+        return view('widgets.box-5', [
+            'is_dark' => false,
+            'title' => 'Paid school fees',
+            'sub_title' => $sub_title,
+            'number' => "UGX " . number_format($paid_fees),
+            'link' => admin_url('students')
+        ]);
+    }
+
+
+
+
+    public static function count_percentage_paid_fees()
+    {
+
+        $enterprise_id = Auth::user()->enterprise_id;
+
+        $active_students_condition = " admin_users.id = accounts.administrator_id 
+        AND admin_users.enterprise_id = $enterprise_id AND admin_users.status = 1 ";
+
+
+        $sql = DB::select("SELECT count(admin_users.id) as count FROM accounts,admin_users WHERE $active_students_condition");
+        $studebts_count = $sql[0]->count;
+
+        $active_students_accounts = "SELECT accounts.id FROM accounts,admin_users WHERE $active_students_condition";
+
+        $sql = DB::select("SELECT sum(amount) as sum FROM transactions WHERE amount < 0 AND transactions.enterprise_id = $enterprise_id AND account_id in ($active_students_accounts)");
+        $expected_fees = $sql[0]->sum;
+
+        $sql = DB::select("SELECT sum(amount) as sum FROM transactions WHERE amount > 0 AND transactions.enterprise_id = $enterprise_id AND account_id in ($active_students_accounts)");
+        $paid_fees = $sql[0]->sum;
+
+        if ($expected_fees < 0) {
+            $expected_fees = -1 * $expected_fees;
+        }
+
+        $percentage = 0;
+        if ($expected_fees != 0) {
+            $percentage = ($paid_fees / $expected_fees) * 100;
+            $percentage = round($percentage, 2);
+        }
+
+
+        $sub_title =  "To be paid by $studebts_count active students.";
+        return view('widgets.box-5', [
+            'is_dark' => true,
+            'title' => 'Percentage paid',
+            'sub_title' => $sub_title,
+            'number' => $percentage . "%",
+            'link' => admin_url('students')
+        ]);
+    }
+
+
+
+
+    public static function count_unpaid_fees()
+    {
+
+        $enterprise_id = Auth::user()->enterprise_id;
+
+        $active_students_condition = " admin_users.id = accounts.administrator_id 
+        AND admin_users.enterprise_id = $enterprise_id AND admin_users.status = 1 ";
+
+
+        $sql = DB::select("SELECT count(admin_users.id) as count FROM accounts,admin_users WHERE $active_students_condition");
+        $studebts_count = $sql[0]->count;
+
+        $active_students_accounts = "SELECT accounts.id FROM accounts,admin_users WHERE $active_students_condition";
+
+        $sql = DB::select("SELECT sum(amount) as sum FROM transactions WHERE amount < 0 AND transactions.enterprise_id = $enterprise_id AND account_id in ($active_students_accounts)");
+        $expected_fees = $sql[0]->sum;
+
+        $sql = DB::select("SELECT sum(amount) as sum FROM transactions WHERE amount > 0 AND transactions.enterprise_id = $enterprise_id AND account_id in ($active_students_accounts)");
+        $paid_fees = $sql[0]->sum;
+
+
+
+        $sub_title =  "To be paid by $studebts_count active students.";
+        return view('widgets.box-5', [
+            'is_dark' => false,
+            'title' => 'Unpaid school fees',
+            'sub_title' => $sub_title,
+            'number' => "UGX " . number_format($expected_fees + $paid_fees),
+            'link' => admin_url('students')
+        ]);
+    }
+
+
+
     public static function students()
     {
         $u = Auth::user();
         $all_students = User::where([
             'enterprise_id' => $u->enterprise_id,
             'user_type' => 'Student',
+            'status' => 1
         ])->count();
 
         $male_students = User::where([
             'enterprise_id' => $u->enterprise_id,
             'user_type' => 'Student',
             'sex' => 'Male',
+            'status' => 1
         ])->count();
 
         $female_students = $all_students - $male_students;
@@ -395,6 +561,88 @@ class Dashboard
             'link' => admin_url('employees')
         ]);
     }
+
+
+    public static function school_population()
+    {
+        $u = Auth::user();
+        $all_students = User::where([
+            'enterprise_id' => $u->enterprise_id,
+        ])->count();
+
+        $male_students = User::where([
+            'enterprise_id' => $u->enterprise_id,
+            'user_type' => 'employee',
+        ])->count();
+
+
+        $female_students = $all_students - $male_students;
+
+        $sub_title = number_format($male_students) . ' Males, ';
+        $sub_title .= number_format($female_students) . ' Females.';
+        return view('widgets.box-5', [
+            'is_dark' => true,
+            'title' => 'School population',
+            'sub_title' => $sub_title,
+            'number' => number_format($all_students),
+            'link' => admin_url('employees')
+        ]);
+    }
+
+
+    public static function staff()
+    {
+        $u = Auth::user();
+        $all_students = User::where([
+            'enterprise_id' => $u->enterprise_id,
+        ])
+            ->where(
+                'user_type',
+                '!=',
+                'employee'
+            )
+            ->where(
+                'user_type',
+                '!=',
+                'student'
+            )
+            ->count();
+
+
+        $male_students =  User::where([
+            'enterprise_id' => $u->enterprise_id,
+        ])
+            ->where(
+                'user_type',
+                '!=',
+                'employee'
+            )
+            ->where(
+                'user_type',
+                '!=',
+                'student'
+            )
+            ->where(
+                'sex',
+                '=',
+                'Male',
+            )
+            ->count();
+
+
+        $female_students = $all_students - $male_students;
+
+        $sub_title = number_format($male_students) . ' Males, ';
+        $sub_title .= number_format($female_students) . ' Females.';
+        return view('widgets.box-5', [
+            'is_dark' => false,
+            'title' => 'Staff',
+            'sub_title' => $sub_title,
+            'number' => number_format($all_students),
+            'link' => admin_url('employees')
+        ]);
+    }
+
 
 
     public static function parents()
