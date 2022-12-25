@@ -321,8 +321,12 @@ php artisan make:migration add_school_phone_number_2 --table=enterprises
 
 git add --all 
 git commit -am "Your commit message"
-ssh schooics@gator4311.hostgator.com
-ssh-keygen -t rsa -C "schooics@gator4311.hostgator.com"
+ssh schooics@gator4311.hostgator.com 
+ssh-keygen -t rsa -C "schooics@gator4311.hostgator.com" -p
+
+ssh-keygen -f ~/.ssh/id_rsa -p
+
+ssh-keygen -f "" -p
 
 
 
