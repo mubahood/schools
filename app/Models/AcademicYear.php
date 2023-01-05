@@ -117,7 +117,7 @@ class AcademicYear extends Model
     }
     /* 
 
-  "id" => 4
+    "id" => 4
     "created_at" => "2022-12-14 20:51:40"
     "updated_at" => "2022-12-14 20:51:40"
     "name" => "Primary one"
