@@ -55,7 +55,10 @@ class AcademicYear extends Model
                 $term->save();
             }
 
-            AcademicYear::generate_classes($m);
+            try {
+                AcademicYear::generate_classes($m);
+            } catch (\Throwable $th) {
+            }
         });
 
 
@@ -107,11 +110,11 @@ class AcademicYear extends Model
                     }
                 }
             } else {
-                try {
+                /* try {
                     AcademicYear::generate_classes($m);   
                 } catch (\Throwable $th) {
  
-                }
+                } */
             }
         });
     }
