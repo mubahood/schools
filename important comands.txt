@@ -1,4 +1,4 @@
-ssh-keygen -t ed25519 -C "mubs0x@gmail.com"
+lssh-keygen -t ed25519 -C "mubs0x@gmail.com"
 
 git config --global user.email "mubs0x@gmail.com"
 git config --global user.name "mubahood"
@@ -322,11 +322,10 @@ php artisan make:migration add_school_phone_number_2 --table=enterprises
 git add --all 
 git commit -am "Your commit message"
 ssh schooics@gator4311.hostgator.com 
-ssh-keygen -t rsa -C "schooics@gator4311.hostgator.com" -p
+ssh-keygen -t rsa -C "schooics@gator4311.hostgator.com"  
 
 ssh-keygen -f ~/.ssh/id_rsa -p
-
-ssh-keygen -f "" -p
+ 
 
 
 
