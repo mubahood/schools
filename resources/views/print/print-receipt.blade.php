@@ -15,26 +15,15 @@ $owner = $account->owner;
 $ent = $owner->ent;
 $amount_in_words = Utils::convert_number_to_words($transaction->amount);
 
-$template = Document::where([
-    'enterprise_id' => $owner->enterprise_id,
-    'name' => 'Receipt',
-])->first();
-
-if ($template == null) {
-    throw new Exception('Receipt Template not found.', 1);
-}
+ 
+ 
 if ($ent == null) {
     throw new Exception('School not found.', 1);
 }
 
 $logo_link = public_path('/storage/' . $ent->logo);
 
-$template->body = str_replace('[STUDENT_NAME]', $owner->name, $template->body);
-$template->body = str_replace('[STUDENT_SCHOOL_PAY_CODE]', $owner->school_pay_payment_code, $template->body);
-$template->body = str_replace('[SCHOOL_NAME]', $ent->name, $template->body);
-$template->body = str_replace('background-color: rgb(249, 242, 244);', ' ', $template->body);
-$template->body = str_replace('color: rgb(199, 37, 78);', ' ', $template->body);
-
+ 
 $requirements_rows = '';
 $requirements_row_count = 0;
 $requirements_total = 0;
@@ -49,57 +38,32 @@ $requirements_total = 0;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="{{ public_path('css/bootstrap-print.css') }}">
-    <title>Addmission letter</title>
-    @if ($template->print_water_mark == 1)
-        <style>
-            /* body::before {
-                content: "";
-                position: absolute;
-                top: 0;
-                right: 0;
-                bottom: 0;
-                left: 0;
-                z-index: -1;
-                background-image: url({{ $logo_link }});
-                background-size: cover;
-                background-position: center;
-                opacity: 0.15;
-                background-repeat: no-repeat;
-                background-position: center;
-                background-size: 80%;
-                opacity: 0.15;
-            } */
-        </style>
-    @endif
-
+    <title>Payment receipt</title>
+ 
 </head>
 
 <body>
 
     <div class="receipt  p-3 pb-4" style="border: solid black .2rem;">
-        @if ($template->print_hearder == 1)
-            <table class="w-100 ">
-                <tbody>
-                    <tr>
-                        <td style="width: 10%;" class="pr-2">
-                            <img class="img-fluid" src="{{ $logo_link }}" alt="{{ $ent->name }}">
-                        </td>
-                        <td class=" text-left">
-                            <p class="p-0 m-0" style="font-size: 1.3rem;"><b>{{ strtoupper($ent->name) }}</b></p>
-                            <p class="mt-0">Email: {{ $ent->email }}</p>
-                            <p class="mt-1">Tel: <b>{{ $ent->phone_number }}</b> , <b>{{ $ent->phone_number_2 }}</b>
-                            </p>
-                        </td>
-                        <td style="width: 15%; text-align: right;">
-                            <b>No. <span style="color: red;">{{ $transaction->id }}</span></b>
-                            <br><br><br>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        @else
-            <div style="height: 4cm;"></div>
-        @endif
+        <table class="w-100 ">
+            <tbody>
+                <tr>
+                    <td style="width: 10%;" class="pr-2">
+                        <img class="img-fluid" src="{{ $logo_link }}" alt="{{ $ent->name }}">
+                    </td>
+                    <td class=" text-left">
+                        <p class="p-0 m-0" style="font-size: 1.3rem;"><b>{{ strtoupper($ent->name) }}</b></p>
+                        <p class="mt-0">Email: {{ $ent->email }}</p>
+                        <p class="mt-1">Tel: <b>{{ $ent->phone_number }}</b> , <b>{{ $ent->phone_number_2 }}</b>
+                        </p>
+                    </td>
+                    <td style="width: 15%; text-align: right;">
+                        <b>No. <span style="color: red;">{{ $transaction->id }}</span></b>
+                        <br><br><br>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
 
         <h2 class="text-center h4 mb-4 mt-4"><u>RECEIPT</u></h2>
 
@@ -126,9 +90,7 @@ $requirements_total = 0;
             </tr>
         </table>
 
-
-        {{-- {{$template->body}} --}}
-        {{--  {!! $template->body !!} --}}
+ 
     </div>
 </body>
 

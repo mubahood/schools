@@ -271,7 +271,7 @@ class Utils  extends Model
             $admission_letter->save();
         }
 
-        $reciept = Document::where([
+     /*    $reciept = Document::where([
             'enterprise_id' => $u->enterprise_id,
             'name' => DOCUMENT_RECEIPT
         ])->first();
@@ -284,7 +284,7 @@ class Utils  extends Model
             $reciept->print_water_mark = 1;
             $reciept->body = file_get_contents(Utils::docs_root() . '/templates/receipt-letter.html');
             $reciept->save();
-        }
+        } */
     }
 
     public static function financial_accounts_creation()
