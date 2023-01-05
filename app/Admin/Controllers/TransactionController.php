@@ -92,14 +92,7 @@ class TransactionController extends AdminController
             ->sortable()->totalRow(function ($x) {
                 return  number_format($x);
             });
-
-            $grid->column('documents', __('Print Documents'))
-            ->display(function () {
-                $admission_letter = url('print-admission-letter?id=' . $this->id);
-                return '<a title="Print admission letter" href="' . $admission_letter . '" target="_blank">Print receipt</a>';
-            });
-
-
+ 
         return $grid;
     }
 

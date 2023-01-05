@@ -80,6 +80,13 @@ class SchoolFeesPaymentController extends AdminController
         $grid->column('academic_year_id', __('Academic year id'))->hide();
         $grid->column('term_id', __('Term id'))->hide();
 
+        $grid->column('documents', __('Print'))
+            ->display(function () {
+                $admission_letter = url('print-receipt?id=' . $this->id);
+                return '<a title="Print admission letter" href="' . $admission_letter . '" target="_blank">Print receipt</a>';
+            });
+
+
         return $grid;
     }
 

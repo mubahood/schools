@@ -309,7 +309,7 @@ class StudentsController extends AdminController
                 return '<a title="Print admission letter" href="' . $admission_letter . '" target="_blank">Admission letter</a>';
             });
 
-
+ 
 
 
         $grid->column('created_at', __('Admitted'))

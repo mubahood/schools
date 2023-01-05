@@ -7,6 +7,7 @@ use App\Models\BooksCategory;
 use App\Models\Course;
 use App\Models\StudentHasClass;
 use App\Models\Subject;
+use App\Models\Utils;
 use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Support\Facades\Route;
 use Mockery\Matcher\Subset;
@@ -93,9 +94,14 @@ Route::get('/', function () {
 Route::match(['get', 'post'], '/print', [PrintController2::class, 'index']);
 Route::get('print-admission-letter', function () {
   //return view('print/print-admission-letter'); 
-  $pdf = App::make('dompdf.wrapper'); 
+  $pdf = App::make('dompdf.wrapper');
   //$pdf->setOption(['DOMPDF_ENABLE_REMOTE' => false]);
 
   $pdf->loadHTML(view('print/print-admission-letter'));
+  return $pdf->stream();
+});
+Route::get('print-receipt', function () { 
+  $pdf = App::make('dompdf.wrapper');
+  $pdf->loadHTML(view('print/print-receipt'));
   return $pdf->stream();
 });

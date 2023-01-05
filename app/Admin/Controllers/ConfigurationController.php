@@ -77,6 +77,9 @@ class ConfigurationController extends AdminController
     protected function form()
     {
         $form = new Form(new Enterprise());
+        $form->disableCreatingCheck();
+        $form->disableReset();
+        $form->disableViewCheck();
 
         $form->text('name', __('School Name'))->required();
         $form->text('short_name', __('Short name'))->required();

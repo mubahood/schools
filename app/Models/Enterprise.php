@@ -26,6 +26,7 @@ class Enterprise extends Model
     {
         parent::boot();
         self::deleting(function ($m) {
+            die("Default enterprise cannot be deleted.");
             if ($m->id == 1) {
                 die("Default enterprise cannot be deleted.");
                 return false;
@@ -50,7 +51,7 @@ class Enterprise extends Model
         return $t;
     }
     public function active_academic_year()
-    {   
+    {
         $t = AcademicYear::where([
             'enterprise_id' => $this->id,
             'is_active' => 1,
