@@ -25,21 +25,33 @@ class AcademicClassLevelController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new AcademicClassLevel());
-
-        /* $c = new AcademicClassLevel();
+        /* 
+        $c = new AcademicClassLevel();
         $c->name = 'Senior six';
         $c->short_name = 'S.6';
         $c->is_final_class = 1;
         $c->category = 'A-Level';
         $c->details = $c->name;
-        $c->save(); */
+        $c->save();
+
+   
+              'Nursery' => 'Nursery',
+                'Primary' => 'Primary',
+                'Secondary' => 'Secondary',
+                'A-Level' => 'A-Level',
+        */
 
         $grid->disableBatchActions();
         $grid->model()->orderBy('id', 'Desc');
         $grid->column('id', __('Id'))->sortable();
         $grid->column('name', __('Name'))->sortable();
         $grid->column('short_name', __('Short name'))->sortable();
-        $grid->column('is_final_class', __('Is final class'))->sortable();
+        $grid->column('is_final_class', __('Is final class'))
+            ->using([
+                1 => 'Final class',
+                0 => 'Not Final class',
+            ])
+            ->sortable();
         $grid->column('category', __('Category'))->filter([
             'Nursery' => 'Nursery',
             'Primary' => 'Primary',

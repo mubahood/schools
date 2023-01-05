@@ -55,7 +55,6 @@ class AcademicYear extends Model
                 $term->save();
             }
 
-
             AcademicYear::generate_classes($m);
         });
 
@@ -87,6 +86,7 @@ class AcademicYear extends Model
         });
 
         self::updated(function ($m) {
+
             if (((int)($m->is_active)) != 1) {
                 foreach ($m->classes as $class) {
                     foreach ($class->students as $student) {
@@ -105,6 +105,12 @@ class AcademicYear extends Model
                         }
                         $a->save();
                     }
+                }
+            } else {
+                try {
+                    AcademicYear::generate_classes($m);   
+                } catch (\Throwable $th) {
+ 
                 }
             }
         });

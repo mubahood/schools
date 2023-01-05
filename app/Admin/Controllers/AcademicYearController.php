@@ -29,11 +29,13 @@ class AcademicYearController extends AdminController
         /*  $ac = Academicyear::find(3);
         Academicyear::generate_classes($ac);
         dd($ac); */
-        /* $ac = Academicyear::find(2);
+        /**/
+
+        $ac = Academicyear::find(3);
         $ac->details .= '1';
-        $ac->is_active = 0;
-        $ac->save();
-        die("romina"); */
+        $ac->is_active = 1;  
+        $ac->save(); 
+        
         $grid = new Grid(new AcademicYear());
         $grid->disableBatchActions();
         $grid->model()->where([

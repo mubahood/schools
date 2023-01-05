@@ -191,10 +191,20 @@ class Utils  extends Model
 
     public static function docs_root()
     {
-        $r = env('DOCUMENT_ROOT');
-        $r = str_replace('public/', '', $r);
-        $r = str_replace('public', '', $r);
-        $r .= 'public/';
+        $r = $_SERVER['DOCUMENT_ROOT'] . "";
+
+        if (!str_contains($r, 'home/')) {
+            $r = str_replace('/public', "", $r);
+            $r = str_replace('\public', "", $r);
+        }
+
+        $r = $r . "/public";
+
+        /* 
+         "/home/ulitscom_html/public/storage/images/956000011639246-(m).JPG
+        
+        public_html/public/storage/images
+        */
         return $r;
     }
 
@@ -243,7 +253,7 @@ class Utils  extends Model
 
     public static function create_documents($u)
     {
-        if($u == null){
+        if ($u == null) {
             return;
         }
         $admission_letter = Document::where([
@@ -255,11 +265,10 @@ class Utils  extends Model
             $admission_letter->name = DOCUMENT_ADMISSION;
             $admission_letter->enterprise_id = $u->enterprise_id;
             $admission_letter->print_hearder = 1;
-            $admission_letter->print_water_mark = 1;
-            $admission_letter->body = file_get_contents( 'public/templates/admission-letter.html');
-            $admission_letter->save(); 
+            $admission_letter->print_water_mark = 1; 
+            $admission_letter->body = file_get_contents(Utils::docs_root().'/templates/admission-letter.html'); 
+            $admission_letter->save();
         }
- 
     }
 
     public static function financial_accounts_creation()
