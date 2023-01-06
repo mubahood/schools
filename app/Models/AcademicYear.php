@@ -86,11 +86,11 @@ class AcademicYear extends Model
                     }
                 }
             }
-
+/* 
             try {
                 AcademicYear::generate_classes($m);
             } catch (\Throwable $th) {
-            }
+            } */
         });
 
         self::updated(function ($m) {
