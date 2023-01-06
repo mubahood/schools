@@ -65,7 +65,7 @@ class StudentsController extends AdminController
 
         $grid = new Grid(new Administrator());
 
-        
+
         $grid->disableBatchActions();
         $grid->actions(function ($actions) {
 
@@ -74,7 +74,7 @@ class StudentsController extends AdminController
             }
         });
 
-        
+
 
         Utils::display_checklist(Utils::students_checklist(Admin::user()));
         Utils::display_checklist(Utils::students_optional_subjects_checklist(Admin::user()));
@@ -93,12 +93,12 @@ class StudentsController extends AdminController
             ])
             ->get();
 
-            
+
 
         $teacher_theology_subjects = TheologySubject::where([
             'subject_teacher' => Admin::user()->id
         ])
-        
+
             ->orWhere([
                 'teacher_1' => Admin::user()->id
             ])
@@ -110,7 +110,7 @@ class StudentsController extends AdminController
             ])
             ->get();
 
-            
+
 
         $grid->filter(function ($filter) {
 
@@ -182,9 +182,9 @@ class StudentsController extends AdminController
             $filter->disableIdFilter();
         });
 
-        
 
-        
+
+
         $grid->quickSearch('name')->placeholder("Search by name...");
 
 
@@ -193,7 +193,7 @@ class StudentsController extends AdminController
             $grid->disableExport();
             $grid->disableCreateButton();
 
-           /*  $grid->model()->where(
+            /*  $grid->model()->where(
                 'current_class_id',
                 $teacher_subjects->pluck('academic_class_id'),
             )->orWhereIn(
@@ -211,7 +211,7 @@ class StudentsController extends AdminController
         ]);
 
 
-        /* if (Admin::user()->isRole('dos')) {
+        if (Admin::user()->isRole('dos')) {
             $states = [
                 'on' => ['value' => 1, 'text' => 'Verified', 'color' => 'success'],
                 'off' => ['value' => 0, 'text' => 'Pending', 'color' => 'danger'],
@@ -233,23 +233,16 @@ class StudentsController extends AdminController
                     1 => 'success',
                 ])
                 ->sortable();
-        } */
+        }
 
-        $grid->column('status', __('Status'))
-            ->using([0 => 'Not Active', 1 => 'Active', 2 => 'Pending',])
-            ->width(100)
-            ->label([
-                0 => 'danger',
-                1 => 'success',
-                2 => 'default',
-            ])
-            ->sortable();
+
 
 
         $grid->column('id', __('ID'))
+            ->hide()
             ->sortable();
 
-           
+
 
         $grid->column('avatar', __('Photo'))
             ->lightbox(['width' => 60, 'height' => 60])
@@ -309,7 +302,7 @@ class StudentsController extends AdminController
                 return '<a title="Print admission letter" href="' . $admission_letter . '" target="_blank">Admission letter</a>';
             });
 
- 
+
 
 
         $grid->column('created_at', __('Admitted'))

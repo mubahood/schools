@@ -51,7 +51,7 @@ class ServiceCategory extends Model
         self::updated(function ($m) {
             ServiceCategory::update_data($m);
         });
-        self::booting(function ($m) {
+        self::deleting(function ($m) {
             die("You cannot delete this account.");
             if ($m->name == 'Other') {
             }

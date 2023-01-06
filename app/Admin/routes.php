@@ -65,6 +65,8 @@ Route::group([
     $router->resource('promotions', PromotionController::class);
     $router->resource('documents', DocumentController::class);
     $router->resource('configuration', ConfigurationController::class); 
+    $router->resource('bursaries', BursaryController::class);
+    $router->resource('bursary-beneficiaries', BursaryBeneficiaryController::class); 
 
     //$router->resource('fees', StudentHasFeeController::class);
 
