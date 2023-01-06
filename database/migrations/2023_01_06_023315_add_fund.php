@@ -14,7 +14,7 @@ class AddFund extends Migration
     public function up()
     {
         Schema::table('bursaries', function (Blueprint $table) {
-            $table->text('fund')->nullable()->default(0);
+            $table->bigInteger('fund')->nullable()->default(0);
         });
     }
 
