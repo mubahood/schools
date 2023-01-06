@@ -24,8 +24,8 @@ if ($is_dark) {
 }
 
 if($style == 'danger'){
-    $bg = 'bg-danger';
     $text = 'text-white';
+    $bg = 'bg-danger';
     $text2 = 'text-white';
     $border = 'border-danger';
 }

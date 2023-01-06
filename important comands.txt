@@ -334,6 +334,7 @@ ssh schooics@gator4311.hostgator.com
 ssh-keygen -t rsa -C "schooics@gator4311.hostgator.com"  
 
 ssh-keygen -f ~/.ssh/id_rsa -p
+
  
 
 
