@@ -47,7 +47,7 @@ class Enterprise extends Model
         $t = Term::where([
             'enterprise_id' => $this->id,
             'is_active' => 1,
-        ])->first();
+        ])->orderBy('id','desc')->first();
         return $t;
     }
     public function active_academic_year()

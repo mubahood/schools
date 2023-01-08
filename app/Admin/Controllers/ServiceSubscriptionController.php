@@ -63,7 +63,7 @@ class ServiceSubscriptionController extends AdminController
             $filter->disableIdFilter();
 
 
-            $terms = []; 
+            $terms = [];
             foreach (Term::where(
                 'enterprise_id',
                 Admin::user()->enterprise_id

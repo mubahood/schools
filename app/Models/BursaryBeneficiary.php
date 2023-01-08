@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Encore\Admin\Auth\Database\Administrator;
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
@@ -15,14 +16,25 @@ class BursaryBeneficiary extends Model
     public static function boot()
     {
         parent::boot();
-        self::creating(function ($m) {
+        self::creating(function ($m) { 
+
+            $term = Term::find($m->due_term_id);
+            if ($term == null) {
+                throw new Exception("Due term not found.", 1);
+            }
+            $m->due_academic_year_id = $term->academic_year_id;
+
+
             $b = BursaryBeneficiary::where([
+                'due_term_id' => $m->due_term_id,
                 'bursary_id' => $m->bursary_id,
                 'administrator_id' => $m->administrator_id
             ])->first();
             if ($b != null) {
-                die("Same student cannot benefit on same bursary twice.");
+                die("Same student cannot benefit on same bursary twice in same term.");
             }
+
+
         });
         self::created(function ($m) {
             if ($m->bursary->is_termly) {
@@ -60,6 +72,13 @@ contra_entry_transaction_id
     {
         return  $this->belongsTo(Bursary::class);
     }
+
+    public function due_term()
+    {
+        return $this->belongsTo(Term::class);
+    }
+
+
     public function beneficiary()
     {
         return  $this->belongsTo(Administrator::class, 'administrator_id');

@@ -56,4 +56,16 @@ class User extends Authenticatable
     {
         return $this->hasMany(ServiceSubscription::class, 'administrator_id');
     }
+
+    public function active_term_services()
+    {
+        $term = $this->ent->active_term();
+        if ($term == null) {
+            return [];
+        }
+        return ServiceSubscription::where([
+            'administrator_id' => $this->id,
+            'due_term_id' => $term->id,
+        ])->get();
+    }
 }

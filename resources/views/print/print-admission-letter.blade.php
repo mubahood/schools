@@ -53,7 +53,7 @@ foreach ($class->academic_class_fees as $fee) {
         </tr>";
 }
 
-foreach ($student->services as $fee) {
+foreach ($student->active_term_services() as $fee) {
     $requirements_row_count++;
     $requirements_total += $fee->total;
     $requirements_rows .=

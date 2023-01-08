@@ -4,6 +4,8 @@ namespace App\Admin\Controllers;
 
 use App\Models\Bursary;
 use App\Models\BursaryBeneficiary;
+use App\Models\Term;
+use App\Models\Utils;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -29,21 +31,53 @@ class BursaryBeneficiaryController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new BursaryBeneficiary());
-     /*    $x = BursaryBeneficiary::find(1);
+        /*    $x = BursaryBeneficiary::find(1);
         $x->description .= 1;
         $x->save(); 
  */
 
+
         $grid->disableBatchActions();
-        $grid->disableActions(); 
+        $grid->disableActions();
         $grid->model()
             ->where([
                 'enterprise_id' => Auth::user()->enterprise_id
             ])->orderBy('id', 'desc');
 
+        $grid->column('created_at', __('Date'))
+            ->display(function () {
+                return Utils::my_date_time($this->created_at);
+            })
+            ->sortable();
 
-        $grid->column('administrator_id', __('Beneficiary'));
-        $grid->column('bursary_id', __('Bursary'));
+        $grid->column('due_term_id', __('Due term'))
+            ->display(function () {
+                return $this->due_term->name_text;
+            })
+            ->sortable();
+
+        $grid->actions(function ($actions) {
+            $actions->disableView();
+            $actions->disableEdit();
+        });
+
+
+        $grid->column('administrator_id', __('Beneficiary'))
+            ->display(function () {
+                if ($this->beneficiary == null) {
+                    return $this->administrator_id;
+                }
+                return $this->beneficiary->name;
+            });
+ 
+        $grid->column('bursary_id', __('Bursary'))
+        ->display(function () {
+            if ($this->bursary == null) {
+                return $this->bursary_id;
+            }
+            return $this->bursary->name;
+        });
+
         $grid->column('description', __('Description'));
 
         return $grid;
@@ -89,6 +123,26 @@ class BursaryBeneficiaryController extends AdminController
                 . "&model=User"
         );
 
+
+
+
+        $terms = [];
+        $active_term = 0;
+        foreach (Term::where(
+            'enterprise_id',
+            Admin::user()->enterprise_id
+        )->orderBy('id', 'desc')->get() as $key => $term) {
+            $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
+            if ($term->is_active) {
+                $active_term = $term->id;
+            }
+        }
+
+        $form->select('due_term_id', 'Due term')->options($terms)
+            ->default($active_term)
+            ->rules('required');
+
+
         $form->select('administrator_id', "Beneficiary")
             ->options(function ($id) {
                 $a = Administrator::find($id);
@@ -98,12 +152,12 @@ class BursaryBeneficiaryController extends AdminController
             })
             ->ajax($ajax_url)->rules('required');
 
-        $form->select('bursary_id', 'Select Service')->options(Bursary::where(
+        $form->select('bursary_id', 'Select bursary scheme')->options(Bursary::where(
             'enterprise_id',
             Admin::user()->enterprise_id
         )->get()->pluck('name', 'id'))->rules('required');
 
-        $form->textarea('description', __('Description'))->rules('required'); 
+        $form->textarea('description', __('Description'))->rules('required');
 
         return $form;
     }

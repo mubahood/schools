@@ -17,7 +17,7 @@ class TermController extends AdminController
      *
      * @var string
      */
-    protected $title = 'Term';
+    protected $title = 'Terms';
 
     /**
      * Make a grid builder.
@@ -27,7 +27,10 @@ class TermController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Term());
-        $grid->model()->where('enterprise_id', Admin::user()->enterprise_id);
+        $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
+            ->orderBy('id', 'desc');
+
+        $grid->disableBatchActions();
 
         $grid->column('id', __('Term ID'))->sortable();
         $grid->column('academic_year_id', __('Academic year'))

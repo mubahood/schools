@@ -86,7 +86,7 @@ class AcademicYear extends Model
                     }
                 }
             }
-/* 
+            /* 
             try {
                 AcademicYear::generate_classes($m);
             } catch (\Throwable $th) {
@@ -96,6 +96,10 @@ class AcademicYear extends Model
         self::updated(function ($m) {
 
             if (((int)($m->is_active)) != 1) {
+                foreach ($m->terms as $t) {
+                    $t->is_active = 0;
+                    $t->save();
+                }
                 foreach ($m->classes as $class) {
                     foreach ($class->students as $student) {
                         $a = $student->student;
@@ -115,6 +119,20 @@ class AcademicYear extends Model
                     }
                 }
             } else {
+                $has_active_term = false;
+                foreach ($m->terms as $t) {
+                    if ($t->is_active) {
+                        $has_active_term = true;
+                    }
+                }
+                if (!$has_active_term) {
+                    foreach ($m->terms as $t) {
+                        $t->is_active = true;
+                        $t->save();
+                        break;
+                    }
+                }
+
                 /* try {
                     AcademicYear::generate_classes($m);   
                 } catch (\Throwable $th) {
