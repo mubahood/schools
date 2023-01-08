@@ -51,6 +51,16 @@ class Term extends Model
         });
     }
 
+    function getNameTextAttribute()
+    {
+        return $this->name." - ".$this->academic_year->name;
+        return $this->belongsTo(AcademicYear::class);
+    }
+
+    protected $appends = [
+        'name_text'
+    ];
+
     function academic_year()
     {
         return $this->belongsTo(AcademicYear::class);

@@ -32,9 +32,21 @@ class ServiceSubscriptionController extends AdminController
     {
         $grid = new Grid(new ServiceSubscription());
 
+        $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
+            ->orderBy('id', 'Desc');
+
+        $grid->disableBatchActions();
+
+
         $grid->column('created_at', __('Date'))
             ->display(function () {
                 return Utils::my_date_time($this->created_at);
+            })
+            ->sortable();
+
+        $grid->column('due_term_id', __('Due term'))
+            ->display(function () {
+                return $this->due_term->name_text;
             })
             ->sortable();
 
@@ -49,6 +61,18 @@ class ServiceSubscriptionController extends AdminController
         $grid->filter(function ($filter) {
             // Remove the default id filter
             $filter->disableIdFilter();
+
+
+            $terms = []; 
+            foreach (Term::where(
+                'enterprise_id',
+                Admin::user()->enterprise_id
+            )->orderBy('id', 'desc')->get() as $key => $term) {
+                $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
+            }
+
+            $filter->equal('due_term_id', 'Filter by term')
+                ->select($terms);
 
             $u = Admin::user();
             $ajax_url = url(
@@ -165,7 +189,6 @@ class ServiceSubscriptionController extends AdminController
         )->orderBy('id', 'desc')->get() as $key => $term) {
             $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
             if ($term->is_active) {
-                dd($term);
                 $active_term = $term->id;
             }
         }
@@ -174,7 +197,7 @@ class ServiceSubscriptionController extends AdminController
             ->default($active_term)
             ->rules('required');
 
-        
+        //UPDATE service_subscriptions SET due_term_id = 6, due_academic_year_id= 2
         //6
         //2
 

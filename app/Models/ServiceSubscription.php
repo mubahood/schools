@@ -48,6 +48,11 @@ class ServiceSubscription extends Model
         return $this->belongsTo(Service::class);
     }
 
+    public function due_term()
+    {
+        return $this->belongsTo(Term::class);
+    }
+
     public function sub()
     {
         return $this->belongsTo(Administrator::class, 'administrator_id');
