@@ -326,7 +326,7 @@ php artisan make:migration add_body_to_documents --table=documents
 php artisan make:migration add_school_phone_number_2 --table=enterprises
 php artisan make:migration add_fund --table=bursaries
 php artisan make:migration add_enterprise_id_to_promotionss --table=promotions
-php artisan make:migration add_details_to_promotionss --table=promotions
+php artisan make:migration add_due_term_to_service_subscriptions --table=service_subscriptions
 
 git add --all 
 git commit -am "Your commit message"

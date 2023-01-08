@@ -5,6 +5,7 @@ namespace App\Admin\Controllers;
 use App\Models\Account;
 use App\Models\Service;
 use App\Models\ServiceSubscription;
+use App\Models\Term;
 use App\Models\User;
 use App\Models\Utils;
 use Encore\Admin\Auth\Database\Administrator;
@@ -95,8 +96,8 @@ class ServiceSubscriptionController extends AdminController
 
 
         $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
-        ->orderBy('id', 'Desc');
-        
+            ->orderBy('id', 'Desc');
+
 
         $grid->column('administrator_id', __('Subscriber'))
             ->display(function () {
@@ -154,6 +155,29 @@ class ServiceSubscriptionController extends AdminController
 
 
         $u = Admin::user();
+
+
+        $terms = [];
+        $active_term = 0;
+        foreach (Term::where(
+            'enterprise_id',
+            Admin::user()->enterprise_id
+        )->orderBy('id', 'desc')->get() as $key => $term) {
+            $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
+            if ($term->is_active) {
+                dd($term);
+                $active_term = $term->id;
+            }
+        }
+
+        $form->select('due_term_id', 'Due term')->options($terms)
+            ->default($active_term)
+            ->rules('required');
+
+        
+        //6
+        //2
+
         $ajax_url = url(
             '/api/ajax?'
                 . 'enterprise_id=' . $u->enterprise_id
@@ -171,10 +195,12 @@ class ServiceSubscriptionController extends AdminController
             })
             ->ajax($ajax_url)->rules('required');
 
+
         $form->select('service_id', 'Select Service')->options(Service::where(
             'enterprise_id',
             Admin::user()->enterprise_id
         )->get()->pluck('name', 'id'))->rules('required');
+
 
         $form->text('quantity', __('Quantity'))
             ->rules('required|int')
