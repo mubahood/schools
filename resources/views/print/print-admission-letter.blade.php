@@ -47,7 +47,7 @@ foreach ($class->academic_class_fees as $fee) {
         "<tr>
             <th width=\"6%\">$requirements_row_count</th>
             <td>{$fee->name}</td>
-            <td class=\"text-right\"> UGX. " .
+            <td class=\"text-right\"> UGX " .
         number_format($fee->amount) .
         "/=</td>
         </tr>";
