@@ -47,7 +47,7 @@ foreach ($class->academic_class_fees as $fee) {
         "<tr>
             <th width=\"6%\">$requirements_row_count</th>
             <td>{$fee->name}</td>
-            <td class=\"text-right\">" .
+            <td class=\"text-right\"> UGX. " .
         number_format($fee->amount) .
         "/=</td>
         </tr>";
@@ -60,7 +60,7 @@ foreach ($student->active_term_services() as $fee) {
         "<tr>
             <th width=\"6%\">$requirements_row_count</th>
             <td>{$fee->service->name} ({$fee->quantity})</td>
-            <td class=\"text-right\">" .
+            <td class=\"text-right\"> UGX " .
         number_format($fee->total) .
         "/=</td>
         </tr>";
@@ -71,7 +71,7 @@ $requirements_row_table = '<h4 class=" mb-2"><u>REQUIREMENTS</u></h4>';
 $requirements_rows .=
     "<tr>
             <th colspan=\"2\">TOTAL</th> 
-            <th class=\"text-right\">" .
+            <th class=\"text-right\"> UGX " .
     number_format($requirements_total) .
     "/=</th>
         </tr>";
