@@ -1,8 +1,6 @@
 <?php
 use App\Models\Utils;
 
-
-
 $max_bot = 30;
 $max_mot = 40;
 $max_eot = 60;
@@ -120,7 +118,7 @@ $school_email = 'admin@kjs.com';
 
     <div class="row">
         <div class="col-2">
-            <img width="120px" class="img-fluid" src="{{ url('storage/' . $r->ent->logo) }}">
+            <img width="120px" class="img-fluid" src="{{ public_path('storage/' . $r->ent->logo) }}">
         </div>
 
         <div class="col-8">
@@ -136,7 +134,7 @@ $school_email = 'admin@kjs.com';
         </div>
 
         <div class="col-2 float-right text-right">
-            <img width="120px" class="img-fluid float-right text-right" src="{{ $r->owner->avatar }}">
+            <img width="120px" class="img-fluid float-right text-right" src="{{ public_path($r->owner->avatar) }}">
         </div>
 
     </div>
@@ -343,8 +341,9 @@ $school_email = 'admin@kjs.com';
             </div>
             <div class="col-2 p-0">
                 <img width="140px" style="margin-top: -20px;" class="img-fluid"
-                    src="https://schooldynamics.ug/assets/kira-hm.png">
-                    <h2 style="line-height: 1;font-size: 16px; margin-top:-15px; margin-bottom: 0px; padding:0px;">HEAD TEACHER</h2>
+                    src="{{ public_path('https://schooldynamics.ug/assets/kira-hm.png') }}">
+                <h2 style="line-height: 1;font-size: 16px; margin-top:-15px; margin-bottom: 0px; padding:0px;">HEAD
+                    TEACHER</h2>
             </div>
         </div>
         <div class="row mt-2 d-flex justify-content-between p-0 border-top pt-2 border-primary"

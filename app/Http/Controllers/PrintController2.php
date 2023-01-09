@@ -61,7 +61,10 @@ class PrintController2 extends Controller
                 ];
             }
 
-            return view('report-cards.print', ['recs' => $reps]);
+            $pdf = App::make('dompdf.wrapper');  
+            $pdf->loadHTML(view('report-cards.print', ['recs' => $reps]));
+            return $pdf->stream();  
+
         }
 
         $id = ((int)($req->id));
@@ -93,10 +96,12 @@ class PrintController2 extends Controller
         if ($r == null) {
             die("Report card not found.");
         }
- 
-        return view('report-cards.print', ['recs' => [['r' => $r, 'tr' => $tr]]]);
 
-      
+        $pdf = App::make('dompdf.wrapper');  
+        $pdf->loadHTML( view('report-cards.print', ['recs' => [['r' => $r, 'tr' => $tr]]]));
+        return $pdf->stream();   
+
+
 
 
 
