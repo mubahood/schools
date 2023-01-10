@@ -105,7 +105,7 @@ $ent = Utils::ent();
         <div class="col-md-6 fill pc-only " style="background-color: {{ $ent->color }}">
             <br>
             <br>
-            <img class="img-fluid center " width="25%" src="{{ url("storage/$ent->logo") }}" alt="">
+            <img class="img-fluid center " width="25%" src="{{ url("storage/images/$ent->logo") }}" alt="">
             <div class="description">
                 <h2>{{ $ent->name }}.</h2>
                 {!! $ent->welcome_message !!}
