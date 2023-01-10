@@ -167,13 +167,17 @@ class AcademicClass extends Model
         $fees = $class->academic_class_fees;
         foreach ($class->students as $student) {
 
+            /* if ($student->student != null) {
+                if ($student->student->status != 1) {
+                    continue;
+                }
+            } */
             foreach ($fees as $fee) {
                 $has_fee = StudentHasFee::where([
                     'administrator_id' => $student->administrator_id,
                     'academic_class_fee_id' => $fee->id,
                 ])->first();
                 if ($has_fee == null) {
-
 
                     Transaction::my_create([
                         'academic_year_id' => $class->academic_year_id,

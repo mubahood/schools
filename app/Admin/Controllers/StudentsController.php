@@ -212,17 +212,13 @@ class StudentsController extends AdminController
 
 
         if (Admin::user()->isRole('dos')) {
-            $states = [
-                'on' => ['value' => 1, 'text' => 'Verified', 'color' => 'success'],
-                'off' => ['value' => 0, 'text' => 'Pending', 'color' => 'danger'],
-            ];
             $grid->column('status', 'Status')
                 ->filter([
-                    0 => 'Pending',
+                    0 => 'Not active',
+                    2 => 'Pending',
                     1 => 'Verified',
                 ])
-                ->switch($states)
-                ->sortable();
+                ->editable('select', [1 => 'Active', 2 => 'Pending', 0 => 'Not active']);
         } else {
             $grid->column('status', __('Status'))
                 ->filter([0 => 'Pending', 1 => 'Verified'])
@@ -463,7 +459,7 @@ class StudentsController extends AdminController
                     $form->select('academic_class_id', 'Class')->options(function () {
                         return AcademicClass::where([
                             'enterprise_id' => Admin::user()->enterprise_id,
-                        ])->get()->pluck('name', 'id');
+                        ])->get()->pluck('name_text', 'id');
                     })
                         ->rules('required')->load(
                             'stream_id',

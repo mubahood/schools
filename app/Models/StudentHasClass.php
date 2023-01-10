@@ -40,6 +40,7 @@ class StudentHasClass extends Model
         });
 
         self::updating(function ($m) {
+
             $_m = AcademicClass::find($m->academic_class_id);
             if ($_m == null) {
                 die("Class not found.");
@@ -50,12 +51,20 @@ class StudentHasClass extends Model
 
         self::created(function ($m) {
             Utils::sync_classes($m->enterprise_id);
-            AcademicClass::update_fees($m->academic_class_id);
+            if ($m->student != null) {
+                if ($m->student->status == 1) {
+                    AcademicClass::update_fees($m->academic_class_id);
+                }
+            }
         });
 
         self::updated(function ($m) {
             Utils::sync_classes($m->enterprise_id);
-            AcademicClass::update_fees($m->academic_class_id);
+            if ($m->student != null) {
+                if ($m->student->status == 1) {
+                    AcademicClass::update_fees($m->academic_class_id);
+                }
+            }
         });
     }
 

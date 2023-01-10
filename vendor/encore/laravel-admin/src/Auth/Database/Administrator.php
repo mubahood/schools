@@ -156,8 +156,8 @@ class Administrator extends Model implements AuthenticatableContract
                 strlen($model->email) < 3
             ) {
                 $model->username = null;
-                $model->email = null; 
-                
+                $model->email = null;
+
                 if (
                     $model->school_pay_payment_code == null ||
                     strlen($model->school_pay_payment_code) < 4
@@ -299,9 +299,18 @@ class Administrator extends Model implements AuthenticatableContract
 
     public static function my_update($m)
     {
+
         if ($m->user_type == 'student') {
             $current_class_id = ((int)($m->current_class_id));
             $class = AcademicClass::find($current_class_id);
+            if ($m->status == 1) {
+                foreach (StudentHasClass::where([
+                    'administrator_id' => $m->id,
+                ])->get() as $key => $val) {
+                    AcademicClass::update_fees($val->academic_class_id);
+                }
+            }
+
             if ($class != null) {
                 $hasClass = StudentHasClass::where([
                     'administrator_id' => $m->id,

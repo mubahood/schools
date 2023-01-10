@@ -210,8 +210,30 @@ class Utils  extends Model
     }
 
     public static function system_boot($u)
-    {
-        /* foreach (AcademicClass::all() as $key => $class) {
+    { /* 
+        $u = Administrator::find(2317);
+        $u->spouse_name .= '1';
+        $u->save();
+        dd($u);
+        $m = StudentHasClass::find(100);
+        $m->optional_subjects_picked = !$m->optional_subjects_picked;
+        $m->save();
+
+        dd($m);
+        die("romina");
+       
+         
+        "academic_class_id" => 16
+        "administrator_id" => 2416
+        "stream_id" => 0
+        "updated_at" => "2022-10-02"
+        "created_at" => "2022-10-02"
+        "academic_year_id" => 2
+        "done_selecting_option_courses" => 0
+        "optional_subjects_picked" => 0
+        
+        
+        foreach (AcademicClass::all() as $key => $class) {
             $level = AcademicClassLevel::where([
                 'short_name' => $class->short_name
             ])->first();
@@ -271,7 +293,7 @@ class Utils  extends Model
             $admission_letter->save();
         }
 
-     /*    $reciept = Document::where([
+        /*    $reciept = Document::where([
             'enterprise_id' => $u->enterprise_id,
             'name' => DOCUMENT_RECEIPT
         ])->first();
@@ -734,7 +756,6 @@ class Utils  extends Model
                     if ($class->class->academic_year->is_active) {
                         if ($class->student != null) {
                             $class_id = $class->class->id;
-
                             DB::update("UPDATE admin_users SET current_class_id = $class_id WHERE id = {$class->student->id}");
                         }
                     }
@@ -1497,7 +1518,8 @@ class Utils  extends Model
 
 
 
-    public static function convert_number_to_words($number) {
+    public static function convert_number_to_words($number)
+    {
 
         $hyphen      = '-';
         $conjunction = ' and ';
