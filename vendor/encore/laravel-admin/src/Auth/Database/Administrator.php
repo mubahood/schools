@@ -383,6 +383,23 @@ class Administrator extends Model implements AuthenticatableContract
         return url($link);
     }
 
+    public function getAvatarPath()
+    {
+        $exps = explode('/', $this->avatar);
+        if (empty($exps)) {
+            return $this->avatar;
+        }
+        $avatar = $exps[(count($exps) - 1)];
+
+        $link = 'storage/images/' . $avatar;
+
+        if (!file_exists(public_path($link))) {
+            $link = 'user.jpeg';
+        }
+        return  $link;
+        //$real_avatar= 
+    }
+
     /**
      * A user has and belongs to many roles.
      *
