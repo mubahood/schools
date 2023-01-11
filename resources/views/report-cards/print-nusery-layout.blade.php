@@ -157,7 +157,7 @@ $school_email = 'admin@kjs.com';
 
     <div class="row">
         <table class=" ">
-            <tbody> 
+            <tbody>
                 <tr>
                     <td style="width: 42%">
                         <h2 class="text-center text-uppercase h2" style="font-size: 16px">secular studies</h2>
@@ -189,32 +189,32 @@ $school_email = 'admin@kjs.com';
                         </div>
 
                     </td>
-                    <td style="width: 40%" >
+                    <td style="width: 40%">
                         <h2 class="text-center text-uppercase" style="font-size: 16px">Theology Studies</h2>
                         <hr class="my-1">
                         @if ($tr != null)
-                        <table class="table table-bordered marks-table p-0 m-0 w-100 ">
-                            <thead class="p-0 m-0 text-center">
-                                <th style="width: 7%" class="text-left pl-2" >SUBJECTS</th>
-                                <th style="width: 30%">Area of learning</th>
-                                <th style="width: 7%" class="remarks">GRADE</th>
-                                {{-- <th class="remarks text-center">Initials</th> --}}
-                            </thead>
-                            @foreach ($tr->items as $v)
-                                <?php
-                                $_v = Utils::compute_competance_theology($v);
-                                ?>
-                                <tr class="marks-1">
-                                    <th style="font-size: 10px;">{{ $_v['competance'] }}</th>
-                                    <td>{{ $_v['comment'] }}</td>
-                                    <td class="remarks text-center"><b>{{ $_v['grade'] }}</b></td>
-                                    {{--  <td class="remarks text-center">{{ $v->initials }}</td> --}}
-                                </tr>
-                            @endforeach
+                            <table class="table table-bordered marks-table p-0 m-0 w-100 ">
+                                <thead class="p-0 m-0 text-center">
+                                    <th style="width: 7%" class="text-left pl-2">SUBJECTS</th>
+                                    <th style="width: 30%">Area of learning</th>
+                                    <th style="width: 7%" class="remarks">GRADE</th>
+                                    {{-- <th class="remarks text-center">Initials</th> --}}
+                                </thead>
+                                @foreach ($tr->items as $v)
+                                    <?php
+                                    $_v = Utils::compute_competance_theology($v);
+                                    ?>
+                                    <tr class="marks-1">
+                                        <th style="font-size: 10px;">{{ $_v['competance'] }}</th>
+                                        <td>{{ $_v['comment'] }}</td>
+                                        <td class="remarks text-center"><b>{{ $_v['grade'] }}</b></td>
+                                        {{--  <td class="remarks text-center">{{ $v->initials }}</td> --}}
+                                    </tr>
+                                @endforeach
 
-                        </table>
+                            </table>
 
-                    @endif
+                        @endif
 
                         @if ($tr != null)
                             <div class="p-0 mt-2 mb-2 class-teacher">
@@ -282,7 +282,8 @@ $school_email = 'admin@kjs.com';
             <td class=" pl-3 text-center">
                 <img width="80%" style=" " class="text-center "
                     src="{{ public_path('storage/' . $r->ent->hm_signature) }}">
-                <h2 class="text-center" style="line-height: .6rem;font-size: 14px;   margin-bottom: 0px; padding:0px;">HEAD
+                <h2 class="text-center" style="line-height: .6rem;font-size: 14px;   margin-bottom: 0px; padding:0px;">
+                    HEAD
                     TEACHER</h2>
             </td>
         </tr>
