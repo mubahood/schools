@@ -160,8 +160,8 @@ $school_email = 'admin@kjs.com';
             <tbody>
                 <tr>
                     <td style="width: 42%">
-                        <h2 class="text-center text-uppercase h2" style="font-size: 16px">secular studies</h2>
-                        <div class="row mt-2 d-flex justify-content-between pl-3 pr-3 summary" style="font-size: 11px">
+                        <h2 class="text-center mt-1 text-uppercase h2" style="font-size: 16px"><u>secular studies</u></h2>
+                        <div class="row mt-1 d-flex justify-content-between pl-3 pr-3 summary mb-1" style="font-size: 11px">
                             <span><b>CLASS:</b> <span class="value">{{ $r->academic_class->name }}</span></span>
                         </div>
                         <table class="table table-bordered marks-table p-0 m-0">
@@ -190,7 +190,7 @@ $school_email = 'admin@kjs.com';
 
                     </td>
                     <td style="width: 40%">
-                        <h2 class="text-center text-uppercase" style="font-size: 16px">Theology Studies</h2>
+                        <h2 class="text-center text-uppercase" style="font-size: 16px"><u>Theology Studies</u></h2>
                         <hr class="my-1">
                         @if ($tr != null)
                             <table class="table table-bordered marks-table p-0 m-0 w-100 ">
@@ -230,7 +230,7 @@ $school_email = 'admin@kjs.com';
     </div>
 
     <div class="row">
-        <h2 class="p-1 text-center m-0 bg-black " style="font-size: 12px; font-weight: 600;">Grading</h2>
+        <h2 class="p-1 text-center m-0 bg-black text-uppercase " style="font-size: 16px; font-weight: 600;">Grading</h2>
 
         <table class="table table-bordered grade-table">
             <tbody>
@@ -292,11 +292,11 @@ $school_email = 'admin@kjs.com';
 
     <div class="row mt-2 d-flex justify-content-between p-0 border-top pt-2 border-primary" style="font-size: 12px;">
         <span><b>SCHOOL FEES BALANCE:</b> <span class="value" style="font-size: 12px!important;">
-                {{ $bal_text }}</span></span>
+                {{ $bal_text }}</span></span> | 
         {{-- <span><b>NEXT TERM TUTION FEE:</b> <span class="value" style="font-size: 12px!important;">UGX
             18,000</span></span> --}}
         <span><b>SCHOOL PAY CODE:</b> <span class="value"
-                style="font-size: 12px!important;">{{ $r->owner->school_pay_payment_code }}</span></span>
+                style="font-size: 12px!important;">{{ $r->owner->school_pay_payment_code }}</span></span>  | 
         <span><b>TERM BEGINS ON:</b> <span class="value" style="font-size: 12px!important;">6<sup>th</sup> FEB,
                 2023</span></span>
     </div>

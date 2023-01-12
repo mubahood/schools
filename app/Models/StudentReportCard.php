@@ -40,6 +40,11 @@ class StudentReportCard extends Model
     {
         return $this->belongsTo(Administrator::class, 'student_id');
     }
+
+    function term()
+    {
+        return $this->belongsTo(Term::class);
+    }
  
     function ent()
     {

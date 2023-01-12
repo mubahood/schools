@@ -21,6 +21,7 @@ use Encore\Admin\Widgets\Form as WidgetsForm;
 use Encore\Admin\Widgets\InfoBox;
 use Encore\Admin\Widgets\Table;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Request;
 
 class StudentReportCardController extends AdminController
 {
@@ -120,7 +121,7 @@ class StudentReportCardController extends AdminController
                             ])->first();
                             $term_id = $t->id;
                         }
-                        
+
                         $rs = StudentReportCard::where([
                             'term_id' => $term_id,
                             'academic_class_id' => $v->id,
@@ -131,7 +132,7 @@ class StudentReportCardController extends AdminController
                             $v->id,
                             $v->name_text,
                             count($rs),
-                            '<a target="_blank" href="' . url('print?calss_id=' . $v->id) . '&term_id=' . $term_id .'&termly_report_card_id=2">PRINT</a>'
+                            '<a target="_blank" href="' . url('print?calss_id=' . $v->id) . '&term_id=' . $term_id . '&termly_report_card_id=2">PRINT</a>'
                         ];
                     }
 
@@ -220,7 +221,6 @@ class StudentReportCardController extends AdminController
 
 
         $grid->disableBatchActions();
-        $grid->disableActions();
         $grid->disableCreateButton();
 
         $grid->column('id', __('#ID'))->sortable();
@@ -291,13 +291,42 @@ class StudentReportCardController extends AdminController
     {
         $form = new Form(new StudentReportCard());
 
-        $form->number('enterprise_id', __('Enterprise id'));
-        $form->number('academic_year_id', __('Academic year id'));
-        $form->number('term_id', __('Term id'));
-        $form->number('student_id', __('Student id'));
-        $form->number('academic_class_id', __('Academic class id'));
-        $form->number('termly_report_card_id', __('Termly report card id'));
+        $id = Request::segment(2);
+        $item = StudentReportCard::find($id);
+        if ($item == null) {
+            $id = Request::segment(1);
+            $item = StudentReportCard::find($id);
+        }
+        if ($item == null) {
+            die("Item not found.");
+        }
 
+        $form->hidden('enterprise_id', __('Enterprise id'));
+        $form->display('_term_id', __('Term'))->default($item->term->name_text);
+        $form->display('_student_id', __('Student'))->default($item->owner->name);
+        $form->display('_academic_class_id', __('Class'))->default($item->academic_class->name);
+        $form->display('_termly_report_card_id', __('Report card'))->default($item->termly_report_card->report_title);
+
+
+        $form->divider();
+        $form->decimal('total_marks')->rules('required');
+        $form->decimal('total_aggregates')->rules('required');
+        $form->decimal('average_aggregates')->rules('required');
+        $form->decimal('grade')->rules('required');
+        $form->select('grade','Grade')->options([
+            1 => 'Grade 1',
+            2 => 'Grade 2',
+            3 => 'Grade 3',
+            4 => 'Grade 4',
+            5 => 'Failure - F',
+            6 => 'Uganda pass - U',
+        ])->rules('required');
+        $form->decimal('position','Position in class')->rules('required');
+        $form->decimal('total_students','Total students in class')->rules('required');
+        $form->text('class_teacher_comment','Class teacher\'s comment'); 
+        $form->text('head_teacher_comment','Head teacher\'s comment'); 
+
+  
         return $form;
     }
 }
