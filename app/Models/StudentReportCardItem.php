@@ -17,7 +17,7 @@ class StudentReportCardItem extends Model
 
     function items()
     {
-        return $this->hasMany(StudentReportCardItem::class,'student_report_card_id');
+        return $this->hasMany(StudentReportCardItem::class, 'student_report_card_id');
     }
 
     function main_course()
@@ -29,7 +29,7 @@ class StudentReportCardItem extends Model
             $this->main_course_id = 2;
             $this->save();
         }
-        return $this->belongsTo(Course::class,'main_course_id'); 
+        return $this->belongsTo(Course::class, 'main_course_id');
     }
 
     function subject()
@@ -41,6 +41,17 @@ class StudentReportCardItem extends Model
             $this->main_course_id = 2;
             $this->save();
         }
-        return $this->belongsTo(Subject::class,'main_course_id'); 
+        return $this->belongsTo(Subject::class, 'main_course_id');
+    }
+
+
+
+    public static function boot()
+    {
+
+        parent::boot();
+        static::deleting(function ($m) {
+            die("You cannot delete this item.");
+        });
     }
 }

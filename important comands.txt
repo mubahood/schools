@@ -210,6 +210,7 @@ php artisan admin:make AcademicClassController --model=App\\Models\\AcademicClas
 book_borrow_books
 php artisan admin:make SubjectController --model=App\\Models\\Subject
 php artisan admin:make StudentHasClassController --model=App\\Models\\StudentHasClass
+php artisan admin:make StudentReportCardItemController --model=App\Models\StudentReportCardItem
  
 php artisan admin:make TermlyReportCardController --model=App\\Models\\TermlyReportCard
 php artisan admin:make GradingScaleController --model=App\\Models\\GradingScale
