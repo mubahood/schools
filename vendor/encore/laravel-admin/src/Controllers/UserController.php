@@ -27,7 +27,18 @@ class UserController extends AdminController
     {
         $userModel = config('admin.database.users_model');
 
+
+
         $grid = new Grid(new $userModel());
+
+
+        $grid->filter(function ($filter) {
+            $filter->disableIdFilter();
+            $filter->like('username','By username');
+        });
+        $grid->quickSearch('name')->placeholder('Search by name');
+        $grid->disableBatchActions();
+
 
         $grid->column('id', 'ID')->sortable();
         $grid->column('username', trans('admin.username'));
@@ -36,7 +47,7 @@ class UserController extends AdminController
             ->display(function () {
                 return $this->enterprise->name;
             });
-        $grid->column('roles', trans('admin.roles'))->pluck('name')->label(); 
+        $grid->column('roles', trans('admin.roles'))->pluck('name')->label();
         $grid->column('created_at', trans('Created'));
 
         $grid->actions(function (Grid\Displayers\Actions $actions) {
@@ -121,7 +132,7 @@ class UserController extends AdminController
                 return $form->model()->password;
             });
 
-        $form->ignore(['password_confirmation']); 
+        $form->ignore(['password_confirmation']);
 
         $form->multipleSelect('roles', trans('admin.roles'))->options($roleModel::all()->pluck('name', 'id'));
         //$form->multipleSelect('permissions', trans('admin.permissions'))->options($permissionModel::all()->pluck('name', 'id'));
