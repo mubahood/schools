@@ -207,11 +207,11 @@ class Utils  extends Model
             }
         }
 
-        if (!$isOnline) {
+        if(!$isOnline){
 
-            $r = $r . "/public";
         }
 
+        $r = $r . "/public";
 
         /*
          "/home/ulitscom_html/public/storage/images/956000011639246-(m).JPG
