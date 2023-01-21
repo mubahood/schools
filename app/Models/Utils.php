@@ -208,7 +208,7 @@ class Utils  extends Model
         }
 
         if($isOnline){
-            $r = $r . "/public_html";
+            $r = $_SERVER['DOCUMENT_ROOT'] . "";
         }
 
         $r = $r . "/public";
@@ -218,6 +218,9 @@ class Utils  extends Model
 
         public_html/public/storage/images
         */
+        if($isOnline){
+            $r = $_SERVER['DOCUMENT_ROOT'] . "";
+        }
         return $r;
     }
 
