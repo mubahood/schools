@@ -199,18 +199,23 @@ class Utils  extends Model
             $r = str_replace('\public', "", $r);
         }
 
+        if(isset($_SERVER['HTTP_HOST'])){
+            $server = strtolower($_SERVER['HTTP_HOST']);
+            dd($server);
+        }
+
         $r = $r . "/public";
 
-        /* 
+        /*
          "/home/ulitscom_html/public/storage/images/956000011639246-(m).JPG
-        
+
         public_html/public/storage/images
         */
         return $r;
     }
 
     public static function system_boot($u)
-    { /* 
+    { /*
         $u = Administrator::find(2317);
         $u->spouse_name .= '1';
         $u->save();
@@ -221,8 +226,8 @@ class Utils  extends Model
 
         dd($m);
         die("romina");
-       
-         
+
+
         "academic_class_id" => 16
         "administrator_id" => 2416
         "stream_id" => 0
@@ -231,8 +236,8 @@ class Utils  extends Model
         "academic_year_id" => 2
         "done_selecting_option_courses" => 0
         "optional_subjects_picked" => 0
-        
-        
+
+
         foreach (AcademicClass::all() as $key => $class) {
             $level = AcademicClassLevel::where([
                 'short_name' => $class->short_name
@@ -246,7 +251,7 @@ class Utils  extends Model
             }
         }
         dd("as");
-      
+
         $year = new AcademicYear();
         $year->enterprise_id = $u->enterprise_id;
         $year->name = '2021';
@@ -255,8 +260,8 @@ class Utils  extends Model
         $year->details = '2021';
         $year->is_active = 1;
         $year->demo_id = 0;
-        $year->save();   
-        
+        $year->save();
+
         die("romina"); */
 
 
@@ -463,21 +468,21 @@ class Utils  extends Model
 
 
         $sql_classes_with_optionals =
-            "SELECT id FROM academic_classes WHERE 
+            "SELECT id FROM academic_classes WHERE
             enterprise_id = {$u->enterprise_id} AND
             optional_subjects > 0
             ";
 
 
         $sql_ids_of_students_in_classes_with_pending_optionals =
-            "SELECT administrator_id FROM student_has_classes WHERE 
+            "SELECT administrator_id FROM student_has_classes WHERE
             enterprise_id = {$u->enterprise_id} AND
             done_selecting_option_courses != 1 AND
             academic_class_id IN ($sql_classes_with_optionals)
             ";
 
 
-        $sql_students_in_classes_with_optionals = "SELECT * FROM admin_users WHERE 
+        $sql_students_in_classes_with_optionals = "SELECT * FROM admin_users WHERE
         user_type = 'student' AND
         enterprise_id = {$u->enterprise_id} AND
         id IN ($sql_ids_of_students_in_classes_with_pending_optionals)";
@@ -499,7 +504,7 @@ class Utils  extends Model
     {
 
         $sql_1 = "SELECT administrator_id FROM student_has_classes WHERE enterprise_id = {$u->enterprise_id}";
-        $sql = "SELECT * FROM admin_users WHERE 
+        $sql = "SELECT * FROM admin_users WHERE
             user_type = 'student' AND
             enterprise_id = {$u->enterprise_id} AND
             id NOT IN ($sql_1)
@@ -538,8 +543,8 @@ class Utils  extends Model
 
             $msg = "";
             if ($class->optional_subjects > $optional_subjects) {
-                $msg = "Class {$class->name} is supposed to have 
-                $class->optional_subjects optional subjects, but there is only 
+                $msg = "Class {$class->name} is supposed to have
+                $class->optional_subjects optional subjects, but there is only
                 $optional_subjects optional subjetcs.
                 Navigate to subjects tab under Academics and add missing subjects in this class.";
 
@@ -549,8 +554,8 @@ class Utils  extends Model
             }
 
             if ($class->compulsory_subjects > $compulsory_subjects) {
-                $msg = "Class {$class->name} is supposed to have 
-                $class->compulsory_subjects compulsory subjects, but there is only 
+                $msg = "Class {$class->name} is supposed to have
+                $class->compulsory_subjects compulsory subjects, but there is only
                 $compulsory_subjects compulsory subjects.
                 Navigate to subjects tab under Academics and add missing subjects in this class.";
                 $resp['message'] = $msg;
