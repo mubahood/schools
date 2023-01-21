@@ -33,8 +33,15 @@ class UserController extends AdminController
 
 
         $grid->filter(function ($filter) {
+            $filter->equal('enterprise_id', 'Student')->select(Enterprise::all()->pluck('name','id'));
+        });
+
+
+
+
+        $grid->filter(function ($filter) {
             $filter->disableIdFilter();
-            $filter->like('username','By username');
+            $filter->like('username', 'By username');
         });
         $grid->quickSearch('name')->placeholder('Search by name');
         $grid->disableBatchActions();
@@ -43,10 +50,10 @@ class UserController extends AdminController
         $grid->column('id', 'ID')->sortable();
         $grid->column('username', trans('admin.username'));
         $grid->column('name', trans('admin.name'));
-        $grid->column('name', trans('Enteprise'))
+        $grid->column('enterprise_id', trans('Enteprise'))
             ->display(function () {
                 return $this->enterprise->name;
-            });
+            })->sortable();
         $grid->column('roles', trans('admin.roles'))->pluck('name')->label();
         $grid->column('created_at', trans('Created'));
 
