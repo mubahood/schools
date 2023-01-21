@@ -207,7 +207,7 @@ class Utils  extends Model
             }
         }
 
-        if(!$isOnline){
+        if($isOnline){
             $r = $r . "/public_html";
         }
 
