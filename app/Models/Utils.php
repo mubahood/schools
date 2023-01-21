@@ -199,12 +199,19 @@ class Utils  extends Model
             $r = str_replace('\public', "", $r);
         }
 
-        if(isset($_SERVER['HTTP_HOST'])){
+        $isOnline = false;
+        if (isset($_SERVER['HTTP_HOST'])) {
             $server = strtolower($_SERVER['HTTP_HOST']);
-            dd($server);
+            if (str_contains($server, 'schooldynamics.ug')) {
+                $isOnline = true;
+            }
         }
 
-        $r = $r . "/public";
+        if (!$isOnline) {
+
+            $r = $r . "/public";
+        }
+
 
         /*
          "/home/ulitscom_html/public/storage/images/956000011639246-(m).JPG
