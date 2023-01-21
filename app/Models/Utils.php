@@ -219,10 +219,10 @@ class Utils  extends Model
         public_html/public/storage/images
         */
         if($isOnline){
-            $r = $_SERVER['DOCUMENT_ROOT'] . "";
+            $r = $_SERVER['DOCUMENT_ROOT'] . "/public";
         }
         return $r;
-    }
+}
 
     public static function system_boot($u)
     { /*
