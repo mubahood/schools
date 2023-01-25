@@ -57,6 +57,11 @@ class User extends Authenticatable
         return $this->hasMany(ServiceSubscription::class, 'administrator_id');
     }
 
+    public function report_cards()
+    {
+        return $this->hasMany(StudentReportCard::class, 'student_id');
+    }
+
     public function active_term_services()
     {
         $term = $this->ent->active_term();

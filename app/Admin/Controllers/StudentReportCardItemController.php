@@ -2,8 +2,11 @@
 
 namespace App\Admin\Controllers;
 
+use App\Models\ServiceSubscription;
+use App\Models\StudentReportCard;
 use App\Models\StudentReportCardItem;
 use Encore\Admin\Controllers\AdminController;
+use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
@@ -32,24 +35,66 @@ class StudentReportCardItemController extends AdminController
                 'enterprise_id' => $u->ent->id
             ])->orderBy('id', 'desc');
         $grid->disableBatchActions();
+        $grid->disableActions();
+        $grid->disableCreateButton();
+        $grid->disableExport();
+
+        $grid->filter(function ($filter) {
+
+            if (
+                ((!isset($_GET['student_report_card_id'])) ||
+                    (((int)($_GET['student_report_card_id'])) < 1))
+            ) {
+                $filter->expand();
+            }
+
+            // Remove the default id filter
+            $filter->disableIdFilter();
+
+            $u = Admin::user();
+            $ajax_url = url(
+                '/api/report-cards?'
+                    . 'enterprise_id=' . $u->enterprise_id
+            );
+
+            $filter->equal('student_report_card_id', 'Report card')->select(function ($id) {
+                $r = StudentReportCard::find($id);
+                if ($r == null) {
+                    return  "-";
+                }
+                return [$r->id => "#{$r->id} - " . $r->owner->name . " - " . $r->termly_report_card->report_title];
+            })->ajax($ajax_url);
+        });
+
+        if (
+            ((!isset($_GET['student_report_card_id'])) ||
+                (((int)($_GET['student_report_card_id'])) < 1))
+        ) {
+            $grid->disableActions();
+            return  $grid;
+        }
 
 
-        $grid->column('main_course_id', __('Course'))
+
+        $url =  admin_url('print?id=' . $_GET['student_report_card_id']);
+
+        admin_info("PRINT", '<a href="' . $url . '" target="_blank">PRINT THIS REPORT CARD</a>');
+        $grid->column('main_course_id', __('Subject'))
             ->display(function () {
                 return $this->subject->subject_name;
             });
-        $grid->column('student_report_card_id', __('Student report card id'));
-        $grid->column('did_bot', __('Did bot'));
-        $grid->column('did_mot', __('Did mot'));
-        $grid->column('did_eot', __('Did eot'));
-        $grid->column('bot_mark', __('Bot mark'));
-        $grid->column('mot_mark', __('Mot mark'));
-        $grid->column('eot_mark', __('Eot mark'));
-        $grid->column('grade_name', __('Grade name'));
-        $grid->column('aggregates', __('Aggregates'));
-        $grid->column('remarks', __('Remarks'));
-        $grid->column('initials', __('Initials'));
-        $grid->column('total', __('Total'));
+        $grid->column('student_report_card_id', __('Student report card id'))->hide();
+        $grid->column('did_bot', __('Did bot'))->hide();
+        $grid->column('did_mot', __('Did mot'))->hide();
+        $grid->column('did_eot', __('Did eot'))->hide();
+        $grid->column('bot_mark', __('B.O.T'))->editable();
+        $grid->column('mot_mark', __('M.O.T'))->editable();
+        $grid->column('eot_mark', __('E.O.T'))->editable();
+        $grid->column('total', __('Total Mark'))->editable();
+        $grid->column('grade_name', __('Grade'))->editable();
+        $grid->column('aggregates', __('Aggregates'))->editable();
+        $grid->column('remarks', __('Remarks'))->editable();
+        $grid->column('initials', __('Initials'))->editable();
 
         return $grid;
     }

@@ -41,7 +41,7 @@ class StudentReportCardController extends AdminController
 
 
 
-                /* 
+                /*
                     "id" => 1
     "created_at" => "2022-10-26 12:31:36"
     "updated_at" => "2022-11-24 17:17:23"
@@ -61,7 +61,7 @@ class StudentReportCardController extends AdminController
     "total_students" => 77
     "average_aggregates" => 13.0
     "grade" => "2"
-                
+
                 */
 
                 $row->column(4, function (Column $column) {
@@ -240,27 +240,29 @@ class StudentReportCardController extends AdminController
                 return $this->academic_class->name;
             })->sortable();
 
-        $grid->column('total_marks', __('Total marks'))->sortable();
-        $grid->column('average_aggregates', __('Average aggregates'))->sortable();
-        $grid->column('grade', __('Grade'))->sortable();
+        $grid->column('total_marks', __('Total marks'))->editable()->sortable();
+        $grid->column('average_aggregates', __('Average aggregates'))->editable()->sortable();
+        $grid->column('grade', __('Grade'))->editable()->sortable();
 
         $grid->column('position', __('Position in class'))->display(function ($position) {
             $numFormat = new NumberFormatter('en_US', NumberFormatter::ORDINAL);
             return $numFormat->format($position);
-        })->sortable();
+        })->editable()->sortable();
 
         $grid->column('class_teacher_comment', __('Class Teacher Remarks'))->editable()->sortable();
         $grid->column('head_teacher_comment', __('Head Teacher Remarks'))->editable()->sortable();
 
         $grid->column('print', __('Print'))->display(function ($m) {
-            return '<a target="_blank" href="' . url('print?id=' . $this->id) . '" >print</a>';
+            $d = '<a target="_blank" href="' . url('print?id=' . $this->id) . '" >PRINT</a>';
+            $d .= '<br><a target="_blank" href="' . url('student-report-card-items?student_report_card_id=' . $this->id) . '" >EDIT</a>';
+            return $d;
         });
 
         return $grid;
     }
 
     /**
-     * Make a show builder.q                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+     * Make a show builder.q
      *
      * @param mixed $id
      * @return Show
@@ -323,12 +325,10 @@ class StudentReportCardController extends AdminController
         ])->rules('required');
         $form->decimal('position','Position in class')->rules('required');
         $form->decimal('total_students','Total students in class')->rules('required');
-        $form->text('class_teacher_comment','Class teacher\'s comment'); 
-        $form->text('head_teacher_comment','Head teacher\'s comment'); 
+        $form->text('class_teacher_comment','Class teacher\'s comment');
+        $form->text('head_teacher_comment','Head teacher\'s comment');
 
-  
+
         return $form;
     }
 }
-3ec44bb7
-git reset --hard 3ec44bb7

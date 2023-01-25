@@ -6,13 +6,13 @@ git config --global user.name "mubahood"
 - Authentication
 - 2 Step Auth
 - Session timeout
-- Data integrety 
+- Data integrety
 - Data validation (Form level)
 - Validate data at DB level
 - Accountability and accessability
 - Data Confidentiality (DATA In transit)
 - Encrypt (imporatant data)
-- Don't make things obvious 
+- Don't make things obvious
 
 
 schooics@schooldynamics.ug [~/public_html]# git config --global user.email "mubs0x@gmail.com"
@@ -25,7 +25,7 @@ git checkout schools
 git clone https://github.com/mubahood/schools.git public_html
 
 ----
-PASS: 
+PASS:
 ()(+256@Kampala+)()
 
 SERVER:
@@ -46,12 +46,12 @@ git@github.com:mubahood/schools.git
 
 
 Generating public/private rsa key pair.
-Enter passphrase (empty for no passphrase): 
-Enter same passphrase again: 
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
 Your identification has been saved in /home4/schooics/.ssh/id_rsa.
 Your public key has been saved in /home4/schooics/.ssh/id_rsa.pub.
 The key fingerprint is:
-SHA256:jsb7Xpc1tSNmK6swc4WCy1BQ4sWwbjBIjUkJwzOXCK0 
+SHA256:jsb7Xpc1tSNmK6swc4WCy1BQ4sWwbjBIjUkJwzOXCK0
 The key's randomart image is:
 +---[RSA 2048]----+
 |O+*+=o           |
@@ -79,7 +79,7 @@ php artisan make:migration create_service_subscriptions_table
 php artisan make:migration create_service_categories_table
 php artisan make:migration create_main_courses_table
 php artisan make:migration create_academic_years_table
-php artisan make:model Banner 
+php artisan make:model Banner
 php artisan make:model Enterprise
 php artisan make:model BursaryBeneficiary
 php artisan make:migration create_books_categories_table
@@ -101,7 +101,8 @@ php artisan make:migration create_promotions_table
 php artisan make:migration create_documents_table
 php artisan make:migration create_bursaries_table
 php artisan make:migration create_bursary_beneficiaries_table
-    
+php artisan make:migration create_bursary_beneficiaries_table
+
 
 
 php artisan make:model StudentHasTheologyClass
@@ -182,12 +183,12 @@ php artisan make:migration create_fees_table
 php artisan make:migration create_academic_class_fee_table
 php artisan make:migration create_student_as_fees_table
 php artisan make:migration create_accounts_table
-php artisan make:migration create_transactions_table 
-php artisan make:migration create_reconciler_table 
-php artisan make:migration create_menu_items_table 
-php artisan make:migration create_fund_requisitions_table 
-php artisan make:migration create_stock_item_categories_table 
-php artisan make:migration create_stock_batches_table 
+php artisan make:migration create_transactions_table
+php artisan make:migration create_reconciler_table
+php artisan make:migration create_menu_items_table
+php artisan make:migration create_fund_requisitions_table
+php artisan make:migration create_stock_item_categories_table
+php artisan make:migration create_stock_batches_table
 php artisan make:migration create_fee_deposit_confirmations_table
 php artisan make:migration create_theology_courses_table
 php artisan make:migration create_theology_exams_table
@@ -211,7 +212,7 @@ book_borrow_books
 php artisan admin:make SubjectController --model=App\\Models\\Subject
 php artisan admin:make StudentHasClassController --model=App\\Models\\StudentHasClass
 php artisan admin:make StudentReportCardItemController --model=App\Models\StudentReportCardItem
- 
+
 php artisan admin:make TermlyReportCardController --model=App\\Models\\TermlyReportCard
 php artisan admin:make GradingScaleController --model=App\\Models\\GradingScale
 php artisan admin:make GradeRangeController --model=App\\Models\\GradeRange
@@ -237,22 +238,22 @@ php artisan admin:make TheologyTermlyReportCardController --model=App\\Models\\T
 php artisan admin:make TheologryStudentReportCardController --model=App\\Models\\TheologryStudentReportCard
 php artisan admin:make NurseryTermlyReportCardController --model=App\\Models\\NurseryTermlyReportCard
 php artisan admin:make NurseryStudentReportCardController --model=App\\Models\\NurseryStudentReportCard
-php artisan admin:make NurseryStudentReportCardItemController --model=App\\Models\\NurseryStudentReportCardItem 
-php artisan admin:make AccountParentController --model=App\\Models\\AccountParent 
-php artisan admin:make ServiceCategoryController --model=App\\Models\\ServiceCategory  
-php artisan admin:make AcademicClassLevelController --model=App\\Models\\AcademicClassLevel  
-php artisan admin:make PromotionController --model=App\\Models\\Promotion  
-php artisan admin:make DocumentController --model=App\\Models\\Document 
+php artisan admin:make NurseryStudentReportCardItemController --model=App\\Models\\NurseryStudentReportCardItem
+php artisan admin:make AccountParentController --model=App\\Models\\AccountParent
+php artisan admin:make ServiceCategoryController --model=App\\Models\\ServiceCategory
+php artisan admin:make AcademicClassLevelController --model=App\\Models\\AcademicClassLevel
+php artisan admin:make PromotionController --model=App\\Models\\Promotion
+php artisan admin:make DocumentController --model=App\\Models\\Document
 php artisan admin:make BursaryController --model=App\Models\\Bursary
-php artisan admin:make BursaryBeneficiaryController --model=App\Models\BursaryBeneficiary 
+php artisan admin:make BursaryBeneficiaryController --model=App\Models\BursaryBeneficiary
 
-  
+
 
 
 enterprise_id
 name
-short_name	
-details	
+short_name
+details
 code
 
 subject_type
@@ -302,8 +303,8 @@ Add correct host key in /Users/mac/.ssh/known_hosts to get rid of this message.
 Offending ECDSA key in /Users/mac/.ssh/known_hosts:3
 Host key for gator4311.hostgator.com has changed and you have requested strict checking.
 Host key verification failed.
-mac:schools juniorbendera$ 
- 
+mac:schools juniorbendera$
+
 
 //force update from remote
 git fetch origin master
@@ -331,14 +332,14 @@ php artisan make:migration add_due_term_to_service_subscriptions --table=service
 php artisan make:migration add_due_term_to_bursary_beneficiaries_1 --table=bursary_beneficiaries
 php artisan make:migration add_signatures_enterprises --table=enterprises
 
-git add --all 
+git add --all
 git commit -am "Your commit message"
-ssh schooics@gator4311.hostgator.com 
-ssh-keygen -t rsa -C "schooics@gator4311.hostgator.com"  
+ssh schooics@gator4311.hostgator.com
+ssh-keygen -t rsa -C "schooics@gator4311.hostgator.com"
 
 ssh-keygen -f ~/.ssh/id_rsa -p
 
- 
+
 
 
 
@@ -378,7 +379,7 @@ php artisan make:migration add_total_students --table=student_report_cards
 php artisan make:migration add_total_students --table=student_report_cards
 php artisan make:migration add_do_update --table=theology_termly_report_cards
 php artisan make:migration add_total --table=service_subscriptions
- 
+
 php artisan admin:action Post\\BatchPrint --grid-batch --name="batch print"
 
 git commit -a

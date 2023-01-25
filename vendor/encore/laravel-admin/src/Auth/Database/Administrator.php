@@ -15,6 +15,7 @@ use App\Models\TheologyClass;
 use App\Models\Transaction;
 use App\Models\Utils;
 use Encore\Admin\Traits\DefaultDatetimeFormat;
+use Exception;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Database\Eloquent\Model;
@@ -87,21 +88,21 @@ class Administrator extends Model implements AuthenticatableContract
             return false;
 
             dd("=====DELETING====");
-            //$m->account->delete(); 
+            //$m->account->delete();
 
             Transaction::where('account_id', $m->id)
                 ->orWhere('contra_entry_account_id', $m->id)
                 ->orWhere('contra_entry_transaction_id', $m->id)
                 ->delete();
-            /* 
+            /*
 
- 
-	
+
+
 	            $x = DB::delete("DELETE FROM admin_users WHERE id = $m->id ");
-	
+
 		 	Browse Browse	Structure Structure	Search Search	Insert Insert	Empty Empty	Drop Drop	0	InnoDB	utf8mb4_unicode_ci	16.0 KiB	-
 	user_batch_importers	 	Browse Browse	Structure Structure	Search Search	Insert Insert	Empty Empty	Drop Drop	23	InnoDB	utf8mb4_unicode_ci	16.0 KiB	-
-	_mark_has_classes	 
+	_mark_has_classes
 */
 
             echo $x . "<hr>";
@@ -185,6 +186,8 @@ class Administrator extends Model implements AuthenticatableContract
             ) {
                 $model->password = password_hash('4321', PASSWORD_DEFAULT);
             }
+
+
 
             Enterprise::my_update($e);
             $model->name = $model->first_name . " " . $model->given_name . " " . $model->last_name;
@@ -280,6 +283,28 @@ class Administrator extends Model implements AuthenticatableContract
                 }
             }
 
+            $_u = Administrator::where([
+                'email' => $model->email
+            ])->orWhere([
+                'username' => $model->email
+            ])->first();
+
+            if ($_u != null) {
+                if ($_u->id != $model->id) {
+                    throw new Exception("User with provided email address already exist.", 1);
+                }
+            }
+            $_u = Administrator::where([
+                'email' => $model->username
+            ])->orWhere([
+                'username' => $model->username
+            ])->first();
+
+            if ($_u != null) {
+                if ($_u->id != $model->id) {
+                    throw new Exception("User with provided username already exist.", 1);
+                }
+            }
 
             $model->name = $model->first_name . " " . $model->given_name . " " . $model->last_name;
             return $model;
@@ -326,7 +351,7 @@ class Administrator extends Model implements AuthenticatableContract
         }
     }
 
-    /** 
+    /**
      * Create a new Eloquent model instance.
      *
      * @param array $attributes
@@ -397,7 +422,7 @@ class Administrator extends Model implements AuthenticatableContract
             $link = 'user.jpeg';
         }
         return  $link;
-        //$real_avatar= 
+        //$real_avatar=
     }
 
     /**

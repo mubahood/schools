@@ -52,7 +52,7 @@ use Illuminate\Support\Facades\Hash;
 `masters_university_year_graduated` TEXT DEFAULT NULL,
 `phd_university_name` TEXT DEFAULT NULL,
 `phd_university_year_graduated` TEXT DEFAULT NULL,
- 
+
 
 
 ===================================
@@ -88,7 +88,7 @@ PERSONAL INFORMATION
 - Contact for emergency name
 - Contact for emergency phone
 - Mothers's phone
-- 
+-
 
 ACCOUNT NUMBERS
 --------------------
@@ -98,7 +98,7 @@ ACCOUNT NUMBERS
 - NSSF NUMBER
 - Bank name
 - Bank account number
-- 
+-
 
 EDUCATIONAL INFORMATION
 --------------------
@@ -114,7 +114,7 @@ EDUCATIONAL INFORMATION
 - Masters university year graduated
 - PHD university name
 - PHD university year graduated
-- 
+-
 
 ACCOUNT INFORMATION
 --------------------
@@ -315,7 +315,7 @@ class EmployeesController extends AdminController
                     ->options(
                         $roleModel::where('slug', '!=', 'super-admin')
                             ->where('slug', '!=', 'student')
-                            ->where('slug', '!=', 'librarian') 
+                            ->where('slug', '!=', 'librarian')
                             ->where('slug', '!=', 'supplier')
                             ->get()
                             ->pluck('name', 'id')
@@ -325,8 +325,7 @@ class EmployeesController extends AdminController
                 $form->image('avatar', trans('admin.avatar'));
 
                 $form->email('email', 'Email address')
-                    ->creationRules(['required', "unique:admin_users"])
-                    ->updateRules(['required', "unique:admin_users,username,{{id}}"]);
+                    ->creationRules(['required', "unique:admin_users"]);
                 $form->text('username', 'Username')
                     ->creationRules(['required', "unique:admin_users"])
                     ->updateRules(['required', "unique:admin_users,username,{{id}}"]);

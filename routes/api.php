@@ -4,14 +4,15 @@ use App\Models\AcademicClass;
 use App\Models\AcademicClassSctream;
 use App\Models\Book;
 use App\Models\TermlyReportCard;
+use App\Models\User;
 use App\Models\Utils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('git', function (Request $r) {
-    //$resp = shell_exec('git pull --rebase=interactive -s recursive -X theirs');  
-    //$resp = shell_exec('git commit --romina');  
-    // $resp = shell_exec('cd public_html/ && git pull');  
+    //$resp = shell_exec('git pull --rebase=interactive -s recursive -X theirs');
+    //$resp = shell_exec('git commit --romina');
+    // $resp = shell_exec('cd public_html/ && git pull');
     $resp = exec('PWD');
 
 
@@ -232,6 +233,50 @@ Route::get('books', function (Request $r) {
             'text' => $v->title
         ];
     }
+
+    return [
+        'data' => $data
+    ];
+});
+
+
+
+Route::get('report-cards', function (Request $r) {
+
+
+    $q = trim($r->get('q'));
+    $enterprise_id = ((int)($r->get('enterprise_id')));
+    if (strlen($q) < 1) {
+        return [
+            'data' => []
+        ];
+    }
+
+    $res_1 = User::where(
+        'name',
+        'like',
+        "%$q%"
+    )
+        ->where([
+            'enterprise_id' => $enterprise_id
+        ])
+        ->limit(50)->get();
+
+    $data = [];
+    foreach ($res_1 as $key => $v) {
+        $name = "";
+        if (isset($v->name)) {
+            $name = " - " . $v->name;
+        }
+
+        foreach ($v->report_cards as  $report) {
+            $data[] = [
+                'id' => $report->id,
+                'text' => "#$report->id " . $name . " - {$report->termly_report_card->report_title}"
+            ];
+        }
+    }
+
 
     return [
         'data' => $data
