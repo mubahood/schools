@@ -3,6 +3,7 @@
 use App\Models\AcademicClass;
 use App\Models\AcademicClassSctream;
 use App\Models\Book;
+use App\Models\Subject;
 use App\Models\TermlyReportCard;
 use App\Models\User;
 use App\Models\Utils;
@@ -99,6 +100,30 @@ Route::get('promotion-to-class', function (Request $r) {
         'data' => $data
     ];
 });
+
+
+Route::get('class-subject', function (Request $r) {
+    $clasess = Subject::where([
+        'academic_class_id' =>  (int)($r->get('q')),
+        'enterprise_id' =>  (int)($r->get('enterprise_id')),
+    ])->get();
+
+
+
+    $data = [];
+    foreach ($clasess as $key => $v) {
+        $data[] = [
+            'id' => $v->id . "",
+            'text' => $v->subject_name . ""
+        ];
+    }
+    return [
+        'data' => $data
+    ];
+});
+
+
+
 
 Route::get('promotion-termly-report-cards', function (Request $r) {
     $from_class = AcademicClass::find((int)($r->get('q')));

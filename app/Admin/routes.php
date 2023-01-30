@@ -68,6 +68,8 @@ Route::group([
     $router->resource('bursaries', BursaryController::class);
     $router->resource('bursary-beneficiaries', BursaryBeneficiaryController::class);
     $router->resource('student-report-card-items', StudentReportCardItemController::class);
+    $router->resource('sessions', SessionController::class);
+    $router->resource('participants', ParticipantController::class);
 
     //$router->resource('fees', StudentHasFeeController::class);
 

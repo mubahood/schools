@@ -207,7 +207,7 @@ class Utils  extends Model
             }
         }
 
-        if($isOnline){
+        if ($isOnline) {
             $r = $_SERVER['DOCUMENT_ROOT'] . "";
         }
 
@@ -218,14 +218,16 @@ class Utils  extends Model
 
         public_html/public/storage/images
         */
-        if($isOnline){
+        if ($isOnline) {
             $r = $_SERVER['DOCUMENT_ROOT'] . "/public";
         }
         return $r;
-}
+    }
 
     public static function system_boot($u)
-    { /*
+    {
+
+        /*
         $u = Administrator::find(2317);
         $u->spouse_name .= '1';
         $u->save();
@@ -276,6 +278,8 @@ class Utils  extends Model
 
 
         Utils::create_documents($u);
+        Utils::prepare_session_participations($u);
+
         $subs = Exam::where('marks_generated', '!=', true)->get();
         foreach ($subs as $m) {
             Exam::my_update($m);
@@ -287,6 +291,25 @@ class Utils  extends Model
         }
 
         Utils::financial_accounts_creation();
+    }
+
+    public static function prepare_session_participations($u)
+    {
+        if ($u == null) {
+            return;
+        }
+
+
+        $preps = Session::where([
+            'is_open' => 0,
+            'prepared' => NULL,
+        ])->get();
+
+        foreach ($preps as $key => $session) {
+            $session->close_session();
+        }
+
+
     }
 
     public static function create_documents($u)
