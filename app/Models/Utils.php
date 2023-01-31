@@ -536,6 +536,7 @@ class Utils  extends Model
     public static function students_checklist($u)
     {
 
+        return [];
         $sql_1 = "SELECT administrator_id FROM student_has_classes WHERE enterprise_id = {$u->enterprise_id}";
         $sql = "SELECT * FROM admin_users WHERE
             user_type = 'student' AND

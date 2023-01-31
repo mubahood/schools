@@ -33,7 +33,7 @@ class StudentFinancialAccountController extends AdminController
     protected function grid()
     {
         /*  $ac = Account::find(881);
-        $ac->name .= "1"; 
+        $ac->name .= "1";
         $ac->want_to_transfer = 'Soap';
         $ac->transfer_keyword = 1;
         $ac->save();
@@ -263,141 +263,150 @@ class StudentFinancialAccountController extends AdminController
 
         if ($form->isEditing()) {
 
-            $params = request()->route()->parameters();
-            if (isset($params['account'])) {
-                $id =  $params['account'];
+            $params = request()->segments();
+            if (isset($params[1])) {
+                $id =  $params[1];
             }
 
             $u = $form->model()->find($id);
+
+
 
             if ($u == null) {
                 die("Model not found.");
             }
 
+            if ($u->type == 'STUDENT_ACCOUNT') {
 
-            foreach ($u->transactions as $key => $v) {
-                if ($v->amount < 0) {
-                    $payable += $v->amount;
-                } else {
-                    $paid += $v->amount;
+                foreach ($u->transactions as $key => $v) {
+                    if ($v->amount < 0) {
+                        $payable += $v->amount;
+                    } else {
+                        $paid += $v->amount;
+                    }
                 }
+                $balance = $payable + $paid;
+
+                $form->display('name', __('Account name'));
+                $form->display('payable', __('Total payable fees'))
+                    ->default("UGX " . number_format($payable));
+
+                $form->display('paid', __('Total paid fees'))
+                    ->default("UGX " . number_format($paid));
+
+                $form->display('paid', __('FEES BALANCE'))
+                    ->default("UGX " . number_format($balance));
+                $form->divider();
             }
-            $balance = $payable + $paid;
 
-            $form->display('name', __('Account name'));
-            $form->display('payable', __('Total payable fees'))
-                ->default("UGX " . number_format($payable));
+            if ($form->isEditing()) {
+                $form->radio('status', "Account verification")
+                    ->options([
+                        0 => 'Not verified',
+                        1 => 'Account verified',
+                    ])->rules('required');
+            }
 
-            $form->display('paid', __('Total paid fees'))
-                ->default("UGX " . number_format($paid));
-
-            $form->display('paid', __('FEES BALANCE'))
-                ->default("UGX " . number_format($balance));
-            $form->divider();
-        }
-
-        if (!$form->isEditing()) {
-            $form->saving(function ($f) {
-                $type = $f->type;
-                $u = Admin::user();
-                $enterprise_id = $u->enterprise_id;
-                $administrator_id = 0;
-                $ent =  Enterprise::find($enterprise_id);
-                if ($ent == null) {
-                    die("Enterprise not found.");
-                }
-                $enterprise_owner_id = $ent->administrator_id;
-                $administrator_id = $ent->administrator_id;
-
-                if ($administrator_id < 1) {
-                    $error = new MessageBag([
-                        'title'   => 'Error',
-                        'message' => "Account ower ID was not found.",
-                    ]);
-                    return back()->with(compact('error'));
-                }
+            if ($form->isEditing()) {
+                $form->radio('new_balance', "Change balance")
+                    ->options([
+                        0 => 'Don\'t change account balance',
+                        1 => 'Change account balance',
+                    ])
+                    ->when(1, function ($f) {
+                        $f->text('new_balance_amount', __('New Account Amount'))
+                            ->rules('int')->attribute('type', 'number')
+                            ->rules('required');
+                    })
+                    ->default(0)
+                    ->rules('required');
+            }
 
 
+            if (!$form->isEditing()) {
+                $form->saving(function ($f) {
+                    $type = $f->type;
+                    $u = Admin::user();
+                    $enterprise_id = $u->enterprise_id;
+                    $administrator_id = 0;
+                    $ent =  Enterprise::find($enterprise_id);
+                    if ($ent == null) {
+                        die("Enterprise not found.");
+                    }
+                    $enterprise_owner_id = $ent->administrator_id;
+                    $administrator_id = $ent->administrator_id;
 
-                $f->administrator_id = $administrator_id;
-                return $f;
-                /*  $success = new MessageBag([
+                    if ($administrator_id < 1) {
+                        $error = new MessageBag([
+                            'title'   => 'Error',
+                            'message' => "Account ower ID was not found.",
+                        ]);
+                        return back()->with(compact('error'));
+                    }
+
+
+
+                    $f->administrator_id = $administrator_id;
+                    return $f;
+                    /*  $success = new MessageBag([
                 'title'   => 'title...',
                 'message' => "Good to go!",
             ]);
             return back()->with(compact('success')); */
-            });
-        }
-
-
-        $u = Admin::user();
-        $ent = Enterprise::find($u->enterprise_id);
-        $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
-        $form->hidden('administrator_id', __('Enterprise id'))->default($ent->administrator_id)->rules('required');
-
-
-        $form->text('name', __('Account name'))
-            ->rules('required');
-
-        $form->select('account_parent_id', "Account category")
-            ->options(
-                AccountParent::where([
-                    'enterprise_id' => Admin::user()->enterprise_id
-                ])->orderBy('name', 'Asc')->get()->pluck('name', 'id')
-            )
-            ->rules('required');
-
-
-
-        if ($form->isEditing()) {
-            $form->radio('status', "Account verification")
-                ->options([
-                    0 => 'Not verified',
-                    1 => 'Account verified',
-                ])->rules('required');
-        }
-
-        if ($form->isEditing()) {
-            $form->radio('new_balance', "Change balance")
-                ->options([
-                    0 => 'Don\'t change account balance',
-                    1 => 'Change account balance',
-                ])
-                ->when(1, function ($f) {
-                    $f->text('new_balance_amount', __('New Account Amount'))
-                        ->rules('int')->attribute('type', 'number')
-                        ->rules('required');
-                })
-                ->default(0)
-                ->rules('required');
-        }
-
-        if ($form->isEditing()) {
-            $form->radio('category', "Account type")
-                ->options(Utils::account_categories())
-                ->readonly()
-                ->rules('required');
+                });
+            }
         } else {
-            $form->hidden('type', "Account type")
-                ->default('OTHER_ACCOUNT')
+
+
+
+
+            $u = Admin::user();
+            $ent = Enterprise::find($u->enterprise_id);
+            $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
+            $form->hidden('administrator_id', __('Enterprise id'))->default($ent->administrator_id)->rules('required');
+
+
+            $form->text('name', __('Account name'))
                 ->rules('required');
 
-            $form->radio('category', "Account type")
-                ->options(Utils::account_categories())
-                ->readonly()
+
+            $form->select('account_parent_id', "Account category")
+                ->options(
+                    AccountParent::where([
+                        'enterprise_id' => Admin::user()->enterprise_id
+                    ])->orderBy('name', 'Asc')->get()->pluck('name', 'id')
+                )
                 ->rules('required');
+
+
+
+            if ($form->isEditing()) {
+                $form->radio('category', "Account type")
+                    ->options(Utils::account_categories())
+                    ->readonly()
+                    ->rules('required');
+            } else {
+                $form->hidden('type', "Account type")
+                    ->default('OTHER_ACCOUNT')
+                    ->rules('required');
+
+                $form->radio('category', "Account type")
+                    ->options(Utils::account_categories())
+                    ->readonly()
+                    ->rules('required');
+            }
+
+
+            $form->radio('transfer_keyword', "Do you want to transfer trannsactions to this account?")
+                ->options([
+                    1 => 'Yes',
+                    0 => 'No',
+                ])->when(1, function ($f) {
+                    $f->text('want_to_transfer', "Transfer keyword")
+                        ->rules('required')
+                        ->help("Any transaction containing mentioned keyword in its description should be transfered to this account.");
+                })->rules('required');
         }
-
-
-        $form->radio('transfer_keyword', "Do you want to transfer trannsactions to this account?")
-            ->options([
-                1 => 'Yes',
-                0 => 'No',
-            ])->when(1, function ($f) {
-                $f->text('want_to_transfer', "Transfer keyword")
-                    ->rules('required')
-                    ->help("Any transaction containing mentioned keyword in its description should be transfered to this account.");
-            })->rules('required');
 
         $form->textarea('description', __('Account description'));
 

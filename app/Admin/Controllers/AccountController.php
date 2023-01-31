@@ -20,7 +20,7 @@ class AccountController extends AdminController
     /**
      * Title for current resource.
      *
-     * @var string 
+     * @var string
      */
     protected $title = 'Financial Accounts';
     /**
@@ -31,7 +31,7 @@ class AccountController extends AdminController
     protected function grid()
     {
         /*  $ac = Account::find(881);
-        $ac->name .= "1"; 
+        $ac->name .= "1";
         $ac->want_to_transfer = 'Soap';
         $ac->transfer_keyword = 1;
         $ac->save();
@@ -69,8 +69,8 @@ class AccountController extends AdminController
                     'BANK_ACCOUNT' => 'Bank accounts',
                     'CASH_ACCOUNT' => 'Cash accounts',
                 ]
-            ); 
-            
+            );
+
             */
 
 
