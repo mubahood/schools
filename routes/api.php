@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ApiAuthController;
 use App\Models\AcademicClass;
 use App\Models\AcademicClassSctream;
 use App\Models\Book;
@@ -9,6 +10,13 @@ use App\Models\User;
 use App\Models\Utils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+
+
+Route::POST("users/register", [ApiAuthController::class, "register"]);
+Route::POST("login", [ApiAuthController::class, "login"]);
+
+
 
 Route::get('git', function (Request $r) {
     //$resp = shell_exec('git pull --rebase=interactive -s recursive -X theirs');
