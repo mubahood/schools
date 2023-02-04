@@ -172,6 +172,7 @@ class ApiAuthController extends Controller
         ]);
 
         $new_user->token = $token;
+        $u->remember_token = $token;
         return $this->success($new_user, 'Account created successfully.');
     }
 }
