@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Controller;
+use App\Http\Controllers\MainController;
 use App\Http\Controllers\PrintController2;
 use App\Models\AcademicClass;
 use App\Models\Book;
@@ -24,7 +26,7 @@ use Illuminate\Support\Facades\App;
 | contains the "web" middleware group. Now create something great!
 |
 */
-/* 
+/*
 Route::get('/', function () {
 
   $clases = AcademicClass::where([
@@ -36,8 +38,8 @@ Route::get('/', function () {
 
   $i = 1;
 
-  for ($x=0; $x < 1000; $x++) { 
-    
+  for ($x=0; $x < 1000; $x++) {
+
   foreach ($clases as $key => $cl) {
     $i++;
     $sex = ['Male', 'Female'];
@@ -70,7 +72,7 @@ Route::get('/', function () {
     shuffle($sex);
     $u->sex = $sex[0];
     $u->save();
- 
+
 
     $has_class = new StudentHasClass();
     $has_class->enterprise_id = $u->enterprise_id;
@@ -81,7 +83,7 @@ Route::get('/', function () {
 
     echo $cl->id . " === " . $u->phone_number_1 . "<hr>";
   }
- 
+
   }
 
 
@@ -92,16 +94,17 @@ Route::get('/', function () {
  */
 
 Route::match(['get', 'post'], '/print', [PrintController2::class, 'index']);
+Route::get('generate-variables', [MainController::class, 'generate_variables']);
 Route::get('print-admission-letter', function () {
-  //return view('print/print-admission-letter'); 
-  $pdf = App::make('dompdf.wrapper');
-  //$pdf->setOption(['DOMPDF_ENABLE_REMOTE' => false]);
+    //return view('print/print-admission-letter');
+    $pdf = App::make('dompdf.wrapper');
+    //$pdf->setOption(['DOMPDF_ENABLE_REMOTE' => false]);
 
-  $pdf->loadHTML(view('print/print-admission-letter'));
-  return $pdf->stream();
+    $pdf->loadHTML(view('print/print-admission-letter'));
+    return $pdf->stream();
 });
-Route::get('print-receipt', function () { 
-  $pdf = App::make('dompdf.wrapper');
-  $pdf->loadHTML(view('print/print-receipt'));
-  return $pdf->stream();
+Route::get('print-receipt', function () {
+    $pdf = App::make('dompdf.wrapper');
+    $pdf->loadHTML(view('print/print-receipt'));
+    return $pdf->stream();
 });
