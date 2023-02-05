@@ -11,6 +11,7 @@ use App\Models\ServiceSubscription;
 use App\Models\StudentHasClass;
 use App\Models\StudentHasFee;
 use App\Models\StudentHasTheologyClass;
+use App\Models\Subject;
 use App\Models\TheologyClass;
 use App\Models\Transaction;
 use App\Models\Utils;
@@ -23,18 +24,34 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Tymon\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Foundation\Auth\User as Authenticatable1;
+use Mockery\Matcher\Subset;
 
 /**
  * Class Administrator.
  *
  * @property Role[] $roles
  */
-class Administrator extends Model implements AuthenticatableContract
+class Administrator extends Model implements AuthenticatableContract, JWTSubject
 {
     use SoftDeletes;
     use Authenticatable;
     use HasPermissions;
     use DefaultDatetimeFormat;
+
+
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
+
+
 
     //    ALTER TABLE `admin_users` ADD `deleted_at` DATE NULL DEFAULT NULL AFTER `previous_school`;
 
@@ -466,6 +483,38 @@ class Administrator extends Model implements AuthenticatableContract
 
     public function classes()
     {
+        return $this->hasMany(StudentHasClass::class);
+    }
+
+
+
+    public function get_my_classes()
+    {
+
+        if ($this->user_type == 'employee') {
+            $sql1 = "SELECT academic_classes.id FROM subjects,academic_classes WHERE
+                (
+                    subject_teacher = {$this->id} OR
+                    teacher_1 = {$this->id} OR
+                    teacher_2 = {$this->id} OR
+                    teacher_3 = {$this->id}
+                ) AND (
+                    subjects.academic_class_id = academic_classes.id
+                )
+            ";
+
+            $sql = "SELECT * FROM academic_classes WHERE id IN
+            ( $sql1 )
+            ";
+            return DB::select($sql);
+        }
+
+
+
+
+
+
+        die($this->user_type);
         return $this->hasMany(StudentHasClass::class);
     }
 

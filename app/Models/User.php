@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use Encore\Admin\Form\Field\BelongsToMany;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany as RelationsBelongsToMany;
 use Laravel\Sanctum\HasApiTokens;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Notifications\Notifiable;
@@ -85,5 +87,17 @@ class User extends Authenticatable implements JWTSubject
     {
         return [];
     }
+
+
+
+    public function roles(): RelationsBelongsToMany
+    {
+        $pivotTable = config('admin.database.role_users_table');
+
+        $relatedModel = config('admin.database.roles_model');
+
+        return $this->belongsToMany($relatedModel, $pivotTable, 'user_id', 'role_id');
+    }
+
 
 }

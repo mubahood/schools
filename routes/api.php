@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ApiAuthController;
+use App\Http\Controllers\ApiMainController;
 use App\Models\AcademicClass;
 use App\Models\AcademicClassSctream;
 use App\Models\Book;
@@ -16,6 +17,7 @@ Route::POST("users/login", [ApiAuthController::class, "login"]);
 
 Route::group(['middleware' => 'api'], function ($router) {
     Route::get("users/me", [ApiAuthController::class, 'me']);
+    Route::get("my-classes", [ApiMainController::class, 'classes']);
 });
 
 

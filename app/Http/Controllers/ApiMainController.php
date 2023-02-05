@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
-class ApiAuthController extends Controller
+class ApiMainController extends Controller
 {
 
     use ApiResponser;
@@ -25,15 +25,21 @@ class ApiAuthController extends Controller
     public function __construct()
     {
 
-        /* $token = auth('api')->attempt([
-            'username' => 'admin',
-            'password' => 'admin',
-        ]);
-        die($token); */
-        $this->middleware('auth:api', ['except' => ['login', 'register']]);
+
+        $this->middleware('auth:api');
     }
 
 
+    public function classes()
+    {
+        $u = auth('api')->user();
+
+
+
+
+
+        return $this->success($u->get_my_classes() , $message = "Profile details", 200);
+    }
     /**
      * Get a JWT via given credentials.
      *
@@ -94,6 +100,10 @@ class ApiAuthController extends Controller
             return $this->error('Wrong credentials.');
         }
 
+
+        if ($u == null) {
+            return $this->success('Success.');
+        }
 
         //auth('api')->factory()->setTTL(Carbon::now()->addMonth(12)->timestamp);
 

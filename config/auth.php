@@ -66,7 +66,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => App\Models\User::class,
+            'model' => Encore\Admin\Auth\Database\Administrator::class,
         ],
 
         // 'users' => [
