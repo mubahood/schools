@@ -33,10 +33,13 @@ class ApiMainController extends Controller
     public function classes()
     {
         $u = auth('api')->user();
+        return $this->success($u->get_my_classes(), $message = "Success", 200);
+    }
 
-
-
-        return $this->success($u->get_my_classes() , $message = "Profile details", 200);
+    public function my_subjects()
+    {
+        $u = auth('api')->user();
+        return $this->success($u->get_my_subjetcs(), $message = "Success", 200);
     }
     /**
      * Get a JWT via given credentials.

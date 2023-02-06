@@ -508,14 +508,12 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
 
             $clases = [];
             foreach (DB::select($sql) as $key => $v) {
-
                 $u = Administrator::find($v->class_teahcer_id);
                 if ($u != null) {
                     $v->class_teacher_name = $u->name;
                 } else {
                     $v->class_teacher_name  = "";
                 }
-
                 $v->students_count = StudentHasClass::where([
                     'academic_class_id' => $v->id
                 ])->count();
@@ -524,6 +522,55 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
             return $clases;
         }
     }
+
+
+
+    public function get_my_subjetcs()
+    {
+
+        $active_academic_year_id = 0;
+        if($this->ent != null){
+            $y = $this->ent->active_academic_year();
+            if($y != null){
+                $active_academic_year_id = $y->id;
+            }
+        }
+
+        if ($this->user_type == 'employee') {
+            $sql1 = "SELECT * FROM subjects,academic_classes WHERE
+                (
+                    subject_teacher = {$this->id} OR
+                    teacher_1 = {$this->id} OR
+                    teacher_2 = {$this->id} OR
+                    teacher_3 = {$this->id}
+                ) AND (
+                    subjects.academic_class_id = academic_classes.id
+                ) AND (
+                    academic_classes.academic_year_id = $active_academic_year_id
+                )
+            ";
+
+            $data = [];
+            foreach (DB::select($sql1) as $key => $v) {
+
+                $u = Administrator::where([
+                    'id' => $v->subject_teacher
+                ])
+                ->orWhere('id',$v->teacher_1)
+                ->orWhere('id',$v->teacher_2)
+                ->orWhere('id',$v->teacher_3)->first();
+
+                if ($u != null) {
+                    $v->subject_teacher_name = $u->name;
+                } else {
+                    $v->subject_teacher_name  = "";
+                }
+                $data[] = $v;
+            }
+            return $data;
+        }
+    }
+
 
     public function theology_classes()
     {
