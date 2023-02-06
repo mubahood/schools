@@ -36,8 +36,6 @@ class ApiMainController extends Controller
 
 
 
-
-
         return $this->success($u->get_my_classes() , $message = "Profile details", 200);
     }
     /**
