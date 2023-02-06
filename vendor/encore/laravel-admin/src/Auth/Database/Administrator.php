@@ -525,13 +525,31 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
 
 
 
+    public function get_my_students($u){
+        if($u == null){
+            return [];
+        }
+        $classes = $u->get_my_classes();
+
+        $students = [];
+        foreach ($classes as $class) {
+            foreach (Administrator::where([
+                'current_class_id' => $class->id
+            ])->get() as $user) {
+                $students[] = $user;
+            }
+
+        }
+
+        return $students;
+    }
     public function get_my_subjetcs()
     {
 
         $active_academic_year_id = 0;
-        if($this->ent != null){
+        if ($this->ent != null) {
             $y = $this->ent->active_academic_year();
-            if($y != null){
+            if ($y != null) {
                 $active_academic_year_id = $y->id;
             }
         }
@@ -556,9 +574,9 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                 $u = Administrator::where([
                     'id' => $v->subject_teacher
                 ])
-                ->orWhere('id',$v->teacher_1)
-                ->orWhere('id',$v->teacher_2)
-                ->orWhere('id',$v->teacher_3)->first();
+                    ->orWhere('id', $v->teacher_1)
+                    ->orWhere('id', $v->teacher_2)
+                    ->orWhere('id', $v->teacher_3)->first();
 
                 if ($u != null) {
                     $v->subject_teacher_name = $u->name;

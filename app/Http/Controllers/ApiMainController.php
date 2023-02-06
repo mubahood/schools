@@ -41,6 +41,12 @@ class ApiMainController extends Controller
         $u = auth('api')->user();
         return $this->success($u->get_my_subjetcs(), $message = "Success", 200);
     }
+
+    public function get_my_students()
+    {
+        $u = auth('api')->user();
+        return $this->success($u->get_my_students($u), $message = "Success", 200);
+    }
     /**
      * Get a JWT via given credentials.
      *
