@@ -502,20 +502,27 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                     subjects.academic_class_id = academic_classes.id
                 )
             ";
-
             $sql = "SELECT * FROM academic_classes WHERE id IN
             ( $sql1 )
             ";
-            return DB::select($sql);
+
+            $clases = [];
+            foreach (DB::select($sql) as $key => $v) {
+
+                $u = Administrator::find($v->class_teahcer_id);
+                if ($u != null) {
+                    $v->class_teacher_name = $u->name;
+                } else {
+                    $v->class_teacher_name  = "";
+                }
+
+                $v->students_count = StudentHasClass::where([
+                    'academic_class_id' => $v->id
+                ])->count();
+                $clases[] = $v;
+            }
+            return $clases;
         }
-
-
-
-
-
-
-        die($this->user_type);
-        return $this->hasMany(StudentHasClass::class);
     }
 
     public function theology_classes()
