@@ -62,11 +62,7 @@ user_batch_importer_id
 school_pay_account_id
 school_pay_payment_code
 given_name
-residential_type
-transportation
-swimming
-outstanding
-guardian_relation
+  
 referral
 previous_school
 deleted_at

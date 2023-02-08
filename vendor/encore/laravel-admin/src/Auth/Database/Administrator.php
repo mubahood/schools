@@ -51,9 +51,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
         return [];
     }
 
-
-
-    //    ALTER TABLE `admin_users` ADD `deleted_at` DATE NULL DEFAULT NULL AFTER `previous_school`;
+ 
 
 
     //protected $fillable = ['username', 'password', 'name', 'avatar'];

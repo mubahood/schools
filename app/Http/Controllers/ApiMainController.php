@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
+use Throwable;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class ApiMainController extends Controller
@@ -29,6 +30,40 @@ class ApiMainController extends Controller
         $this->middleware('auth:api');
     }
 
+
+    public function update_bio($id,Request $r)
+    {
+
+        $acc = Administrator::find($id);
+        if ($acc == null) {
+            return $this->error('Account not found.');
+        }
+        if ($r->first_name == null) {
+            return $this->error('First name is required.');
+        }
+        if ($r->last_name == null) {
+            return $this->error('Last name is required.');
+        }
+        if ($r->sex == null) {
+            return $this->error('Sex is required.');
+        }
+        if ($r->nationality == null) {
+            return $this->error($r->home_address);
+        }
+        
+        $acc->given_name = $r->given_name;  
+        $acc->home_address = $r->home_address;  
+
+        try{
+            $acc->save();
+    
+        }catch(Throwable $t){
+            return $this->error($t);
+        }
+
+        return $this->success($acc, $message = "Success", 200);
+
+    }
 
     public function classes()
     {

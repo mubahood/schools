@@ -15,8 +15,7 @@ Guardian Phone 2
 Guardian Relation  
 D.O.B
 Referral 
-Guardian Email
-Previous School previous_school
+Guardian Email 
 Nationality
 
 

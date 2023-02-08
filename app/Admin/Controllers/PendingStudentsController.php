@@ -320,11 +320,6 @@ class PendingStudentsController extends AdminController
 
         $grid->column('place_of_birth', __('Address'))->sortable()->hide();
         $grid->column('home_address', __('Home address'))->hide();
-        $grid->column('previous_school', __('Previous school'))->hide();
-        $grid->column('residential_type', __('Residential type'))->hide();
-        $grid->column('transportation', __('Transportation'))->hide();
-        $grid->column('swimming', __('Swimming'))->hide();
-        $grid->column('referral', __('Referral'))->hide();
         $grid->column('school_pay_payment_code', __('School pay payment code'))->sortable();
 
 
@@ -468,17 +463,13 @@ class PendingStudentsController extends AdminController
             $form->text('emergency_person_phone', "Guardian phone number");
             $form->text('phone_number_2', "Guardian phone number 2");
 
-            $form->text('religion');
-            $form->text('previous_school');
+            $form->text('religion'); 
 
             $form->text('father_name', "Father's name");
             $form->text('father_phone', "Father's phone number");
             $form->text('mother_name', "Mother's name");
             $form->text('mother_phone', "Mother's phone number");
-
-            $form->text('residential_type');
-            $form->text('transportation');
-            $form->text('swimming');
+ 
             $form->text('nationality');
             $form->text('referral');
         });
