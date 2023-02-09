@@ -31,6 +31,14 @@ class ApiMainController extends Controller
     }
 
 
+    public function update_guardian($id, Request $r){
+ 
+        'father_name': item.,
+        'mother_name': item.,
+        'phone_number_1	': item.,
+        'phone_number_2': item.phone_number_2,
+        '': item.email,
+    }
     public function update_bio($id, Request $r)
     {
 
@@ -38,21 +46,23 @@ class ApiMainController extends Controller
         if ($acc == null) {
             return $this->error('Account not found.');
         }
-        if ($r->first_name == null) {
-            return $this->error('First name is required.');
+        if ($r->father_name == null) {
+            return $this->error('Father\' name is required.');
         }
-        if ($r->last_name == null) {
-            return $this->error('Last name is required.');
+        if ($r->mother_name == null) {
+            return $this->error('Mother\'s name is required.');
         }
-        if ($r->sex == null) {
-            return $this->error('Sex is required.');
+        if ($r->phone_number_1 == null) {
+            return $this->error('Guadian phone number is required.');
         }
-        if ($r->nationality == null) {
-            return $this->error($r->home_address);
-        }
+ 
 
-        $acc->given_name = $r->given_name;
-        $acc->home_address = $r->home_address;
+        $acc->phone_number_1 = $r->phone_number_1;
+        $acc->mother_name = $r->father_name;
+        $acc->father_name = $r->mother_name;
+        $acc->father_name = $r->phone_number_1;
+        $acc->phone_number_2 = $r->phone_number_2;
+        $acc->email = $r->email;
 
         try {
             $acc->save();
