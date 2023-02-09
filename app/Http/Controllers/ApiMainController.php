@@ -32,16 +32,6 @@ class ApiMainController extends Controller
 
 
     public function update_guardian($id, Request $r){
- 
-        'father_name': item.,
-        'mother_name': item.,
-        'phone_number_1	': item.,
-        'phone_number_2': item.phone_number_2,
-        '': item.email,
-    }
-    public function update_bio($id, Request $r)
-    {
-
         $acc = Administrator::find($id);
         if ($acc == null) {
             return $this->error('Account not found.');
@@ -63,6 +53,40 @@ class ApiMainController extends Controller
         $acc->father_name = $r->phone_number_1;
         $acc->phone_number_2 = $r->phone_number_2;
         $acc->email = $r->email;
+
+        try {
+            $acc->save();
+        } catch (Throwable $t) {
+            return $this->error($t);
+        }
+
+        return $this->success($acc, $message = "Success", 200);
+ 
+    }
+
+
+    public function update_bio($id, Request $r)
+    {
+
+        $acc = Administrator::find($id);
+        if ($acc == null) {
+            return $this->error('Account not found.');
+        }
+        if ($r->first_name == null) {
+            return $this->error('First name is required.');
+        }
+        if ($r->last_name == null) {
+            return $this->error('Last name is required.');
+        }
+        if ($r->sex == null) {
+            return $this->error('Sex is required.');
+        }
+        if ($r->nationality == null) {
+            return $this->error($r->home_address);
+        }
+
+        $acc->given_name = $r->given_name;
+        $acc->home_address = $r->home_address;
 
         try {
             $acc->save();
