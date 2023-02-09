@@ -31,7 +31,7 @@ class ApiMainController extends Controller
     }
 
 
-    public function update_bio($id,Request $r)
+    public function update_bio($id, Request $r)
     {
 
         $acc = Administrator::find($id);
@@ -50,19 +50,17 @@ class ApiMainController extends Controller
         if ($r->nationality == null) {
             return $this->error($r->home_address);
         }
-        
-        $acc->given_name = $r->given_name;  
-        $acc->home_address = $r->home_address;  
 
-        try{
+        $acc->given_name = $r->given_name;
+        $acc->home_address = $r->home_address;
+
+        try {
             $acc->save();
-    
-        }catch(Throwable $t){
+        } catch (Throwable $t) {
             return $this->error($t);
         }
 
         return $this->success($acc, $message = "Success", 200);
-
     }
 
     public function classes()
@@ -77,6 +75,68 @@ class ApiMainController extends Controller
         return $this->success($u->get_my_subjetcs(), $message = "Success", 200);
     }
 
+    public function upload_media(Request $r)
+    {
+
+
+
+        if ($r->parent_type == null) {
+            return $this->error('Parent type not found.');
+        }
+        if ($r->parent_id_online == null) {
+            return $this->error('Parent id online is required.');
+        }
+
+
+        if ($r->parent_type == 'user-photo') {
+            $acc = Administrator::find($r->parent_id_online);
+            if ($acc == null) {
+                return $this->success(null, $message = "File not found.", 200);
+            }
+
+            $image = Utils::upload_images_1($_FILES, true);
+
+            if ($image != null) {
+                if (strlen($image) > 3) {
+                    $acc->avatar = $image;
+                    $acc->save();
+                }
+            }
+
+            return $this->success($acc, 'File uploaded successfully.');
+        }
+
+ 
+
+
+
+
+
+        /* 
+      
+        
+        $_images = [];
+        foreach ($images as $src) {
+            $img = new Image();
+            $img->administrator_id =  $administrator_id;
+            $img->src =  $src;
+            $img->thumbnail =  null;
+            $img->parent_id =  null;
+            $img->size = filesize(Utils::docs_root() . '/storage/images/' . $img->src);
+            $img->save();
+
+            $_images[] = $img;
+        }
+        Utils::process_images_in_backround();
+*/
+        return $this->success(null, 'File uploaded successfully.');
+
+
+
+
+
+        die('upload_media');
+    }
     public function get_my_students()
     {
         $u = auth('api')->user();

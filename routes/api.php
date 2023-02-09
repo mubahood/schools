@@ -21,6 +21,7 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::post("update-bio/{id}", [ApiMainController::class, 'update_bio']);
     Route::get("my-subjects", [ApiMainController::class, 'my_subjects']);
     Route::get("my-students", [ApiMainController::class, 'get_my_students']);
+    Route::post("post-media-upload", [ApiMainController::class, 'upload_media']);
 });
 
 
