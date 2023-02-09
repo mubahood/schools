@@ -274,7 +274,7 @@ class StudentsController extends AdminController
         $grid->column('emergency_person_name', __('Guardian'))
             ->hide()
             ->sortable();
-        $grid->column('emergency_person_phone', __('Guardian Phone'))->hide()->sortable();C
+        $grid->column('emergency_person_phone', __('Guardian Phone'))->hide()->sortable();
 
 
         $grid->column('phone_number_1', __('Phone number'))->hide();
