@@ -434,7 +434,6 @@ class StudentsController extends AdminController
             $form->text('mother_phone', "Mother's phone number");
  
             $form->text('nationality');
-            $form->text('referral');
         });
 
 
