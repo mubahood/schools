@@ -207,7 +207,7 @@ class SessionController extends AdminController
                         'academic_year_id' => $term->academic_year_id,
                         'enterprise_id' => $u->enterprise_id,
                     ])->get() as $key => $class) {
-                        $classes[$class->id] = $class->name_text;
+                        $classes[$class->id] = $class->name_text." => ".$class->id;
                     }
 
 

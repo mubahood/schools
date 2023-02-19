@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Participant;
+use App\Models\Session;
 use App\Models\User;
 use App\Models\Utils;
 use App\Traits\ApiResponser;
@@ -31,7 +33,8 @@ class ApiMainController extends Controller
     }
 
 
-    public function update_guardian($id, Request $r){
+    public function update_guardian($id, Request $r)
+    {
         $acc = Administrator::find($id);
         if ($acc == null) {
             return $this->error('Account not found.');
@@ -45,7 +48,7 @@ class ApiMainController extends Controller
         if ($r->phone_number_1 == null) {
             return $this->error('Guadian phone number is required.');
         }
- 
+
 
         $acc->phone_number_1 = $r->phone_number_1;
         $acc->mother_name = $r->father_name;
@@ -61,7 +64,6 @@ class ApiMainController extends Controller
         }
 
         return $this->success($acc, $message = "Success", 200);
- 
     }
 
 
@@ -103,6 +105,76 @@ class ApiMainController extends Controller
         return $this->success($u->get_my_classes(), $message = "Success", 200);
     }
 
+    public function session_create(Request $r)
+    {
+    
+ 
+
+        if (
+            $r->due_date == null ||
+            $r->type == null ||
+            $r->present == null
+
+        ) {
+            return $this->error('Some params are missing.');
+        }
+        $u = auth('api')->user();
+
+ 
+        $session = new Session();
+        $session->enterprise_id = $u->enterprise_id;
+        $session->academic_class_id = $r->academic_class_id;
+        $session->subject_id = $r->subject_id;
+        $session->service_id = $r->service_id;
+        $session->type = $r->type;
+        $session->title = $r->title;
+        $session->is_open = 1;
+        $session->prepared = 1; 
+        $session->administrator_id = $u->id;
+        $session->due_date = Carbon::parse($r->due_date);
+        $session->academic_year_id = $u->ent->active_academic_year()->id;
+        $session->term_id = $u->ent->active_term()->id;
+        $session->save(); 
+
+  
+        $present = [];
+        try {
+            $present = json_decode($r['present']);
+        } catch (Throwable $t) {
+            $present = [];
+        }
+
+        $m = $session;
+     
+        foreach ($m->getCandidates() as $key =>  $candidate) {
+            $p = new Participant();
+            $p->enterprise_id = $m->enterprise_id;
+            $p->administrator_id = $key;
+            $p->academic_year_id = $m->academic_year_id;
+            $p->term_id = $m->term_id;
+            $p->academic_class_id = $m->academic_class_id;
+            $p->subject_id = $m->subject_id;
+            $p->service_id = $m->service_id;
+            $p->is_done = 1;
+            $p->session_id = $m->id;
+
+            if (in_array($key, $present)) {
+                $p->is_present = 1; 
+            } else {
+                $p->is_present = 0;
+            }
+
+            $p->save();
+        }
+
+        $session->is_open = 0;
+        $session->prepared = 1;
+        $session->save();
+         
+
+        return $this->success(null, $message = "Success", 200);
+    }
+
     public function my_subjects()
     {
         $u = auth('api')->user();
@@ -140,7 +212,7 @@ class ApiMainController extends Controller
             return $this->success($acc, 'File uploaded successfully.');
         }
 
- 
+
 
 
 
