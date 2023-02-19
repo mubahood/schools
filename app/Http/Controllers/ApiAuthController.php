@@ -97,7 +97,7 @@ class ApiAuthController extends Controller
 
         //auth('api')->factory()->setTTL(Carbon::now()->addMonth(12)->timestamp);
 
-        Config::set('jwt.ttl', 60 * 24 * 30 * 365);
+        JWTAuth::factory()->setTTL(60 * 24 * 30 * 365);
 
         $token = auth('api')->attempt([
             'id' => $u->id,
