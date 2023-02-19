@@ -553,7 +553,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
         }
 
         if ($this->user_type == 'employee') {
-            $sql1 = "SELECT * FROM subjects,academic_classes WHERE
+            $sql1 = "SELECT *, subjects.id as id FROM subjects,academic_classes WHERE
                 (
                     subject_teacher = {$this->id} OR
                     teacher_1 = {$this->id} OR
