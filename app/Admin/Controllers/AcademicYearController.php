@@ -88,13 +88,13 @@ class AcademicYearController extends AdminController
      */
     protected function form()
     {
-        /*  $u = Admin::user(); 
-        $m = AcademicYear::where('id',5)->first();
-        $m->name = rand(1000,100000)."";
+       /*  $u = Admin::user(); 
+        $m = AcademicYear::where('id',2)->first();
+        $m->name .= rand(1,100).""; 
+      
         $m->is_active = 1;
         $m->save();
-        die("Romina");  */
-
+        die("Romina");   */
         $u = Admin::user();
         $form = new Form(new AcademicYear());
 
@@ -112,11 +112,20 @@ class AcademicYearController extends AdminController
         $form->radio('is_active', __('is_active'))->options([
             1 => 'Set as current year',
             0 => 'Set as Not current year',
-        ]);
+        ])->when(1, function ($f) {
 
+            $f->html('<div class="alert alert-danger"> <b>Warning!</b> Make sure you select the right purpose to why you need to switch academic years.</div>', 'Warning');
+            $f->radio('process_data', __('Why do you want to switch academic years?'))
+                ->options([
+                    'No' => 'To just view data',
+                    'Yes' => 'To process everything, promote students, create new classes, deactivate studnets in candidate classes.',
+                ])
+                ->default('No')
+                ->rules('required');
+        });
         $form->password(
             'password',
-            'Enter your  password to confirm this process.'
+            'Enter your password to confirm this process.'
         )
             ->help('You cannot reverse this proess.')
             ->rules('required');

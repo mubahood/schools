@@ -23,6 +23,7 @@ use App\Admin\Extensions\Nav\Shortcut;
 use App\Admin\Extensions\Nav\Dropdown;
 use App\Models\Utils;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 /* Utils::students_batch_import("public/storage/files/1.xlsx");
 die("DONE!"); */
@@ -37,6 +38,19 @@ Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
 
     $u = Auth::user();
     Utils::system_boot($u);
+
+    if ($u != null) {
+        if (isset($_GET['change_dpy_to'])) {
+            $ay = ((int)(trim($_GET['change_dpy_to'])));
+            if($ay != null){
+                DB::update("update enterprises set dp_year = ? where id = ? ", [$ay, $u->enterprise_id]); 
+                Admin::disablePjax(); 
+                header('location: '. admin_url());
+                die();
+            }
+        }
+    }
+
     $navbar->left(view('admin.search-bar', [
         'u' => $u
     ]));
@@ -74,12 +88,15 @@ Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
 
         $check_list = [];
         $u = Auth::user();
+
         if ($u != null) {
             $check_list = Utils::system_checklist($u);
+
+            $navbar->right(view('widgets.admin-links', [
+                'items' => $check_list,
+                'u' => $u
+            ]));
         }
-        $navbar->right(view('widgets.admin-links', [
-            'items' => $check_list
-        ]));
     }
 });
 

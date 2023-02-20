@@ -7,6 +7,7 @@ use App\Models\AcademicClassFee;
 use App\Models\AcademicClassLevel;
 use App\Models\AcademicYear;
 use App\Models\Course;
+use App\Models\MainCourse;
 use App\Models\Utils;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
@@ -40,7 +41,12 @@ class AcademicClassController extends AdminController
         $grid->disableBatchActions();
         $grid->model()
             ->orderBy('id', 'Desc')
-            ->where('enterprise_id', Admin::user()->enterprise_id);
+            ->where(
+                [
+                    'enterprise_id' => Admin::user()->enterprise_id,
+                    'academic_year_id' => Admin::user()->ent->dp_year,
+                ]
+            );
 
         $grid->column('id', __('Class #ID'))->sortable();
         $grid->column('name', __('Name'))->sortable();
@@ -64,9 +70,9 @@ class AcademicClassController extends AdminController
             return count($this->students);
         });
 
-        $grid->column('competences', __('Competences'))->display(function () {
+        /*         $grid->column('competences', __('Competences'))->display(function () {
             return count($this->competences);
-        });
+        }); */
 
         $grid->column('compulsory_subjects', __('Compulsory Subjects'))->hide();
         $grid->column('optional_subjects', __('Optional Subjects'))->hide();
@@ -114,17 +120,6 @@ class AcademicClassController extends AdminController
 
             $u = Admin::user();
             $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
-
-
-            $form->select('academic_year_id', 'Academic year')
-                ->options(
-                    AcademicYear::where([
-                        'enterprise_id' => $u->enterprise_id,
-                    ])->get()
-                        ->pluck('name', 'id')
-                )->rules('required');
-
-
             $class_levels = [];
             foreach (AcademicClassLevel::all() as $level) {
                 if ($u->ent->type == 'Primary') {
@@ -146,9 +141,38 @@ class AcademicClassController extends AdminController
             }
 
 
-            $form->select('academic_class_level_id', __('Class'))
-                ->options($class_levels)
-                ->rules('required');
+            if ($form->isCreating()) {
+                $form->select('academic_year_id', 'Academic year')
+                    ->options(
+                        AcademicYear::where([
+                            'enterprise_id' => $u->enterprise_id,
+                        ])->get()
+                            ->pluck('name', 'id')
+                    )->rules('required');
+
+                $form->select('academic_class_level_id', __('Class'))
+                    ->options($class_levels)
+                    ->rules('required');
+            } else {
+                $form->select('academic_year_id', 'Academic year')
+                    ->readOnly()
+                    ->options(
+                        AcademicYear::where([
+                            'enterprise_id' => $u->enterprise_id,
+                        ])->get()
+                            ->pluck('name', 'id')
+                    )->rules('required');
+
+                $form->select('academic_class_level_id', __('Class'))
+                    ->options($class_levels)
+                    ->readOnly()
+                    ->rules('required');
+            }
+
+
+
+
+
 
             $teachers = [];
             foreach (Administrator::where([
@@ -203,21 +227,22 @@ class AcademicClassController extends AdminController
 
 
                 $subjects = [];
-                foreach (Course::all() as $key => $c) {
-                    if (
-                        $ent->type == 'Primary'
-                    ) {
-                        if ($c->subject->subject_type == 'Primary') {
-                            $subjects[$c->id] =   $c->subject->name . " - " . $c->subject->code;
-                        }
-                    } else {
-                        $subjects[$c->id] =   $c->subject->name . " - " . $c->subject->code . "/" . $c->name;
-                    }
+                if ($u->ent->type == 'Primary') {
+                    $subjects = MainCourse::where([
+                        'subject_type' => 'Primary'
+                    ])->orwhere([
+                        'subject_type' =>  'Nursery'
+                    ])->get();
+                }else{
+                    $subjects = MainCourse::where([
+                        'subject_type' => 'Secondary'
+                    ])->get();
                 }
+ 
 
                 $form->select('course_id', 'Subject')
                     ->options(
-                        $subjects
+                        $subjects->pluck('name','id')
                     )->rules('required');
 
                 $form->radio('is_optional', 'Subject type')

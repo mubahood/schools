@@ -5,6 +5,7 @@ namespace App\Admin\Controllers;
 use App\Models\AcademicClass;
 use App\Models\AcademicYear;
 use App\Models\Course;
+use App\Models\MainCourse;
 use App\Models\Subject;
 use App\Models\Utils;
 use Encore\Admin\Auth\Database\Administrator;
@@ -35,7 +36,9 @@ class SubjectController extends AdminController
         $grid = new Grid(new Subject());
         Utils::display_system_checklist();
 
-        $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
+        $grid->model()->where([
+            'enterprise_id' => Admin::user()->enterprise_id,
+        ])
             ->orderBy('id', 'Desc');
         $grid->disableBatchActions();
 
@@ -72,13 +75,16 @@ class SubjectController extends AdminController
             ->orderBy('id', 'Desc')
             ->where('enterprise_id', Admin::user()->enterprise_id);
         $grid->column('id', __('#ID'))->sortable();
-        $grid->column('subject_name', __('SUBJECT'))->sortable();
+        $grid->column('subject_name', __('SUBJECT'))
+            ->display(function ($t) {
+                return $this->course->name;
+            });
         $grid->column('academic_class_id', __('Class'))
             ->display(function ($t) {
-                if( $this->academic_class == null){
+                if ($this->academic_class == null) {
                     return "#{$this->id}";
                 }
-                return $this->academic_class->name 
+                return $this->academic_class->name
                     . " - " .
                     $this->academic_class->academic_year->name;
             })->sortable();
@@ -92,7 +98,7 @@ class SubjectController extends AdminController
                 return $this->teacher->name;
             });
 
-        $grid->column('code', __('Code'))->sortable();
+        $grid->column('code', __('Code'))->hide()->sortable();
         $grid->column('details', __('Details'))->hide();
 
         return $grid;
@@ -156,22 +162,24 @@ class SubjectController extends AdminController
             )->rules('required');
 
         $ent = Utils::ent();
+
         $subjects = [];
-        foreach (Course::all() as $key => $c) {
-            if (
-                $ent->type == 'Primary'
-            ) {
-                if ($c->subject->subject_type == 'Primary') {
-                    $subjects[$c->id] =   $c->subject->name . " - " . $c->subject->code;
-                }
-            } else {
-                $subjects[$c->id] =   $c->subject->name . " - " . $c->subject->code . "/" . $c->name;
-            }
+        if ($u->ent->type == 'Primary') {
+            $subjects = MainCourse::where([
+                'subject_type' => 'Primary'
+            ])->orwhere([
+                'subject_type' =>  'Nursery'
+            ])->get();
+        } else {
+            $subjects = MainCourse::where([
+                'subject_type' => 'Secondary'
+            ])->get();
         }
+
 
         $form->select('course_id', 'Subject')
             ->options(
-                $subjects
+                $subjects->pluck('name', 'id')
             )->rules('required');
 
 
@@ -206,7 +214,7 @@ class SubjectController extends AdminController
         $form->textarea('details', __('Details'));
 
 
-        
+
 
         return $form;
     }

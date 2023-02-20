@@ -27,8 +27,14 @@ class TermController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Term());
-        $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
-            ->orderBy('id', 'desc');
+        $grid->model()
+            ->orderBy('id', 'Desc')
+            ->where(
+                [
+                    'enterprise_id' => Admin::user()->enterprise_id,
+                    'academic_year_id' => Admin::user()->ent->dp_year,
+                ]
+            );
 
         $grid->disableBatchActions();
 

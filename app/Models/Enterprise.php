@@ -47,9 +47,10 @@ class Enterprise extends Model
         $t = Term::where([
             'enterprise_id' => $this->id,
             'is_active' => 1,
-        ])->orderBy('id','desc')->first();
+        ])->orderBy('id', 'desc')->first();
         return $t;
     }
+
     public function active_academic_year()
     {
         $t = AcademicYear::where([
@@ -57,6 +58,41 @@ class Enterprise extends Model
             'is_active' => 1,
         ])->first();
         return $t;
+    }
+
+    public function dpYear()
+    {
+
+        $dp = AcademicYear::where([
+            'enterprise_id' => $this->id,
+            'id' => $this->dp_year,
+        ])->first();
+
+        if ($dp == null) {
+            $t = AcademicYear::where([
+                'enterprise_id' => $this->id,
+                'is_active' => 1,
+            ])->first();
+            if ($t == null) {
+                $t = AcademicYear::where([
+                    'enterprise_id' => $this->id,
+                ])->first();
+            }
+            if ($t != null) {
+                DB::update("update enterprises set dp_year = ? where id = ? ", [$t->id, $this->id]);
+            }
+            $dp = AcademicYear::where([
+                'enterprise_id' => $this->id,
+                'id' => $this->dp_year,
+            ])->first();
+        }
+
+        return $dp;
+    }
+
+    public function academic_years()
+    {
+        return $this->hasMany(AcademicYear::class, 'enterprise_id');
     }
 
     public static function main_bank_account($m)

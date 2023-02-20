@@ -5,6 +5,7 @@ namespace App\Models;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class AcademicYear extends Model
 {
@@ -71,6 +72,7 @@ class AcademicYear extends Model
             if ($_m != null) {
                 throw new Exception("You cannot have to active academic years.", 1);
             }
+            $m->process_data = 'Yes';
         });
 
         self::updating(function ($m) {
@@ -78,22 +80,23 @@ class AcademicYear extends Model
                 'enterprise_id' => $m->enterprise_id,
                 'is_active' => 1,
             ])->first();
+
             if ($_m != null) {
                 if ($_m->id != $m->id) {
                     if ($_m->is_active == 1) {
-                        $m->is_active = 0;
-                        admin_error('Warning', "You cannot have two active academic years deativate the other first.");
+                        DB::update("update academic_years set is_active = ? where id = ? ", [0, $_m->id]);
                     }
                 }
             }
-            /* 
-            try {
-                AcademicYear::generate_classes($m);
-            } catch (\Throwable $th) {
-            } */
+            
+            return $m;
         });
 
         self::updated(function ($m) {
+
+            if ($m->process_data != 'Yes') {
+                return $m;
+            } 
 
             if (((int)($m->is_active)) != 1) {
                 foreach ($m->terms as $t) {

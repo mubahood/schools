@@ -57,7 +57,7 @@ class Subject extends Model
 
         static::updating(function ($m) {
             return $m;
-          /*   $c = MainCourse::find($m->course_id);
+            /*   $c = MainCourse::find($m->course_id);
 
             if ($c == null) {
                 die("Course not found.");
@@ -124,29 +124,25 @@ class Subject extends Model
                     ])->first();
                     if ($main_course == null) {
                         $main_course = MainCourse::where([
-                            'name' => $this->subject_name, 
+                            'name' => $this->subject_name,
                         ])->first();
                     }
                     if ($main_course != null) {
                         $this->code =  $main_course->code;
                         $this->course_id =  $main_course->id;
                         $this->subject_name =  $main_course->name;
-                        if($this->save()){
-                            echo("Updated {$this->subject_name} <br>"); 
-                        }else{ 
-
+                        $_name =  $main_course->name;
+                        if ($this->save()) {
+                            // echo("Updated {$this->subject_name} <br>"); 
+                        } else {
                         }
-                        $fixed = true; 
+                        $fixed = true;
                     }
                 }
             }
-            
-        
-       
-            $_name = '-';
         }
 
-        return  " $_name ";
+        return  $_name;
     }
 
 
