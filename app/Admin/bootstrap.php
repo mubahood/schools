@@ -21,14 +21,16 @@
 use Encore\Admin\Facades\Admin;
 use App\Admin\Extensions\Nav\Shortcut;
 use App\Admin\Extensions\Nav\Dropdown;
+use App\Models\Enterprise;
+use App\Models\MainCourse;
+use App\Models\ParentCourse;
 use App\Models\Utils;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-/* Utils::students_batch_import("public/storage/files/1.xlsx");
-die("DONE!"); */
-
-
+ 
+ 
+  
 
 Encore\Admin\Form::forget(['map', 'editor']);
 
@@ -42,10 +44,10 @@ Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
     if ($u != null) {
         if (isset($_GET['change_dpy_to'])) {
             $ay = ((int)(trim($_GET['change_dpy_to'])));
-            if($ay != null){
-                DB::update("update enterprises set dp_year = ? where id = ? ", [$ay, $u->enterprise_id]); 
-                Admin::disablePjax(); 
-                header('location: '. admin_url());
+            if ($ay != null) {
+                DB::update("update enterprises set dp_year = ? where id = ? ", [$ay, $u->enterprise_id]);
+                Admin::disablePjax();
+                header('location: ' . admin_url());
                 die();
             }
         }

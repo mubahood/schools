@@ -24,8 +24,10 @@ class MainCourseController extends AdminController
      */
     protected function grid()
     {
+        
         $grid = new Grid(new MainCourse());
-
+        $grid->column('id', __('ID'))->sortable(); 
+        $grid->disableBatchActions();
         $grid->column('subject_type', __('Category'))->filter([
             'Nursery' => 'Nursery',
             'Primary' => 'Primary',
@@ -33,6 +35,7 @@ class MainCourseController extends AdminController
             'Advanced' => 'A\'level',
             'Other' => 'Other',
         ]);
+
         $grid->column('name', __('Subject name'))->sortable();
         $grid->column('code', __('Code'))->sortable();
         $grid->column('papers', __('Papers'))->display(function () {

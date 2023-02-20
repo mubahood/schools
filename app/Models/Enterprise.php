@@ -38,7 +38,7 @@ class Enterprise extends Model
         });
 
         self::updated(function ($m) {
-            Enterprise::my_update($m);
+            //Enterprise::my_update($m);
         });
     }
 
@@ -119,7 +119,10 @@ class Enterprise extends Model
         return $fees_acc;
     }
     public static function my_update($m)
-    {
+    { 
+        if ($m->id == 1) {
+            return;
+        }
         $owner = Administrator::find($m->administrator_id);
         if ($owner != null) {
             $owner->enterprise_id = $m->id;
@@ -181,6 +184,28 @@ class Enterprise extends Model
             $ac->enterprise_id = $m->id;
             $ac->administrator_id = $user->id;
             $ac->save();
+        }
+
+        /* academic year processing */
+
+        $ay = AcademicYear::where([
+            'enterprise_id' => $m->id
+        ])->first();
+
+        if ($ay == null) {
+            $ay = new AcademicYear();
+            $ay->enterprise_id = $m->id;
+            $ay->name = date('Y');
+            $ay->details = date('Y');
+            $now = Carbon::now();
+            $ay->starts = $now;
+            $then =  $now->addYear(1);
+            $ay->ends = $then;
+            $ay->is_active = 1;
+            $ay->process_data = 'Yes';
+            $ay->save();
+        } else {
+            AcademicYear::generate_classes($ay);
         }
     }
 }

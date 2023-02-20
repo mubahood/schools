@@ -48,10 +48,10 @@ class Subject extends Model
                 return false;
             }
 
-            $c = MainCourse::find($m->course_id);
+           /*  $c = MainCourse::find($m->course_id);
             $m->main_course_id = $c->main_course_id;
             $m->subject_name = $c->subject->name;
-            $m->code = $c->subject->code;
+            $m->code = $c->subject->code; */
             return $m;
         });
 

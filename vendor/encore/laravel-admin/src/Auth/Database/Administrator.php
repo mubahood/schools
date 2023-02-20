@@ -51,7 +51,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
         return [];
     }
 
- 
+
 
 
     //protected $fillable = ['username', 'password', 'name', 'avatar'];
@@ -205,7 +205,12 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
 
 
             Enterprise::my_update($e);
-            $model->name = $model->first_name . " " . $model->given_name . " " . $model->last_name;
+            $_name = $model->first_name . " " . $model->given_name . " " . $model->last_name;
+
+            if (strlen(trim($_name)) > 1) {
+                $model->name =  $_name;
+            }
+
             return $model;
         });
 
@@ -321,7 +326,10 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                 }
             }
 
-            $model->name = $model->first_name . " " . $model->given_name . " " . $model->last_name;
+            $_name = $model->first_name . " " . $model->given_name . " " . $model->last_name;
+            if (strlen(trim($_name)) > 1) {
+                $model->name =  $_name;
+            }
             return $model;
         });
 
@@ -523,8 +531,9 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
 
 
 
-    public function get_my_students($u){
-        if($u == null){
+    public function get_my_students($u)
+    {
+        if ($u == null) {
             return [];
         }
         $classes = $u->get_my_classes();
@@ -536,13 +545,12 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
             ])->get() as $user) {
                 $students[] = $user;
             }
-
         }
 
         return $students;
     }
 
-    
+
     public function get_my_subjetcs()
     {
 

@@ -103,6 +103,7 @@ php artisan make:migration create_bursaries_table
 php artisan make:migration create_bursary_beneficiaries_table
 php artisan make:migration create_bursary_beneficiaries_table
 php artisan make:migration create_sessions_table
+php artisan make:migration create_parent_courses_table 
 
 
 
@@ -166,6 +167,7 @@ php artisan make:model Document
 php artisan make:model Bursary
 php artisan make:model Session
 php artisan make:model Participant
+php artisan make:model ParentCourse
 
 
 php artisan admin:make TermController --model=App\\Models\\Term
@@ -252,6 +254,7 @@ php artisan admin:make BursaryController --model=App\Models\\Bursary
 php artisan admin:make BursaryBeneficiaryController --model=App\Models\BursaryBeneficiary
 php artisan admin:make SessionController --model=App\Models\Session
 php artisan admin:make ParticipantController --model=App\Models\Participant
+php artisan admin:make ParentCourseController --model=App\Models\ParentCourse
 
 
 

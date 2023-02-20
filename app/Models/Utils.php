@@ -271,6 +271,13 @@ class Utils  extends Model
 
     public static function system_boot($u)
     {
+        if($u == null){
+            return;
+        }
+
+        if($u->enterprise_id == 1){
+            return;
+        }
 
     /*     $u = Auth::user();
         $classes = AcademicClass::where([
@@ -472,6 +479,7 @@ class Utils  extends Model
         foreach ($subs as $key => $sub) {
             $sub->total = $sub->quantity * $sub->service->fee;
             $sub->save();
+            
         }
 
         $accs = Account::where([
@@ -483,12 +491,13 @@ class Utils  extends Model
             if ($acc->owner != null) {
                 $acc->academic_class_id = $acc->owner->current_class_id;
                 $acc->save();
+         
             }
         }
 
         //academic_class_id
 
-        Enterprise::my_update($ent);
+
         Utils::generate_account_categories($u);
     }
     public static function generate_account_categories($u)

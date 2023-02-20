@@ -6,22 +6,28 @@
         $canSwitchYears = true;
     }
     ?>
-    <li class="dropdown">
-        <a href="#" class="dropdown-toggle auto-refresh" data-toggle="dropdown" title="Academic Year - Display"
-            aria-expanded="true">
-            <i class="fa fa-play"></i>&nbsp;&nbsp;
-            <span class="interval-text">{{ $dpYear->name }}</span>
-        </a>
-        @if ($canSwitchYears)
+    @if ($dpYear != null)
 
-            <ul class="dropdown-menu" style="width: 30px !important;">
-                @foreach ($u->ent->academic_years as $year)
-                    <li><a href="{{ admin_url('?change_dpy_to='.$year->id) }}" title='Change display academic year to {{ $year->name }}' data-interval="2">{{ $year->name }}</a></li>
-                @endforeach
-            </ul>
-        @endif
 
-    </li>
+        <li class="dropdown">
+            <a href="#" class="dropdown-toggle auto-refresh" data-toggle="dropdown" title="Academic Year - Display"
+                aria-expanded="true">
+                <i class="fa fa-play"></i>&nbsp;&nbsp;
+                <span class="interval-text">{{ $dpYear->name }}</span>
+            </a>
+            @if ($canSwitchYears)
+
+                <ul class="dropdown-menu" style="width: 30px !important;">
+                    @foreach ($u->ent->academic_years as $year)
+                        <li><a href="{{ admin_url('?change_dpy_to=' . $year->id) }}"
+                                title='Change display academic year to {{ $year->name }}'
+                                data-interval="2">{{ $year->name }}</a></li>
+                    @endforeach
+                </ul>
+            @endif
+
+        </li>
+    @endif
 @endif
 {{-- 
     

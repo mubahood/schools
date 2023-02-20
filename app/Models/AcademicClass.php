@@ -40,33 +40,57 @@ class AcademicClass extends Model
     public static function generate_subjects($m)
     {
 
- 
+
         $category = $m->class_type;
         $courses = MainCourse::where([
             'subject_type' => $category
         ])->get();
+
+        $ent = Enterprise::find($m->enterprise_id);
+        $ay = $ent->active_academic_year();
+        if ($ay == null) {
+            $ay = AcademicYear::where([
+                'enterprise_id' => $m->enterprise_id
+            ])->first();
+        }
+        if ($ay == null) {
+            return $ay;
+        }
 
         foreach ($courses as $main_course) {
             if (
                 $category == 'Secondary' ||
                 $category == 'Advanced'
             ) {
-                foreach ($main_course->papers as  $paper) {
-                    $s = new Subject();
-                    $s->enterprise_id = $m->enterprise_id;
-                    $s->academic_class_id = $m->id;
-                    $s->subject_teacher = $m->class_teahcer_id;
-                    $s->code =  $main_course->code . "/" . $paper->name;
-                    $s->course_id =  $main_course->id;
-                    $s->subject_name =  $main_course->name . " - Paper " . $paper->name;
-                    $s->demo_id =  0;
-                    $s->details =  '';
-                    $s->is_optional =  (!((bool)($paper->is_compulsory)));
-                    $s->save();
+
+
+                foreach (ParentCourse::where([
+                    'type' => 'Secondary',
+                    'is_compulsory' => 1,
+                ])->get() as $pc) {
+                    foreach ($pc->papers as $paper) {
+                        $sub = Subject::where([
+                            'academic_class_id' => $m->id,
+                            'course_id' => $paper->id,
+                        ])->first();
+                        if ($sub != null) {
+                            continue;
+                        }
+                        $sub = new Subject();
+                        $sub->academic_class_id = $m->id;
+                        $sub->enterprise_id = $m->enterprise_id;
+                        $sub->course_id = $paper->id;
+                        $sub->main_course_id = $paper->id;
+                        $sub->subject_teacher = $ent->administrator_id;
+                        $sub->academic_year_id = $ay->id;
+                        $sub->code = $paper->code;
+                        $sub->details = $paper->name;
+                        $sub->subject_name = $paper->name;
+                        $sub->is_optional = (!$paper->is_compulsory);
+                        $sub->save();
+                    }
                 }
             } else {
-
-
                 $s = Subject::where([
                     'academic_class_id' => $m->id,
                     'course_id' => $main_course->id

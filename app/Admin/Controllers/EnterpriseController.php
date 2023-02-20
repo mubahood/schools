@@ -37,6 +37,9 @@ class EnterpriseController extends AdminController
         $grid->column('id', __('Id'))->sortable();
         $grid->column('name', __('Name'))->sortable();
         $grid->column('administrator_id', __('Onwer'))->display(function () {
+            if($this->owner == null){
+                return '-';
+            }
             return $this->owner->name;
         });
         $grid->column('logo', __('Logo'));
@@ -86,7 +89,7 @@ class EnterpriseController extends AdminController
         $ads = [];
         foreach (Administrator::all() as $ad) {
             if ($ad->isRole('admin')) {
-                $ads[$ad->id] = $ad->username;
+                $ads[$ad->id] = "{$ad->id}. $ad->name - {$ad->username}";
             };
         }
 

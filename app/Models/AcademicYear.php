@@ -54,8 +54,7 @@ class AcademicYear extends Model
                     $term->is_active = 0;
                 }
                 $term->save();
-            }
-
+            } 
             try {
                 AcademicYear::generate_classes($m);
             } catch (\Throwable $th) {
@@ -88,7 +87,7 @@ class AcademicYear extends Model
                     }
                 }
             }
-            
+
             return $m;
         });
 
@@ -96,7 +95,7 @@ class AcademicYear extends Model
 
             if ($m->process_data != 'Yes') {
                 return $m;
-            } 
+            }
 
             if (((int)($m->is_active)) != 1) {
                 foreach ($m->terms as $t) {
@@ -194,7 +193,20 @@ class AcademicYear extends Model
                 $classes[] = $level;
             }
         }
+
         foreach ($classes as $class) {
+
+            $_class = AcademicClass::where([
+                'enterprise_id' =>  $ent->id,
+                'academic_year_id' =>  $m->id,
+                'academic_class_level_id' => $class->id,
+            ])->first();
+
+            if ($_class != null) {
+                AcademicClass::generate_subjects($_class);
+                continue;
+            }
+
             $c = new AcademicClass();
             $c->enterprise_id = $ent->id;
             $c->academic_year_id = $m->id;
@@ -204,6 +216,7 @@ class AcademicYear extends Model
             $c->academic_class_level_id = $class->id;
             $c->details = $class->name;
             $c->save();
+            AcademicClass::generate_subjects($c);
         }
     }
 }
