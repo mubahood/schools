@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Session extends Model
 {
@@ -22,14 +23,7 @@ class Session extends Model
         self::updated(function ($m) {
         });
     }
-    /*
 
-
-
-
-
-Edit
-*/
 
     function close_session()
     {
@@ -166,4 +160,14 @@ Edit
         }
         return $candidates;
     }
+
+    public function getPresentAttribute()
+    {
+        return DB::table('participants')->where([
+            'is_present' => 1,
+            'session_id' => $this->id,
+        ])->pluck('administrator_id');
+    }
+
+    protected $appends = ['present'];
 }

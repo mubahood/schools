@@ -541,6 +541,8 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
 
         return $students;
     }
+
+    
     public function get_my_subjetcs()
     {
 

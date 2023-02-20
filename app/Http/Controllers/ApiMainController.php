@@ -107,8 +107,8 @@ class ApiMainController extends Controller
 
     public function session_create(Request $r)
     {
-    
- 
+
+
 
         if (
             $r->due_date == null ||
@@ -120,7 +120,7 @@ class ApiMainController extends Controller
         }
         $u = auth('api')->user();
 
- 
+
         $session = new Session();
         $session->enterprise_id = $u->enterprise_id;
         $session->academic_class_id = $r->academic_class_id;
@@ -129,14 +129,14 @@ class ApiMainController extends Controller
         $session->type = $r->type;
         $session->title = $r->title;
         $session->is_open = 1;
-        $session->prepared = 1; 
+        $session->prepared = 1;
         $session->administrator_id = $u->id;
         $session->due_date = Carbon::parse($r->due_date);
         $session->academic_year_id = $u->ent->active_academic_year()->id;
         $session->term_id = $u->ent->active_term()->id;
-        $session->save(); 
+        $session->save();
 
-  
+
         $present = [];
         try {
             $present = json_decode($r['present']);
@@ -145,7 +145,7 @@ class ApiMainController extends Controller
         }
 
         $m = $session;
-     
+
         foreach ($m->getCandidates() as $key =>  $candidate) {
             $p = new Participant();
             $p->enterprise_id = $m->enterprise_id;
@@ -159,7 +159,7 @@ class ApiMainController extends Controller
             $p->session_id = $m->id;
 
             if (in_array($key, $present)) {
-                $p->is_present = 1; 
+                $p->is_present = 1;
             } else {
                 $p->is_present = 0;
             }
@@ -170,7 +170,7 @@ class ApiMainController extends Controller
         $session->is_open = 0;
         $session->prepared = 1;
         $session->save();
-         
+
 
         return $this->success(null, $message = "Success", 200);
     }
@@ -180,6 +180,15 @@ class ApiMainController extends Controller
         $u = auth('api')->user();
         return $this->success($u->get_my_subjetcs(), $message = "Success", 200);
     }
+
+    public function my_sessions()
+    {
+        $u = auth('api')->user(); 
+        return $this->success(Session::where([
+            'administrator_id' => $u->id,
+            'academic_year_id' => $u->ent->active_academic_year()->id,
+        ])->get(), $message = "Success", 200);
+    } 
 
     public function upload_media(Request $r)
     {
