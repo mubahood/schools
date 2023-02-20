@@ -27,7 +27,7 @@ class Subject extends Model
         'is_optional',
     ];
 
-    
+
 
     public static function boot()
     {
@@ -44,11 +44,11 @@ class Subject extends Model
                 'course_id' => $m->course_id
             ])->first();
             if ($s != null) {
-                throw new Exception("Same subject cannot be in a certain class twice", 1); 
+                throw new Exception("Same subject cannot be in a certain class twice", 1);
                 return false;
             }
 
-            $c = Course::find($m->course_id);
+            $c = MainCourse::find($m->course_id);
             $m->main_course_id = $c->main_course_id;
             $m->subject_name = $c->subject->name;
             $m->code = $c->subject->code;
@@ -56,7 +56,8 @@ class Subject extends Model
         });
 
         static::updating(function ($m) {
-            $c = Course::find($m->course_id);
+            return $m;
+          /*   $c = MainCourse::find($m->course_id);
 
             if ($c == null) {
                 die("Course not found.");
@@ -75,20 +76,20 @@ class Subject extends Model
             }
 
             $m->subject_name = $c->subject->name;
-            $m->code = $c->subject->code;
+            $m->code = $c->subject->code; */
         });
     }
 
 
     function academic_class()
     {
-        return $this->belongsTo(AcademicClass::class,'academic_class_id');
+        return $this->belongsTo(AcademicClass::class, 'academic_class_id');
     }
 
     function course()
     {
-        return $this->belongsTo(MainCourse::class,'course_id'); 
-    } 
+        return $this->belongsTo(MainCourse::class, 'course_id');
+    }
 
     function teacher()
     {
@@ -108,9 +109,41 @@ class Subject extends Model
     {
         $_name = "";
         if ($this->course != null) {
-            return $_name = $this->course->name;
-        } else {
             $_name = $this->course->name;
+        } else {
+
+            $fixed = false;
+            if (($this->subject_name != null) &&
+                ($this->academic_class != null) &&
+                ($this->academic_class->class_type != null)
+            ) {
+                if (strlen($this->subject_name) > 1) {
+                    $main_course = MainCourse::where([
+                        'name' => $this->subject_name,
+                        'subject_type' => $this->academic_class->class_type,
+                    ])->first();
+                    if ($main_course == null) {
+                        $main_course = MainCourse::where([
+                            'name' => $this->subject_name, 
+                        ])->first();
+                    }
+                    if ($main_course != null) {
+                        $this->code =  $main_course->code;
+                        $this->course_id =  $main_course->id;
+                        $this->subject_name =  $main_course->name;
+                        if($this->save()){
+                            echo("Updated {$this->subject_name} <br>"); 
+                        }else{ 
+
+                        }
+                        $fixed = true; 
+                    }
+                }
+            }
+            
+        
+       
+            $_name = '-';
         }
 
         return  " $_name ";
