@@ -21,43 +21,7 @@ class AcademicClass extends Model
 
 
         self::created(function ($m) {
-            $category = AcademicClass::get_academic_class_category($m->short_name);
-            $courses = MainCourse::where([
-                'subject_type' => $category
-            ])->get();
-
-            foreach ($courses as $main_course) {
-                if (
-                    $category == 'Secondary' ||
-                    $category == 'Advanced'
-                ) {
-                    foreach ($main_course->papers as  $paper) {
-                        $s = new Subject();
-                        $s->enterprise_id = $m->enterprise_id;
-                        $s->academic_class_id = $m->id;
-                        $s->subject_teacher = $m->class_teahcer_id;
-                        $s->code =  $main_course->code . "/" . $paper->name;
-                        $s->course_id =  $main_course->id;
-                        $s->subject_name =  $main_course->name . " - Paper " . $paper->name;
-                        $s->demo_id =  0;
-                        $s->details =  '';
-                        $s->is_optional =  (!((bool)($paper->is_compulsory)));
-                        $s->save();
-                    }
-                } else {
-                    $s = new Subject();
-                    $s->enterprise_id = $m->enterprise_id;
-                    $s->academic_class_id = $m->id;
-                    $s->subject_teacher = $m->class_teahcer_id;
-                    $s->code =  $main_course->code;
-                    $s->course_id =  $main_course->id;
-                    $s->subject_name =  $main_course->name;
-                    $s->demo_id =  0;
-                    $s->details =  '';
-                    $s->is_optional =  false;
-                    $s->save();
-                }
-            }
+            AcademicClass::generate_subjects($m);
         });
         self::deleting(function ($m) {
             die("You cannot delete this item.");
@@ -73,6 +37,57 @@ class AcademicClass extends Model
         });
     }
 
+    public static function generate_subjects($m)
+    {
+
+ 
+        $category = $m->class_type;
+        $courses = MainCourse::where([
+            'subject_type' => $category
+        ])->get();
+
+        foreach ($courses as $main_course) {
+            if (
+                $category == 'Secondary' ||
+                $category == 'Advanced'
+            ) {
+                foreach ($main_course->papers as  $paper) {
+                    $s = new Subject();
+                    $s->enterprise_id = $m->enterprise_id;
+                    $s->academic_class_id = $m->id;
+                    $s->subject_teacher = $m->class_teahcer_id;
+                    $s->code =  $main_course->code . "/" . $paper->name;
+                    $s->course_id =  $main_course->id;
+                    $s->subject_name =  $main_course->name . " - Paper " . $paper->name;
+                    $s->demo_id =  0;
+                    $s->details =  '';
+                    $s->is_optional =  (!((bool)($paper->is_compulsory)));
+                    $s->save();
+                }
+            } else {
+
+
+                $s = Subject::where([
+                    'academic_class_id' => $m->id,
+                    'course_id' => $main_course->id
+                ])->first();
+                if ($s != null) {
+                    continue;
+                }
+                $s = new Subject();
+                $s->enterprise_id = $m->enterprise_id;
+                $s->academic_class_id = $m->id;
+                $s->subject_teacher = $m->class_teahcer_id;
+                $s->code =  $main_course->code;
+                $s->course_id =  $main_course->id;
+                $s->subject_name =  $main_course->name;
+                $s->demo_id =  0;
+                $s->details =  '';
+                $s->is_optional =  false;
+                $s->save();
+            }
+        }
+    }
     public static function my_update($class)
     {
         $_class = AcademicClass::where([

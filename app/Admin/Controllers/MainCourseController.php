@@ -27,9 +27,11 @@ class MainCourseController extends AdminController
         $grid = new Grid(new MainCourse());
 
         $grid->column('subject_type', __('Category'))->filter([
+            'Nursery' => 'Nursery',
             'Primary' => 'Primary',
             'Secondary' => 'O\'level',
             'Advanced' => 'A\'level',
+            'Other' => 'Other',
         ]);
         $grid->column('name', __('Subject name'))->sortable();
         $grid->column('code', __('Code'))->sortable();
@@ -57,9 +59,7 @@ class MainCourseController extends AdminController
         $show->field('name', __('Name'));
         $show->field('short_name', __('Short name'));
         $show->field('code', __('Code'));
-
-
-
+ 
         return $show;
     }
 
@@ -76,9 +76,11 @@ class MainCourseController extends AdminController
 
             $form->radio('subject_type', __('Subject category'))
                 ->options([
+                    'Nursery' => 'Nursery subject',
                     'Primary' => 'Primary school subject',
                     'Secondary' => 'O\'level subject',
                     'Advanced' => 'For A\'level subject',
+                    'Other' => 'Other',
                 ])
                 ->rules('required');
 

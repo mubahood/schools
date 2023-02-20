@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Encore\Admin\Auth\Database\Administrator;
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -43,7 +44,7 @@ class Subject extends Model
                 'course_id' => $m->course_id
             ])->first();
             if ($s != null) {
-                admin_error('Warning', 'Same subject cannot be in a certain class twice');
+                throw new Exception("Same subject cannot be in a certain class twice", 1); 
                 return false;
             }
 
@@ -86,8 +87,8 @@ class Subject extends Model
 
     function course()
     {
-        return $this->belongsTo(Course::class);
-    }
+        return $this->belongsTo(MainCourse::class,'course_id'); 
+    } 
 
     function teacher()
     {

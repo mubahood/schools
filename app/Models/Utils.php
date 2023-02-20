@@ -25,7 +25,7 @@ define('DOCUMENT_RECEIPT', 'Receipt');
 class Utils  extends Model
 {
 
-    
+
 
     public static function upload_images_1($files, $is_single_file = false)
     {
@@ -68,7 +68,7 @@ class Utils  extends Model
 
 
 
-    
+
     public static function my_date($t)
     {
         $c = Carbon::parse($t);
@@ -272,6 +272,71 @@ class Utils  extends Model
     public static function system_boot($u)
     {
 
+        $u = Auth::user();
+        $classes = AcademicClass::where([
+            'academic_year_id' => $u->ent->active_academic_year()->id
+        ])->get();
+
+        echo "<pre>";
+
+        foreach ($classes as $class) {
+
+            AcademicClass::generate_subjects($class);
+ 
+        }
+
+        foreach ($classes as $key => $c) {
+            echo "<b>{$c->short_name}</b> ==> {$c->subjects->count()} <hr>";
+            foreach ($c->subjects as $s) {
+                if ($s->course == null) {
+                    $s->delete();
+                    echo "no name <br>";
+                    continue;
+                }
+                if ($s->course->subject_type == $c->class_type) {
+                    echo ($s->course->name . "<br>");
+                } else {
+                    echo "{$s->course->name} NOT FOUND <br>";
+                    $s->delete();
+                }
+            }
+        }
+
+
+
+
+        die("");
+        /* 
+
+
+            "id" => 38
+    "created_at" => "2022-09-17 06:20:44"
+    "updated_at" => "2022-09-17 06:20:44"
+    "name" => "English"
+    "short_name" => "ENG"
+    "code" => "112"
+    "subject_type" => "Primary"
+
+
+        [id] => 11
+        [created_at] => 2022-09-17 16:44:49
+        [updated_at] => 2023-01-05 19:18:20
+        [enterprise_id] => 7
+        [academic_year_id] => 2
+        [class_teahcer_id] => 3012
+        [name] => Primary four
+        [short_name] => P.4
+        [details] => P.4 - 2022
+        [demo_id] => 0
+        [compulsory_subjects] => 0
+        [optional_subjects] => 0
+        [class_type] => Primary
+        [academic_class_level_id] => 7
+ 
+ */
+
+
+
         /*
         $u = Administrator::find(2317);
         $u->spouse_name .= '1';
@@ -353,8 +418,6 @@ class Utils  extends Model
         foreach ($preps as $key => $session) {
             $session->close_session();
         }
-
-
     }
 
     public static function create_documents($u)

@@ -7,6 +7,7 @@ use App\Models\Account;
 use App\Models\MenuItem;
 use App\Models\StudentHasClass;
 use App\Models\StudentHasTheologyClass;
+use App\Models\Subject;
 use App\Models\Transaction;
 use App\Models\Utils;
 use Carbon\Carbon;
@@ -25,6 +26,7 @@ class HomeController extends Controller
     public function index(Content $content)
     {
 
+     
 
         /*
         set_time_limit(-1);
@@ -139,12 +141,12 @@ class HomeController extends Controller
         $u = Admin::user();
 
         if (
-            $u->isRole('admin') || 
+            $u->isRole('admin') ||
             $u->isRole('dos')
         ) {
             $content->row(function (Row $row) {
 
-           
+
 
                 $row->column(3, function (Column $column) {
                     $column->append(Dashboard::students());
@@ -306,19 +308,17 @@ class HomeController extends Controller
 
 
         if (
-            $u->isRole('bursar')  
+            $u->isRole('bursar')
         ) {
 
             $content->row(function (Row $row) {
-            $row->column(6, function (Column $column) {
-                $column->append(Dashboard::bursarFeesExpected()); 
+                $row->column(6, function (Column $column) {
+                    $column->append(Dashboard::bursarFeesExpected());
+                });
+                $row->column(6, function (Column $column) {
+                    $column->append(Dashboard::bursarFeesPaid());
+                });
             });
-            $row->column(6, function (Column $column) { 
-                $column->append(Dashboard::bursarFeesPaid());
-            });
-
-        });
-
         }
 
 
