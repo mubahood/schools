@@ -272,7 +272,7 @@ class Utils  extends Model
     public static function system_boot($u)
     {
 
-        $u = Auth::user();
+    /*     $u = Auth::user();
         $classes = AcademicClass::where([
             'academic_year_id' => $u->ent->active_academic_year()->id
         ])->get();
@@ -300,12 +300,8 @@ class Utils  extends Model
                     $s->delete();
                 }
             }
-        }
-
-
-
-
-        die("");
+        } 
+        die(""); */
         /* 
 
 
