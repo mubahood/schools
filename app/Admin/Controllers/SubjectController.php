@@ -32,12 +32,26 @@ class SubjectController extends AdminController
     protected function grid()
     {
 
+        foreach (Subject::all() as $key => $sub) {
+            if ($sub->course != null) {
+                if ($sub->course->subject_type == 'Primary') {
+                    $sub->code = $sub->course->code;
+                    echo "from ==> $sub->subject_name ";
+                    $sub->subject_name = $sub->course->name; 
+                    $sub->save();
+                    echo "TO =======> $sub->subject_name <=======<hr>";
+                }
+            }
+        }
+        die("dpone");
+
+
 
         $grid = new Grid(new Subject());
-        Utils::display_system_checklist();
 
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
+            'academic_year_id' => Admin::user()->ent->dp_year,
         ])
             ->orderBy('id', 'Desc');
         $grid->disableBatchActions();
@@ -63,7 +77,8 @@ class SubjectController extends AdminController
             }
 
             $filter->equal('academic_class_id', 'Fliter by class')->select(AcademicClass::where([
-                'enterprise_id' => $u->enterprise_id
+                'enterprise_id' => $u->enterprise_id,
+                'academic_year_id' => Admin::user()->ent->dp_year,
             ])->get()
                 ->pluck('name_text', 'id'));
             $filter->equal('subject_teacher', 'Fliter by teacher')->select($teachers);
@@ -156,7 +171,8 @@ class SubjectController extends AdminController
         $form->select('academic_class_id', 'Class')
             ->options(
                 AcademicClass::where([
-                    'enterprise_id' => $u->enterprise_id
+                    'enterprise_id' => $u->enterprise_id,
+                    'academic_year_id' => Admin::user()->ent->dp_year,
                 ])->get()
                     ->pluck('name', 'id')
             )->rules('required');

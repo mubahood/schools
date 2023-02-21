@@ -258,7 +258,7 @@ class Utils  extends Model
 
         $r = $r . "/public/";
 
-        /*
+        /*oot
          "/home/ulitscom_html/public/storage/images/956000011639246-(m).JPG
 
         public_html/public/storage/images
@@ -271,127 +271,17 @@ class Utils  extends Model
 
     public static function system_boot($u)
     {
-        if($u == null){
+        if ($u == null) {
             return;
         }
 
-        if($u->enterprise_id == 1){
+        if ($u->enterprise_id == 1) {
             return;
         }
-
-    /*     $u = Auth::user();
-        $classes = AcademicClass::where([
-            'academic_year_id' => $u->ent->active_academic_year()->id
-        ])->get();
-
-        echo "<pre>";
-
-        foreach ($classes as $class) {
-
-            AcademicClass::generate_subjects($class);
- 
-        }
-
-        foreach ($classes as $key => $c) {
-            echo "<b>{$c->short_name}</b> ==> {$c->subjects->count()} <hr>";
-            foreach ($c->subjects as $s) {
-                if ($s->course == null) {
-                    $s->delete();
-                    echo "no name <br>";
-                    continue;
-                }
-                if ($s->course->subject_type == $c->class_type) {
-                    echo ($s->course->name . "<br>");
-                } else {
-                    echo "{$s->course->name} NOT FOUND <br>";
-                    $s->delete();
-                }
-            }
-        } 
-        die(""); */
-        /* 
-
-
-            "id" => 38
-    "created_at" => "2022-09-17 06:20:44"
-    "updated_at" => "2022-09-17 06:20:44"
-    "name" => "English"
-    "short_name" => "ENG"
-    "code" => "112"
-    "subject_type" => "Primary"
-
-
-        [id] => 11
-        [created_at] => 2022-09-17 16:44:49
-        [updated_at] => 2023-01-05 19:18:20
-        [enterprise_id] => 7
-        [academic_year_id] => 2
-        [class_teahcer_id] => 3012
-        [name] => Primary four
-        [short_name] => P.4
-        [details] => P.4 - 2022
-        [demo_id] => 0
-        [compulsory_subjects] => 0
-        [optional_subjects] => 0
-        [class_type] => Primary
-        [academic_class_level_id] => 7
- 
- */
-
-
-
-        /*
-        $u = Administrator::find(2317);
-        $u->spouse_name .= '1';
-        $u->save();
-        dd($u);
-        $m = StudentHasClass::find(100);
-        $m->optional_subjects_picked = !$m->optional_subjects_picked;
-        $m->save();
-
-        dd($m);
-        die("romina");
-
-
-        "academic_class_id" => 16
-        "administrator_id" => 2416
-        "stream_id" => 0
-        "updated_at" => "2022-10-02"
-        "created_at" => "2022-10-02"
-        "academic_year_id" => 2
-        "done_selecting_option_courses" => 0
-        "optional_subjects_picked" => 0
-
-
-        foreach (AcademicClass::all() as $key => $class) {
-            $level = AcademicClassLevel::where([
-                'short_name' => $class->short_name
-            ])->first();
-            if ($level != null) {
-                $class->academic_class_level_id = $level->id;
-                $class->save();
-                echo "FOUND ==> {$class->name}<hr>";
-            }else{
-                echo "NOT FOUND ==> {$class->name}<hr>";
-            }
-        }
-        dd("as");
-
-        $year = new AcademicYear();
-        $year->enterprise_id = $u->enterprise_id;
-        $year->name = '2021';
-        $year->starts = Carbon::now();
-        $year->ends = Carbon::now();
-        $year->details = '2021';
-        $year->is_active = 1;
-        $year->demo_id = 0;
-        $year->save();
-
-        die("romina"); */
-
 
         Utils::create_documents($u);
         Utils::prepare_session_participations($u);
+        Utils::prepare_pending_things($u);
 
         $subs = Exam::where('marks_generated', '!=', true)->get();
         foreach ($subs as $m) {
@@ -458,6 +348,27 @@ class Utils  extends Model
         } */
     }
 
+    public static function prepare_pending_things()
+    {
+        $ent_id  = null;
+        $u = Auth::user();
+
+        if ($u != null) {
+            $ent_id = ((int)($u->enterprise_id));
+        }
+
+        /* =============== start SUBJECTS WITH NO academic_year_id============= */
+        foreach (Subject::where([
+            'academic_year_id' => null,
+        ])->get() as $sub) {
+            if ($sub->academic_class != null) {
+                $sub->academic_year_id = $sub->academic_class->academic_year_id;
+                $sub->save(); 
+            } 
+        } 
+        /* =============== end SUBJECTS WITH NO academic_year_id============= */
+    }
+
     public static function financial_accounts_creation()
     {
 
@@ -479,7 +390,6 @@ class Utils  extends Model
         foreach ($subs as $key => $sub) {
             $sub->total = $sub->quantity * $sub->service->fee;
             $sub->save();
-            
         }
 
         $accs = Account::where([
@@ -491,7 +401,6 @@ class Utils  extends Model
             if ($acc->owner != null) {
                 $acc->academic_class_id = $acc->owner->current_class_id;
                 $acc->save();
-         
             }
         }
 

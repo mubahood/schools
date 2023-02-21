@@ -563,6 +563,29 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
         }
 
         if ($this->user_type == 'employee') {
+
+            $data = [];
+            foreach (Subject::where([
+                'subject_teacher' => $this->id,
+                'academic_year_id' =>   $active_academic_year_id
+            ])
+                ->orwhere([
+                    'teacher_1' => $this->id
+                ])
+                ->orwhere([
+                    'teacher_2' => $this->id
+                ])
+                ->orwhere([
+                    'teacher_3' => $this->id
+                ])
+                ->get() as $sub) {
+                $data[] = $sub;
+            }
+            return $data;
+
+            die(count($data) . "");
+
+
             $sql1 = "SELECT *, subjects.id as id FROM subjects,academic_classes WHERE
                 (
                     subject_teacher = {$this->id} OR
@@ -575,6 +598,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                     academic_classes.academic_year_id = $active_academic_year_id
                 )
             ";
+
 
             $data = [];
             foreach (DB::select($sql1) as $key => $v) {
