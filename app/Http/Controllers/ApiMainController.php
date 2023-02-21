@@ -194,7 +194,8 @@ class ApiMainController extends Controller
             transactions.account_id = accounts.id AND
             transactions.enterprise_id = $u->enterprise_id AND
             is_contra_entry = 0 ORDER BY id DESC LIMIT 4000");
-        return $recs; 
+
+        return $this->success($recs, $message = "Success", 200);
     }
     public function my_subjects()
     {
