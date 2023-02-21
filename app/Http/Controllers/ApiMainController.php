@@ -184,7 +184,7 @@ class ApiMainController extends Controller
         transactions.created_at as created_at,
         transactions.type as type,
         transactions.payment_date as payment_date,
-        transactions.account_id,
+        transactions.account_id, 
         transactions.amount,
         transactions.description,
         accounts.name as account_name,
@@ -192,19 +192,9 @@ class ApiMainController extends Controller
          FROM transactions,accounts
         WHERE 
             transactions.account_id = accounts.id AND
+            transactions.enterprise_id = $u->enterprise_id AND
             is_contra_entry = 0 ORDER BY id DESC LIMIT 4000");
-        return $recs;
-        /* 
-
-        "": 163,
-        "": 235000,
-        "": "Sserubula Haitham paid UGX 235,000 school fees through school pay. Transaction ID #75689500629",
-        "": "75689500629",
-        "": "FEES_PAYMENT",
-        "": "2022-10-06 08:47:53"
-
-        */
-        return $this->success($u->get_my_subjetcs(), $message = "Success", 200);
+        return $recs; 
     }
     public function my_subjects()
     {
