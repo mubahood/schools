@@ -57,7 +57,10 @@ class Subject extends Model
             return $m;
         });
 
-        static::updating(function ($m) {
+        static::updating(function ($m) { 
+            if(isset($m->name)){
+                unset($m->name);
+            }
             return $m;
             /*   $c = MainCourse::find($m->course_id);
 

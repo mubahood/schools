@@ -565,18 +565,24 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
         if ($this->user_type == 'employee') {
 
             $data = [];
-            foreach (Subject::where([
-                'subject_teacher' => $this->id,
+            foreach (Subject::where([ 
                 'academic_year_id' =>   $active_academic_year_id,
                 'enterprise_id' =>   $this->enterprise_id,
-            ])
+                'subject_teacher' => $this->id,
+            ]) 
                 ->orwhere([
+                    'academic_year_id' =>   $active_academic_year_id,
+                    'enterprise_id' =>   $this->enterprise_id,
                     'teacher_1' => $this->id
                 ])
                 ->orwhere([
+                    'academic_year_id' =>   $active_academic_year_id,
+                    'enterprise_id' =>   $this->enterprise_id,
                     'teacher_2' => $this->id
                 ])
                 ->orwhere([
+                    'academic_year_id' =>   $active_academic_year_id,
+                    'enterprise_id' =>   $this->enterprise_id,
                     'teacher_3' => $this->id
                 ])
                 ->get() as $sub) {
