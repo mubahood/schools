@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 use Throwable;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -175,6 +176,36 @@ class ApiMainController extends Controller
         return $this->success(null, $message = "Success", 200);
     }
 
+    public function transactions()
+    {
+        $u = auth('api')->user();
+        $recs =  DB::select("SELECT 
+        transactions.id as id,
+        transactions.created_at as created_at,
+        transactions.type as type,
+        transactions.payment_date as payment_date,
+        transactions.account_id,
+        transactions.amount,
+        transactions.description,
+        accounts.name as account_name,
+        accounts.administrator_id as administrator_id
+         FROM transactions,accounts
+        WHERE 
+            transactions.account_id = accounts.id AND
+            is_contra_entry = 0 ORDER BY id DESC LIMIT 4000");
+        return $recs;
+        /* 
+
+        "": 163,
+        "": 235000,
+        "": "Sserubula Haitham paid UGX 235,000 school fees through school pay. Transaction ID #75689500629",
+        "": "75689500629",
+        "": "FEES_PAYMENT",
+        "": "2022-10-06 08:47:53"
+
+        */
+        return $this->success($u->get_my_subjetcs(), $message = "Success", 200);
+    }
     public function my_subjects()
     {
         $u = auth('api')->user();
@@ -183,12 +214,12 @@ class ApiMainController extends Controller
 
     public function my_sessions()
     {
-        $u = auth('api')->user(); 
+        $u = auth('api')->user();
         return $this->success(Session::where([
             'administrator_id' => $u->id,
             'academic_year_id' => $u->ent->active_academic_year()->id,
         ])->get(), $message = "Success", 200);
-    } 
+    }
 
     public function upload_media(Request $r)
     {
