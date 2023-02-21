@@ -381,10 +381,10 @@ class StudentsController extends AdminController
 
             $form->text('first_name')->rules('required');
             $form->text('given_name');
-            $form->text('last_name')->rules('required');
+            $form->text('last_name');
 
-            $form->text('school_pay_payment_code')->rules('required');
-            $form->text('school_pay_account_id')->rules('required');
+            $form->text('school_pay_payment_code');
+            $form->text('school_pay_account_id');
             $form->radio('sex', 'Gender')->options(['Male' => 'Male', 'Female' => 'Female'])->rules('required');
 
 
