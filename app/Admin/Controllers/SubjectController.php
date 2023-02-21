@@ -34,77 +34,7 @@ class SubjectController extends AdminController
     protected function grid()
     {
 
-
-        $u = Auth::user();
-        
-        $active_academic_year_id = 0;
-        if ($u->ent != null) {
-            $y = $u->ent->active_academic_year();
-            if ($y != null) {
-                $active_academic_year_id = $y->id;
-            }
-        }
-
-         foreach (Subject::where([ 
-            'academic_year_id' =>   $active_academic_year_id, 
-        ])->get() as $s){
-            if($s->course->subject_type == 'Primary'){
-                continue;
-            }
-            echo "$s->name |||||||||| {$s->course->subject_type} ====> {$s->course->name} <hr> ";
-            $s->subject_name = $s->course->name;
-            $s->save();
-        }
-
-        dd('done');
-
-        foreach (Subject::where([
-            'subject_teacher' => $u->id,
-            'academic_year_id' =>   $active_academic_year_id,
-            'enterprise_id' =>   $u->enterprise_id,
-        ])
-            ->orwhere([
-                'academic_year_id' =>   $active_academic_year_id,
-                'teacher_1' => $u->id
-            ])
-            ->orwhere([
-                'academic_year_id' =>   $active_academic_year_id,
-                'teacher_2' => $u->id
-            ])
-            ->orwhere([
-                'academic_year_id' =>   $active_academic_year_id,
-                'teacher_3' => $u->id
-            ])
-            ->get() as $sub) {
-            if ($sub->course != null) {
-                if ($sub->course->subject_type == 'Primary') {
-                    echo $sub->subject_name . " $sub->id<hr>";
-                    continue;
-
-                    DB::update("update subjects set subject_name = ? where id = ? ", [$sub->course->name, $sub->id]);
-                }
-            } else {
-                die('course is null');
-            }
-        }
-
-        die("done");
-
-
-        /*         foreach (Subject::all() as $key => $sub) {
-            if ($sub->course != null) {
-                if ($sub->course->subject_type == 'Primary') {
-                    $sub->code = $sub->course->code;
-                    echo "from ==> $sub->subject_name ";
-                    $sub->subject_name = $sub->course->name; 
-                    $sub->save();
-                    echo "TO =======> $sub->subject_name <=======<hr>";
-                }
-            }
-        }
-        die("dpone"); */
-
-
+ 
 
         $grid = new Grid(new Subject());
 
