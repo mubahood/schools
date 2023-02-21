@@ -32,7 +32,7 @@ class SubjectController extends AdminController
     protected function grid()
     {
 
-        foreach (Subject::all() as $key => $sub) {
+/*         foreach (Subject::all() as $key => $sub) {
             if ($sub->course != null) {
                 if ($sub->course->subject_type == 'Primary') {
                     $sub->code = $sub->course->code;
@@ -43,7 +43,7 @@ class SubjectController extends AdminController
                 }
             }
         }
-        die("dpone");
+        die("dpone"); */
 
 
 

@@ -48,10 +48,12 @@ class Subject extends Model
                 return false;
             }
 
-           /*  $c = MainCourse::find($m->course_id);
-            $m->main_course_id = $c->main_course_id;
-            $m->subject_name = $c->subject->name;
-            $m->code = $c->subject->code; */
+            if (strlen($m->subject_name) < 2) {
+                $c = MainCourse::find($m->course_id);
+                $m->main_course_id = $c->main_course_id;
+                $m->subject_name = $c->subject->name;
+                $m->code = $c->subject->code;
+            }
             return $m;
         });
 
@@ -75,7 +77,6 @@ class Subject extends Model
                 }
             }
 
-            $m->subject_name = $c->subject->name;
             $m->code = $c->subject->code; */
         });
     }
@@ -107,42 +108,8 @@ class Subject extends Model
 
     function getNameAttribute()
     {
-        $_name = "";
-        if ($this->course != null) {
-            $_name = $this->course->name;
-        } else {
-
-            $fixed = false;
-            if (($this->subject_name != null) &&
-                ($this->academic_class != null) &&
-                ($this->academic_class->class_type != null)
-            ) {
-                if (strlen($this->subject_name) > 1) {
-                    $main_course = MainCourse::where([
-                        'name' => $this->subject_name,
-                        'subject_type' => $this->academic_class->class_type,
-                    ])->first();
-                    if ($main_course == null) {
-                        $main_course = MainCourse::where([
-                            'name' => $this->subject_name,
-                        ])->first();
-                    }
-                    if ($main_course != null) {
-                        $this->code =  $main_course->code;
-                        $this->course_id =  $main_course->id;
-                        $this->subject_name =  $main_course->name;
-                        $_name =  $main_course->name;
-                        if ($this->save()) {
-                            // echo("Updated {$this->subject_name} <br>"); 
-                        } else {
-                        }
-                        $fixed = true;
-                    }
-                }
-            }
-        }
-
-        return  $_name;
+       
+        return  $this->subject_name;
     }
 
 
