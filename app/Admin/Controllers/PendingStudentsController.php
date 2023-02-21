@@ -298,6 +298,7 @@ class PendingStudentsController extends AdminController
                 }
                 return $this->current_theology_class->name_text;
             })
+            ->hide()
             ->sortable();
 
 

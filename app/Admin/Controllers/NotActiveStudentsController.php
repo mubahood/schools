@@ -283,6 +283,7 @@ class NotActiveStudentsController extends AdminController
                 }
                 return $this->current_theology_class->name_text;
             })
+            ->hide()
             ->sortable();
 
 
