@@ -309,9 +309,12 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                 'username' => $model->email
             ])->first();
 
+
             if ($_u != null) {
                 if ($_u->id != $model->id) {
-                    throw new Exception("User with provided email address already exist.", 1);
+        
+                    throw new Exception("Use with provided email address ($model->email) already exist. $_u->name", 1);
+          
                 }
             }
             $_u = Administrator::where([

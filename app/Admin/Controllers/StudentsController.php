@@ -45,7 +45,10 @@ class StudentsController extends AdminController
     {
 
 
-        $u = Administrator::find(2317);
+/*         $u = Administrator::find(3143);
+        $u->status =  1;
+        $u->save();
+        dd($u); */
         /* $u->current_class_id = 19;
         $u->first_name .= '.';
         $u->save();
@@ -204,6 +207,9 @@ class StudentsController extends AdminController
         }
 
 
+        $grid->column('id', __('ID')) 
+            ->sortable();
+
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
             'user_type' => 'student',
@@ -233,10 +239,6 @@ class StudentsController extends AdminController
 
 
 
-
-        $grid->column('id', __('ID'))
-            ->hide()
-            ->sortable();
 
 
 
