@@ -693,6 +693,7 @@ class Utils  extends Model
         } else {
             $ent_id = 0;
         }
+        $ent_id = 7;
 
         $ent = Enterprise::where('id', $ent_id)
             ->where('school_pay_code', '!=', NULL)
