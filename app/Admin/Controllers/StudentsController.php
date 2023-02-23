@@ -44,12 +44,12 @@ class StudentsController extends AdminController
     protected function grid()
     {
 
-
-/*         $u = Administrator::find(3143);
+/*
+        $u = Administrator::find(2334);
         $u->status =  1;
         $u->save();
-        dd($u); */
-        /* $u->current_class_id = 19;
+        dd($u);  
+        $u->current_class_id = 19;
         $u->first_name .= '.';
         $u->save();
         dd($u);
@@ -118,6 +118,7 @@ class StudentsController extends AdminController
         $grid->filter(function ($filter) {
 
             $filter->between('created_at', 'Admitted')->date();
+            $filter->like('school_pay_payment_code', 'By school-pay code');
             $u = Admin::user();
 
             if (!Admin::user()->isRole('dos')) {

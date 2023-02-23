@@ -260,6 +260,9 @@ Route::get('ajax', function (Request $r) {
 Route::get('reconcile', function (Request $r) {
     Utils::reconcile($r);
 });
+Route::get('school-pay-reconcile', function (Request $r) {
+    Utils::schoool_pay_sync(); 
+});
 
 Route::get('books', function (Request $r) {
     $q = $r->get('q');

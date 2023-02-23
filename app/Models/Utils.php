@@ -363,9 +363,9 @@ class Utils  extends Model
         ])->get() as $sub) {
             if ($sub->academic_class != null) {
                 $sub->academic_year_id = $sub->academic_class->academic_year_id;
-                $sub->save(); 
-            } 
-        } 
+                $sub->save();
+            }
+        }
         /* =============== end SUBJECTS WITH NO academic_year_id============= */
     }
 
@@ -671,12 +671,80 @@ class Utils  extends Model
 
         //Utils::school_pay_import();
 
-        $last_rec = Reconciler::latest()->first();
+
+        $done = [];
+        $data = [];
+
+        foreach (DB::select("SELECT enterprise_id FROM reconcilers ORDER BY id DESC LIMIT 10000") as $key => $d) {
+            if (in_array($d->enterprise_id, $done)) {
+                continue;
+            }
+            $done[] = $d->enterprise_id;
+            $data[] = $d->enterprise_id;
+        }
+
+        $data = array_reverse($data);
+
+        $ent_id = 0;
+        if (count($data) > 1) {
+            $ent_id = $data[1];
+        } else if (count($data) > 0) {
+            $ent_id = $data[0];
+        } else {
+            $ent_id = 0;
+        }
+
+        $ent = Enterprise::where('id', $ent_id)
+            ->where('school_pay_code', '!=', NULL)
+            ->where('school_pay_password', '!=', NULL)
+            ->first();
+
+        $ents = Enterprise::where('school_pay_code', '!=', NULL)
+            ->where('school_pay_password', '!=', NULL)
+            ->get();
+
+        $have_records = [];
+
+        foreach (DB::select("SELECT DISTINCT enterprise_id FROM reconcilers") as $value) {
+            $have_records[] = $value->enterprise_id;
+        }
+
+
+        foreach ($ents as $key => $value) {
+            if (!in_array($value->id, $have_records)) {
+                $_ent = Enterprise::where('id', $value->id)
+                    ->where('school_pay_code', '!=', NULL)
+                    ->where('school_pay_password', '!=', NULL)
+                    ->first();
+                if ($_ent != null) {
+                    //$ent = $_ent;
+                    //break; 
+                }
+            }
+        }
+
+        if ($ent == null) {
+            $ent = Enterprise::where('school_pay_code', '!=', NULL)
+                ->where('school_pay_password', '!=', NULL)
+                ->first();
+        }
+
+        if ($ent == null) {
+            die("ent not found.");
+        }
+
+
+
+        $last_rec = Reconciler::where([
+            'enterprise_id' => $ent->id
+        ])->orderBy('id', 'Desc')->first();
+
+
         $back_day = 0;
         $max_back_days = 30;
 
         $rec = new Reconciler();
-        $rec->enterprise_id = 0;
+        $rec->enterprise_id = $ent->id;
         $rec->last_update = time();
         $rec_date = date('Y-m-d');
 
@@ -684,9 +752,7 @@ class Utils  extends Model
         if ($last_rec != null) {
             $last_day = Carbon::createFromTimestamp($last_rec->last_update);
             $today = Carbon::now();
-
             $back_day = $last_rec->back_day;
-
             if (!$last_day->isToday()) {
                 $rec->last_update = time();
                 $rec->back_day = $last_rec->back_day;
@@ -703,9 +769,9 @@ class Utils  extends Model
             }
         }
 
-        $md = md5("16241$rec_date" . '%K$no!&7ATAW42cB455pV');
-        $link = "https://schoolpay.co.ug/paymentapi/AndroidRS/SyncSchoolTransactions/16241/{$rec_date}/{$md}";
 
+        $md = md5("{$ent->school_pay_code}$rec_date" . "{$ent->school_pay_password}");
+        $link = "https://schoolpay.co.ug/paymentapi/AndroidRS/SyncSchoolTransactions/16241/{$rec_date}/{$md}";
 
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $link); // set live website where data from
@@ -732,7 +798,6 @@ class Utils  extends Model
 
         if ($success) {
             foreach ($data->transactions as $v) {
-                $ent = Enterprise::find(7);
                 $school_pay_payment_code = $v->studentPaymentCode;
                 $student = Administrator::where([
                     'enterprise_id' => $ent->id,
@@ -799,8 +864,6 @@ class Utils  extends Model
 
         Utils::accounts_sync();
         Utils::sync_classes($r->id);
-        Utils::schoool_pay_sync();
-
         die("Reconciled successfully ");
     }
 

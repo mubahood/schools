@@ -37,7 +37,7 @@ class EnterpriseController extends AdminController
         $grid->column('id', __('Id'))->sortable();
         $grid->column('name', __('Name'))->sortable();
         $grid->column('administrator_id', __('Onwer'))->display(function () {
-            if($this->owner == null){
+            if ($this->owner == null) {
                 return '-';
             }
             return $this->owner->name;
@@ -121,6 +121,9 @@ class EnterpriseController extends AdminController
         $form->text('address', __('Address'));
         $form->date('expiry', __('Expiry'))->required();
         $form->textarea('details', __('Details'));
+        $form->divider('SCHOOL PAY INFO');
+        $form->text('school_pay_code', __('School-pay code'));
+        $form->text('school_pay_password', __('School-pay password'));
 
         return $form;
     }
