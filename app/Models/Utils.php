@@ -626,8 +626,7 @@ class Utils  extends Model
     }
     public static function reconcile_in_background($enterprise_id)
     {
-
-        return "";
+ 
         $url = url('api/reconcile?enterprise_id=' . $enterprise_id);
         $ctx = stream_context_create(['http' => ['timeout' => 3]]);
 

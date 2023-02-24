@@ -259,6 +259,7 @@ Route::get('ajax', function (Request $r) {
 
 Route::get('reconcile', function (Request $r) {
     Utils::reconcile($r);
+    Utils::schoool_pay_sync();  
 });
 Route::get('school-pay-reconcile', function (Request $r) {
     Utils::schoool_pay_sync(); 
