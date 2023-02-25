@@ -232,6 +232,8 @@ class AcademicClassController extends AdminController
                         'subject_type' => 'Primary'
                     ])->orwhere([
                         'subject_type' =>  'Nursery'
+                    ]) ->orwhere([
+                        'subject_type' =>  'Other'
                     ])->get();
                 }else{
                     $subjects = MainCourse::where([
