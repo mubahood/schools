@@ -276,6 +276,7 @@ class HomeController extends Controller
         ) {
             $content->row(function (Row $row) {
 
+
                 $row->column(3, function (Column $column) {
                     $column->append(Dashboard::count_expected_fees());
                 });

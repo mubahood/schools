@@ -25,18 +25,53 @@ define('DOCUMENT_RECEIPT', 'Receipt');
 class Utils  extends Model
 {
 
-    public static function manifest($ent){
+    public static function manifest($ent)
+    {
         $man =  new Manifest();
         $man->expected_fees = 0;
-        if($ent == null){
+        $man->paid_fees = 0;
+        $man->active_students = 0;
+        $man->unpaid_fees = 0;
+        if ($ent == null) {
             return $man;
         }
 
-        dd($ent->actvive);
+        $dp = $ent->dpYear();
+        if ($dp == null) {
+            return $man;
+        }
 
 
-        die("tine ti nani");
-    } 
+
+        $active_casses = "SELECT id FROM academic_classes WHERE academic_year_id = $dp->id AND enterprise_id = {$dp->enterprise_id}";
+        $active_students = "SELECT id FROM admin_users WHERE current_class_id in ($active_casses) AND status = 1 AND enterprise_id = {$dp->enterprise_id}";
+        $man->active_students = count(DB::select($active_students));
+        $active_accounts = "SELECT id  FROM accounts WHERE administrator_id in ($active_students) AND enterprise_id = {$dp->enterprise_id}";
+        $total_expected = "SELECT sum(amount) as amount FROM transactions WHERE account_id in ($active_accounts) AND amount < 0 AND enterprise_id = {$dp->enterprise_id}
+        AND academic_year_id =$dp->id ";
+        $total_paid = "SELECT sum(amount) as amount FROM transactions WHERE account_id in ($active_accounts) AND amount > 0 AND enterprise_id = {$dp->enterprise_id} 
+            AND academic_year_id =$dp->id";
+        $data = DB::select($total_expected);
+        if ($data != null) {
+            if (isset($data['0']) && isset($data['0']->amount)) {
+                $man->expected_fees = $data['0']->amount;
+                if ($man->expected_fees < 0) {
+                    $man->expected_fees = -1 * $man->expected_fees;
+                }
+            }
+        }
+
+        $data = DB::select($total_paid);
+        if ($data != null) {
+            if (isset($data['0']) && isset($data['0']->amount)) {
+                $man->paid_fees = $data['0']->amount;
+            }
+        }
+        $man->unpaid_fees = $man->expected_fees  - $man->paid_fees;
+    
+
+        return $man; 
+    }
 
     public static function upload_images_1($files, $is_single_file = false)
     {
@@ -637,7 +672,7 @@ class Utils  extends Model
     }
     public static function reconcile_in_background($enterprise_id)
     {
- 
+
         $url = url('api/reconcile?enterprise_id=' . $enterprise_id);
         $ctx = stream_context_create(['http' => ['timeout' => 3]]);
 

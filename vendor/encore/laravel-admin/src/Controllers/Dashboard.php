@@ -359,35 +359,18 @@ class Dashboard
     public static function count_expected_fees()
     {
 
-        //$man = Utils::manifest(Auth::user()->ent); 
+        $man = Utils::manifest(Auth::user()->ent); 
         $enterprise_id = Auth::user()->enterprise_id;
 
-        $active_students_condition = " admin_users.id = accounts.administrator_id 
-        AND admin_users.enterprise_id = $enterprise_id AND admin_users.status = 1 ";
+       
+         
 
-
-        $sql = DB::select("SELECT count(admin_users.id) as count FROM accounts,admin_users WHERE $active_students_condition");
-        $studebts_count = $sql[0]->count;
-
-        $active_students_accounts = "SELECT accounts.id FROM accounts,admin_users WHERE $active_students_condition";
-
-        $sql = DB::select("SELECT sum(amount) as sum FROM transactions WHERE amount < 0 AND transactions.enterprise_id = $enterprise_id AND account_id in ($active_students_accounts)");
-        $expected_fees = $sql[0]->sum;
-
-        $sql = DB::select("SELECT sum(amount) as sum FROM transactions WHERE amount > 0 AND transactions.enterprise_id = $enterprise_id AND account_id in ($active_students_accounts)");
-        $paid_fees = $sql[0]->sum;
-
-
-        if ($expected_fees < 0) {
-            $expected_fees = -1 * $expected_fees;
-        }
-
-        $sub_title =  "To be paid by $studebts_count active students.";
+        $sub_title =  "To be paid by $man->active_students active students.";
         return view('widgets.box-5', [
             'is_dark' => false,
-            'title' => 'Expected school fees..',
+            'title' => 'Expected school fees',
             'sub_title' => $sub_title,
-            'number' => "UGX " . number_format($expected_fees),
+            'number' => "UGX " . number_format($man->expected_fees),
             'link' => admin_url('students')
         ]);
     }
@@ -397,30 +380,14 @@ class Dashboard
 
     public static function count_paid_fees()
     {
-
-        $enterprise_id = Auth::user()->enterprise_id;
-
-        $active_students_condition = " admin_users.id = accounts.administrator_id 
-        AND admin_users.enterprise_id = $enterprise_id AND admin_users.status = 1 ";
-
-
-        $sql = DB::select("SELECT count(admin_users.id) as count FROM accounts,admin_users WHERE $active_students_condition");
-        $studebts_count = $sql[0]->count;
-
-        $active_students_accounts = "SELECT accounts.id FROM accounts,admin_users WHERE $active_students_condition";
-
-        $sql = DB::select("SELECT sum(amount) as sum FROM transactions WHERE amount < 0 AND transactions.enterprise_id = $enterprise_id AND account_id in ($active_students_accounts)");
-        $expected_fees = $sql[0]->sum;
-
-        $sql = DB::select("SELECT sum(amount) as sum FROM transactions WHERE amount > 0 AND transactions.enterprise_id = $enterprise_id AND account_id in ($active_students_accounts)");
-        $paid_fees = $sql[0]->sum;
-
-        $sub_title =  "To be paid by $studebts_count active students.";
+        $man = Utils::manifest(Auth::user()->ent);   
+ 
+        $sub_title =  "To be paid by $man->active_students active students.";
         return view('widgets.box-5', [
             'is_dark' => false,
             'title' => 'Paid school fees',
             'sub_title' => $sub_title,
-            'number' => "UGX " . number_format($paid_fees),
+            'number' => "UGX " . number_format($man->paid_fees),
             'link' => admin_url('students')
         ]);
     }
@@ -433,21 +400,11 @@ class Dashboard
 
         $enterprise_id = Auth::user()->enterprise_id;
 
-        $active_students_condition = " admin_users.id = accounts.administrator_id 
-        AND admin_users.enterprise_id = $enterprise_id AND admin_users.status = 1 ";
-
-
-        $sql = DB::select("SELECT count(admin_users.id) as count FROM accounts,admin_users WHERE $active_students_condition");
-        $studebts_count = $sql[0]->count;
-
-        $active_students_accounts = "SELECT accounts.id FROM accounts,admin_users WHERE $active_students_condition";
-
-        $sql = DB::select("SELECT sum(amount) as sum FROM transactions WHERE amount < 0 AND transactions.enterprise_id = $enterprise_id AND account_id in ($active_students_accounts)");
-        $expected_fees = $sql[0]->sum;
-
-        $sql = DB::select("SELECT sum(amount) as sum FROM transactions WHERE amount > 0 AND transactions.enterprise_id = $enterprise_id AND account_id in ($active_students_accounts)");
-        $paid_fees = $sql[0]->sum;
-
+ 
+        $man = Utils::manifest(Auth::user()->ent);   
+  
+        $expected_fees = $man->expected_fees;
+        $paid_fees = $man->paid_fees; 
         if ($expected_fees < 0) {
             $expected_fees = -1 * $expected_fees;
         }
@@ -459,7 +416,7 @@ class Dashboard
         }
 
 
-        $sub_title =  "To be paid by $studebts_count active students.";
+        $sub_title =  "To be paid by $man->active_students active students.";
         return view('widgets.box-5', [
             'is_dark' => true,
             'title' => 'Percentage paid',
@@ -474,32 +431,19 @@ class Dashboard
 
     public static function count_unpaid_fees()
     {
+ 
 
-        $enterprise_id = Auth::user()->enterprise_id;
-
-        $active_students_condition = " admin_users.id = accounts.administrator_id 
-        AND admin_users.enterprise_id = $enterprise_id AND admin_users.status = 1 ";
-
-
-        $sql = DB::select("SELECT count(admin_users.id) as count FROM accounts,admin_users WHERE $active_students_condition");
-        $studebts_count = $sql[0]->count;
-
-        $active_students_accounts = "SELECT accounts.id FROM accounts,admin_users WHERE $active_students_condition";
-
-        $sql = DB::select("SELECT sum(amount) as sum FROM transactions WHERE amount < 0 AND transactions.enterprise_id = $enterprise_id AND account_id in ($active_students_accounts)");
-        $expected_fees = $sql[0]->sum;
-
-        $sql = DB::select("SELECT sum(amount) as sum FROM transactions WHERE amount > 0 AND transactions.enterprise_id = $enterprise_id AND account_id in ($active_students_accounts)");
-        $paid_fees = $sql[0]->sum;
+        $man = Utils::manifest(Auth::user()->ent);   
+ 
 
 
 
-        $sub_title =  "To be paid by $studebts_count active students.";
+        $sub_title =  "To be paid by $man->active_students active students.";  
         return view('widgets.box-5', [
             'is_dark' => false,
             'title' => 'Unpaid school fees',
             'sub_title' => $sub_title,
-            'number' => "UGX " . number_format($expected_fees + $paid_fees),
+            'number' => "UGX " . number_format($man->unpaid_fees),
             'link' => admin_url('students')
         ]);
     }
