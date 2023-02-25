@@ -208,7 +208,7 @@ class HomeController extends Controller
 
         Admin::style('.content-header {display: none;}');
         $ent = Utils::ent();
-        Utils::reconcile_in_background(Admin::user()->enterprise_id);
+        //Utils::reconcile_in_background(Admin::user()->enterprise_id);
 
         /*       $content
             ->title($ent->name)

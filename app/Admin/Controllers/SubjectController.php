@@ -172,9 +172,17 @@ class SubjectController extends AdminController
         if ($u->ent->type == 'Primary') {
             $subjects = MainCourse::where([
                 'subject_type' => 'Primary'
-            ])->orwhere([
+            ])
+            ->orwhere([
                 'subject_type' =>  'Nursery'
-            ])->get();
+            ])
+            ->orwhere([
+                'subject_type' =>  'Other'
+            ])
+            ->get(); 
+
+            
+
         } else {
             $subjects = MainCourse::where([
                 'subject_type' => 'Secondary'

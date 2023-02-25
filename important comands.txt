@@ -82,6 +82,7 @@ php artisan make:migration create_academic_years_table
 php artisan make:model Banner
 php artisan make:model Enterprise
 php artisan make:model BursaryBeneficiary
+php artisan make:model Manifest
 php artisan make:migration create_books_categories_table
 php artisan make:migration create_books_table
 php artisan make:migration create_book_authors_table

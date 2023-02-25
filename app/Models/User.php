@@ -98,6 +98,4 @@ class User extends Authenticatable implements JWTSubject
 
         return $this->belongsToMany($relatedModel, $pivotTable, 'user_id', 'role_id');
     }
-
-
 }

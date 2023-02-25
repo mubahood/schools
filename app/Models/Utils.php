@@ -25,7 +25,18 @@ define('DOCUMENT_RECEIPT', 'Receipt');
 class Utils  extends Model
 {
 
+    public static function manifest($ent){
+        $man =  new Manifest();
+        $man->expected_fees = 0;
+        if($ent == null){
+            return $man;
+        }
 
+        dd($ent->actvive);
+
+
+        die("tine ti nani");
+    } 
 
     public static function upload_images_1($files, $is_single_file = false)
     {

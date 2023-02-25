@@ -51,8 +51,8 @@ class Subject extends Model
             if (strlen($m->subject_name) < 2) {
                 $c = MainCourse::find($m->course_id);
                 $m->main_course_id = $c->main_course_id;
-                $m->subject_name = $c->subject->name;
-                $m->code = $c->subject->code;
+                $m->subject_name = $c->name;  
+                $m->code = $c->code;
             }
             return $m;
         });

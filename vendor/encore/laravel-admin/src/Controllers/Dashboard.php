@@ -359,6 +359,7 @@ class Dashboard
     public static function count_expected_fees()
     {
 
+        //$man = Utils::manifest(Auth::user()->ent); 
         $enterprise_id = Auth::user()->enterprise_id;
 
         $active_students_condition = " admin_users.id = accounts.administrator_id 
@@ -384,7 +385,7 @@ class Dashboard
         $sub_title =  "To be paid by $studebts_count active students.";
         return view('widgets.box-5', [
             'is_dark' => false,
-            'title' => 'Expected school fees',
+            'title' => 'Expected school fees..',
             'sub_title' => $sub_title,
             'number' => "UGX " . number_format($expected_fees),
             'link' => admin_url('students')
