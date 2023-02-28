@@ -68,9 +68,9 @@ class Utils  extends Model
             }
         }
         $man->unpaid_fees = $man->expected_fees  - $man->paid_fees;
-    
 
-        return $man; 
+
+        return $man;
     }
 
     public static function upload_images_1($files, $is_single_file = false)
@@ -713,28 +713,8 @@ class Utils  extends Model
     }
     public static function schoool_pay_sync()
     {
-
-        //Utils::school_pay_import();
-
-        $rec = new Reconciler();
-        $rec->enterprise_id = 1;
-        $rec->details = json_encode($_SERVER);
-        $rec->last_update = json_encode($_POST);
-        $rec->back_day = 1;
-        $rec->save();
-        die("doen");
-
-        /* 
-        
-        
-        
-        details
-        
-        */
-
         $done = [];
         $data = [];
-
         foreach (DB::select("SELECT enterprise_id FROM reconcilers ORDER BY id DESC LIMIT 10000") as $key => $d) {
             if (in_array($d->enterprise_id, $done)) {
                 continue;
