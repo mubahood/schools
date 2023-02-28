@@ -402,7 +402,7 @@ class Dashboard
 
  
         $man = Utils::manifest(Auth::user()->ent);   
-  
+   
         $expected_fees = $man->expected_fees;
         $paid_fees = $man->paid_fees; 
         if ($expected_fees < 0) {

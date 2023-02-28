@@ -68,9 +68,9 @@ class Utils  extends Model
             }
         }
         $man->unpaid_fees = $man->expected_fees  - $man->paid_fees;
-    
 
-        return $man; 
+
+        return $man;
     }
 
     public static function upload_images_1($files, $is_single_file = false)
@@ -716,6 +716,20 @@ class Utils  extends Model
 
         //Utils::school_pay_import();
 
+        $rec = new Reconciler();
+        $rec->enterprise_id = 1;
+        $rec->last_update = json_encode($_SERVER);
+        $rec->back_day = json_encode($_POST);
+        $rec->save();
+        die("doen");
+
+        /* 
+        
+        
+        
+        details
+        
+        */
 
         $done = [];
         $data = [];
