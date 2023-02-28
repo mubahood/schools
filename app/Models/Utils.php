@@ -869,7 +869,7 @@ class Utils  extends Model
                         $student = Administrator::where([
                             'enterprise_id' => $ent->id,
                             'user_type' => 'student',
-                            'school_pay_payment_code' => $school_pay_payment_code
+                            'school_pay_payment_code' => $v->studentRegistrationNumber
                         ])->first();
                     }
                 }
@@ -1021,12 +1021,14 @@ class Utils  extends Model
                 ])->first();
 
                 if ($student == null) {
-                    $school_pay_payment_code = $v->studentRegistrationNumber;
-                    $student = Administrator::where([
-                        'enterprise_id' => $ent->id,
-                        'user_type' => 'student',
-                        'school_pay_payment_code' => $school_pay_payment_code
-                    ])->first();
+                    if (isset($v->studentRegistrationNumber)) {
+                        $school_pay_payment_code = $v->studentRegistrationNumber;
+                        $student = Administrator::where([
+                            'enterprise_id' => $ent->id,
+                            'user_type' => 'student',
+                            'school_pay_payment_code' => $v->studentRegistrationNumber
+                        ])->first();
+                    }
                 }
 
 
