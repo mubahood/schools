@@ -715,66 +715,23 @@ class Utils  extends Model
     {
         $done = [];
         $data = [];
-        foreach (DB::select("SELECT enterprise_id FROM reconcilers ORDER BY id DESC LIMIT 10000") as $key => $d) {
-            if (in_array($d->enterprise_id, $done)) {
-                continue;
-            }
-            $done[] = $d->enterprise_id;
-            $data[] = $d->enterprise_id;
-        }
 
-        $data = array_reverse($data);
-
-        $ent_id = 0;
-        if (count($data) > 1) {
-            $ent_id = $data[1];
-        } else if (count($data) > 0) {
-            $ent_id = $data[0];
-        } else {
-            $ent_id = 0;
+        if (!isset($_GET['ent_id'])) {
+            die("ent not found.");
         }
-        $ent_id = 7;
+        $ent_id = ((int)($_GET['ent_id']));
+        if ($ent_id < 0) {
+            die("Invalid ent.");
+        }
 
         $ent = Enterprise::where('id', $ent_id)
             ->where('school_pay_code', '!=', NULL)
             ->where('school_pay_password', '!=', NULL)
             ->first();
-
-        $ents = Enterprise::where('school_pay_code', '!=', NULL)
-            ->where('school_pay_password', '!=', NULL)
-            ->get();
-
-        $have_records = [];
-
-        foreach (DB::select("SELECT DISTINCT enterprise_id FROM reconcilers") as $value) {
-            $have_records[] = $value->enterprise_id;
+        if($ent == null){
+            die("Ent is null.");
         }
-
-
-        foreach ($ents as $key => $value) {
-            if (!in_array($value->id, $have_records)) {
-                $_ent = Enterprise::where('id', $value->id)
-                    ->where('school_pay_code', '!=', NULL)
-                    ->where('school_pay_password', '!=', NULL)
-                    ->first();
-                if ($_ent != null) {
-                    //$ent = $_ent;
-                    //break; 
-                }
-            }
-        }
-
-        if ($ent == null) {
-            $ent = Enterprise::where('school_pay_code', '!=', NULL)
-                ->where('school_pay_password', '!=', NULL)
-                ->first();
-        }
-
-        if ($ent == null) {
-            die("ent not found.");
-        }
-
-
+  
 
         $last_rec = Reconciler::where([
             'enterprise_id' => $ent->id
@@ -811,9 +768,11 @@ class Utils  extends Model
         }
 
 
+        //$md = md5("174332023-02-28" . '2$F!EN0IBIxn4%9d');
         $md = md5("{$ent->school_pay_code}$rec_date" . "{$ent->school_pay_password}");
-        $link = "https://schoolpay.co.ug/paymentapi/AndroidRS/SyncSchoolTransactions/16241/{$rec_date}/{$md}";
+        $link = "https://schoolpay.co.ug/paymentapi/AndroidRS/SyncSchoolTransactions/{$ent->school_pay_code}/{$rec_date}/{$md}";
 
+        //die($link);
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $link); // set live website where data from
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE); // default
