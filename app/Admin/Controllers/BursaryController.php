@@ -46,8 +46,8 @@ class BursaryController extends AdminController
             }); 
         $grid->column('is_termly', __('Offer Typs'))->using([
             1 => 'Termly',
-            0 => 'One time',
-        ])->sortable();
+            2 => 'One time offer',
+        ])->sortable(); 
 
         $grid->column('description', __('Description'))->hide();
 

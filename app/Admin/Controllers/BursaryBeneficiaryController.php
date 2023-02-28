@@ -5,6 +5,7 @@ namespace App\Admin\Controllers;
 use App\Models\Bursary;
 use App\Models\BursaryBeneficiary;
 use App\Models\Term;
+use App\Models\User;
 use App\Models\Utils;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
@@ -35,6 +36,32 @@ class BursaryBeneficiaryController extends AdminController
         $x->description .= 1;
         $x->save(); 
  */
+
+        $grid->filter(function ($filter) {
+            $filter->disableIdFilter();
+            $u = Admin::user();
+
+            $filter->equal('bursary_id', 'Fliter by class')->select(Bursary::where([
+                'enterprise_id' => $u->enterprise_id
+            ])->get()
+                ->pluck('name', 'id'));
+
+            $ajax_url = url(
+                '/api/ajax?'
+                    . 'enterprise_id=' . $u->enterprise_id
+                    . "&search_by_1=name"
+                    . "&search_by_2=id"
+                    . "&model=User"
+            );
+            $filter->equal('administrator_id', 'Filter by beneficiary')
+                ->select(function ($id) {
+                    $a = User::find($id);
+                    if ($a) {
+                        return [$a->id => $a->name];
+                    }
+                })->ajax($ajax_url);
+        });
+
 
 
         $grid->disableBatchActions();
@@ -67,16 +94,17 @@ class BursaryBeneficiaryController extends AdminController
                 if ($this->beneficiary == null) {
                     return $this->administrator_id;
                 }
-                return $this->beneficiary->name;
+                $link = '<a href="'.admin_url('students/'.$this->administrator_id).'" title="View profile">'.$this->beneficiary->name.'</a>';
+                return $link;
             });
- 
+
         $grid->column('bursary_id', __('Bursary'))
-        ->display(function () {
-            if ($this->bursary == null) {
-                return $this->bursary_id;
-            }
-            return $this->bursary->name;
-        });
+            ->display(function () {
+                if ($this->bursary == null) {
+                    return $this->bursary_id;
+                }
+                return $this->bursary->name;
+            });
 
         $grid->column('description', __('Description'));
 

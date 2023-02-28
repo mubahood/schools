@@ -37,7 +37,7 @@ class BursaryBeneficiary extends Model
 
         });
         self::created(function ($m) {
-            if ($m->bursary->is_termly) {
+            if ($m->bursary->is_termly == 1) {
                 for ($i = 0; $i < 3; $i++) {
                     BursaryBeneficiary::create_transactions($m);
                 }
