@@ -728,18 +728,34 @@ class Utils  extends Model
             $data[] = $d->enterprise_id;
         }
 
-        $data = array_reverse($data);
+        $ent = null;
+        $last_ent = 0;
 
-        $ent_id = 0;
-        if (count($data) > 1) {
-            $ent_id = $data[1];
-        } else if (count($data) > 0) {
-            $ent_id = $data[0];
-        } else {
-            $ent_id = 0;
-        } 
+        foreach ($data as $id) {
 
-        $ent = Enterprise::where('id', $ent_id)
+            if ($last_ent == 0) {
+
+                $ent = Enterprise::where('id', $id)
+                    ->where('school_pay_code', '!=', NULL)
+                    ->where('school_pay_password', '!=', NULL)
+                    ->first();
+                if ($ent != null) {
+                    $last_ent = $id;
+                    continue;
+                }
+            }
+
+            if ($last_ent != $id) {
+                $ent = Enterprise::where('id', $id)
+                    ->where('school_pay_code', '!=', NULL)
+                    ->where('school_pay_password', '!=', NULL)
+                    ->first();
+                if ($ent != null) {
+                    $last_ent = $id;
+                }
+            }
+        }
+        $ent = Enterprise::where('id', $last_ent)
             ->where('school_pay_code', '!=', NULL)
             ->where('school_pay_password', '!=', NULL)
             ->first();
@@ -777,8 +793,6 @@ class Utils  extends Model
         if ($ent == null) {
             die("ent not found.");
         }
-
-
 
         $last_rec = Reconciler::where([
             'enterprise_id' => $ent->id
@@ -850,16 +864,18 @@ class Utils  extends Model
                 ])->first();
 
                 if ($student == null) {
-                    $school_pay_payment_code = $v->studentRegistrationNumber;
-                    $student = Administrator::where([
-                        'enterprise_id' => $ent->id,
-                        'user_type' => 'student',
-                        'school_pay_payment_code' => $school_pay_payment_code
-                    ])->first();
+                    if (isset($v->studentRegistrationNumber)) {
+                        $school_pay_payment_code = $v->studentRegistrationNumber;
+                        $student = Administrator::where([
+                            'enterprise_id' => $ent->id,
+                            'user_type' => 'student',
+                            'school_pay_payment_code' => $school_pay_payment_code
+                        ])->first();
+                    }
                 }
 
                 if ($student == null) {
-                    $rec->details = 'Failed to import transaction ' . json_encode($v) . " because account dose not exist.";
+                    $rec->details .= 'Failed to import transaction ' . json_encode($v) . " because account dose not exist.";
                     continue;
                 }
 
@@ -871,7 +887,7 @@ class Utils  extends Model
                     continue;
                 }
                 if ($student->account == null) {
-                    $rec->details = 'Failed to import transaction. Student account not found. ' . json_encode($v) . " because account dose not exist.";
+                    $rec->details .= 'Failed to import transaction. Student account not found. ' . json_encode($v) . " because account dose not exist.";
                     continue;
                 }
 
@@ -897,7 +913,7 @@ class Utils  extends Model
                 }
                 $trans->save();
             }
-            $rec->details = "$rec_date - $data->returnMessage";
+            $rec->details .= "$rec_date - $data->returnMessage";
             $rec->save();
         } else {
             $rec->last_update = time();
