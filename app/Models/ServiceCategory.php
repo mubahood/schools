@@ -4,10 +4,35 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class ServiceCategory extends Model
 {
     use HasFactory;
+ 
+    public function income()
+    {  
+        $ent = Enterprise::find($this->enterprise_id);
+        if($ent == null){
+            return 0;
+        }
+        $dp = $ent->dpYear();
+        if($dp == null){
+            return 0;
+        }
+
+        $services = "SELECT id FROM services WHERE service_category_id = {$this->id} AND enterprise_id = {$dp->enterprise_id}";
+        $active_services = "SELECT sum(total) as tot FROM service_subscriptions WHERE due_academic_year_id = {$dp->id} AND service_id in ($services) AND enterprise_id = {$dp->enterprise_id}";
+        $res =DB::select($active_services);
+        $tot = 0;
+        if(isset($res[0]) && isset($res[0]->tot)){
+            $tot = $res[0]->tot;
+        }
+        if( $tot > 1000000000){
+    
+        }
+        return $tot;
+    }
 
 
     public static function update_data($m)

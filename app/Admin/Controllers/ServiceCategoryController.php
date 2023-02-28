@@ -37,7 +37,13 @@ class ServiceCategoryController extends AdminController
                 return count($this->services);
             })
             ->sortable();
-        $grid->column('description', __('Description'));
+
+        $grid->column('income', __('Total income'))
+            ->display(function () {
+                return 'UGX '.number_format($this->income());
+            });
+
+        $grid->column('description', __('Description'))->hide();
 
         return $grid;
     }
@@ -83,7 +89,7 @@ class ServiceCategoryController extends AdminController
                     ->rules('required')
                     ->help("Any service containing mentioned keyword in its description should be transfered to this category.");
             })->rules('required');
-            
+
         $form->textarea('description', __('Description'));
 
         return $form;

@@ -27,6 +27,7 @@ class Utils  extends Model
 
     public static function manifest($ent)
     {
+        
         $man =  new Manifest();
         $man->expected_fees = 0;
         $man->paid_fees = 0;
@@ -46,10 +47,18 @@ class Utils  extends Model
         $active_casses = "SELECT id FROM academic_classes WHERE academic_year_id = $dp->id AND enterprise_id = {$dp->enterprise_id}";
         $active_students = "SELECT id FROM admin_users WHERE current_class_id in ($active_casses) AND status = 1 AND enterprise_id = {$dp->enterprise_id}";
         $man->active_students = count(DB::select($active_students));
-        $active_accounts = "SELECT id  FROM accounts WHERE administrator_id in ($active_students) AND enterprise_id = {$dp->enterprise_id}";
-        $total_expected = "SELECT sum(amount) as amount FROM transactions WHERE account_id in ($active_accounts) AND amount < 0 AND enterprise_id = {$dp->enterprise_id}
+
+        $active_year = $ent->active_academic_year();
+        $_active_accounts = '';
+       if ($active_year->id == $dp->id) {
+            $_active_accounts = " administrator_id in ($active_students) AND  ";
+        }  
+
+
+        $active_accounts = "SELECT id  FROM accounts WHERE $_active_accounts enterprise_id = {$dp->enterprise_id}";
+        $total_expected = "SELECT sum(amount) as amount FROM transactions WHERE  academic_year_id = {$dp->id} AND is_contra_entry = 0 AND (type = 'FEES_PAYMENT' OR type = 'FEES_BILL') AND account_id in ($active_accounts) AND amount < 0 AND enterprise_id = {$dp->enterprise_id}
         AND academic_year_id =$dp->id ";
-        $total_paid = "SELECT sum(amount) as amount FROM transactions WHERE account_id in ($active_accounts) AND amount > 0 AND enterprise_id = {$dp->enterprise_id} 
+        $total_paid = "SELECT sum(amount) as amount FROM transactions WHERE academic_year_id = {$dp->id} AND is_contra_entry = 0 AND (type = 'FEES_PAYMENT' OR type = 'FEES_BILL') AND account_id in ($active_accounts) AND amount > 0 AND enterprise_id = {$dp->enterprise_id} 
             AND academic_year_id =$dp->id";
         $data = DB::select($total_expected);
         if ($data != null) {
@@ -925,163 +934,7 @@ class Utils  extends Model
     }
 
 
-
-    public static function schoool_pay_sync_old()
-    {
-        $done = [];
-        $data = [];
-
-        if (!isset($_GET['ent_id'])) {
-            die("ent not found.");
-        }
-        $ent_id = ((int)($_GET['ent_id']));
-        if ($ent_id < 0) {
-            die("Invalid ent.");
-        }
-
-        $ent = Enterprise::where('id', $ent_id)
-            ->where('school_pay_code', '!=', NULL)
-            ->where('school_pay_password', '!=', NULL)
-            ->first();
-        if ($ent == null) {
-            die("Ent is null.");
-        }
-
-
-        $last_rec = Reconciler::where([
-            'enterprise_id' => $ent->id
-        ])->orderBy('id', 'Desc')->first();
-
-
-        $back_day = 0;
-        $max_back_days = 30;
-
-        $rec = new Reconciler();
-        $rec->enterprise_id = $ent->id;
-        $rec->last_update = time();
-        $rec_date = date('Y-m-d');
-
-
-        if ($last_rec != null) {
-            $last_day = Carbon::createFromTimestamp($last_rec->last_update);
-            $today = Carbon::now();
-            $back_day = $last_rec->back_day;
-            if (!$last_day->isToday()) {
-                $rec->last_update = time();
-                $rec->back_day = $last_rec->back_day;
-            } else {
-                if ($back_day < $max_back_days) {
-                    $back_day++;
-                } else {
-                    $back_day = 0;
-                }
-                $rec->back_day = $back_day;
-                $the_day = $today->subDays($back_day);
-                $rec->last_update = $the_day->toDateTimeString();
-                $rec_date = $the_day->format('Y-m-d');
-            }
-        }
-
-
-        //$md = md5("174332023-02-28" . '2$F!EN0IBIxn4%9d');
-        $md = md5("{$ent->school_pay_code}$rec_date" . "{$ent->school_pay_password}");
-        $link = "https://schoolpay.co.ug/paymentapi/AndroidRS/SyncSchoolTransactions/{$ent->school_pay_code}/{$rec_date}/{$md}";
-
-        //die($link);
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $link); // set live website where data from
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE); // default
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE); // default
-        $resp = curl_exec($curl);
-
-
-        $data = json_decode($resp);
-        $success = false;
-        if ($data != null) {
-            if (isset($data->returnCode)) {
-                if (((int)($data->returnCode)) == 0) {
-                    if (isset($data->transactions)) {
-                        if (is_array($data->transactions)) {
-                            $success = true;
-                        }
-                    }
-                }
-            }
-        }
-
-
-
-        if ($success) {
-            foreach ($data->transactions as $v) {
-                $school_pay_payment_code = $v->studentPaymentCode;
-                $student = Administrator::where([
-                    'enterprise_id' => $ent->id,
-                    'user_type' => 'student',
-                    'school_pay_payment_code' => $school_pay_payment_code
-                ])->first();
-
-                if ($student == null) {
-                    if (isset($v->studentRegistrationNumber)) {
-                        $school_pay_payment_code = $v->studentRegistrationNumber;
-                        $student = Administrator::where([
-                            'enterprise_id' => $ent->id,
-                            'user_type' => 'student',
-                            'school_pay_payment_code' => $v->studentRegistrationNumber
-                        ])->first();
-                    }
-                }
-
-
-                if ($student == null) {
-                    $rec->details = 'Failed to import transaction ' . json_encode($v) . " because account dose not exist.";
-                    continue;
-                }
-
-                $school_pay_transporter_id = trim($v->sourceChannelTransactionId);
-                $trans = Transaction::where([
-                    'school_pay_transporter_id' => $school_pay_transporter_id
-                ])->first();
-                if ($trans != null) {
-                    continue;
-                }
-                if ($student->account == null) {
-                    $rec->details = 'Failed to import transaction. Student account not found. ' . json_encode($v) . " because account dose not exist.";
-                    continue;
-                }
-
-                $bank = Enterprise::main_bank_account($ent);
-
-                $trans = new Transaction();
-                $account_id = $student->account->id;
-                $trans->amount = (int)($v->amount);
-                $trans->payment_date = $v->paymentDateAndTime;
-                $trans->enterprise_id = $ent->id;
-                $trans->account_id = $account_id;
-                $trans->created_by_id = $ent->administrator_id;
-                $trans->school_pay_transporter_id = $school_pay_transporter_id;
-                $trans->is_contra_entry = false;
-                $trans->type = 'FEES_PAYMENT';
-                $trans->contra_entry_account_id = $bank->id;
-                $amount = number_format($trans->amount);
-                $trans->description = "$student->name paid UGX $amount school fees through school pay. Transaction ID #$school_pay_transporter_id";
-                $t = $ent->active_term();
-                if ($t != null) {
-                    $trans->term_id = $t->id;
-                    $trans->academic_year_id = $t->academic_year_id;
-                }
-                $trans->save();
-            }
-            $rec->details = "$rec_date - $data->returnMessage";
-            $rec->save();
-        } else {
-            $rec->last_update = time();
-            $rec->back_day = $last_rec->back_day;
-            $rec->enterprise_id = 0;
-            $rec->details = $resp;
-            $rec->save();
-        }
-    }
-
+ 
 
 
 
