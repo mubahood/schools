@@ -68,9 +68,9 @@ class Utils  extends Model
             }
         }
         $man->unpaid_fees = $man->expected_fees  - $man->paid_fees;
-    
 
-        return $man; 
+
+        return $man;
     }
 
     public static function upload_images_1($files, $is_single_file = false)
@@ -737,7 +737,7 @@ class Utils  extends Model
             $ent_id = $data[0];
         } else {
             $ent_id = 0;
-        }
+        } 
 
         $ent = Enterprise::where('id', $ent_id)
             ->where('school_pay_code', '!=', NULL)
@@ -763,7 +763,7 @@ class Utils  extends Model
                     ->first();
                 if ($_ent != null) {
                     $ent = $_ent;
-                    break; 
+                    break;
                 }
             }
         }
@@ -816,8 +816,7 @@ class Utils  extends Model
 
 
         $md = md5("{$ent->school_pay_code}$rec_date" . "{$ent->school_pay_password}");
-        $link = "https://schoolpay.co.ug/paymentapi/AndroidRS/SyncSchoolTransactions/{$ent->school_pay_code}/{$rec_date}/{$md}"; 
-
+        $link = "https://schoolpay.co.ug/paymentapi/AndroidRS/SyncSchoolTransactions/{$ent->school_pay_code}/{$rec_date}/{$md}";
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $link); // set live website where data from
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE); // default
@@ -849,6 +848,15 @@ class Utils  extends Model
                     'user_type' => 'student',
                     'school_pay_payment_code' => $school_pay_payment_code
                 ])->first();
+
+                if ($student == null) {
+                    $school_pay_payment_code = $v->studentRegistrationNumber;
+                    $student = Administrator::where([
+                        'enterprise_id' => $ent->id,
+                        'user_type' => 'student',
+                        'school_pay_payment_code' => $school_pay_payment_code
+                    ])->first();
+                }
 
                 if ($student == null) {
                     $rec->details = 'Failed to import transaction ' . json_encode($v) . " because account dose not exist.";
@@ -919,10 +927,10 @@ class Utils  extends Model
             ->where('school_pay_code', '!=', NULL)
             ->where('school_pay_password', '!=', NULL)
             ->first();
-        if($ent == null){
+        if ($ent == null) {
             die("Ent is null.");
         }
-  
+
 
         $last_rec = Reconciler::where([
             'enterprise_id' => $ent->id
@@ -995,6 +1003,16 @@ class Utils  extends Model
                     'user_type' => 'student',
                     'school_pay_payment_code' => $school_pay_payment_code
                 ])->first();
+
+                if ($student == null) {
+                    $school_pay_payment_code = $v->studentRegistrationNumber;
+                    $student = Administrator::where([
+                        'enterprise_id' => $ent->id,
+                        'user_type' => 'student',
+                        'school_pay_payment_code' => $school_pay_payment_code
+                    ])->first();
+                }
+
 
                 if ($student == null) {
                     $rec->details = 'Failed to import transaction ' . json_encode($v) . " because account dose not exist.";
