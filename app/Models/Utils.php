@@ -718,7 +718,7 @@ class Utils  extends Model
 
         $rec = new Reconciler();
         $rec->enterprise_id = 1;
-        $rec->last_update = Carbon::now();
+        $rec->last_update = time();
         $rec->back_day = json_encode($_POST);
         $rec->save();
         die("doen");
