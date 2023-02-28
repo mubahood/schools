@@ -68,9 +68,9 @@ class Utils  extends Model
             }
         }
         $man->unpaid_fees = $man->expected_fees  - $man->paid_fees;
+    
 
-
-        return $man;
+        return $man; 
     }
 
     public static function upload_images_1($files, $is_single_file = false)
@@ -713,6 +713,197 @@ class Utils  extends Model
     }
     public static function schoool_pay_sync()
     {
+
+        //Utils::school_pay_import();
+
+
+        $done = [];
+        $data = [];
+
+        foreach (DB::select("SELECT enterprise_id FROM reconcilers ORDER BY id DESC LIMIT 10000") as $key => $d) {
+            if (in_array($d->enterprise_id, $done)) {
+                continue;
+            }
+            $done[] = $d->enterprise_id;
+            $data[] = $d->enterprise_id;
+        }
+
+        $data = array_reverse($data);
+
+        $ent_id = 0;
+        if (count($data) > 1) {
+            $ent_id = $data[1];
+        } else if (count($data) > 0) {
+            $ent_id = $data[0];
+        } else {
+            $ent_id = 0;
+        }
+
+        $ent = Enterprise::where('id', $ent_id)
+            ->where('school_pay_code', '!=', NULL)
+            ->where('school_pay_password', '!=', NULL)
+            ->first();
+
+        $ents = Enterprise::where('school_pay_code', '!=', NULL)
+            ->where('school_pay_password', '!=', NULL)
+            ->get();
+
+        $have_records = [];
+
+        foreach (DB::select("SELECT DISTINCT enterprise_id FROM reconcilers") as $value) {
+            $have_records[] = $value->enterprise_id;
+        }
+
+
+        foreach ($ents as $key => $value) {
+            if (!in_array($value->id, $have_records)) {
+                $_ent = Enterprise::where('id', $value->id)
+                    ->where('school_pay_code', '!=', NULL)
+                    ->where('school_pay_password', '!=', NULL)
+                    ->first();
+                if ($_ent != null) {
+                    $ent = $_ent;
+                    break; 
+                }
+            }
+        }
+
+        if ($ent == null) {
+            $ent = Enterprise::where('school_pay_code', '!=', NULL)
+                ->where('school_pay_password', '!=', NULL)
+                ->first();
+        }
+
+        if ($ent == null) {
+            die("ent not found.");
+        }
+
+
+
+        $last_rec = Reconciler::where([
+            'enterprise_id' => $ent->id
+        ])->orderBy('id', 'Desc')->first();
+
+
+        $back_day = 0;
+        $max_back_days = 30;
+
+        $rec = new Reconciler();
+        $rec->enterprise_id = $ent->id;
+        $rec->last_update = time();
+        $rec_date = date('Y-m-d');
+
+
+        if ($last_rec != null) {
+            $last_day = Carbon::createFromTimestamp($last_rec->last_update);
+            $today = Carbon::now();
+            $back_day = $last_rec->back_day;
+            if (!$last_day->isToday()) {
+                $rec->last_update = time();
+                $rec->back_day = $last_rec->back_day;
+            } else {
+                if ($back_day < $max_back_days) {
+                    $back_day++;
+                } else {
+                    $back_day = 0;
+                }
+                $rec->back_day = $back_day;
+                $the_day = $today->subDays($back_day);
+                $rec->last_update = $the_day->toDateTimeString();
+                $rec_date = $the_day->format('Y-m-d');
+            }
+        }
+
+
+        $md = md5("{$ent->school_pay_code}$rec_date" . "{$ent->school_pay_password}");
+        $link = "https://schoolpay.co.ug/paymentapi/AndroidRS/SyncSchoolTransactions/{$ent->school_pay_code}/{$rec_date}/{$md}"; 
+
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $link); // set live website where data from
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE); // default
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE); // default
+        $resp = curl_exec($curl);
+
+
+        $data = json_decode($resp);
+        $success = false;
+        if ($data != null) {
+            if (isset($data->returnCode)) {
+                if (((int)($data->returnCode)) == 0) {
+                    if (isset($data->transactions)) {
+                        if (is_array($data->transactions)) {
+                            $success = true;
+                        }
+                    }
+                }
+            }
+        }
+
+
+
+        if ($success) {
+            foreach ($data->transactions as $v) {
+                $school_pay_payment_code = $v->studentPaymentCode;
+                $student = Administrator::where([
+                    'enterprise_id' => $ent->id,
+                    'user_type' => 'student',
+                    'school_pay_payment_code' => $school_pay_payment_code
+                ])->first();
+
+                if ($student == null) {
+                    $rec->details = 'Failed to import transaction ' . json_encode($v) . " because account dose not exist.";
+                    continue;
+                }
+
+                $school_pay_transporter_id = trim($v->sourceChannelTransactionId);
+                $trans = Transaction::where([
+                    'school_pay_transporter_id' => $school_pay_transporter_id
+                ])->first();
+                if ($trans != null) {
+                    continue;
+                }
+                if ($student->account == null) {
+                    $rec->details = 'Failed to import transaction. Student account not found. ' . json_encode($v) . " because account dose not exist.";
+                    continue;
+                }
+
+                $bank = Enterprise::main_bank_account($ent);
+
+                $trans = new Transaction();
+                $account_id = $student->account->id;
+                $trans->amount = (int)($v->amount);
+                $trans->payment_date = $v->paymentDateAndTime;
+                $trans->enterprise_id = $ent->id;
+                $trans->account_id = $account_id;
+                $trans->created_by_id = $ent->administrator_id;
+                $trans->school_pay_transporter_id = $school_pay_transporter_id;
+                $trans->is_contra_entry = false;
+                $trans->type = 'FEES_PAYMENT';
+                $trans->contra_entry_account_id = $bank->id;
+                $amount = number_format($trans->amount);
+                $trans->description = "$student->name paid UGX $amount school fees through school pay. Transaction ID #$school_pay_transporter_id";
+                $t = $ent->active_term();
+                if ($t != null) {
+                    $trans->term_id = $t->id;
+                    $trans->academic_year_id = $t->academic_year_id;
+                }
+                $trans->save();
+            }
+            $rec->details = "$rec_date - $data->returnMessage";
+            $rec->save();
+        } else {
+            $rec->last_update = time();
+            $rec->back_day = $last_rec->back_day;
+            $rec->enterprise_id = 0;
+            $rec->details = $resp;
+            $rec->save();
+        }
+    }
+
+
+
+    public static function schoool_pay_sync_old()
+    {
         $done = [];
         $data = [];
 
@@ -854,6 +1045,9 @@ class Utils  extends Model
             $rec->save();
         }
     }
+
+
+
 
     public static function reconcile(Request $r)
     {
