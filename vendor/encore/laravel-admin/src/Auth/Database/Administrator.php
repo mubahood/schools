@@ -312,9 +312,8 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
 
             if ($_u != null) {
                 if ($_u->id != $model->id) {
-        
+
                     throw new Exception("Use with provided email address ($model->email) already exist. $_u->name", 1);
-          
                 }
             }
             $_u = Administrator::where([
@@ -500,6 +499,10 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
     public function get_my_classes()
     {
 
+        $year =  $this->ent->active_academic_year();
+        if ($year == null) {
+            return [];
+        }
         if ($this->user_type == 'employee') {
             $sql1 = "SELECT academic_classes.id FROM subjects,academic_classes WHERE
                 (
@@ -509,8 +512,19 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                     teacher_3 = {$this->id}
                 ) AND (
                     subjects.academic_class_id = academic_classes.id
+                ) AND (
+                    academic_year_id = {$year->id}
                 )
             ";
+
+            if (
+                $this->isRole('dos') ||
+                $this->isRole('bursar') ||
+                $this->isRole('admin')
+            ) {
+                $sql1 = "SELECT academic_classes.id FROM academic_classes WHERE academic_year_id = {$year->id}";
+            }
+
             $sql = "SELECT * FROM academic_classes WHERE id IN
             ( $sql1 )
             ";
@@ -567,7 +581,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
 
         if ($this->user_type == 'employee') {
 
-            
+
             $sql1 = "SELECT *, subjects.id as id FROM subjects,academic_classes WHERE
                 (
                     subject_teacher = {$this->id} OR

@@ -28,9 +28,7 @@ class ServiceCategory extends Model
         if(isset($res[0]) && isset($res[0]->tot)){
             $tot = $res[0]->tot;
         }
-        if( $tot > 1000000000){
     
-        }
         return $tot;
     }
 
