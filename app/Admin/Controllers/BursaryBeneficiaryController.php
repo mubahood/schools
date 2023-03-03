@@ -32,10 +32,9 @@ class BursaryBeneficiaryController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new BursaryBeneficiary());
-        /*    $x = BursaryBeneficiary::find(1);
+      /*   $x = BursaryBeneficiary::find(1);
         $x->description .= 1;
-        $x->save(); 
- */
+        $x->delete(); */
 
         $grid->filter(function ($filter) {
             $filter->disableIdFilter();
@@ -65,7 +64,7 @@ class BursaryBeneficiaryController extends AdminController
 
 
         $grid->disableBatchActions();
-        $grid->disableActions();
+        //$grid->disableActions();
         $grid->model()
             ->where([
                 'enterprise_id' => Auth::user()->enterprise_id
@@ -94,7 +93,7 @@ class BursaryBeneficiaryController extends AdminController
                 if ($this->beneficiary == null) {
                     return $this->administrator_id;
                 }
-                $link = '<a href="'.admin_url('students/'.$this->administrator_id).'" title="View profile">'.$this->beneficiary->name.'</a>';
+                $link = '<a href="' . admin_url('students/' . $this->administrator_id) . '" title="View profile">' . $this->beneficiary->name . '</a>';
                 return $link;
             });
 
@@ -107,6 +106,7 @@ class BursaryBeneficiaryController extends AdminController
             });
 
         $grid->column('description', __('Description'));
+        $grid->column('id', __('id'))->sortable();
 
         return $grid;
     }

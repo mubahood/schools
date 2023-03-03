@@ -16,7 +16,25 @@ class BursaryBeneficiary extends Model
     public static function boot()
     {
         parent::boot();
-        self::creating(function ($m) { 
+
+        self::deleting(function ($m) {
+
+            $term = Term::find($m->due_term_id);
+            if ($term == null) {
+                throw new Exception("Due term not found.", 1);
+            }
+            $m->due_academic_year_id = $term->academic_year_id;
+
+            if ($m->bursary->is_termly == 1) {
+                for ($i = 0; $i < 3; $i++) {
+                    BursaryBeneficiary::create_transactions_remove($m);
+                }
+            } else {
+                BursaryBeneficiary::create_transactions_remove($m);
+            }
+        });
+
+        self::creating(function ($m) {
 
             $term = Term::find($m->due_term_id);
             if ($term == null) {
@@ -33,8 +51,6 @@ class BursaryBeneficiary extends Model
             if ($b != null) {
                 die("Same student cannot benefit on same bursary twice in same term.");
             }
-
-
         });
         self::created(function ($m) {
             if ($m->bursary->is_termly == 1) {
@@ -55,6 +71,22 @@ contra_entry_transaction_id
 	
 	 
 */
+
+    public static function create_transactions_remove($m)
+    {
+        $t = new Transaction();
+        $t->enterprise_id = $m->enterprise_id;
+        $t->account_id = $m->beneficiary->account->id;
+        $t->amount = -1 * $m->bursary->fund;
+        $t->is_contra_entry     = 0;
+        $t->payment_date = Carbon::now();
+        $t->created_by_id = Auth::user()->id;
+        $t->school_pay_transporter_id = "-";
+
+        $t->description = "UGX " . number_format($m->bursary->fund) . " was deducted from this account because this account was removed from " . $m->bursary->name . " bursary scheme.";
+        $t->save();
+    }
+
     public static function create_transactions($m)
     {
         $t = new Transaction();
@@ -66,7 +98,7 @@ contra_entry_transaction_id
         $t->created_by_id = Auth::user()->id;
         $t->school_pay_transporter_id = "-";
         $t->description = "Bursary funds of UGX " . number_format($m->bursary->fund) . " deposited to account by " . $m->bursary->name . " bursary scheme.";
-        $t->save();  
+        $t->save();
     }
     public function bursary()
     {

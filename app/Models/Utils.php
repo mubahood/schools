@@ -27,7 +27,7 @@ class Utils  extends Model
 
     public static function manifest($ent)
     {
-        
+
         $man =  new Manifest();
         $man->expected_fees = 0;
         $man->paid_fees = 0;
@@ -50,9 +50,9 @@ class Utils  extends Model
 
         $active_year = $ent->active_academic_year();
         $_active_accounts = '';
-       if ($active_year->id == $dp->id) {
+        if ($active_year->id == $dp->id) {
             $_active_accounts = " administrator_id in ($active_students) AND  ";
-        }  
+        }
 
 
         $active_accounts = "SELECT id  FROM accounts WHERE $_active_accounts enterprise_id = {$dp->enterprise_id}";
@@ -934,7 +934,7 @@ class Utils  extends Model
     }
 
 
- 
+
 
 
 
