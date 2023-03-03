@@ -30,6 +30,9 @@ class ServiceSubscriptionController extends AdminController
      */
     protected function grid()
     {
+        $s = ServiceSubscription::find(1667);
+        //$s->delete();
+        //die("romina");  
         $grid = new Grid(new ServiceSubscription());
 
         $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
@@ -122,18 +125,22 @@ class ServiceSubscriptionController extends AdminController
         $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
             ->orderBy('id', 'Desc');
 
+        $grid->column('id', __('id'))->sortable();
 
         $grid->column('administrator_id', __('Subscriber'))
             ->display(function () {
                 if ($this->sub == null) {
                     return $this->administrator_id;
                 }
-                return $this->sub->name;
+
+                $link = '<a href="' . admin_url('students/' . $this->administrator_id) . '" title="View profile">' . $this->sub->name . '</a>';
+                return $link;
             });
 
         $grid->column('service_id', __('Service'))->display(function () {
             return $this->service->name;
         })->sortable();
+
         $grid->column('quantity', __('Quantity'))->sortable();
         $grid->column('total', __('Total fee'))->display(function () {
             return "UGX " . number_format(((int)($this->total)));
