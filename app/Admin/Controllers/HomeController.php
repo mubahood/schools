@@ -11,6 +11,7 @@ use App\Models\Subject;
 use App\Models\Transaction;
 use App\Models\Utils;
 use Carbon\Carbon;
+use Dflydev\DotAccessData\Util;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\Dashboard;
 use Encore\Admin\Facades\Admin;
@@ -20,13 +21,15 @@ use Encore\Admin\Layout\Row;
 use Encore\Admin\Widgets\Box;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use PDO;
 
 class HomeController extends Controller
 {
     public function index(Content $content)
     {
 
-     
+
+
 
         /*
         set_time_limit(-1);
@@ -137,7 +140,114 @@ class HomeController extends Controller
     }
     public function stats(Content $content)
     {
+ 
+        /*
+        set_time_limit(-1);
+        $u = Auth::user();
+        $ent = $u->ent;
+        $classes = [48, 49, 50, 51, 52, 53];
+        $count = 0;
 
+        foreach (Administrator::where(['enterprise_id' => 7,'user_type' => 'student'])->get() as $key => $stud) {
+            $count++;
+
+            if($count < 30){
+                continue;
+            }
+          
+            $x = new Administrator();
+            $x->name = $stud->name;
+            $x->mother_name = $stud->name;
+            $x->first_name = $stud->first_name;
+            $x->father_name = $stud->first_name;
+            $x->father_phone = '0772' . rand(100, 900) . rand(100, 900) . rand(100, 900);
+            $x->mother_phone = '0772' . rand(100, 900) . rand(100, 900) . rand(100, 900);
+            $dob = Carbon::now()->subYears(rand(15, 25));
+            $dob = $dob->subMonths(rand(1, 11));
+            $dob = $dob->subDay(rand(1, 28));
+            $x->date_of_birth = $dob;
+            $x->last_name = $stud->last_name;
+            $x->sex = $stud->sex;
+            $x->avatar = $stud->avatar;
+            $x->home_address = $stud->home_address;
+            $x->current_address = $stud->home_address;
+            $x->phone_number_1 = $stud->phone_number_1;
+            $x->emergency_person_name = $stud->emergency_person_name;
+            $x->emergency_person_phone = $stud->emergency_person_phone;
+            $x->email =  $stud->name . rand(100, 1000) . "@gmail.com";
+            $x->nationality =  "Ugandan";
+            $x->languages =  "Swahili,English";
+            $x->enterprise_id = $ent->id;
+           
+            $x->user_type = 'Student';
+            $x->status = 1;
+            $x->email = rand(100,1000).$stud->email;
+            $x->username = rand(100,1000).$stud->email;
+           
+            $x->save();
+
+            shuffle($classes);
+            shuffle($classes);
+            shuffle($classes);
+            shuffle($classes);
+            shuffle($classes);
+            $class = new StudentHasClass();
+            $class->enterprise_id =  $ent->id;
+            $class->administrator_id =  $x->id;
+            $class->academic_class_id =  $classes[rand(0, 4)];
+            $class->save(); 
+            if ($count > 500) {
+                die("done!");
+            }
+        }*/
+     
+
+        /* 
+
+	
+	
+	
+	
+updated_at	
+created_at	
+	
+done_selecting_option_courses	
+	
+
+
+    "" => "+256782117770"
+    "national_id_number" => "-"
+    "passport_number" => "-"
+    "tin" => null
+    "nssf_number" => null
+    "bank_name" => null
+    "bank_account_number" => null
+    "primary_school_name" => null
+    "primary_school_year_graduated" => null
+    "seconday_school_name" => null
+    "seconday_school_year_graduated" => null
+    "high_school_name" => null
+    "high_school_year_graduated" => null
+    "degree_university_name" => null
+    "degree_university_year_graduated" => null
+    "masters_university_name" => null
+    "masters_university_year_graduated" => null
+    "phd_university_name" => null
+    "phd_university_year_graduated" => null
+    "user_type" => "student"
+    "demo_id" => 0
+    "user_id" => "3839865"
+    "user_batch_importer_id" => 16
+    "school_pay_account_id" => "3839865"
+    "school_pay_payment_code" => "1003839865"
+    "given_name" => "Rahman"
+    "deleted_at" => null
+    "marital_status" => null
+    "verification" => 1
+    "current_class_id" => 19
+
+
+*/
         $u = Admin::user();
 
         if (
@@ -276,7 +386,7 @@ class HomeController extends Controller
         ) {
             $content->row(function (Row $row) {
 
-                $man = Utils::manifest(Auth::user()->ent);  
+                $man = Utils::manifest(Auth::user()->ent);
                 $row->column(3, function (Column $column) {
                     $column->append(Dashboard::count_expected_fees());
                 });

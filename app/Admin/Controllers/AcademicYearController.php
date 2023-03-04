@@ -88,7 +88,7 @@ class AcademicYearController extends AdminController
      */
     protected function form()
     {
-       /*  $u = Admin::user(); 
+        /*  $u = Admin::user(); 
         $m = AcademicYear::where('id',2)->first();
         $m->name .= rand(1,100).""; 
       

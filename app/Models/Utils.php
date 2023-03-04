@@ -335,6 +335,7 @@ class Utils  extends Model
         }
 
         Utils::create_documents($u);
+        Utils::create_secondary_school_subjects($u);
         Utils::prepare_session_participations($u);
         Utils::prepare_pending_things($u);
 
@@ -351,6 +352,20 @@ class Utils  extends Model
         Utils::financial_accounts_creation();
     }
 
+    public static function create_secondary_school_subjects($u)
+    {
+        $sql_count = "SELECT count(id) FROM secondary_subjects WHERE academic_class_id = academic_classes.id";
+        $sql_classes = "SELECT id FROM academic_classes WHERE class_type = 'Secondary' AND ($sql_count) < 5 ";
+
+        foreach (DB::select($sql_classes) as $key => $val) { 
+            $class = AcademicClass::find($val->id);
+            if ($class == null) {
+                die("class not found.");
+            }
+            AcademicClass::generate_secondary_main_subjects($class); 
+        }
+ 
+     }
     public static function prepare_session_participations($u)
     {
         if ($u == null) {

@@ -95,6 +95,9 @@ class Subject extends Model
         return $this->belongsTo(MainCourse::class, 'course_id');
     }
 
+    function parent(){
+        return $this->belongsTo(ParentCourse::class,'parent_course_id');
+    }
     function teacher()
     {
         $admin  = Administrator::find(((int)($this->subject_teacher)));

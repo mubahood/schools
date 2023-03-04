@@ -29,20 +29,35 @@ class ParentCourseController extends AdminController
 
         $grid->column('id', __('ID'))->sortable();
         $grid->column('name', __('Name'))->sortable();
+        $grid->column('s1_term1_topics');
+        $grid->column('s1_term2_topics')->sortable();
+        $grid->column('s1_term3_topics')->sortable();
+        $grid->column('s2_term1_topics')->sortable();
+        $grid->column('s2_term2_topics')->sortable();
+        $grid->column('s2_term3_topics')->sortable();
+        $grid->column('s3_term1_topics')->sortable();
+        $grid->column('s3_term2_topics')->sortable();
+        $grid->column('s3_term3_topics')->sortable();
+        $grid->column('s4_term1_topics')->sortable();
+        $grid->column('s4_term2_topics')->sortable();
+        $grid->column('s4_term3_topics')->sortable();
+
+   
         $grid->column('code', __('Code'))->sortable();
+
         $grid->column('papers', __('Papers'))->display(function () {
             return count($this->papers);
         });
         $grid->column('is_compulsory', __('Compulsory'))
-        ->using([
-            1 => 'Yes',
-            0 => 'No'
-        ])
-        ->filter([
-            1 => 'Compulsory',
-            0 => 'Not Compulsory'
-        ])
-        ->sortable();
+            ->using([
+                1 => 'Yes',
+                0 => 'No'
+            ])
+            ->filter([
+                1 => 'Compulsory',
+                0 => 'Not Compulsory'
+            ])
+            ->sortable();
         $grid->column('type', __('Type'));
         $grid->column('is_verified', __('Verified'))
             ->using([
@@ -54,7 +69,7 @@ class ParentCourseController extends AdminController
                 0 => 'Not Verified'
             ])
             ->sortable();
-  
+
 
         return $grid;
     }
@@ -121,7 +136,36 @@ class ParentCourseController extends AdminController
 
 
         $form->switch('is_verified', __('Is verified'))->default(1);
+        
+        $form->divider('S.1 Topics');
+        $form->textarea('s1_term1_topics');
+        $form->textarea('s1_term2_topics');
+        $form->textarea('s1_term3_topics');
 
+        $form->divider('S.2 Topics');
+        $form->textarea('s2_term1_topics');
+        $form->textarea('s2_term2_topics');
+        $form->textarea('s2_term3_topics');
+        $form->divider('S.3 Topics');
+        $form->textarea('s3_term1_topics');
+        $form->textarea('s3_term2_topics');
+        $form->textarea('s3_term3_topics'); 
+        
+        $form->divider('S.4 Topics');
+        $form->textarea('s4_term1_topics');
+        $form->textarea('s4_term2_topics');
+        $form->textarea('s4_term3_topics'); 
+
+        /* 
+        	 
+	
+	
+	
+	
+	
+
+        */
+        $form->divider('Papers');
         $form->morphMany('papers', 'Click on new to add a paper to this course', function (Form\NestedForm $form) {
 
             $form->select('paper', __('Paper'))

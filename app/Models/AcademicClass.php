@@ -21,6 +21,13 @@ class AcademicClass extends Model
 
 
         self::created(function ($m) {
+            if ($m->class_type == 'Secondary') {
+                try {
+                    AcademicClass::generate_secondary_main_subjects($m);
+                } catch (\Throwable $th) {
+                }
+            }
+
             AcademicClass::generate_subjects($m);
         });
         self::deleting(function ($m) {
@@ -37,6 +44,83 @@ class AcademicClass extends Model
         });
     }
 
+    public static function generate_secondary_main_subjects($m)
+    {
+        if ($m->class_type != 'Secondary') {
+            return;
+        }
+
+        foreach (ParentCourse::where([
+            'type' => 'Secondary',
+            'is_compulsory' => 1,
+        ])->get() as $pc) {
+
+            $ent = Enterprise::find($m->enterprise_id);
+            if ($ent == null) {
+                throw new Exception("Enterprise not found.", 1);
+            }
+            $sub = new SecondarySubject();
+            $sub->enterprise_id = $m->enterprise_id;
+            $sub->academic_class_id = $m->id;
+            $sub->parent_course_id = $pc->id;
+            $sub->academic_year_id = $m->academic_year_id;
+            $sub->teacher_1 = $ent->administrator_id;
+            $sub->subject_name = $pc->name;
+            $sub->code = $pc->code;
+            $sub->is_optional = 0;
+            $sub->details = '';
+            $sub->save();
+        }
+    }
+
+
+    /*  
+    									
+
+
+    
+    */
+    /*  PARENT
+     "id" => 1
+    "created_at" => "2023-02-20 20:19:10"
+    "updated_at" => "2023-03-03 20:48:03"
+    "name" => "English"
+    "short_name" => "ENG"
+    "code" => "112"
+    "type" => "Secondary"
+    "is_verified" => 1
+    "is_compulsory" => 1
+    "s1_term1_topics" => "Personal life and family,Finding information,Food"
+    "s1_term2_topics" => "At the market,Children at Work,Environment and Pollution"
+    "s1_term3_topics" => "Urban and rural life,Travel,Experience of secondary school"
+    "s2_term1_topics" => "Modern Communication Technology,Celebrations,Parents and Children"
+    "s2_term2_topics" => "Anti-corruption,Human rights, gender and responsibilities,Tourism, Maps and Giving Directions"
+    "s2_term3_topics" => "Tourism (continued),Leisure,Appearance and grooming"
+    "s3_term1_topics" => "Childhood memories,School clubs,Integrity"
+    "s3_term2_topics" => "Identity crisis,Relationships and emotions,Patriotism"
+    "s3_term3_topics" => "Patriotism (continued),Further Education,Banking and money 2"
+    "s4_term1_topics" => "Leadership,The media,Culture"
+    "s4_term2_topics" => "Culture (continued),Choosing a career,Applying for a job"
+    "s4_term3_topics" => "Globalization"
+    
+    */
+
+    /* CLASS
+    "id" => 1
+    "created_at" => "2022-09-17 06:33:43"
+    "updated_at" => "2022-09-17 06:33:43"
+    "enterprise_id" => 8
+    "academic_year_id" => 1
+    "class_teahcer_id" => 2207
+    "name" => "P.1 - Muhindo Mubaraka"
+    "short_name" => "P.1"
+    "details" => "P.1 - Muhindo Mubaraka"
+    "demo_id" => 0
+    "compulsory_subjects" => 0
+    "optional_subjects" => 0
+    "" => ""
+    "academic_class_level_id" => 0
+    */
     public static function generate_subjects($m)
     {
 
@@ -254,6 +338,9 @@ class AcademicClass extends Model
         }
     }
 
+    function secondarySubjects(){
+        return $this->hasMany(SecondarySubject::class);
+    }
     function academic_class_fees()
     {
         return $this->hasMany(AcademicClassFee::class);
