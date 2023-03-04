@@ -354,6 +354,11 @@ class Utils  extends Model
 
     public static function create_secondary_school_subjects($u)
     {
+        return; 
+        if($u == null){
+            return;
+        }
+        dd($u);
         $sql_count = "SELECT count(id) FROM secondary_subjects WHERE academic_class_id = academic_classes.id";
         $sql_classes = "SELECT id FROM academic_classes WHERE class_type = 'Secondary' AND ($sql_count) < 5 ";
 
