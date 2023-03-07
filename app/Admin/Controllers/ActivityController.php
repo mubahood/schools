@@ -157,7 +157,7 @@ class ActivityController extends AdminController
      */
     protected function form()
     {
-        $a = new Activity();
+       /*  $a = new Activity();
         $a->enterprise_id = 11;
         $a->term_id = 16;
         $a->class_type = 'S.1';
@@ -166,7 +166,7 @@ class ActivityController extends AdminController
         $a->topic = 'Test English Topic';
         $a->description = 'Some details about this activity';
         $a->max_score =  3;
-        $a->save();
+        $a->save(); */
 
         $form = new Form(new Activity());
 
