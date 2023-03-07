@@ -141,7 +141,7 @@ class HomeController extends Controller
     public function stats(Content $content)
     {
  
-       
+       /*
         set_time_limit(-1);
         $u = Auth::user();
         $ent = $u->ent;
