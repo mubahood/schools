@@ -173,6 +173,7 @@ php artisan make:model Session
 php artisan make:model Participant
 php artisan make:model ParentCourse
 php artisan make:model SecondarySubject
+php artisan make:model SecondaryCompetence
 
 
 php artisan admin:make TermController --model=App\\Models\\Term
@@ -209,6 +210,7 @@ php artisan make:migration create_theology_student_report_card_items_table
 php artisan make:migration create_competences_table
 php artisan make:migration create_nursery_termly_report_cards_table
 php artisan make:migration create_participants_table
+php artisan make:migration create_secondary_competences_table
 
 --path=/database/migrations/fileName.php
 
@@ -262,6 +264,7 @@ php artisan admin:make ParticipantController --model=App\Models\Participant
 php artisan admin:make ParentCourseController --model=App\Models\ParentCourse
 php artisan admin:make ActivityController --model=App\Models\Activity
 php artisan admin:make SecondarySubjectController --model=App\Models\SecondarySubject
+php artisan admin:make SecondaryCompetenceController --model=App\Models\SecondaryCompetence
 
 
 

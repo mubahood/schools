@@ -5,6 +5,7 @@ namespace App\Admin\Controllers;
 use App\Models\AcademicClass;
 use App\Models\Activity;
 use App\Models\Enterprise;
+use App\Models\Term;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -18,7 +19,7 @@ class ActivityController extends AdminController
      *
      * @var string
      */
-    protected $title = 'Activity';
+    protected $title = 'Activities';
 
     /**
      * Make a grid builder.
@@ -28,20 +29,96 @@ class ActivityController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Activity());
+        $grid->disableBatchActions();
+        $grid->disableActions();
 
-        $grid->column('id', __('Id'));
-        $grid->column('created_at', __('Created at'));
-        $grid->column('updated_at', __('Updated at'));
-        $grid->column('enterprise_id', __('Enterprise id'));
-        $grid->column('academic_year_id', __('Academic year id'));
-        $grid->column('academic_class_id', __('Academic class id'));
-        $grid->column('main_course_id', __('Main course id'));
-        $grid->column('term_id', __('Term id'));
-        $grid->column('class_type', __('Class type'));
-        $grid->column('theme', __('Theme'));
-        $grid->column('topic', __('Topic'));
-        $grid->column('description', __('Description'));
-        $grid->column('max_score', __('Max score'));
+        $grid->filter(function ($filter) {
+            $filter->disableIdFilter();
+            $u = Admin::user();
+
+            $filter->equal('term_id', 'Fliter by term')->select(Term::where([
+                'enterprise_id' => $u->enterprise_id
+            ])->get()
+                ->pluck('name_text', 'id'));
+
+            $filter->equal('academic_class_id', 'Fliter by class')->select(AcademicClass::where([
+                'enterprise_id' => $u->enterprise_id
+            ])->get()
+                ->pluck('name_text', 'id'));
+
+            $u = Admin::user();
+            $class = AcademicClass::where([
+                'enterprise_id' => $u->ent->id,
+                'academic_class_level_id' => 11,
+                'academic_year_id' => $u->ent->dpYear()->id
+            ])->first();
+            if ($class == null) {
+                die("S.1 not found.");
+            }
+            $subs = [];
+            foreach ($class->secondarySubjects as $key => $value) {
+                $subs[$value->id] = $value->subject_name . " - " . $value->academic_class->short_name;
+            }
+            $filter->equal('subject_id', 'Fliter by subject')->select($subs);
+        });
+
+
+        $grid->model()
+            ->orderBy('id', 'Desc')
+            ->where([
+                'enterprise_id' => Admin::user()->enterprise_id,
+                /*   'type' => 'STUDENT_ACCOUNT' */
+            ]);
+
+        $grid->column('term_id', __('Term'))
+            ->display(function ($x) {
+                if ($this->term == null) {
+                    return $x;
+                }
+                return 'Term ' . $this->term->name_text;
+            })
+            ->sortable();
+
+        $grid->column('academic_year_id', __('Academic year'))
+            ->display(function ($x) {
+                if ($this->year == null) {
+                    return $x;
+                }
+                return $this->year->name;
+            })
+            ->hide()
+            ->sortable();
+
+        $grid->column('academic_class_id', __('Class'))
+            ->display(function ($x) {
+                if ($this->academic_class == null) {
+                    return $x;
+                }
+                return $this->academic_class->short_name;
+            })
+            ->sortable();
+        $grid->column('parent_course_id', __('Subject'))
+            ->display(function ($x) {
+                if ($this->parent_course == null) {
+                    return $x;
+                }
+                return $this->parent_course->name;
+            })
+            ->sortable();
+
+        $grid->column('theme', __('Theme'))->hide();
+        $grid->column('topic', __('Topic'))
+            ->sortable();
+        $grid->column('description', __('Description'))->sortable()->hide();
+        $grid->column('max_score', __('Max Score'));
+        $grid->column('competences', __('Competences'))
+            ->display(function ($x) {
+                if ($this->competences == null) {
+                    return 'N/A';
+                }
+                return count($this->competences);
+            });
+        $grid->column('submitted_text', __('Submitted'));
 
         return $grid;
     }
@@ -80,6 +157,17 @@ class ActivityController extends AdminController
      */
     protected function form()
     {
+        $a = new Activity();
+        $a->enterprise_id = 11;
+        $a->term_id = 16;
+        $a->class_type = 'S.1';
+        $a->subject_id = 57;
+        $a->theme = 'Test English Theme';
+        $a->topic = 'Test English Topic';
+        $a->description = 'Some details about this activity';
+        $a->max_score =  3;
+        $a->save();
+
         $form = new Form(new Activity());
 
         $u = Admin::user();

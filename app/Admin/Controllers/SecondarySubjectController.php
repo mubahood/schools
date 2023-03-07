@@ -2,6 +2,9 @@
 
 namespace App\Admin\Controllers;
 
+use App\Models\AcademicClass;
+use App\Models\AcademicYear;
+use App\Models\ParentCourse;
 use App\Models\SecondarySubject;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Form;
@@ -16,7 +19,7 @@ class SecondarySubjectController extends AdminController
      *
      * @var string
      */
-    protected $title = 'SecondarySubject';
+    protected $title = 'Subjects';
 
     /**
      * Make a grid builder.
@@ -26,26 +29,147 @@ class SecondarySubjectController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new SecondarySubject());
+
+        $grid->filter(function ($filter) {
+            $filter->disableIdFilter();
+            $u = Auth::user();
+            $filter->equal('academic_year_id', 'By Academic year')->select(AcademicYear::where([
+                'enterprise_id' => $u->enterprise_id,
+            ])->get()->pluck('name', 'id'));
+
+            $classes = [];
+            foreach (AcademicClass::where([
+                'enterprise_id' => $u->enterprise_id,
+            ])->orderBy('id', 'desc')->get() as $key => $class) {
+                $classes[$class->id] = $class->name_text;
+            }
+
+            $filter->equal('academic_class_id', 'By class')->select($classes);
+        });
+
+        $grid->actions(function ($act) {
+            $act->disableView();
+            $act->disableDelete();
+        });
         $grid->model()->where([
             'enterprise_id' => Auth::user()->enterprise_id,
         ])
             ->orderBy('id', 'Desc');
 
-        $grid->column('id', __('Id'));
-        $grid->column('created_at', __('Created at'));
-        $grid->column('updated_at', __('Updated at'));
-        $grid->column('enterprise_id', __('Enterprise id'));
-        $grid->column('academic_class_id', __('Academic class id'));
-        $grid->column('parent_course_id', __('Parent course id'));
-        $grid->column('academic_year_id', __('Academic year id'));
-        $grid->column('teacher_1', __('Teacher 1'));
-        $grid->column('teacher_2', __('Teacher 2'));
-        $grid->column('teacher_3', __('Teacher 3'));
-        $grid->column('teacher_4', __('Teacher 4'));
-        $grid->column('subject_name', __('Subject name'));
-        $grid->column('details', __('Details'));
-        $grid->column('code', __('Code'));
-        $grid->column('is_optional', __('Is optional'));
+        $grid->column('id', __('Id'))->sortable()->hide();
+        $grid->column('academic_year_id', __('Year'))
+            ->display(function ($x) {
+                if ($this->year == null) {
+                    return $x;
+                }
+                return $this->year->name;
+            })
+            ->sortable();
+
+        $grid->quickSearch('subject_name')->placeholder('Seach by subject');
+        $grid->disableBatchActions();
+
+
+        $grid->column('academic_class_id', __('Class'))
+            ->display(function ($x) {
+                if ($this->academic_class == null) {
+                    return $x;
+                }
+                return $this->academic_class->short_name;
+            })
+            ->sortable();
+
+        $grid->column('subject_name', __('Subject'))->sortable();
+
+        $grid->column('term_1', __('Term 1 - Activities'))
+            ->display(function ($x) {
+                $term = null;
+                foreach ($this->year->terms as $key => $t) {
+                    if ($t->name == '1') {
+                        $term = $t;
+                        break;
+                    }
+                }
+                if ($term == null) {
+                    return 'N/A';
+                }
+                $count = count($this->get_activities_in_term($term->id));
+                return $count . "";
+            });
+
+        $grid->column('term_2', __('Term 2  - Activities'))
+            ->display(function ($x) {
+                $term = null;
+                foreach ($this->year->terms as $key => $t) {
+                    if ($t->name == '2') {
+                        $term = $t;
+                        break;
+                    }
+                }
+                if ($term == null) {
+                    return 'N/A';
+                }
+                $count = count($this->get_activities_in_term($term->id));
+                return $count . "";
+            });
+        $grid->column('term_3', __('Term 3  - Activities'))
+            ->display(function ($x) {
+                $term = null;
+                foreach ($this->year->terms as $key => $t) {
+                    if ($t->name == '3') {
+                        $term = $t;
+                        break;
+                    }
+                }
+                if ($term == null) {
+                    return 'N/A';
+                }
+                $count = count($this->get_activities_in_term($term->id));
+                return $count . "";
+            });
+
+        $grid->column('teacher_1', __('Teacher'))
+            ->display(function ($x) {
+                if ($this->teacher1 == null) {
+                    return $x;
+                }
+                return $this->teacher1->name;
+            })
+            ->sortable();
+        $grid->column('teacher_2', __('Teacher 2'))
+            ->display(function ($x) {
+                if ($this->teacher2 == null) {
+                    return $x;
+                }
+                return $this->teacher2->name;
+            })
+            ->sortable();
+
+        $grid->column('teacher_3', __('Teacher 3'))
+            ->display(function ($x) {
+                if ($this->teacher3 == null) {
+                    return $x;
+                }
+                return $this->teacher3->name;
+            })
+            ->sortable();
+
+        $grid->column('teacher_4', __('Teacher 4'))
+            ->display(function ($x) {
+                if ($this->teacher4 == null) {
+                    return $x;
+                }
+                return $this->teacher4->name;
+            })
+            ->hide()
+            ->sortable();
+        $grid->column('details', __('Details'))->hide();
+        $grid->column('code', __('Code'))->hide();
+
+        $grid->column('is_optional', __('Is optional'))->using([
+            0 => 'Optional',
+            1 => 'Compulsory',
+        ]);
 
         return $grid;
     }
@@ -88,10 +212,31 @@ class SecondarySubjectController extends AdminController
     {
         $form = new Form(new SecondarySubject());
 
-        $form->number('enterprise_id', __('Enterprise id'));
-        $form->number('academic_class_id', __('Academic class id'));
-        $form->number('parent_course_id', __('Parent course id'));
-        $form->number('academic_year_id', __('Academic year id'));
+        $form->hidden('enterprise_id', __('Enterprise id'))->value(Auth::user()->ent->id);
+
+        $form->select('academic_class_id', 'Class')
+            ->options(
+                AcademicClass::where([
+                    'enterprise_id' => Auth::user()->enterprise_id,
+                    'academic_year_id' => Auth::user()->ent->dp_year,
+                ])->get()
+                    ->pluck('name', 'id')
+            )->rules('required');
+
+
+        $form->select('parent_course_id', 'Subject')
+            ->options(
+                ParentCourse::where([
+                    'type' => 'Secondary',
+                ])
+                    ->orwhere([
+                        'type' => 'Advanced',
+                    ])
+                    ->get()
+                    ->pluck('name', 'id')
+            )->rules('required');
+
+ 
         $form->number('teacher_1', __('Teacher 1'));
         $form->number('teacher_2', __('Teacher 2'));
         $form->number('teacher_3', __('Teacher 3'));

@@ -50,6 +50,13 @@ class StudentHasClass extends Model
         });
 
         self::created(function ($m) {
+
+            $class = AcademicClass::find($m->academic_class_id);
+            if ($class != null) {
+                AcademicClass::updateSecondaryCompetences($class);
+            }
+
+
             Utils::sync_classes($m->enterprise_id);
             if ($m->student != null) {
                 if ($m->student->status == 1) {
@@ -59,6 +66,12 @@ class StudentHasClass extends Model
         });
 
         self::updated(function ($m) {
+
+            $class = AcademicClass::find($m->academic_class_id);
+            if ($class != null) {
+                AcademicClass::updateSecondaryCompetences($class);
+            }
+
             Utils::sync_classes($m->enterprise_id);
             if ($m->student != null) {
                 if ($m->student->status == 1) {

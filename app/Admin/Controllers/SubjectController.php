@@ -34,9 +34,11 @@ class SubjectController extends AdminController
     protected function grid()
     {
 
- 
+
 
         $grid = new Grid(new Subject());
+
+
 
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
@@ -165,7 +167,7 @@ class SubjectController extends AdminController
                 ])->get()
                     ->pluck('name', 'id')
             )->rules('required');
-
+ 
         $ent = Utils::ent();
 
         $subjects = [];
@@ -173,16 +175,13 @@ class SubjectController extends AdminController
             $subjects = MainCourse::where([
                 'subject_type' => 'Primary'
             ])
-            ->orwhere([
-                'subject_type' =>  'Nursery'
-            ])
-            ->orwhere([
-                'subject_type' =>  'Other'
-            ])
-            ->get(); 
-
-            
-
+                ->orwhere([
+                    'subject_type' =>  'Nursery'
+                ])
+                ->orwhere([
+                    'subject_type' =>  'Other'
+                ])
+                ->get();
         } else {
             $subjects = MainCourse::where([
                 'subject_type' => 'Secondary'

@@ -44,6 +44,7 @@ class AcademicClass extends Model
         });
     }
 
+
     public static function generate_secondary_main_subjects($m)
     {
         if ($m->class_type != 'Secondary') {
@@ -72,6 +73,40 @@ class AcademicClass extends Model
             $sub->save();
         }
     }
+
+
+    public static function updateSecondaryCompetences($class)
+    {
+        if ($class == null) {
+            return;
+        }
+        if ($class->class_type != 'Secondary') {
+            return;
+        }
+
+        if ($class->activities == null) {
+            return;
+        }
+
+        foreach ($class->activities as $key => $act) {
+            try {
+                Activity::generateSecondaryCompetences($act);
+            } catch (\Throwable $th) {
+                //throw $th;
+            }
+        }
+    }
+
+    public function activities()
+    {
+        return $this->hasMany(Activity::class);
+    }
+
+    public function secondarySubjects()
+    {
+        return $this->hasMany(SecondarySubject::class);
+    }
+
 
 
     /*  
@@ -338,8 +373,9 @@ class AcademicClass extends Model
         }
     }
 
-    function secondarySubjects(){
-        return $this->hasMany(SecondarySubject::class);
+    function subject()
+    {
+        return $this->belongsTo(SecondarySubject::class, 'subject_id');
     }
     function academic_class_fees()
     {
