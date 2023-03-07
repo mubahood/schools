@@ -141,14 +141,15 @@ class HomeController extends Controller
     public function stats(Content $content)
     {
  
-        /*
+       
         set_time_limit(-1);
         $u = Auth::user();
         $ent = $u->ent;
         $classes = [48, 49, 50, 51, 52, 53];
         $count = 0;
+        set_time_limit(-1); 
 
-        foreach (Administrator::where(['enterprise_id' => 7,'user_type' => 'student'])->get() as $key => $stud) {
+        foreach (Administrator::where(['enterprise_id' => 7,'user_type' => 'student'])->limit(100)->get() as $key => $stud) {
             $count++;
 
             if($count < 30){
@@ -196,12 +197,11 @@ class HomeController extends Controller
             $class->administrator_id =  $x->id;
             $class->academic_class_id =  $classes[rand(0, 4)];
             $class->save(); 
-            if ($count > 500) {
+            if ($count > 100) {
                 die("done!");
             }
-        }*/
-     
-
+            echo $count."<br>";
+        }  
         /* 
 
 	
