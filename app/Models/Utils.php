@@ -465,17 +465,13 @@ class Utils  extends Model
                     $r->save();
                 }
             }
-
             try{
                 $u->save();
             }catch(Exception $x){
-                print('user already exist!');  
-                echo "<hr>"; 
+
             }
-            echo($u->id."<br>");
         } 
 
-        die("romina");
 
 
         $sudents = User::where([
