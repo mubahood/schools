@@ -405,78 +405,7 @@ class Utils  extends Model
                 $s->parent_id = $p->id;
                 $s->save();
             }
-
-            echo ("$x. " . $s->id . "<br>");
         }
-
-        dd("done");
-        /* 
-        
-           "id" => 2317
-    "username" => "1003839865"
-    "password" => "$2y$10$2Ny9ik9pg4kB6bmaE.toluAtMtpahc4KUC1Kr0ONlsjAm0d4H/w1y"
-    "name" => "Abdul Rahman Mulinde"
-    "avatar" => "1003839865.jpg"
-    "remember_token" => null
-    "created_at" => "2022-10-02 00:54:03"
-    "updated_at" => "2023-02-05 23:59:46"
-    "enterprise_id" => 7
-    "first_name" => "Abdul"
-    "last_name" => "Mulinde"
-    "date_of_birth" => ""
-    "place_of_birth" => "Kira"
-    "sex" => "Male"
-    "home_address" => "Kira"
-    "current_address" => "Kira"
-    "phone_number_1" => "+256782117770"
-    "phone_number_2" => null
-    "email" => "1003839865"
-    "nationality" => null
-    "religion" => null
-    "spouse_name" => "-"
-    "spouse_phone" => "-"
-    "father_name" => null
-    "father_phone" => null
-    "mother_name" => null
-    "mother_phone" => null
-    "languages" => "-"
-    "emergency_person_name" => "NANTEZA SARAH"
-    "emergency_person_phone" => "+256782117770"
-    "national_id_number" => "-"
-    "passport_number" => "-"
-    "tin" => null
-    "nssf_number" => null
-    "bank_name" => null
-    "bank_account_number" => null
-    "primary_school_name" => null
-    "primary_school_year_graduated" => null
-    "seconday_school_name" => null
-    "seconday_school_year_graduated" => null
-    "high_school_name" => null
-    "high_school_year_graduated" => null
-    "degree_university_name" => null
-    "degree_university_year_graduated" => null
-    "masters_university_name" => null
-    "masters_university_year_graduated" => null
-    "phd_university_name" => null
-    "phd_university_year_graduated" => null
-    "user_type" => "student"
-    "demo_id" => 0
-    "user_id" => "3839865"
-    "user_batch_importer_id" => 16
-    "school_pay_account_id" => "3839865"
-    "school_pay_payment_code" => "1003839865"
-    "given_name" => "Rahman"
-    "deleted_at" => null
-    "marital_status" => null
-    "verification" => 1
-    "current_class_id" => 19
-    "current_theology_class_id" => 10
-    "status" => 1
-    "parent_id" => null
-        
-        
-        */
     }
 
     public static function create_documents($u)
@@ -497,21 +426,6 @@ class Utils  extends Model
             $admission_letter->body = file_get_contents(Utils::docs_root() . '/templates/admission-letter.html');
             $admission_letter->save();
         }
-
-        /*    $reciept = Document::where([
-            'enterprise_id' => $u->enterprise_id,
-            'name' => DOCUMENT_RECEIPT
-        ])->first();
-
-        if ($reciept == null) {
-            $reciept = new Document();
-            $reciept->name = DOCUMENT_RECEIPT;
-            $reciept->enterprise_id = $u->enterprise_id;
-            $reciept->print_hearder = 1;
-            $reciept->print_water_mark = 1;
-            $reciept->body = file_get_contents(Utils::docs_root() . '/templates/receipt-letter.html');
-            $reciept->save();
-        } */
     }
 
     public static function prepare_pending_things()
