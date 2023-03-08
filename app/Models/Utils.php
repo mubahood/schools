@@ -425,9 +425,9 @@ class Utils  extends Model
             } else if ($u->isRole('supplier')) {
                 $u->main_role_id = 9;
             } else if ($u->isRole('warden')) {
-                $u->main_role_id = 5;
-            } else if ($u->isRole('teacher')) {
                 $u->main_role_id = 16;
+            } else if ($u->isRole('teacher')) {
+                $u->main_role_id = 5;
             } else if ($u->isRole('parent')) {
                 $u->main_role_id = 17;
             }
