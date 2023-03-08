@@ -469,8 +469,8 @@ class Utils  extends Model
             try{
                 $u->save();
             }catch(Exception $x){
-                print('user already exist!'); 
-                echo "<hr>";
+                print('user already exist!');  
+                echo "<hr>"; 
             }
             echo($u->id."<br>");
         } 
