@@ -14,6 +14,7 @@ use App\Models\StudentHasTheologyClass;
 use App\Models\Subject;
 use App\Models\TheologyClass;
 use App\Models\Transaction;
+use App\Models\User;
 use App\Models\Utils;
 use Encore\Admin\Traits\DefaultDatetimeFormat;
 use Exception;
@@ -203,20 +204,28 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
             }
 
 
-
-            Enterprise::my_update($e);
             $_name = $model->first_name . " " . $model->given_name . " " . $model->last_name;
 
-            if (strlen(trim($_name)) > 1) {
-                $model->name =  $_name;
+            if (
+                $model->name == null ||
+                strlen($model->name) < 3
+            ) {
+                if (strlen(trim($_name)) > 2) {
+                    $model->name =  $_name;
+                }
             }
 
             return $model;
         });
 
         self::created(function ($m) {
-            Account::create($m->id);
-            Administrator::my_update($m);
+            if (strtolower($m->user_type) == 'student') {
+                User::createParent($m);
+                Account::create($m->id);
+                Administrator::my_update($m);
+            }
+
+
             //created Administrator
         });
 

@@ -334,6 +334,7 @@ class Utils  extends Model
             return;
         }
 
+        Utils::create_make_parents($u);
         Utils::create_documents($u);
         Utils::create_secondary_school_subjects($u);
         Utils::prepare_session_participations($u);
@@ -355,21 +356,20 @@ class Utils  extends Model
     public static function create_secondary_school_subjects($u)
     {
 
-        if($u == null){
+        if ($u == null) {
             return;
         }
         $sql_count = "SELECT count(id) FROM secondary_subjects WHERE academic_class_id = academic_classes.id";
         $sql_classes = "SELECT id FROM academic_classes WHERE class_type = 'Secondary' AND ($sql_count) < 5 ";
 
-        foreach (DB::select($sql_classes) as $key => $val) { 
+        foreach (DB::select($sql_classes) as $key => $val) {
             $class = AcademicClass::find($val->id);
             if ($class == null) {
                 die("class not found.");
             }
-            AcademicClass::generate_secondary_main_subjects($class); 
+            AcademicClass::generate_secondary_main_subjects($class);
         }
- 
-     }
+    }
     public static function prepare_session_participations($u)
     {
         if ($u == null) {
@@ -385,6 +385,98 @@ class Utils  extends Model
         foreach ($preps as $key => $session) {
             $session->close_session();
         }
+    }
+
+    public static function create_make_parents($u)
+    {
+        set_time_limit(-1);
+        $sudents = User::where([
+            'user_type' => 'Student',
+            'parent_id' => null,
+        ])->get();
+        $x = 0;
+
+        foreach ($sudents as $key => $s) {
+            $x++;
+            $p = $s->getParent();
+            if ($p == null) {
+                $p = $s::createParent($s);
+            } else {
+                $s->parent_id = $p->id;
+                $s->save();
+            }
+
+            echo ("$x. " . $s->id . "<br>");
+        }
+
+        dd("done");
+        /* 
+        
+           "id" => 2317
+    "username" => "1003839865"
+    "password" => "$2y$10$2Ny9ik9pg4kB6bmaE.toluAtMtpahc4KUC1Kr0ONlsjAm0d4H/w1y"
+    "name" => "Abdul Rahman Mulinde"
+    "avatar" => "1003839865.jpg"
+    "remember_token" => null
+    "created_at" => "2022-10-02 00:54:03"
+    "updated_at" => "2023-02-05 23:59:46"
+    "enterprise_id" => 7
+    "first_name" => "Abdul"
+    "last_name" => "Mulinde"
+    "date_of_birth" => ""
+    "place_of_birth" => "Kira"
+    "sex" => "Male"
+    "home_address" => "Kira"
+    "current_address" => "Kira"
+    "phone_number_1" => "+256782117770"
+    "phone_number_2" => null
+    "email" => "1003839865"
+    "nationality" => null
+    "religion" => null
+    "spouse_name" => "-"
+    "spouse_phone" => "-"
+    "father_name" => null
+    "father_phone" => null
+    "mother_name" => null
+    "mother_phone" => null
+    "languages" => "-"
+    "emergency_person_name" => "NANTEZA SARAH"
+    "emergency_person_phone" => "+256782117770"
+    "national_id_number" => "-"
+    "passport_number" => "-"
+    "tin" => null
+    "nssf_number" => null
+    "bank_name" => null
+    "bank_account_number" => null
+    "primary_school_name" => null
+    "primary_school_year_graduated" => null
+    "seconday_school_name" => null
+    "seconday_school_year_graduated" => null
+    "high_school_name" => null
+    "high_school_year_graduated" => null
+    "degree_university_name" => null
+    "degree_university_year_graduated" => null
+    "masters_university_name" => null
+    "masters_university_year_graduated" => null
+    "phd_university_name" => null
+    "phd_university_year_graduated" => null
+    "user_type" => "student"
+    "demo_id" => 0
+    "user_id" => "3839865"
+    "user_batch_importer_id" => 16
+    "school_pay_account_id" => "3839865"
+    "school_pay_payment_code" => "1003839865"
+    "given_name" => "Rahman"
+    "deleted_at" => null
+    "marital_status" => null
+    "verification" => 1
+    "current_class_id" => 19
+    "current_theology_class_id" => 10
+    "status" => 1
+    "parent_id" => null
+        
+        
+        */
     }
 
     public static function create_documents($u)
