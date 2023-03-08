@@ -321,7 +321,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
 
             if ($_u != null) {
                 if ($_u->id != $model->id) {
-
+                    //dd($model->user_type);
                     throw new Exception("Use with provided email address ($model->email) already exist. $_u->name", 1);
                 }
             }

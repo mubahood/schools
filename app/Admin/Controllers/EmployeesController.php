@@ -11,118 +11,6 @@ use Encore\Admin\Show;
 use Encore\Admin\Widgets\Tab;
 use Illuminate\Support\Facades\Hash;
 
-/*
-
-`first_name` TEXT DEFAULT NULL,
-`last_name` TEXT DEFAULT NULL,
-`date_of_birth` TEXT DEFAULT NULL,
-`place_of_birth` TEXT DEFAULT NULL,
-`sex` TEXT DEFAULT NULL,
-`home_address` TEXT DEFAULT NULL,
-`current_address` TEXT DEFAULT NULL,
-`phone_number_1` TEXT DEFAULT NULL,
-`phone_number_2` TEXT DEFAULT NULL,
-`email` TEXT DEFAULT NULL,
-`nationality` TEXT DEFAULT NULL,
-`religion` TEXT DEFAULT NULL,
-`spouse_name` TEXT DEFAULT NULL,
-`spouse_phone` TEXT DEFAULT NULL,
-`father_name` TEXT DEFAULT NULL,
-`father_phone` TEXT DEFAULT NULL,
-`mother_name` TEXT DEFAULT NULL,
-`mother_phone` TEXT DEFAULT NULL,
-`languages` TEXT DEFAULT NULL,
-`emergency_person_name` TEXT DEFAULT NULL,
-`emergency_person_phone` TEXT DEFAULT NULL,
-`national_id_number` TEXT DEFAULT NULL,
-`passport_number` TEXT DEFAULT NULL,
-`tin` TEXT DEFAULT NULL,
-`nssf_number` TEXT DEFAULT NULL,
-`bank_name` TEXT DEFAULT NULL,
-`bank_account_number` TEXT DEFAULT NULL,
-`primary_school_name` TEXT DEFAULT NULL,
-`primary_school_year_graduated` TEXT DEFAULT NULL,
-`seconday_school_name` TEXT DEFAULT NULL,
-`seconday_school_year_graduated` TEXT DEFAULT NULL,
-`high_school_name` TEXT DEFAULT NULL,
-`high_school_year_graduated` TEXT DEFAULT NULL,
-`degree_university_name` TEXT DEFAULT NULL,
-`degree_university_year_graduated` TEXT DEFAULT NULL,
-`masters_university_name` TEXT DEFAULT NULL,
-`masters_university_year_graduated` TEXT DEFAULT NULL,
-`phd_university_name` TEXT DEFAULT NULL,
-`phd_university_year_graduated` TEXT DEFAULT NULL,
-
-
-
-===================================
-===================================
-===================================
-===================================
-===================================
-===================================
-===================================
-===================================
-PERSONAL INFORMATION
---------------------
-- First name
-- Last name
-- Date of birth
-- Place of birth
-- Sex
-- Home Address
-- Current Address
-- Telephone
-- Cell phone
-- Email address
-- Cival status
-- Citizineship
-- Religion
-- Spource name
-- Spource phone
-- Farther's name
-- Farther's phone
-- Mothers's name
-- Mothers's phone
-- Languages
-- Contact for emergency name
-- Contact for emergency phone
-- Mothers's phone
--
-
-ACCOUNT NUMBERS
---------------------
-- National ID Number
-- Passport number
-- TIN Number
-- NSSF NUMBER
-- Bank name
-- Bank account number
--
-
-EDUCATIONAL INFORMATION
---------------------
-- Primary school name
-- Primary school year graduated
-- Seconday school name
-- Seconday school year graduated
-- High school name
-- High school year graduated
-- Degree university name
-- Degree university year graduated
-- Masters university name
-- Masters university year graduated
-- PHD university name
-- PHD university year graduated
--
-
-ACCOUNT INFORMATION
---------------------
-- Usename
-- Password
-
-
-*/
 
 class EmployeesController extends AdminController
 {
@@ -145,7 +33,7 @@ class EmployeesController extends AdminController
             $actions->disableDelete();
         });
 
-/*         $ git add  .git/MERGE_MSG -f
+        /*         $ git add  .git/MERGE_MSG -f
 
 
         UW PICO 5.09                 File: /home4/schooics/public_html/.git/MERGE_MSG                 Modified   */
@@ -178,12 +66,15 @@ class EmployeesController extends AdminController
 
 
 
+        $grid->quickSearch('name')->placeholder('Search by name');
+        $grid->disableBatchActions();
         $grid->column('id', __('Id'))->sortable();
         $grid->column('name', __('Name'))->sortable();
+        $grid->column('main_role_id', __('Main role'))->label('primary');
+        $grid->column('roles', 'Other roles')->pluck('name')->label()->hide();
         $grid->column('phone_number_1', __('Phone number'));
         $grid->column('phone_number_2', __('Phone number 2'))->hide();
         $grid->column('email', __('Email'));
-        $grid->column('roles', trans('admin.roles'))->pluck('name')->label();
         $grid->column('date_of_birth', __('D.O.B'))->sortable();
         $grid->column('nationality', __('Nationality'))->sortable();
         $grid->column('sex', __('Gender'));
@@ -264,7 +155,7 @@ class EmployeesController extends AdminController
             $form->text('last_name')->rules('required');
             $form->date('date_of_birth')->rules('required');
             $form->text('place_of_birth');
-            $form->select('sex','Gender')->options(['Male' => 'Male', 'Female' => 'Female'])->rules('required');
+            $form->select('sex', 'Gender')->options(['Male' => 'Male', 'Female' => 'Female'])->rules('required');
             $form->text('home_address');
             $form->text('current_address');
             $form->text('phone_number_1', 'Mobile phone number')->rules('required');

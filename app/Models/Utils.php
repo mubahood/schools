@@ -389,15 +389,106 @@ class Utils  extends Model
 
     public static function create_make_parents($u)
     {
-        set_time_limit(-1);
+        $users = Administrator::where([
+            'main_role_id' => null,
+        ])->get();
+        
+        if (count($users) > 1) {
+            set_time_limit(-1);
+        }
+
+        foreach ($users as $u) {
+            if ($u->isRole('admin')) {
+                $u->main_role_id = 2;
+            } else if ($u->isRole('hm')) {
+                $u->main_role_id = 10;
+            } else if ($u->isRole('super-admin')) {
+                $u->main_role_id = 1;
+            } else if ($u->isRole('bursar')) {
+                $u->main_role_id = 7;
+            } else if ($u->isRole('dos')) {
+                $u->main_role_id = 6;
+            } else if ($u->isRole('gate')) {
+                $u->main_role_id = 12;
+            } else if ($u->isRole('librarian')) {
+                $u->main_role_id = 3;
+            } else if ($u->isRole('nurse')) {
+                $u->main_role_id = 15;
+            } else if ($u->isRole('receptionist')) {
+                $u->main_role_id = 14;
+            } else if ($u->isRole('security')) {
+                $u->main_role_id = 11;
+            } else if ($u->isRole('staff')) {
+                $u->main_role_id = 13;
+            } else if ($u->isRole('student')) {
+                $u->main_role_id = 4;
+            } else if ($u->isRole('supplier')) {
+                $u->main_role_id = 9;
+            } else if ($u->isRole('warden')) {
+                $u->main_role_id = 5;
+            } else if ($u->isRole('teacher')) {
+                $u->main_role_id = 16;
+            } else if ($u->isRole('parent')) {
+                $u->main_role_id = 17;
+            }
+
+            if ($u->main_role_id == null) {
+                if ($u->user_type == 'employee') {
+                    $u->main_role_id = 16;
+                    $r = new AdminRoleUser();
+                    $r->user_id = $u->id;
+                    $r->role_id = 16;
+                    $r->save();
+                } else if ($u->user_type == 'supplier') {
+                    $u->main_role_id = 9;
+                    $r = new AdminRoleUser();
+                    $r->user_id = $u->id;
+                    $r->role_id = 9;
+                    $r->save();
+                } else if ($u->user_type == 'student') {
+                    $u->main_role_id = 4;
+                    $r = new AdminRoleUser();
+                    $r->user_id = $u->id;
+                    $r->role_id = 4;
+                    $r->save();
+                } else if ($u->user_type == 'parent') {
+                    $u->main_role_id = 17;
+                    $r = new AdminRoleUser();
+                    $r->user_id = $u->id;
+                    $r->role_id = 17;
+                    $r->save();
+                } else {
+                    $u->main_role_id = 17;
+                    $r = new AdminRoleUser();
+                    $r->user_id = $u->id;
+                    $r->role_id = 17;
+                    $r->save();
+                }
+            }
+
+            try{
+                $u->save();
+            }catch(Exception $x){
+                print('user already exist!'); 
+                echo "<hr>";
+            }
+            echo($u->id."<br>");
+        } 
+
+        die("romina");
+
+
         $sudents = User::where([
             'user_type' => 'Student',
             'parent_id' => null,
         ])->get();
-        $x = 0;
+
+
+        if (count($sudents) > 1) {
+            set_time_limit(-1);
+        }
 
         foreach ($sudents as $key => $s) {
-            $x++;
             $p = $s->getParent();
             if ($p == null) {
                 $p = $s::createParent($s);

@@ -105,15 +105,15 @@ class Dashboard
         $classes = [];
         $labels = [];
         $amounts = [];
-        $total = 0; 
+        $total = 0;
 
         $academic_year_id = 0;
 
         $active_academic_year = $u->ent->active_academic_year();
-        if($active_academic_year != null){
+        if ($active_academic_year != null) {
             $academic_year_id = $active_academic_year->id;
         }
- 
+
         foreach (AcademicClass::where([
             'enterprise_id' => $u->enterprise_id,
             'academic_year_id' => $academic_year_id
@@ -129,7 +129,7 @@ class Dashboard
         }
 
         $s = new AcademicClass();
-       /*  $s->name = "Services";
+        /*  $s->name = "Services";
         foreach (Service::where([
             'enterprise_id' => $u->enterprise_id
         ])->get() as $key => $val) {
@@ -137,8 +137,8 @@ class Dashboard
             $subs = count($val->subs);
             $s->amount += ($amount * $subs);
         } */
-      /*   $labels[] = 'Services'; */
-     /*    $classes[] = $s; */
+        /*   $labels[] = 'Services'; */
+        /*    $classes[] = $s; */
         /* $amounts[] = $s->amount; */
 
         return view('dashboard.bursarFeesExpected', [
@@ -179,7 +179,7 @@ class Dashboard
         $academic_year_id = 0;
 
         $active_academic_year = $u->ent->active_academic_year();
-        if($active_academic_year != null){
+        if ($active_academic_year != null) {
             $academic_year_id = $active_academic_year->id;
         }
 
@@ -359,11 +359,11 @@ class Dashboard
     public static function count_expected_fees()
     {
 
-        $man = Utils::manifest(Auth::user()->ent); 
+        $man = Utils::manifest(Auth::user()->ent);
         $enterprise_id = Auth::user()->enterprise_id;
 
-       
-         
+
+
 
         $sub_title =  "To be paid by $man->active_students active students.";
         return view('widgets.box-5', [
@@ -380,8 +380,8 @@ class Dashboard
 
     public static function count_paid_fees()
     {
-        $man = Utils::manifest(Auth::user()->ent);   
- 
+        $man = Utils::manifest(Auth::user()->ent);
+
         $sub_title =  "To be paid by $man->active_students active students.";
         return view('widgets.box-5', [
             'is_dark' => false,
@@ -400,11 +400,11 @@ class Dashboard
 
         $enterprise_id = Auth::user()->enterprise_id;
 
- 
-        $man = Utils::manifest(Auth::user()->ent);   
-   
+
+        $man = Utils::manifest(Auth::user()->ent);
+
         $expected_fees = $man->expected_fees;
-        $paid_fees = $man->paid_fees; 
+        $paid_fees = $man->paid_fees;
         if ($expected_fees < 0) {
             $expected_fees = -1 * $expected_fees;
         }
@@ -431,14 +431,14 @@ class Dashboard
 
     public static function count_unpaid_fees()
     {
- 
-
-        $man = Utils::manifest(Auth::user()->ent);   
- 
 
 
+        $man = Utils::manifest(Auth::user()->ent);
 
-        $sub_title =  "To be paid by $man->active_students active students.";  
+
+
+
+        $sub_title =  "To be paid by $man->active_students active students.";
         return view('widgets.box-5', [
             'is_dark' => false,
             'title' => 'Unpaid school fees',
@@ -493,14 +493,13 @@ class Dashboard
             'sex' => 'Male',
         ])->count();
 
-
         $female_students = $all_students - $male_students;
 
         $sub_title = number_format($male_students) . ' Males, ';
         $sub_title .= number_format($female_students) . ' Females.';
         return view('widgets.box-5', [
             'is_dark' => false,
-            'title' => 'Teachers',
+            'title' => 'Teachers & Staff',
             'sub_title' => $sub_title,
             'number' => number_format($all_students),
             'link' => admin_url('employees')
@@ -581,10 +580,10 @@ class Dashboard
         $sub_title .= number_format($female_students) . ' Females.';
         return view('widgets.box-5', [
             'is_dark' => false,
-            'title' => 'Staff',
+            'title' => 'Parents',
             'sub_title' => $sub_title,
             'number' => number_format($all_students),
-            'link' => admin_url('employees')
+            'link' => admin_url('parents')
         ]);
     }
 
