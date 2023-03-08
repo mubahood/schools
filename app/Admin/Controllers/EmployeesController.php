@@ -49,19 +49,14 @@ class EmployeesController extends AdminController
 
 
         $grid->filter(function ($filter) {
-            $filter->disableIdFilter();
-            $u = Admin::user();
-            $teachers = [];
-            foreach (Administrator::where([
-                'enterprise_id' => $u->enterprise_id,
-                'user_type' => 'employee',
-            ])->get() as $key => $a) {
-                if ($a->isRole('teacher')) {
-                    $teachers[$a['id']] = $a['name'] . " => " . $a['id'];
-                }
-            }
 
-            $filter->like('name', 'Name');
+            $roleModel = config('admin.database.roles_model');
+            $filter->equal('main_role_id', 'Filter by role')
+                ->select($roleModel::where('slug', '!=', 'super-admin')
+                    ->where('slug', '!=', 'student')
+                    ->get()
+                    ->pluck('name', 'id')); 
+ 
         });
 
 
@@ -70,8 +65,16 @@ class EmployeesController extends AdminController
         $grid->disableBatchActions();
         $grid->column('id', __('Id'))->sortable();
         $grid->column('name', __('Name'))->sortable();
-        $grid->column('main_role_id', __('Main role'))->label('primary');
-        $grid->column('roles', 'Other roles')->pluck('name')->label()->hide();
+        $grid->column('main_role_id', __('Main role'))
+            ->display(function ($x) {
+                if ($this->main_role == null) {
+                    return $x;
+                }
+                return $this->main_role->name;
+            })
+            ->sortable()
+            ->label('success');
+        $grid->column('roles', 'Roles')->pluck('name')->label()->hide();
         $grid->column('phone_number_1', __('Phone number'));
         $grid->column('phone_number_2', __('Phone number 2'))->hide();
         $grid->column('email', __('Email'));

@@ -5,6 +5,7 @@ namespace Encore\Admin\Auth\Database;
 use App\Models\AcademicClass;
 use App\Models\AcademicYear;
 use App\Models\Account;
+use App\Models\AdminRole;
 use App\Models\AdminRoleUser;
 use App\Models\Enterprise;
 use App\Models\ServiceSubscription;
@@ -649,6 +650,11 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
     public function account()
     {
         return $this->hasOne(Account::class);
+    }
+
+    public function main_role()
+    {
+        return $this->belongsTo(AdminRole::class,'main_role_id');
     }
 
     /**
