@@ -74,6 +74,7 @@ Route::group([
     $router->resource('activities', ActivityController::class);
     $router->resource('secondary-subjects', SecondarySubjectController::class);
     $router->resource('secondary-competences', SecondaryCompetenceController::class);
+    $router->resource('parents', ParentsController::class);
 
     //$router->resource('fees', StudentHasFeeController::class);
 

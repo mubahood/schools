@@ -392,7 +392,7 @@ class Utils  extends Model
         $users = Administrator::where([
             'main_role_id' => null,
         ])->get();
-        
+
         if (count($users) > 1) {
             set_time_limit(-1);
         }
@@ -465,12 +465,11 @@ class Utils  extends Model
                     $r->save();
                 }
             }
-            try{
+            try {
                 $u->save();
-            }catch(Exception $x){
-
+            } catch (Exception $x) {
             }
-        } 
+        }
 
 
 

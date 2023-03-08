@@ -10,6 +10,7 @@ use App\Models\StudentHasClass;
 use App\Models\Subject;
 use App\Models\TheologyClass;
 use App\Models\TheologySubject;
+use App\Models\User;
 use App\Models\UserBatchImporter;
 use App\Models\Utils;
 use Carbon\Carbon;
@@ -44,7 +45,7 @@ class StudentsController extends AdminController
     protected function grid()
     {
 
-/*
+        /*
         $u = Administrator::find(2334);
         $u->status =  1;
         $u->save();
@@ -117,6 +118,27 @@ class StudentsController extends AdminController
 
         $grid->filter(function ($filter) {
 
+            $u = Admin::user();
+            $ajax_url = url(
+                '/api/ajax?'
+                    . 'enterprise_id=' . $u->enterprise_id
+                    . "&search_by_1=name"
+                    . "&search_by_2=id"
+                    . "&model=User"
+            );
+
+            $filter->equal('parent_id', 'Filte by Parent')
+            ->select(function ($id) {
+                $a = User::find($id);
+                if ($a) {
+                    return [$a->id => "#" . $a->id . " - " . $a->name];
+                }
+            })
+            
+            ->ajax($ajax_url);
+        
+
+            
             $filter->between('created_at', 'Admitted')->date();
             $filter->like('school_pay_payment_code', 'By school-pay code');
             $u = Admin::user();
@@ -176,10 +198,12 @@ class StudentsController extends AdminController
                     'enterprise_id' => $u->enterprise_id
                 ])->orderBy('id', 'Desc')->get()->pluck('name_text', 'id'));
                 $classes[0] = 'No theology class';
-
                 $filter->equal('current_theology_class_id', 'Filter by theology class')->select($classes);
+
+               
             }
 
+            
 
 
             // Remove the default id filter
@@ -208,7 +232,7 @@ class StudentsController extends AdminController
         }
 
 
-        $grid->column('id', __('ID')) 
+        $grid->column('id', __('ID'))
             ->sortable();
 
         $grid->model()->where([
@@ -289,8 +313,20 @@ class StudentsController extends AdminController
 
         $grid->column('place_of_birth', __('Address'))->sortable()->hide();
         $grid->column('home_address', __('Home address'))->hide();
- 
+
         $grid->column('school_pay_payment_code', __('School pay payment code'))->sortable();
+
+        $grid->column('parent_id', __('Parent'))
+        ->display(function($x){
+            if($this->parent == null){
+                return $x;
+            }
+
+            $txt = '<a href="' . admin_url('parents/?id=' . $this->parent->id) . '" title="View parent" ><b>' . $this->parent->name . "</b></a>";
+
+            return $txt; 
+        })
+        ->sortable(); 
         $grid->column('documents', __('Print Documents'))
             ->display(function () {
                 $admission_letter = url('print-admission-letter?id=' . $this->id);
@@ -427,7 +463,7 @@ class StudentsController extends AdminController
 
             $form->text('home_address');
             $form->text('current_address');
-            $form->text('emergency_person_name', "Guardian name"); 
+            $form->text('emergency_person_name', "Guardian name");
             $form->text('emergency_person_phone', "Guardian phone number");
             $form->text('phone_number_2', "Guardian phone number 2");
 
@@ -436,7 +472,7 @@ class StudentsController extends AdminController
             $form->text('father_phone', "Father's phone number");
             $form->text('mother_name', "Mother's name");
             $form->text('mother_phone', "Mother's phone number");
- 
+
             $form->text('nationality');
         });
 

@@ -12,14 +12,14 @@ use Encore\Admin\Widgets\Tab;
 use Illuminate\Support\Facades\Hash;
 
 
-class EmployeesController extends AdminController
+class ParentsController extends AdminController
 {
     /**
      * Title for current resource.
      *
      * @var string
      */
-    protected $title = 'Teaching & non teaching staff';
+    protected $title = 'Parents';
 
     /**
      * Make a grid builder.
@@ -41,7 +41,7 @@ class EmployeesController extends AdminController
             ->orderBy('id', 'Desc')
             ->where([
                 'enterprise_id' => Admin::user()->enterprise_id,
-                'user_type' => 'employee'
+                'user_type' => 'parent'
             ]);
         $grid->actions(function ($actions) {
             //$actions->disableView();
@@ -51,39 +51,64 @@ class EmployeesController extends AdminController
         $grid->filter(function ($filter) {
 
             $roleModel = config('admin.database.roles_model');
-            $filter->equal('main_role_id', 'Filter by role')
+            /*  $filter->equal('main_role_id', 'Filter by role')
                 ->select($roleModel::where('slug', '!=', 'super-admin')
                     ->where('slug', '!=', 'student')
                     ->get()
                     ->pluck('name', 'id')); 
- 
+  */
         });
 
 
-
+        $grid->disableExport();
+        $grid->disableCreateButton();
         $grid->quickSearch('name')->placeholder('Search by name');
         $grid->disableBatchActions();
         $grid->column('id', __('Id'))->sortable();
         $grid->column('name', __('Name'))->sortable();
-        $grid->column('main_role_id', __('Main role'))
+        $grid->column('children', __('No. of Children'))
             ->display(function ($x) {
-                if ($this->main_role == null) {
-                    return $x;
+                if ($this->kids == null) {
+                    return '-';
                 }
-                return $this->main_role->name;
-            })
-            ->sortable()
-            ->label('success'); 
+                $txt = '<a href="' . admin_url('students/?parent_id=' . $this->id) . '" title="View children" ><b>' . count($this->kids) . "</b></a>";
+
+                return $txt;
+            });
+        $grid->column('kids', __('No. of Children'))
+            ->display(function ($x) {
+                if ($this->kids == null) {
+                    return '-';
+                }
+                $txt = "";
+                $isFirst = true;
+                foreach ($this->kids as $key => $kid) {
+                    if (!$isFirst) {
+                        $txt .= ', ';
+                    } else {
+                        $isFirst = false;
+                    }
+                    $txt .= '<a href="' . admin_url('students/' . $kid->id) . '" title="' . $kid->name . '" >' . $kid->name . "</a>";
+                }
+                return $txt;
+            });
         $grid->column('roles', 'Roles')->pluck('name')->label()->hide();
-        $grid->column('phone_number_1', __('Phone number'));
-        $grid->column('phone_number_2', __('Phone number 2'))->hide();
+        $grid->column('phone_number_1', __('Phone number'))
+            ->display(function ($x) {
+                $phone_number = "-";
+                if (strlen($this->phone_number_1) > 1) {
+                    $phone_number = $this->phone_number_1;
+                }
+
+                if (strlen($this->phone_number_2) > 2) {
+                    $phone_number .= "/" . $this->phone_number_2;
+                }
+                return $phone_number;
+            })
+            ->sortable();
+        $grid->column('current_address', __('Address'));
         $grid->column('email', __('Email'));
-        $grid->column('date_of_birth', __('D.O.B'))->sortable();
-        $grid->column('nationality', __('Nationality'))->sortable();
-        $grid->column('sex', __('Gender'));
-        $grid->column('place_of_birth', __('Place of birth'))->sortable();
-        $grid->column('home_address', __('Home address'))->hide();
-        $grid->column('current_address', __('Current address'))->hide();
+        $grid->column('sex', __('Gender'))->hide();
         $grid->column('religion', __('Religion'))->hide();
         $grid->column('spouse_name', __('Spouse name'))->hide();
         $grid->column('spouse_phone', __('Spouse phone'))->hide();
@@ -156,67 +181,26 @@ class EmployeesController extends AdminController
 
             $form->text('first_name')->rules('required');
             $form->text('last_name')->rules('required');
-            $form->date('date_of_birth')->rules('required');
-            $form->text('place_of_birth');
             $form->select('sex', 'Gender')->options(['Male' => 'Male', 'Female' => 'Female'])->rules('required');
-            $form->text('home_address');
-            $form->text('current_address');
+            $form->text('current_address', 'Address');
             $form->text('phone_number_1', 'Mobile phone number')->rules('required');
             $form->text('phone_number_2', 'Home phone number');
             $form->text('nationality');
-        })->tab('PERSONAL INFORMATION', function (Form $form) {
             $form->text('religion');
-            $form->text('spouse_name', "Spouse's name");
-            $form->text('spouse_phone', "Spouse's phone number");
-            $form->text('father_name', "Father's name");
-            $form->text('father_phone', "Father's phone number");
-            $form->text('mother_name', "Mother's name");
-            $form->text('mother_phone', "Mother's phone number");
-            $form->text('languages', "Languages/Dilect");
-            $form->text('emergency_person_name', "Emergency person to contact name");
-            $form->text('emergency_person_phone', "Emergency person to contact phone number");
         })
-            ->tab('EDUCATIONAL INFORMATION', function (Form $form) {
+            ->tab('SYSTEM ACCOUNT', function (Form $form) {
+                $form->image('avatar', trans('admin.avatar'));
 
-                $form->text('primary_school_name');
-                $form->year('primary_school_year_graduated');
-                $form->text('seconday_school_name');
-                $form->year('seconday_school_year_graduated');
-                $form->text('high_school_name');
-                $form->year('high_school_year_graduated');
-                $form->text('degree_university_name');
-                $form->year('degree_university_year_graduated');
-                $form->text('masters_university_name');
-                $form->year('masters_university_year_graduated');
-                $form->text('phd_university_name');
-                $form->year('phd_university_year_graduated');
-            })
-            ->tab('ACCOUNT NUMBERS', function (Form $form) {
-
-                $form->text('national_id_number', 'National ID number');
-                $form->text('passport_number', 'Passport number');
-                $form->text('tin', 'TIN Number');
-                $form->text('nssf_number', 'NSSF number');
-                $form->text('bank_name');
-                $form->text('bank_account_number');
-            })
-            ->tab('USER ROLES', function (Form $form) {
                 $roleModel = config('admin.database.roles_model');
                 $form->multipleSelect('roles', trans('admin.roles'))
                     ->attribute([
                         'autocomplete' => 'off'
                     ])
                     ->options(
-                        $roleModel::where('slug', '!=', 'super-admin')
-                            ->where('slug', '!=', 'student')
-                            ->where('slug', '!=', 'librarian')
-                            ->where('slug', '!=', 'supplier')
+                        $roleModel::where('slug', '==', 'parent')
                             ->get()
                             ->pluck('name', 'id')
                     )->rules('required');
-            })
-            ->tab('SYSTEM ACCOUNT', function (Form $form) {
-                $form->image('avatar', trans('admin.avatar'));
 
                 $form->email('email', 'Email address')
                     ->creationRules(['required', "unique:admin_users"]);

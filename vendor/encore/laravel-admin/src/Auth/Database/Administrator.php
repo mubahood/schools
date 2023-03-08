@@ -496,10 +496,19 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
         return $this->belongsTo(Enterprise::class, 'enterprise_id');
     }
 
+    public function parent()
+    {
+        return $this->belongsTo(Administrator::class, 'parent_id');
+    }
+
 
     public function services()
     {
         return $this->hasMany(ServiceSubscription::class, 'administrator_id');
+    }
+    public function kids()
+    {
+        return $this->hasMany(Administrator::class, 'parent_id');
     }
 
     public function classes()
