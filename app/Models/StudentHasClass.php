@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Encore\Admin\Auth\Database\Administrator;
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -33,7 +34,7 @@ class StudentHasClass extends Model
                 'academic_class_id' => $m->academic_class_id,
             ])->first();
             if ($existing != null) {
-                die("A student can't be in same class more than once.");
+                throw new Exception("Student already in this class.", 1);
             }
 
             return $m;

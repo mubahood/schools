@@ -178,7 +178,6 @@ class UserBatchImporter extends Model
 
             $i++;
             if (
-                (count($v) < 3) ||
                 (!isset($v[0])) ||
                 (!isset($v[1])) ||
                 ($v[0] == null)
@@ -201,13 +200,13 @@ class UserBatchImporter extends Model
                 $is_updating = true;
                 $update_count++;
             } else {
-                $import_count++;
+   
                 $is_updating = false;
                 $u = new Administrator();
                 $u->user_id = $user_id;
                 $u->school_pay_account_id = $user_id;
                 $u->school_pay_payment_code = $user_id;
-                $u->username = $user_id;
+                $u->username = $enterprise_id.$user_id;
                 $u->password = password_hash('4321', PASSWORD_DEFAULT);
                 $u->enterprise_id = $enterprise_id;
                 $u->avatar = url('user.png');
@@ -215,8 +214,43 @@ class UserBatchImporter extends Model
 
 
             $u->first_name = trim($v[1]);
-            $u->given_name = trim($v[2]);
-            $u->last_name = trim($v[3]);
+            $u->given_name = "";
+            $u->last_name = "";
+            if (
+                isset($v[2]) &&
+                strlen($v[2]) > 2
+            ) {
+                $u->given_name = trim($v[2]);
+            }
+
+            if (
+                isset($v[3]) &&
+                strlen($v[3]) > 2
+            ) {
+                $u->last_name = trim($v[3]);
+            }
+
+            if (strlen($u->last_name) < 2) {
+                if (strlen($u->given_name) < 2) {
+                    $names = explode(' ', $u->first_name);
+                    if (isset($names[0])) {
+                        $u->first_name = $names[0];
+                    }
+                    if (isset($names[1])) {
+                        $u->last_name = $names[1];
+                    }
+                    if (isset($names[3])) {
+                        $u->given_name = $names[3];
+                    }
+                }
+            }
+
+            $u->name = $u->first_name . " " . $u->given_name . " " . $u->last_name;
+            if (strlen(trim($u->name)) < 4) {
+                continue;
+            }
+
+
             $u->sex = trim($v[4]);
             if ($u->sex != null) {
                 if (strlen($u->sex) > 0) {
@@ -229,12 +263,16 @@ class UserBatchImporter extends Model
             }
 
 
-
-            $u->name = $u->first_name . " " . $u->given_name . " " . $u->last_name;
-
             $u->user_type = 'student';
 
-            $u->save();
+         
+            try {
+                $u->save();
+                $import_count++; 
+            } catch (\Throwable $th) {
+                //throw $th;
+            }
+
             if (!$is_updating) {
                 if ($u != null) {
                     $class = new StudentHasClass();
@@ -245,7 +283,11 @@ class UserBatchImporter extends Model
                     $class->stream_id = 0;
                     $class->done_selecting_option_courses = 0;
                     $class->optional_subjects_picked = 0;
-                    $class->save();
+                    try {
+                        $class->save();
+                    } catch (\Throwable $th) {
+                        //throw $th;
+                    }
                 }
             }
         }
@@ -318,8 +360,8 @@ class UserBatchImporter extends Model
 
             $math->score = ((int)trim($v[10]));
             $math->save();
-       
-            continue; 
+
+            continue;
         }
         $m->description = "Imported $import_count new students and Updated $update_count students.";
         dd($m->description);
