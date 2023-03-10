@@ -180,6 +180,7 @@ class ApiMainController extends Controller
     {
         $u = auth('api')->user();
         $marks = [];
+        $data = [];
         $exams = [];
 
         if ($u->isRole('teacher')) {
@@ -239,7 +240,11 @@ class ApiMainController extends Controller
             }
         }
 
-        return $this->success($exams, $message = "Success", 200);
+        foreach ($exams as $key => $value) {
+            $data[] = $value;
+        }
+
+        return $this->success($data, $message = "Success", 200);
     }
 
     public function transactions()
