@@ -462,14 +462,14 @@ class UserBatchImporter extends Model
             }
 
             $is_updating = false;
-
+            $import_count++;
             if ($u != null) {
                 //time to update
                 $_duplicates .= " $user_id, ";
                 $is_updating = true;
                 $update_count++;
             } else {
-                $import_count++;
+        
                 $is_updating = false;
                 $u = new Administrator();
                 $u->user_id = $user_id;

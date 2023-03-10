@@ -323,18 +323,19 @@ class Dashboard
     {
         $u = Auth::user();
 
-        $number_main = number_format(Mark::where([
+        $number_main =  (Mark::where([
             'enterprise_id' => $u->enterprise_id,
             'teacher_id' => $u->id,
         ])->count());
 
-        $number_1 = number_format(Mark::where([
+        $number_1 =  (Mark::where([
             'enterprise_id' => $u->enterprise_id,
             'teacher_id' => $u->id,
             'is_submitted' => true,
         ])->count());
 
-        $number_2 = $number_main - $number_1;
+
+        $number_2 = ((int)($number_main)) - ((int)($number_1));
 
         $sub_title = number_format($number_1) . ' Submitted, ';
         $sub_title .= number_format($number_2) . ' Not Submitted.';

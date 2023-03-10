@@ -176,6 +176,76 @@ class ApiMainController extends Controller
         return $this->success(null, $message = "Success", 200);
     }
 
+    public function exams_list()
+    {
+        $u = auth('api')->user();
+        $marks = [];
+        $exams = [];
+
+        if ($u->isRole('teacher')) {
+            $subs = "SELECT 
+        `id` FROM subjects
+        WHERE 
+        subject_teacher = $u->id OR
+        teacher_1 = $u->id OR
+        teacher_2 = $u->id OR
+        teacher_3 = $u->id";
+            $exam_ids = "
+            SELECT DISTINCT(exam_id) FROM marks WHERE subject_id in  ($subs)
+        ";
+            $_exams = "
+        SELECT 
+        exams.id,
+        term_id,
+        type,
+        exams.name,
+        max_mark,
+        marks_generated,
+        can_submit_marks,
+        terms.details as term_name
+        FROM exams,terms WHERE exams.id in  ($exam_ids) AND terms.id = exams.term_id
+    ";
+
+
+            foreach (DB::select($_exams) as $key => $ex) {
+                $ex->items = [];
+                $exams[$ex->id] = $ex;
+            }
+
+
+            $_marks = DB::select("
+            SELECT 
+            marks.id as id,
+            exam_id,
+            class_id,
+            subject_id,
+            student_id,
+            admin_users.name as student_name,
+            score,
+            remarks,
+            main_course_id,
+            is_submitted 
+            FROM
+            marks,admin_users
+            WHERE 
+            subject_id in  ($subs) AND
+            admin_users.id = marks.student_id 
+        ");
+
+        foreach ($_marks as $key => $mark) {
+            if(isset($exams[$mark->exam_id])){
+                $exams[$mark->exam_id]->items[] = $mark;
+            }
+        }
+
+
+        return $exams;
+            $marks = $_marks;
+        }
+
+        return $this->success($marks, $message = "Success", 200);
+    }
+
     public function transactions()
     {
         $u = auth('api')->user();
@@ -197,6 +267,8 @@ class ApiMainController extends Controller
 
         return $this->success($recs, $message = "Success", 200);
     }
+
+
     public function my_subjects()
     {
         $u = auth('api')->user();

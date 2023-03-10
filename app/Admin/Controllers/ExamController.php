@@ -40,11 +40,11 @@ class ExamController extends AdminController
         $grid = new Grid(new Exam());
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
-        ])->orderBy('id', 'DESC'); 
+        ])->orderBy('id', 'DESC');
 
         $grid->column('id', __('ID'))->sortable();
 
- 
+
         $terms = [];
         foreach (Term::where([
             'enterprise_id' => Admin::user()->enterprise_id,
@@ -62,7 +62,7 @@ class ExamController extends AdminController
             'E.O.T' => 'End of term exam'
         ]);
         $grid->column('name', __('Name'));
-        $grid->column('max_mark', __('Max mark')); 
+        $grid->column('max_mark', __('Max mark'));
         $grid->column('_marks', __('All Marks'))->display(function () {
             return count($this->marks);
         });
@@ -84,7 +84,7 @@ class ExamController extends AdminController
                 $percentage = ($submitted / $tot) * 100;
             }
 
-            return round($percentage,0) . "%";
+            return round($percentage, 0) . "%";
         });
 
         return $grid;
@@ -152,9 +152,14 @@ class ExamController extends AdminController
             'E.O.T' => 'End of term exam'
         ])->rules('required');
         $form->text('name', __('Exam Name'))->rules('required');
-        $form->hidden('marks_generated', __('marks_generated'))->default(0)->value(0) ->rules('required');
+        $form->hidden('marks_generated', __('marks_generated'))->default(0)->value(0)->rules('required');
         $form->text('max_mark', __('Max mark'))->rules('required|max:100')->attribute('type', 'number');
+
+        $form->radio('can_submit_marks', __('Can teachers submit marks?'))->options(['Yes' => 'Yes', 'No' => 'No'])
+            ->default(0);
+
         if ($form->isEditing()) {
+
             $form->radio('do_update', __('Do you want to update all related marks?'))->options([1 => 'Yes', 0 => 'No'])
                 ->default(0);
         }
