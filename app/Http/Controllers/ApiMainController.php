@@ -232,18 +232,14 @@ class ApiMainController extends Controller
             admin_users.id = marks.student_id 
         ");
 
-        foreach ($_marks as $key => $mark) {
-            if(isset($exams[$mark->exam_id])){
-                $exams[$mark->exam_id]->items[] = $mark;
+            foreach ($_marks as $key => $mark) {
+                if (isset($exams[$mark->exam_id])) {
+                    $exams[$mark->exam_id]->items[] = $mark;
+                }
             }
         }
 
-
-        return $exams;
-            $marks = $_marks;
-        }
-
-        return $this->success($marks, $message = "Success", 200);
+        return $this->success($exams, $message = "Success", 200);
     }
 
     public function transactions()

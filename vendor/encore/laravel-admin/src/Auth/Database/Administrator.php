@@ -216,6 +216,8 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                 }
             }
 
+            $model->name = str_replace('   ', ' ', $model->name);
+            $model->name = str_replace('  ', ' ', $model->name);
             return $model;
         });
 
@@ -336,7 +338,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
             if ($_u != null) {
                 if ($_u->id != $model->id) {
                     $model->email = $model->id;
-                    $model->username = $model->id; 
+                    $model->username = $model->id;
                     //throw new Exception("User with provided username already exist.", 1);
                 }
             }
@@ -663,7 +665,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
 
     public function main_role()
     {
-        return $this->belongsTo(AdminRole::class,'main_role_id');
+        return $this->belongsTo(AdminRole::class, 'main_role_id');
     }
 
     /**
