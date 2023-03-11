@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Mark;
 use App\Models\Participant;
 use App\Models\Session;
 use App\Models\User;
@@ -176,6 +177,33 @@ class ApiMainController extends Controller
         return $this->success(null, $message = "Success", 200);
     }
 
+    public function mark_submit(Request $r)
+    {
+        if (
+            ($r->id == null) ||
+            ($r->score == null)
+        ) {
+            return $this->success('Missing ID and score');
+        }
+        $mark = Mark::find($r->id);
+
+        if (
+            $mark == null
+        ) {
+            return $this->success('Mark not found.');
+        }
+
+        $msg =  "success";
+
+        $mark->score = $r->score;
+        $mark->remarks = $r->remarks;
+        try {
+            $mark->save();
+        } catch (\Throwable $th) {
+            $msg = 'failed';
+        }
+        return $this->success(null, $msg = $msg, 200);
+    }
     public function exams_list()
     {
         $u = auth('api')->user();
