@@ -78,7 +78,11 @@ class GenerateTheologyClass extends Model
         $class->details = $class->name;
         $class->save();
         $m->updateSubjects($class);
-        $m->updateStudents($class);
+        
+        if($short_name != 'P.7'){
+            $m->updateStudents($class);
+        }
+ 
     }
 
     public function updateSubjects($class)

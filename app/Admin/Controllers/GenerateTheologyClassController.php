@@ -57,8 +57,8 @@ class GenerateTheologyClassController extends AdminController
         $grid->column('P4', __('P4'));
         $grid->column('P5', __('P5'));
         $grid->column('P6', __('P6'));
-        $grid->column('P7', __('P7'));
-
+        $grid->column('P7', __('Shuubah'));
+ 
         return $grid;
     }
 
@@ -86,7 +86,7 @@ class GenerateTheologyClassController extends AdminController
         $show->field('P4', __('P4'));
         $show->field('P5', __('P5'));
         $show->field('P6', __('P6'));
-        $show->field('P7', __('P7'));
+        $show->field('P7', __('Shuubah'));
 
         return $show;
     }
