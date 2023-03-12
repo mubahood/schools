@@ -145,8 +145,8 @@ class GenerateTheologyClassController extends AdminController
         $form->radio('P4', __('P4'))->options(['Yes' => 'Yes', 'No' => 'No'])->rules('required');
         $form->radio('P5', __('P5'))->options(['Yes' => 'Yes', 'No' => 'No'])->rules('required');
         $form->radio('P6', __('P6'))->options(['Yes' => 'Yes', 'No' => 'No'])->rules('required');
-        $form->radio('P7', __('P7'))->options(['Yes' => 'Yes', 'No' => 'No'])->rules('required');
+        $form->radio('P7', __('Shuubah'))->options(['Yes' => 'Yes', 'No' => 'No'])->rules('required');
 
-        return $form;
+        return $form; 
     }
 }
