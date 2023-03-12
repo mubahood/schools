@@ -1344,6 +1344,77 @@ class Utils  extends Model
     }
 
 
+    public static function get_class_level_from_short_name($short_name)
+    {
+        $name = $short_name;
+        switch ($short_name) {
+            case 'P.1':
+                $name = 4;
+                break;
+            case 'P.2':
+                $name = 5;
+                break;
+            case 'P.3':
+                $name = 6;
+                break;
+            case 'P.4':
+                $name = 7;
+                break;
+            case 'P.5':
+                $name = 8;
+                break;
+            case 'P.6':
+                $name = 9;
+                break;
+            case 'BC':
+                $name = 1;
+                break;
+            case 'MC':
+                $name = 2;
+                break;
+            case 'TC':
+                $name = 3;
+                break;
+        }
+
+        return $name;
+    }
+
+    public static function get_class_name_from_short_name($short_name)
+    {
+        $name = $short_name;
+        switch ($short_name) {
+            case 'P.1':
+                $name = 'Primary one';
+                break;
+            case 'P.2':
+                $name = 'Primary two';
+                break;
+            case 'P.3':
+                $name = 'Primary three';
+                break;
+            case 'P.4':
+                $name = 'Primary four';
+                break;
+            case 'P.5':
+                $name = 'Primary five';
+                break;
+            case 'P.6':
+                $name = 'Primary six';
+                break;
+            case 'BC':
+                $name = 'Baby class';
+                break;
+            case 'MC':
+                $name = 'Middle class';
+                break;
+            case 'TC':
+                $name = 'Top class';
+                break;
+        }
+
+        return $name;
+    }
     public static function courses_primary()
     {
         return [

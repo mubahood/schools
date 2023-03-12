@@ -46,7 +46,10 @@ class StudentHasTheologyClassController extends AdminController
 
 
 
-        $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
+        $dpYear   =  Admin::user()->ent->dpYear();
+        $grid->model()->where([
+            'enterprise_id' => Admin::user()->enterprise_id,
+        ])
             ->orderBy('id', 'Desc');
         if (!Admin::user()->isRole('dos')) {
             $grid->disableCreateButton();
@@ -291,9 +294,6 @@ class StudentHasTheologyClassController extends AdminController
                 })
                     ->readOnly();
             }
-
-
-
         });
 
         if (Admin::user()->enterprise->type != 'Primary') {

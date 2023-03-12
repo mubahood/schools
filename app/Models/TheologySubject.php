@@ -79,7 +79,7 @@ class TheologySubject extends Model
                 'theology_class_id' => $m->theology_class_id,
             ])->first();
             if ($current != null) {
-                admin_error('Warning', 'A certain subject can not be in same class twice.');
+                throw('A certain subject can not be in same class twice.');
                 return false;
             }
         });

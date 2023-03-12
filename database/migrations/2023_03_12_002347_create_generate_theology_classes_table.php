@@ -32,21 +32,7 @@ class CreateGenerateTheologyClassesTable extends Migration
             $table->string('P7')->nullable();
         });
     }
-    /* 
-1	Shubah Upper - 2022	KASIM KAUKAB SSEKANDI	4	51	
-2	Primary Six - 2022	ABDUL GHANIYU LUKWAGO	4	0	
-3	Primary Five - 2022	FAROOK LUTAAYA	4	14	
-4	Primary Four - 2022	FAUZI ABDALLAH SEBISUBI	4	55	
-5	Primary Three - 2022	KASULE MAKKIYU	4	83	
-6	Primary Two - 2022	IDDI SULAIMAN	4	31	
-7	Primary One - 2022	NALUKENGE HIDAAYA	4	43	
-8	Top Class - 2022	LATIIFA NAMAGANDA	4	67	
-
-9	Middle Class - 2022	NASSUR MANSUR	4	81	
-10	Baby Class - 2022	SWALEH ABUBAKAR MATOVU	4	81	
-11	Primary One (Shubah) - 2022	NUHA NAGAWA	4	49	
-12	Primary Two (Shubah) - 2022	ISIKO EDRIS SULAIMAN
-*/
+    
     /**
      * Reverse the migrations.
      *

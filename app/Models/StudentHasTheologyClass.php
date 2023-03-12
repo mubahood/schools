@@ -21,10 +21,10 @@ class StudentHasTheologyClass extends Model
         });
         self::creating(function ($m) {
             $exist = StudentHasTheologyClass::where([
-                'enterprise_id' => $m->enterprise_id,
+                'theology_class_id' => $m->theology_class_id,
                 'administrator_id' => $m->administrator_id,
             ])->first();
-            if ($exist != null) {
+            if ($exist != null) { 
                 return false;
             }
         });
