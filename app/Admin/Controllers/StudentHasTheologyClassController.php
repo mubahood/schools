@@ -58,7 +58,8 @@ class StudentHasTheologyClassController extends AdminController
         }
 
         $grid->actions(function ($actions) {
-            $actions->disableDelete();
+            $actions->disableEdit(); 
+            $actions->disableView(); 
         });
 
         $grid->disableBatchActions();

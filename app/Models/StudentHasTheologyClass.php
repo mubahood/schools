@@ -13,6 +13,14 @@ class StudentHasTheologyClass extends Model
     public static function boot()
     {
         parent::boot();
+        self::deleting(function ($m) {
+            Utils::updateStudentCurrentClass($m->administrator_id);
+            //Utils::sync_classes($m->enterprise_id);
+        });
+        self::deleted(function ($m) {
+            Utils::updateStudentCurrentClass($m->administrator_id);
+            //Utils::sync_classes($m->enterprise_id);
+        });
         self::created(function ($m) {
             Utils::updateStudentCurrentClass($m->administrator_id);
             //Utils::sync_classes($m->enterprise_id);
