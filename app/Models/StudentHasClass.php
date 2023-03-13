@@ -58,7 +58,7 @@ class StudentHasClass extends Model
             }
 
 
-            Utils::sync_classes($m->enterprise_id);
+            Utils::updateStudentCurrentClass($m->administrator_id); 
             if ($m->student != null) {
                 if ($m->student->status == 1) {
                     AcademicClass::update_fees($m->academic_class_id);
@@ -73,7 +73,7 @@ class StudentHasClass extends Model
                 AcademicClass::updateSecondaryCompetences($class);
             }
 
-            Utils::sync_classes($m->enterprise_id);
+            Utils::updateStudentCurrentClass($m->administrator_id); 
             if ($m->student != null) {
                 if ($m->student->status == 1) {
                     AcademicClass::update_fees($m->academic_class_id);

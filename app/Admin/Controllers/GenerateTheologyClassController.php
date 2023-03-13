@@ -28,8 +28,8 @@ class GenerateTheologyClassController extends AdminController
      */
     protected function grid()
     {
-        $gen = new GenerateTheologyClass();
-        /*  $gen->academic_year_id = 3;
+     /*    $gen = new GenerateTheologyClass();
+        $gen->academic_year_id = 3;
         $gen->enterprise_id = Admin::user()->enterprise_id;
         $gen->P1 = 'Yes';
         $gen->P2 = 'Yes';
@@ -37,7 +37,6 @@ class GenerateTheologyClassController extends AdminController
         $gen->P4 = rand(1, 10000);
         $gen->save();
         dd('done'); */
-
 
         $grid = new Grid(new GenerateTheologyClass());
         $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
@@ -58,7 +57,7 @@ class GenerateTheologyClassController extends AdminController
         $grid->column('P5', __('P5'));
         $grid->column('P6', __('P6'));
         $grid->column('P7', __('Shuubah'));
- 
+
         return $grid;
     }
 
@@ -147,6 +146,6 @@ class GenerateTheologyClassController extends AdminController
         $form->radio('P6', __('P6'))->options(['Yes' => 'Yes', 'No' => 'No'])->rules('required');
         $form->radio('P7', __('Shuubah'))->options(['Yes' => 'Yes', 'No' => 'No'])->rules('required');
 
-        return $form; 
+        return $form;
     }
 }

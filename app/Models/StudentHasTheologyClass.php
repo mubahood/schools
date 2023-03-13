@@ -14,17 +14,19 @@ class StudentHasTheologyClass extends Model
     {
         parent::boot();
         self::created(function ($m) {
-            Utils::sync_classes($m->enterprise_id);
+            Utils::updateStudentCurrentClass($m->administrator_id);
+            //Utils::sync_classes($m->enterprise_id);
         });
         self::updated(function ($m) {
-            Utils::sync_classes($m->enterprise_id);
+            Utils::updateStudentCurrentClass($m->administrator_id);
+            //Utils::sync_classes($m->enterprise_id);
         });
         self::creating(function ($m) {
             $exist = StudentHasTheologyClass::where([
                 'theology_class_id' => $m->theology_class_id,
                 'administrator_id' => $m->administrator_id,
             ])->first();
-            if ($exist != null) { 
+            if ($exist != null) {
                 return false;
             }
         });

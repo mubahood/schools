@@ -812,6 +812,33 @@ class Utils  extends Model
     }
 
 
+    public static function updateStudentCurrentClass($administrator_id)
+    {
+        $stud = Administrator::find($administrator_id);
+        if ($stud == null) {
+            return;
+        }
+        if ((strtolower($stud->user_type) != 'student')) {
+            return;
+        }
+        $theo = StudentHasTheologyClass::where([
+            'administrator_id' => $stud->id
+        ])
+            ->orderBy('id', 'desc')
+            ->first();
+        if ($theo != null) {
+            DB::update("UPDATE admin_users SET current_theology_class_id = {$theo->theology_class_id} WHERE id = {$stud->id}");
+        }
+
+        $class = StudentHasClass::where([
+            'administrator_id' => $stud->id
+        ])
+            ->orderBy('id', 'desc')
+            ->first();
+        if ($class != null) {
+            DB::update("UPDATE admin_users SET current_class_id = {$class->academic_class_id} WHERE id = {$stud->id}");
+        }
+    }
     public static function accounts_sync()
     {
         $enterprise_id = 7;

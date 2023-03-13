@@ -64,6 +64,7 @@ class GenerateTheologyClass extends Model
             'academic_year_id' => $m->academic_year_id,
             'enterprise_id' => $m->enterprise_id,
         ])->first();
+
         if ($class == null) {
             $class = new TheologyClass();
             $ent = Enterprise::find($m->enterprise_id);
@@ -77,16 +78,16 @@ class GenerateTheologyClass extends Model
         $class->short_name = $short_name;
         $class->details = $class->name;
         $class->save();
+
         $m->updateSubjects($class);
-        
-        if($short_name != 'P.7'){
+
+        if ($short_name != 'P.7') {
             $m->updateStudents($class);
         }
- 
     }
 
     public function updateSubjects($class)
-    {
+    { 
         $courses = TheologyCourse::all();
         $ent = Enterprise::find($class->enterprise_id);
         foreach ($courses as $key => $course) {
@@ -110,9 +111,10 @@ class GenerateTheologyClass extends Model
             }
         }
     }
-  
-    public function academic_year(){
-        return $this->belongsTo(AcademicYear::class,'academic_year_id');
+
+    public function academic_year()
+    {
+        return $this->belongsTo(AcademicYear::class, 'academic_year_id');
     }
     public function updateStudents($class)
     {
@@ -129,6 +131,7 @@ class GenerateTheologyClass extends Model
         if ($academicClass == null) {
             return;
         }
+
         foreach ($academicClass->students as $key => $stud) {
             $hasClass = StudentHasTheologyClass::where([
                 'theology_class_id' => $class->id,
