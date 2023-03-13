@@ -286,12 +286,12 @@ class Dashboard
     {
         $u = Auth::user();
 
-        $number_main = number_format(TheologyMark::where([
+        $number_main =  (TheologyMark::where([
             'enterprise_id' => $u->enterprise_id,
             'teacher_id' => $u->id,
         ])->count());
 
-        $number_1 = number_format(TheologyMark::where([
+        $number_1 =  (TheologyMark::where([
             'enterprise_id' => $u->enterprise_id,
             'teacher_id' => $u->id,
             'is_submitted' => true,
