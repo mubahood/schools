@@ -58,8 +58,8 @@ class StudentHasTheologyClassController extends AdminController
         }
 
         $grid->actions(function ($actions) {
-            $actions->disableEdit(); 
-            $actions->disableView(); 
+            $actions->disableEdit();
+            $actions->disableView();
         });
 
         $grid->disableBatchActions();
@@ -163,6 +163,26 @@ class StudentHasTheologyClassController extends AdminController
     {
 
         $form = new Form(new StudentHasTheologyClass());
+
+        $form->select('administrator_id', 'Student')->options(function () {
+            return Administrator::where([
+                'enterprise_id' => Admin::user()->enterprise_id,
+                'user_type' => 'student',
+                'status' => 1
+            ])->get()->pluck('name', 'id');
+        })
+            ->rules('required');
+        $dpYear   =  Admin::user()->ent->dpYear();
+        $years = [];
+        foreach (TheologyClass::where([
+            'enterprise_id' => Admin::user()->enterprise_id,
+            'academic_year_id' => $dpYear->id
+        ])->get() as $key => $value) {
+            $years[$value->id] = $value->name_text;
+        }
+        $form->select('theology_class_id', 'Class')->options($years)->rules('required');
+
+        return $form;
 
         // callback before save
         $form->submitted(function (Form $form) {
