@@ -118,13 +118,14 @@ class MarkController extends AdminController
             ])->get() as $ex) {
                 $exams[$ex->id] = $ex->name_text;
             }
+
             $filter->equal('exam_id', 'Filter by exam')->select($exams);
 
             $subs = [];
             foreach (Subject::where([
                 'enterprise_id' => $u->enterprise_id
             ])
-                ->orderBy('subject_name', 'asc')
+                ->orderBy('id', 'desc')
                 ->get() as $ex) {
                 if (Admin::user()->isRole('dos')) {
                     $subs[$ex->id] = $ex->subject_name . " - " . $ex->academic_class->name_text;

@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Models\Enterprise;
 use App\Models\StudentHasTheologyClass;
 use App\Models\TheologyClass;
 use App\Models\TheologyExam;
@@ -33,7 +34,7 @@ class TheologyMarkController extends AdminController
     protected function grid()
     {
 
-        
+
 
 
         /*         
@@ -52,7 +53,7 @@ class TheologyMarkController extends AdminController
         "is_submitted" => 0
         "is_missed" => 1 
         
-        */ 
+        */
         $grid = new Grid(new TheologyMark());
         $grid->disableActions();
         $grid->disableCreateButton();
@@ -79,10 +80,10 @@ class TheologyMarkController extends AdminController
 
         $grid->disableBatchActions();
 
-        $grid->export(function ($export) { 
-            $export->filename('School dynamics.csv'); 
-            $export->except(['is_submitted']); 
-            $export->originalValue(['score', 'remarks']); 
+        $grid->export(function ($export) {
+            $export->filename('School dynamics.csv');
+            $export->except(['is_submitted']);
+            $export->originalValue(['score', 'remarks']);
         });
 
         if (
@@ -104,6 +105,13 @@ class TheologyMarkController extends AdminController
         }
 
         $grid->filter(function ($filter) {
+
+            $u = Admin::user();
+            $ent = Enterprise::find($u->enterprise_id);
+            $dpYear =  $ent->dpYear();
+            if ($dpYear == null) {
+                die("Display year not found.");
+            }
 
 
             if (
@@ -134,7 +142,7 @@ class TheologyMarkController extends AdminController
             $exams = [];
             foreach (TheologyExam::where([
                 'enterprise_id' => $u->enterprise_id
-            ])->get() as $ex) {
+            ])->orderBy('id', 'Desc')->get() as $ex) {
                 $exams[$ex->id] = $ex->name_text;
             }
             $filter->equal('theology_exam_id', 'Filter by exam')->select($exams);
@@ -147,7 +155,10 @@ class TheologyMarkController extends AdminController
                 ])
                     ->orderBy('theology_course_id', 'asc')
                     ->get() as $ex) {
-                    $subs[$ex->id] = $ex->course->name . " - " . $ex->theology_class->name;
+                    if ($ex->theology_class->academic_year_id != $dpYear->id) {
+                        continue;
+                    }
+                    $subs[$ex->id] = $ex->course->name . " - " . $ex->theology_class->name . " - " . $dpYear->name;
                 }
             } else {
                 foreach (TheologySubject::where([
@@ -155,8 +166,17 @@ class TheologyMarkController extends AdminController
                 ])
                     ->orderBy('theology_course_id', 'asc')
                     ->get() as $ex) {
-                    if ($ex->subject_teacher == Admin::user()->id) {
-                        $subs[$ex->id] = $ex->course->name . " - " . $ex->theology_class->name;
+
+                    if (
+                        $ex->subject_teacher == Admin::user()->id ||
+                        $ex->teacher_1 == Admin::user()->id ||
+                        $ex->teacher_2 == Admin::user()->id ||
+                        $ex->teacher_3 == Admin::user()->id 
+                        ) {
+                        if ($ex->theology_class->academic_year_id != $dpYear->id) {
+                            continue;
+                        }
+                        $subs[$ex->id] = $ex->course->name . " - " . $ex->theology_class->name . " - " . $dpYear->name; 
                     }
                 }
             }
@@ -194,7 +214,7 @@ class TheologyMarkController extends AdminController
             return $this->class->name;
         })->sortable();
         $grid->column('theology_subject_id', __('Subject'))->display(function () {
-            return $this->subject->course->name; 
+            return $this->subject->course->name;
         })->sortable();
 
         $grid->column('score', __('Score'))->sortable()->editable();

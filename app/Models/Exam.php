@@ -138,7 +138,7 @@ class Exam extends Model
     protected  $appends = ['name_text'];
     function getNameTextAttribute($x)
     {
-        return $this->name . " - " . $this->term->name . "";
+        return $this->name . " - " . $this->term->name_text . "";
     }
 
     public function classes()
