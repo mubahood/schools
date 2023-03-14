@@ -223,7 +223,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
 
         self::created(function ($m) {
             if (strtolower($m->user_type) == 'student') {
-                User::createParent($m);
+                //User::createParent($m);
                 Account::create($m->id);
                 Administrator::my_update($m);
             }
