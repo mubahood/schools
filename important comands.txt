@@ -107,6 +107,9 @@ php artisan make:migration create_sessions_table
 php artisan make:migration create_parent_courses_table 
 php artisan make:migration create_activities_table 
 php artisan make:migration create_secondary_subjects_table 
+php artisan make:migration create_secondary_termly_report_cards_table 
+php artisan make:migration create_secondary_termly_report_card_items_table 
+php artisan make:migration create_secondary_report_cards_table 
 
 
 
@@ -153,7 +156,7 @@ php artisan make:model FeeDepositConfirmation
 php artisan make:model TheologyClass
 php artisan make:model TheologyCourse
 php artisan make:model TheologySubject
-php artisan make:model TheologyExam
+php artisan make:model Theologym
 php artisan make:model TheologyMark
 php artisan make:model TheologyExamHasClass
 php artisan make:model TheologyTermlyReportCard
@@ -175,6 +178,10 @@ php artisan make:model ParentCourse
 php artisan make:model SecondarySubject
 php artisan make:model SecondaryCompetence
 php artisan make:model GenerateTheologyClass
+php artisan make:model SecondaryTermlyReportCard
+php artisan make:model SecondaryTermlyReportCardItem
+php artisan make:model SecondaryReportCard
+php artisan make:model SecondaryReportCardItem
 
 
 php artisan admin:make TermController --model=App\\Models\\Term
@@ -268,6 +275,9 @@ php artisan admin:make ActivityController --model=App\Models\Activity
 php artisan admin:make SecondarySubjectController --model=App\Models\SecondarySubject
 php artisan admin:make SecondaryCompetenceController --model=App\Models\SecondaryCompetence
 php artisan admin:make GenerateTheologyClassController --model=App\Models\GenerateTheologyClass
+php artisan admin:make SecondaryTermlyReportCardController --model=App\Models\SecondaryTermlyReportCard
+php artisan admin:make SecondaryReportCardController --model=App\Models\SecondaryReportCard
+php artisan admin:make SecondaryReportCardItemController --model=App\Models\SecondaryReportCardItem
 
 
 

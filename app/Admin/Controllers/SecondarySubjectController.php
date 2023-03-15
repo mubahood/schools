@@ -4,9 +4,13 @@ namespace App\Admin\Controllers;
 
 use App\Models\AcademicClass;
 use App\Models\AcademicYear;
+use App\Models\Activity;
+use App\Models\Competence;
 use App\Models\ParentCourse;
+use App\Models\SecondaryCompetence;
 use App\Models\SecondarySubject;
 use Encore\Admin\Controllers\AdminController;
+use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
@@ -28,6 +32,42 @@ class SecondarySubjectController extends AdminController
      */
     protected function grid()
     {
+        $u = Admin::user();
+        $ent = Admin::user()->ent;
+        $term = Admin::user()->ent->active_term();
+
+        foreach (SecondarySubject::where('enterprise_id', 11)->get() as $key => $sub) {
+            $acts = $sub->activities;
+            if (count($acts) < 3) {
+                for ($i = 0; $i < 3; $i++) {
+                    $a = new Activity();
+                    $a->enterprise_id = 11;
+                    $a->term_id = $term->id;
+                    $a->class_type = $sub->academic_class->short_name;
+                    $a->subject_id = $sub->id;
+                    $a->theme = $sub->subject_name . ' Theme';
+                    $a->topic = $sub->subject_name . ' Topic ' . $i;
+                    $a->description = 'Some details about this activity go here. Some details about this activity go here. Some details about this activity go here. Some details about this activity go here.';
+                    $a->max_score =  3;
+                    $a->save();
+                }
+            }
+        }
+        $comps = SecondaryCompetence::where(['enterprise_id' => 11,'score' => null])->get();
+        //dd(count($comps));
+        foreach ($comps as $key => $sub) {
+            $sub->score = rand(0,3);
+            if($sub->score < 3){
+                $sub->score = $sub->score.'.'.rand(1,9);
+            }else{
+                $sub->score = $sub->score.'.0';
+            }
+            $sub->score = ((float)($sub->score));
+            $sub->submitted = 1;
+            $sub->save(); 
+        }
+        dd("done");
+
         $grid = new Grid(new SecondarySubject());
 
         $grid->filter(function ($filter) {
@@ -236,7 +276,7 @@ class SecondarySubjectController extends AdminController
                     ->pluck('name', 'id')
             )->rules('required');
 
- 
+
         $form->number('teacher_1', __('Teacher 1'));
         $form->number('teacher_2', __('Teacher 2'));
         $form->number('teacher_3', __('Teacher 3'));

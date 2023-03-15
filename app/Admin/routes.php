@@ -76,6 +76,9 @@ Route::group([
     $router->resource('secondary-competences', SecondaryCompetenceController::class);
     $router->resource('parents', ParentsController::class);
     $router->resource('generate-theology-classes', GenerateTheologyClassController::class);
+    $router->resource('secondary-termly-report-cards', SecondaryTermlyReportCardController::class);
+    $router->resource('secondary-report-cards', SecondaryReportCardController::class); 
+    $router->resource('secondary-report-card-items', SecondaryReportCardItemController::class); 
 
     //$router->resource('fees', StudentHasFeeController::class);
 

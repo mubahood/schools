@@ -34,6 +34,11 @@ class SecondarySubject extends Model
         });
     }
 
+    public function activities()
+    {
+        return $this->hasMany(Activity::class,'subject_id');
+    }
+
 
     public function get_activities_in_term($term_id)
     {
