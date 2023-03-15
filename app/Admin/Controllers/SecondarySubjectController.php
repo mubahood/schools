@@ -32,6 +32,7 @@ class SecondarySubjectController extends AdminController
      */
     protected function grid()
     {
+        /*
         $u = Admin::user();
         $ent = Admin::user()->ent;
         $term = Admin::user()->ent->active_term();
@@ -66,7 +67,7 @@ class SecondarySubjectController extends AdminController
             $sub->submitted = 1;
             $sub->save(); 
         }
-        dd("done");
+        dd("done");*/
 
         $grid = new Grid(new SecondarySubject());
 
