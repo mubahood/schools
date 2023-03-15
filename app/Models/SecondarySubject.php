@@ -57,7 +57,7 @@ class SecondarySubject extends Model
     }
     public function teacher1()
     {
-        return $this->belongsTo(Administrator::class, 'teacher_1');
+        return $this->belongsTo(Administrator::class, 'subject_teacher');
     }
     public function teacher2()
     {

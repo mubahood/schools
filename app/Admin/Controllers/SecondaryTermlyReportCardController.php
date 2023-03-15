@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Models\SecondaryTermlyReportCard;
 use Encore\Admin\Controllers\AdminController;
+use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
@@ -25,6 +26,24 @@ class SecondaryTermlyReportCardController extends AdminController
      */
     protected function grid()
     {
+        /* 
+
+    	do_update	
+
+        */
+        $rep = new SecondaryTermlyReportCard();
+        $u = Admin::user();
+        $ent = Admin::user()->ent;
+        $year = $ent->active_academic_year();
+        $term = Admin::user()->ent->active_term();
+        $rep->enterprise_id = 11;
+        $rep->academic_year_id = $year->id;
+        $rep->term_id = $term->id;
+        $rep->report_title = 'End of term 1 2023';
+        $rep->general_commnunication = 'Simple general communication go here. Simple general communication go here. Simple general communication go here. Simple general communication go here.';
+        $rep->save();
+        dd($year);
+
         $grid = new Grid(new SecondaryTermlyReportCard());
 
         $grid->actions(function ($act) {
