@@ -36,25 +36,45 @@ class SecondaryTermlyReportCard extends Model
         });
     }
 
-    public static function update_data($reportdCard)
+    public static function update_data($exam)
     {
         set_time_limit(-1);
         ini_set('memory_limit', '-1');
         foreach (AcademicClass::where([
-            'academic_year_id' => $reportdCard->academic_year_id
+            'academic_year_id' => $exam->academic_year_id
         ])->get() as $key => $class) {
             if (count($class->students) < 1) {
                 continue;
             }
             foreach ($class->students as $key => $student) {
+
+                $reportCard = SecondaryReportCard::where([
+                    'secondary_termly_report_card_id' => $exam->id,
+                    'administrator_id' => $student->administrator_id,
+                ])->first();
+                if ($reportCard == null) {
+                    $reportCard = new SecondaryReportCard();
+                    $reportCard->secondary_termly_report_card_id = $exam->id;
+                    $reportCard->administrator_id = $student->administrator_id;
+                }
+                $reportCard->enterprise_id = $exam->enterprise_id;
+                $reportCard->academic_year_id = $exam->academic_year_id;
+                $reportCard->term_id = $exam->term_id;
+                $reportCard->academic_class_id = $class->id;
+                $reportCard->save();
+
+
+
+
                 foreach ($class->subjects as $key => $subject) {
                     $reportItem = SecondaryReportCardItem::where([
-                        'secondary_report_card_id' => $reportdCard->id,
+                        'secondary_report_card_id' => $reportCard->id,
                         'secondary_subject_id' => $subject->id,
                     ])->first();
+
                     if ($reportItem == null) {
                         $reportItem = new SecondaryReportCardItem();
-                        $reportItem->secondary_report_card_id = $reportdCard->id;
+                        $reportItem->secondary_report_card_id = $reportCard->id;
                         $reportItem->secondary_subject_id = $subject->id;
                     }
                     $teacher = Administrator::find($subject->subject_teacher);
