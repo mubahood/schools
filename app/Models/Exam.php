@@ -29,6 +29,9 @@ class Exam extends Model
         });
 
         self::updated(function ($m) {
+            if ($m->do_update != 1) {
+                return;
+            }
             if ($m->do_update) {
                 Exam::my_update($m);
             }
@@ -65,12 +68,9 @@ class Exam extends Model
     public static function my_update($exam)
     {
 
-
         if ($exam == null) {
             return false;
         }
-
-
         if ($exam->classes == null) {
             return false;
         }
@@ -83,13 +83,13 @@ class Exam extends Model
                 foreach ($class->students as $student) {
                     foreach ($class->subjects as $subject) {
 
-                        if ($subject->course_id == 74) {
+                        /*  if ($subject->course_id == 74) {
                             Mark::where([
                                 'subject_id' => $subject->id,
                             ])->delete();
                             continue;
                         }
-
+                        */
 
                         $mark = Mark::where([
                             'exam_id' => $exam->id,
