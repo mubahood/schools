@@ -94,17 +94,20 @@ Route::get('/', function () {
  */
 
 Route::match(['get', 'post'], '/print', [PrintController2::class, 'index']);
+Route::match(['get', 'post'], '/report-cards', [PrintController2::class, 'secondary_report_cards']);
+
+
 Route::get('generate-variables', [MainController::class, 'generate_variables']);
 Route::get('print-admission-letter', function () {
-    //return view('print/print-admission-letter');
-    $pdf = App::make('dompdf.wrapper');
-    //$pdf->setOption(['DOMPDF_ENABLE_REMOTE' => false]);
+  //return view('print/print-admission-letter');
+  $pdf = App::make('dompdf.wrapper');
+  //$pdf->setOption(['DOMPDF_ENABLE_REMOTE' => false]);
 
-    $pdf->loadHTML(view('print/print-admission-letter'));
-    return $pdf->stream();
+  $pdf->loadHTML(view('print/print-admission-letter'));
+  return $pdf->stream();
 });
 Route::get('print-receipt', function () {
-    $pdf = App::make('dompdf.wrapper');
-    $pdf->loadHTML(view('print/print-receipt'));
-    return $pdf->stream();
+  $pdf = App::make('dompdf.wrapper');
+  $pdf->loadHTML(view('print/print-receipt'));
+  return $pdf->stream();
 });

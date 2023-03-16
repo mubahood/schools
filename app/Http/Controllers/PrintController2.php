@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ReportCard;
+use App\Models\SecondaryReportCard;
 use App\Models\StudentReportCard;
 use App\Models\TheologryStudentReportCard;
 use App\Models\TheologyStudentReportCardItem;
@@ -11,6 +12,20 @@ use Illuminate\Support\Facades\App;
 
 class PrintController2 extends Controller
 {
+    public function secondary_report_cards(Request $req)
+    {
+
+        $pdf = App::make('dompdf.wrapper');
+        $data = [
+            SecondaryReportCard::find(1)
+        ];
+        $pdf->loadHTML(view('report-cards/secondary_report_cards', [
+            'data' => $data,
+        ]));
+        return $pdf->stream();
+    }
+
+
     public static function get_row($t1 = "Title 1", $d1 = "Deatils 1", $t2 = "Title 2", $d2 = "Deatils 2")
     {
         return '<tr>
@@ -61,10 +76,9 @@ class PrintController2 extends Controller
                 ];
             }
 
-            $pdf = App::make('dompdf.wrapper');  
+            $pdf = App::make('dompdf.wrapper');
             $pdf->loadHTML(view('report-cards.print', ['recs' => $reps]));
-            return $pdf->stream();  
-
+            return $pdf->stream();
         }
 
         $id = ((int)($req->id));
@@ -97,9 +111,9 @@ class PrintController2 extends Controller
             die("Report card not found.");
         }
 
-        $pdf = App::make('dompdf.wrapper');  
-        $pdf->loadHTML( view('report-cards.print', ['recs' => [['r' => $r, 'tr' => $tr]]]));
-        return $pdf->stream();   
+        $pdf = App::make('dompdf.wrapper');
+        $pdf->loadHTML(view('report-cards.print', ['recs' => [['r' => $r, 'tr' => $tr]]]));
+        return $pdf->stream();
 
 
 
