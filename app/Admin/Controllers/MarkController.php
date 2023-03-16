@@ -208,7 +208,12 @@ class MarkController extends AdminController
                 return '<span class="bagde bagde-success">Submitted</span>';
             else
                 return '<span class="bagde bagde-danger">Missing</span>';
-        })->sortable();
+        })
+        ->filter([
+            1 => 'Submitted',
+            0 => 'Not Submitted',
+        ])
+        ->sortable();
 
         if (Admin::user()->isRole('dos')) {
             $grid->column('teacher.name', __('Teacher'))->sortable();
