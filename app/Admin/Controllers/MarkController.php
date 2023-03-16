@@ -55,8 +55,7 @@ class MarkController extends AdminController
         if (!Admin::user()->isRole('dos')) {
 
             $grid->model()->where([
-                'teacher_id' => Admin::user()->id,
-            ]);
+                /*                 'teacher_id' => Admin::user()->id, */]);
         }
 
         $grid->disableCreateButton();
@@ -75,7 +74,7 @@ class MarkController extends AdminController
                 (((int)($_GET['exam_id'])) < 1) ||
                 (((int)($_GET['class_id'])) < 1))
         ) {
-            admin_error(
+            admin_success(
                 'Alert',
                 'Select class, exam and subject and press "search button" to enter marks.'
             );
@@ -100,13 +99,17 @@ class MarkController extends AdminController
             }
 
 
-            // Remove the default id filter
+            // Remove the default id filter 
             $filter->disableIdFilter();
+            $ent = Admin::user()->ent;
+            $year = $ent->dpYear();
+            $term = $ent->active_term();
 
-            // Add a column filter
+            // Add a column filter 
             $u = Admin::user();
             $filter->equal('class_id', 'Filter by class')->select(AcademicClass::where([
-                'enterprise_id' => $u->enterprise_id
+                'enterprise_id' => $u->enterprise_id,
+                'academic_year_id' => $year->id
             ])
                 ->orderBy('id', 'Desc')
                 ->get()->pluck('name_text', 'id'));
@@ -114,7 +117,8 @@ class MarkController extends AdminController
 
             $exams = [];
             foreach (Exam::where([
-                'enterprise_id' => $u->enterprise_id
+                'enterprise_id' => $u->enterprise_id,
+                'term_id' => $term->id,
             ])->get() as $ex) {
                 $exams[$ex->id] = $ex->name_text;
             }
@@ -123,19 +127,40 @@ class MarkController extends AdminController
 
             $subs = [];
             foreach (Subject::where([
-                'enterprise_id' => $u->enterprise_id
+                'enterprise_id' => $u->enterprise_id,
             ])
                 ->orderBy('id', 'desc')
                 ->get() as $ex) {
+                if($ex->academic_class->academic_year_id != $year->id){
+                    continue;
+                }
+
+                
                 if (Admin::user()->isRole('dos')) {
                     $subs[$ex->id] = $ex->subject_name . " - " . $ex->academic_class->name_text;
                 } else {
-                    if ($ex->subject_teacher == Admin::user()->id) {
+                    if (
+                        $ex->subject_teacher == Admin::user()->id ||
+                        $ex->teacher_1 == Admin::user()->id ||
+                        $ex->teacher_2 == Admin::user()->id ||
+                        $ex->teacher_3 == Admin::user()->id
+                    ) { 
                         $subs[$ex->id] = $ex->subject_name . " - " . $ex->academic_class->name_text;
                     }
                 }
             }
+            /* /
+  "subject_name" => "Reading"
+    "demo_id" => 0
+    "is_optional" => 0
+    "main_course_id" => 20
+    "" => 0
+    "" => 0
+    "teacher_3" => 0
+    "parent_course_id" => null
+    "academic_year_id" => 3
 
+*/
             $filter->equal('subject_id', 'Filter by subject')->select($subs);
 
 

@@ -133,7 +133,7 @@ class TheologyMarkController extends AdminController
                 (((int)($_GET['theology_exam_id'])) < 1) ||
                 (((int)($_GET['theology_class_id'])) < 1))
         ) {
-            admin_error(
+            admin_success(
                 'Alert',
                 'Select class, exam and subject and press "search button" to enter marks.'
             );
