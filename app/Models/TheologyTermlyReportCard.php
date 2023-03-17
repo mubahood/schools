@@ -79,6 +79,8 @@ class TheologyTermlyReportCard extends Model
                     continue;
                 }
 
+                dd($student);
+
 
                 $report_card = TheologryStudentReportCard::where([
                     'term_id' => $m->term_id,
