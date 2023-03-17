@@ -64,8 +64,8 @@
     --}}
             <tr>
                 <th rowspan="3">{{ $item->subject->subject_name }}</th>
-                <?php 
-                    dd($item->subject->subject_name);
+                <?php
+                dd($item->subject->subject_name);
                 ?>
                 <td>
                     <b>PERSONAL LIFE AND FAMILY:</b>
@@ -113,6 +113,6 @@
 </div>
 <div class="row px-3 mt-1">
     <hr style="border: solid black .5px; " class="m-0 mt-1  mb-2">
-    <p>SCHOOL FEES BALANCE: <b>UGX 6,000</b> | SCHOOL PAY CODE: <b>1002281322</b> | NEXT TERM BEGINS ON: <b>6 FEB, 2023
-            TH</b></p>
+    <span><b>TERM ENDS ON:</b> <span class="value" style="font-size: 12px!important;">5<sup>th</sup> MAY,
+            2023</span></span>
 </div>

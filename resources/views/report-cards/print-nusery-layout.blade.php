@@ -272,9 +272,8 @@ $school_email = 'admin@kjs.com';
                     <div class="col-12 p-0">
                         <div class="p-0 mt-0 mb-2 class-teacher">
                             <b>HEAD TEACHER'S COMMUNICATION:</b>
-                            <span class="comment">Assalam Alaikum Warahmatullah Wabarakatuhu. We are informing our
-                                beloved parents that the Quran competition for this term three is postponed to Saturday
-                                9/4/2023 next term.</span>
+                            <span class="comment">We thank you for all the support you have accorded us since you joined Kira Junior School.
+                                We remain open to positive feedback, which we believe helps us to improve the services we provide to our children.</span>
                         </div>
                     </div>
                 </div>
@@ -297,7 +296,7 @@ $school_email = 'admin@kjs.com';
             18,000</span></span> --}}
         <span><b>SCHOOL PAY CODE:</b> <span class="value"
                 style="font-size: 12px!important;">{{ $r->owner->school_pay_payment_code }}</span></span>  | 
-        <span><b>TERM BEGINS ON:</b> <span class="value" style="font-size: 12px!important;">6<sup>th</sup> FEB,
-                2023</span></span>
+        <span><b>TERM ENDS ON:</b> <span class="value" style="font-size: 12px!important;">5<sup>th</sup> MAY,
+                    2023</span></span>
     </div>
 </article>

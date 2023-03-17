@@ -46,7 +46,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     <p class="text-center p font-serif  fs-3 m-0 p-0 mt-1 title-2"><b
                             class="m-0 p-0">{{ $r->ent->address }}</b>
                     </p>
-                    <p class="text-center p font-serif mt-0 mb-0 title-2" ><b>WEBSITE:</b> www.kirajuniorschool.ac.ug</p>
+                    <p class="text-center p font-serif mt-0 mb-0 title-2"><b>WEBSITE:</b> www.kirajuniorschool.ac.ug</p>
                     <p class="text-center p font-serif mt-0 title-2 mb-1"><b>EMAIL:</b> {{ $r->ent->email }}</p>
                     <p class="text-center p font-serif  fs-3 m-0 p-0 mt-1 mb-2" style="font-size: 1.3rem">
                         <u><b>{{ $r->termly_report_card->report_title }}</b></u>
@@ -79,7 +79,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                         <span><b>CLASS:</b> <span class="value">{{ $r->academic_class->name }}</span></span>
                         {{-- <span><b class="text-uppercase">Aggre:</b> <span class="value">18</span></span> --}}
                         <span><b class="text-uppercase">Aggr:</b> <span
-                                class="value text-lowercase">{{ ((int)($r->average_aggregates)) }}</span></span>
+                                class="value text-lowercase">{{ (int) $r->average_aggregates }}</span></span>
 
                         <span><b class="text-uppercase">DIV:</b> <span class="value">{{ $r->grade }}</span></span>
                         <span><b class="text-uppercase">Position:</b> <span
@@ -148,8 +148,10 @@ foreach ($r->termly_report_card->term->exams as $exam) {
 
 
                     @if ($tr != null)
-                        <h2 class="text-center text-uppercase mt-0 pt-0 h2" style="font-size: 16px"><u>Theology Studies</u></h2>
-                        <div class="row mt-2 mb-2 d-flex justify-content-between pl-3 pr-3 summary" style="font-size: 13px">
+                        <h2 class="text-center text-uppercase mt-0 pt-0 h2" style="font-size: 16px"><u>Theology
+                                Studies</u></h2>
+                        <div class="row mt-2 mb-2 d-flex justify-content-between pl-3 pr-3 summary"
+                            style="font-size: 13px">
                             <span><b>CLASS:</b> <span class="value">{{ $tr->theology_class->name }}</span></span>
                             {{-- <span><b class="text-uppercase">Aggre:</b> <span class="value">18</span></span> --}}
                             <span><b class="text-uppercase">DIV:</b> <span
@@ -231,7 +233,8 @@ foreach ($r->termly_report_card->term->exams as $exam) {
             <tbody>
                 <tr>
                     <td style="width: 70%;">
-                        <h2 class="p-1 text-center m-0 bg-black text-uppercase" style="font-size: 16px;">Aggregates Scale</h2>
+                        <h2 class="p-1 text-center m-0 bg-black text-uppercase" style="font-size: 16px;">Aggregates
+                            Scale</h2>
                         <table class="table table-bordered grade-table w-100">
                             <tbody>
                                 <tr class="text-center">
@@ -262,7 +265,8 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                         </table>
                     </td>
                     <td style="width: 30%;">
-                        <h2 class="p-1 text-center m-0  bg-black text-uppercase" style="font-size: 16px;">Grading Scale</h2>
+                        <h2 class="p-1 text-center m-0  bg-black text-uppercase" style="font-size: 16px;">Grading Scale
+                        </h2>
                         <table class="table table-bordered grade-table">
                             <tbody>
                                 <tr class="text-center">
@@ -297,10 +301,10 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     <span class="comment">{{ Utils::getClassTeacherComment($r)['hm'] }}</span>
                     <div class="p-0 mt-0 mb-2 class-teacher">
                         <b>HEAD TEACHER'S COMMUNICATION:</b>
-                        <span class="comment">Assalam Alaikum Warahmatullah Wabarakatuhu. We are informing our
-                            beloved parents that the Quran competition for this term three is postponed to
-                            Saturday
-                            9/4/2023 next term.</span>
+                        <span class="comment">We thank you for all the support you have accorded us since you joined
+                            Kira Junior School.
+                            We remain open to positive feedback, which we believe helps us to improve the services we
+                            provide to our children.</span>
                     </div>
                 </td>
                 <td class=" pl-3 text-center">
@@ -322,7 +326,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 18,000</span></span> --}}
             <span><b>SCHOOL PAY CODE:</b> <span class="value"
                     style="font-size: 12px!important;">{{ $r->owner->school_pay_payment_code }}</span></span> |
-            <span><b>NEXT TERM BEGINS ON:</b> <span class="value" style="font-size: 12px!important;">6<sup>th</sup> FEB,
+            <span><b>TERM ENDS ON:</b> <span class="value" style="font-size: 12px!important;">5<sup>th</sup> MAY,
                     2023</span></span>
         </div>
 

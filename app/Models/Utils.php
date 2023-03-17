@@ -1704,7 +1704,6 @@ class Utils  extends Model
     {
         $position = $r->average_aggregates;
         $total_students = $r->total_aggregates;
-
         $percentage = 0;
         if ($total_students > 0) {
             $percentage = ($position / $total_students) * 100;
@@ -1770,7 +1769,7 @@ class Utils  extends Model
             $comment['theo'] = $theologyComments2[1];
             $comment['teacher'] = $Comment2[1];
             $comment['n'] = $nurseryComments2[1];
-        } elseif ($percentage < 101) {
+        } elseif ($percentage < 1000) {
             $comment['theo'] = $theologyComments3[1];
             $comment['teacher'] = $Comment3[2];
             $comment['n'] = $nurseryComments3[1];
@@ -1784,7 +1783,7 @@ class Utils  extends Model
             $comment['hm'] = $hmComment3[2];
         } elseif ($percentage < 80) {
             $comment['hm'] = $hmComment4[2];
-        } elseif ($percentage < 101) {
+        } elseif ($percentage < 1000) {
             $comment['hm'] = $hmComment5[2];
         }
 
