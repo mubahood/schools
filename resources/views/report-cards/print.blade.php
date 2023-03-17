@@ -10,13 +10,12 @@
 
     <link rel="stylesheet" href="{{ public_path('css/bootstrap-print.css') }}"> 
 
-{{-- 
+
     @if ($recs[0]['r']->enterprise_id == 9)
         <link type="text/css" href="{{ public_path('assets/buck-print.css') }}" rel="stylesheet" />
     @else
-
-    @endif --}}
-    <link type="text/css" href="{{ public_path('assets/print.css') }}" rel="stylesheet" />
+        <link type="text/css" href="{{ public_path('assets/print.css') }}" rel="stylesheet" />
+    @endif
 
 </head>
 

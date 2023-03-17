@@ -46,7 +46,10 @@ class PrintController2 extends Controller
         ini_set('display_startup_errors', 1);
         error_reporting(E_ALL);
 
-        $term_id = 6;
+        $term_id = 7;
+        if(isset($_GET['term_id'])){
+            $term_id = (int)($_GET['term_id']);
+        }
         $termly_report_card_id = 2;
         if (isset($_GET['term_id'])) {
             $term_id = (int)($_GET['term_id']);
