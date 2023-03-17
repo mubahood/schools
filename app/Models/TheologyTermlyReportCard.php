@@ -23,6 +23,7 @@ class TheologyTermlyReportCard extends Model
                 die("Term not found.");
             }
             $m->academic_year_id = $t->academic_year_id;
+            return $m;
         });
         self::creating(function ($m) {
             $t = Term::find($m->term_id);
@@ -32,6 +33,7 @@ class TheologyTermlyReportCard extends Model
             $m->academic_year_id = $t->academic_year_id;
         });
         self::updated(function ($m) {
+            return $m;
             TheologyTermlyReportCard::my_update($m);  
             if ($m->do_update) {
 
