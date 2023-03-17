@@ -32,8 +32,9 @@ class TheologyTermlyReportCard extends Model
             $m->academic_year_id = $t->academic_year_id;
         });
         self::updated(function ($m) {
+            TheologyTermlyReportCard::my_update($m);  
             if ($m->do_update) {
-                TheologyTermlyReportCard::my_update($m);
+
             }
         });
     }
@@ -78,8 +79,7 @@ class TheologyTermlyReportCard extends Model
                 if ($student->status != 1) {
                     continue;
                 }
-
-                dd($student);
+                
 
 
                 $report_card = TheologryStudentReportCard::where([
@@ -191,9 +191,9 @@ class TheologyTermlyReportCard extends Model
                                         $tot += $my_mark->score;
                                     } */
 
-                                    if ($my_mark->exam->type != 'M.O.T') {
+                                   /*  if ($my_mark->exam->type != 'M.O.T') {
                                         continue;
-                                    }
+                                    } */
                                     $report_item->total =  $my_mark->score;
                                 }
                             }
