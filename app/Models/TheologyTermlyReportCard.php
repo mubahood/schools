@@ -274,7 +274,7 @@ class TheologyTermlyReportCard extends Model
 
             $report_card->average_aggregates = ($total_aggregates / $number_of_marks) * 4;
 
-
+ 
             if ($report_card->average_aggregates <= 12) {
                 $report_card->grade = '1';
             } else if ($report_card->average_aggregates <= 23) {
