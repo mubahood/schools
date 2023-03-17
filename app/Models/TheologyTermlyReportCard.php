@@ -101,12 +101,10 @@ class TheologyTermlyReportCard extends Model
                     $report_card->total_students = count($class->students);
                     try {
                         $report_card->save(); 
-                        echo "success save report card =======> $report_card->id <========";
+
                     } catch (\Throwable $th) {
-                        echo "FAILED  save report card =======> $th <========";
                         //throw $th;
                     }
-                    echo "<hr>";
                 } else {
                 }
 
@@ -133,7 +131,7 @@ class TheologyTermlyReportCard extends Model
                             }
 
                             if ($main_course->course == null) {
-                                die("course not found");
+                              continue;
                             }
                             $marks = TheologyMark::where([
                                 'theology_subject_id' => $main_course->id,
@@ -230,18 +228,17 @@ class TheologyTermlyReportCard extends Model
         
                             try {
                                 $report_item->save();
-                                echo "success save report card item =======> $report_item->id <========";
                             } catch (\Throwable $th) {
-                                echo "FAILED  save report card item =======> $th <========";
+
                                 //throw $th;
                             }
-                            echo "<hr>";
+
                         }
                     } else {
-                        die("noo...");
+
                     }
                 } else {
-                    die("is not null");
+
                 }
             }
         }
