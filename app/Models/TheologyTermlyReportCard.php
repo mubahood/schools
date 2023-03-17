@@ -33,11 +33,12 @@ class TheologyTermlyReportCard extends Model
             $m->academic_year_id = $t->academic_year_id;
         });
         self::updated(function ($m) {
-            return $m;
+
             TheologyTermlyReportCard::my_update($m);  
             if ($m->do_update) {
 
             }
+            return $m; 
         });
     }
 
@@ -99,6 +100,7 @@ class TheologyTermlyReportCard extends Model
                     $report_card->theology_termly_report_card_id = $m->id;
                     $report_card->total_students = count($class->students);
                     $report_card->save();
+                    dd("time save"); 
                 } else {
                 }
 
