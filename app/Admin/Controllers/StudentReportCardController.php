@@ -147,6 +147,53 @@ class StudentReportCardController extends AdminController
 
                     $column->append($box);
                 });
+
+
+
+                $row->column(4, function (Column $column) {
+
+                    $u = Admin::user();
+                    $rows = [];
+
+                    foreach (AcademicClass::where([
+                        'enterprise_id' => $u->enterprise_id
+                    ])
+                        ->orderBy('id', 'Desc')
+                        ->get() as $v) {
+
+                        $term_id = 7;
+                        if (Auth::user()->enterprise_id == 9) {
+                            $t = Term::where([
+                                'enterprise_id' => 9
+                            ])->first();
+                            $term_id = $t->id;
+                        }
+
+                        $rs = StudentReportCard::where([
+                            'term_id' => $term_id,
+                            'academic_class_id' => $v->id,
+                        ])->get();
+
+
+                        $rows[] = [
+                            $v->id,
+                            $v->name_text,
+                            count($rs),
+                            '<a target="_blank" href="' . url('print?calss_id=' . $v->id) . '&term_id=' . $term_id . '&termly_report_card_id=2">PRINT</a>'
+                        ];
+                    }
+
+                    $headers = ['Id', 'Class', 'Report cards', 'Print'];
+
+
+                    $table = new Table($headers, $rows);
+
+                    $box = new Box('1ST Term - 2023', $table);
+
+                    $box->style('success');
+
+                    $column->append($box);
+                });
             });
     }
     /**
@@ -315,7 +362,7 @@ class StudentReportCardController extends AdminController
         $form->decimal('total_aggregates')->rules('required');
         $form->decimal('average_aggregates')->rules('required');
         $form->decimal('grade')->rules('required');
-        $form->select('grade','Grade')->options([
+        $form->select('grade', 'Grade')->options([
             1 => 'Grade 1',
             2 => 'Grade 2',
             3 => 'Grade 3',
@@ -323,10 +370,10 @@ class StudentReportCardController extends AdminController
             5 => 'Failure - F',
             6 => 'Uganda pass - U',
         ])->rules('required');
-        $form->decimal('position','Position in class')->rules('required');
-        $form->decimal('total_students','Total students in class')->rules('required');
-        $form->text('class_teacher_comment','Class teacher\'s comment');
-        $form->text('head_teacher_comment','Head teacher\'s comment');
+        $form->decimal('position', 'Position in class')->rules('required');
+        $form->decimal('total_students', 'Total students in class')->rules('required');
+        $form->text('class_teacher_comment', 'Class teacher\'s comment');
+        $form->text('head_teacher_comment', 'Head teacher\'s comment');
 
 
         return $form;
