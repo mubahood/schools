@@ -75,6 +75,11 @@ class TheologyTermlyReportCard extends Model
                 }
 
 
+                if ($student->status != 1) {
+                    continue;
+                }
+
+
                 $report_card = TheologryStudentReportCard::where([
                     'term_id' => $m->term_id,
                     'theology_termly_report_card_id' => $m->id,

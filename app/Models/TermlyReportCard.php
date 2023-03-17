@@ -107,14 +107,18 @@ class TermlyReportCard extends Model
 
         foreach ($m->term->academic_year->classes as $class) {
             foreach ($class->students as $_student) {
-    
+
+                
 
 
                 $student = $_student->student;
                 if ($student == null) {
-                    die("Failed because Student {$student->id} was not found");
+                    continue;
                 }
 
+                if ($student->status != 1) {
+                    continue;
+                }
                 $report_card = StudentReportCard::where([
                     'term_id' => $m->term_id,
                     'termly_report_card_id' => $m->id,
