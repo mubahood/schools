@@ -243,8 +243,6 @@ class TheologyTermlyReportCard extends Model
             }
         }
 
-        dd('romindex');
-
         TheologyTermlyReportCard::grade_students($m);
     }
 
