@@ -179,7 +179,7 @@ class StudentReportCardController extends AdminController
                             $v->id,
                             $v->name_text,
                             count($rs),
-                            '<a target="_blank" href="' . url('print?calss_id=' . $v->id) . '&term_id=' . $term_id . '&termly_report_card_id=2">PRINT</a>'
+                            '<a target="_blank" href="' . url('print?calss_id=' . $v->id) . '&term_id=' . $term_id . '&termly_report_card_id=3">PRINT</a>'
                         ];
                     }
 

@@ -61,11 +61,12 @@ class PrintController2 extends Controller
         if (isset($_GET['calss_id'])) {
             $icalss_id = ((int)($_GET['calss_id']));
             $reps  = [];
-            foreach (StudentReportCard::where([
+             foreach (StudentReportCard::where([
                 'academic_class_id' => $icalss_id,
                 'term_id' => $term_id,
                 'termly_report_card_id' => $termly_report_card_id,
             ])->get() as $r) {
+
 
 
                 $tr = TheologryStudentReportCard::where([
