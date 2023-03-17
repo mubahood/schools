@@ -44,6 +44,7 @@ class TheologyTermlyReportCard extends Model
     {
 
 
+
         if (
             ($m->has_beginning_term  != 1)
         ) {
@@ -63,6 +64,7 @@ class TheologyTermlyReportCard extends Model
 
         foreach ($m->term->academic_year->theology_classes as $class) {
             foreach ($class->students as $_student) {
+
                 /* if ($_student->administrator_id != 2891) {
                     continue;
                 } */
@@ -79,7 +81,6 @@ class TheologyTermlyReportCard extends Model
                     'student_id' => $student->id,
                 ])->first();
                 if ($report_card == null) {
-
                     $report_card = new TheologryStudentReportCard();
                     $report_card->enterprise_id = $m->enterprise_id;
                     $report_card->academic_year_id = $class->academic_year_id;
@@ -90,10 +91,7 @@ class TheologyTermlyReportCard extends Model
                     $report_card->total_students = count($class->students);
                     $report_card->save();
                 } else {
-                    //do the update
                 }
-
-
 
 
                 if ($report_card != null) {
@@ -101,7 +99,6 @@ class TheologyTermlyReportCard extends Model
                     if ($report_card->id > 0) {
 
                         foreach ($class->subjects as $main_course) {
-
 
                             $report_item =  TheologyStudentReportCardItem::where([
                                 'theology_subject_id' => $main_course->id,
@@ -116,7 +113,6 @@ class TheologyTermlyReportCard extends Model
                                 $report_item->theology_subject_id = $main_course->id;
                                 $report_item->theologry_student_report_card_id = $report_card->id;
                             } else {
-                                //die("Updating..."); 
                             }
 
                             if ($main_course->course == null) {
@@ -188,7 +184,7 @@ class TheologyTermlyReportCard extends Model
                                         $tot += $my_mark->score;
                                     } */
 
-                                    if ($my_mark->exam->type != 'E.O.T') {
+                                    if ($my_mark->exam->type != 'M.O.T') {
                                         continue;
                                     }
                                     $report_item->total =  $my_mark->score;
@@ -214,10 +210,10 @@ class TheologyTermlyReportCard extends Model
 
                             $report_item->grade_name = $scale->name;
                             $report_item->aggregates = $scale->aggregates;
-                            $report_item->save(); 
+                            $report_item->save();
                         }
                     } else {
-                        die("noo..."); 
+                        die("noo...");
                     }
                 } else {
                     die("is not null");
@@ -225,6 +221,7 @@ class TheologyTermlyReportCard extends Model
             }
         }
 
+        dd('romindex');
 
         TheologyTermlyReportCard::grade_students($m);
     }

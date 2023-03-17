@@ -27,12 +27,12 @@ class TheologyTermlyReportCardController extends AdminController
      */
     protected function grid()
     {
-        /*
-        $r = TheologyTermlyReportCard::find(2);
+ /* 
+        $r = TheologyTermlyReportCard::find(3);
         $r->report_title .= 1;
         $r->save();
-        die("romina");   
-        TheologyTermlyReportCard::grade_students($r);
+        die("romina");    */
+      /*  TheologyTermlyReportCard::grade_students($r);
 
 
        $x = TermlyReportCard::find(1);

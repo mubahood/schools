@@ -42,12 +42,12 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     <img style="width: 100%;" src="{{ public_path('storage/' . $r->ent->logo) }}">
                 </td>
                 <td>
-                    <h1 class="text-center h3 p-0 m-0 text-uppercase">{{ $r->ent->name }}</h1>
-                    <p class="text-center p font-serif  fs-3 m-0 p-0 mt-2 title-2"><b
+                    <h1 class="text-center h3 p-0 m-0 text-uppercase" style="font-size: 24px;">{{ $r->ent->name }}</h1>
+                    <p class="text-center p font-serif  fs-3 m-0 p-0 mt-1 title-2"><b
                             class="m-0 p-0">{{ $r->ent->address }}</b>
                     </p>
-                    <p class="text-center p font-serif mt-0 mb-0 title-2"><b>WEBSITE:</b> www.kirajuniorschool.ac.ug</p>
-                    <p class="text-center p font-serif mt-0 title-2 mb-2"><b>EMAIL:</b> {{ $r->ent->email }}</p>
+                    <p class="text-center p font-serif mt-0 mb-0 title-2" ><b>WEBSITE:</b> www.kirajuniorschool.ac.ug</p>
+                    <p class="text-center p font-serif mt-0 title-2 mb-1"><b>EMAIL:</b> {{ $r->ent->email }}</p>
                     <p class="text-center p font-serif  fs-3 m-0 p-0 mt-1 mb-2" style="font-size: 1.3rem">
                         <u><b>{{ $r->termly_report_card->report_title }}</b></u>
                     </p>
@@ -75,11 +75,11 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 <td style="width: 40%" class="pr-3">
 
                     <h2 class="text-center text-uppercase h2" style="font-size: 18px"><u>secular studies</u></h2>
-                    <div class="row mt-1 pb-2 d-flex justify-content-between pl-3 pr-3 summary" style="font-size: 13px">
+                    <div class="row mt-1 pb-2 d-flex justify-content-between pl-3 pr-3 summary" style="font-size: 12px">
                         <span><b>CLASS:</b> <span class="value">{{ $r->academic_class->name }}</span></span>
                         {{-- <span><b class="text-uppercase">Aggre:</b> <span class="value">18</span></span> --}}
-                        <span><b class="text-uppercase">Aggregates:</b> <span
-                                class="value text-lowercase">{{ $r->average_aggregates }}</span></span>
+                        <span><b class="text-uppercase">Aggr:</b> <span
+                                class="value text-lowercase">{{ ((int)($r->average_aggregates)) }}</span></span>
 
                         <span><b class="text-uppercase">DIV:</b> <span class="value">{{ $r->grade }}</span></span>
                         <span><b class="text-uppercase">Position:</b> <span
@@ -135,7 +135,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                             @endif
                             <td><b>{{ $r->total_marks }}</b></td>
                             <td><b>{{ $r->total_aggregates }}</b></td>
-                            <td colspan="2"> AS</td>
+                            <td colspan="2"></td>
                         </tr>
                     </table>
                     <div class="p-0 mt-2 mb-2 class-teacher">
@@ -304,7 +304,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     </div>
                 </td>
                 <td class=" pl-3 text-center">
-                    <img width="80%" style=" " class="text-center "
+                    <img width="60%" style=" " class="text-center "
                         src="{{ public_path('storage/' . $r->ent->hm_signature) }}">
                     <h2 class="text-center"
                         style="line-height: .6rem;font-size: 14px;   margin-bottom: 0px; padding:0px;">

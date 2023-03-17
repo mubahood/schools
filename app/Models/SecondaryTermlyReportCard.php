@@ -66,7 +66,8 @@ class SecondaryTermlyReportCard extends Model
 
 
 
-                foreach ($class->subjects as $key => $subject) {
+                foreach ($class->secondary_subjects as $key => $subject) {
+//                    dd($subject);
                     $reportItem = SecondaryReportCardItem::where([
                         'secondary_report_card_id' => $reportCard->id,
                         'secondary_subject_id' => $subject->id,
@@ -82,7 +83,7 @@ class SecondaryTermlyReportCard extends Model
                     if ($teacher != null) {
                         $etacher_name = $teacher->name;
                     }
-                    $reportItem->enterprise_id = $reportItem->enterprise_id;
+                    $reportItem->enterprise_id = $subject->enterprise_id;
                     $reportItem->academic_year_id = $class->academic_year_id;
                     $reportItem->teacher = $etacher_name;
                     $reportItem->save();

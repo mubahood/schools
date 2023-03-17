@@ -509,6 +509,10 @@ class AcademicClass extends Model
     {
         return $this->hasMany(Subject::class, 'academic_class_id');
     }
+    function secondary_subjects()
+    {
+        return $this->hasMany(SecondarySubject::class, 'academic_class_id');
+    }
 
     function main_subjects()
     {

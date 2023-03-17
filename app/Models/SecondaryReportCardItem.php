@@ -28,4 +28,12 @@ class SecondaryReportCardItem extends Model
         });
     }
 
+    public function subject(){ 
+        return $this->belongsTo(SecondarySubject::class,'secondary_subject_id');
+    }
+
+    public function items(){ 
+        
+        return $this->belongsTo(SecondaryCompetence::class,'secondary_subject_id');
+    }
 } 
