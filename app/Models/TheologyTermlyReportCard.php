@@ -100,12 +100,10 @@ class TheologyTermlyReportCard extends Model
                     $report_card->theology_termly_report_card_id = $m->id;
                     $report_card->total_students = count($class->students);
                     try {
-                        $report_card->save();
-                        dd("success", $report_card);  
+                        $report_card->save(); 
                     } catch (\Throwable $th) {
-                        dd("failed", $report_card);
+                        //throw $th;
                     }
-                    dd("time save"); 
                 } else {
                 }
 
