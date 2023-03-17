@@ -101,9 +101,12 @@ class TheologyTermlyReportCard extends Model
                     $report_card->total_students = count($class->students);
                     try {
                         $report_card->save(); 
+                        echo "success save report card =======> $report_card->id <========";
                     } catch (\Throwable $th) {
+                        echo "FAILED  save report card =======> $th <========";
                         //throw $th;
                     }
+                    echo "<hr>";
                 } else {
                 }
 
@@ -224,7 +227,15 @@ class TheologyTermlyReportCard extends Model
 
                             $report_item->grade_name = $scale->name;
                             $report_item->aggregates = $scale->aggregates;
-                            $report_item->save();
+        
+                            try {
+                                $report_item->save();
+                                echo "success save report card item =======> $report_item->id <========";
+                            } catch (\Throwable $th) {
+                                echo "FAILED  save report card item =======> $th <========";
+                                //throw $th;
+                            }
+                            echo "<hr>";
                         }
                     } else {
                         die("noo...");
