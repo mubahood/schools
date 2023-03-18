@@ -5,6 +5,10 @@ $max_bot = 30;
 $max_mot = 40;
 $max_eot = 60;
 $tr = isset($tr) ? $tr : null;
+
+if ($tr == null) {
+    $tr = $r->get_theology_report();
+}
 $bal = ((int) $r->owner->account->balance);
 $bal_text = '';
 if ($bal == 0) {
@@ -103,7 +107,13 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                             <th class="remarks">Remarks</th>
                             <th class="remarks text-center">Initials</th>
                         </thead>
+                        <?php $done = []; ?>
                         @foreach ($r->items as $v)
+                            <?php
+                            if (in_array($v->main_course_id, $done)) {
+                                continue;
+                            }
+                            $done[] = $v->main_course_id; ?>
                             <tr class="marks">
                                 <th>{{ $v->subject->subject_name }}</th>
                                 @if ($r->termly_report_card->has_beginning_term)

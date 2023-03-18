@@ -25,4 +25,10 @@ class TheologyStudentReportCardItem extends Model
         return $this->belongsTo(TheologySubject::class,'theology_subject_id'); 
     } 
 
+
+    function theology_class()
+    {
+        return $this->belongsTo(TheologyClass::class,'theology_class_id'); 
+    } 
+
 }

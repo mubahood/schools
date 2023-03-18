@@ -24,13 +24,12 @@ class StudentReportCard extends Model
         self::updating(function ($m) {
             if ($m->class_teacher_commented == 10) {
                 $m->class_teacher_commented = 0;
-            }else{
+            } else {
                 $m->class_teacher_commented = 1;
-
             }
             if ($m->head_teacher_commented == 10) {
                 $m->head_teacher_commented = 0;
-            }else{
+            } else {
                 $m->head_teacher_commented = 1;
             }
         });
@@ -45,7 +44,7 @@ class StudentReportCard extends Model
     {
         return $this->belongsTo(Term::class);
     }
- 
+
     function ent()
     {
         return $this->belongsTo(Enterprise::class, 'enterprise_id');
@@ -54,6 +53,16 @@ class StudentReportCard extends Model
     function academic_class()
     {
         return $this->belongsTo(AcademicClass::class, 'academic_class_id');
+    }
+
+    function get_theology_report()
+    {
+
+        $theo = TheologryStudentReportCard::where([
+            'term_id' => $this->term_id,
+            'student_id' => $this->student_id,
+        ])->orderBy('id', 'desc')->first();
+        return $theo;
     }
 
 

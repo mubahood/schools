@@ -34,11 +34,10 @@ class TheologyTermlyReportCard extends Model
         });
         self::updated(function ($m) {
 
-            TheologyTermlyReportCard::my_update($m);  
+            TheologyTermlyReportCard::my_update($m);
             if ($m->do_update) {
-
             }
-            return $m; 
+            return $m;
         });
     }
 
@@ -82,7 +81,7 @@ class TheologyTermlyReportCard extends Model
                 if ($student->status != 1) {
                     continue;
                 }
-                
+
 
 
                 $report_card = TheologryStudentReportCard::where([
@@ -100,146 +99,14 @@ class TheologyTermlyReportCard extends Model
                     $report_card->theology_termly_report_card_id = $m->id;
                     $report_card->total_students = count($class->students);
                     try {
-                        $report_card->save(); 
-
+                        $report_card->save();
                     } catch (\Throwable $th) {
                         //throw $th;
                     }
                 } else {
                 }
 
-
-                if ($report_card != null) {
-
-                    if ($report_card->id > 0) {
-
-                        foreach ($class->subjects as $main_course) {
-
-                            $report_item =  TheologyStudentReportCardItem::where([
-                                'theology_subject_id' => $main_course->id,
-                                'theologry_student_report_card_id' => $report_card->id,
-                            ])->first();
-
-
-
-                            if ($report_item == null) {
-                                $report_item = new TheologyStudentReportCardItem();
-                                $report_item->enterprise_id = $m->enterprise_id;
-                                $report_item->theology_subject_id = $main_course->id;
-                                $report_item->theologry_student_report_card_id = $report_card->id;
-                            } else {
-                            }
-
-                            if ($main_course->course == null) {
-                              continue;
-                            }
-                            $marks = TheologyMark::where([
-                                'theology_subject_id' => $main_course->id,
-                                'student_id' => $student->id,
-                                'theology_class_id' => $class->id
-                            ])->get();
-
-                            if (count($marks) < 1) {
-                                continue;
-                            }
-
-
-
-
-
-
-                            $avg_score = 0;
-                            $bot_avg_score = 0;
-                            $bot_avg_count = 0;
-
-                            $mot_avg_score = 0;
-                            $mot_avg_count = 0;
-
-                            $eot_avg_score = 0;
-                            $eot_avg_count = 0;
-                            $regular_total = 0;
-
-
-                            if (count($marks) > 0) {
-                                $num = count($marks);
-                                $tot = 0;
-                                $regular_total = 0;
-                                foreach ($marks as $my_mark) {
-
-
-                                    /* $xam = TheologyExam::find($my_mark->theology_exam_id);
-
-                                    if ($xam == null) {
-                                        continue;
-                                    }
-
-
-                                    if ($xam->term->id != $m->term->id) {
-                                        continue;
-                                    } */
-
-                                    $regular_total = 0;
-                                    /* if (
-                                        $my_mark->exam->type == 'B.O.T' &&
-                                        $m->has_beginning_term
-                                    ) {
-                                        $bot_avg_count++;
-                                        $bot_avg_score +=  $my_mark->score;
-                                        $regular_total += $my_mark->exam->max_mark;
-                                        $tot += $my_mark->score;
-                                    }
-
-                                    if (
-                                        $my_mark->exam->type == 'M.O.T' &&
-                                        $m->has_mid_term
-                                    ) {
-                                        $regular_total += $my_mark->exam->max_mark;
-                                        $mot_avg_count++;
-                                        $mot_avg_score +=  $my_mark->score;
-                                        $tot += $my_mark->score;
-                                    } */
-
-                                   /*  if ($my_mark->exam->type != 'M.O.T') {
-                                        continue;
-                                    } */
-                                    $report_item->total =  $my_mark->score;
-                                }
-                            }
-
-
-                            $report_item->remarks = Utils::get_automaic_mark_remarks($report_item->total);
-                            $u = Administrator::find($my_mark->subject->subject_teacher);
-                            $initial = "";
-                            if ($u != null) {
-                                if (strlen($u->first_name) > 0) {
-                                    $initial = substr($u->first_name, 0, 1);
-                                }
-                                if (strlen($u->last_name) > 0) {
-                                    $initial .= "." . substr($u->last_name, 0, 1);
-                                }
-                            }
-                            $report_item->initials = $initial;
-
-
-                            $scale = Utils::theology_grade_marks($report_item);
-
-                            $report_item->grade_name = $scale->name;
-                            $report_item->aggregates = $scale->aggregates;
-        
-                            try {
-                                $report_item->save();
-                            } catch (\Throwable $th) {
-
-                                //throw $th;
-                            }
-
-                        }
-                    } else {
-
-                    }
-                } else {
-
-                }
+                TheologyTermlyReportCard::grade_report_card($report_card);
             }
         }
 
@@ -247,6 +114,114 @@ class TheologyTermlyReportCard extends Model
     }
 
 
+    public static function grade_report_card($report_card)
+    {
+
+
+        if ($report_card != null) {
+
+            if ($report_card->id > 0) {
+                if ($report_card->theology_class == null) {
+                    return;
+                }
+
+                $exam = TheologyExam::where(['term_id' => $report_card->termly_report_card->term_id])->first();
+                if ($exam == null) {
+                    return;
+                }
+
+
+                foreach ($report_card->theology_class->subjects as $main_course) {
+
+
+                    $report_item =  TheologyStudentReportCardItem::where([
+                        'theology_subject_id' => $main_course->id,
+                        'theologry_student_report_card_id' => $report_card->id,
+                    ])->first();
+
+
+
+                    if ($report_item == null) {
+                        $report_item = new TheologyStudentReportCardItem();
+                        $report_item->enterprise_id = $report_card->enterprise_id;
+                        $report_item->theology_subject_id = $main_course->id;
+                        $report_item->theologry_student_report_card_id = $report_card->id;
+                    } else {
+                    }
+
+                    if ($main_course->course == null) {
+                        continue;
+                    }
+
+                    $marks = TheologyMark::where([
+                        'theology_subject_id' => $main_course->id,
+                        'student_id' => $report_card->student_id,
+                        'theology_exam_id' => $exam->id,
+                    ])->get();
+
+                    $isFound = false;
+                    $_mark = new TheologyMark();
+                    foreach ($marks as $mark) {
+                        if ($mark->score > 0) {
+                            $isFound = true;
+                            $_mark = $mark;
+                            break;
+                        }
+                    }
+
+                    if ($isFound) {
+                        $num = count($marks);
+                        $tot = 0;
+                        $regular_total = 0;
+                        $report_item->total =  $_mark->score;
+
+                        $avg_score = 0;
+                        $bot_avg_score = 0;
+                        $bot_avg_count = 0;
+
+                        $mot_avg_score = 0;
+                        $mot_avg_count = 0;
+
+                        $eot_avg_score = 0;
+                        $eot_avg_count = 0;
+                        $regular_total = 0;
+
+
+
+                        $report_item->remarks = Utils::get_automaic_mark_remarks($report_item->total);
+
+                        $u = Administrator::find($main_course->subject_teacher);
+                        $initial = "";
+                        if ($u != null) {
+                            if (strlen($u->first_name) > 0) {
+                                $initial = substr($u->first_name, 0, 1);
+                            }
+                            if (strlen($u->last_name) > 0) {
+                                $initial .= "." . substr($u->last_name, 0, 1);
+                            }
+                        }
+                        $report_item->initials = $initial;
+
+                        $scale = Utils::theology_grade_marks($report_item);
+
+                        $report_item->grade_name = $scale->name;
+                        $report_item->aggregates = $scale->aggregates;
+                    } else {
+                        $report_item->total = 0;
+                        $report_item->aggregates = 'X';
+                        $report_item->remarks = "Missed";
+                    }
+                    try {
+                        $report_item->save();
+                    } catch (\Throwable $th) {
+                        //throw $th;
+                    }
+                }
+            } else {
+            }
+        } else {
+        }
+    }
     public static function grade_students($m)
     {
 
@@ -274,7 +249,7 @@ class TheologyTermlyReportCard extends Model
 
             $report_card->average_aggregates = ($total_aggregates / $number_of_marks) * 4;
 
- 
+
             if ($report_card->average_aggregates <= 12) {
                 $report_card->grade = '1';
             } else if ($report_card->average_aggregates <= 23) {

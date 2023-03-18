@@ -11,6 +11,7 @@ use App\Models\StudentHasTheologyClass;
 use App\Models\StudentReportCard;
 use App\Models\Subject;
 use App\Models\TermlyReportCard;
+use App\Models\TheologyTermlyReportCard;
 use App\Models\Transaction;
 use App\Models\Utils;
 use Carbon\Carbon;
@@ -143,7 +144,10 @@ class HomeController extends Controller
     }
     public function stats(Content $content)
     {
-      /*   $theo = StudentReportCard::find(2528);
+       /*  $sec = StudentReportCard::find(2528);
+        $theo = $sec->get_theology_report();
+        TheologyTermlyReportCard::grade_report_card($theo);
+
         dd($theo); */
       /*   $x = StudentReportCard::find(2392);
         TermlyReportCard::grade_report_card($x);
