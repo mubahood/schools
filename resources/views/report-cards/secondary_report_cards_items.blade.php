@@ -47,25 +47,51 @@
     <tbody>
         @foreach ($r->items as $item)
             <?php
-            if ($item->subject == null) {
-                continue;
+            
+            if ($item->subject == null) { 
+                dd("Subject not found");
+                continue; 
             }
             ?>
             {{-- 
-        "created_at" => "2023-03-16 09:17:34"
-    "updated_at" => "2023-03-16 09:17:34"
-    "enterprise_id" => null
-    "academic_year_id" => 6
-    "secondary_subject_id" => 390
-    "secondary_report_card_id" => 100
-    "average_score" => 0.0
-    "generic_skills" => null
-    "remarks" => null
+            "created_at" => "2023-03-16 09:17:34"
+            "updated_at" => "2023-03-16 09:17:34"
+            "enterprise_id" => null
+            "academic_year_id" => 6
+            "secondary_subject_id" => 390
+            "secondary_report_card_id" => 100
+            "average_score" => 0.0
+            "generic_skills" => null
+            "remarks" => null
+
+
+
+            "enterprise_id" => 11
+            "academic_class_id" => 48
+            "parent_course_id" => 1
+            "secondary_subject_id" => 57
+            "term_id" => 16
+            "academic_year_id" => 6
+            "score" => 1.7
+            "submitted" => 1
+            "activity_id" => 1
+            "administrator_id" => 3759
+
+
+            "enterprise_id" => null
+            "academic_year_id" => 6
+            "secondary_subject_id" => 390
+            "secondary_report_card_id" => 1
+            "average_score" => 0.0
+            "generic_skills" => null
+            "remarks" => null
+            "teacher" => "secondary admin"
     --}}
             <tr>
                 <th rowspan="3">{{ $item->subject->subject_name }}</th>
                 <?php
-                dd($item->subject->subject_name);
+                $items = $item->subject->items;
+                dd(count($items));
                 ?>
                 <td>
                     <b>PERSONAL LIFE AND FAMILY:</b>

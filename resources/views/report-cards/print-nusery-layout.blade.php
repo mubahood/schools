@@ -184,8 +184,8 @@ $school_email = 'admin@kjs.com';
                             @endforeach
                         </table>
                         <div class="p-0 mt-2 mb-2 class-teacher">
-                            <b>CLASS TEACHER'S COMMENT:</b>
-                            <span class="comment">{{ Utils::getClassTeacherComment($r)['n'] }}</span>
+                            <b>CLASS TEACHER'S COMMENT:</b><br><br>
+                            {{-- <span class="comment">{{ Utils::getClassTeacherComment($r)['n'] }}</span> --}}
                         </div>
 
                     </td>

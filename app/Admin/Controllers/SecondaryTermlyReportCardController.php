@@ -31,7 +31,7 @@ class SecondaryTermlyReportCardController extends AdminController
     	do_update	
 
         */
-   /*      $rep = new SecondaryTermlyReportCard();
+     /*    $rep = new SecondaryTermlyReportCard();
         $u = Admin::user();
         $ent = Admin::user()->ent;
         $year = $ent->active_academic_year();
@@ -42,7 +42,7 @@ class SecondaryTermlyReportCardController extends AdminController
         $rep->report_title = 'End of term 1 2023' . rand(10000, 1000000);
         $rep->general_commnunication = 'Simple general communication go here. Simple general communication go here. Simple general communication go here. Simple general communication go here.';
         $rep->save();
-        dd($year); */
+        dd('done'); */
 
         $grid = new Grid(new SecondaryTermlyReportCard());
 

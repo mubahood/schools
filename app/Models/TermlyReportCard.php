@@ -42,10 +42,9 @@ class TermlyReportCard extends Model
             TermlyReportCard::my_update($m);
         });
 
-        self::updated(function ($m) { 
-            if($m->do_update){
+        self::updated(function ($m) {
+            if ($m->do_update) {
                 TermlyReportCard::my_update($m);
-
             }
         });
     }
@@ -108,7 +107,7 @@ class TermlyReportCard extends Model
         foreach ($m->term->academic_year->classes as $class) {
             foreach ($class->students as $_student) {
 
-                
+
 
 
                 $student = $_student->student;
@@ -142,14 +141,14 @@ class TermlyReportCard extends Model
                     if ($report_card->id > 0) {
 
 
-                        $marks = Mark::where([ 
+                        $marks = Mark::where([
                             'student_id' => $student->id,
                             'class_id' => $class->id
-                        ])->get(); 
+                        ])->get();
                         foreach ($marks as $mark) {
-                            
-                       
-                            
+
+
+
                             $report_item =  StudentReportCardItem::where([
                                 'main_course_id' => $mark->subject_id,
                                 'student_report_card_id' => $report_card->id,
@@ -163,13 +162,13 @@ class TermlyReportCard extends Model
                                 $report_item->student_report_card_id = $report_card->id;
                             } else {
                                 //die("Updating...");
-                             
+
                             }
- 
- 
+
+
 
                             if ($mark != null) {
- 
+
                                 $report_item->total = $mark->score;
                                 $report_item->remarks = Utils::get_automaic_mark_remarks($report_item->total);
                                 $u = Administrator::find($mark->subject->subject_teacher);
@@ -203,9 +202,8 @@ class TermlyReportCard extends Model
                                         $report_item->grade_name = $scale->name;
                                         $report_item->aggregates = $scale->aggregates;
                                     }
- 
                                 } else {
- 
+
                                     $report_item->initials = $initial;
                                     $scale = Utils::grade_marks($report_item);
                                     $report_item->grade_name = $scale->name;
@@ -223,7 +221,7 @@ class TermlyReportCard extends Model
                     }
                 }
             }
-        } 
+        }
 
         TermlyReportCard::grade_students($m);
     }
@@ -235,48 +233,7 @@ class TermlyReportCard extends Model
 
 
         foreach ($m->report_cards as  $report_card) {
-
-            /* if ($report_card->id != 234) {
-                continue;
-            } */
-            //dd("{$report_card->owner->name}"); */
-
-            $total_marks = 0;
-            $number_of_marks = 0;
-            $total_aggregates = 0;
-            $total_students = count($report_card->academic_class->students);
-
-            foreach ($report_card->items as $student_report_card) {
-                if ((int)($student_report_card->aggregates) < 1) {
-                    continue;
-                }
-                $total_aggregates += ((int)($student_report_card->aggregates));
-                $total_marks += ((int)($student_report_card->total));
-                $number_of_marks++;
-            }
-            if ($number_of_marks < 1) {
-                continue;
-            }
-
-            $report_card->average_aggregates = ($total_aggregates / $number_of_marks) * 4;
-
-
-            if ($report_card->average_aggregates <= 12) {
-                $report_card->grade = '1';
-            } else if ($report_card->average_aggregates <= 23) {
-                $report_card->grade = '2';
-            } else if ($report_card->average_aggregates <= 29) {
-                $report_card->grade = '3';
-            } else if ($report_card->average_aggregates <= 34) {
-                $report_card->grade = '4';
-            } else {
-                $report_card->grade = 'U';
-            }
-            $report_card->average_aggregates = round($report_card->average_aggregates, 2);
-            $report_card->total_marks = $total_marks;
-            $report_card->total_aggregates = $total_aggregates;
-            $report_card->total_students = $total_students;
-            $report_card->save();
+            TermlyReportCard::grade_report_card($report_card);
             //TermlyReportCard::get_teachers_remarks($report_card);
         }
 
@@ -294,6 +251,71 @@ class TermlyReportCard extends Model
         }
     }
 
+    public static function grade_report_card($report_card)
+    {
+
+        /* if ($report_card->id != 234) {
+                continue;
+            } */
+        //dd("{$report_card->owner->name}"); */
+
+        $total_marks = 0;
+        $number_of_marks = 0;
+        $total_aggregates = 0;
+        $total_students = count($report_card->academic_class->students);
+
+        foreach ($report_card->items as $student_report_card) {
+            if ((int)($student_report_card->aggregates) < 1) {
+                continue;
+            }
+
+            $total_marks += ((int)($student_report_card->total));
+
+
+            $course_id = 0;
+            if (
+                isset($student_report_card->subject) &&
+                $student_report_card->subject != null &&
+                isset($student_report_card->subject->course) &&
+                $student_report_card->subject->course != null
+            ) {
+                $course_id = $student_report_card->subject->course->id;
+            }
+            $course_id = ((int)($course_id));
+            if (!in_array($course_id, [
+                38, 39, 40, 41
+            ])) {
+                continue;
+            }
+            $number_of_marks++;
+            $total_aggregates += ((int)($student_report_card->aggregates));
+         
+        }
+
+        if ($number_of_marks < 1) {
+            return;
+        }
+
+        $report_card->average_aggregates = ($total_aggregates / $number_of_marks) * 4;
+
+
+        if ($report_card->average_aggregates <= 12) {
+            $report_card->grade = '1';
+        } else if ($report_card->average_aggregates <= 23) {
+            $report_card->grade = '2';
+        } else if ($report_card->average_aggregates <= 29) {
+            $report_card->grade = '3';
+        } else if ($report_card->average_aggregates <= 34) {
+            $report_card->grade = '4';
+        } else {
+            $report_card->grade = 'U';
+        }
+        $report_card->average_aggregates = round($report_card->average_aggregates, 2);
+        $report_card->total_marks = $total_marks;
+        $report_card->total_aggregates = $total_aggregates;
+        $report_card->total_students = $total_students; 
+        $report_card->save();
+    }
     public static function get_teachers_remarks($report_card)
     {
         set_time_limit(-1);
@@ -398,7 +420,7 @@ class TermlyReportCard extends Model
 
             $comments = [
                 "Work harder than this to attain a better aggregate.",
-                "Aim higher than thus to better your performance.",
+                "Aim higher than this to better your performance.",
                 'Steady progress reflected, aim higher than this next time.',
                 'Positive progress observed do not relax.',
                 'Steady progress though more is still desired to attain the best.'

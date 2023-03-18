@@ -1838,7 +1838,7 @@ class Utils  extends Model
             'There-is some progress displayed, but continue motivating and encouraging them.',
             'A slight improvement has been shown, however, concentrate more next term.',
             'There is still need for more effort to be put in, continue working hard',
-            'A slight gradual progress is shown, but doubles the effort for better results.'
+            'A slight gradual progress is shown, but double the effort for better results.'
         ];
     }
 
@@ -1856,7 +1856,7 @@ class Utils  extends Model
     {
         return [
             'Very good work, thank you so much, however, keep working hard',
-            'A steady progress has been shown, however, more effort is sti',
+            'A steady progress has been shown, however, more effort is still needed in reading.',
             'Thank you for improving, but more effort is required to do ev',
             'Well done with your continuous improvement, however, read eve',
             'Thank you for the improvement, however, double your effort fos',
@@ -1881,6 +1881,7 @@ class Utils  extends Model
 
     public static   function nurseryComments1($Sex)
     {
+        $Sex2 = ' his/her '; 
         return [$Sex . ' performance has greatly improved; ' . $Sex . ' produces attractive work.', 'In all the fundamental subjects, ' . $Sex . ' is performing admirably well.', $Sex . ' is focused and enthusiastic learner with much determination.', $Sex . ' has produced an excellent report ' . $Sex . ' shouldn’t relax.', $Sex . ' performance is very good. He just needs more encouragement.', $Sex . ' is hardworking, determined, co-operative and well disciplined.'];
     }
 
@@ -1892,6 +1893,8 @@ class Utils  extends Model
         } else {
             $Sex2 = ' her ';
         }
+
+        $Sex2 = ' his/her '; 
         return [
             $Sex . ' has a lot of potential and is working hard to realize it.',
             $Sex . ' is a focused and enthusiastic learner with much determination.', $Sex . ' is self-confident and has excellent manners. Thumbs up.', $Sex . ' has done some good work, but it hasn’t been consistent because of ' . $Sex2 . ' frequent relaxation.', $Sex . ' can produce considerably better results. Though ' . $Sex . ' frequently seeks the attention and help from peers.',
@@ -1919,7 +1922,7 @@ class Utils  extends Model
     }
     public static   function hmComment3()
     {
-        return ['Work harder than this to attain a better aggregate.', 'Aim higher than thus to better your performance.', 'Steady progress reflected, aim higher than this next time.', 'Positive progress observed do not relax.', 'Steady progress though more is still desired to attain the best.'];
+        return ['Work harder than this to attain a better aggregate.', 'Aim higher than this to better your performance.', 'Steady progress reflected, aim higher than this next time.', 'Positive progress observed do not relax.', 'Steady progress though more is still desired to attain the best.'];
     }
     public static   function hmComment4()
     {

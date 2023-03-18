@@ -33,7 +33,9 @@ class SecondaryReportCardItem extends Model
     }
 
     public function items(){ 
-        
+        return 'test';
         return $this->belongsTo(SecondaryCompetence::class,'secondary_subject_id');
     }
+
+    protected $appends = ['items'];
 } 

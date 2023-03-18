@@ -378,7 +378,7 @@ class TheologyTermlyReportCard extends Model
 
             $comments = [
                 "Work harder than this to attain a better aggregate.",
-                "Aim higher than thus to better your performance.",
+                "Aim higher than this to better your performance.",
                 'Steady progress reflected, aim higher than this next time.',
                 'Positive progress observed do not relax.',
                 'Steady progress though more is still desired to attain the best.'

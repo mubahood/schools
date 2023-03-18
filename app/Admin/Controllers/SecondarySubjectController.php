@@ -32,10 +32,11 @@ class SecondarySubjectController extends AdminController
      */
     protected function grid()
     {
-        /*
+   /*    
         $u = Admin::user();
-        $ent = Admin::user()->ent;
+        $ent = Admin::user()->ent; 
         $term = Admin::user()->ent->active_term();
+        set_time_limit(-1);
 
         foreach (SecondarySubject::where('enterprise_id', 11)->get() as $key => $sub) {
             $acts = $sub->activities;
@@ -67,7 +68,7 @@ class SecondarySubjectController extends AdminController
             $sub->submitted = 1;
             $sub->save(); 
         }
-        dd("done");*/
+        dd("done");  */
 
         $grid = new Grid(new SecondarySubject());
 

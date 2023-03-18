@@ -5,9 +5,12 @@ namespace App\Admin\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Account;
 use App\Models\MenuItem;
+use App\Models\ReportCard;
 use App\Models\StudentHasClass;
 use App\Models\StudentHasTheologyClass;
+use App\Models\StudentReportCard;
 use App\Models\Subject;
+use App\Models\TermlyReportCard;
 use App\Models\Transaction;
 use App\Models\Utils;
 use Carbon\Carbon;
@@ -140,7 +143,12 @@ class HomeController extends Controller
     }
     public function stats(Content $content)
     {
- 
+      /*   $theo = StudentReportCard::find(2528);
+        dd($theo); */
+      /*   $x = StudentReportCard::find(2392);
+        TermlyReportCard::grade_report_card($x);
+        dd($x); */
+
        /*
         set_time_limit(-1);
         $u = Auth::user();

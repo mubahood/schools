@@ -39,6 +39,11 @@ class SecondarySubject extends Model
         return $this->hasMany(Activity::class,'subject_id');
     }
 
+    public function items()
+    {
+        return $this->hasMany(SecondaryCompetence::class);
+    }
+
 
     public function get_activities_in_term($term_id)
     {
