@@ -156,7 +156,7 @@ $school_email = 'admin@kjs.com';
     </div>
 
     <div class="row">
-        <table class=" ">
+        <table class="col-6">
             <tbody>
                 <tr>
                     <td style="width: 42%">
@@ -192,8 +192,8 @@ $school_email = 'admin@kjs.com';
                             @endforeach
                         </table>
                         <div class="p-0 mt-2 mb-2 class-teacher">
-                            <b>CLASS TEACHER'S COMMENT:</b>
-                            <span class="comment">{{ Utils::getClassTeacherComment($r)['n'] }}</span>
+                            <b>CLASS TEACHER'S COMMENT:</b><br><br>
+                            {{-- <span class="comment">{{ Utils::getClassTeacherComment($r)['n'] }}</span> --}}
                         </div>
 
                     </td>
@@ -227,7 +227,7 @@ $school_email = 'admin@kjs.com';
                         @if ($tr != null)
                             <div class="p-0 mt-2 mb-2 class-teacher">
                                 <b>CLASS TEACHER'S COMMENT:</b>
-                                <span class="comment">{{ Utils::getClassTeacherComment($tr)['theo'] }}</span>
+{{--                                 <span class="comment">{{ Utils::getClassTeacherComment($tr)['theo'] }}</span> --}}
                             </div>
                         @endif
 
@@ -289,8 +289,8 @@ $school_email = 'admin@kjs.com';
                 </div>
             </td>
             <td class=" pl-3 text-center">
-                <img width="80%" style=" " class="text-center "
-                    src="{{ public_path('storage/' . $r->ent->hm_signature) }}">
+                <img width="70%" style=" " class="text-center "
+                    src="{{ public_path('storage/images/kira-hm.png') }}">
                 <h2 class="text-center" style="line-height: .6rem;font-size: 14px;   margin-bottom: 0px; padding:0px;">
                     HEAD
                     TEACHER</h2>
