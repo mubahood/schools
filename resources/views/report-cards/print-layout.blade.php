@@ -318,8 +318,8 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     </div>
                 </td>
                 <td class=" pl-3 text-center">
-                    <img width="60%" style=" " class="text-center "
-                        src="{{ public_path('storage/' . $r->ent->hm_signature) }}">
+                    <img width="70%" style=" " class="text-center "
+                        src="{{ public_path('storage/images/kira-hm.png') }}">
                     <h2 class="text-center"
                         style="line-height: .6rem;font-size: 14px;   margin-bottom: 0px; padding:0px;">
                         HEAD

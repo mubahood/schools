@@ -189,6 +189,9 @@ class TheologyTermlyReportCard extends Model
 
 
                         $report_item->remarks = Utils::get_automaic_mark_remarks($report_item->total);
+                        if($report_item->total == 0){
+                            $report_item->remarks = 'Missed';
+                        }
 
                         $u = Administrator::find($main_course->subject_teacher);
                         $initial = "";
