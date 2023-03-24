@@ -3,7 +3,9 @@
 namespace App\Admin\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\AcademicClass;
 use App\Models\Account;
+use App\Models\Enterprise;
 use App\Models\MenuItem;
 use App\Models\ReportCard;
 use App\Models\StudentHasClass;
@@ -11,8 +13,11 @@ use App\Models\StudentHasTheologyClass;
 use App\Models\StudentReportCard;
 use App\Models\Subject;
 use App\Models\TermlyReportCard;
+use App\Models\TheologyClass;
+use App\Models\TheologyMark;
 use App\Models\TheologyTermlyReportCard;
 use App\Models\Transaction;
+use App\Models\User;
 use App\Models\Utils;
 use Carbon\Carbon;
 use Dflydev\DotAccessData\Util;
@@ -144,123 +149,92 @@ class HomeController extends Controller
     }
     public function stats(Content $content)
     {
-       /*  $sec = StudentReportCard::find(2528);
-        $theo = $sec->get_theology_report();
-        TheologyTermlyReportCard::grade_report_card($theo);
 
-        dd($theo); */
-      /*   $x = StudentReportCard::find(2392);
-        TermlyReportCard::grade_report_card($x);
-        dd($x); */
-
-       /*
-        set_time_limit(-1);
-        $u = Auth::user();
-        $ent = $u->ent;
-        $classes = [48, 49, 50, 51, 52, 53];
-        $count = 0;
-        set_time_limit(-1); 
-
-        foreach (Administrator::where(['enterprise_id' => 7,'user_type' => 'student'])->limit(100)->get() as $key => $stud) {
-            $count++;
-
-            if($count < 30){
-                continue;
-            }
-          
-            $x = new Administrator();
-            $x->name = $stud->name;
-            $x->mother_name = $stud->name;
-            $x->first_name = $stud->first_name;
-            $x->father_name = $stud->first_name;
-            $x->father_phone = '0772' . rand(100, 900) . rand(100, 900) . rand(100, 900);
-            $x->mother_phone = '0772' . rand(100, 900) . rand(100, 900) . rand(100, 900);
-            $dob = Carbon::now()->subYears(rand(15, 25));
-            $dob = $dob->subMonths(rand(1, 11));
-            $dob = $dob->subDay(rand(1, 28));
-            $x->date_of_birth = $dob;
-            $x->last_name = $stud->last_name;
-            $x->sex = $stud->sex;
-            $x->avatar = $stud->avatar;
-            $x->home_address = $stud->home_address;
-            $x->current_address = $stud->home_address;
-            $x->phone_number_1 = $stud->phone_number_1;
-            $x->emergency_person_name = $stud->emergency_person_name;
-            $x->emergency_person_phone = $stud->emergency_person_phone;
-            $x->email =  $stud->name . rand(100, 1000) . "@gmail.com";
-            $x->nationality =  "Ugandan";
-            $x->languages =  "Swahili,English";
-            $x->enterprise_id = $ent->id;
-           
-            $x->user_type = 'Student';
-            $x->status = 1;
-            $x->email = rand(100,1000).$stud->email;
-            $x->username = rand(100,1000).$stud->email;
-           
-            $x->save();
-
-            shuffle($classes);
-            shuffle($classes);
-            shuffle($classes);
-            shuffle($classes);
-            shuffle($classes);
-            $class = new StudentHasClass();
-            $class->enterprise_id =  $ent->id;
-            $class->administrator_id =  $x->id;
-            $class->academic_class_id =  $classes[rand(0, 4)];
-            $class->save(); 
-            if ($count > 100) {
-                die("done!");
-            }
-            echo $count."<br>";
-        }  
-        /* 
-
-	
-	
-	
-	
-updated_at	
-created_at	
-	
-done_selecting_option_courses	
-	
-
-
-    "" => "+256782117770"
-    "national_id_number" => "-"
-    "passport_number" => "-"
-    "tin" => null
-    "nssf_number" => null
-    "bank_name" => null
-    "bank_account_number" => null
-    "primary_school_name" => null
-    "primary_school_year_graduated" => null
-    "seconday_school_name" => null
-    "seconday_school_year_graduated" => null
-    "high_school_name" => null
-    "high_school_year_graduated" => null
-    "degree_university_name" => null
-    "degree_university_year_graduated" => null
-    "masters_university_name" => null
-    "masters_university_year_graduated" => null
-    "phd_university_name" => null
-    "phd_university_year_graduated" => null
-    "user_type" => "student"
-    "demo_id" => 0
-    "user_id" => "3839865"
-    "user_batch_importer_id" => 16
-    "school_pay_account_id" => "3839865"
-    "school_pay_payment_code" => "1003839865"
-    "given_name" => "Rahman"
-    "deleted_at" => null
-    "marital_status" => null
-    "verification" => 1
-    "current_class_id" => 19
-
-
-*/
         $u = Admin::user();
+        $year = $u->ent->active_academic_year();
+        $classes = TheologyClass::where([
+            'enterprise_id' => $u->enterprise_id,
+            'academic_year_id' => $year->id,
+        ])->get();
+
+        $classes_ids = [];
+        foreach ($classes as $class) {
+            $classes_ids[] = $class->id;
+        }
+
+    
+        $sql = "SELECT * FROM theology_marks WHERE theology_class_id in (13,
+        14,
+        15,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27)";
+        $marks=DB::select($sql);
+        foreach ($marks as $mark) {
+            $hasClass = StudentHasTheologyClass::where([
+                'administrator_id' => $mark->student_id,
+                'theology_class_id' => $mark->theology_class_id,
+            ])->first();
+            if($hasClass == null){
+                TheologyMark::where(['id'=>$mark->id])->delete();
+
+                echo "NOOOO";
+            }else{
+                echo "YESS";
+            } 
+            echo "<hr>";
+        }
+        dd("done");
+        
+        /*
+          +"id": 4876
+  +"created_at": "2023-03-15 23:07:33"
+  +"updated_at": "2023-03-16 21:38:44"
+  +"enterprise_id": 7
+  +"theology_exam_id": 3
+  +"theology_class_id": 13
+  +"theology_subject_id": 49
+  +"student_id": 3057
+  +"teacher_id": 2206
+  +"score": 75.0
+  +"remarks": "Improve"
+  +"is_submitted": 1
+  +"is_missed": 1
+
+        theology_marks */
+
+
+        dd(count($marks));
+        dd($classes_ids);
+
+        set_time_limit(-1);
+        $users = User::where([
+            'enterprise_id' => $u->enterprise_id,
+            'user_type' => 'student',
+            'status' => 1,
+        ])->get();
+
+        foreach ($users as $student) {
+            foreach ($classes as $class) {
+                $has_classes = StudentHasTheologyClass::where([
+                    'theology_class_id' => $class->id,
+                    'administrator_id' => $student->id,
+                ])->get();
+                if (count($has_classes) < 2) {
+                    continue;
+                }
+                echo count($has_classes) . "<hr>";
+            }
+        }
+
+        dd("done");
+
+        dd(count($users));
 
         if (
             $u->isRole('admin') ||
