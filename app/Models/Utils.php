@@ -1620,7 +1620,7 @@ class Utils  extends Model
 
         $data['competance'] = $r->subject->subject_name;
         $data['comment'] = $r->remarks;
-        $data['grade'] = "-"; 
+        $data['grade'] = "-";
         if ($r->subject->course_id == 38) {
             //$data['competance'] = 'L.A 6';
             $data['comment'] = 'Using my language appropriately.';
@@ -1635,11 +1635,20 @@ class Utils  extends Model
             $data['comment'] = 'Taking care of myself for proper growth and development.';
         } else if ($r->subject->course_id == 47) {
             //$data['competance'] = 'L.A 2';
-            $data['comment'] = 'interacting with, exploring knowing and using my enviroment.';
+            $data['comment'] = 'Interacting with, exploring knowing and using my enviroment.';
         } else if ($r->subject->course_id == 46) {
             //$data['competance'] = 'L.A 1';
             $data['comment'] = 'Relating with others in an acceptable way.';
+        } else if ($r->subject->course_id == 43) {
+            //$data['competance'] = 'L.A 1';
+            $data['comment'] = 'Learning to write and writing to learn.';
+        } else if ($r->subject->course_id == 49) {
+            //$data['competance'] = 'L.A 1';
+            $data['comment'] = 'Match, recognise, and write numerals, and developing counting skills.';
+        } else {
+            $data['comment'] = 'Create and share oral, written, and visual texts in English language';
         }
+
 
 
         if ($r->total < 44) {
@@ -1657,7 +1666,6 @@ class Utils  extends Model
     }
     public static function compute_competance_theology($r)
     {
-
 
 
 
@@ -1881,7 +1889,7 @@ class Utils  extends Model
 
     public static   function nurseryComments1($Sex)
     {
-        $Sex2 = ' his/her '; 
+        $Sex2 = ' his/her ';
         return [$Sex . ' performance has greatly improved; ' . $Sex . ' produces attractive work.', 'In all the fundamental subjects, ' . $Sex . ' is performing admirably well.', $Sex . ' is focused and enthusiastic learner with much determination.', $Sex . ' has produced an excellent report ' . $Sex . ' shouldn’t relax.', $Sex . ' performance is very good. He just needs more encouragement.', $Sex . ' is hardworking, determined, co-operative and well disciplined.'];
     }
 
@@ -1894,7 +1902,7 @@ class Utils  extends Model
             $Sex2 = ' her ';
         }
 
-        $Sex2 = ' his/her '; 
+        $Sex2 = ' his/her ';
         return [
             $Sex . ' has a lot of potential and is working hard to realize it.',
             $Sex . ' is a focused and enthusiastic learner with much determination.', $Sex . ' is self-confident and has excellent manners. Thumbs up.', $Sex . ' has done some good work, but it hasn’t been consistent because of ' . $Sex2 . ' frequent relaxation.', $Sex . ' can produce considerably better results. Though ' . $Sex . ' frequently seeks the attention and help from peers.',

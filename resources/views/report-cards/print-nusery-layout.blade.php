@@ -268,14 +268,14 @@ $school_email = 'admin@kjs.com';
     <table class="w-100">
         <tr>
             <td style="width: 80%">
-                <div class="row">
+               {{--  <div class="row">
                     <div class="col-12 p-0">
                         <div class="p-0 mt-0 mb-2 class-teacher">
                             <b>HEAD TEACHER'S COMMENT:</b>
                             <span class="comment">{{ Utils::getClassTeacherComment($r)['hm'] }}</span>
                         </div>
                     </div>
-                </div>
+                </div> --}}
                 <div class="row">
                     <div class="col-12 p-0">
                         <div class="p-0 mt-0 mb-2 class-teacher">
