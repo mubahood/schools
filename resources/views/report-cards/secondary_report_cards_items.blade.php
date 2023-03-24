@@ -4,7 +4,7 @@
 <table>
     <tr>
         <td class="text-center ">
-            <img style="width: 100%;" src="{{ public_path('assets/logo.jpeg') }}">
+            <img style="width: 100%;" src="{{ public_path('assets/charles.jpeg') }}">
         </td>
         <td style="width: 72%;" class="px-3">
             <p class="text-center" style="font-size: 22px"><b>ST. CHARLES VOCATIONAL S.S KASANGA</b></p>
@@ -16,7 +16,8 @@
             {{--          <p class="mt-2 text-center text-sm small"><i>"For Broader Minds"</i></p> --}}
         </td>
         <td class="text-center">
-            <img style="width: 100%;" src="{{ public_path('assets/logo.jpeg') }}">
+            <br>
+            <img style="width: 100%;" src="{{ public_path('assets/mubahood.png') }}">
         </td>
     </tr>
 </table>
@@ -48,78 +49,94 @@
         @foreach ($r->items as $item)
             <?php
             
-            if ($item->subject == null) { 
-                dd("Subject not found");
-                continue; 
+            if ($item->subject == null) {
+                dd('Subject not found');
+                continue;
             }
             ?>
-            {{-- 
-            "created_at" => "2023-03-16 09:17:34"
-            "updated_at" => "2023-03-16 09:17:34"
-            "enterprise_id" => null
-            "academic_year_id" => 6
-            "secondary_subject_id" => 390
-            "secondary_report_card_id" => 100
-            "average_score" => 0.0
-            "generic_skills" => null
-            "remarks" => null
 
-
-
-            "enterprise_id" => 11
-            "academic_class_id" => 48
-            "parent_course_id" => 1
-            "secondary_subject_id" => 57
-            "term_id" => 16
-            "academic_year_id" => 6
-            "score" => 1.7
-            "submitted" => 1
-            "activity_id" => 1
-            "administrator_id" => 3759
-
-
-            "enterprise_id" => null
-            "academic_year_id" => 6
-            "secondary_subject_id" => 390
-            "secondary_report_card_id" => 1
-            "average_score" => 0.0
-            "generic_skills" => null
-            "remarks" => null
-            "teacher" => "secondary admin"
-    --}}
             <tr>
-                <th rowspan="3">{{ $item->subject->subject_name }}</th>
                 <?php
-                $items = $item->subject->items;
-                dd(count($items));
-                ?>
-                <td>
-                    <b>PERSONAL LIFE AND FAMILY:</b>
-                    The Learner narrates experiences,
-                    reads and responds to stories about personal and family life.
-                </td>
-                <td class="text-center"><b>40</b></td>
-                <td rowspan="3">Muhindo is good at speaking English</td>
-                <td rowspan="3">Good</td>
-                <td rowspan="3">M.J</td>
-            </tr>
-            <tr>
-                <td>
-                    <b>PERSONAL LIFE AND FAMILY:</b>
-                    The Learner narrates experiences,
-                    reads and responds to stories about personal and family life.
-                </td>
-                <td class="text-center"><b>40</b></td>
+                $competences = $item->items();
+                $first_competence = $competences[0];
+                $last_competences = array_slice($competences, 1, count($competences));
+                /*
 
-            </tr>
-            <tr>
+                  "id" => 1
+    "created_at" => "2023-03-17 22:34:11"
+    "updated_at" => "2023-03-17 22:34:11"
+    "enterprise_id" => 11
+    "academic_year_id" => 6
+    "secondary_subject_id" => 57
+    "secondary_report_card_id" => 1
+    "average_score" => 0.0
+    "generic_skills" => null
+    "remarks" => null
+    "teacher" => "-"
+
+
+ "id" => 1
+    "created_at" => "2023-03-17 23:09:43"
+    "updated_at" => "2023-03-17 23:10:57"
+    "enterprise_id" => 11
+    "academic_class_id" => 48
+    "parent_course_id" => 1
+    "secondary_subject_id" => 57
+    "term_id" => 16
+    "academic_year_id" => 6 
+    "submitted" => 1
+    "activity_id" => 197
+    "administrator_id" => 3759
+
+    
+    "id" => 197
+    "created_at" => "2023-03-17 23:09:43"
+    "updated_at" => "2023-03-17 23:09:43"
+    "enterprise_id" => 11
+    "academic_year_id" => 6
+    "academic_class_id" => 48
+    "parent_course_id" => 1
+    "term_id" => 16
+    "class_type" => "S.1"
+    "theme" => "English Theme"
+    "topic" => "English Topic 0"
+    "description" => "Some details about this activity go here. Some details about this activity go here. Some details about this activity go here. Some details about this activity g ▶"
+    "max_score" => 3
+    "subject_id" => 57
+    "competance" => App\Models\SecondaryCompetence {#2452 ▶}
+
+*/
+                $seed = str_split('abcdefghijklmnopqrstuvwxyz' . 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'); // and any other characters
+                shuffle($seed); // probably optional since array_is randomized; this may be redundant
+                $rand = '';
+                $isFirst = true; //
+                foreach (array_rand($seed, 2) as $k) {
+                    if (!$isFirst) {
+                        $rand .= '.';
+                    }
+                    $isFirst = false;
+                    $rand .= $seed[$k];
+                }
+                $rand = strtoupper($rand);
+                ?>
+                <th rowspan="{{ count($competences) }}">{{ $item->subject->subject_name }}</th>
                 <td>
-                    <b>PERSONAL LIFE AND FAMILY:</b>
-                    The Learner narrates experiences,
-                    reads and responds to stories about personal and family life.
+                    <b>{{ $first_competence->topic }}:</b> {{ $first_competence->description }}
                 </td>
-                <td class="text-center"><b>40</b></td>
+                <td class="text-center"><b>{{ $first_competence->competance->score }}</b></td>
+                <td rowspan="{{ count($competences) }}">{{ $item->generic_skills }}</td>
+                <td rowspan="{{ count($competences) }}">{{ $item->remarks }}</td>
+                <td rowspan="{{ count($competences) }}">{{ $rand }}</td>
             </tr>
+            @foreach ($last_competences as $competence)
+                <tr>
+                    <td>
+                        <b>{{ $first_competence->topic }}:</b> {{ $first_competence->description }}
+                    </td>
+                    <td class="text-center"><b>{{ $first_competence->competance->score }}</b></td>
+
+                </tr>
+            @endforeach
         @endforeach
     </tbody>
 </table>

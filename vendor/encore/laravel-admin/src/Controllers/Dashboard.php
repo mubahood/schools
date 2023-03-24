@@ -432,13 +432,8 @@ class Dashboard
 
     public static function count_unpaid_fees()
     {
-
-
-        $man = Utils::manifest(Auth::user()->ent);
-
-
-
-
+ 
+        $man = Utils::manifest(Auth::user()->ent); 
         $sub_title =  "To be paid by $man->active_students active students.";
         return view('widgets.box-5', [
             'is_dark' => false,

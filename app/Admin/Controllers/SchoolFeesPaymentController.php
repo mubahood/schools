@@ -63,7 +63,10 @@ class SchoolFeesPaymentController extends AdminController
             ->sortable();
 
 
-        $grid->column('account_id', __('Student Account'))->display(function () {
+        $grid->column('account_id', __('Student Account'))->display(function ($x) {
+            if($this->account == null){
+                return $x;
+            }
             return $this->account->name;
         })->sortable();
 
