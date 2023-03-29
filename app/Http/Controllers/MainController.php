@@ -63,20 +63,15 @@ class MainController extends Controller
 
 
 
-                            echo  $i . '<=== <img src="' . url('storage/images/' . $file) . '" width="300" />';
-                            echo  '<img src="' . url('storage/images/temp_' . $file) . '" width="300" />.<hr>';
+                            echo  $i . '<=== <img src="' . url('storage/images/' . $file) . '" width="300" /><br>';
                             $i++;
                             rename($thumb, $original_file);
 
                             // unlink($thumb);
 
-                            dd("success");
                         } catch (\Throwable $th) {
                             //throw $th;
                         }
-
-                        echo "<br>";
-                        //echo "filename: $file : filetype: " . filetype($dir . $file) . "\n";
                     }
                 }
                 closedir($dh);
