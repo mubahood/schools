@@ -1659,7 +1659,7 @@ class Utils  extends Model
             $data['grade'] = "G";
         } else if ($r->total < 74) {
             $data['grade'] = "V.G";
-        } else if ($r->total < 100) {
+        } else if ($r->total <= 100) {
             $data['grade'] = "E";
         }
         return $data;
@@ -1691,7 +1691,7 @@ class Utils  extends Model
             $data['grade'] = "G";
         } else if ($r->total < 74) {
             $data['grade'] = "V.G";
-        } else if ($r->total < 100) {
+        } else if ($r->total <= 100) {
             $data['grade'] = "E";
         }
         return $data;
@@ -1777,7 +1777,7 @@ class Utils  extends Model
             $comment['theo'] = $theologyComments2[1];
             $comment['teacher'] = $Comment2[1];
             $comment['n'] = $nurseryComments2[1];
-        } elseif ($percentage < 1000) {
+        } elseif ($percentage <= 1000) {
             $comment['theo'] = $theologyComments3[1];
             $comment['teacher'] = $Comment3[2];
             $comment['n'] = $nurseryComments3[1];
@@ -1791,7 +1791,7 @@ class Utils  extends Model
             $comment['hm'] = $hmComment3[2];
         } elseif ($percentage < 80) {
             $comment['hm'] = $hmComment4[2];
-        } elseif ($percentage < 1000) {
+        } elseif ($percentage <= 1000) {
             $comment['hm'] = $hmComment5[2];
         }
 
@@ -2017,7 +2017,7 @@ class Utils  extends Model
             case $number < 21:
                 $string = $dictionary[$number];
                 break;
-            case $number < 100:
+            case $number <= 100:
                 $tens   = ((int) ($number / 10)) * 10;
                 $units  = $number % 10;
                 $string = $dictionary[$tens];
@@ -2025,7 +2025,7 @@ class Utils  extends Model
                     $string .= $hyphen . $dictionary[$units];
                 }
                 break;
-            case $number < 1000:
+            case $number <= 1000:
                 $hundreds  = $number / 100;
                 $remainder = $number % 100;
                 $string = $dictionary[$hundreds] . ' ' . $dictionary[100];
@@ -2039,7 +2039,7 @@ class Utils  extends Model
                 $remainder = $number % $baseUnit;
                 $string = Self::convert_number_to_words($numBaseUnits) . ' ' . $dictionary[$baseUnit];
                 if ($remainder) {
-                    $string .= $remainder < 100 ? $conjunction : $separator;
+                    $string .= $remainder <= 100 ? $conjunction : $separator;
                     $string .= Self::convert_number_to_words($remainder);
                 }
                 break;

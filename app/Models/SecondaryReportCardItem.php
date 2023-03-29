@@ -38,6 +38,9 @@ class SecondaryReportCardItem extends Model
         return $this->belongsTo(SecondaryReportCard::class, 'secondary_report_card_id');
     }
 
+    public function getItemsAttribute(){
+        return $this->hasMany();
+    }
     public function items()
     {
 

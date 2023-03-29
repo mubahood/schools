@@ -184,7 +184,7 @@ $school_email = 'admin@kjs.com';
                                 
                                 ?>
                                 <tr class="marks-1">
-                                    <th style="font-size: 10px;">{{ $_v['competance'] }} {{ $v->course_id }}</th>
+                                    <th style="font-size: 10px;"> <b>{{$v->id}}</b> {{ $_v['competance'] }} {{ $v->course_id }}</th>
                                     <td>{{ $_v['comment'] }}</td>
                                     <td class="remarks text-center"><b>{{ $_v['grade'] }}</b></td>
                                     {{--  <td class="remarks text-center">{{ $v->initials }}</td> --}}

@@ -17,7 +17,7 @@ class PrintController2 extends Controller
 
         $pdf = App::make('dompdf.wrapper');
         $data = [
-            SecondaryReportCard::find(1)
+            SecondaryReportCard::find(100)
         ];
         $pdf->loadHTML(view('report-cards/secondary_report_cards', [
             'data' => $data,
