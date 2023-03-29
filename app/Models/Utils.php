@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Str;
+use Zebra_Image;
 
 define('STATUS_NOT_ACTIVE', 0);
 define('STATUS_ACTIVE', 1);
@@ -387,6 +388,48 @@ class Utils  extends Model
         }
     }
 
+    public static function create_thumbnail($file_path)
+    {
+        if (!file_exists($file_path)) {
+            return null;
+        }
+
+        $ext = pathinfo($file_path, PATHINFO_EXTENSION);
+        if ($ext == null) {
+            return null;
+        }
+        $ext = strtolower($ext);
+
+        if (!in_array($ext, [
+            'jpg',
+            'jpeg',
+            'png',
+            'gif',
+        ])) {
+            return null;
+        }
+        $file_name_1 = basename($file_path);
+        $file_name_2 = 'temp_' . $file_name_1;
+
+
+        $image = new Zebra_Image();
+        $image->handle_exif_orientation_tag = false;
+        $image->preserve_aspect_ratio = true;
+        $image->enlarge_smaller_images = true;
+        $image->preserve_time = true;
+        $image->jpeg_quality = 80;
+
+        $file_path_2 = str_replace($file_name_1, $file_name_2, $file_path);
+
+
+        $image->auto_handle_exif_orientation = true;
+        $image->source_path =  $file_path;
+        $image->target_path =  $file_path_2;
+        if (!$image->resize(413, 531, ZEBRA_IMAGE_CROP_CENTER)) {
+            return null;
+        }
+        return $file_path_2;
+    }
     public static function create_make_parents($u)
     {
         $users = Administrator::where([

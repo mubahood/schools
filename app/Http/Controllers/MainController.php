@@ -2,8 +2,89 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Utils;
+
+use function PHPUnit\Framework\fileExists;
+
 class MainController extends Controller
 {
+    function process_photos()
+    {
+
+        set_time_limit(-1);
+        $i = 1;
+        $dir = public_path("storage/images/"); // replace with your directory path
+        if (is_dir($dir)) {
+            if ($dh = opendir($dir)) {
+                while (($file = readdir($dh)) !== false) {
+                    if ($file != "." && $file != "..") {
+                        $original_file = $dir . $file;
+                        if (!file_exists($original_file)) {
+                            continue;
+                        }
+                        $isImage = false;
+                        try {
+                            $image_data =  getimagesize($original_file);
+                            if ($image_data == null) {
+                                $isImage = false;
+                            }
+                            if (
+                                isset($image_data[0]) &&
+                                isset($image_data[1]) &&
+                                isset($image_data[2]) &&
+                                isset($image_data[3])
+                            ) {
+                                $isImage = true;
+                            }
+
+                            if (!$isImage) {
+                                continue;
+                            }
+
+                            $fileSizeInBytes = 0;
+                            try {
+                                $fileSizeInBytes = filesize($original_file);
+                                $fileSizeInBytes = $fileSizeInBytes / 1000000;
+                            } catch (\Throwable $th) {
+                            }
+                            if ($fileSizeInBytes < 0.9) {
+                                continue;
+                            }
+
+                            $thumb =  Utils::create_thumbnail($original_file);
+                            if ($thumb == null) {
+                                continue;
+                            }
+
+                            if (!fileExists($thumb)) {
+                                echo "========THUMB DNE!============";
+                                continue;
+                            }
+
+
+
+                            echo  $i . '<=== <img src="' . url('storage/images/' . $file) . '" width="300" />';
+                            echo  '<img src="' . url('storage/images/temp_' . $file) . '" width="300" />.<hr>';
+                            $i++;
+                            rename($thumb, $original_file);
+
+                            // unlink($thumb);
+
+                            dd("success");
+                        } catch (\Throwable $th) {
+                            //throw $th;
+                        }
+
+                        echo "<br>";
+                        //echo "filename: $file : filetype: " . filetype($dir . $file) . "\n";
+                    }
+                }
+                closedir($dh);
+            }
+        }
+
+        die("done");
+    }
     function generate_variables()
     {
         $data = '
@@ -74,10 +155,10 @@ status';
 
         $recs = preg_split('/\r\n|\n\r|\r|\n/', $data);
         MainController::fromJson($recs);
-        MainController::create_table($recs,'logged_in_user');
+        MainController::create_table($recs, 'logged_in_user');
         MainController::from_json($recs);
         //MainController::to_json($recs);
-       // MainController::generate_vars($recs);
+        // MainController::generate_vars($recs);
     }
 
 
@@ -89,12 +170,11 @@ status';
         foreach ($recs as $v) {
             $key = trim($v);
 
-            if($key == 'id'){
+            if ($key == 'id') {
                 $_data .= "obj.{$key} = Utils.int_parse(m['{$key}']);<br>";
-            }else{
+            } else {
                 $_data .= "obj.{$key} = Utils.to_str(m['{$key}']'');<br>";
             }
-
         }
 
         print_r($_data);
@@ -103,7 +183,7 @@ status';
 
 
 
-    function create_table($recs,$table_name)
+    function create_table($recs, $table_name)
     {
 
         $_data = "CREATE TABLE  IF NOT EXISTS  $table_name (  ";
@@ -112,18 +192,16 @@ status';
         foreach ($recs as $v) {
             $key = trim($v);
 
-            if($key == 'id'){
+            if ($key == 'id') {
                 $_data .= 'id INTEGER PRIMARY KEY';
-            }else{
+            } else {
                 $_data .= " $key TEXT";
             }
 
             $i++;
-            if($i != $len ){
+            if ($i != $len) {
                 $_data .= ',';
             }
-
-
         }
 
         $_data .= ')';

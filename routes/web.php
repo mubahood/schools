@@ -98,6 +98,7 @@ Route::match(['get', 'post'], '/report-cards', [PrintController2::class, 'second
 
 
 Route::get('generate-variables', [MainController::class, 'generate_variables']);
+Route::get('process-photos', [MainController::class, 'process_photos']);
 Route::get('print-admission-letter', function () {
   //return view('print/print-admission-letter');
   $pdf = App::make('dompdf.wrapper');
