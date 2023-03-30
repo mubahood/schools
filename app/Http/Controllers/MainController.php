@@ -22,7 +22,7 @@ class MainController extends Controller
 
 
         $array = Excel::toArray([], $file_path);
-        set_time_limit(-1); 
+        set_time_limit(-1);
         $i = 0;
         $enterprise_id = 13;
         $ent = Enterprise::find($enterprise_id);
@@ -74,6 +74,8 @@ class MainController extends Controller
                 $user = new Administrator();
                 $user->school_pay_payment_code = $school_pay;
                 $user->school_pay_account_id = $school_pay;
+            } else {
+                continue; 
             }
 
             $user->first_name     = $v[1];
@@ -85,7 +87,7 @@ class MainController extends Controller
             $user->status =  2;
             $user->password =  password_hash('4321', PASSWORD_DEFAULT);
             $user->save();
-             
+
             $class = strtolower($v[3]);
             $hasClass = new StudentHasClass();
             $hasClass->academic_year_id = $ay->id;
@@ -153,7 +155,7 @@ class MainController extends Controller
                 'arch6',
             ])) {
                 $user->status =  0;
-                $user->save(); 
+                $user->save();
                 //$hasClass->academic_class_id = 83;
             } else {
 
@@ -165,7 +167,7 @@ class MainController extends Controller
                 //throw $th;
             }
             $i++;
-            echo  $i. ". $user->name <br>";
+            echo  $i . ". $user->name <br>";
         }
 
 
