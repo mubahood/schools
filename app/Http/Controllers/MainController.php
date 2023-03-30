@@ -14,6 +14,7 @@ class MainController extends Controller
 {
     function student_data_import()
     {
+        die("staring...");
         $file_path = public_path("storage/files/lukman-ps-students.xlsx");
         if (!file_exists($file_path)) {
             die("dne");
