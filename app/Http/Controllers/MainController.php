@@ -2,12 +2,176 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Enterprise;
+use App\Models\StudentHasClass;
 use App\Models\Utils;
+use Encore\Admin\Auth\Database\Administrator;
+use Excel;
 
 use function PHPUnit\Framework\fileExists;
 
 class MainController extends Controller
 {
+    function student_data_import()
+    {
+        $file_path = public_path("storage/files/lukman-ps-students.xlsx");
+        if (!file_exists($file_path)) {
+            die("dne");
+        }
+
+
+
+        $array = Excel::toArray([], $file_path);
+        set_time_limit(-1); 
+        $i = 0;
+        $enterprise_id = 13;
+        $ent = Enterprise::find($enterprise_id);
+
+        $ay = $ent->active_academic_year();
+        $_duplicates = '';
+        $update_count = 0;
+        $import_count = 0;
+        $is_first = true;
+        $classes = [];
+        $i = 0;
+        foreach ($array[0] as $key => $v) {
+            if ($is_first) {
+                $is_first = false;
+                continue;
+            }
+
+            if (
+                !isset($v[0]) ||
+                !isset($v[1]) ||
+                !isset($v[2]) ||
+                !isset($v[3]) ||
+                $v[0] == null ||
+                $v[1] == null ||
+                $v[2] == null ||
+                $v[3] == null ||
+                strlen($v[0]) < 3 ||
+                strlen($v[1]) < 3 ||
+                strlen($v[2]) < 3 ||
+                strlen($v[3]) < 3
+            ) {
+                die("failed");
+            }
+
+            $school_pay = $v[0];
+
+            $user = Administrator::where([
+                'school_pay_payment_code' => $school_pay,
+                'enterprise_id' => $ent->id,
+            ])->first();
+
+            if ($user == null) {
+                $user = Administrator::where([
+                    'school_pay_account_id' => $school_pay,
+                    'enterprise_id' => $ent->id,
+                ])->first();
+            }
+            if ($user == null) {
+                $user = new Administrator();
+                $user->school_pay_payment_code = $school_pay;
+                $user->school_pay_account_id = $school_pay;
+            }
+
+            $user->first_name     = $v[1];
+            $user->last_name     = $v[2];
+            $user->name =  $user->first_name . " " . $user->last_name;
+            $user->enterprise_id =  $ent->id;
+            $user->username =  $school_pay;
+            $user->user_type =  'student';
+            $user->status =  2;
+            $user->password =  password_hash('4321', PASSWORD_DEFAULT);
+            $user->save();
+             
+            $class = strtolower($v[3]);
+            $hasClass = new StudentHasClass();
+            $hasClass->academic_year_id = $ay->id;
+            $hasClass->administrator_id = $user->id;
+            $hasClass->enterprise_id = $ent->id;
+
+            if (in_array($class, [
+                'p1b',
+                'p1 g'
+            ])) {
+                $hasClass->academic_class_id = 84;
+            } elseif (in_array($class, [
+                'p2r',
+                'p2g',
+                'p2b'
+            ])) {
+
+                $hasClass->academic_class_id = 85;
+            } elseif (in_array($class, [
+                'p3g',
+                'p3b',
+                'p3r'
+            ])) {
+
+                $hasClass->academic_class_id = 86;
+            } elseif (in_array($class, [
+                'p4 g',
+                'p4r',
+                'p4b'
+            ])) {
+                $hasClass->academic_class_id = 87;
+            } elseif (in_array($class, [
+                'p5r',
+                'p5g',
+                'p5b',
+                'p5 o',
+                'p4 o',
+            ])) {
+                $hasClass->academic_class_id = 88;
+            } elseif (in_array($class, [
+                'p6b',
+                'p6g',
+                'p6o',
+                'p6 r',
+            ])) {
+                $hasClass->academic_class_id = 90;
+            } elseif (in_array($class, [
+                'p7 b',
+                'p.7o',
+                'p7 r',
+                'p7 g',
+            ])) {
+                $hasClass->academic_class_id = 89;
+            } elseif (in_array($class, [
+                'arch9',
+                'arch9',
+                'arch7',
+                'arch666',
+                'arch88',
+                'arch555',
+                'arch99',
+                'arch4',
+                'arch5',
+                'arch8',
+                'arch6',
+            ])) {
+                $user->status =  0;
+                $user->save(); 
+                //$hasClass->academic_class_id = 83;
+            } else {
+
+                die("not found! $class");
+            }
+            try {
+                $hasClass->save();
+            } catch (\Throwable $th) {
+                //throw $th;
+            }
+            $i++;
+            echo  $i. ". $user->name <br>";
+        }
+
+
+
+        dd('good');
+    }
     function process_photos()
     {
 

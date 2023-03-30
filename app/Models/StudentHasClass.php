@@ -22,7 +22,7 @@ class StudentHasClass extends Model
         self::creating(function ($m) {
             $_m = AcademicClass::find($m->academic_class_id);
             if ($_m == null) {
-                die("Academic not found.");
+                throw new Exception("Academic class not found.", 1); 
             }
 
             $m->academic_year_id = $_m->academic_year_id;
