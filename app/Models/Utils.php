@@ -425,7 +425,8 @@ class Utils  extends Model
         $image->auto_handle_exif_orientation = true;
         $image->source_path =  $file_path;
         $image->target_path =  $file_path_2;
-        if (!$image->resize(413, 531, ZEBRA_IMAGE_CROP_CENTER)) {
+        //if (!$image->resize(413, 531, ZEBRA_IMAGE_CROP_CENTER)) {
+        if (!$image->resize(0, 0, ZEBRA_IMAGE_CROP_CENTER)) {
             return null;
         }
         return $file_path_2;
