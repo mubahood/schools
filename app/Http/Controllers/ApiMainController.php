@@ -211,12 +211,6 @@ class ApiMainController extends Controller
     {
         $u = auth('api')->user();
         $students = [];
-
-
-        die("done"); 
-
-
-
         foreach (Administrator::where([
             'enterprise_id' => $u->enterprise_id,
             'user_type' => 'student',
@@ -249,7 +243,6 @@ class ApiMainController extends Controller
             }
             $students[] = $d;
         }
-
         return $this->success($students, $message = "Success", 200);
     }
     public function exams_list()
