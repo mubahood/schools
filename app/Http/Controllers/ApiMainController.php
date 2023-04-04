@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\AcademicClass;
 use App\Models\Mark;
 use App\Models\Participant;
 use App\Models\Session;
+use App\Models\StudentHasClass;
 use App\Models\User;
 use App\Models\Utils;
 use App\Traits\ApiResponser;
@@ -203,6 +205,46 @@ class ApiMainController extends Controller
             $msg = 'failed';
         }
         return $this->success(null, $msg = $msg, 200);
+    }
+    public function student_verification()
+    {
+        $u = auth('api')->user();
+        $students = [];
+
+        foreach (Administrator::where([
+            'enterprise_id' => $u->enterprise_id,
+            'user_type' => 'student',
+        ])->limit(10000)->orderBy('id', 'desc')->get() as $key => $s) {
+
+            $d['id'] = $s->id;
+            $d['name'] = $s->name;
+            $d['avatar'] = $s->avatar;
+            $d['sex'] = $s->sex;
+            $d['status'] = $s->status;
+            $d['current_class_id'] = $s->current_class_id;
+            $d['student_has_class_id'] = "";
+            $d['stream_id'] = "";
+            $d['current_class_text'] = "";
+
+            $hasClass = StudentHasClass::where([
+                'academic_class_id' => $s->current_class_id,
+                'administrator_id' => $s->id,
+            ])->first();
+            if ($hasClass != null) {
+                $d['student_has_class_id'] = $hasClass->id;
+                $d['stream_id'] = $hasClass->stream_id;
+
+                $class = AcademicClass::find($s->current_class_id);
+                if ($class != null) {
+                    $d['current_class_text'] = $class->short_name;
+                }
+            } else {
+                $d['current_class_id'] = null;
+            }
+            $students[] = $d;
+        }
+
+        return $this->success($students, $message = "Success", 200);
     }
     public function exams_list()
     {
