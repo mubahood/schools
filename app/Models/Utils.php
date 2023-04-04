@@ -341,6 +341,8 @@ class Utils  extends Model
         Utils::prepare_session_participations($u);
         Utils::prepare_pending_things($u);
 
+
+
         $subs = Exam::where('marks_generated', '!=', true)->get();
         foreach ($subs as $m) {
             Exam::my_update($m);
@@ -352,6 +354,26 @@ class Utils  extends Model
         }
 
         Utils::financial_accounts_creation();
+
+        set_time_limit(-1);
+        foreach (Account::where(
+            'name',
+            'like',
+            '%  %',
+        )->get() as $x) {
+            $x->name = str_replace('   ', ' ', $x->name);
+            $x->name = str_replace('  ', ' ', $x->name);
+            $x->save();
+        }
+        foreach (Administrator::where(
+            'name',
+            'like',
+            '%  %',
+        )->get() as $x) {
+            $x->name = str_replace('   ', ' ', $x->name);
+            $x->name = str_replace('  ', ' ', $x->name);
+            $x->save();
+        }
     }
 
     public static function create_secondary_school_subjects($u)

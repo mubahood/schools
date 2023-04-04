@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\AcademicClass;
+use App\Models\Account;
 use App\Models\Mark;
 use App\Models\Participant;
 use App\Models\Session;
@@ -211,20 +212,7 @@ class ApiMainController extends Controller
         $u = auth('api')->user();
         $students = [];
 
-        set_time_limit(-1);
-        $count = 1;
-        $users = Administrator::where(
-            'name',
-            'like',
-            '%  %',
-        )->get();
-        //die(count($users) . ""); 
-        foreach ($users as $x) { 
-            $x->name = str_replace('   ', ' ', $x->name);
-            $x->name = str_replace('  ', ' ', $x->name);
-            $x->save();
-        }
-        die(count($users) . "");  
+
         die("done"); 
 
 
