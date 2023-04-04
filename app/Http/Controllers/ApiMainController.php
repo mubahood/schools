@@ -220,14 +220,9 @@ class ApiMainController extends Controller
         )->get();
         //die(count($users) . ""); 
         foreach ($users as $x) { 
-            echo strlen($x->name)."<=>";
             $x->name = str_replace('   ', ' ', $x->name);
             $x->name = str_replace('  ', ' ', $x->name);
             $x->save();
-            $count++;
-            if($count>100){
-                break;
-            }
         }
         die(count($users) . "");  
         die("done"); 
