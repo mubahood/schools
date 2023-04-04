@@ -211,6 +211,29 @@ class ApiMainController extends Controller
         $u = auth('api')->user();
         $students = [];
 
+        set_time_limit(-1);
+        $count = 1;
+        $users = Administrator::where(
+            'name',
+            'like',
+            '%  %',
+        )->get();
+        //die(count($users) . ""); 
+        foreach ($users as $x) { 
+            echo strlen($x->name)."<=>";
+            $x->name = str_replace('   ', ' ', $x->name);
+            $x->name = str_replace('  ', ' ', $x->name);
+            $x->save();
+            $count++;
+            if($count>100){
+                break;
+            }
+        }
+        die(count($users) . "");  
+        die("done"); 
+
+
+
         foreach (Administrator::where([
             'enterprise_id' => $u->enterprise_id,
             'user_type' => 'student',

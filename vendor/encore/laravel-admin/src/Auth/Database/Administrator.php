@@ -205,15 +205,20 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
             }
 
 
-            $_name = $model->first_name . " " . $model->given_name . " " . $model->last_name;
+            //$_name = $model->first_name . " " . $model->given_name . " " . $model->last_name;
+            $_name = "";
+            if (($model->first_name != null) && strlen($model->first_name) > 2) {
+                $_name = $model->first_name;
+            }
+            if (($model->given_name != null) && strlen($model->given_name) > 2) {
+                $_name .= " " . $model->given_name;
+            }
+            if (($model->last_name != null) && strlen($model->last_name) > 2) {
+                $_name .= " " . $model->last_name;
+            }
 
-            if (
-                $model->name == null ||
-                strlen($model->name) < 3
-            ) {
-                if (strlen(trim($_name)) > 2) {
-                    $model->name =  $_name;
-                }
+            if (strlen(trim($_name)) > 2) {
+                $model->name =  $_name;
             }
 
             $model->name = str_replace('   ', ' ', $model->name);
@@ -343,10 +348,23 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                 }
             }
 
-            $_name = $model->first_name . " " . $model->given_name . " " . $model->last_name;
-            if (strlen(trim($_name)) > 1) {
+            $_name = "";
+            if (($model->first_name != null) && strlen($model->first_name) > 2) {
+                $_name = $model->first_name;
+            }
+            if (($model->given_name != null) && strlen($model->given_name) > 2) {
+                $_name .= " " . $model->given_name;
+            }
+            if (($model->last_name != null) && strlen($model->last_name) > 2) {
+                $_name .= " " . $model->last_name;
+            }
+
+            if (strlen(trim($_name)) > 2) {
                 $model->name =  $_name;
             }
+
+            $model->name = str_replace('   ', ' ', $model->name);
+            $model->name = str_replace('  ', ' ', $model->name);
             return $model;
         });
 
