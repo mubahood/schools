@@ -110,7 +110,7 @@ class ApiMainController extends Controller
             if ($hasClass == null) {
                 $hasClass = new StudentHasClass();
                 $hasClass->administrator_id = $id;
-                $hasClass->academic_year_id = $class->id;
+                $hasClass->academic_class_id = $class->id;
                 $hasClass->enterprise_id = $class->enterprise_id;
             }
 
