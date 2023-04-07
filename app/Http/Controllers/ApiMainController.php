@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\AcademicClass;
+use App\Models\AcademicClassSctream;
 use App\Models\Account;
 use App\Models\Mark;
 use App\Models\Participant;
@@ -225,6 +226,7 @@ class ApiMainController extends Controller
             $d['student_has_class_id'] = "";
             $d['stream_id'] = "";
             $d['current_class_text'] = "";
+            $d['current_stream_text'] = "";
 
             $hasClass = StudentHasClass::where([
                 'academic_class_id' => $s->current_class_id,
@@ -237,6 +239,10 @@ class ApiMainController extends Controller
                 $class = AcademicClass::find($s->current_class_id);
                 if ($class != null) {
                     $d['current_class_text'] = $class->short_name;
+                    $stream = AcademicClassSctream::find($class->stream_id);
+                    if ($stream != null) {
+                        $d['current_stream_text'] = $stream->short_name;
+                    }
                 }
             } else {
                 $d['current_class_id'] = null;

@@ -58,6 +58,14 @@ class AcademicClassController extends AdminController
             return $this->class_teacher->name;
         });
 
+        
+
+        $grid->actions(function ($x)
+        {
+            $x->disableDelete();
+            $x->disableView();
+        });
+        
         $grid->column('details', __('Details'))->hide();
         $grid->column('streams', __('Streams'))->display(function ($ay) {
             return $this->academic_class_sctreams->count();

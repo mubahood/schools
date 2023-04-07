@@ -79,6 +79,7 @@ Route::group([
     $router->resource('secondary-termly-report-cards', SecondaryTermlyReportCardController::class);
     $router->resource('secondary-report-cards', SecondaryReportCardController::class); 
     $router->resource('secondary-report-card-items', SecondaryReportCardItemController::class); 
+    $router->resource('streams', AcademicClassSctreamController::class); 
 
     //$router->resource('fees', StudentHasFeeController::class);
 
