@@ -28,7 +28,8 @@ class AcademicClassSctreamController extends AdminController
         $grid = new Grid(new AcademicClassSctream());
         $grid->disableBatchActions();
         $grid->model()->where([
-            /*             'enterprise_id' => Admin::user()->enterprise_id, */])
+            'enterprise_id' => Admin::user()->enterprise_id,
+        ])
             ->orderBY('id', 'desc');
 
 
@@ -37,17 +38,16 @@ class AcademicClassSctreamController extends AdminController
                 if ($this->academic_class->name == null) {
                     return $x;
                 }
-                return $this->academic_class->short_name." - ".$this->academic_class->name_text;
+                return $this->academic_class->short_name . " - " . $this->academic_class->name_text;
             })
             ->sortable();
 
-            $grid->disableCreateButton();
-            $grid->disableActions();
-            $grid->actions(function ($x)
-            {
-                $x->disableDelete();
-                $x->disableView();
-            });
+        $grid->disableCreateButton();
+        $grid->disableActions();
+        $grid->actions(function ($x) {
+            $x->disableDelete();
+            $x->disableView();
+        });
         $grid->column('name', __('Stream'))->sortable();
 
         return $grid;

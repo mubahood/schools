@@ -111,6 +111,16 @@ class ApiMainController extends Controller
         return $this->success($u->get_my_classes(), $message = "Success", 200);
     }
 
+    public function streams()
+    {
+        $u = auth('api')->user();
+        $data = AcademicClassSctream::where([
+            'enterprise_id' => $u->enterprise_id,
+        ])->limit(10000)->orderBy('id', 'desc')->get();
+
+        return $this->success($data, $message = "Success", 200);
+    }
+
     public function session_create(Request $r)
     {
 
