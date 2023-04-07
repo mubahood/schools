@@ -73,6 +73,65 @@ class ApiMainController extends Controller
     }
 
 
+
+    public function verify_student($id, Request $r)
+    {
+
+
+        $acc = Administrator::find($id);
+        if ($acc == null) {
+            return $this->error('Account not found.');
+        }
+        if ($r->sex == null) {
+            return $this->error('Sex is required.');
+        }
+        if ($r->status == null) {
+            return $this->error('Status is required.');
+        }
+
+        if ($r->status == '1') {
+            if ($r->current_class_id == null) {
+                return $this->error('Class is required.');
+            }
+            $class = AcademicClass::find($r->current_class_id);
+            if ($class == null) {
+                return $this->error('Class not found.');
+            }
+
+            $stream = AcademicClassSctream::find($r->stream_id);
+            if ($class == null) {
+                return $this->error('Stream not found.');
+            }
+
+            $hasClass = StudentHasClass::where([
+                'administrator_id' => $id,
+                'academic_class_id' => $class->id,
+            ])->first();
+            if ($hasClass == null) {
+                $hasClass = new StudentHasClass();
+                $hasClass->administrator_id = $id;
+                $hasClass->academic_year_id = $class->id;
+                $hasClass->enterprise_id = $class->enterprise_id;
+            }
+
+            $hasClass->stream_id = $stream->id;
+            $hasClass->save();
+        }
+
+        $acc->sex = $r->sex;
+        $acc->status = $r->status;
+        $acc->save();
+
+        try {
+            $acc->save();
+        } catch (Throwable $t) {
+            return $this->error($t);
+        }
+
+        return $this->success(null, $message = "Success", 200);
+    }
+
+
     public function update_bio($id, Request $r)
     {
 
