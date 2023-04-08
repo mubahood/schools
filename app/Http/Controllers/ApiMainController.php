@@ -211,7 +211,6 @@ class ApiMainController extends Controller
         $session->term_id = $u->ent->active_term()->id;
         $session->save();
 
-
         $present = [];
         try {
             $present = json_decode($r['present']);
@@ -221,8 +220,8 @@ class ApiMainController extends Controller
 
         $m = $session;
 
-        $cands = $m->getCandidates($r->stream_id);
-        foreach ($m->getCandidates() as $key =>  $candidate) {
+        $cands = $m->getCandidates($r->stream_id); 
+        foreach ($cands as $key =>  $candidate) {
             $p = new Participant();
             $p->enterprise_id = $m->enterprise_id;
             $p->administrator_id = $key;
@@ -239,7 +238,6 @@ class ApiMainController extends Controller
             } else {
                 $p->is_present = 0;
             }
-
             $p->save();
         }
 
