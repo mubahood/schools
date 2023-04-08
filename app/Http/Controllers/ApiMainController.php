@@ -203,7 +203,7 @@ class ApiMainController extends Controller
         $session->service_id = $r->service_id;
         $session->type = $r->type;
         $session->title = $r->title;
-        $session->is_open = 1;
+        $session->is_open = 0;
         $session->prepared = 1;
         $session->administrator_id = $u->id;
         $session->due_date = Carbon::parse($r->due_date);
@@ -222,7 +222,6 @@ class ApiMainController extends Controller
         $m = $session;
 
         $cands = $m->getCandidates($r->stream_id);
-        die(count($cands)." =. ");
         foreach ($m->getCandidates() as $key =>  $candidate) {
             $p = new Participant();
             $p->enterprise_id = $m->enterprise_id;
