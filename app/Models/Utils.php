@@ -456,7 +456,7 @@ class Utils  extends Model
     }
     public static function create_streams($u)
     {
-        $users = Administrator::where([
+        $users = Administrator::where([ 
             'stream_id' => NULL,
             'user_type' => 'student',
         ])->get();
