@@ -364,6 +364,8 @@ php artisan make:migration add_enterprise_id_to_promotionss --table=promotions
 php artisan make:migration add_due_term_to_service_subscriptions --table=service_subscriptions
 php artisan make:migration add_due_term_to_bursary_beneficiaries_1 --table=bursary_beneficiaries
 php artisan make:migration add_signatures_enterprises --table=enterprises
+php artisan make:migration add_stream_id --table=enterprises
+php artisan make:migration add_stream_id --table=sessions
 
 git add --all
 git commit -am "Your commit message"
