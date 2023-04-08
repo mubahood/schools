@@ -22,7 +22,7 @@ class StudentHasClass extends Model
         self::creating(function ($m) {
             $_m = AcademicClass::find($m->academic_class_id);
             if ($_m == null) {
-                throw new Exception("Academic class not found.", 1); 
+                throw new Exception("Academic class not found.", 1);
             }
 
             $m->academic_year_id = $_m->academic_year_id;
@@ -64,6 +64,11 @@ class StudentHasClass extends Model
                     AcademicClass::update_fees($m->academic_class_id);
                 }
             }
+            $u =    Administrator::find($m->administrator_id);
+            if ($u != null) {
+                $u->stream_id = $m->stream_id;
+                $u->save();
+            }
         });
 
         self::updated(function ($m) {
@@ -79,6 +84,12 @@ class StudentHasClass extends Model
                     AcademicClass::update_fees($m->academic_class_id);
                 }
             }
+
+            $u = Administrator::find($m->administrator_id);
+            if ($u != null) {
+                $u->stream_id = $m->stream_id;
+                $u->save();
+            } 
         });
     }
 

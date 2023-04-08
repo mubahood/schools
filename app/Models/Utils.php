@@ -335,6 +335,7 @@ class Utils  extends Model
             return;
         }
 
+        Utils::create_streams($u);
         Utils::create_make_parents($u);
         Utils::create_documents($u);
         Utils::create_secondary_school_subjects($u);
@@ -452,6 +453,33 @@ class Utils  extends Model
             return null;
         }
         return $file_path_2;
+    }
+    public static function create_streams($u)
+    {
+        $users = Administrator::where([
+            'stream_id' => NULL,
+            'user_type' => 'student',
+        ])->get();
+        $x = 0;
+        if ($users->count() > 0) {
+            set_time_limit(-1); 
+            foreach ($users as $key => $v) {
+                $v->stream_id = 0;
+                $hasClass = StudentHasClass::where([
+                    'academic_class_id' => $v->current_class_id,
+                    'administrator_id' => $v->id,
+                ])->first();
+                if ($hasClass != null) {
+                    if ($hasClass->stream_id != null) {
+                        $v->stream_id = $hasClass->stream_id;
+                    }
+                }
+                $x++;
+                echo $x."<br>"; 
+                $v->save();
+            }
+            dd(count($users));
+        }
     }
     public static function create_make_parents($u)
     {

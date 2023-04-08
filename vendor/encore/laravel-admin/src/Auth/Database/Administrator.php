@@ -3,6 +3,7 @@
 namespace Encore\Admin\Auth\Database;
 
 use App\Models\AcademicClass;
+use App\Models\AcademicClassSctream;
 use App\Models\AcademicYear;
 use App\Models\Account;
 use App\Models\AdminRole;
@@ -434,15 +435,14 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
      */
 
 
-
-
-
-
-
-
     public function current_class()
     {
         return $this->belongsTo(AcademicClass::class, 'current_class_id');
+    }
+
+    public function stream()
+    {
+        return $this->belongsTo(AcademicClassSctream::class, 'stream_id');
     }
 
     public function current_theology_class()

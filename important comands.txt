@@ -366,6 +366,7 @@ php artisan make:migration add_due_term_to_bursary_beneficiaries_1 --table=bursa
 php artisan make:migration add_signatures_enterprises --table=enterprises
 php artisan make:migration add_stream_id --table=enterprises
 php artisan make:migration add_stream_id --table=sessions
+php artisan make:migration add_stream_id_to_admin_users --table=admin_users
 
 git add --all
 git commit -am "Your commit message"
