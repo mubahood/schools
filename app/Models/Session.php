@@ -134,7 +134,7 @@ class Session extends Model
 
 
 
-    function getCandidates()
+    function getCandidates($stream_id = 0)
     {
         $m = $this;
         $candidates = [];
@@ -143,6 +143,11 @@ class Session extends Model
                 $class = AcademicClass::find($m->academic_class_id);
                 if ($class != null) {
                     foreach ($class->students as $student) {
+                        if ($stream_id != 0) {
+                            if ($student->stream_id != $stream_id) {
+                                continue;
+                            }
+                        }
                         $candidates[$student->administrator_id] = $student->student->name;
                     }
                 }

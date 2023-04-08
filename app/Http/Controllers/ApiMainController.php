@@ -183,16 +183,16 @@ class ApiMainController extends Controller
     public function session_create(Request $r)
     {
 
-
-
         if (
             $r->due_date == null ||
             $r->type == null ||
+            $r->stream_id == null ||
             $r->present == null
 
         ) {
             return $this->error('Some params are missing.');
         }
+
         $u = auth('api')->user();
 
 
@@ -221,6 +221,8 @@ class ApiMainController extends Controller
 
         $m = $session;
 
+        $cands = $m->getCandidates($r->stream_id);
+        die(count($cands)." =. ");
         foreach ($m->getCandidates() as $key =>  $candidate) {
             $p = new Participant();
             $p->enterprise_id = $m->enterprise_id;

@@ -17,7 +17,9 @@ use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
+use Exception;
 use GuzzleHttp\Psr7\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Request as FacadesRequest;
 
@@ -39,6 +41,21 @@ class StudentHasClassController extends AdminController
     {
 
 
+        $enterprise_id = 8;
+        $users = StudentHasClass::where([
+            'enterprise_id' => $enterprise_id
+        ])->get();
+
+        foreach ($users as $key => $c) {
+            if ($c->class->streams->count() < 1) {
+                continue;
+            }
+            $stream = $c->class->streams[rand(0, ($c->class->streams->count() - 1))];
+            $c->stream_id = $stream->id;
+            $c->save();
+            echo $c->id . "<hr>";
+        }
+        dd($users);
 
         Utils::display_checklist(Utils::students_checklist(Admin::user()));
 
@@ -245,133 +262,152 @@ class StudentHasClassController extends AdminController
         });
 
 
-        $form->tab('Class information', function ($form) {
-
-            $form->disableCreatingCheck();
-            $form->disableEditingCheck();
-            $form->disableReset();
-            $form->disableViewCheck();
+        $form->disableCreatingCheck();
+        $form->disableEditingCheck();
+        $form->disableReset();
+        $form->disableViewCheck();
 
 
-            $form->saving(function (Form $form) {
-
-                if ($form->isCreating()) {
-                    $class = StudentHasClass::where([
-                        'administrator_id' => $form->administrator_id,
-                        'enterprise_id' => $form->academic_class_id,
-
-                    ])->first();
-                    if ($class != null) {
-                        return Redirect::back()->withInput()->withErrors([
-                            'academic_class_id' => 'Selected student is already registered in this class.'
-                        ]);
-                    }
-                }
-            });
-
-
-            $u = Admin::user();
-            $form->hidden('enterprise_id')->rules('required')->default($u->enterprise_id)
-                ->value($u->enterprise_id);
+        $form->saving(function (Form $form) {
 
             if ($form->isCreating()) {
+                $class = StudentHasClass::where([
+                    'administrator_id' => $form->administrator_id,
+                    'enterprise_id' => $form->academic_class_id,
 
-                $form->select('administrator_id', 'Student')->options(function () {
-                    return Administrator::where([
-                        'enterprise_id' => Admin::user()->enterprise_id,
-                        'user_type' => 'student',
-                    ])->get()->pluck('name', 'id');
-                })
-                    ->rules('required');
-
-                $form->select('academic_class_id', 'Class')->options(function () {
-                    return AcademicClass::where([
-                        'enterprise_id' => Admin::user()->enterprise_id,
-                    ])->get()->pluck('name', 'id');
-                })
-                    ->rules('required')->load(
-                        'stream_id',
-                        url('/api/streams?enterprise_id=' . $u->enterprise_id)
-                    );
-            } else {
-                $form->select('administrator_id', 'Student')->options(function () {
-                    return Administrator::where([
-                        'enterprise_id' => Admin::user()->enterprise_id,
-                        'user_type' => 'student',
-                    ])->get()->pluck('name', 'id');
-                })
-                    ->readOnly()
-                    ->rules('required');
-
-                $form->select('academic_class_id', 'Class')->options(function () {
-                    return AcademicClass::where([
-                        'enterprise_id' => Admin::user()->enterprise_id,
-                    ])->get()->pluck('name', 'id');
-                })
-                    ->readOnly()
-                    ->rules('required')->load(
-                        'stream_id',
-                        url('/api/streams?enterprise_id=' . $u->enterprise_id)
-                    );
+                ])->first();
+                if ($class != null) {
+                    return Redirect::back()->withInput()->withErrors([
+                        'academic_class_id' => 'Selected student is already registered in this class.'
+                    ]);
+                }
             }
+        });
 
 
+        $u = Admin::user();
+        $form->hidden('enterprise_id')->rules('required')->default($u->enterprise_id)
+            ->value($u->enterprise_id);
 
+        if ($form->isCreating()) {
 
+            $form->select('administrator_id', 'Student')->options(function () {
+                return Administrator::where([
+                    'enterprise_id' => Admin::user()->enterprise_id,
+                    'user_type' => 'student',
+                ])->get()->pluck('name', 'id');
+            })
+                ->rules('required');
 
+            $form->select('academic_class_id', 'Class')->options(function () {
+                return AcademicClass::where([
+                    'enterprise_id' => Admin::user()->enterprise_id,
+                ])->get()->pluck('name', 'id');
+            })
+                ->rules('required')->load(
+                    'stream_id',
+                    url('/api/streams?enterprise_id=' . $u->enterprise_id)
+                );
             $form->select('stream_id', __('Stream'))->options(function ($id) {
                 return AcademicClassSctream::all()->pluck('name', 'id');
             });
-        });
+        } else {
+
+            $id = 0;
+            foreach (explode('/', $_SERVER['REQUEST_URI']) as $key => $v) {
+                if ((int)($v) > 0) {
+                    $id = (int)($v);
+                    break;
+                }
+            }
+            $hasClass = StudentHasClass::find($id);
+            if ($hasClass == null) {
+                throw new Exception("Has class not found.", 1);
+            }
+            if ($hasClass->class == null) {
+                throw new Exception("Class not found.", 1);
+            }
+
+            $streams = [];
+            foreach ($hasClass->class->streams as $s) {
+                $streams[$s->id] = $s->name;
+            }
+            $form->select('administrator_id', 'Student')->options(function () {
+                return Administrator::where([
+                    'enterprise_id' => Admin::user()->enterprise_id,
+                    'user_type' => 'student',
+                ])->get()->pluck('name', 'id');
+            })
+                ->readOnly()
+                ->rules('required');
+
+            $form->select('academic_class_id', 'Class')->options(function () {
+                return AcademicClass::where([
+                    'enterprise_id' => Admin::user()->enterprise_id,
+                ])->get()->pluck('name', 'id');
+            })
+                ->readOnly()
+                ->rules('required')->load(
+                    'stream_id',
+                    url('/api/streams?enterprise_id=' . $u->enterprise_id)
+                );
+
+            $form->select('stream_id', __('Stream'))->options($streams)->required();
+        }
+
+
+
+
+
+
 
         if (Admin::user()->enterprise->type != 'Primary') {
-            $form->tab('Optional subjects', function ($form) {
+            $form->divider();
 
-                $form->morphMany('optional_subjects', 'Click to add optional subject', function (Form\NestedForm $form) {
+            $form->morphMany('optional_subjects', 'Click to add optional subject', function (Form\NestedForm $form) {
 
-                    $id = ((int)(FacadesRequest::segment(2)));
-                    if ($id < 1) {
-                        $id = ((int)(FacadesRequest::segment(1)));
-                    }
-                    if ($id < 1) {
-                        $id = ((int)(FacadesRequest::segment(0)));
-                    }
-                    if ($id < 1) {
-                        $id = ((int)(FacadesRequest::segment(3)));
-                    }
-                    if ($id < 1) {
-                        $id = ((int)(FacadesRequest::segment(4)));
-                    }
-                    if ($id < 1) {
-                        die("Class not found.");
-                    }
-                    $class = StudentHasClass::find($id);
+                $id = ((int)(FacadesRequest::segment(2)));
+                if ($id < 1) {
+                    $id = ((int)(FacadesRequest::segment(1)));
+                }
+                if ($id < 1) {
+                    $id = ((int)(FacadesRequest::segment(0)));
+                }
+                if ($id < 1) {
+                    $id = ((int)(FacadesRequest::segment(3)));
+                }
+                if ($id < 1) {
+                    $id = ((int)(FacadesRequest::segment(4)));
+                }
+                if ($id < 1) {
+                    die("Class not found.");
+                }
+                $class = StudentHasClass::find($id);
 
-                    if ($class == null) {
-                        die("Class not found..");
-                    }
+                if ($class == null) {
+                    die("Class not found..");
+                }
 
-                    $academic_class = AcademicClass::find($class->academic_class_id);
-                    if ($academic_class == null) {
-                        die("Academic class not found.");
-                    }
+                $academic_class = AcademicClass::find($class->academic_class_id);
+                if ($academic_class == null) {
+                    die("Academic class not found.");
+                }
 
-                    $subs = [];
-                    foreach ($academic_class->getOptionalSubjectsItems() as  $s) {
-                        $subs[((int)($s->course_id))] = $s->subject_name . " - " . $s->code;
-                    }
+                $subs = [];
+                foreach ($academic_class->getOptionalSubjectsItems() as  $s) {
+                    $subs[((int)($s->course_id))] = $s->subject_name . " - " . $s->code;
+                }
 
-                    $u = Admin::user();
+                $u = Admin::user();
 
-                    $form->hidden('enterprise_id')->default($u->enterprise_id);
+                $form->hidden('enterprise_id')->default($u->enterprise_id);
 
 
 
-                    $form->select('course_id', 'Select subject')
-                        ->options(
-                            $subs
-                        )->rules('required');
-                });
+                $form->select('course_id', 'Select subject')
+                    ->options(
+                        $subs
+                    )->rules('required');
             });
         }
 

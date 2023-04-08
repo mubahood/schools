@@ -382,6 +382,11 @@ class AcademicClass extends Model
         return $this->hasMany(AcademicClassFee::class);
     }
 
+    function streams()
+    {
+        return $this->hasMany(AcademicClassSctream::class,'academic_class_id');
+    }
+
     function competences()
     {
         return $this->hasMany(Competence::class);
