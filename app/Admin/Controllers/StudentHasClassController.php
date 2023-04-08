@@ -41,7 +41,7 @@ class StudentHasClassController extends AdminController
     {
 
 
-/*         $enterprise_id = 8;
+        $enterprise_id = 8;
         $users = StudentHasClass::where([
             'enterprise_id' => $enterprise_id
         ])->get();
@@ -54,7 +54,7 @@ class StudentHasClassController extends AdminController
             $c->stream_id = $stream->id;
             $c->save();
         }
-        dd($users); */
+        dd($users);
 
         Utils::display_checklist(Utils::students_checklist(Admin::user()));
 
