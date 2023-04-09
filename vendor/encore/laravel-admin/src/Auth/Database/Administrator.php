@@ -595,14 +595,55 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
         if ($u == null) {
             return [];
         }
-        $classes = $u->get_my_classes();
 
         $students = [];
-        foreach ($classes as $class) {
+        $isAdmin = false;
+
+        if (
+            $u->isRole('dos') ||
+            $u->isRole('admin') ||
+            $u->isRole('dos') ||
+            $u->isRole('bursar') ||
+            $u->isRole('hm') ||
+            $u->isRole('nurse') ||
+            $u->isRole('warden')
+        ) {
+            $isAdmin = true;
+        }
+
+        if ($isAdmin) {
             foreach (Administrator::where([
-                'current_class_id' => $class->id
+                'status' => 1,
+                'user_type' => 'student',
+                'enterprise_id' => $u->enterprise_id,
             ])->get() as $user) {
+ 
+                $user->balance = 0;
+                $user->account_id = 0;
+                $acc = $user->getAccount();
+                if ($acc != null) {
+                    $user->balance = $acc->balance;
+                    $user->account_id = $acc->id;
+                }
                 $students[] = $user;
+            }
+        } else {
+            $classes = $u->get_my_classes();
+            foreach ($classes as $class) {
+                foreach (Administrator::where([
+                    'current_class_id' => $class->id,
+                    'user_type' => 'student', 
+                    'status' => 1,
+                ])->get() as $user) {
+                    $user->balance = 0;
+                    $user->account_id = 0;
+                    $acc = $this->getAccount();
+                    if ($acc != null) {
+                        $user->balance = $acc->balance;
+                        $user->account_id = $acc->id;
+                    }
+                    $students[] = $user;
+                }
             }
         }
 
@@ -680,6 +721,30 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
     {
         return $this->hasOne(Account::class);
     }
+
+    public function getAccount()
+    {
+        $acc = null;
+        $data = DB::select("SELECT * FROM accounts WHERE administrator_id = $this->id");
+        if ($data != null) {
+            if (isset($data[0])) {
+                $acc = $data[0];
+            }
+        }
+        return $acc;
+    }
+    /*
+    public function getBalanceAttribute()
+    {
+        $balance = ''; 
+        $data = DB::select("SELECT balance FROM accounts WHERE administrator_id = $this->id");
+        if($data!=null){
+            if(isset($data[0])){
+                $balance = $data[0]->balance;
+            }
+        } 
+        return $balance; 
+    } */
 
     public function main_role()
     {
