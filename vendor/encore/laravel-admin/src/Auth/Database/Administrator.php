@@ -617,9 +617,14 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                 'user_type' => 'student',
                 'enterprise_id' => $u->enterprise_id,
             ])->get() as $user) {
- 
+
                 $user->balance = 0;
                 $user->account_id = 0;
+                $user->current_class_text = $user->current_class_id;
+                $class = $user->getActiveClass();
+                if ($class != null) {
+                    $user->current_class_text = $class->short_name;
+                }
                 $acc = $user->getAccount();
                 if ($acc != null) {
                     $user->balance = $acc->balance;
@@ -632,11 +637,19 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
             foreach ($classes as $class) {
                 foreach (Administrator::where([
                     'current_class_id' => $class->id,
-                    'user_type' => 'student', 
+                    'user_type' => 'student',
                     'status' => 1,
                 ])->get() as $user) {
+
                     $user->balance = 0;
                     $user->account_id = 0;
+
+                    $user->current_class_text = $user->current_class_id;
+                    $class = $user->getActiveClass();
+                    if ($class != null) {
+                        $user->current_class_text = $class->short_name;
+                    }
+
                     $acc = $this->getAccount();
                     if ($acc != null) {
                         $user->balance = $acc->balance;
@@ -726,6 +739,18 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
     {
         $acc = null;
         $data = DB::select("SELECT * FROM accounts WHERE administrator_id = $this->id");
+        if ($data != null) {
+            if (isset($data[0])) {
+                $acc = $data[0];
+            }
+        }
+        return $acc;
+    }
+
+    public function getActiveClass()
+    {
+        $acc = null;
+        $data = DB::select("SELECT * FROM academic_classes WHERE id = $this->current_class_id");
         if ($data != null) {
             if (isset($data[0])) {
                 $acc = $data[0];
