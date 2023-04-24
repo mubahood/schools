@@ -28,7 +28,7 @@ body {
 
 .value {
     font-family: "Arial";
-    font-size: 14px;
+    font-size: 16px;
     color: black;
     font-weight: 800;
     margin: 0;
@@ -56,7 +56,7 @@ h2,
 }
 
 .marks-table thead th {
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 600;
     color: black;
     padding: 0%;
@@ -67,7 +67,7 @@ h2,
 
 .marks th,
 .marks-1 th {
-    font-size: 12px;
+    font-size: 14px;
     padding: 0%;
     margin: 0%;
     padding-left: 10px;
@@ -77,7 +77,7 @@ h2,
     padding: 0%;
     margin: 0%;
     text-align: center;
-    font-size: 12px;
+    font-size: 14px;
 
     font-family: "Arial";
     color: black;
@@ -88,7 +88,7 @@ h2,
     padding: 0%;
     margin: 0%;
     text-align: start;
-    font-size: 12px;
+    font-size: 14px;
     font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -107,7 +107,7 @@ h2,
 }
 
 .grade-table {
-    font-size: 12px;
+    font-size: 14px;
     padding: 0px;
 }
 
