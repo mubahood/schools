@@ -377,7 +377,7 @@ ssh-keygen -f ~/.ssh/id_rsa -p
 
 
 
-
+()(+256@Kampala+)()
 
 sudo mysql -u root -p
 ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'Dev@Team';

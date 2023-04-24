@@ -46,7 +46,7 @@ class PrintController2 extends Controller
         ini_set('display_startup_errors', 1);
         error_reporting(E_ALL);
 
-        $term_id = 7;
+        $term_id = 0;
         if(isset($_GET['term_id'])){
             $term_id = (int)($_GET['term_id']);
         }
@@ -59,6 +59,7 @@ class PrintController2 extends Controller
         }
 
         if (isset($_GET['calss_id'])) {
+            die("is batch");
             $icalss_id = ((int)($_GET['calss_id']));
             $reps  = [];
              foreach (StudentReportCard::where([

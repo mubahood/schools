@@ -1,6 +1,12 @@
-<?php 
+<?php
+$portrait = false;
 
-?><!DOCTYPE html>
+if ($recs[0]['r']->ent->has_theology != 'Yes') {
+    $portrait = true;
+}
+
+?>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -8,14 +14,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
-    <link rel="stylesheet" href="{{ public_path('css/bootstrap-print.css') }}"> 
+    <link rel="stylesheet" href="{{ public_path('css/bootstrap-print.css') }}">
 
 
-    @if ($recs[0]['r']->enterprise_id == 9)
-        <link type="text/css" href="{{ public_path('assets/buck-print.css') }}" rel="stylesheet" />
+    @if ($portrait)
+        <link type="text/css" href="{{ public_path('assets/print-portrait.css') }}" rel="stylesheet" />
     @else
         <link type="text/css" href="{{ public_path('assets/print.css') }}" rel="stylesheet" />
     @endif
+
+
 
 </head>
 
@@ -26,8 +34,8 @@
         @if ($item['r']->academic_class->class_type == 'Nursery')
             @include('report-cards.print-nusery-layout', $item)
         @else
-            @if ($item['r']->enterprise_id == 9)
-                @include('report-cards.print-buck-layout', $item)
+            @if ($portrait)
+                @include('report-cards.print-portrait-layout', $item)
             @else
                 @include('report-cards.print-layout', $item)
             @endif

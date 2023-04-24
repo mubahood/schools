@@ -8,4 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class ReportCard extends Model
 {
     use HasFactory;  
+    public function ent()
+    {
+        return $this->belongsTo(Enterprise::class);
+    }
 }
