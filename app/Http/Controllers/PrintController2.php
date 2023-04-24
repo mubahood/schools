@@ -59,13 +59,13 @@ class PrintController2 extends Controller
         }
 
         if (isset($_GET['calss_id'])) {
-            die("is batch");
+       
             $icalss_id = ((int)($_GET['calss_id']));
             $reps  = [];
              foreach (StudentReportCard::where([
                 'academic_class_id' => $icalss_id,
                 'term_id' => $term_id,
-                'termly_report_card_id' => $termly_report_card_id,
+/*                 'termly_report_card_id' => $termly_report_card_id, */
             ])->get() as $r) {
 
 
@@ -81,6 +81,7 @@ class PrintController2 extends Controller
                 ];
             }
 
+ 
             $pdf = App::make('dompdf.wrapper');
             $pdf->loadHTML(view('report-cards.print', ['recs' => $reps]));
             return $pdf->stream();

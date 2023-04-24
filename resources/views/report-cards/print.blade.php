@@ -1,10 +1,14 @@
 <?php
+
+if(!isset($recs[0])){
+    die("Reports not selected."); 
+}
 $portrait = false;
 
 if ($recs[0]['r']->ent->has_theology != 'Yes') {
-    $portrait = true;
+    $portrait = true; 
 }
-
+ 
 ?>
 <!DOCTYPE html>
 <html lang="en">
