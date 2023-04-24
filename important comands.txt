@@ -1,4 +1,4 @@
-lssh-keygen -t ed25519 -C "mubs0x@gmail.com"
+ssh-keygen -t ed25519 -C "mubs0x@gmail.com"
 
 git config --global user.email "mubs0x@gmail.com"
 git config --global user.name "mubahood"

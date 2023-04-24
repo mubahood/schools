@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Models\Enterprise;
+use App\Models\User;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -86,18 +87,26 @@ class EnterpriseController extends AdminController
     {
         $form = new Form(new Enterprise());
 
-        $ads = [];
-        foreach (Administrator::all() as $ad) {
-            if ($ad->isRole('admin')) {
-                $ads[$ad->id] = "{$ad->id}. $ad->name - {$ad->username}";
-            };
-        }
+        $u = Admin::user();
 
+        $ajax_url = url(
+            '/api/ajax?'
+                . 'enterprise_id=' . $u->enterprise_id
+                . "&search_by_1=name"
+                . "&search_by_2=id"
+                . "&model=User"
+        );
 
         $form->select('administrator_id', __('School owner'))
-            ->options(
-                $ads
+            ->ajax(
+                $ajax_url
             )
+            ->options(function ($id) {
+                $a = User::find($id);
+                if ($a) {
+                    return [$a->id => "#" . $a->id . " - " . $a->name];
+                }
+            })
             ->rules('required');
 
         $form->text('name', __('Name'))->required();
@@ -108,6 +117,12 @@ class EnterpriseController extends AdminController
                 'Primary' => 'Primary school school',
                 'Secondary' => 'O\'level school',
                 'Advanced' => 'Both O\'level and A\'level school',
+            ])
+            ->rules('required');
+        $form->radio('has_theology', __('Has theology'))
+            ->options([
+                'Yes' => 'Yes',
+                'No' => 'No',
             ])
             ->rules('required');
 
