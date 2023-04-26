@@ -113,7 +113,7 @@ class StudentHasTheologyClassController extends AdminController
         })->sortable();
 
 
-        $grid->column('stream', __('Class'))->display(function () {
+        $grid->column('stream', __('Stream'))->display(function () {
             if (!$this->stream) {
                 return '<a class="bg-danger badge  badge-danger">No Stream</a>';
             }
@@ -190,7 +190,7 @@ class StudentHasTheologyClassController extends AdminController
             ])->get() as $key => $value) {
                 $years[$value->id] = $value->name_text;
             }
-            $form->select('theology_class_id', 'Class')->options($years)->rules('required');
+            $form->select('theology_class_id', 'Stream')->options($years)->rules('required');
         } else { 
             $form->select('administrator_id', 'Student')->options(function () {
                 return Administrator::where([
