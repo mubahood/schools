@@ -38,6 +38,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
 }
 
 ?>
+{{-- New changes --}}
 <article class="ml-4 mr-4">
     <div class="row">
         <table class="w-100">
