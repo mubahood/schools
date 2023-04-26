@@ -37,8 +37,30 @@ foreach ($r->termly_report_card->term->exams as $exam) {
     }
 }
 
+$bg = $r->ent->logo;
 ?>
 {{-- New changes --}}
+
+<style>
+    body::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: -1;
+        background-image: url({{ $bg }});
+        background-size: cover;
+        background-position: center;
+        opacity: 0.15;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 80%;
+        opacity: 0.15;
+    }
+</style>
+
 <article class="ml-4 mr-4">
     <div class="row">
         <table class="w-100">
@@ -82,10 +104,10 @@ foreach ($r->termly_report_card->term->exams as $exam) {
             <span><b>CLASS:</b> <span class="value">{{ $r->academic_class->name }}</span></span>
             {{-- <span><b class="text-uppercase">Aggre:</b> <span class="value">18</span></span> --}}
             <br>
-            <span><b class="text-uppercase">Aggr:</b> <span
-                    class="value text-lowercase">{{ (int) $r->average_aggregates }}</span></span>
+            <span><b class="text-uppercase"  style="font-weight: 200;">Aggregates:</b> <span
+                    class="value text-lowercase">{{ (int) $r->average_aggregates }}</span></span>&nbsp; &nbsp; &nbsp; 
 
-            <span><b class="text-uppercase">DIV:</b> <span class="value">{{ $r->grade }}</span></span>
+            <span><b class="text-uppercase" style="font-weight: 200;">DIVISION:</b> <span class="value">{{ $r->grade }}</span></span>
             {{-- <span><b class="text-uppercase">Position:</b> <span
                     class="value text-lowercase">{{ $numFormat->format($r->position) }}</span></span> --}}
 {{--             <span><b class="text-uppercase">OUT OF :</b> <span class="value">{{ $r->total_students }} --}}
@@ -217,6 +239,12 @@ foreach ($r->termly_report_card->term->exams as $exam) {
 
 
     <div class="row p-0 mt-2 mb-2 class-teacher" style="font-size: 16px;">
+        <b>GENERAL CONDUCT:</b>
+        <span class="comment">Good</span> 
+        {{-- <span class="comment">{{  }}</span> --}}
+    </div>
+
+    <div class="row p-0 mt-2 mb-2 class-teacher" style="font-size: 16px;">
         <b>CLASS TEACHER'S COMMENT:</b>
         <span class="comment">{{ Utils::getClassTeacherComment($r)['teacher'] }}</span>
         {{-- <span class="comment">{{  }}</span> --}}
@@ -255,7 +283,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 18,000</span></span> --}}
         <span><b>SCHOOL PAY CODE:</b> <span class="value"
                 style="font-size: 16px!important;">{{ $r->owner->school_pay_payment_code }}</span></span> 
-        <br><span><b>NEXT TERM BBEGINS ON:</b><span class="value" style="font-size: 16px!important;"> 29<sup>th</sup> MAY,
+        <br><span><b>NEXT TERM BEGINS ON:</b><span class="value" style="font-size: 16px!important;"> 29<sup>th</sup> MAY,
                 2023</span></span>
     </div>
 
