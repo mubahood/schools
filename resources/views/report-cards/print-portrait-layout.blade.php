@@ -50,7 +50,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     <p class="text-center p font-serif  fs-3 m-0 p-0 mt-1 title-2"><b
                             class="m-0 p-0">{{ $r->ent->address }}</b>
                     </p>
-                    <p class="text-center p font-serif mt-0 mb-0 title-2"><b>TELL:</b> {{ $r->ent->phone_number }}</p>
+                    <p class="text-center p font-serif mt-0 mb-0 title-2"><b>TEL:</b> {{ $r->ent->phone_number }}</p>
                     <p class="text-center p font-serif mt-0 title-2 mb-1"><b>EMAIL:</b> {{ $r->ent->email }}</p>
                     <p class="text-center p font-serif  fs-3 m-0 p-0 mt-3 mb-2" style="font-size: 1.3rem">
                         <u><b>{{ $r->termly_report_card->report_title }}</b></u>
