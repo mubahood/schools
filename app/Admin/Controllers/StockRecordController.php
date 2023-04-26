@@ -197,8 +197,7 @@ class StockRecordController extends AdminController
                 . "&search_by_2=id"
                 . "&model=User"
         );
-
-
+ 
         $form->decimal('quanity', __('Quanity'))->rules('required');
 
         $form->select('received_by', "Received by")

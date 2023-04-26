@@ -34,7 +34,7 @@ class TheologyClass extends Model
                 'academic_year_id' => $m->academic_year_id,
                 'enterprise_id' => $m->enterprise_id,
             ])->first();
-            if ($class != null) { 
+            if ($class != null) {
                 throw new Exception("You cannot have same cl twice in a year.", 1);
             }
         });
@@ -44,6 +44,11 @@ class TheologyClass extends Model
     function subjects()
     {
         return $this->hasMany(TheologySubject::class, 'theology_class_id');
+    }
+
+    function streams()
+    {
+        return $this->hasMany(TheologyStream::class);
     }
 
     function getNameTextAttribute()

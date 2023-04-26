@@ -80,6 +80,7 @@ php artisan make:migration create_service_categories_table
 php artisan make:migration create_main_courses_table
 php artisan make:migration create_academic_years_table
 php artisan make:model Banner
+php artisan make:model TheologyStream
 php artisan make:model Enterprise
 php artisan make:model BursaryBeneficiary
 php artisan make:model Manifest
@@ -220,6 +221,7 @@ php artisan make:migration create_nursery_termly_report_cards_table
 php artisan make:migration create_participants_table
 php artisan make:migration create_secondary_competences_table
 php artisan make:migration create_generate_theology_classes_table
+php artisan make:migration create_theology_streams_table
 
 --path=/database/migrations/fileName.php
 
@@ -344,6 +346,8 @@ git fetch origin master
 git reset --hard orign/master
 
 
+php artisan make:migration add_strea_id_to_student_has_theology_classes --table=student_has_theology_classes 
+php artisan make:migration add_enterprise_id_to_streams --table=theology_streams 
 php artisan make:migration add_created_by --table=stock_records
 php artisan make:migration add_current_class_id --table=admin_users
 php artisan make:migration add_total --table=student_report_card_items
@@ -388,6 +392,7 @@ sudo service mysql stop
 sudo service mysql start
 
 mysql -u romina -p romina
+
 
 grant all privileges on *.* to romina@localhost identified by 'romina' with grant option;
 grant all privileges on *.* to romina@localhost with grant option;

@@ -43,6 +43,10 @@ class StudentHasTheologyClass extends Model
     {
         return $this->belongsTo(Administrator::class, 'administrator_id');
     }
+    function stream()
+    {
+        return $this->belongsTo(TheologyStream::class, 'theology_stream_id');
+    }
 
     function class()
     {

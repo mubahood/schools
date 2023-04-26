@@ -58,7 +58,6 @@ class StudentHasTheologyClassController extends AdminController
         }
 
         $grid->actions(function ($actions) {
-            $actions->disableEdit();
             $actions->disableView();
         });
 
@@ -114,6 +113,14 @@ class StudentHasTheologyClassController extends AdminController
         })->sortable();
 
 
+        $grid->column('stream', __('Class'))->display(function () {
+            if (!$this->stream) {
+                return '<a class="bg-danger badge  badge-danger">No Stream</a>';
+            }
+            return  $this->stream->name;
+        })->sortable();
+
+
         $u = Admin::user();
 
         if ($u->enterprise->type != 'Primary') {
@@ -164,24 +171,85 @@ class StudentHasTheologyClassController extends AdminController
 
         $form = new Form(new StudentHasTheologyClass());
 
-        $form->select('administrator_id', 'Student')->options(function () {
-            return Administrator::where([
-                'enterprise_id' => Admin::user()->enterprise_id,
-                'user_type' => 'student',
-                'status' => 1
-            ])->get()->pluck('name', 'id');
-        })
-            ->rules('required');
-        $dpYear   =  Admin::user()->ent->dpYear();
-        $years = [];
-        foreach (TheologyClass::where([
-            'enterprise_id' => Admin::user()->enterprise_id,
-            'academic_year_id' => $dpYear->id
-        ])->get() as $key => $value) {
-            $years[$value->id] = $value->name_text;
-        }
-        $form->select('theology_class_id', 'Class')->options($years)->rules('required');
 
+        if ($form->isCreating()) {
+            $form->select('administrator_id', 'Student')->options(function () {
+                return Administrator::where([
+                    'enterprise_id' => Admin::user()->enterprise_id,
+                    'user_type' => 'student',
+                    'status' => 1
+                ])->get()->pluck('name', 'id');
+            })
+                ->rules('required');
+
+            $dpYear   =  Admin::user()->ent->dpYear();
+            $years = [];
+            foreach (TheologyClass::where([
+                'enterprise_id' => Admin::user()->enterprise_id,
+                'academic_year_id' => $dpYear->id
+            ])->get() as $key => $value) {
+                $years[$value->id] = $value->name_text;
+            }
+            $form->select('theology_class_id', 'Class')->options($years)->rules('required');
+        } else { 
+            $form->select('administrator_id', 'Student')->options(function () {
+                return Administrator::where([
+                    'enterprise_id' => Admin::user()->enterprise_id,
+                    'user_type' => 'student',
+                    'status' => 1
+                ])->get()->pluck('name', 'id');
+            })
+                ->readOnly()
+                ->rules('required');
+
+            $dpYear   =  Admin::user()->ent->dpYear();
+            $years = [];
+            foreach (TheologyClass::where([
+                'enterprise_id' => Admin::user()->enterprise_id,
+            ])->get() as $key => $value) {
+                $years[$value->id] = $value->name_text;
+            }
+            $form->select('theology_class_id', 'Class')
+                ->readOnly()
+                ->options($years)->rules('required');
+
+                $id = ((int)(FacadesRequest::segment(2)));
+                if ($id < 1) {
+                    $id = ((int)(FacadesRequest::segment(1)));
+                }
+                if ($id < 1) {
+                    $id = ((int)(FacadesRequest::segment(0)));
+                }
+                if ($id < 1) {
+                    $id = ((int)(FacadesRequest::segment(3)));
+                }
+                if ($id < 1) {
+                    $id = ((int)(FacadesRequest::segment(4)));
+                }
+                if ($id < 1) {
+                    die("Class not found.");
+                }
+                $StudentHasTheologyClass = StudentHasTheologyClass::find($id);
+
+                if ($StudentHasTheologyClass == null) {
+                    die("Class not found..");
+                }
+
+
+                $TheologyClass = TheologyClass::find($StudentHasTheologyClass->theology_class_id);
+
+
+                if ($TheologyClass == null || $StudentHasTheologyClass == null) {
+                    die("Classes not found.");
+                } 
+                $strems = [];
+                foreach ($TheologyClass->streams as $key => $s) {
+                    $strems[$s->id] = $s->name;
+                }
+                $form->select('theology_stream_id', 'Class')->options($strems);  
+
+
+        }
         return $form;
 
         // callback before save
@@ -285,13 +353,27 @@ class StudentHasTheologyClassController extends AdminController
 
             if ($form->isCreating()) {
 
-                $form->select('administrator_id', 'Student')->options(function () {
-                    return Administrator::where([
-                        'enterprise_id' => Admin::user()->enterprise_id,
-                        'user_type' => 'student',
-                    ])->get()->pluck('name', 'id');
-                })
-                    ->rules('required');
+ 
+
+                    $u = Admin::user();
+                    $ajax_url = url(
+                        '/api/ajax?'
+                            . 'enterprise_id=' . $u->enterprise_id
+                            . "&search_by_1=name"
+                            . "&search_by_2=id"
+                            . "&model=User"
+                    );
+             
+                    $form->decimal('quanity', __('Quanity'))->rules('required');
+            
+                    $form->select('administrator_id', 'Student')->options(function ($id) {  
+                            $a = Administrator::find($id);
+                            if ($a) {
+                                return [$a->id => "#" . $a->id . " - " . $a->name];
+                            }
+                        })
+                        ->ajax($ajax_url)->rules('required');
+                        
 
                 $form->select('theology_class_id', 'Class')->options(function () {
                     return TheologyClass::where([
@@ -299,6 +381,41 @@ class StudentHasTheologyClassController extends AdminController
                     ])->get()->pluck('name', 'id');
                 });
             } else {
+
+                die("nto creating");
+
+                $id = ((int)(FacadesRequest::segment(2)));
+                if ($id < 1) {
+                    $id = ((int)(FacadesRequest::segment(1)));
+                }
+                if ($id < 1) {
+                    $id = ((int)(FacadesRequest::segment(0)));
+                }
+                if ($id < 1) {
+                    $id = ((int)(FacadesRequest::segment(3)));
+                }
+                if ($id < 1) {
+                    $id = ((int)(FacadesRequest::segment(4)));
+                }
+                if ($id < 1) {
+                    die("Class not found.");
+                }
+                $StudentHasTheologyClass = StudentHasTheologyClass::find($id);
+
+                if ($StudentHasTheologyClass == null) {
+                    die("Class not found..");
+                }
+
+
+                $TheologyClass = TheologyClass::find($StudentHasTheologyClass->theology_class_id);
+
+
+                if ($TheologyClass == null || $StudentHasTheologyClass == null) {
+                    die("Classes not found.");
+                }
+
+                dd($TheologyClass);
+
                 $form->select('administrator_id', 'Student')->options(function () {
                     return Administrator::where([
                         'enterprise_id' => Admin::user()->enterprise_id,
@@ -314,6 +431,8 @@ class StudentHasTheologyClassController extends AdminController
                     ])->get()->pluck('name', 'id');
                 })
                     ->readOnly();
+
+                    
             }
         });
 

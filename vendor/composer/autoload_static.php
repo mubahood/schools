@@ -882,6 +882,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Models\\TheologyExam' => __DIR__ . '/../..' . '/app/Models/TheologyExam.php',
         'App\\Models\\TheologyExamHasClass' => __DIR__ . '/../..' . '/app/Models/TheologyExamHasClass.php',
         'App\\Models\\TheologyMark' => __DIR__ . '/../..' . '/app/Models/TheologyMark.php',
+        'App\\Models\\TheologyStream' => __DIR__ . '/../..' . '/app/Models/TheologyStream.php',
         'App\\Models\\TheologyStudentReportCardItem' => __DIR__ . '/../..' . '/app/Models/TheologyStudentReportCardItem.php',
         'App\\Models\\TheologySubject' => __DIR__ . '/../..' . '/app/Models/TheologySubject.php',
         'App\\Models\\TheologyTermlyReportCard' => __DIR__ . '/../..' . '/app/Models/TheologyTermlyReportCard.php',
