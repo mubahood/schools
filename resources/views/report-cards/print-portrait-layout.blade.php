@@ -69,9 +69,10 @@ foreach ($r->termly_report_card->term->exams as $exam) {
     </div>
     <div class="row mb-1 d-flex justify-content-between summary"style="font-size: 16px">
         <span><b>NAME:</b> <span class="value">{{ $r->owner->name }}</span></span>
+        <br>
         <span><b>GENDER:</b> <span class="value">{{ $r->owner->sex }}</span></span>
-        <span><b>AGE:</b> <span class="value">{{ '--' }}</span></span>
-        <span><b>REG NO.:</b> <span class="value">{{ $r->owner->id }}</span></span>
+    {{--     <br><span><b>AGE:</b> <span class="value">{{ '--' }}</span></span> --}}{{-- 
+        <br><span><b>REG NO.:</b> <span class="value">{{ $r->owner->id }}</span></span> --}}
     </div>
 
     <div class="row">
@@ -80,6 +81,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
         <div class="row mt-1 pb-2 d-flex justify-content-between pl-3 pr-3 summary" style="font-size: 16px">
             <span><b>CLASS:</b> <span class="value">{{ $r->academic_class->name }}</span></span>
             {{-- <span><b class="text-uppercase">Aggre:</b> <span class="value">18</span></span> --}}
+            <br>
             <span><b class="text-uppercase">Aggr:</b> <span
                     class="value text-lowercase">{{ (int) $r->average_aggregates }}</span></span>
 
