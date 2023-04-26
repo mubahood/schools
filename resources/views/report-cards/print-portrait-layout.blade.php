@@ -247,18 +247,20 @@ foreach ($r->termly_report_card->term->exams as $exam) {
         </tr>
     </table> --}}
     <div class="row  mt-4 d-flex justify-content-between p-0  pt-2"
-        style="font-size: 12px; border-top: solid
+        style="font-size: 16px; border-top: solid
             {{ $r->ent->color }} 1px; ">
         {{-- <span><b>SCHOOL FEES BALANCE:</b> <span class="value" style="font-size: 12px!important;">
                 {{ $bal_text }}</span></span> | --}}
         {{-- <span><b>NEXT TERM TUTION FEE:</b> <span class="value" style="font-size: 12px!important;">UGX
                 18,000</span></span> --}}
         <span><b>SCHOOL PAY CODE:</b> <span class="value"
-                style="font-size: 12px!important;">{{ $r->owner->school_pay_payment_code }}</span></span> |
-        <span><b>NEXT TERM BBEGINS ON:</b> <span class="value" style="font-size: 12px!important;">29<sup>th</sup> MAY,
+                style="font-size: 16px!important;">{{ $r->owner->school_pay_payment_code }}</span></span> 
+        <br><span><b>NEXT TERM BBEGINS ON:</b><span class="value" style="font-size: 16px!important;"> 29<sup>th</sup> MAY,
                 2023</span></span>
     </div>
 
+    <br>
+    <p class="text-center" style="font-size: 24; font-weight: 300;">"<i>The future begins here</i>"</p>
 
 
     </div>

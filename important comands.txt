@@ -382,7 +382,7 @@ ssh-keygen -f ~/.ssh/id_rsa -p
 sudo mysql -u root -p
 ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'Dev@Team';
 flush privileges;
-quit
+quit*
 
 sudo service mysql stop
 sudo service mysql start
