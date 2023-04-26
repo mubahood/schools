@@ -37,7 +37,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
     }
 }
 
-$bg = $r->ent->logo;
+$bg = public_path('storage/' . $r->ent->logo);
 ?>
 {{-- New changes --}}
 
