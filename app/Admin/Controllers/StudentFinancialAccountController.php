@@ -194,7 +194,7 @@ class StudentFinancialAccountController extends AdminController
                 if ($this->owner->current_class == null) {
                     return "-";
                 }
-                return $this->owner->current_class->name_text;
+                return $this->owner->current_class->short_name;
  
                 return "-";
             });
