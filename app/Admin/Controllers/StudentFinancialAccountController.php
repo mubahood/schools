@@ -189,26 +189,13 @@ class StudentFinancialAccountController extends AdminController
 
         $grid->column('owner.current_class_id', __('Class'))
             ->sortable()
-            ->display(function () {
+            ->display(function ($x) {
 
-                if ($this->academic_class == null) {
+                if ($this->current_class == null) {
                     return "-";
                 }
-
-                return $this->academic_class->short_name;
-
-                if ($this->owner == null) {
-                    return "-";
-                }
-                if ($this->owner->current_class == null) {
-                    return "-";
-                }
-                if ($this->owner->current_class->name == null) {
-                    return "-";
-                }
-                if ($this->owner->current_class->short_name != null) {
-                    return $this->owner->current_class->short_name;
-                }
+                return $this->current_class->name_text;
+ 
                 return "-";
             });
 
