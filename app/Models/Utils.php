@@ -325,6 +325,27 @@ class Utils  extends Model
         return $r;
     }
 
+
+
+/*     public static function create_secondary_school_subjects($u)
+    {
+
+        if ($u == null) {
+            return;
+        }
+        $sql_count = "SELECT count(id) FROM secondary_subjects WHERE academic_class_id = academic_classes.id";
+        $sql_classes = "SELECT id FROM academic_classes WHERE class_type = 'Secondary' AND ($sql_count) < 5 ";
+
+        foreach (DB::select($sql_classes) as $key => $val) {
+            $class = AcademicClass::find($val->id);
+            if ($class == null) {
+                die("class not found.");
+            }
+            AcademicClass::generate_secondary_main_subjects($class);
+        }
+    }
+     */
+
     public static function system_boot($u)
     {
         if ($u == null) {
