@@ -191,10 +191,10 @@ class StudentFinancialAccountController extends AdminController
             ->sortable()
             ->display(function ($x) {
 
-                if ($this->current_class == null) {
+                if ($this->owner->current_class == null) {
                     return "-";
                 }
-                return $this->current_class->name_text;
+                return $this->owner->current_class->name_text;
  
                 return "-";
             });
