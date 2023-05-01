@@ -40,108 +40,6 @@ class HomeController extends Controller
 
 
 
-
-        /*
-        set_time_limit(-1);
-        $x = 0;
-         foreach (StudentHasClass::where('academic_class_id', 17)->get() as $key => $s) {
-            $x++;
-            StudentHasTheologyClass::where([
-                'administrator_id' => $s->administrator_id
-            ])->delete();
-
-            $th = new StudentHasTheologyClass();
-            $th->enterprise_id = $s->enterprise_id;
-            $th->administrator_id = $s->administrator_id;
-            $th->theology_class_id = 8;
-            $th->save();
-            echo $x . "<hr>";
-        }
-
-
-        
-        Utils::sync_classes(7);
-        die("done $x");
-     
-
-                 $x =0; 
-        foreach (StudentHasClass::where('academic_class_id', 16)->get() as $key => $s) {
-            $x++;
-            StudentHasTheologyClass::where([
-                'administrator_id' => $s->administrator_id
-            ])->delete();
-
-            $th = new StudentHasTheologyClass();
-            $th->enterprise_id = $s->enterprise_id;
-            $th->administrator_id = $s->administrator_id;
-            $th->theology_class_id = 9;
-            $th->save();
-            echo $x . "<hr>";
-        }
-
-        
-        $x = 0;
-        foreach (StudentHasClass::where('academic_class_id', 15)->get() as $key => $s) {
-            $x++;
-            StudentHasTheologyClass::where([
-                'administrator_id' => $s->administrator_id
-            ])->delete();
-
-            $th = new StudentHasTheologyClass();
-            $th->enterprise_id = $s->enterprise_id;
-            $th->administrator_id = $s->administrator_id;
-            $th->theology_class_id = 10;
-            $th->save();
-            echo $x . "<hr>";
-        }
-
-        //middle
-        foreach (StudentHasClass::where('academic_class_id', 16)->get() as $key => $s) {
-            $x++;
-            StudentHasTheologyClass::where([
-                'administrator_id' => $s->administrator_id
-            ])->delete();
-
-            $th = new StudentHasTheologyClass();
-            $th->enterprise_id = $s->enterprise_id;
-            $th->administrator_id = $s->administrator_id;
-            $th->theology_class_id = 9;
-            $th->save();
-            echo $x . "<hr>";
-        }
-
-        //upper
-        foreach (StudentHasClass::where('academic_class_id', 17)->get() as $key => $s) {
-            $x++;
-            StudentHasTheologyClass::where([
-                'administrator_id' => $s->administrator_id
-            ])->delete();
-
-            $th = new StudentHasTheologyClass();
-            $th->enterprise_id = $s->enterprise_id;
-            $th->administrator_id = $s->administrator_id;
-            $th->theology_class_id = 1;
-            $th->save();
-            echo $x . "<hr>";
-        }
-
-
-        die("DONE");*/
-        /* $i = 0;
-
-
-        foreach (Transaction::where([])->orderBy('payment_date', 'asc')->get() as $key => $a) {
-            $d = Carbon::parse($a->payment_date);
-            $min_data = Carbon::parse('15-08-2022');
-            if(!$d->isBefore($min_data)){
-                continue;  
-            }
-            $a->delete();
-            $i++; 
-            echo $d->format('d-M-Y') . "<hr>";
-        }
-        die("romina => $i"); */
-
         Admin::style('.content-header {display: none;}');
         $u = Admin::user();
         return $content->view('admin.index', [
@@ -151,9 +49,19 @@ class HomeController extends Controller
     public function stats(Content $content)
     {
 
-  
 
- $u = Admin::user();
+
+        $u = Admin::user();
+
+        if (
+            true
+        ) {
+            $content->row(function (Row $row) {
+                $row->column(6, function (Column $column) {
+                    $column->append(Dashboard::bursarServices()); 
+                });
+            }); 
+        }
 
         if (
             $u->isRole('admin') ||
@@ -165,6 +73,7 @@ class HomeController extends Controller
                 $row->column(3, function (Column $column) {
                     $column->append(Dashboard::count_expected_fees());
                 });
+
                 $row->column(3, function (Column $column) {
                     $column->append(Dashboard::count_paid_fees());
                 });
@@ -177,7 +86,7 @@ class HomeController extends Controller
                 });
 
 
-                /*    $row->column(3, function (Column $column) {
+                $row->column(3, function (Column $column) {
                     $column->append(Dashboard::students());
                 });
                 $row->column(3, function (Column $column) {
@@ -188,7 +97,7 @@ class HomeController extends Controller
                 });
                 $row->column(3, function (Column $column) {
                     $column->append(Dashboard::school_population());
-                }); */
+                });
             });
         }
 
