@@ -40,9 +40,7 @@ class MainCourseController extends AdminController
         $grid->column('code', __('Code'))->sortable();
         $grid->column('papers', __('Papers'))->display(function () {
             return count($this->papers);
-        });
-
-
+        }); 
         return $grid;
     }
 

@@ -85,10 +85,10 @@ $school_email = 'admin@kjs.com';
     </div>
 
     <div class="row">
-        <table class="col-6">
+        <table >
             <tbody>
                 <tr>
-                    <td style="width: 42%">
+                    <td style="width: 40%!important">
                         <h2 class="text-center mt-1 text-uppercase h2" style="font-size: 16px"><u>secular studies</u>
                         </h2>
                         <div class="row mt-1 d-flex justify-content-between pl-3 pr-3 summary mb-1"
@@ -110,16 +110,24 @@ $school_email = 'admin@kjs.com';
                                     continue;
                                 }
                                 $done[] = $_v['competance'];
-                                
+                                $dp = $_v['competance'];
+                                if($dp == 'Literacy 1A'){
+                                    $dp = 'Learning Area 1';
+                                }
+
+                                if($dp == 'Literacy 1B'){
+                                    $dp = 'Learning Area 2';
+                                } 
+
                                 ?>
                                 <tr class="marks-1">
-                                    <th style="font-size: 10px;">{{ $_v['competance'] }} {{ $v->course_id }}</th>
-                                    <td>{{ $_v['comment'] }}</td>
+                                    <th style="font-size: 10px;">{{ $dp }}</th>
+                                    <td>{!! $_v['comment'] !!}</td>
                                     <td class="remarks text-center">
                                         @if (!$isBlank)
-                                            <b>{{ $_v['grade'] }}</b>
+                                            <b>{!! $_v['grade'] !!}</b>
                                         @else
-                                        @endif
+                                        @endif 
 
                                     </td>
                                     {{--  <td class="remarks text-center">{{ $v->initials }}</td> --}}
@@ -172,13 +180,13 @@ $school_email = 'admin@kjs.com';
                         @if ($tr != null)
                             <div class="p-0 mt-2 mb-2 class-teacher"><br>
                                 <b class="d-block">CLASS TEACHER'S COMMENT:</b>
-                                .............................................................................................................................................
+                                ...............................................................................................................................
                                 <br>
-                                .............................................................................................................................................
+                                ...............................................................................................................................
                                 <br>
-                                .............................................................................................................................................
+                                .............................................................................................................................
                                 <br>
-                                .............................................................................................................................................
+                                ..............................................................................................................................
                                 <br>
 
 
@@ -258,11 +266,12 @@ $school_email = 'admin@kjs.com';
     <div class="row mt-2 d-flex justify-content-between p-0 border-top pt-2 border-primary" style="font-size: 12px;">
         <span><b>SCHOOL FEES BALANCE:</b> <span class="value" style="font-size: 12px!important;">
                 ........................................{{-- {{ $bal_text }}</span></span> | --}}
-        {{-- <span><b>NEXT TERM TUTION FEE:</b> <span class="value" style="font-size: 12px!important;">UGX
+                {{-- <span><b>NEXT TERM TUTION FEE:</b> <span class="value" style="font-size: 12px!important;">UGX
             18,000</span></span> --}}
-        <span><b>SCHOOL PAY CODE:</b> <span class="value"
-                style="font-size: 12px!important;">{{ $r->owner->school_pay_payment_code }}</span></span> |
-        <span><b>NEXT TERM BEGINS ON:</b> <span class="value" style="font-size: 12px!important;">29<sup>th</sup> MAY,
-                2023</span></span>
+                <span><b>SCHOOL PAY CODE:</b> <span class="value"
+                        style="font-size: 12px!important;">{{ $r->owner->school_pay_payment_code }}</span></span> |
+                <span><b>NEXT TERM BEGINS ON:</b> <span class="value"
+                        style="font-size: 12px!important;">29<sup>th</sup> MAY,
+                        2023</span></span>
     </div>
 </article>
