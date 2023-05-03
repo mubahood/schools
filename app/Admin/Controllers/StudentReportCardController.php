@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Models\AcademicClass;
 use App\Models\AcademicYear;
+use App\Models\StudentHasClass;
 use App\Models\StudentReportCard;
 use App\Models\Term;
 use App\Models\TermlyReportCard;
@@ -181,20 +182,37 @@ class StudentReportCardController extends AdminController
     {
 
         set_time_limit(-1);
-        ini_set('memory_limit', '-1'); 
+        ini_set('memory_limit', '-1');
         foreach (StudentReportCard::all() as $c) {
-            echo $c->id."<hr>";
-            $c->class_teacher_comment = $c->class_teacher_comment.".";
-            $c->save();
+
+            $stream = StudentHasClass::where([
+                'academic_class_id' => $c->academic_class_id,
+                'administrator_id' => $c->student_id
+            ])
+                ->orderBy('id', 'desc')
+                ->first();
+
+            if ($stream == null) {
+                continue;
+            } 
+            if ($stream->stream_id == 0) {
+                continue;
+            } 
+
+            $c->stream_id = $stream->stream_id;
+            $c->save();  
+
+            echo $c->id."<br>";
         }
- 
-/* 
+
+        dd("done");
+        /* 
         $r = TermlyReportCard::find(3);
         $r::grade_students($r);
         dd($r);
 
 
-        die("simple test"); */ 
+        die("simple test"); */
         $grid = new Grid(new StudentReportCard());
 
 
@@ -282,7 +300,7 @@ class StudentReportCardController extends AdminController
 
         $grid->column('stream_id', __('Stream'))
             ->display(function () {
-                if($this->stream == null){
+                if ($this->stream == null) {
                     return "-";
                 }
                 return $this->stream->name;

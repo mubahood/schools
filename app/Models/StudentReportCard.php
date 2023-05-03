@@ -31,7 +31,7 @@ class StudentReportCard extends Model
 
             if ($stream != null) {
                 if ($stream->stream_id != null) {
-                    $m->stream_id = $m->stream_id;
+                    $m->stream_id = $stream->stream_id;
                 }
             }
             return $m;
@@ -47,7 +47,7 @@ class StudentReportCard extends Model
 
             if ($stream != null) {
                 if ($stream->stream_id != null) {
-                    $m->stream_id = $m->stream_id;
+                    $m->stream_id = $stream->stream_id;
                 }
             }
 
