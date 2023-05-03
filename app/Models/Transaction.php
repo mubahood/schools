@@ -216,8 +216,7 @@ class Transaction extends Model
 
 
             echo "<pre>";
-            print_r($m);
-            die("romina");
+            print_r($m); 
             
 
             if ($m->type == 'FEES_PAYMENT') {

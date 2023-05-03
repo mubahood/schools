@@ -239,16 +239,13 @@ class TermlyReportCard extends Model
                     'stream_id' => $stream->id,
                 ])
                     ->orderBy('total_marks', 'Desc')
-                    ->get() as $key => $report_card) {
-                        die("AS rominah K."); 
+                    ->get() as $key => $report_card) { 
                     $report_card->position = ($key + 1);
                     $report_card->save();
                 }
             }
         }
-
-
-        die("AS romina");
+ 
 
         foreach ($m->report_cards as  $report_card) {
             TermlyReportCard::grade_report_card($report_card);

@@ -218,10 +218,8 @@ dd($_am);
             if (strlen($acc->name) < 5) {
                 $acc->name = $acc->username;
                 $acc->save();
-            }
-            echo $name . " ====> {$acc->name}<hr>";
-        }
-        die("romina");
+            } 
+        } 
     }
 
     public static function school_pay_import()

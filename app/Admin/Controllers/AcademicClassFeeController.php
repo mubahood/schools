@@ -33,8 +33,7 @@ class AcademicClassFeeController extends AdminController
         $fee->academic_class_id = 1;
         $fee->name = 'Test fee';
         $fee->amount = 20000;
-        $fee->save();
-  	         die("romina");
+        $fee->save();  
         */
 
 
