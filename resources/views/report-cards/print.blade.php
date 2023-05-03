@@ -41,13 +41,13 @@ if ($recs[0]['r']->ent->has_theology != 'Yes') {
         $x = 1;
     @endphp
     @foreach ($recs as $item)
-       @php
-       $x++;
+        @php
+            /*  $x++;
        if($x > 2){
         break;
-       }
-           $item['isBlank'] = $isBlank;
-       @endphp
+       } */
+            $item['isBlank'] = $isBlank;
+        @endphp
         @if ($item['r']->academic_class->class_type == 'Nursery')
             @include('report-cards.print-nusery-layout', $item)
         @else
