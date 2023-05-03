@@ -1775,7 +1775,7 @@ dd($_am);
             $data['comment'] = 'Using my language appropriately.';
         } else if ($r->subject->course_id == 42) {
             //$data['competance'] = 'L.A 5';
-            $data['comment'] = 'Developing my language.';
+            $data['comment'] = 'Reading to enjoy aquire knowlege and be able to comprehend.';
         } else if ($r->subject->course_id == 39 || $r->subject->main_course_id == 49) {
             //$data['competance'] = 'L.A 4';
             $data['comment'] = 'Developing and using mathematical concepts in my day to day expiriences.';
@@ -1790,14 +1790,14 @@ dd($_am);
             $data['comment'] = 'Relating with others in an acceptable way.';
         } else if ($r->subject->course_id == 43) {
             //$data['competance'] = 'L.A 1';
-            $data['comment'] = 'Learning to write and writing to learn.';
+            $data['comment'] = 'Writing different kinds of factual and imaginative tasks <br> depicting good letter formation, creativity and handwriting skills.';
         } else if ($r->subject->course_id == 49) {
             //$data['competance'] = 'L.A 1';
             $data['comment'] = 'Match, recognise, and write numerals, and developing counting skills.';
         } else {
-            $data['comment'] = 'Create and share oral, written, and visual texts in English language';
+            $data['comment'] = 'Developing and using my language appropriately';
         }
-
+ 
 
 
         if ($r->total < 44) {

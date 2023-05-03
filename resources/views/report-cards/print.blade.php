@@ -37,15 +37,15 @@ if ($recs[0]['r']->ent->has_theology != 'Yes') {
 <body>
 
 
-    @php
+    {{-- @php
         $x = 1;
-    @endphp
+    @endphp --}}
     @foreach ($recs as $item)
        @php
-       $x++;
+       /* $x++;
        if($x > 3){
         break;
-       }
+       } */
            $item['isBlank'] = $isBlank;
        @endphp
         @if ($item['r']->academic_class->class_type == 'Nursery')

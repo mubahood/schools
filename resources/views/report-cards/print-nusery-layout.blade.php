@@ -127,9 +127,14 @@ $school_email = 'admin@kjs.com';
                             @endforeach
                         </table>
                         <div class="p-0 mt-2 mb-2 class-teacher">
-                            <b>CLASS TEACHER'S COMMENT:</b><br>
+                            <b class="d-block">CLASS TEACHER'S COMMENT:</b>
+                            .............................................................................................................................................
                             <br>
+                            .............................................................................................................................................
                             <br>
+                            .............................................................................................................................................
+                            <br>
+
                             {{-- <span class="comment">{{ Utils::getClassTeacherComment($r)['n'] }}</span> --}}
                         </div>
 
@@ -165,8 +170,18 @@ $school_email = 'admin@kjs.com';
                         @endif
 
                         @if ($tr != null)
-                            <div class="p-0 mt-2 mb-2 class-teacher">
-                                <b>CLASS TEACHER'S COMMENT:</b>
+                            <div class="p-0 mt-2 mb-2 class-teacher"><br>
+                                <b class="d-block">CLASS TEACHER'S COMMENT:</b>
+                                .............................................................................................................................................
+                                <br>
+                                .............................................................................................................................................
+                                <br>
+                                .............................................................................................................................................
+                                <br>
+                                .............................................................................................................................................
+                                <br>
+
+
                                 {{--                                 <span class="comment">{{ Utils::getClassTeacherComment($tr)['theo'] }}</span> --}}
                             </div>
                         @endif
@@ -220,10 +235,11 @@ $school_email = 'admin@kjs.com';
                     <div class="col-12 p-0">
                         <div class="p-0 mt-0 mb-2 class-teacher">
                             <b>HEAD TEACHER'S COMMUNICATION:</b>
-                            <span class="comment">We thank you for all the support you have accorded us since you joined
-                                Kira Junior School.
-                                We remain open to positive feedback, which we believe helps us to improve the services
-                                we provide to our children.</span>
+                            <span class="comment">
+                                At Kira Junior School, we believe that every child is a genius who only needs a
+                                conducive environment to blossom. Please note that next term we have to prepare for the
+                                sports gala and the election of prefects InSha'Allah.
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -241,12 +257,12 @@ $school_email = 'admin@kjs.com';
 
     <div class="row mt-2 d-flex justify-content-between p-0 border-top pt-2 border-primary" style="font-size: 12px;">
         <span><b>SCHOOL FEES BALANCE:</b> <span class="value" style="font-size: 12px!important;">
-                {{ $bal_text }}</span></span> |
+                ........................................{{-- {{ $bal_text }}</span></span> | --}}
         {{-- <span><b>NEXT TERM TUTION FEE:</b> <span class="value" style="font-size: 12px!important;">UGX
             18,000</span></span> --}}
         <span><b>SCHOOL PAY CODE:</b> <span class="value"
                 style="font-size: 12px!important;">{{ $r->owner->school_pay_payment_code }}</span></span> |
-        <span><b>TERM ENDS ON:</b> <span class="value" style="font-size: 12px!important;">5<sup>th</sup> MAY,
+        <span><b>NEXT TERM BEGINS ON:</b> <span class="value" style="font-size: 12px!important;">29<sup>th</sup> MAY,
                 2023</span></span>
     </div>
 </article>
