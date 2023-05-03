@@ -347,6 +347,7 @@ git reset --hard orign/master
 
 
 php artisan make:migration add_strea_id_to_student_has_theology_classes --table=student_has_theology_classes 
+php artisan make:migration add_strea_id_to_student_report_cards --table=student_report_cards 
 php artisan make:migration add_enterprise_id_to_streams --table=theology_streams 
 php artisan make:migration add_created_by --table=stock_records
 php artisan make:migration add_current_class_id --table=admin_users

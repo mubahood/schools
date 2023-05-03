@@ -28,12 +28,13 @@ class Utils  extends Model
 
     public static function manifest($ent)
     {
-
+        
         $man =  new Manifest();
         $man->expected_fees = 0;
         $man->paid_fees = 0;
         $man->active_students = 0;
         $man->unpaid_fees = 0;
+        return $man; 
         if ($ent == null) {
             return $man;
         }
@@ -45,7 +46,40 @@ class Utils  extends Model
 
 
 
-        $active_casses = "SELECT id FROM academic_classes WHERE academic_year_id = $dp->id AND enterprise_id = {$dp->enterprise_id}";
+        $active_casses = "SELECT * FROM academic_classes WHERE academic_year_id = $dp->id AND enterprise_id = {$dp->enterprise_id}";
+
+        $classes_balances = [];
+        foreach (DB::select($active_casses) as $key => $v) {
+            $total_expected = "SELECT sum(accounts.balance) as amount FROM admin_users,accounts WHERE 
+            admin_users.current_class_id = {$v->id} AND
+            accounts.administrator_id = admin_users.id";
+            $_am = DB::select($total_expected);
+            if(isset($_am[0]) && $_am[0]->amount){
+                dd($_am[0]->amount);
+            }
+
+
+dd($_am);
+/* 
+  +"id": 18
+    +"created_at": "2023-01-05 19:09:44"
+    +"updated_at": "2023-02-25 19:53:27"
+    +"enterprise_id": 7
+    +"academic_year_id": 3
+    +"class_teahcer_id": 3034
+    +"name": "Baby class"
+    +"short_name": "B.C"
+    +"details": "Baby class"
+    +"demo_id": 0
+    +"compulsory_subjects": 0
+    +"optional_subjects": 0
+    +"class_type": "Nursery"
+    +"academic_class_level_id": 1
+*/
+            //$classes_balances[] = 
+        }
+        dd($classes_balances);
+
         $active_students = "SELECT id FROM admin_users WHERE current_class_id in ($active_casses) AND status = 1 AND enterprise_id = {$dp->enterprise_id}";
         $man->active_students = count(DB::select($active_students));
 

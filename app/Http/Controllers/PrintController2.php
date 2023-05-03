@@ -47,7 +47,7 @@ class PrintController2 extends Controller
         error_reporting(E_ALL);
 
         $term_id = 0;
-        if(isset($_GET['term_id'])){
+        if (isset($_GET['term_id'])) {
             $term_id = (int)($_GET['term_id']);
         }
         $termly_report_card_id = 2;
@@ -58,16 +58,22 @@ class PrintController2 extends Controller
             $termly_report_card_id = (int)($_GET['termly_report_card_id']);
         }
 
+        $isBlank = false;
+        if (isset($_GET['task'])) {
+            if ($_GET['task'] == 'blank') {
+                $isBlank = true;
+            }
+        }
+
         if (isset($_GET['calss_id'])) {
-       
+
             $icalss_id = ((int)($_GET['calss_id']));
             $reps  = [];
-             foreach (StudentReportCard::where([
+            foreach (StudentReportCard::where([
                 'academic_class_id' => $icalss_id,
                 'term_id' => $term_id,
-/*                 'termly_report_card_id' => $termly_report_card_id, */
+                /*                 'termly_report_card_id' => $termly_report_card_id, */
             ])->get() as $r) {
-
 
 
                 $tr = TheologryStudentReportCard::where([
@@ -81,9 +87,9 @@ class PrintController2 extends Controller
                 ];
             }
 
- 
+
             $pdf = App::make('dompdf.wrapper');
-            $pdf->loadHTML(view('report-cards.print', ['recs' => $reps]));
+            $pdf->loadHTML(view('report-cards.print', ['recs' => $reps, 'isBlank' => $isBlank]));
             return $pdf->stream();
         }
 

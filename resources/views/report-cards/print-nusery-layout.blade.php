@@ -1,6 +1,10 @@
 <?php
 use App\Models\Utils;
 
+if (!isset($isBlank)) {
+    $isBlank = false;
+}
+
 $max_bot = 30;
 $max_mot = 40;
 $max_eot = 60;
@@ -33,81 +37,6 @@ foreach ($r->termly_report_card->term->exams as $exam) {
         $max_eot = $exam->max_mark;
     }
 }
-
-/*
-
-
-
-    "id" => 3
-    "created_at" => "2022-10-25 21:03:14"
-    "updated_at" => "2022-10-26 03:25:59"
-    "enterprise_id" => 7
-    "academic_year_id" => 2
-    "term_id" => 6
-    "has_beginning_term" => 0
-    "has_mid_term" => 1
-    "has_end_term" => 0
-    "report_title" => "10"
-    "grading_scale_id" => 7
-
- "id" => 192
-    "created_at" => "2022-10-25 21:03:14"
-    "updated_at" => "2022-10-26 03:26:05"
-    "enterprise_id" => 7
-    "academic_year_id" => 2
-    "term_id" => 6
-    "student_id" => 2704
-    "academic_class_id" => 11
-    "termly_report_card_id" => 3
-    "total_marks" => 194.0
-    "total_aggregates" => 36.0
-    "position" => 28
-    "class_teacher_comment" => "Tried, Work harder next time."
-    "head_teacher_comment" => "Nabakka  Husnah can do better than this."
-    "class_teacher_commented" => 0
-    "head_teacher_commented" => 0
-    "total_students" => 77
-    
-"id" => 7
-"created_at" => "2022-09-17 04:25:22"
-"updated_at" => "2022-09-17 04:37:05"
-"name" => "Kira Junior School"
-"short_name" => "kjs"
-"details" => "https://kirajuniorschool.ac.ug/"
-"logo" => "kjs.png"
-"phone_number" => "256700869880"
-"email" => "info@kirajuniorschool.ac.ug"
-"address" => null
-"expiry" => "2022-09-16"
-"administrator_id" => 2206
-"subdomain" => "kjs"
-"color" => "#038935"
-"welcome_message" => "<p>"In pursuit of faith and wisdom"</p>"
-"type" => "Primary"
-
-*/
-
-/*
-
-    "id" => 345
-    "created_at" => "2022-10-26 22:39:36"
-    "updated_at" => "2022-10-26 23:17:47"
-    "enterprise_id" => 7
-    "academic_year_id" => 2
-    "term_id" => 6
-    "student_id" => 3010
-    "theology_class_id" => 8
-    "theology_termly_report_card_id" => 1
-    "total_students" => 68
-    "total_aggregates" => 4
-    "total_marks" => 396.0
-    "position" => 8
-    "class_teacher_comment" => "Tried, Work harder next time."
-    "head_teacher_comment" => "Tasleem  Katumba can do better than this."
-    "class_teacher_commented" => 10
-    "head_teacher_commented" => 10
-    
-    */
 
 $school_name = 'KIIRA JUNIOR PRIMARY SCHOOL';
 $school_address = 'Bwera Kasese Uganda';
@@ -186,7 +115,13 @@ $school_email = 'admin@kjs.com';
                                 <tr class="marks-1">
                                     <th style="font-size: 10px;">{{ $_v['competance'] }} {{ $v->course_id }}</th>
                                     <td>{{ $_v['comment'] }}</td>
-                                    <td class="remarks text-center"><b>{{ $_v['grade'] }}</b></td>
+                                    <td class="remarks text-center">
+                                        @if (!$isBlank)
+                                            <b>{{ $_v['grade'] }}</b>
+                                        @else
+                                        @endif
+
+                                    </td>
                                     {{--  <td class="remarks text-center">{{ $v->initials }}</td> --}}
                                 </tr>
                             @endforeach
@@ -217,19 +152,22 @@ $school_email = 'admin@kjs.com';
                                     <tr class="marks-1">
                                         <th style="font-size: 10px;">{{ $_v['competance'] }}</th>
                                         <td>{{ $_v['comment'] }}</td>
-                                        <td class="remarks text-center"><b>{{ $_v['grade'] }}</b></td>
+                                        <td class="remarks text-center">
+                                            @if (!$isBlank)
+                                                <b>{{ $_v['grade'] }}</b>
+                                            @else
+                                            @endif
+                                        </td>
                                         {{--  <td class="remarks text-center">{{ $v->initials }}</td> --}}
                                     </tr>
                                 @endforeach
-
                             </table>
-
                         @endif
 
                         @if ($tr != null)
                             <div class="p-0 mt-2 mb-2 class-teacher">
                                 <b>CLASS TEACHER'S COMMENT:</b>
-{{--                                 <span class="comment">{{ Utils::getClassTeacherComment($tr)['theo'] }}</span> --}}
+                                {{--                                 <span class="comment">{{ Utils::getClassTeacherComment($tr)['theo'] }}</span> --}}
                             </div>
                         @endif
 
@@ -270,7 +208,7 @@ $school_email = 'admin@kjs.com';
     <table class="w-100">
         <tr>
             <td style="width: 80%">
-               {{--  <div class="row">
+                {{--  <div class="row">
                     <div class="col-12 p-0">
                         <div class="p-0 mt-0 mb-2 class-teacher">
                             <b>HEAD TEACHER'S COMMENT:</b>

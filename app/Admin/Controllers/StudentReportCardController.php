@@ -6,6 +6,7 @@ use App\Models\AcademicClass;
 use App\Models\AcademicYear;
 use App\Models\StudentReportCard;
 use App\Models\Term;
+use App\Models\TermlyReportCard;
 use App\Models\User;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -38,34 +39,7 @@ class StudentReportCardController extends AdminController
             ->title('Batch report card printing')
             ->description('Dashboard')
             ->row(function (Row $row) {
-
-
-
-                /*
-                    "id" => 1
-    "created_at" => "2022-10-26 12:31:36"
-    "updated_at" => "2022-11-24 17:17:23"
-    "enterprise_id" => 7
-    "academic_year_id" => 2
-    "term_id" => 6
-    "student_id" => 2704
-    "academic_class_id" => 11
-    "termly_report_card_id" => 1
-    "total_marks" => 299.0
-    "total_aggregates" => 13.0
-    "position" => 44
-    "class_teacher_comment" => "Encouraging results, Continue reading hard."
-    "head_teacher_comment" => "Positive progress observed, continue with the energy for a better grade."
-    "class_teacher_commented" => 1
-    "head_teacher_commented" => 1
-    "total_students" => 77
-    "average_aggregates" => 13.0
-    "grade" => "2"
-
-                */
-
                 $row->column(4, function (Column $column) {
-
                     $u = Admin::user();
                     $rows = [];
 
@@ -86,11 +60,13 @@ class StudentReportCardController extends AdminController
                             $v->id,
                             $v->name_text,
                             count($rs),
-                            '<a target="_blank" href="' . url('print?calss_id=' . $v->id) . '&term_id=' . $term_id . '&termly_report_card_id=1">PRINT</a>'
+                            '<a target="_blank" href="' . url('print?calss_id=' . $v->id) . '&term_id=' . $term_id . '&termly_report_card_id=1">PRINT REPORTS</a>',
+
+                            '<a target="_blank" href="' . url('print?calss_id=' . $v->id) . '&term_id=' . $term_id . '&termly_report_card_id=1&task=blank">PRINT BLANK</a>'
                         ];
                     }
 
-                    $headers = ['Id', 'Class', 'Report cards', 'Print'];
+                    $headers = ['Id', 'Class', 'Report cards', 'Print', 'Blank'];
 
 
                     $table = new Table($headers, $rows);
@@ -203,7 +179,24 @@ class StudentReportCardController extends AdminController
      */
     protected function grid()
     {
+
+        set_time_limit(-1);
+        ini_set('memory_limit', '-1'); 
+        foreach (StudentReportCard::all() as $c) {
+            echo $c->id."<hr>";
+            $c->class_teacher_comment = $c->class_teacher_comment.".";
+            $c->save();
+        }
+ 
+/* 
+        $r = TermlyReportCard::find(3);
+        $r::grade_students($r);
+        dd($r);
+
+
+        die("simple test"); */ 
         $grid = new Grid(new StudentReportCard());
+
 
 
 
@@ -225,7 +218,7 @@ class StudentReportCardController extends AdminController
 
             $filter->equal('term_id', 'Filter by term')->select(Term::where([
                 'enterprise_id' => Admin::user()->enterprise_id
-            ])->orderBy('id', 'Desc')->get()->pluck('name', 'id'));
+            ])->orderBy('id', 'Desc')->get()->pluck('name_text', 'id'));
 
 
             $u = Admin::user();
@@ -282,10 +275,19 @@ class StudentReportCardController extends AdminController
         $grid->column('student_id', __('Student'))->display(function () {
             return $this->owner->name;
         });
-        $grid->column('academic_class_id', __('Academic'))
+        $grid->column('academic_class_id', __('Class'))
             ->display(function () {
                 return $this->academic_class->name;
             })->sortable();
+
+        $grid->column('stream_id', __('Stream'))
+            ->display(function () {
+                if($this->stream == null){
+                    return "-";
+                }
+                return $this->stream->name;
+            })
+            ->sortable();
 
         $grid->column('total_marks', __('Total marks'))->editable()->sortable();
         $grid->column('average_aggregates', __('Average aggregates'))->editable()->sortable();

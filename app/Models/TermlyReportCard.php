@@ -231,23 +231,28 @@ class TermlyReportCard extends Model
     {
 
 
+        foreach ($m->academic_year->classes as $class) {
+            foreach ($class->streams as $stream) {
+                foreach (StudentReportCard::where([
+                    'academic_class_id' => $class->id,
+                    'termly_report_card_id' => $m->id,
+                    'stream_id' => $stream->id,
+                ])
+                    ->orderBy('total_marks', 'Desc')
+                    ->get() as $key => $report_card) {
+                        die("AS rominah K."); 
+                    $report_card->position = ($key + 1);
+                    $report_card->save();
+                }
+            }
+        }
+
+
+        die("AS romina");
 
         foreach ($m->report_cards as  $report_card) {
             TermlyReportCard::grade_report_card($report_card);
             //TermlyReportCard::get_teachers_remarks($report_card);
-        }
-
-
-        foreach ($m->academic_year->classes as $class) {
-            foreach (StudentReportCard::where([
-                'academic_class_id' => $class->id,
-                'termly_report_card_id' => $m->id
-            ])
-                ->orderBy('total_marks', 'Desc')
-                ->get() as $key => $report_card) {
-                $report_card->position = ($key + 1);
-                $report_card->save();
-            }
         }
     }
 
@@ -289,7 +294,6 @@ class TermlyReportCard extends Model
             }
             $number_of_marks++;
             $total_aggregates += ((int)($student_report_card->aggregates));
-         
         }
 
         if ($number_of_marks < 1) {
@@ -313,7 +317,7 @@ class TermlyReportCard extends Model
         $report_card->average_aggregates = round($report_card->average_aggregates, 2);
         $report_card->total_marks = $total_marks;
         $report_card->total_aggregates = $total_aggregates;
-        $report_card->total_students = $total_students; 
+        $report_card->total_students = $total_students;
         $report_card->save();
     }
     public static function get_teachers_remarks($report_card)

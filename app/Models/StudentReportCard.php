@@ -22,6 +22,35 @@ class StudentReportCard extends Model
 
         parent::boot();
         self::updating(function ($m) {
+            $stream = StudentHasClass::where([
+                'academic_class_id' => $m->academic_class_id,
+                'administrator_id' => $m->student_id
+            ])
+                ->orderBy('id', 'desc')
+                ->first();
+
+            if ($stream != null) {
+                if ($stream->stream_id != null) {
+                    $m->stream_id = $m->stream_id;
+                }
+            }
+            return $m;
+        });
+        self::updating(function ($m) {
+
+            $stream = StudentHasClass::where([
+                'academic_class_id' => $m->academic_class_id,
+                'administrator_id' => $m->student_id
+            ])
+                ->orderBy('id', 'desc')
+                ->first();
+
+            if ($stream != null) {
+                if ($stream->stream_id != null) {
+                    $m->stream_id = $m->stream_id;
+                }
+            }
+
             if ($m->class_teacher_commented == 10) {
                 $m->class_teacher_commented = 0;
             } else {
@@ -53,6 +82,10 @@ class StudentReportCard extends Model
     function academic_class()
     {
         return $this->belongsTo(AcademicClass::class, 'academic_class_id');
+    }
+    function stream()
+    {
+        return $this->belongsTo(AcademicClassSctream::class, 'stream_id');
     }
 
     function get_theology_report()

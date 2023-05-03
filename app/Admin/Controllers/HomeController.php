@@ -53,7 +53,7 @@ class HomeController extends Controller
 
         $u = Admin::user();
 
-        if (
+  /*       if (
             true
         ) {
             $content->row(function (Row $row) {
@@ -61,7 +61,7 @@ class HomeController extends Controller
                     $column->append(Dashboard::bursarServices()); 
                 });
             }); 
-        }
+        } */
 
         if (
             $u->isRole('admin') ||
@@ -69,7 +69,7 @@ class HomeController extends Controller
         ) {
             $content->row(function (Row $row) {
 
-                $man = Utils::manifest(Auth::user()->ent);
+                //$man = Utils::manifest(Auth::user()->ent); 
                 $row->column(3, function (Column $column) {
                     $column->append(Dashboard::count_expected_fees());
                 });

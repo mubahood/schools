@@ -7,6 +7,9 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'App\\Admin\\Actions\\Post\\BatchPrint' => $baseDir . '/app/Admin/Actions/Post/BatchPrint.php',
+    'App\\Admin\\Actions\\Post\\BatchStudentFinancialAccountChangeBalance' => $baseDir . '/app/Admin/Actions/Post/BatchStudentFinancialAccountChangeBalance.php',
+    'App\\Admin\\Actions\\Post\\BatchStudentFinancialAccountSetNotVerified' => $baseDir . '/app/Admin/Actions/Post/BatchStudentFinancialAccountSetNotVerified.php',
+    'App\\Admin\\Actions\\Post\\BatchStudentFinancialAccountSetVerified' => $baseDir . '/app/Admin/Actions/Post/BatchStudentFinancialAccountSetVerified.php',
     'App\\Admin\\Controllers\\AcademicClassController' => $baseDir . '/app/Admin/Controllers/AcademicClassController.php',
     'App\\Admin\\Controllers\\AcademicClassFeeController' => $baseDir . '/app/Admin/Controllers/AcademicClassFeeController.php',
     'App\\Admin\\Controllers\\AcademicClassLevelController' => $baseDir . '/app/Admin/Controllers/AcademicClassLevelController.php',

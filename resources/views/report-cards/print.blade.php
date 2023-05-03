@@ -1,14 +1,17 @@
 <?php
 
-if(!isset($recs[0])){
-    die("Reports not selected."); 
+if (!isset($isBlank)) {
+    $isBlank = false;
+}
+if (!isset($recs[0])) {
+    die('Reports not selected.');
 }
 $portrait = false;
 
 if ($recs[0]['r']->ent->has_theology != 'Yes') {
-    $portrait = true; 
+    $portrait = true;
 }
- 
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -34,7 +37,17 @@ if ($recs[0]['r']->ent->has_theology != 'Yes') {
 <body>
 
 
+    @php
+        $x = 1;
+    @endphp
     @foreach ($recs as $item)
+       @php
+       $x++;
+       if($x > 3){
+        break;
+       }
+           $item['isBlank'] = $isBlank;
+       @endphp
         @if ($item['r']->academic_class->class_type == 'Nursery')
             @include('report-cards.print-nusery-layout', $item)
         @else
