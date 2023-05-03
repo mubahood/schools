@@ -180,7 +180,7 @@ class StudentReportCardController extends AdminController
      */
     protected function grid()
     {
-     /*  
+        /* 
         set_time_limit(-1);
         ini_set('memory_limit', '-1');
         foreach (StudentReportCard::all() as $c) {
@@ -210,7 +210,6 @@ class StudentReportCardController extends AdminController
         $r = TermlyReportCard::find(3);
         $r::grade_students($r);
         dd($r);
-
 
         die("simple test"); */
         $grid = new Grid(new StudentReportCard());
