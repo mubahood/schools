@@ -163,7 +163,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                             <td colspan="2"></td>
                         </tr>
                     </table>
-                    <div class="p-0 mt-2 mb-2 class-teacher">
+                    <div class="p-0 mt-0 mb-0 class-teacher">
                         <b class="d-block">CLASS TEACHER'S COMMENT:</b>
                         .............................................................................................................................................
                         <br>
@@ -255,7 +255,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     @endif
 
                     @if ($tr != null)
-                        <div class="p-0 mt-2 mb-2 class-teacher">
+                        <div class="p-0 mt-1 mb-0 class-teacher">
 
                             <b class="d-block">CLASS TEACHER'S COMMENT:</b>
                             ...............................................................................................................................
