@@ -137,8 +137,7 @@ class TermlyReportCard extends Model
 
                 if ($report_card != null) {
                     if ($report_card->id > 0) {
-
-
+ 
                         $marks = Mark::where([
                             'student_id' => $student->id,
                             'class_id' => $class->id
