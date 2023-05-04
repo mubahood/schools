@@ -169,8 +169,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                         <br>
                         .............................................................................................................................................
                         <br>
-                        .............................................................................................................................................
-                        <br>
+                         
 
                  {{--        <b>CLASS TEACHER'S COMMENT:</b> 
                         <span class="comment">{{ Utils::getClassTeacherComment($r)['teacher'] }}</span> --}}
@@ -344,8 +343,8 @@ foreach ($r->termly_report_card->term->exams as $exam) {
         <table class="w-100">
             <tr>
                 <td style="width: 80%">
-                    <b>HEAD TEACHER'S COMMENT:</b>
-                    <span class="comment">{{ Utils::getClassTeacherComment($r)['hm'] }}</span>
+{{--                     <b>HEAD TEACHER'S COMMENT:</b>
+                    <span class="comment">{{ Utils::getClassTeacherComment($r)['hm'] }}</span> --}}
                     <div class="p-0 mt-0 mb-2 class-teacher">
                         <b>HEAD TEACHER'S COMMUNICATION:</b>
                         <span class="comment">At Kira Junior School, we believe that every child is a genius who only needs a
