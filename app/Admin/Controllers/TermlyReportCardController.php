@@ -30,16 +30,32 @@ class TermlyReportCardController extends AdminController
 
 
         $grid = new Grid(new TermlyReportCard());
-  
-
 
 /*         $x = TermlyReportCard::find(3);
-        $x->do_update = 1;               
+        if($x == null){
+            die("not found"); 
+        }
+        foreach ($x->report_cards as $r) {
+            foreach ($r->items as $student_report) { 
+                $student_report->delete(); 
+                echo($student_report->id."<br>");
+            }
+            $r->delete();
+            echo($r->id."<br>");
+        }
+        $x->delete();
+
+        dd($x->delete); 
+        $x->do_update = 1;
         $x->report_title .= rand(1, 10);
-        $x->save();
+        $x->save(); */
+
+
+
+        /*      
 
         dd("dpme"); */
-/*
+        /*
         $x = TermlyReportCard::find(1);
         TermlyReportCard::grade_students($x);
         dd("remove");  */

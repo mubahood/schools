@@ -108,8 +108,6 @@ class TermlyReportCard extends Model
             foreach ($class->students as $_student) {
 
 
-
-
                 $student = $_student->student;
                 if ($student == null) {
                     continue;
@@ -144,7 +142,9 @@ class TermlyReportCard extends Model
                         $marks = Mark::where([
                             'student_id' => $student->id,
                             'class_id' => $class->id
-                        ])->get();
+                        ])
+                            ->orderBy('id', 'desc')
+                            ->get();
                         foreach ($marks as $mark) {
 
 
@@ -236,16 +236,15 @@ class TermlyReportCard extends Model
                 foreach (StudentReportCard::where([
                     'academic_class_id' => $class->id,
                     'termly_report_card_id' => $m->id,
-                    'stream_id' => $stream->id,
                 ])
                     ->orderBy('total_marks', 'Desc')
-                    ->get() as $key => $report_card) { 
+                    ->get() as $key => $report_card) {
                     $report_card->position = ($key + 1);
                     $report_card->save();
                 }
             }
         }
- 
+
 
         foreach ($m->report_cards as  $report_card) {
             TermlyReportCard::grade_report_card($report_card);
@@ -505,7 +504,7 @@ class TermlyReportCard extends Model
                 $report_card = StudentReportCard::where([
                     'term_id' => $m->term_id,
                     'termly_report_card_id' => $m->id,
-/*                     'student_id' => $student->id, */
+                    /*                     'student_id' => $student->id, */
                 ])->first();
                 if ($report_card == null) {
                     $report_card = new StudentReportCard();

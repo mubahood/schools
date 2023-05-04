@@ -125,7 +125,10 @@ class TheologyTermlyReportCard extends Model
                     return;
                 }
 
-                $exam = TheologyExam::where(['term_id' => $report_card->termly_report_card->term_id])->first();
+                $exam = TheologyExam::where(['term_id' => $report_card->termly_report_card->term_id])
+                ->orderBy('id','desc')
+                ->first();
+                 
                 if ($exam == null) {
                     return;
                 }
@@ -160,7 +163,7 @@ class TheologyTermlyReportCard extends Model
                     ])->get();
 
                     $isFound = false;
-                    $_mark = new TheologyMark();
+                    $_mark = new TheologyMark(); 
                     foreach ($marks as $mark) {
                         if ($mark->score > 0) {
                             $isFound = true;

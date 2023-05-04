@@ -51,7 +51,7 @@ class StudentReportCardItem extends Model
 
         parent::boot();
         static::deleting(function ($m) {
-            die("You cannot delete this item.");
+            //die("You cannot delete this item.");
         });
     }
 }

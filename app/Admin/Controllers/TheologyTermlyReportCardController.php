@@ -26,13 +26,36 @@ class TheologyTermlyReportCardController extends AdminController
      * @return Grid
      */
     protected function grid()
-    {
+    {  /*
+     $x = TheologyTermlyReportCard::find(6); 
+     TheologyTermlyReportCard::my_update($x);
+     die("done");
+   
+        if($x == null){
+            die("not found"); 
+        }
+        foreach ($x->report_cards as $r) {
+            foreach ($r->items as $student_report) { 
+                $student_report->delete(); 
+                echo($student_report->id."<br>"); 
+            }
+            $r->delete();
+            echo($r->id."<br>");  
+            //echo($r->id."<br>");
+        }
+        
+        $x->delete();
+        dd($x->id); 
+        $x->do_update = 1;
+        $x->report_title .= rand(1, 10);
+        $x->save();  */
+
         /* 
-        $r = TheologyTermlyReportCard::find(3);
         $r->report_title .= 1;
         $r->save();
         die("romina");    */
-        /*  TheologyTermlyReportCard::grade_students($r);
+        /*  
+        TheologyTermlyReportCard::grade_students($r);
 
 
        $x = TermlyReportCard::find(1);
