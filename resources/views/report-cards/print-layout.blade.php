@@ -6,6 +6,13 @@ $max_mot = 40;
 $max_eot = 60;
 $tr = isset($tr) ? $tr : null;
 
+$stream_class = '.......';
+if ($r->owner->stream != null) {
+    if ($r->owner->stream->name != null) {
+        $stream_class = $r->owner->stream->name;
+    }
+}
+
 if ($tr == null) {
     $tr = $r->get_theology_report();
 }
@@ -80,15 +87,20 @@ foreach ($r->termly_report_card->term->exams as $exam) {
 
                     <h2 class="text-center text-uppercase h2" style="font-size: 18px"><u>secular studies</u></h2>
                     <div class="row mt-1 pb-2 d-flex justify-content-between pl-3 pr-3 summary" style="font-size: 12px">
-                        <span><b>CLASS:</b> <span class="value">{{ $r->academic_class->name }}</span></span>
+                        <span><b>CLASS:</b> <span class="value">{{ $r->academic_class->name }}
+                                {{ $stream_class }}</span></span>
                         {{-- <span><b class="text-uppercase">Aggre:</b> <span class="value">18</span></span> --}}
                         <span><b class="text-uppercase">Aggr:</b> <span
                                 class="value text-lowercase">{{ (int) $r->average_aggregates }}</span></span>
 
                         <span><b class="text-uppercase">DIV:</b> <span class="value">{{ $r->grade }}</span></span>
-                        <span><b class="text-uppercase">Position:</b> <span
-                                class="value text-lowercase">{{ $numFormat->format($r->position) }}</span></span>
-                        <span><b class="text-uppercase">OUT OF :</b> <span class="value">{{ $r->total_students }}
+                        <span><b class="text-uppercase">Position:</b> <span class="value text-lowercase">
+                                {{-- {{ $numFormat->format($r->position) }} --}}
+                                .........</span>
+                            <span><b class="text-uppercase">OUT OF :</b> <span class="value">
+                                    {{-- {{ $r->total_students }} --}}
+                                    .........
+                                </span>
                     </div>
                     <table class="table table-bordered marks-table p-0 m-0 w-100">
                         <thead class="p-0 m-0 text-center">
@@ -166,8 +178,11 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                             {{-- <span><b class="text-uppercase">Aggre:</b> <span class="value">18</span></span> --}}
                             <span><b class="text-uppercase">DIV:</b> <span
                                     class="value">{{ $tr->grade }}</span></span>
-                            <span><b class="text-uppercase">Position in class:</b> <span
-                                    class="value text-lowercase">{{ $numFormat->format($tr->position) }}</span></span>
+                            <span><b class="text-uppercase">Position in class:</b> <span class="value text-lowercase">
+                                    {{-- {{ $numFormat->format($tr->position) }} --}}
+                                    ..........
+                                </span></span>
+                                OUT OF.........
 
                         </div>
                     @endif
@@ -311,10 +326,9 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     <span class="comment">{{ Utils::getClassTeacherComment($r)['hm'] }}</span>
                     <div class="p-0 mt-0 mb-2 class-teacher">
                         <b>HEAD TEACHER'S COMMUNICATION:</b>
-                        <span class="comment">We thank you for all the support you have accorded us since you joined
-                            Kira Junior School.
-                            We remain open to positive feedback, which we believe helps us to improve the services we
-                            provide to our children.</span>
+                        <span class="comment">At Kira Junior School, we believe that every child is a genius who only needs a
+                            conducive environment to blossom. Please note that next term we have to prepare for the
+                            sports gala and the election of prefects InSha'Allah.</span>
                     </div>
                 </td>
                 <td class=" pl-3 text-center">
@@ -327,19 +341,18 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 </td>
             </tr>
         </table>
-        <div class="  mt-2 d-flex justify-content-between p-0  pt-2"
-            style="font-size: 12px; border-top: solid
-            {{ $r->ent->color }} 1px; ">
+        <hr style="background-color:  {{ $r->ent->color }}">
+        <div class=" mt-2 d-flex justify-content-between p-0 pt-2 " style="font-size: 12px;">
             <span><b>SCHOOL FEES BALANCE:</b> <span class="value" style="font-size: 12px!important;">
-                    {{ $bal_text }}</span></span> |
-            {{-- <span><b>NEXT TERM TUTION FEE:</b> <span class="value" style="font-size: 12px!important;">UGX
+                    ........................................{{-- {{ $bal_text }}</span></span> | --}}
+                    {{-- <span><b>NEXT TERM TUTION FEE:</b> <span class="value" style="font-size: 12px!important;">UGX
                 18,000</span></span> --}}
-            <span><b>SCHOOL PAY CODE:</b> <span class="value"
-                    style="font-size: 12px!important;">{{ $r->owner->school_pay_payment_code }}</span></span> |
-            <span><b>TERM ENDS ON:</b> <span class="value" style="font-size: 12px!important;">5<sup>th</sup> MAY,
-                    2023</span></span>
+                    <span><b>SCHOOL PAY CODE:</b> <span class="value"
+                            style="font-size: 12px!important;">{{ $r->owner->school_pay_payment_code }}</span></span> |
+                    <span><b>NEXT TERM BEGINS ON:</b> <span class="value"
+                            style="font-size: 12px!important;">29<sup>th</sup> MAY,
+                            2023</span></span>
         </div>
-
 
 
     </div>

@@ -2012,10 +2012,10 @@ dd($_am);
         return [
             'Very good work, thank you so much, however, keep working hard',
             'A steady progress has been shown, however, more effort is still needed in reading.',
-            'Thank you for improving, but more effort is required to do ev',
-            'Well done with your continuous improvement, however, read eve',
-            'Thank you for the improvement, however, double your effort fos',
-            'Good progress reflected, continue reading hard for the better',
+            'Thank you for improving, but more effort is required.',
+            'Well done with your continuous improvement, however more effort are still needed for the better performance.',
+            'Thank you for the improvement, however, double your effort for the better performance.',
+            'Good progress reflected, continue reading hard for the better performance.',
         ];
     }
 

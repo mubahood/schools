@@ -62,6 +62,11 @@ class User extends Authenticatable implements JWTSubject
         return $this->belongsTo(Enterprise::class, 'enterprise_id');
     }
 
+    public function stream()
+    {
+        return $this->belongsTo(Stream::class, 'stream_id');
+    }
+
     public function services()
     {
         return $this->hasMany(ServiceSubscription::class, 'administrator_id');

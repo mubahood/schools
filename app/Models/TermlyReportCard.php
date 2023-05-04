@@ -505,7 +505,7 @@ class TermlyReportCard extends Model
                 $report_card = StudentReportCard::where([
                     'term_id' => $m->term_id,
                     'termly_report_card_id' => $m->id,
-                    'student_id' => $student->id,
+/*                     'student_id' => $student->id, */
                 ])->first();
                 if ($report_card == null) {
                     $report_card = new StudentReportCard();
