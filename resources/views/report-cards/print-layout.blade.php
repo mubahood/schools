@@ -71,7 +71,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
     </div>
 
     <div class="row">
-        <hr style="border: solid {{ $r->ent->color }} 1px; " class="m-0 mt-1  mb-1">
+        <hr style="border: solid {{ $r->ent->color }} 1px; " class="m-0 mt-1  mb-0">
     </div>
     <div class="row mb-1 d-flex justify-content-between summary"style="font-size: 14px">
         <span><b>NAME:</b> <span class="value">{{ $r->owner->name }}</span></span>
@@ -362,8 +362,8 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 </td>
             </tr>
         </table>
-        <hr style="background-color:  {{ $r->ent->color }}">
-        <div class=" mt-2 d-flex justify-content-between p-0 pt-2 " style="font-size: 16px;">
+        <hr style="background-color:  {{ $r->ent->color }}; ">
+        <div class=" mt-0 d-flex justify-content-between p-0 pt-0 " style="font-size: 16px;">
             <span><b>SCHOOL FEES BALANCE:</b> <span class="value" style="font-size: 16px!important;">
                     ........................................{{-- {{ $bal_text }}</span></span> | --}}
                     {{-- <span><b>NEXT TERM TUTION FEE:</b> <span class="value" style="font-size: 12px!important;">UGX
