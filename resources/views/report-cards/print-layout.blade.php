@@ -125,6 +125,9 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                             if (in_array($v->main_course_id, $done)) {
                                 continue;
                             }
+                            if ( ((int)($v->total)) < 1 ) {
+                                continue;
+                            }
                             $done[] = $v->main_course_id; ?>
                             <tr class="marks">
                                 <th>{{ $v->subject->subject_name }}</th>
@@ -161,8 +164,16 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                         </tr>
                     </table>
                     <div class="p-0 mt-2 mb-2 class-teacher">
-                        <b>CLASS TEACHER'S COMMENT:</b>
-                        <span class="comment">{{ Utils::getClassTeacherComment($r)['teacher'] }}</span>
+                        <b class="d-block">CLASS TEACHER'S COMMENT:</b>
+                        .............................................................................................................................................
+                        <br>
+                        .............................................................................................................................................
+                        <br>
+                        .............................................................................................................................................
+                        <br>
+
+                 {{--        <b>CLASS TEACHER'S COMMENT:</b> 
+                        <span class="comment">{{ Utils::getClassTeacherComment($r)['teacher'] }}</span> --}}
                         {{-- <span class="comment">{{  }}</span> --}}
                     </div>
                 </td>
@@ -246,8 +257,19 @@ foreach ($r->termly_report_card->term->exams as $exam) {
 
                     @if ($tr != null)
                         <div class="p-0 mt-2 mb-2 class-teacher">
+
+                            <b class="d-block">CLASS TEACHER'S COMMENT:</b>
+                            ...............................................................................................................................
+                            <br>
+                            ...............................................................................................................................
+                            <br>
+                            .............................................................................................................................
+                            <br>
+                            ..............................................................................................................................
+                            <br>
+             {{--                
                             <b>CLASS TEACHER'S COMMENT:</b>
-                            <span class="comment">{{ Utils::getClassTeacherComment($r)['theo'] }}</span>
+                            <span class="comment">{{ Utils::getClassTeacherComment($r)['theo'] }}</span> --}}
                         </div>
                     @endif
                 </td>
@@ -342,15 +364,15 @@ foreach ($r->termly_report_card->term->exams as $exam) {
             </tr>
         </table>
         <hr style="background-color:  {{ $r->ent->color }}">
-        <div class=" mt-2 d-flex justify-content-between p-0 pt-2 " style="font-size: 12px;">
-            <span><b>SCHOOL FEES BALANCE:</b> <span class="value" style="font-size: 12px!important;">
+        <div class=" mt-2 d-flex justify-content-between p-0 pt-2 " style="font-size: 16px;">
+            <span><b>SCHOOL FEES BALANCE:</b> <span class="value" style="font-size: 16px!important;">
                     ........................................{{-- {{ $bal_text }}</span></span> | --}}
                     {{-- <span><b>NEXT TERM TUTION FEE:</b> <span class="value" style="font-size: 12px!important;">UGX
                 18,000</span></span> --}}
-                    <span><b>SCHOOL PAY CODE:</b> <span class="value"
-                            style="font-size: 12px!important;">{{ $r->owner->school_pay_payment_code }}</span></span> |
-                    <span><b>NEXT TERM BEGINS ON:</b> <span class="value"
-                            style="font-size: 12px!important;">29<sup>th</sup> MAY,
+                    <span>&nbsp;&nbsp; <b>SCHOOL PAY CODE:</b> <span class="value"
+                            style="font-size: 16px!important;">{{ $r->owner->school_pay_payment_code }}</span></span> |
+                    <span>&nbsp;&nbsp;<b>NEXT TERM BEGINS ON:</b> <span class="value"
+                            style="font-size: 16px!important;">29<sup>th</sup> MAY,
                             2023</span></span>
         </div>
 
