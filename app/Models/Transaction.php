@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Facades\Admin;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -209,9 +210,9 @@ class Transaction extends Model
 
             /*      [enterprise_id] => 7
             [type] => FEES_PAYMENT
-            [account_id] => 153
-            [amount] => 12000
-            [created_by_id] => 2206
+ 
+              [account_id] => 153
+            [amount] => 12000         [created_by_id] => 2206
             [is_contra_entry] => 
 
 
@@ -298,5 +299,13 @@ class Transaction extends Model
     public function account()
     {
         return $this->belongsTo(Account::class);
+    }
+    public function term()
+    {
+        return $this->belongsTo(Term::class,'term_id');
+    }
+    public function by()
+    {
+        return $this->belongsTo(Administrator::class,'created_by_id');
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Models\Account;
+use App\Models\Term;
 use App\Models\Transaction;
 use App\Models\Utils;
 use Attribute;
@@ -11,6 +12,8 @@ use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class TransactionController extends AdminController
 {
@@ -30,12 +33,36 @@ class TransactionController extends AdminController
     {
         $grid = new Grid(new Transaction());
 
+        $grid->export(function ($export) {
+
+            $export->filename('Transactions');
+
+            $export->except(['actions']);
+            $export->originalValue(['description', 'type']);
+
+            $export->column('account_id', function ($value, $original) {
+                $acc = Account::find($original);
+                if ($acc == null) {
+                    return '-';
+                }
+                return $acc->name;
+            });
+            $export->column('is_contra_entry', function ($value, $original) {
+                if ($original == 1) {
+                    return 'Contra Entry';
+                }
+                return 'Not Contra Entry';
+            });
+        });
+
 
 
         $grid->filter(function ($filter) {
             // Remove the default id filter
             $filter->disableIdFilter();
             $u = Admin::user();
+
+
             $ajax_url = url(
                 '/api/ajax?'
                     . 'enterprise_id=' . $u->enterprise_id
@@ -50,6 +77,12 @@ class TransactionController extends AdminController
                         return [$a->id => $a->name];
                     }
                 })->ajax($ajax_url);
+
+
+            $filter->equal('term_id', 'Fliter by term')->select(Term::where([
+                'enterprise_id' => $u->enterprise_id
+            ])->get()
+                ->pluck('name_text', 'id'));
             $filter->between('payment_date', 'Created between')->date();
         });
 
@@ -65,20 +98,28 @@ class TransactionController extends AdminController
 
         $grid->column('id', __('Id'))->sortable();
 
-        $grid->column('payment_date', __('Created'))->display(function () {
+        $grid->column('term_id', __('Term'))->display(function () {
+            if ($this->term == null) {
+            }
+            return 'Term ' . $this->term->name_text;
+        })
+            ->sortable();
+
+        $grid->column('payment_date', __('Date'))->display(function () {
             return Utils::my_date_time($this->payment_date);
         })
             ->sortable();
 
-        $grid->column('description', __('Description'));
+
         $grid->column('academic_year_id', __('Academic year id'))->hide();
-        /* $grid->column('account_id', __('Account'))->display(function () {
-            return $this->account->name;
-        }); */
+
 
         $grid->column('account_id', __('Account'))
             ->sortable()
-            ->display(function () {
+            ->display(function ($x) {
+                if($this->account == null){
+                    return $x;
+                }
                 return
                     '<a class="text-dark" href="' . admin_url('students/' . $this->account->administrator_id) . '">' . $this->account->name . "</a>";;
             });
@@ -86,13 +127,53 @@ class TransactionController extends AdminController
 
 
 
-        $grid->column('amount', __('Amount'))->display(function () {
-            return "UGX " . number_format($this->amount);
+        $grid->column('amount', __('Amount (UGX)'))->display(function () {
+            return  number_format($this->amount);
         })
             ->sortable()->totalRow(function ($x) {
                 return  number_format($x);
             });
- 
+
+
+        $grid->column('is_contra_entry', __('Is Contra Entry'))
+            ->using([
+                1 => 'Yes',
+                0 => 'No',
+            ])->dot([
+                1 => 'danger',
+                0 => 'success',
+            ])
+            ->filter([
+                0 => 'Not Contra Entry',
+                1 => 'Contra Entry',
+            ])
+            ->sortable();
+
+
+        $grid->column('description', __('Description'))->display(function ($x) {
+            return '<spap title="' . $x . '" >' . Str::limit($x, 40, '...') . '</span>';
+        });
+
+        $grid->column('type', __('Transaction Type'))
+            ->label([
+                "FEES_PAYMENT" => 'success',
+                "FEES_BILL" => 'info',
+                "other" => 'warning',
+            ])
+            ->filter([
+                "FEES_PAYMENT" => 'Fees Payment',
+                "FEES_BILL" => 'FEES BILL',
+                "other" => 'Other',
+            ])
+            ->sortable();
+
+
+        $grid->column('created_by_id', __('Created By'))->display(function () {
+            if ($this->by == null) {
+            }
+            return  $this->by->name;
+        })
+            ->sortable();
         return $grid;
     }
 
