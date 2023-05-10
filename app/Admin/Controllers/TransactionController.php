@@ -84,6 +84,13 @@ class TransactionController extends AdminController
             ])->get()
                 ->pluck('name_text', 'id'));
             $filter->between('payment_date', 'Created between')->date();
+            
+            $filter->group('amount', function ($group) {
+                $group->gt('greater than');
+                $group->lt('less than');
+                $group->equal('equal to');
+            });
+
         });
 
         $grid->disableBatchActions();
