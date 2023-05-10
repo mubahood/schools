@@ -96,7 +96,7 @@ class TransactionController extends AdminController
         ])
             ->orderBy('id', 'Desc');
 
-        $grid->column('id', __('Id'))->sortable();
+/*         $grid->column('id', __('Id'))->sortable(); */
 
         $grid->column('term_id', __('Term'))->display(function () {
             if ($this->term == null) {
