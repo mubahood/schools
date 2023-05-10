@@ -28,13 +28,13 @@ class Utils  extends Model
 
     public static function manifest($ent)
     {
-        
+
         $man =  new Manifest();
         $man->expected_fees = 0;
         $man->paid_fees = 0;
         $man->active_students = 0;
         $man->unpaid_fees = 0;
-        return $man; 
+        return $man;
         if ($ent == null) {
             return $man;
         }
@@ -54,13 +54,13 @@ class Utils  extends Model
             admin_users.current_class_id = {$v->id} AND
             accounts.administrator_id = admin_users.id";
             $_am = DB::select($total_expected);
-            if(isset($_am[0]) && $_am[0]->amount){
+            if (isset($_am[0]) && $_am[0]->amount) {
                 dd($_am[0]->amount);
             }
 
 
-dd($_am);
-/* 
+            dd($_am);
+            /* 
   +"id": 18
     +"created_at": "2023-01-05 19:09:44"
     +"updated_at": "2023-02-25 19:53:27"
@@ -218,8 +218,8 @@ dd($_am);
             if (strlen($acc->name) < 5) {
                 $acc->name = $acc->username;
                 $acc->save();
-            } 
-        } 
+            }
+        }
     }
 
     public static function school_pay_import()
@@ -359,7 +359,7 @@ dd($_am);
 
 
 
-/*     public static function create_secondary_school_subjects($u)
+    /*     public static function create_secondary_school_subjects($u)
     {
 
         if ($u == null) {
@@ -388,6 +388,7 @@ dd($_am);
             return;
         }
 
+        Utils::rectify_terms_forItransactions($u);
         Utils::create_streams($u);
         Utils::create_make_parents($u);
         Utils::create_documents($u);
@@ -507,15 +508,47 @@ dd($_am);
         }
         return $file_path_2;
     }
+    public static function rectify_terms_forItransactions($u)
+    {
+        if ($u  == null) {
+            return;
+        }
+        set_time_limit(-1);
+
+        $tems = Term::where([
+            'enterprise_id' => $u->enterprise_id,
+        ])->orderBy('id', 'desc')->get();
+
+
+        $trans = Transaction::where([
+            'enterprise_id' => $u->enterprise_id,
+            'term_id' => 0
+        ])->orderBy('id', 'asc')->get();
+
+        foreach ($trans as $key => $tra) {
+            $tra_year = Carbon::parse($tra->payment_date)->format('Y');
+
+            foreach ($tems as $term) {
+                $term_id = Carbon::parse($term->created_at)->format('Y');
+                if ($tra_year != $term_id) {
+                    continue;
+                }
+                $tra->term_id = $term->id;
+                $tra->academic_year_id = $term->academic_year_id;
+                $tra->save();
+            }
+        }
+    }
+
     public static function create_streams($u)
     {
-        $users = Administrator::where([ 
+        $users = Administrator::where([
             'stream_id' => NULL,
             'user_type' => 'student',
         ])->get();
         $x = 0;
         if ($users->count() > 0) {
-            set_time_limit(-1); 
+            set_time_limit(-1);
             foreach ($users as $key => $v) {
                 $v->stream_id = 0;
                 $hasClass = StudentHasClass::where([
@@ -528,7 +561,7 @@ dd($_am);
                     }
                 }
                 $x++;
-                echo $x."<br>"; 
+                echo $x . "<br>";
                 $v->save();
             }
             dd(count($users));
@@ -1795,7 +1828,7 @@ dd($_am);
         } else {
             $data['comment'] = 'Developing and using my language appropriately';
         }
- 
+
 
 
         if ($r->total < 44) {
