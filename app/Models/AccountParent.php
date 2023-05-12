@@ -37,11 +37,11 @@ class AccountParent extends Model
         ])->get() as $key => $acc) {
             $tot += Transaction::where([
                 'account_id' => $acc->id,
-                'is_contra_entry' => 0,
+                /* 'is_contra_entry' => 0, */
                 'academic_year_id' => $year->id
             ])
-            ->where('amount','>',0)
-            ->sum('amount');
+                ->where('amount', '<', 0)
+                ->sum('amount');
         }
 
         return $tot;
