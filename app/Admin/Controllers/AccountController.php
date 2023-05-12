@@ -2,6 +2,8 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\Post\BatchSetNotProcessedAccountController;
+use App\Admin\Actions\Post\BatchSetProcessedAccountController;
 use App\Models\Account;
 use App\Models\AccountParent;
 use App\Models\Enterprise;
@@ -32,13 +34,15 @@ class AccountController extends AdminController
     {
 
 
-        /*  $ac = Account::find(881);
-        $ac->name .= "1";
-        $ac->want_to_transfer = 'Soap';
-        $ac->transfer_keyword = 1;
-        $ac->save();
-        die("done"); */
+
+
         $grid = new Grid(new Account());
+
+        $grid->batchActions(function ($batch) {
+            $batch->disableDelete();
+            $batch->add(new BatchSetProcessedAccountController());
+            $batch->add(new BatchSetNotProcessedAccountController());
+        });
 
 
 
@@ -84,7 +88,6 @@ class AccountController extends AdminController
         });
 
 
-        $grid->disableBatchActions();
         $grid->actions(function ($actions) {
             $actions->disableView();
             $actions->disableDelete();
@@ -112,6 +115,7 @@ class AccountController extends AdminController
         $grid->column('type', __('Account type'))->hide()->sortable();
 
         $grid->column('name', __('Account name'))->sortable();
+
         $grid->column('account_parent_id', __('Account category'))
             ->display(function () {
                 $acc =  Utils::getObject(AccountParent::class, $this->account_parent_id);
@@ -162,6 +166,34 @@ class AccountController extends AdminController
             }); */
         });
 
+
+        $grid->column('debit', __('Debit (this term)'))->display(function ($x) {
+            return "UGX " . number_format($x);
+        });
+
+        $grid->column('credit', __('Credit (this term)'))->display(function ($x) {
+            return "UGX " . number_format($x);
+        });
+
+
+        /* 
+            ->totalRow(function ($amount) {
+                return  "UGX " . number_format($amount);
+            });             ->totalRow(function ($amount) {
+                return  "UGX " . number_format($amount);
+            });
+*/
+
+
+        /*         $grid->column('prossessed', __('Prossessed'))
+            ->using([
+                'Yes' => 'Yes'
+            ], 'No')
+            ->dot([
+                'Yes' => 'success',
+                'No' => 'danger'
+            ], 'danger')
+            ->sortable(); */
         return $grid;
     }
 

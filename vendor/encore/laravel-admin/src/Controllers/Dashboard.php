@@ -5,6 +5,7 @@ namespace Encore\Admin\Controllers;
 use App\Models\AcademicClass;
 use App\Models\AcademicClassFee;
 use App\Models\Account;
+use App\Models\AccountParent;
 use App\Models\Enterprise;
 use App\Models\Mark;
 use App\Models\Service;
@@ -165,6 +166,40 @@ class Dashboard
             'amounts' => $amounts,
             'total' => $total,
         ]); */
+    }
+
+
+    public static function bursarFeesServices()
+    {
+
+        $u = Auth::user();
+        $year = $u->ent->dpYear();
+        if ($year == null) {
+            die("DP Year not found.");
+        }
+        $cats = [];
+         
+        $labels = [];
+        $accounts = [];
+        $amounts = [];
+        $total = 0; 
+        foreach (AccountParent::where([
+            'enterprise_id' => $u->enterprise_id,
+        ])->get() as $key => $acc) {
+            $acc->total = $acc->getSum($year);
+            $labels[] = $acc->name;
+            $accounts[] = $acc;
+            $amounts[] = $acc->total;
+            $total += $acc->total; 
+        }
+ 
+ 
+        return view('dashboard.bursarBedgets', [
+            'accounts' => $accounts,
+            'labels' => $labels,
+            'amounts' => $amounts,
+            'total' => $total,
+        ]); 
     }
 
 
@@ -432,8 +467,8 @@ class Dashboard
 
     public static function count_unpaid_fees()
     {
- 
-        $man = Utils::manifest(Auth::user()->ent); 
+
+        $man = Utils::manifest(Auth::user()->ent);
         $sub_title =  "To be paid by $man->active_students active students.";
         return view('widgets.box-5', [
             'is_dark' => false,
@@ -680,7 +715,7 @@ class Dashboard
 
     public static function income_vs_expenses()
     {
-           return view('admin.charts.bar', [
+        return view('admin.charts.bar', [
             'is_dark' => true
         ]);
     }

@@ -36,10 +36,6 @@ class HomeController extends Controller
 {
     public function index(Content $content)
     {
-
-
-
-
         Admin::style('.content-header {display: none;}');
         $u = Admin::user();
         return $content->view('admin.index', [
@@ -49,11 +45,9 @@ class HomeController extends Controller
     public function stats(Content $content)
     {
 
-
-
         $u = Admin::user();
 
-  /*       if (
+        /*       if (
             true
         ) {
             $content->row(function (Row $row) {
@@ -105,6 +99,13 @@ class HomeController extends Controller
         if (
             $u->isRole('bursar')
         ) {
+
+            
+            $content->row(function (Row $row) {
+                $row->column(12, function (Column $column) {
+                    $column->append(Dashboard::bursarFeesServices());
+                }); 
+            });
 
             $content->row(function (Row $row) {
                 $row->column(6, function (Column $column) {

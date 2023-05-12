@@ -192,6 +192,8 @@ class Account extends Model
         return Carbon::parse($value)->format('d-M-Y');
     }
 
+
+
     function owner()
     {
 
@@ -229,4 +231,51 @@ class Account extends Model
         $balance = $payable + $paid;
         return $balance;
     }
+
+
+    public function getDebitAttribute()
+    {
+        $academic_year_id = 0;
+        $u = Admin::user();
+        if ($u != null) {
+            if ($u->ent != null) {
+                $year = $u->ent->dpYear();
+                if ($year != null) {
+                    $academic_year_id = $year->id;
+                }
+            }
+        }
+
+        return Transaction::where([
+            'account_id' => $this->id,
+            'is_contra_entry' => 0,
+            'academic_year_id' => $academic_year_id
+        ])
+            ->where('amount', '>', 0)
+            ->sum('amount');
+    }
+
+
+    public function getCreditAttribute()
+    {
+        $academic_year_id = 0;
+        $u = Admin::user();
+        if ($u != null) {
+            if ($u->ent != null) {
+                $year = $u->ent->dpYear();
+                if ($year != null) {
+                    $academic_year_id = $year->id;
+                }
+            }
+        }
+
+        return Transaction::where([
+            'account_id' => $this->id,
+            'is_contra_entry' => 0,
+            'academic_year_id' => $academic_year_id
+        ])
+            ->where('amount', '<', 0)
+            ->sum('amount');
+    }
+    protected $appends = ['debit', 'credit'];
 }

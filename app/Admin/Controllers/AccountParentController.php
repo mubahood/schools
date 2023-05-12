@@ -25,16 +25,16 @@ class AccountParentController extends AdminController
      */
     protected function grid()
     {
-        $grid = new Grid(new AccountParent());
+        $grid = new Grid(new AccountParent()); 
 
-
+        $grid->disableBatchActions();
         $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
             ->orderBy('name', 'Asc');
 
         $grid->column('name', __('Name'))->sortable();
         $grid->column('Accounts', __('Accounts'))->display(function () {
             return count($this->accounts);
-        });
+        }); 
         $grid->column('description', __('Description'));
 
         return $grid;
@@ -71,7 +71,6 @@ class AccountParentController extends AdminController
 
         $u = Admin::user();
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
-
         $form->text('name', __('Name'))->rules('required');
         $form->textarea('description', __('Description'));
 
