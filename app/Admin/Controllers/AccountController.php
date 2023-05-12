@@ -40,8 +40,7 @@ class AccountController extends AdminController
 
         $grid->batchActions(function ($batch) {
             $batch->disableDelete();
-            $batch->add(new BatchSetProcessedAccountController());
-            $batch->add(new BatchSetNotProcessedAccountController());
+            $batch->add(new BatchSetProcessedAccountController()); 
         });
 
 

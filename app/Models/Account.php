@@ -256,6 +256,14 @@ class Account extends Model
     }
 
 
+    public function processBalance()
+    {
+        $this->balance = Transaction::where([
+            'account_id' => $this->id
+        ])->sum('amount');
+        $this->prossessed = 'Yes';
+        $this->save();
+    }
     public function getCreditAttribute()
     {
         $academic_year_id = 0;

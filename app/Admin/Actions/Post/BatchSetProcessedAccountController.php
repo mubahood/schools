@@ -15,13 +15,8 @@ class BatchSetProcessedAccountController extends BatchAction
     public function handle(Collection $collection, Request $r)
     {
         $i = 0;
-        foreach ($collection as $acc) { 
-            $acc->balance = Transaction::where([
-                'account_id' => $acc->id
-            ])->sum('amount');
-            $acc->prossessed = 'Yes';
-            $acc->save();
-
+        foreach ($collection as $acc) {
+            $acc->processBalance(); 
             $i++;
         }
 

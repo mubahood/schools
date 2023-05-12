@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\Post\BatchSetProcessedAccountController;
 use App\Admin\Actions\Post\BatchStudentFinancialAccountChangeBalance;
 use App\Admin\Actions\Post\BatchStudentFinancialAccountSetNotVerified;
 use App\Admin\Actions\Post\BatchStudentFinancialAccountSetVerified;
@@ -70,6 +71,8 @@ class StudentFinancialAccountController extends AdminController
             $batch->add(new BatchStudentFinancialAccountSetNotVerified());
             $batch->add(new BatchStudentFinancialAccountSetVerified());
             $batch->add(new BatchStudentFinancialAccountChangeBalance());
+            $batch->add(new BatchSetProcessedAccountController()); 
+  
         });
 
 
