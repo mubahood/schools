@@ -391,7 +391,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                 foreach (StudentHasClass::where([
                     'administrator_id' => $m->id,
                 ])->get() as $key => $val) {
-                    AcademicClass::update_fees($val->academic_class_id);
+                    AcademicClass::update_fees($val);
                 }
             }
 

@@ -698,6 +698,8 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
 
     public static $classMap = array (
         'App\\Admin\\Actions\\Post\\BatchPrint' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/BatchPrint.php',
+        'App\\Admin\\Actions\\Post\\BatchSetNotProcessedAccountController' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/BatchSetNotProcessedAccountController.php',
+        'App\\Admin\\Actions\\Post\\BatchSetProcessedAccountController' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/BatchSetProcessedAccountController.php',
         'App\\Admin\\Actions\\Post\\BatchStudentFinancialAccountChangeBalance' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/BatchStudentFinancialAccountChangeBalance.php',
         'App\\Admin\\Actions\\Post\\BatchStudentFinancialAccountSetNotVerified' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/BatchStudentFinancialAccountSetNotVerified.php',
         'App\\Admin\\Actions\\Post\\BatchStudentFinancialAccountSetVerified' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/BatchStudentFinancialAccountSetVerified.php',

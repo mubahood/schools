@@ -23,9 +23,11 @@ class StudentHasTheologyClass extends Model
         });
         self::created(function ($m) {
             Utils::updateStudentCurrentClass($m->administrator_id);
+            AcademicClass::update_fees($m);
             //Utils::sync_classes($m->enterprise_id);
         });
         self::updated(function ($m) {
+            AcademicClass::update_fees($m); 
             Utils::updateStudentCurrentClass($m->administrator_id);
             //Utils::sync_classes($m->enterprise_id);
         });

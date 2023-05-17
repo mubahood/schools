@@ -40,7 +40,9 @@ class StudentHasTheologyClassController extends AdminController
 
 
 
-        Utils::display_checklist(Utils::students_checklist(Admin::user()));
+      
+
+        //Utils::display_checklist(Utils::students_checklist(Admin::user()));
 
         $grid = new Grid(new StudentHasTheologyClass());
 
@@ -169,7 +171,16 @@ class StudentHasTheologyClassController extends AdminController
     protected function form()
     {
 
+/*         $fee = StudentHasTheologyClass::find(1885);
+        $fee->theology_stream_id .= 1;
+        $fee->save();   
+        dd('$fee'); */
+
         $form = new Form(new StudentHasTheologyClass());
+
+        $u = Admin::user();
+        $form->hidden('enterprise_id')->rules('required')->default($u->enterprise_id)
+            ->value($u->enterprise_id); 
 
 
         if ($form->isCreating()) {
@@ -347,9 +358,6 @@ class StudentHasTheologyClassController extends AdminController
             });
 
 
-            $u = Admin::user();
-            $form->hidden('enterprise_id')->rules('required')->default($u->enterprise_id)
-                ->value($u->enterprise_id);
 
             if ($form->isCreating()) {
 
@@ -475,7 +483,6 @@ class StudentHasTheologyClassController extends AdminController
 
                     $u = Admin::user();
 
-                    $form->hidden('enterprise_id')->default($u->enterprise_id);
 
 
 

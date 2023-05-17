@@ -71,6 +71,11 @@ class TheologyClass extends Model
         return $this->hasMany(StudentHasTheologyClass::class, 'theology_class_id');
     }
 
+    function academic_class_fees()
+    {
+        return $this->hasMany(AcademicClassFee::class,'theology_class_id');
+    }
 
+    
     protected  $appends = ['name_text'];
 }

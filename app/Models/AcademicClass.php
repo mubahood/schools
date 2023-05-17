@@ -314,60 +314,76 @@ class AcademicClass extends Model
         }
     }
 
-    public static function update_fees($academic_class_id)
+    public static function update_fees($m)
     {
+ 
 
-        $class = AcademicClass::find($academic_class_id);
+        $class = TheologyClass::find($m->theology_class_id);
+        $type = 'Theology';
+        if ($class == null) {
+            $type = 'Secular';
+            $class = AcademicClass::find($m->academic_class_id);
+        }
         if ($class == null) {
             return;
         }
 
-        $fees = $class->academic_class_fees;
-        foreach ($class->students as $student) {
+        if ($type == 'Theology') { 
+            $fees = $class->academic_class_fees;
+            foreach ($class->students as $student) {
 
-            /* if ($student->student != null) {
-                if ($student->student->status != 1) {
-                    continue;
-                }
-            } */
-            foreach ($fees as $fee) {
-                $has_fee = StudentHasFee::where([
-                    'administrator_id' => $student->administrator_id,
-                    'academic_class_fee_id' => $fee->id,
-                ])->first();
-                if ($has_fee == null) {
-
-                    Transaction::my_create([
-                        'academic_year_id' => $class->academic_year_id,
+                foreach ($fees as $fee) {
+                    $has_fee = StudentHasFee::where([
                         'administrator_id' => $student->administrator_id,
-                        'type' => 'FEES_PAYMENT',
-                        'description' => "Debited {$fee->amount} for $fee->name",
-                        'amount' => ((-1) * ($fee->amount))
-                    ]);
-
-                    /* $bank_acc = Account::where([
-                        'type' => 'FEES_ACCOUNT',
-                        'enterprise_id' => $student->enterprise_id,
+                        'academic_class_fee_id' => $fee->id,
                     ])->first();
+                    if ($has_fee == null) {
 
-                    if ($bank_acc != null) {
-                        $trans = new Transaction();
-                        $trans->enterprise_id = $student->enterprise_id;
-                        $trans->amount = $fee->amount;
-                        $trans->account_id = $bank_acc->id;
-                        $trans->term_id = 1;
-                        $trans->academic_year_id = $class->academic_year_id;
-                        $trans->description = "Fee debited $fee->amount on {$student->name}'s account for $fee->name";
-                        $trans->save();
-                    } */
+                        Transaction::my_create([
+                            'academic_year_id' => $class->academic_year_id,
+                            'administrator_id' => $student->administrator_id,
+                            'type' => 'FEES_BILLING',
+                            'description' => "Debited {$fee->amount} for $fee->name",
+                            'amount' => ((-1) * ($fee->amount))
+                        ]);
+
+                        $has_fee =  new StudentHasFee();
+                        $has_fee->enterprise_id    = $student->enterprise_id;
+                        $has_fee->administrator_id    = $student->administrator_id;
+                        $has_fee->academic_class_fee_id    = $fee->id;
+                        $has_fee->theology_class_id    = $fee->theology_class_id;
+                        $has_fee->save();
+                    }
+                }
+            }
+        } else {
 
 
+            $fees = $class->academic_class_fees;
+            foreach ($class->students as $student) {
 
-                    $has_fee =  new StudentHasFee();
-                    $has_fee->enterprise_id    = $student->enterprise_id;
-                    $has_fee->administrator_id    = $student->administrator_id;
-                    $has_fee->academic_class_fee_id    = $fee->id;
-                    $has_fee->save();
+                foreach ($fees as $fee) {
+                    $has_fee = StudentHasFee::where([
+                        'administrator_id' => $student->administrator_id,
+                        'academic_class_fee_id' => $fee->id,
+                    ])->first();
+                    if ($has_fee == null) {
+
+                        Transaction::my_create([
+                            'academic_year_id' => $class->academic_year_id,
+                            'administrator_id' => $student->administrator_id,
+                            'type' => 'FEES_BILLING',
+                            'description' => "Debited {$fee->amount} for $fee->name",
+                            'amount' => ((-1) * ($fee->amount))
+                        ]);
+
+                        $has_fee =  new StudentHasFee();
+                        $has_fee->enterprise_id    = $student->enterprise_id;
+                        $has_fee->administrator_id    = $student->administrator_id;
+                        $has_fee->academic_class_fee_id    = $fee->id;
+                        $has_fee->academic_class_id    = $fee->academic_class_id;
+                        $has_fee->save();
+                    }
                 }
             }
         }
@@ -384,7 +400,7 @@ class AcademicClass extends Model
 
     function streams()
     {
-        return $this->hasMany(AcademicClassSctream::class,'academic_class_id');
+        return $this->hasMany(AcademicClassSctream::class, 'academic_class_id');
     }
 
     function competences()

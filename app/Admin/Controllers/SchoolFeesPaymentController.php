@@ -49,11 +49,18 @@ class SchoolFeesPaymentController extends AdminController
 
         $grid->disableBatchActions();
         $grid->disableActions();
-        $grid->model()->where([
+        $grid->model()
+        ->where([
             'enterprise_id' => Admin::user()->enterprise_id,
             'type' => 'FEES_PAYMENT',
             'is_contra_entry' => 0,
-        ])->orderBy('id', 'DESC');
+        ])
+        ->orwhere([
+            'enterprise_id' => Admin::user()->enterprise_id,
+            'type' => 'FEES_BILLING',
+            'is_contra_entry' => 0,
+        ])
+        ->orderBy('id', 'DESC');
 
         $grid->column('id', __('ID'))->sortable()->hide();
 

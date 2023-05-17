@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Models\AcademicClass;
 use App\Models\AcademicClassFee;
+use App\Models\TheologyClass;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -27,15 +28,13 @@ class AcademicClassFeeController extends AdminController
     protected function grid()
     {
 
-        /* 
-        $fee = new AcademicClassFee;
-        $fee->enterprise_id = Admin::user()->enterprise_id;
+      
+/*         $fee = AcademicClassFee::find(42);
         $fee->academic_class_id = 1;
-        $fee->name = 'Test fee';
+        $fee->name .= '.';
         $fee->amount = 20000;
-        $fee->save();  
-        */
-
+        $fee->save();   */
+      
 
 
         $grid = new Grid(new AcademicClassFee());
@@ -102,20 +101,50 @@ class AcademicClassFeeController extends AdminController
     {
         $form = new Form(new AcademicClassFee());
         $u = Admin::user();
+        $year = $u->ent->active_academic_year();
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
 
-        $form->select('academic_class_id', 'Application to Class')
-            ->options(
-                AcademicClass::where([
-                    'enterprise_id' => $u->enterprise_id
-                ])->get()
-                    ->pluck('name_text', 'id')
-            )->rules('required');
+        $form->radio('type', "Class type")
+            ->options([
+                'Secular' => 'Secular class',
+                'Theology' => 'Theology class',
+            ])
+            ->when('Secular', function ($form) {
+                $u = Admin::user();
+                $year = $u->ent->active_academic_year();
+                $form->select('academic_class_id', 'Select Secular Class')
+                    ->options(
+                        AcademicClass::where([
+                            'enterprise_id' => $u->enterprise_id,
+                            'academic_year_id' => $year->id
+                        ])->get()
+                            ->pluck('name_text', 'id')
+                    )->rules('required');
+            })
+            ->when('Theology', function ($form) {
+                $u = Admin::user();
+                $year = $u->ent->active_academic_year();
+                $form->select('theology_class_id', 'Select Theology Class')
+                    ->options(
+                        TheologyClass::where([
+                            'enterprise_id' => $u->enterprise_id,
+                            'academic_year_id' => $year->id
+                        ])->get()
+                            ->pluck('name_text', 'id')
+                    )->rules('required');
+            })
+            ->rules('required');
+
 
         $form->text('name', __('Fee name'))->rules('required');
         $form->text('amount', __('Amount'))->rules('required|int');
 
-
+        $form->radio('cycle', "Billing cycle")
+            ->options([
+                'Termly' => 'Termly',
+                'One time' => 'One time',
+            ])->rules('required');
+ 
 
         return $form;
     }
