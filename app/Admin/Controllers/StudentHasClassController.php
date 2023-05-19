@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\Post\ChangeStudentsClass;
 use App\Models\AcademicClass;
 use App\Models\AcademicClassSctream;
 use App\Models\AcademicYear;
@@ -61,9 +62,11 @@ class StudentHasClassController extends AdminController
 
         $grid = new Grid(new StudentHasClass());
 
+        $grid->paginate(500);
+
         $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
             ->orderBy('id', 'Desc');
-        if (!Admin::user()->isRole('dos')) {
+        if (!Admin::user()->isRole('dos')) { 
             $grid->disableCreateButton();
             $grid->disableExport();
             $grid->disableActions();
@@ -73,7 +76,11 @@ class StudentHasClassController extends AdminController
             $actions->disableDelete();
         });
 
-        $grid->disableBatchActions();
+        $grid->batchActions(function ($batch) {
+            $batch->disableDelete();
+            $batch->add(new ChangeStudentsClass()); 
+        });
+
         $grid->disableExport();
 
         $grid->filter(function ($filter) {
@@ -115,6 +122,20 @@ class StudentHasClassController extends AdminController
 
 
         $grid->column('id', __('Id'))->sortable();
+        $grid->column('done_selecting_option_courses', __('FROM P7'))
+        ->using([
+            1 => 'From P.7',
+            0 => 'From P.6',
+        ])
+        ->filter([
+            1 => 'From P.7',
+            0 => 'From P.6',
+        ])
+        ->dot([
+            1 => 'success',
+            0 => 'danger',
+        ])
+        ->sortable();
 
         $grid->column('administrator_id', __('Student'))->display(function () {
             if (!$this->student) {
@@ -172,7 +193,7 @@ class StudentHasClassController extends AdminController
 
         $show->field('id', __('Id'));
         $show->field('enterprise_id', __('Enterprise id'));
-        $show->field('academic_class_id', __('Academic class id'));
+        $show->field('academic_class_id', __('Academic class'));
         $show->field('administrator_id', __('Administrator id'));
         $show->field('stream_id', __('Stream id'));
         $show->field('updated_at', __('Updated at'));

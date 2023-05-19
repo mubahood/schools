@@ -263,9 +263,7 @@ class StudentsController extends AdminController
         }
 
 
-
-
-
+ 
 
         $grid->column('avatar', __('Photo'))
             ->lightbox(['width' => 60, 'height' => 60])

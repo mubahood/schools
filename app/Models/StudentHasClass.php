@@ -53,9 +53,19 @@ class StudentHasClass extends Model
         self::created(function ($m) {
 
             $class = AcademicClass::find($m->academic_class_id);
-            if ($class != null) {
-                AcademicClass::updateSecondaryCompetences($class);
-            }
+            if (isset($m->academic_class_id)) {
+                $class = AcademicClass::find($m->academic_class_id);
+                if ($class != null) {
+                    if ($class->class_type == 'Secondary') {
+                        try {
+                            AcademicClass::generate_secondary_main_subjects($class);
+                            AcademicClass::updateSecondaryCompetences($class);
+                            AcademicClass::generate_subjects($class); 
+                        } catch (\Throwable $th) {
+                        }
+                    }
+                }
+            } 
 
 
             Utils::updateStudentCurrentClass($m->administrator_id);
@@ -64,19 +74,46 @@ class StudentHasClass extends Model
                     AcademicClass::update_fees($m);
                 }
             }
-            $u =    Administrator::find($m->administrator_id);
-            if ($u != null) {
-                $u->stream_id = $m->stream_id;
+            $u = Administrator::find($m->administrator_id);
+            $classes = StudentHasClass::where('administrator_id', $m->administrator_id)
+                ->orderBy('id', 'desc')
+                ->get();
+            foreach ($classes as $cla) {
+                $u->current_class_id = $cla->academic_class_id;
+                $u->stream_id = $cla->stream_id;
                 $u->save();
+                break;
             }
         });
 
         self::updated(function ($m) {
 
+            $u = Administrator::find($m->administrator_id);
+            $classes = StudentHasClass::where('administrator_id', $m->administrator_id)
+                ->orderBy('id', 'desc')
+                ->get();
+            foreach ($classes as $cla) {
+                $u->current_class_id = $cla->academic_class_id;
+                $u->stream_id = 0;
+                $u->save();
+                break;
+            } 
+
             $class = AcademicClass::find($m);
-            if ($class != null) {
-                AcademicClass::updateSecondaryCompetences($class);
-            }
+            if (isset($m->academic_class_id)) {
+                $class = AcademicClass::find($m->academic_class_id);
+                if ($class != null) {
+                    if ($class->class_type == 'Secondary') {
+                        try {
+                            AcademicClass::generate_secondary_main_subjects($class);
+                            AcademicClass::updateSecondaryCompetences($class);
+                            AcademicClass::generate_subjects($class); 
+                        } catch (\Throwable $th) {
+                        }
+                    }
+                }
+            } 
+
 
             Utils::updateStudentCurrentClass($m->administrator_id);
             if ($m->student != null) {
@@ -85,11 +122,7 @@ class StudentHasClass extends Model
                 }
             }
 
-            $u = Administrator::find($m->administrator_id);
-            if ($u != null) {
-                $u->stream_id = $m->stream_id;
-                $u->save();
-            } 
+
         });
     }
 
