@@ -62,7 +62,7 @@ class StudentHasClassController extends AdminController
 
         $grid = new Grid(new StudentHasClass());
 
-        $grid->paginate(500);
+        //$grid->paginate(500);
 
         $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
             ->orderBy('id', 'Desc');
@@ -122,7 +122,7 @@ class StudentHasClassController extends AdminController
 
 
         $grid->column('id', __('Id'))->sortable();
-        $grid->column('done_selecting_option_courses', __('FROM P7'))
+     /*    $grid->column('done_selecting_option_courses', __('FROM P7'))
         ->using([
             1 => 'From P.7',
             0 => 'From P.6',
@@ -135,7 +135,7 @@ class StudentHasClassController extends AdminController
             1 => 'success',
             0 => 'danger',
         ])
-        ->sortable();
+        ->sortable(); */
 
         $grid->column('administrator_id', __('Student'))->display(function () {
             if (!$this->student) {

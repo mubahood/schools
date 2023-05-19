@@ -18,7 +18,7 @@ class ChangeStudentsClass extends BatchAction
         $i = 0;
         foreach ($collection as $model) { 
             $model->academic_class_id = $r->get('academic_class_id');
-            $model->done_selecting_option_courses = $r->get('done_selecting_option_courses');
+/*             $model->done_selecting_option_courses = $r->get('done_selecting_option_courses'); */
             $model->stream_id = null;
             $i++;
             $model->save();
@@ -42,13 +42,13 @@ class ChangeStudentsClass extends BatchAction
             ->options($ops)
             ->required()
             ->rules('required');
-
+/* 
         $this->radio('done_selecting_option_courses', __('FROM P-7 to P-6'))
             ->options([
                 1 => 'Yes',
                 0 => 'No',
             ])
             ->required()
-            ->rules('required');
+            ->rules('required'); */
     }
 }
