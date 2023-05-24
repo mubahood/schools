@@ -183,6 +183,9 @@ php artisan make:model SecondaryTermlyReportCard
 php artisan make:model SecondaryTermlyReportCardItem
 php artisan make:model SecondaryReportCard
 php artisan make:model SecondaryReportCardItem
+php artisan make:model SupplierOrder
+php artisan make:model SupplierOrder
+php artisan make:model SupplierOrderItem
 
 
 php artisan admin:make TermController --model=App\\Models\\Term
@@ -222,6 +225,8 @@ php artisan make:migration create_participants_table
 php artisan make:migration create_secondary_competences_table
 php artisan make:migration create_generate_theology_classes_table
 php artisan make:migration create_theology_streams_table
+php artisan make:migration create_supplier_products_table
+php artisan make:migration create_supplier_order_items_table
 
 --path=/database/migrations/fileName.php
 
@@ -280,7 +285,7 @@ php artisan admin:make GenerateTheologyClassController --model=App\Models\Genera
 php artisan admin:make SecondaryTermlyReportCardController --model=App\Models\SecondaryTermlyReportCard
 php artisan admin:make SecondaryReportCardController --model=App\Models\SecondaryReportCard
 php artisan admin:make SecondaryReportCardItemController --model=App\Models\SecondaryReportCardItem
-php artisan admin:make AcademicClassSctreamController --model=App\Models\AcademicClassSctream
+php artisan admin:make SupplierOrderController --model=App\Models\SupplierOrder 
 
 
 
