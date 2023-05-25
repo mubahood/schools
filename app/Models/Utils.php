@@ -388,6 +388,7 @@ class Utils  extends Model
             return;
         }
 
+        Utils::delete_contraentries($u);
         Utils::rectify_terms_forItransactions($u);
         Utils::create_streams($u);
         Utils::create_make_parents($u);
@@ -538,6 +539,19 @@ class Utils  extends Model
                 $tra->save();
             }
         }
+    }
+
+    public static function delete_contraentries()
+    {
+
+        Transaction::where([
+            'is_contra_entry' => 1, 
+        ])->delete();
+        Transaction::where([
+            'amount' => 0, 
+        ])->delete();
+ 
+        return "";
     }
 
     public static function create_streams($u)

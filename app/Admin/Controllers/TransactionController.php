@@ -141,21 +141,7 @@ class TransactionController extends AdminController
                 return  number_format($x);
             });
 
-
-        $grid->column('is_contra_entry', __('Is Contra Entry'))
-            ->using([
-                1 => 'Yes',
-                0 => 'No',
-            ])->dot([
-                1 => 'danger',
-                0 => 'success',
-            ])
-            ->filter([
-                0 => 'Not Contra Entry',
-                1 => 'Contra Entry',
-            ])
-            ->sortable();
-
+ 
 
         $grid->column('description', __('Description'))->display(function ($x) {
             return '<spap title="' . $x . '" >' . Str::limit($x, 40, '...') . '</span>';

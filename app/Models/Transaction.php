@@ -110,7 +110,7 @@ class Transaction extends Model
     public static function boot()
     {
         parent::boot();
-        self::deleting(function ($m) { 
+        self::deleting(function ($m) {
             //die("You cannot delete this item.");
         });
         self::deleted(function ($m) {
@@ -120,12 +120,12 @@ class Transaction extends Model
             Transaction::where(['contra_entry_account_id' => $m->id])->delete();
             Transaction::where(['contra_entry_transaction_id' => $m->id])->delete();
 
-            Transaction::my_update($m); 
+            Transaction::my_update($m);
         });
 
         self::created(function ($m) {
-            if (!$m->is_contra_entry) {
-                Transaction::contra_entry_transaction($m);
+            if ($m->is_contra_entry == 1) {
+                return false;
             }
             Transaction::my_update($m);
         });
@@ -253,37 +253,7 @@ class Transaction extends Model
 
     public static function contra_entry_transaction($m)
     {
-
-        $ac = Account::find($m->contra_entry_account_id);
-        if ($ac == null) {
-            return;
-        }
-
-        $contra = new Transaction();
-
-
-        $contra->enterprise_id = $m->enterprise_id;
-        $contra->account_id = $m->contra_entry_account_id;
-        $contra->contra_entry_account_id = $m->account_id;
-        $contra->created_by_id = $m->created_by_id;
-        $contra->school_pay_transporter_id = $m->school_pay_transporter_id;
-        $contra->is_contra_entry = true;
-        $contra->description = $m->description;
-        $contra->term_id = $m->term_id;
-        $contra->academic_year_id = $m->academic_year_id;
-        $contra->contra_entry_transaction_id = $m->id;
-        $contra->type = $m->type;
-        $contra->payment_date = $m->payment_date;
-
-        if ($m->type == 'FEES_PAYMENT') {
-            $contra->amount = $m->amount;
-        } else {
-            $contra->amount = (-1) * ((int)($m->amount));
-        }
-
-        $contra->save();
-        $m->contra_entry_transaction_id = $contra->id;
-        $m->save();
+        return false;
     }
 
     public static function my_update($m)
@@ -304,10 +274,10 @@ class Transaction extends Model
     }
     public function term()
     {
-        return $this->belongsTo(Term::class,'term_id');
+        return $this->belongsTo(Term::class, 'term_id');
     }
     public function by()
     {
-        return $this->belongsTo(Administrator::class,'created_by_id');
+        return $this->belongsTo(Administrator::class, 'created_by_id');
     }
 }
