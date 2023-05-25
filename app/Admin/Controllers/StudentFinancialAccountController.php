@@ -71,8 +71,7 @@ class StudentFinancialAccountController extends AdminController
             $batch->add(new BatchStudentFinancialAccountSetNotVerified());
             $batch->add(new BatchStudentFinancialAccountSetVerified());
             $batch->add(new BatchStudentFinancialAccountChangeBalance());
-            $batch->add(new BatchSetProcessedAccountController()); 
-  
+            $batch->add(new BatchSetProcessedAccountController());
         });
 
 
@@ -172,6 +171,54 @@ class StudentFinancialAccountController extends AdminController
                 1 => 'success',
             ])
             ->sortable();
+        $grid->column('mother_phone', __('Parent\'s Contact'))
+            ->display(function () {
+                $u = $this->owner;
+                if ($u == null) {
+                    return "-";
+                }
+                if (
+                    $u->phone_number_1 != null &&
+                    strlen($u->phone_number_1) > 2
+                ) {
+                    return $u->phone_number_1;
+                }
+                if (
+                    $u->phone_number_2 != null &&
+                    strlen($u->phone_number_2) > 2
+                ) {
+                    return $u->phone_number_2;
+                }
+                if (
+                    $u->spouse_phone != null &&
+                    strlen($u->spouse_phone) > 2
+                ) {
+                    return $u->spouse_phone;
+                }
+                if (
+                    $u->father_phone != null &&
+                    strlen($u->father_phone) > 2
+                ) {
+                    return $u->father_phone;
+                }
+                if (
+                    $u->mother_phone != null &&
+                    strlen($u->mother_phone) > 2
+                ) {
+                    return $u->mother_phone;
+                }
+                if (
+                    $u->emergency_person_phone == null &&
+                    strlen($u->emergency_person_phone) > 2
+                ) {
+                    return $u->emergency_person_phone;
+                }
+                if ($u->username == null) {
+                    return $u->username;
+                }
+                return "-";
+            });
+
         $grid->column('account_parent_id', __('Account category'))
             ->hide()
             ->display(function () {
@@ -198,7 +245,7 @@ class StudentFinancialAccountController extends AdminController
                     return "-";
                 }
                 return $this->owner->current_class->short_name;
- 
+
                 return "-";
             });
 
