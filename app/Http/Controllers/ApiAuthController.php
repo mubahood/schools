@@ -110,6 +110,7 @@ class ApiAuthController extends Controller
         }
         $u->token = $token;
         $u->remember_token = $token;
+        $u->roles_text = json_encode($u->roles); 
 
         return $this->success($u, 'Logged in successfully.');
     }
