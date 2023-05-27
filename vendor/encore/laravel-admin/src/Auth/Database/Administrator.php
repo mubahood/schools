@@ -600,7 +600,6 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
         $isAdmin = false;
 
         if (
-            $u->isRole('dos') ||
             $u->isRole('admin') ||
             $u->isRole('dos') ||
             $u->isRole('bursar') ||
@@ -634,29 +633,54 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
             }
         } else {
             $classes = $u->get_my_classes();
-            foreach ($classes as $class) {
-                foreach (Administrator::where([
-                    'current_class_id' => $class->id,
-                    'user_type' => 'student',
-                    'status' => 1,
-                ])->get() as $user) {
+            if ($classes != null)
+                foreach ($classes as $class) {
+                    foreach (Administrator::where([
+                        'current_class_id' => $class->id,
+                        'user_type' => 'student',
+                        'status' => 1,
+                    ])->get() as $user) {
 
-                    $user->balance = 0;
-                    $user->account_id = 0;
+                        $user->balance = 0;
+                        $user->account_id = 0;
 
-                    $user->current_class_text = $user->current_class_id;
-                    $class = $user->getActiveClass();
-                    if ($class != null) {
-                        $user->current_class_text = $class->short_name;
+                        $user->current_class_text = $user->current_class_id;
+                        $class = $user->getActiveClass();
+                        if ($class != null) {
+                            $user->current_class_text = $class->short_name;
+                        }
+
+                        $acc = $this->getAccount();
+                        if ($acc != null) {
+                            $user->balance = $acc->balance;
+                            $user->account_id = $acc->id;
+                        }
+                        $students[] = $user;
                     }
-
-                    $acc = $this->getAccount();
-                    if ($acc != null) {
-                        $user->balance = $acc->balance;
-                        $user->account_id = $acc->id;
-                    }
-                    $students[] = $user;
                 }
+        }
+
+        if ($u->isRole('parent')) {
+            foreach (Administrator::where([
+                'parent_id' => $u->id,
+                'user_type' => 'student', 
+            ])->get() as $user) {
+
+                $user->balance = 0;
+                $user->account_id = 0;
+
+                $user->current_class_text = $user->current_class_id;
+                $class = $user->getActiveClass();
+                if ($class != null) {
+                    $user->current_class_text = $class->short_name;
+                }
+
+                $acc = $this->getAccount();
+                if ($acc != null) {
+                    $user->balance = $acc->balance;
+                    $user->account_id = $acc->id;
+                }
+                $students[] = $user;
             }
         }
 
