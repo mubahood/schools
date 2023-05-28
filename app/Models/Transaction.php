@@ -17,8 +17,7 @@ class Transaction extends Model
 
         $amount = 0;
         $academic_year_id = 0;
-        $term_id = 0;
-
+        $term_id = 0; 
 
         if (isset($data['academic_year_id'])) {
             $academic_year_id = ((int)($data['academic_year_id']));
@@ -130,7 +129,18 @@ class Transaction extends Model
             Transaction::my_update($m);
         });
         self::creating(function ($m) {
-
+            
+            if(
+                (!isset($m->created_by_id)) ||
+                ($m->created_by_id == null)
+            ){
+                $ent = Enterprise::find($m->enterprise_id);
+                if($ent == null){
+                    throw("Enterprise not found."); 
+                }
+                $m->created_by_id = $ent->administrator_id;
+            }
+ 
             if ($m != false) {
                 if ($m->payment_date != null) {
                     $d = Carbon::parse($m->payment_date);

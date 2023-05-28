@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\Post\ChangeStudentsStatus;
 use App\Models\AcademicClass;
 use App\Models\AcademicYear;
 use App\Models\AdminRole;
@@ -69,10 +70,12 @@ class StudentsController extends AdminController
 
         $grid = new Grid(new Administrator());
 
-
-        $grid->disableBatchActions();
+        $grid->perPages([10,50,100,300,500]); 
+        $grid->batchActions(function ($batch) {
+            $batch->disableDelete();
+            $batch->add(new ChangeStudentsStatus()); 
+        });
         $grid->actions(function ($actions) {
-
             if (!Auth::user()->isRole('admin')) {
                 $actions->disableDelete();
             }

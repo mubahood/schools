@@ -35,8 +35,7 @@ class Service extends Model
 
 
     public static function update_fees($m)
-    {
-        
+    { 
         foreach ($m->subs as  $s) {
             $fd = FeeDepositConfirmation::where([
                 'fee_id' => $s->id,

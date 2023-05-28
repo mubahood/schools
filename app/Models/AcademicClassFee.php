@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -24,10 +25,10 @@ class AcademicClassFee extends Model
     {
         parent::boot();
         self::created(function ($m) {
-            AcademicClass::update_fees($m);
+            AcademicClass::update_fees(Administrator::find($m->administrator_id));
         });
         self::updated(function ($m) {
-            AcademicClass::update_fees($m);
+            AcademicClass::update_fees(Administrator::find($m->administrator_id));
         });
     }
 

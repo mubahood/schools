@@ -163,7 +163,7 @@ class Account extends Model
             'id' => $administrator_id
         ])->first();
         if ($admin == null) {
-            die("Account was not created because admin account was not found.");
+            throw("Account was not created because admin account was not found.");
         }
         $acc = Account::where(['administrator_id' => $administrator_id])->first();
         if ($acc != null) {

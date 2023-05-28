@@ -71,7 +71,7 @@ class StudentHasClass extends Model
             Utils::updateStudentCurrentClass($m->administrator_id);
             if ($m->student != null) {
                 if ($m->student->status == 1) {
-                    AcademicClass::update_fees($m);
+                    AcademicClass::update_fees(Administrator::find($m->administrator_id));
                 }
             }
             $u = Administrator::find($m->administrator_id);
@@ -118,7 +118,7 @@ class StudentHasClass extends Model
             Utils::updateStudentCurrentClass($m->administrator_id);
             if ($m->student != null) {
                 if ($m->student->status == 1) {
-                    AcademicClass::update_fees($m);
+                    AcademicClass::update_fees($u);
                 }
             }
 

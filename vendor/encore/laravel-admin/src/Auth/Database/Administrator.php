@@ -229,8 +229,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
 
         self::created(function ($m) {
             if (strtolower($m->user_type) == 'student') {
-                //User::createParent($m);
-                Account::create($m->id);
+                //User::createParent($m); 
                 Administrator::my_update($m);
             }
 
@@ -366,6 +365,18 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
 
             $model->name = str_replace('   ', ' ', $model->name);
             $model->name = str_replace('  ', ' ', $model->name);
+
+            if ($model->user_type == 'student') {
+                foreach (StudentHasClass::where([
+                    'administrator_id' => $model->id,
+                ])
+                    ->orderBy('id', 'desc')
+                    ->get() as $key => $val) {
+                    $model->current_class_id = $val->academic_class_id;
+                    $model->stream_id = $val->stream_id; 
+                }
+            }
+
             return $model;
         });
 
@@ -385,27 +396,8 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
     {
 
         if ($m->user_type == 'student') {
-            $current_class_id = ((int)($m->current_class_id));
-            $class = AcademicClass::find($current_class_id);
             if ($m->status == 1) {
-                foreach (StudentHasClass::where([
-                    'administrator_id' => $m->id,
-                ])->get() as $key => $val) {
-                    AcademicClass::update_fees($val);
-                }
-            }
-
-            if ($class != null) {
-                $hasClass = StudentHasClass::where([
-                    'administrator_id' => $m->id,
-                    'academic_class_id' => $current_class_id
-                ])->first();
-                if ($hasClass == null) {
-                    $class = new StudentHasClass();
-                    $class->administrator_id = $m->id;
-                    $class->academic_class_id = $current_class_id;
-                    $class->save();
-                }
+                AcademicClass::update_fees($m);
             }
         }
     }
@@ -663,7 +655,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
         if ($u->isRole('parent')) {
             foreach (Administrator::where([
                 'parent_id' => $u->id,
-                'user_type' => 'student', 
+                'user_type' => 'student',
             ])->get() as $user) {
 
                 $user->balance = 0;
