@@ -220,7 +220,7 @@ class ApiMainController extends Controller
 
         $m = $session;
 
-        $cands = $m->getCandidates($r->stream_id); 
+        $cands = $m->getCandidates($r->stream_id);
         foreach ($cands as $key =>  $candidate) {
             $p = new Participant();
             $p->enterprise_id = $m->enterprise_id;
@@ -393,6 +393,31 @@ class ApiMainController extends Controller
     public function transactions()
     {
         $u = auth('api')->user();
+
+        if (
+            (!$u->isRole('bursar')) &&
+            (!$u->isRole('parent'))
+        ) {
+            return $this->success([], $message = "Success", 200);
+        }
+
+        $parents_conditions = "";
+        if(($u->isRole('parent'))){
+            $students = $u->get_my_students($u);
+            $parents_conditions = ' AND administrator_id IN (';
+            $isFirst = true;
+            foreach ($students as $key => $value) {
+                if($isFirst){
+                    $isFirst = false;
+                }else{
+                    $parents_conditions .= ",";
+                }
+                $parents_conditions .= $value->id;
+            }
+            $parents_conditions .= ') ';
+        }
+
+
         $recs =  DB::select("SELECT 
         transactions.id as id,
         transactions.created_at as created_at,
@@ -407,7 +432,7 @@ class ApiMainController extends Controller
         WHERE 
             transactions.account_id = accounts.id AND
             transactions.enterprise_id = $u->enterprise_id AND
-            is_contra_entry = 0 ORDER BY id DESC LIMIT 4000");
+            is_contra_entry = 0 $parents_conditions ORDER BY id DESC LIMIT 4000");
 
         return $this->success($recs, $message = "Success", 200);
     }
