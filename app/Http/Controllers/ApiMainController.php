@@ -312,7 +312,7 @@ class ApiMainController extends Controller
                     $d['current_class_text'] = $class->short_name;
                     $stream = AcademicClassSctream::find($class->stream_id);
                     if ($stream != null) {
-                        $d['current_stream_text'] = $stream->name;
+                        $d['current_stream_text'] = $stream->short_name;
                     }
                 }
             } else {
