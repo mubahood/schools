@@ -102,7 +102,7 @@ class ApiAuthController extends Controller
         if($u->user_type == 'student'){
             $u = Administrator::find($u->parent_id);
             if ($u == null) {
-                return $this->error('Wrong credentials.');
+                return $this->error('Parent account not found.');
             }    
         }
  
