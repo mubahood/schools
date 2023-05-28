@@ -303,20 +303,14 @@ class ApiMainController extends Controller
                 'academic_class_id' => $s->current_class_id,
                 'administrator_id' => $s->id,
             ])->first();
-            if ($hasClass != null) {
-                $d['student_has_class_id'] = $hasClass->id;
-                $d['stream_id'] = $hasClass->stream_id;
 
-                $class = AcademicClass::find($s->current_class_id);
-                if ($class != null) {
-                    $d['current_class_text'] = $class->short_name;
-                    $stream = AcademicClassSctream::find($class->stream_id);
-                    if ($stream != null) {
-                        $d['current_stream_text'] = $stream->short_name;
-                    }
-                }
-            } else {
-                $d['current_class_id'] = null;
+            $class = AcademicClass::find($s->current_class_id);
+            if ($class != null) {
+                $d['current_class_text'] = $class->short_name;
+            }
+            $stream = AcademicClass::find($s->stream_id);
+            if ($class != null) {
+                $d['current_stream_text'] = $stream->name;
             }
             $students[] = $d;
         }
@@ -339,13 +333,15 @@ class ApiMainController extends Controller
 
         $s = Service::find($r->service_id);
         if (
-            $s == null ) {
+            $s == null
+        ) {
             return $this->error('Service not found.');
         }
-       
+
         $s = Administrator::find($r->administrator_id);
         if (
-            $s == null ) {
+            $s == null
+        ) {
             return $this->error('Service not found.');
         }
 
@@ -353,7 +349,7 @@ class ApiMainController extends Controller
         $sub->enterprise_id = $u->enterprise_id;
         $sub->service_id = $r->service_id;
         $sub->quantity = $r->quantity;
-        $sub->administrator_id = $r->administrator_id; 
+        $sub->administrator_id = $r->administrator_id;
         $sub->due_term_id = $term->id;
 
         try {
