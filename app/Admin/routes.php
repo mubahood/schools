@@ -82,6 +82,7 @@ Route::group([
     $router->resource('streams', AcademicClassSctreamController::class);
     $router->resource('supplier-products', SupplierProductController::class);
     $router->resource('supplier-orders', SupplierOrderController::class); 
+    $router->resource('gens', GenController::class);  
 
     //$router->resource('fees', StudentHasFeeController::class);
 

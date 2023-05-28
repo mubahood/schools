@@ -7,6 +7,7 @@ use App\Models\AcademicClass;
 use App\Models\Book;
 use App\Models\BooksCategory;
 use App\Models\Course;
+use App\Models\Gen;
 use App\Models\StudentHasClass;
 use App\Models\Subject;
 use App\Models\Utils;
@@ -19,6 +20,10 @@ use Illuminate\Support\Facades\App;
 
 Route::match(['get', 'post'], '/print', [PrintController2::class, 'index']);
 Route::match(['get', 'post'], '/report-cards', [PrintController2::class, 'secondary_report_cards']);
+
+Route::get('/gen', function () {
+  die(Gen::find($_GET['id'])->do_get());
+})->name("gen");
 
 
 Route::get('generate-variables', [MainController::class, 'generate_variables']);

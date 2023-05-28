@@ -8,6 +8,7 @@ use App\Models\AcademicClassSctream;
 use App\Models\Account;
 use App\Models\Mark;
 use App\Models\Participant;
+use App\Models\Service;
 use App\Models\Session;
 use App\Models\StudentHasClass;
 use App\Models\User;
@@ -276,6 +277,7 @@ class ApiMainController extends Controller
         }
         return $this->success(null, $msg = $msg, 200);
     }
+
     public function student_verification()
     {
         $u = auth('api')->user();
@@ -319,6 +321,19 @@ class ApiMainController extends Controller
         }
         return $this->success($students, $message = "Success", 200);
     }
+
+
+    public function services()
+    {
+        $u = auth('api')->user();
+
+        return $this->success(Service::where([
+            'enterprise_id' => $u->enterprise_id,
+        ])->limit(10000)->orderBy('id', 'desc')->get(), $message = "Success", 200);
+    }
+
+
+
     public function exams_list()
     {
         $u = auth('api')->user();
@@ -402,14 +417,14 @@ class ApiMainController extends Controller
         }
 
         $parents_conditions = "";
-        if(($u->isRole('parent'))){
+        if (($u->isRole('parent'))) {
             $students = $u->get_my_students($u);
             $parents_conditions = ' AND administrator_id IN (';
             $isFirst = true;
             foreach ($students as $key => $value) {
-                if($isFirst){
+                if ($isFirst) {
                     $isFirst = false;
-                }else{
+                } else {
                     $parents_conditions .= ",";
                 }
                 $parents_conditions .= $value->id;

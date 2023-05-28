@@ -16,13 +16,10 @@ Route::POST("users/register", [ApiAuthController::class, "register"]);
 Route::POST("users/login", [ApiAuthController::class, "login"]);
 
 Route::group(['middleware' => 'api'], function ($router) {
-
-
     Route::get("student-verification", [ApiMainController::class, 'student_verification']);
-
+    Route::get("services", [ApiMainController::class, 'services']);
     Route::get("exams", [ApiMainController::class, 'exams_list']);
     Route::post("marks", [ApiMainController::class, 'mark_submit']);
-
     Route::get("users/me", [ApiAuthController::class, 'me']);
     Route::get("my-classes", [ApiMainController::class, 'classes']);
     Route::get("class-streams", [ApiMainController::class, 'streams']);

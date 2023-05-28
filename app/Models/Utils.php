@@ -556,6 +556,7 @@ class Utils  extends Model
 
     public static function create_streams($u)
     {
+        return;
         $users = Administrator::where([
             'stream_id' => NULL,
             'user_type' => 'student',
