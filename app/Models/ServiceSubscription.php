@@ -26,21 +26,17 @@ class ServiceSubscription extends Model
             if ($term == null) {
                 throw new Exception("Due term not found.", 1);
             }
+            $service = Service::find($m->service_id);
+            if ($service == null) {
+                throw new Exception("Service Not Found.", 1);
+            }
             $m->due_academic_year_id = $term->academic_year_id;
             $m->enterprise_id = $term->enterprise_id;
-
-            /*  $s = ServiceSubscription::where([
-                'service_id' => $m->service_id,
-                'administrator_id' => $m->administrator_id,
-            ])->first();
-
-            if ($s != null) {
-                return false;
-            } */
             $quantity = ((int)($m->quantity));
             if ($quantity < 0) {
                 $m->quantity = $quantity;
             }
+            $m->total = $service->fee * $m->quantity;
             return $m;
         });
 
