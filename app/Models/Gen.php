@@ -93,7 +93,7 @@ class Gen extends Model
       }
       $done[] = $key;
       if ($key == 'id') {
-        $_data .= "\"int {$key} INTEGER PRIMARY KEY\"<br>";
+        $_data .= "\"{$key} INTEGER PRIMARY KEY\"<br>";
       } else {
         $_data .= "\",{$key} TEXT\"<br>";
         if (str_contains($key, '_id')) {
@@ -270,7 +270,7 @@ class Gen extends Model
     try {
       //await db.delete(tableName);
 
-      await db.execute(sql);
+      await db.execute("DROP TABLE \${tableName}");
     } catch (e) {
       Utils.log('Failed to create table because \${e . toString()}');
 

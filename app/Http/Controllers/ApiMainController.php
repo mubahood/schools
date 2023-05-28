@@ -9,6 +9,7 @@ use App\Models\Account;
 use App\Models\Mark;
 use App\Models\Participant;
 use App\Models\Service;
+use App\Models\ServiceSubscription;
 use App\Models\Session;
 use App\Models\StudentHasClass;
 use App\Models\User;
@@ -323,10 +324,42 @@ class ApiMainController extends Controller
     }
 
 
+    public function service_subscriptions()
+    {
+        $u = auth('api')->user();
+        $term = $u->ent->active_term();
+
+        if (
+            $u->isRole('bursar') ||
+            $u->isRole('admin') ||
+            $u->isRole('dos')
+        ) {
+            return $this->success(ServiceSubscription::where([
+                'enterprise_id' => $u->enterprise_id,
+                'due_term_id' => $term->id
+            ])->limit(100000)->orderBy('id', 'desc')->get(), $message = "Success", 200);
+        }
+
+        if ($u->isRole('parent')) {
+
+            $parents_conditions = [];
+            $students = $u->get_my_students($u);
+            foreach ($students as $key => $value) {
+                $parents_conditions[] =  $value->id;
+            }
+
+            return $this->success(ServiceSubscription::where([
+                'enterprise_id' => $u->enterprise_id,
+                'due_term_id' => $term->id
+            ])
+                ->whereIn('administrator_id', $parents_conditions)
+                ->limit(10000)->orderBy('id', 'desc')->get(), $message = "Success", 200);
+        }
+    }
+
     public function services()
     {
         $u = auth('api')->user();
-
         return $this->success(Service::where([
             'enterprise_id' => $u->enterprise_id,
         ])->limit(10000)->orderBy('id', 'desc')->get(), $message = "Success", 200);
