@@ -337,11 +337,23 @@ class ApiMainController extends Controller
             return $this->error('Params are missing.');
         }
 
+        $s = Service::find($r->service_id);
+        if (
+            $s == null ) {
+            return $this->error('Service not found.');
+        }
+       
+        $s = Administrator::find($r->administrator_id);
+        if (
+            $s == null ) {
+            return $this->error('Service not found.');
+        }
+
         $sub = new ServiceSubscription();
         $sub->enterprise_id = $u->enterprise_id;
         $sub->service_id = $r->service_id;
         $sub->quantity = $r->quantity;
-        $sub->total = $r->quantity * $r->total;
+        $sub->administrator_id = $r->administrator_id; 
         $sub->due_term_id = $term->id;
 
         try {
