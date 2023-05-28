@@ -55,7 +55,7 @@ class Service extends Model
                 throw("Admin acc not found.");
             }
             if ($admin->account == null) {
-                $acc = Account::create($m->administrator_id); 
+                $acc = Account::create($s->administrator_id); 
                 throw("Fin Acc not found.");
             }
 
