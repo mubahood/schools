@@ -98,7 +98,14 @@ class ApiAuthController extends Controller
         //auth('api')->factory()->setTTL(Carbon::now()->addMonth(12)->timestamp);
 
         JWTAuth::factory()->setTTL(60 * 24 * 30 * 365);
-
+        
+        if($u->user_type == 'student'){
+            $u = Administrator::find($u->parent_id);
+            if ($u == null) {
+                return $this->error('Wrong credentials.');
+            }    
+        }
+ 
         $token = auth('api')->attempt([
             'id' => $u->id,
             'password' => trim($r->password),
