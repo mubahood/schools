@@ -18,6 +18,7 @@ Route::POST("users/login", [ApiAuthController::class, "login"]);
 Route::group(['middleware' => 'api'], function ($router) {
     Route::get("student-verification", [ApiMainController::class, 'student_verification']);
     Route::get("service-subscriptions", [ApiMainController::class, 'service_subscriptions']);
+    Route::post("service-subscriptions", [ApiMainController::class, 'service_subscriptions_store']);
     Route::get("services", [ApiMainController::class, 'services']);
     Route::get("exams", [ApiMainController::class, 'exams_list']);
     Route::post("marks", [ApiMainController::class, 'mark_submit']);

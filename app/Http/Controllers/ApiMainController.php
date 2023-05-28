@@ -324,6 +324,33 @@ class ApiMainController extends Controller
     }
 
 
+    public function service_subscriptions_store(Request $r)
+    {
+        $u = auth('api')->user();
+        $term = $u->ent->active_term();
+
+        if (
+            $r->service_id == null ||
+            $r->quantity == null ||
+            $r->administrator_id == null
+        ) {
+            return $this->error('Params are missing.');
+        }
+
+        $sub = new ServiceSubscription();
+        $sub->enterprise_id = $u->enterprise_id;
+        $sub->service_id = $r->service_id;
+        $sub->quantity = $r->quantity;
+        $sub->total = $r->quantity * $r->total;
+        $sub->due_term_id = $term->id;
+
+        try {
+            $sub->save();
+            return $this->success('Saved successfully!', $message = "Success", 200);
+        } catch (\Throwable $th) {
+            return $this->error('Failed to save record because ' . $th);
+        }
+    }
     public function service_subscriptions()
     {
         $u = auth('api')->user();
@@ -350,7 +377,7 @@ class ApiMainController extends Controller
 
             return $this->success(ServiceSubscription::where([
                 'enterprise_id' => $u->enterprise_id,
-                'due_term_id' => $term->id 
+                'due_term_id' => $term->id
             ])
                 ->whereIn('administrator_id', $parents_conditions)
                 ->limit(10000)->orderBy('id', 'desc')->get(), $message = "Success", 200);

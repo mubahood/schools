@@ -27,6 +27,7 @@ class ServiceSubscription extends Model
                 throw new Exception("Due term not found.", 1);
             }
             $m->due_academic_year_id = $term->academic_year_id;
+            $m->enterprise_id = $term->enterprise_id;
 
             /*  $s = ServiceSubscription::where([
                 'service_id' => $m->service_id,
