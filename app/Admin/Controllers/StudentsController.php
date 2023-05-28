@@ -389,9 +389,11 @@ class StudentsController extends AdminController
      */
     protected function form()
     {
+
+       /*  $u  = Administrator::find(10615);
+        Administrator::my_update($u);
+        die("done romina"); */
         $u = Admin::user();
-
-
         $form = new Form(new Administrator());
 
 

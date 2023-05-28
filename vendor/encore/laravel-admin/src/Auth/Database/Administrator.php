@@ -393,7 +393,24 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
     public static function my_update($m)
     {
         $acc = Account::create($m->id);
-        if ($acc != null) { 
+        if ($m->user_type == 'student') {
+            if ($m->current_class_id != null) {
+                $existing = StudentHasClass::where([
+                    'administrator_id' => $m->id,
+                    'academic_class_id' => $m->current_class_id,
+                ])->first();
+                if ($existing == null) {
+                    $class = new StudentHasClass();
+                    $class->enterprise_id = $m->enterprise_id;
+                    $class->academic_class_id = $m->current_class_id;
+                    $class->administrator_id = $m->id;
+                    $class->stream_id = $m->stream_id; 
+                    $class->save();
+                }
+            }
+
+        }
+        if ($acc != null) {
             if ($m->user_type == 'student') {
                 if ($m->status == 1) {
                     AcademicClass::update_fees($m);

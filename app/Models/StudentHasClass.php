@@ -34,6 +34,7 @@ class StudentHasClass extends Model
                 'academic_class_id' => $m->academic_class_id,
             ])->first();
             if ($existing != null) {
+                return false;
                 throw new Exception("Student already in this class.", 1);
             }
 

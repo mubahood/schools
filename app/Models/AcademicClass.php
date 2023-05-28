@@ -316,12 +316,11 @@ class AcademicClass extends Model
 
     public static function update_fees($m)
     {
-
         if ($m == null) {
             return;
         }
 
-        if ($m->user_type == 'student') {
+        if (strtolower($m->user_type) != 'student') {
             return;
         }
 
@@ -341,6 +340,7 @@ class AcademicClass extends Model
                     if ($val->class->academic_class_fees != null) {
                         foreach ($val->class->academic_class_fees as $fee) {
                             if ($fee != null) {
+                             
                                 $has_fee = StudentHasFee::where([
                                     'administrator_id' => $m->id,
                                     'academic_class_fee_id' => $fee->id,
