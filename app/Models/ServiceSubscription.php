@@ -96,4 +96,21 @@ class ServiceSubscription extends Model
     {
         return $this->belongsTo(Administrator::class, 'administrator_id');
     }
+    public function getServiceTextAttribute()
+    {
+        $s = Service::find($this->service_id);
+        if ($s == null) {
+            return $this->service_id;
+        }
+        return $s->name;
+    }
+    public function getDueTermTextAttribute()
+    {
+        $s = Term::find($this->due_term_id);
+        if ($s == null) {
+            return $this->due_term_id;
+        }
+        return $s->name_text;
+    }
+    protected $appends = ['service_text', 'due_term_text'];
 }

@@ -350,7 +350,7 @@ class ApiMainController extends Controller
 
             return $this->success(ServiceSubscription::where([
                 'enterprise_id' => $u->enterprise_id,
-                'due_term_id' => $term->id
+                'due_term_id' => $term->id 
             ])
                 ->whereIn('administrator_id', $parents_conditions)
                 ->limit(10000)->orderBy('id', 'desc')->get(), $message = "Success", 200);
