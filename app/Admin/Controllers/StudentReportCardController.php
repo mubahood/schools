@@ -205,13 +205,10 @@ class StudentReportCardController extends AdminController
 
             echo $c->id."<br>";
         }
-
-        dd("done");
-   
+ 
         $r = TermlyReportCard::find(3);
         $r::grade_students($r);
-        dd($r);
-
+     
         die("simple test"); */  
         $grid = new Grid(new StudentReportCard());
 

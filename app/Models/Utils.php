@@ -574,11 +574,9 @@ class Utils  extends Model
                         $v->stream_id = $hasClass->stream_id;
                     }
                 }
-                $x++;
-                echo $x . "<br>";
+                $x++; 
                 $v->save();
-            }
-            dd(count($users));
+            } 
         }
     }
     public static function create_make_parents($u)

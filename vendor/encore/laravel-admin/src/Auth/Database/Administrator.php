@@ -105,7 +105,6 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
 
             return false;
 
-            dd("=====DELETING====");
             //$m->account->delete();
 
             Transaction::where('account_id', $m->id)
@@ -330,7 +329,6 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                 if ($_u->id != $model->id) {
                     $model->email = $model->id;
                     $model->username = $model->id;
-                    //dd($model->user_type);
                     //throw new Exception("Use with provided email address ($model->email) already exist. $_u->name", 1);
                 }
             }

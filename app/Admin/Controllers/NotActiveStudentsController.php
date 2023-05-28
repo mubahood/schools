@@ -77,9 +77,7 @@ class NotActiveStudentsController extends AdminController
         $u->id = 2317;
         $u->enterprise_id = Auth::user()->enterprise_id;
         $u->save(); */
-
-        /*    $u->delete();
-        dd("done"); */
+ 
         $grid = new Grid(new Administrator());
         $grid->disableBatchActions();
         $grid->actions(function ($actions) {

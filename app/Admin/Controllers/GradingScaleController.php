@@ -67,8 +67,7 @@ class GradingScaleController extends AdminController
         $range->min_mark = 50;
         $range->max_mark = 54;
         $range->aggregates = 8;
-        $range->save();
-        dd("anjane");
+        $range->save();  
  */
         /*         $table->integer('')->default(0);
         $table->integer('max_mark')->default(0);
