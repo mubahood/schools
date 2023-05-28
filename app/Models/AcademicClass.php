@@ -321,9 +321,16 @@ class AcademicClass extends Model
             return;
         }
 
+        if ($m->user_type == 'student') {
+            return;
+        }
+
         if ($m->status != 1) {
             return;
         }
+
+
+
 
         //billing for secular class
         foreach (StudentHasClass::where([
