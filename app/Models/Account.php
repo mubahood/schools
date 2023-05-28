@@ -161,7 +161,7 @@ class Account extends Model
     {
         $admin = Administrator::where([
             'id' => $administrator_id
-        ])->first();
+        ])->first(); 
         if ($admin == null) {
             throw("Account was not created because admin account was not found.");
         }
@@ -180,10 +180,14 @@ class Account extends Model
         $acc->type = $admin->user_type;
         if ($admin->user_type == 'student') {
             $acc->type = 'STUDENT_ACCOUNT';
+            $acc->save(); 
+            $admin->account_id = $acc->id;
+            $admin->save(); 
         } else if ($admin->user_type == 'employee') {
             $acc->type = 'EMPLOYEE_ACCOUNT';
+            $acc->save(); 
         }
-        $acc->save();
+
         return $acc;
     }
 

@@ -371,7 +371,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                     ->orderBy('id', 'desc')
                     ->get() as $key => $val) {
                     $model->current_class_id = $val->academic_class_id;
-                    $model->stream_id = $val->stream_id; 
+                    $model->stream_id = $val->stream_id;
                 }
             }
 
@@ -392,10 +392,14 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
 
     public static function my_update($m)
     {
-
-        if ($m->user_type == 'student') {
-            if ($m->status == 1) {
-                AcademicClass::update_fees($m);
+        $acc = Account::create($m->id);
+        if ($acc != null) {
+            $m->account_id = $acc->id;
+            $m->save();
+            if ($m->user_type == 'student') {
+                if ($m->status == 1) {
+                    AcademicClass::update_fees($m);
+                }
             }
         }
     }
@@ -746,7 +750,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
 
     public function account()
     {
-        return $this->hasOne(Account::class);
+        return $this->belongsTo(Account::class);
     }
 
     public function getAccount()
