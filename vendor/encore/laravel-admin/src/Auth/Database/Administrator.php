@@ -393,9 +393,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
     public static function my_update($m)
     {
         $acc = Account::create($m->id);
-        if ($acc != null) {
-            $m->account_id = $acc->id;
-            $m->save();
+        if ($acc != null) { 
             if ($m->user_type == 'student') {
                 if ($m->status == 1) {
                     AcademicClass::update_fees($m);
@@ -750,7 +748,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
 
     public function account()
     {
-        return $this->belongsTo(Account::class);
+        return $this->hasOne(Account::class);
     }
 
     public function getAccount()
