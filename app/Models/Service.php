@@ -36,7 +36,7 @@ class Service extends Model
 
     public static function update_fees($m)
     { 
-        
+
         foreach ($m->subs as  $s) {
             $fd = FeeDepositConfirmation::where([
                 'fee_id' => $s->id,
@@ -54,6 +54,10 @@ class Service extends Model
             if ($admin == null) {
                 throw("Admin acc not found.");
             }
+            if ($admin->account == null) {
+                Account::create($m->iadministrator_idd);  
+            }
+
             if ($admin->account == null) {
                 throw("Fin Acc not found.");
             }
