@@ -363,7 +363,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
 
             $model->name = str_replace('   ', ' ', $model->name);
             $model->name = str_replace('  ', ' ', $model->name);
-
+/* 
             if ($model->user_type == 'student') {
                 foreach (StudentHasClass::where([
                     'administrator_id' => $model->id,
@@ -371,9 +371,11 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                     ->orderBy('id', 'desc')
                     ->get() as $key => $val) {
                     $model->current_class_id = $val->academic_class_id;
-                    $model->stream_id = $val->stream_id;
+                    if($val->stream_id!=null){
+                        $model->stream_id = $val->stream_id;
+                    }
                 }
-            }
+            } */
 
             return $model;
         });
