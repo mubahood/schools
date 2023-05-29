@@ -40,7 +40,11 @@ $template->body = str_replace('color: rgb(199, 37, 78);', ' ', $template->body);
 $requirements_rows = '';
 $requirements_row_count = 0;
 $requirements_total = 0;
+$term = $ent->active_term();
 foreach ($class->academic_class_fees as $fee) {
+    if($fee->due_term_id != $term->id){
+        continue;
+    } 
     $requirements_row_count++;
     $requirements_total += $fee->amount;
     $requirements_rows .=

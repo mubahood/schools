@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Models\AcademicClass;
 use App\Models\AcademicClassFee;
+use App\Models\Term;
 use App\Models\TheologyClass;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -138,6 +139,23 @@ class AcademicClassFeeController extends AdminController
 
         $form->text('name', __('Fee name'))->rules('required');
         $form->text('amount', __('Amount'))->rules('required|int');
+
+        $terms = [];
+        $active_term = 0;
+        foreach (Term::where(
+            'enterprise_id',
+            Admin::user()->enterprise_id
+        )->orderBy('id', 'desc')->get() as $key => $term) {
+            $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
+            if ($term->is_active) {
+                $active_term = $term->id;
+            }
+        }
+
+        $form->select('due_term_id', 'Due term')->options($terms)
+            ->default($active_term)
+            ->rules('required');
+
 
         $form->radio('cycle', "Billing cycle")
             ->options([
