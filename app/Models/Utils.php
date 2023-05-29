@@ -544,18 +544,18 @@ class Utils  extends Model
     {
 
         Transaction::where([
-            'is_contra_entry' => 1, 
+            'is_contra_entry' => 1,
         ])->delete();
         Transaction::where([
-            'amount' => 0, 
+            'amount' => 0,
         ])->delete();
- 
+
         return "";
     }
 
     public static function create_streams()
-    { 
-        $users = Administrator::where([ 
+    {
+        $users = Administrator::where([
             'user_type' => 'student',
         ])->get();
         $x = 0;
@@ -567,25 +567,21 @@ class Utils  extends Model
                 foreach (StudentHasClass::where([
                     'administrator_id' => $v->id,
                 ])
-                ->orderBy('id','desc')
-                ->get() as $key => $hasClass) {
-                    if($hasClass->class!=null){
-                        if($term->academic_year_id == $hasClass->class->academic_year_id){
+                    ->orderBy('id', 'desc')
+                    ->get() as $key => $hasClass) {
+                    if ($hasClass->class != null) {
+                        if ($term->academic_year_id == $hasClass->class->academic_year_id) {
                             $v->current_class_id = $hasClass->class->id;
-                            if(((int)($hasClass->stream_id)) > 0){
+                            if (((int)($hasClass->stream_id)) > 0) {
                                 $v->stream_id = $hasClass->stream_id;
                             }
-                            echo $x." $v->name - $v->current_class_id <br>";
-                            $x++; 
-                            $v->save(); 
+                            echo $x . " $v->name - $v->current_class_id <br>";
+                            $x++;
+                            $v->save();
                         }
-                        
                     }
-
                 }
-
-              
-            } 
+            }
         }
         die("done");
     }
