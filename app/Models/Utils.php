@@ -578,6 +578,7 @@ class Utils  extends Model
                             echo $x . " $v->name - $v->current_class_id <br>";
                             $x++;
                             $v->save();
+                            break; 
                         }
                     }
                 }

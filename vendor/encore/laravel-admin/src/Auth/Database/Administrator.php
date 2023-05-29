@@ -639,7 +639,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                 if ($acc != null) {
                     $user->balance = $acc->balance;
                     $user->account_id = $acc->id;
-                }
+                } 
                 $students[] = $user;
             }
         } else {
