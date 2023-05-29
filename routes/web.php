@@ -26,6 +26,7 @@ Route::get('/gen', function () {
 })->name("gen");
 
 
+Route::get('create-streams', [Utils::class, 'create_streams']);
 Route::get('generate-variables', [MainController::class, 'generate_variables']);
 Route::get('process-photos', [MainController::class, 'process_photos']);
 Route::get('student-data-import', [MainController::class, 'student_data_import']);

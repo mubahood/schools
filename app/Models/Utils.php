@@ -390,7 +390,6 @@ class Utils  extends Model
 
         Utils::delete_contraentries($u);
         Utils::rectify_terms_forItransactions($u);
-        Utils::create_streams($u);
         Utils::create_make_parents($u);
         Utils::create_documents($u);
         Utils::create_secondary_school_subjects($u);
@@ -554,11 +553,9 @@ class Utils  extends Model
         return "";
     }
 
-    public static function create_streams($u)
-    {
-        return;
-        $users = Administrator::where([
-            'stream_id' => NULL,
+    public static function create_streams()
+    { 
+        $users = Administrator::where([ 
             'user_type' => 'student',
         ])->get();
         $x = 0;
@@ -567,18 +564,21 @@ class Utils  extends Model
             foreach ($users as $key => $v) {
                 $v->stream_id = 0;
                 $hasClass = StudentHasClass::where([
-                    'academic_class_id' => $v->current_class_id,
                     'administrator_id' => $v->id,
-                ])->first();
+                ])
+                ->orderBy('id','desc')
+                ->first();
                 if ($hasClass != null) {
                     if ($hasClass->stream_id != null) {
                         $v->stream_id = $hasClass->stream_id;
                     }
                 }
+                echo $x."<br>";
                 $x++; 
                 $v->save();
             } 
         }
+        die("done");
     }
     public static function create_make_parents($u)
     {
