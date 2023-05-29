@@ -68,6 +68,13 @@ class AcademicClassFeeController extends AdminController
         $grid->column('amount', __('Amount'))->display(function () {
             return '<span style="float: right;">' . $this->amount_text . '</span>';
         })->sortable();
+        $grid->column('due_term_id', __('Due term'))->display(function ($x) {
+            $t = Term::find($x);
+            if($t == null){
+                return $x;
+            }
+            return '<span style="float: right;">Term '. $t->name_text . '</span>';
+        })->sortable();
 
         return $grid;
     }
