@@ -99,10 +99,10 @@ class ApiMainController extends Controller
             if ($class == null) {
                 return $this->error('Class not found.');
             }
-
+ /*
             $stream = AcademicClassSctream::find($r->stream_id);
             if ($class == null) {
-                return $this->error('Stream not found.');
+                //return $this->error('Stream not found.');
             }
 
             $hasClass = StudentHasClass::where([
@@ -116,8 +116,8 @@ class ApiMainController extends Controller
                 $hasClass->enterprise_id = $class->enterprise_id;
             }
 
-            $hasClass->stream_id = $stream->id;
-            $hasClass->save();
+            //$hasClass->stream_id = $stream->id;
+            $hasClass->save(); */
         }
 
         $acc->sex = $r->sex;
