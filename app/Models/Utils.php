@@ -563,19 +563,28 @@ class Utils  extends Model
             set_time_limit(-1);
             foreach ($users as $key => $v) {
                 $v->stream_id = 0;
-                $hasClass = StudentHasClass::where([
+                $term = $v->ent->active_term();
+                foreach (StudentHasClass::where([
                     'administrator_id' => $v->id,
                 ])
                 ->orderBy('id','desc')
-                ->first();
-                if ($hasClass != null) {
-                    if ($hasClass->stream_id != null) {
-                        $v->stream_id = $hasClass->stream_id;
+                ->get() as $key => $hasClass) {
+                    if($hasClass->class!=null){
+                        if($term->academic_year_id == $hasClass->class->academic_year_id){
+                            $v->current_class_id = $hasClass->class->id;
+                            if(((int)($hasClass->stream_id)) > 0){
+                                $v->stream_id = $hasClass->stream_id;
+                            }
+                            echo $x." $v->name - $v->current_class_id <br>";
+                            $x++; 
+                            $v->save(); 
+                        }
+                        
                     }
+
                 }
-                echo $x."<br>";
-                $x++; 
-                $v->save();
+
+              
             } 
         }
         die("done");
