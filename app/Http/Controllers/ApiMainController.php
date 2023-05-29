@@ -99,10 +99,10 @@ class ApiMainController extends Controller
             if ($class == null) {
                 return $this->error('Class not found.');
             }
- /*
+
             $stream = AcademicClassSctream::find($r->stream_id);
             if ($class == null) {
-                //return $this->error('Stream not found.');
+                return $this->error('Stream not found.');
             }
 
             $hasClass = StudentHasClass::where([
@@ -116,8 +116,8 @@ class ApiMainController extends Controller
                 $hasClass->enterprise_id = $class->enterprise_id;
             }
 
-            //$hasClass->stream_id = $stream->id;
-            $hasClass->save(); */
+            $hasClass->stream_id = $stream->id;
+            $hasClass->save();
         }
 
         $acc->sex = $r->sex;
@@ -307,11 +307,12 @@ class ApiMainController extends Controller
                 $d['student_has_class_id'] = $hasClass->id;
                 $d['stream_id'] = $hasClass->stream_id;
 
-                $hasClass = StudentHasClass::find($s->current_class_id);
-                if ($hasClass->stream_id != null && $hasClass->stream_id > 0) {
-                    $stream = AcademicClassSctream::find($hasClass->stream_id);
-                    if ($stream != null) { 
-                        $d['current_class_text'] = $stream->name; 
+                $class = AcademicClass::find($s->current_class_id);
+                if ($class != null) {
+                    $d['current_class_text'] = $class->short_name;
+                    $stream = AcademicClassSctream::find($class->stream_id);
+                    if ($stream != null) {
+                        $d['current_stream_text'] = $stream->name;
                     }
                 }
             } else {
@@ -338,15 +339,13 @@ class ApiMainController extends Controller
 
         $s = Service::find($r->service_id);
         if (
-            $s == null
-        ) {
+            $s == null ) {
             return $this->error('Service not found.');
         }
-
+       
         $s = Administrator::find($r->administrator_id);
         if (
-            $s == null
-        ) {
+            $s == null ) {
             return $this->error('Service not found.');
         }
 
@@ -354,7 +353,7 @@ class ApiMainController extends Controller
         $sub->enterprise_id = $u->enterprise_id;
         $sub->service_id = $r->service_id;
         $sub->quantity = $r->quantity;
-        $sub->administrator_id = $r->administrator_id;
+        $sub->administrator_id = $r->administrator_id; 
         $sub->due_term_id = $term->id;
 
         try {
