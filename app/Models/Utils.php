@@ -575,7 +575,7 @@ class Utils  extends Model
                             if (((int)($hasClass->stream_id)) > 0) {
                                 $v->stream_id = $hasClass->stream_id;
                             }
-                            echo $x . " $v->name - $v->current_class_id <br>";
+                            echo $x . ". $v->name - $v->current_class_id <br>";
                             $x++;
                             $v->save();
                             break; 

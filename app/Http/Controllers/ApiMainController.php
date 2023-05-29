@@ -307,10 +307,10 @@ class ApiMainController extends Controller
                 $d['student_has_class_id'] = $hasClass->id;
                 $d['stream_id'] = $hasClass->stream_id;
 
-                $class = AcademicClass::find($s->current_class_id);
-                if ($class != null) {
-                    $d['current_class_text'] = $class->short_name;
-                    $stream = AcademicClassSctream::find($class->stream_id);
+                $hasClass = StudentHasClass::find($s->current_class_id);
+                if ($hasClass->class != null) {
+                    $d['current_class_text'] = $hasClass->class->short_name;
+                    $stream = AcademicClassSctream::find($hasClass->class->stream_id);
                     if ($stream != null) {
                         $d['current_stream_text'] = $stream->name;
                     }
