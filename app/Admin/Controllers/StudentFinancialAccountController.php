@@ -171,6 +171,33 @@ class StudentFinancialAccountController extends AdminController
                 1 => 'success',
             ])
             ->sortable();
+        $grid->column('parent_name', __('Parent\'s Contact'))
+            ->display(function () {
+                $u = $this->owner;
+                if ($u == null) {
+                    return "-";
+                }
+                if (
+                    $u->mother_name != null &&
+                    strlen($u->mother_name) > 2
+                ) {
+                    return $u->mother_name;
+                }
+                if (
+                    $u->father_name != null &&
+                    strlen($u->father_name) > 2
+                ) {
+                    return $u->father_name;
+                }
+                if (
+                    $u->emergency_person_name != null &&
+                    strlen($u->emergency_person_name) > 2
+                ) {
+                    return $u->emergency_person_name;
+                }
+                 
+                return "-";
+            });
         $grid->column('mother_phone', __('Parent\'s Contact'))
             ->display(function () {
                 $u = $this->owner;
