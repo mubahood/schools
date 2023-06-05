@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Encore\Admin\Auth\Database\Administrator;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,6 +11,21 @@ class FinancialRecord extends Model
 {
     use HasFactory;
 
+    public function created_by(){
+        return $this->belongsTo(Administrator::class,'created_by_id');
+    }
+
+    public function par(){
+        return $this->belongsTo(AccountParent::class,'parent_account_id');
+    }
+
+    public function term(){
+        return $this->belongsTo(Term::class);
+    }
+
+    public function account(){
+        return $this->belongsTo(Account::class);
+    }
     public static function boot()
     {
         parent::boot();

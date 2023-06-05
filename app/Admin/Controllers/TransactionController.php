@@ -34,7 +34,7 @@ class TransactionController extends AdminController
     {
         $grid = new Grid(new Transaction());
 
-        $grid->disableActions(); 
+        $grid->disableActions();
         $grid->export(function ($export) {
 
             $export->filename('Transactions');
@@ -107,9 +107,7 @@ class TransactionController extends AdminController
                 $group->lt('less than');
                 $group->equal('equal to');
             });
-        });
-
-        //$grid->disableBatchActions();
+        }); 
 
         $grid->quickSearch('description');
 

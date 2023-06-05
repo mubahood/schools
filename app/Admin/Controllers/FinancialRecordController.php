@@ -3,15 +3,19 @@
 namespace App\Admin\Controllers;
 
 use App\Models\Account;
+use App\Models\AccountParent;
 use App\Models\FinancialRecord;
 use App\Models\Term;
+use App\Models\Utils;
 use Dflydev\DotAccessData\Util;
 use Encore\Admin\Controllers\AdminController;
+use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class FinancialRecordController extends AdminController
 {
@@ -31,20 +35,139 @@ class FinancialRecordController extends AdminController
     {
         $grid = new Grid(new FinancialRecord());
 
-        $grid->column('id', __('Id'));
-        $grid->column('created_at', __('Created at'));
-        $grid->column('updated_at', __('Updated at'));
-        $grid->column('enterprise_id', __('Enterprise id'));
-        $grid->column('account_id', __('Account id'));
-        $grid->column('academic_year_id', __('Academic year id'));
-        $grid->column('term_id', __('Term id'));
-        $grid->column('parent_account_id', __('Parent account id'));
-        $grid->column('created_by_id', __('Created by id'));
-        $grid->column('amount', __('Amount'));
-        $grid->column('termly_school_fees_balancing_id', __('Termly school fees balancing id'));
-        $grid->column('description', __('Description'));
-        $grid->column('type', __('Type'));
-        $grid->column('payment_date', __('Payment date'));
+        $grid->export(function ($export) {
+
+            $export->filename('Financial Records');
+
+            $export->except(['actions']);
+            $export->originalValue(['description', 'type']);
+        });
+
+        $grid->disableBatchActions();
+
+
+
+        $grid->filter(function ($filter) {
+            // Remove the default id filter
+            $filter->disableIdFilter();
+            $u = Admin::user();
+            $accs = [];
+            foreach (Account::where([
+                'enterprise_id' => $u->enterprise_id,
+                'type' => 'OTHER_ACCOUNT'
+            ])
+                ->get() as $val) {
+                if ($val->account_parent_id == null) {
+                    continue;
+                }
+
+                $accs[$val->id] = $val->getName();
+            }
+            $parents = [];
+            foreach (AccountParent::where([
+                'enterprise_id' => $u->enterprise_id
+            ])
+                ->orderBy('id', 'desc')
+                ->get() as $v) {
+                $parents[$v->id] = $v->name;
+            }
+
+
+            $filter->equal('parent_account_id', 'Filter by account')
+                ->select($parents);
+
+            $filter->equal('account_id', 'Filter by account')
+                ->select($accs);
+
+
+            $filter->equal('term_id', 'Fliter by term')->select(Term::where([
+                'enterprise_id' => $u->enterprise_id
+            ])->get()
+                ->pluck('name_text', 'id'));
+
+
+
+
+            $filter->between('payment_date', 'Date Created between')->date();
+
+            $filter->group('amount', function ($group) {
+                $group->gt('greater than');
+                $group->lt('less than');
+                $group->equal('equal to');
+            });
+        });
+
+        $grid->quickSearch('description');
+
+
+        $grid->model()->where([
+            'enterprise_id' => Admin::user()->enterprise_id,
+        ])->orderBy('id', 'DESC');
+
+        $grid->column('created_at', __('Created'))
+            ->display(function ($x) {
+                return Utils::my_date($x);
+            })
+            ->sortable()
+            ->hide();
+
+        $grid->column('payment_date', __('Created'))
+            ->display(function ($x) {
+                return Utils::my_date($x);
+            })->sortable();
+
+        $grid->column('description', __('Description'))
+            ->display(function ($x) {
+                return '<spap title="' . $x . '" >' . Str::limit($x, 40, '...') . '</span>';
+            });
+        $grid->column('amount', __('Amount (UGX)'))
+            ->display(function ($x) {
+                return number_format($x);
+            })->sortable();
+        $grid->column('type', __('Type'))
+            ->dot([
+                'EXPENDITURE' => 'danger',
+                'BUDGET' => 'success',
+            ])
+            ->filter([
+                'BUDGET' => 'BUDGET',
+                'EXPENDITURE' => 'EXPENDITURE',
+            ])->sortable();
+
+
+        $grid->column('account_id', __('Account'))
+            ->display(function ($x) {
+                if ($this->account == null) {
+                    return $x;
+                }
+                return $this->account->name;
+            })->sortable();
+
+
+        $grid->column('parent_account_id', __('Department'))
+            ->display(function ($x) {
+                if ($this->par == null) {
+                    return $x;
+                }
+                return $this->par->name;
+            })->sortable();
+        $grid->column('term_id', __('Term'))
+            ->display(function ($x) {
+                if ($this->term == null) {
+                    return $x;
+                }
+                return $this->term->name_text;
+            })->sortable();
+
+        $grid->column('created_by_id', __('Created by'))
+            ->display(function ($x) {
+                if ($this->created_by == null) {
+                    return $x;
+                }
+                return $this->created_by->name;
+            })->sortable();
+
+
 
         return $grid;
     }
