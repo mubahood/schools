@@ -64,8 +64,17 @@ class FinancialRecordController extends AdminController
                 $accs[$val->id] = $val->getName();
             }
             $parents = [];
+
+            $type = "BUDGET";
+            $segments = explode('/', trim($_SERVER['REQUEST_URI'], '/'));
+            if (in_array('financial-records-expenditure', $segments)) {
+
+                $type = 'Expenditure ';
+            }
+
             foreach (AccountParent::where([
-                'enterprise_id' => $u->enterprise_id
+                'enterprise_id' => $u->enterprise_id,
+                'type' => $type
             ])
                 ->orderBy('id', 'desc')
                 ->get() as $v) {
@@ -123,7 +132,9 @@ class FinancialRecordController extends AdminController
         $grid->column('amount', __('Amount (UGX)'))
             ->display(function ($x) {
                 return number_format($x);
-            })->sortable();
+            })->sortable()->totalRow(function ($x) {
+                return  number_format($x);
+            });
         $grid->column('type', __('Type'))
             ->dot([
                 'EXPENDITURE' => 'danger',
