@@ -73,8 +73,7 @@ class FinancialRecordController extends AdminController
             }
 
             foreach (AccountParent::where([
-                'enterprise_id' => $u->enterprise_id,
-                'type' => $type
+                'enterprise_id' => $u->enterprise_id 
             ])
                 ->orderBy('id', 'desc')
                 ->get() as $v) {
