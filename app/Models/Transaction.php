@@ -109,8 +109,7 @@ class Transaction extends Model
     public static function boot()
     {
         parent::boot();
-        self::deleting(function ($m) {
-            //die("You cannot delete this item.");
+        self::deleting(function ($m) { 
         });
         self::deleted(function ($m) {
             DB::table('transactions')->where('contra_entry_account_id', $m->id)->delete();
@@ -215,25 +214,7 @@ class Transaction extends Model
                 unset($m->is_debit);
             }
 
-
-
-
-
-
-            /*      [enterprise_id] => 7
-            [type] => FEES_PAYMENT
  
-              [account_id] => 153
-            [amount] => 12000         [created_by_id] => 2206
-            [is_contra_entry] => 
-
-
-            echo "<pre>";
-            print_r($m); 
-            
-
-            if ($m->type == 'FEES_PAYMENT') {
- */
 
             if ($m->description == null) {
                 if (strlen($m->description) < 3) {
@@ -245,8 +226,7 @@ class Transaction extends Model
                         } else {
                             $m->description = "UGX " . number_format((int)($m->amount)) .
                                 " on " . $m->account->name . "'s account.";
-                        }
-                        //BANK_ACCOUNT
+                        } 
                     }
                 }
             }

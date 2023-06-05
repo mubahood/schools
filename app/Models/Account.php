@@ -192,6 +192,17 @@ class Account extends Model
         return Carbon::parse($value)->format('d-M-Y');
     }
 
+    public function getName()
+    {
+        if ($this->account_parent_id == null) {
+            return $this->name;
+        }
+        $par = AccountParent::find($this->account_parent_id);
+        if ($par == null) {
+            return $this->name;
+        }
+        return $par->name . " - " . $this->name;
+    }
 
 
     function owner()
@@ -285,5 +296,6 @@ class Account extends Model
             ->where('amount', '<', 0)
             ->sum('amount');
     }
+
     protected $appends = ['debit', 'credit'];
 }

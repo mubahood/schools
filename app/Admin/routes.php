@@ -84,7 +84,10 @@ Route::group([
     $router->resource('supplier-orders', SupplierOrderController::class);
     $router->resource('gens', GenController::class);
     $router->resource('termly-school-fees-balancings', TermlySchoolFeesBalancingController::class);
-
+    $router->resource('financial-records', FinancialRecordController::class);
+    $router->resource('financial-records-budget', FinancialRecordController::class);
+    $router->resource('financial-records-expenditure', FinancialRecordController::class);
+ 
     //$router->resource('fees', StudentHasFeeController::class);
 
     $router->get('/statistics', 'HomeController@stats')->name('statistics');
