@@ -81,8 +81,9 @@ Route::group([
     $router->resource('secondary-report-card-items', SecondaryReportCardItemController::class);
     $router->resource('streams', AcademicClassSctreamController::class);
     $router->resource('supplier-products', SupplierProductController::class);
-    $router->resource('supplier-orders', SupplierOrderController::class); 
-    $router->resource('gens', GenController::class);  
+    $router->resource('supplier-orders', SupplierOrderController::class);
+    $router->resource('gens', GenController::class);
+    $router->resource('termly-school-fees-balancings', TermlySchoolFeesBalancingController::class);
 
     //$router->resource('fees', StudentHasFeeController::class);
 

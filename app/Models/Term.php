@@ -70,4 +70,5 @@ class Term extends Model
     {
         return $this->hasMany(Exam::class);
     }
+
 }

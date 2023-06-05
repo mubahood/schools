@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Models\Account;
 use App\Models\Term;
+use App\Models\TermlySchoolFeesBalancing;
 use App\Models\Transaction;
 use App\Models\Utils;
 use Attribute;
@@ -33,6 +34,7 @@ class TransactionController extends AdminController
     {
         $grid = new Grid(new Transaction());
 
+        $grid->disableActions(); 
         $grid->export(function ($export) {
 
             $export->filename('Transactions');
@@ -83,14 +85,28 @@ class TransactionController extends AdminController
                 'enterprise_id' => $u->enterprise_id
             ])->get()
                 ->pluck('name_text', 'id'));
+
+
+            $balancings = [];
+            foreach (TermlySchoolFeesBalancing::where([
+                'enterprise_id' => $u->enterprise_id
+            ])
+                ->orderBy('id', 'desc')
+                ->get() as $v) {
+                $balancings[$v->id] = 'Term ' . $v->term->name_text;
+            }
+
+            $filter->equal('termly_school_fees_balancing_id', 'Fliter by balance')->select(
+                $balancings
+            );
+
             $filter->between('payment_date', 'Created between')->date();
-            
+
             $filter->group('amount', function ($group) {
                 $group->gt('greater than');
                 $group->lt('less than');
                 $group->equal('equal to');
             });
-
         });
 
         //$grid->disableBatchActions();
@@ -103,7 +119,7 @@ class TransactionController extends AdminController
         ])
             ->orderBy('id', 'Desc');
 
-/*         $grid->column('id', __('Id'))->sortable(); */
+        /*         $grid->column('id', __('Id'))->sortable(); */
 
         $grid->column('term_id', __('Term'))->display(function () {
             if ($this->term == null) {
@@ -124,7 +140,7 @@ class TransactionController extends AdminController
         $grid->column('account_id', __('Account'))
             ->sortable()
             ->display(function ($x) {
-                if($this->account == null){
+                if ($this->account == null) {
                     return $x;
                 }
                 return
@@ -141,7 +157,7 @@ class TransactionController extends AdminController
                 return  number_format($x);
             });
 
- 
+
 
         $grid->column('description', __('Description'))->display(function ($x) {
             return '<spap title="' . $x . '" >' . Str::limit($x, 40, '...') . '</span>';
@@ -156,6 +172,8 @@ class TransactionController extends AdminController
             ->filter([
                 "FEES_PAYMENT" => 'Fees Payment',
                 "FEES_BILL" => 'FEES BILL',
+                "BALANCE_BROUGHT_FORWARD" => 'BALANCE BROUGHT FORWARD',
+                "BALANCE_CARRIED_DOWN" => 'BALANCE CARRIED DOWN',
                 "other" => 'Other',
             ])
             ->sortable();

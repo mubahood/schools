@@ -111,9 +111,11 @@ php artisan make:migration create_secondary_subjects_table
 php artisan make:migration create_secondary_termly_report_cards_table 
 php artisan make:migration create_secondary_termly_report_card_items_table 
 php artisan make:migration create_secondary_report_cards_table 
+php artisan make:migration create_termly_school_fees_balancings_table
 
 
 
+php artisan make:model TermlySchoolFeesBalancing
 php artisan make:model StudentHasTheologyClass
 php artisan make:model BooksCategory
 php artisan make:model BookAuthor
@@ -286,6 +288,7 @@ php artisan admin:make SecondaryTermlyReportCardController --model=App\Models\Se
 php artisan admin:make SecondaryReportCardController --model=App\Models\SecondaryReportCard
 php artisan admin:make SecondaryReportCardItemController --model=App\Models\SecondaryReportCardItem
 php artisan admin:make SupplierOrderController --model=App\Models\SupplierOrder 
+php artisan admin:make TermlySchoolFeesBalancingController --model=App\Models\TermlySchoolFeesBalancing 
 
 
 
@@ -381,6 +384,8 @@ php artisan make:migration add_signatures_enterprises --table=enterprises
 php artisan make:migration add_stream_id --table=enterprises
 php artisan make:migration add_stream_id --table=sessions
 php artisan make:migration add_stream_id_to_admin_users --table=admin_users
+php artisan make:migration add_coulmns_to_termly_school_fees_balancings --table=termly_school_fees_balancings
+php artisan make:migration add_balancing_to_transactions --table=transactions
 
 git add --all
 git commit -am "Your commit message"
