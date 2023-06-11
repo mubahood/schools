@@ -52,8 +52,7 @@ class SchoolFeesPaymentController extends AdminController
         $grid->model()
         ->where([
             'enterprise_id' => Admin::user()->enterprise_id,
-            'type' => 'FEES_PAYMENT',
-            'is_contra_entry' => 0,
+            'type' => 'FEES_PAYMENT', 
         ]) 
         ->orderBy('id', 'DESC');
 
