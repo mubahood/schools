@@ -15,8 +15,8 @@ class AcademicClassFee extends Model
 
     function academic_class()
     {
-        if($this->type == 'Theology'){
-            return $this->belongsTo(TheologyClass::class,'theology_class_id');            
+        if ($this->type == 'Theology') {
+            return $this->belongsTo(TheologyClass::class, 'theology_class_id');
         }
         return $this->belongsTo(AcademicClass::class);
     }
@@ -25,10 +25,22 @@ class AcademicClassFee extends Model
     {
         parent::boot();
         self::created(function ($m) {
-            AcademicClass::update_fees(Administrator::find($m->administrator_id));
+            if ($m->academic_class != null) {
+                if ($m->academic_class->students != null) {
+                    foreach ($m->academic_class->students as $key => $val) {
+                        AcademicClass::update_fees(Administrator::find($val->administrator_id));
+                    }
+                }
+            }
         });
         self::updated(function ($m) {
-            AcademicClass::update_fees(Administrator::find($m->administrator_id));
+            if ($m->academic_class != null) {
+                if ($m->academic_class->students != null) {
+                    foreach ($m->academic_class->students as $key => $val) {
+                        AcademicClass::update_fees(Administrator::find($val->administrator_id));
+                    }
+                }
+            }
         });
     }
 
