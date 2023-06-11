@@ -54,12 +54,7 @@ class SchoolFeesPaymentController extends AdminController
             'enterprise_id' => Admin::user()->enterprise_id,
             'type' => 'FEES_PAYMENT',
             'is_contra_entry' => 0,
-        ])
-        ->orwhere([
-            'enterprise_id' => Admin::user()->enterprise_id,
-            'type' => 'FEES_BILLING',
-            'is_contra_entry' => 0,
-        ])
+        ]) 
         ->orderBy('id', 'DESC');
 
         $grid->column('id', __('ID'))->sortable()->hide();
