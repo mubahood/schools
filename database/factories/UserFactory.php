@@ -2,41 +2,65 @@
 
 namespace Database\Factories;
 
+use App\Models\AcademicClass;
+use App\Models\TheologyClass;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
- */
 class UserFactory extends Factory
 {
     /**
      * Define the model's default state.
      *
-     * @return array<string, mixed>
+     * @return array
      */
     public function definition()
     {
-        return [
-            'name' => $this->faker->name(),
-            'email' => $this->faker->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
-            'remember_token' => Str::random(10),
-        ];
-    }
+        $email = $this->faker->unique()->safeEmail;
+        $phone_number_1 = $this->faker->unique()->phoneNumber();
+        $phone_number_2 = $this->faker->unique()->phoneNumber();
+        $mother_phone = $this->faker->unique()->phoneNumber();
+        $classes = AcademicClass::where(
+            'enterprise_id',
+            config('config.demo_ent')
+        )->get()->pluck('id');
+        $classes_2 = TheologyClass::where(
+            'enterprise_id',
+            config('config.demo_ent')
+        )->get()->pluck('id');
+        $current_class_id = $classes[rand(0, (count($classes) - 1))];
+        $current_theology_class_id = 0;
+        if (count($classes_2) > 1) {
+            $current_theology_class_id = $classes_2[rand(0, (count($classes_2) - 1))];
+        }
 
-    /**
-     * Indicate that the model's email address should be unverified.
-     *
-     * @return static
-     */
-    public function unverified()
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'email_verified_at' => null,
-            ];
-        });
+        return [
+            'enterprise_id' => config('config.demo_ent'),
+            'demo_id' => config('config.demo_ent'),
+            'username' => $email,
+            'email' => $email,
+            'password' => password_hash('4321', PASSWORD_DEFAULT),
+            'name' => $this->faker->name,
+            'father_name' => $this->faker->name,
+            'mother_phone' => $mother_phone,
+            'mother_name' => $this->faker->name,
+            'first_name' => $this->faker->firstName(),
+            'last_name' => $this->faker->lastName(),
+            'place_of_birth' => $this->faker->address(),
+            'home_address' => $this->faker->address(),
+            'sex' => ['Male', 'Female'][rand(0, 1)],
+            'phone_number_1' => $phone_number_1,
+            'phone_number_2' => $phone_number_2,
+            'date_of_birth' => Carbon::now()->subDays(((365) * (rand(12, 23)))),
+            'avatar' => rand(1, 50) . ".jpg",
+            'remember_token' => time() . rand(10, 1000),
+            'verification' => 1,
+            'status' => 1,
+            'current_class_id' => $current_class_id,
+            'current_theology_class_id' => $current_theology_class_id,
+            'user_type' => 'student',
+            'primary_school_name' => time() . rand(10000, 100000),
+
+        ];
     }
 }

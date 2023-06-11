@@ -1,3 +1,23 @@
+php artisan make:factory PostFactory
+
+
+
+php artisan migrate --seed
+
+php artisan make:factory UserFactory
+php artisan make:seeder UserSeeder
+
+
+
+
+
+
+
+
+
+
+
+
 ssh-keygen -t ed25519 -C "mubs0x@gmail.com"
 
 git config --global user.email "mubs0x@gmail.com"

@@ -36,9 +36,7 @@ class FinancialRecordController extends AdminController
         $grid = new Grid(new FinancialRecord());
 
         $grid->export(function ($export) {
-
             $export->filename('Financial Records');
-
             $export->except(['actions']);
             $export->originalValue(['description', 'type']);
         });
@@ -73,7 +71,7 @@ class FinancialRecordController extends AdminController
             }
 
             foreach (AccountParent::where([
-                'enterprise_id' => $u->enterprise_id 
+                'enterprise_id' => $u->enterprise_id
             ])
                 ->orderBy('id', 'desc')
                 ->get() as $v) {
@@ -81,7 +79,7 @@ class FinancialRecordController extends AdminController
             }
 
 
-            $filter->equal('parent_account_id', 'Filter by account')
+            $filter->equal('parent_account_id', 'Filter by department')
                 ->select($parents);
 
             $filter->equal('account_id', 'Filter by account')
