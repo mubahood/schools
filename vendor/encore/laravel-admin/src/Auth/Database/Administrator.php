@@ -223,6 +223,36 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
 
             $model->name = str_replace('   ', ' ', $model->name);
             $model->name = str_replace('  ', ' ', $model->name);
+
+
+
+            if ($model->username == null) {
+                if ($model->phone_number_1 != null) {
+                    $model->username = $model->phone_number_1;
+                }
+            }
+
+            if ($model->email == null) {
+                if ($model->username != null) {
+                    $model->email = $model->username;
+                }
+            }
+
+            if ($model->username == null) {
+                if ($model->email != null) {
+                    $model->username = $model->email;
+                }
+            }
+
+            if ($model->username == null || strlen($model->username) < 2) {
+                $model->username = time() . rand(10, 1000);
+                $model->email = $model->username;
+            }
+
+            if ($model->password == null || strlen($model->password) < 2) {
+                $model->password = password_hash('4321', PASSWORD_DEFAULT);
+            }
+
             return $model;
         });
 
@@ -363,7 +393,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
 
             $model->name = str_replace('   ', ' ', $model->name);
             $model->name = str_replace('  ', ' ', $model->name);
-/* 
+            /* 
             if ($model->user_type == 'student') {
                 foreach (StudentHasClass::where([
                     'administrator_id' => $model->id,
@@ -406,11 +436,10 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                     $class->enterprise_id = $m->enterprise_id;
                     $class->academic_class_id = $m->current_class_id;
                     $class->administrator_id = $m->id;
-                    $class->stream_id = $m->stream_id; 
+                    $class->stream_id = $m->stream_id;
                     $class->save();
                 }
             }
-
         }
         if ($acc != null) {
             if ($m->user_type == 'student') {
@@ -639,7 +668,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                 if ($acc != null) {
                     $user->balance = $acc->balance;
                     $user->account_id = $acc->id;
-                } 
+                }
                 $students[] = $user;
             }
         } else {

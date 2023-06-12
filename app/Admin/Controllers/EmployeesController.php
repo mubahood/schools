@@ -55,8 +55,7 @@ class EmployeesController extends AdminController
                 ->select($roleModel::where('slug', '!=', 'super-admin')
                     ->where('slug', '!=', 'student')
                     ->get()
-                    ->pluck('name', 'id')); 
- 
+                    ->pluck('name', 'id'));
         });
 
 
@@ -73,7 +72,7 @@ class EmployeesController extends AdminController
                 return $this->main_role->name;
             })
             ->sortable()
-            ->label('success'); 
+            ->label('success');
         $grid->column('roles', 'Roles')->pluck('name')->label()->hide();
         $grid->column('phone_number_1', __('Phone number'));
         $grid->column('phone_number_2', __('Phone number 2'))->hide();
@@ -145,38 +144,51 @@ class EmployeesController extends AdminController
         $form = new Form(new Administrator());
 
 
+        $form->divider('BIO DATA');
 
-        $form->tab('BIO DATA', function (Form $form) {
+        $u = Admin::user();
+        $form->hidden('enterprise_id')->rules('required')->default($u->enterprise_id)
+            ->value($u->enterprise_id);
+        $form->hidden('user_type')->default('employee')->value('employee');
+        $form->text('first_name')->rules('required');
+        $form->text('last_name')->rules('required');
+        $form->date('date_of_birth');
+        $form->text('place_of_birth');
+        $form->radioCard('sex', 'Gender')->options(['Male' => 'Male', 'Female' => 'Female'])->rules('required');
+        $form->text('phone_number_1', 'Mobile phone number')->rules('required');
+        $form->text('phone_number_2', 'Home phone number');
 
-            $u = Admin::user();
-            $form->hidden('enterprise_id')->rules('required')->default($u->enterprise_id)
-                ->value($u->enterprise_id);
+        $form->divider('PERSONAL INFORMATION');
 
-            $form->hidden('user_type')->default('employee')->value('employee');
+        $form->radioCard('has_personal_info', 'Does this user have personal information?')
+            ->options([
+                'Yes' => 'Yes',
+                'No' => 'No',
+            ])->when('Yes', function ($form) {
+                $form->text('religion');
+                $form->text('nationality');
+                $form->text('home_address');
+                $form->text('current_address');
 
-            $form->text('first_name')->rules('required');
-            $form->text('last_name')->rules('required');
-            $form->date('date_of_birth')->rules('required');
-            $form->text('place_of_birth');
-            $form->select('sex', 'Gender')->options(['Male' => 'Male', 'Female' => 'Female'])->rules('required');
-            $form->text('home_address');
-            $form->text('current_address');
-            $form->text('phone_number_1', 'Mobile phone number')->rules('required');
-            $form->text('phone_number_2', 'Home phone number');
-            $form->text('nationality');
-        })->tab('PERSONAL INFORMATION', function (Form $form) {
-            $form->text('religion');
-            $form->text('spouse_name', "Spouse's name");
-            $form->text('spouse_phone', "Spouse's phone number");
-            $form->text('father_name', "Father's name");
-            $form->text('father_phone', "Father's phone number");
-            $form->text('mother_name', "Mother's name");
-            $form->text('mother_phone', "Mother's phone number");
-            $form->text('languages', "Languages/Dilect");
-            $form->text('emergency_person_name', "Emergency person to contact name");
-            $form->text('emergency_person_phone', "Emergency person to contact phone number");
-        })
-            ->tab('EDUCATIONAL INFORMATION', function (Form $form) {
+                $form->text('spouse_name', "Spouse's name");
+                $form->text('spouse_phone', "Spouse's phone number");
+                $form->text('father_name', "Father's name");
+                $form->text('father_phone', "Father's phone number");
+                $form->text('mother_name', "Mother's name");
+                $form->text('mother_phone', "Mother's phone number");
+
+                $form->text('languages', "Languages/Dilect");
+                $form->text('emergency_person_name', "Emergency person to contact name");
+                $form->text('emergency_person_phone', "Emergency person to contact phone number");
+            });
+
+
+        $form->divider('EDUCATIONAL INFORMATION');
+        $form->radioCard('has_educational_info', 'Does this user have education information?')
+            ->options([
+                'Yes' => 'Yes',
+                'No' => 'No',
+            ])->when('Yes', function ($form) {
 
                 $form->text('primary_school_name');
                 $form->year('primary_school_year_graduated');
@@ -184,63 +196,77 @@ class EmployeesController extends AdminController
                 $form->year('seconday_school_year_graduated');
                 $form->text('high_school_name');
                 $form->year('high_school_year_graduated');
+
+                $form->text('certificate_school_name');
+                $form->year('certificate_year_graduated');
+
+                $form->text('diploma_school_name');
+                $form->year('diploma_year_graduated');
+
                 $form->text('degree_university_name');
                 $form->year('degree_university_year_graduated');
                 $form->text('masters_university_name');
                 $form->year('masters_university_year_graduated');
                 $form->text('phd_university_name');
                 $form->year('phd_university_year_graduated');
-            })
-            ->tab('ACCOUNT NUMBERS', function (Form $form) {
+            });
 
+        $form->divider('ACCOUNT NUMBERS');
+        $form->radioCard('has_account_info', 'Does this user have account information?')
+            ->options([
+                'Yes' => 'Yes',
+                'No' => 'No',
+            ])->when('Yes', function ($form) {
                 $form->text('national_id_number', 'National ID number');
                 $form->text('passport_number', 'Passport number');
                 $form->text('tin', 'TIN Number');
                 $form->text('nssf_number', 'NSSF number');
                 $form->text('bank_name');
                 $form->text('bank_account_number');
-            })
-            ->tab('USER ROLES', function (Form $form) {
-                $roleModel = config('admin.database.roles_model');
-                $form->multipleSelect('roles', trans('admin.roles'))
-                    ->attribute([
-                        'autocomplete' => 'off'
-                    ])
-                    ->options(
-                        $roleModel::where('slug', '!=', 'super-admin')
-                            ->where('slug', '!=', 'student')
-                            ->where('slug', '!=', 'librarian')
-                            ->where('slug', '!=', 'supplier')
-                            ->get()
-                            ->pluck('name', 'id')
-                    )->rules('required');
-            })
-            ->tab('SYSTEM ACCOUNT', function (Form $form) {
-                $form->image('avatar', trans('admin.avatar'));
-
-                $form->email('email', 'Email address')
-                    ->creationRules(['required', "unique:admin_users"]);
-                $form->text('username', 'Username')
-                    ->creationRules(['required', "unique:admin_users"])
-                    ->updateRules(['required', "unique:admin_users,username,{{id}}"]);
-
-                $form->password('password', trans('admin.password'))->rules('required|confirmed');
-                $form->password('password_confirmation', trans('admin.password_confirmation'))->rules('required')
-                    ->default(function ($form) {
-                        return $form->model()->password;
-                    });
-
-                $form->ignore(['password_confirmation']);
-                $form->saving(function (Form $form) {
-                    if ($form->password && $form->model()->password != $form->password) {
-                        $form->password = Hash::make($form->password);
-                    }
-                });
             });
 
+        $form->divider('USER ROLES');
+        $roleModel = config('admin.database.roles_model');
+        $form->multipleSelect('roles', trans('admin.roles'))
+            ->attribute([
+                'autocomplete' => 'off'
+            ])
+            ->options(
+                $roleModel::where('slug', '!=', 'super-admin')
+                    ->where('slug', '!=', 'student')
+                    ->where('slug', '!=', 'librarian')
+                    ->where('slug', '!=', 'supplier')
+                    ->get()
+                    ->pluck('name', 'id')
+            );
+
+        $form->divider('SYSTEM ACCOUNT');
+        $form->image('avatar', trans('admin.avatar'));
+
+        $form->email('email', 'Email address')
+            ->creationRules([ "unique:admin_users"]);
+        $form->text('username', 'Username')
+            ->creationRules([ "unique:admin_users"])
+            ->updateRules(['required', "unique:admin_users,username,{{id}}"]);
+
+        $form->password('password', trans('admin.password'))->rules('confirmed');
+        $form->password('password_confirmation', trans('admin.password_confirmation'))
+            ->default(function ($form) {
+                return $form->model()->password;
+            });
+
+        $form->ignore(['password_confirmation']);
+        $form->saving(function (Form $form) {
+            if ($form->password && $form->model()->password != $form->password) {
+                $form->password = Hash::make($form->password);
+            }
+        });
 
 
 
+ 
+        $form->disableReset();
+        $form->disableViewCheck();
         return $form;
     }
 }

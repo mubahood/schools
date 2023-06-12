@@ -1,3 +1,5 @@
+php artisan make:migration add_cols_to_users --table=admin_users
+
 php artisan make:factory PostFactory
 
 
