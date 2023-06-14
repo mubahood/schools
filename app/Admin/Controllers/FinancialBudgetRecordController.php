@@ -17,14 +17,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
-class FinancialRecordController extends AdminController
+class FinancialBudgetRecordController extends AdminController
 {
     /**
      * Title for current resource.
      *
      * @var string
      */
-    protected $title = 'Financial Records';
+    protected $title = 'Budget';
 
     /**
      * Make a grid builder.
@@ -41,7 +41,21 @@ class FinancialRecordController extends AdminController
             $export->originalValue(['description', 'type']);
         });
 
+        $terms = [];
+        $active_term = 0;
+        foreach (Term::where(
+            'enterprise_id',
+            Admin::user()->enterprise_id
+        )->orderBy('id', 'desc')->get() as $key => $term) {
+            $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
+            if ($term->is_active) {
+                $active_term = $term->id;
+            }
+        } 
         $grid->disableBatchActions();
+        if (!isset($_GET['term_id'])) {
+            $grid->model()->where('term_id', $active_term);
+        } 
 
 
 
@@ -63,15 +77,10 @@ class FinancialRecordController extends AdminController
             }
             $parents = [];
 
-            $type = "BUDGET";
-            $segments = explode('/', trim($_SERVER['REQUEST_URI'], '/'));
-            if (in_array('financial-records-expenditure', $segments)) {
 
-                $type = 'Expenditure ';
-            }
 
             foreach (AccountParent::where([
-                'enterprise_id' => $u->enterprise_id
+                'enterprise_id' => $u->enterprise_id,
             ])
                 ->orderBy('id', 'desc')
                 ->get() as $v) {
@@ -86,12 +95,13 @@ class FinancialRecordController extends AdminController
                 ->select($accs);
 
 
-            $filter->equal('term_id', 'Fliter by term')->select(Term::where([
-                'enterprise_id' => $u->enterprise_id
-            ])->get()
-                ->pluck('name_text', 'id'));
-
-
+            foreach (Term::where(
+                'enterprise_id',
+                Admin::user()->enterprise_id
+            )->orderBy('id', 'desc')->get() as $key => $term) {
+                $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
+            }
+            $filter->equal('term_id', 'Fliter by term')->select($terms);
 
 
             $filter->between('payment_date', 'Date Created between')->date();
@@ -108,6 +118,7 @@ class FinancialRecordController extends AdminController
 
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
+            'type' => 'BUDGET',
         ])->orderBy('id', 'DESC');
 
         $grid->column('created_at', __('Created'))
@@ -122,11 +133,19 @@ class FinancialRecordController extends AdminController
                 return Utils::my_date($x);
             })->sortable();
 
-        $grid->column('description', __('Description'))
+        $grid->column('description', __('Particulars'))
             ->display(function ($x) {
                 return '<spap title="' . $x . '" >' . Str::limit($x, 40, '...') . '</span>';
             });
-        $grid->column('amount', __('Amount (UGX)'))
+        $grid->column('quantity', __('Quantity'))
+            ->display(function ($x) {
+                return number_format($x);
+            });
+        $grid->column('unit_price', __('Unit price (UGX)'))
+            ->display(function ($x) {
+                return number_format($x);
+            });
+        $grid->column('amount', __('Total (UGX)'))
             ->display(function ($x) {
                 return number_format($x);
             })->sortable()->totalRow(function ($x) {
@@ -223,22 +242,11 @@ class FinancialRecordController extends AdminController
             $form->hidden('created_by_id', __('Enterprise id'))->default($u->id)->rules('required');
         }
 
-        $type = "";
-        $segments = explode('/', trim($_SERVER['REQUEST_URI'], '/'));
-        if (in_array('financial-records-expenditure', $segments)) {
-            $form->text('type', __('Record Type'))
-                ->value('EXPENDITURE')
-                ->readonly()
-                ->rules('required');
-            $type = 'Expenditure ';
-        }
-        if (in_array('financial-records-budget', $segments)) {
-            $form->text('type', __('Record Type'))
-                ->readonly()
-                ->value('BUDGET')
-                ->rules('required');
-            $type = 'Budget ';
-        }
+        $form->text('type', __('Record Type'))
+            ->readonly()
+            ->value('BUDGET')
+            ->rules('required');
+
         $term = $u->ent->active_term();
         $form->select('term_id', "Due term")
             ->options(Term::where([
@@ -285,11 +293,11 @@ class FinancialRecordController extends AdminController
         //$form->number('created_by_id', __('Created by id'));
         //$form->number('termly_school_fees_balancing_id', __('Termly school fees balancing id'));
 
+        $form->text('description', __('Particulars'))->rules('required');
         $form->decimal('quantity', __('Quantity'))
             ->rules('required');
-        $form->decimal('unit_price', __($type . 'Unit price'))->rules('required');
+        $form->decimal('unit_price', __('Unit price'))->rules('required');
 
-        $form->text('description', __('Description'));
 
         $form->disableViewCheck();
         $form->disableReset();

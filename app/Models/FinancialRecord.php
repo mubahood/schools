@@ -11,19 +11,23 @@ class FinancialRecord extends Model
 {
     use HasFactory;
 
-    public function created_by(){
-        return $this->belongsTo(Administrator::class,'created_by_id');
+    public function created_by()
+    {
+        return $this->belongsTo(Administrator::class, 'created_by_id');
     }
 
-    public function par(){
-        return $this->belongsTo(AccountParent::class,'parent_account_id');
+    public function par()
+    {
+        return $this->belongsTo(AccountParent::class, 'parent_account_id');
     }
 
-    public function term(){
+    public function term()
+    {
         return $this->belongsTo(Term::class);
     }
 
-    public function account(){
+    public function account()
+    {
         return $this->belongsTo(Account::class);
     }
     public static function boot()
@@ -37,7 +41,7 @@ class FinancialRecord extends Model
                 if ($m->type != 'EXPENDITURE') {
                     throw new Exception("Type not found.", 1);
                 }
-            } 
+            }
             $t = Term::find($m->term_id);
             if ($t == null) {
                 $ent = Enterprise::find($t->enterprise_id);
@@ -54,6 +58,9 @@ class FinancialRecord extends Model
                 throw new Exception("Account  not found.", 1);
             }
             $m->parent_account_id = $acc->account_parent_id;
+
+            $m->amount = $m->quantity * $m->unit_price;
+
             if ($m->type == 'EXPENDITURE') {
                 $amount = ((int)($m->amount));
                 if ($amount < 0) {

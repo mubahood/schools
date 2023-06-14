@@ -85,8 +85,8 @@ Route::group([
     $router->resource('gens', GenController::class);
     $router->resource('termly-school-fees-balancings', TermlySchoolFeesBalancingController::class);
     $router->resource('financial-records', FinancialRecordController::class);
-    $router->resource('financial-records-budget', FinancialRecordController::class);
-    $router->resource('financial-records-expenditure', FinancialRecordController::class);
+    $router->resource('financial-records-budget', FinancialBudgetRecordController::class);
+    $router->resource('financial-records-expenditure', FinancialExpenditureRecordController::class);
  
     //$router->resource('fees', StudentHasFeeController::class);
 

@@ -210,8 +210,7 @@ class TransactionController extends AdminController
         if (!isset($_GET['term_id'])) {
             $grid->model()->where('term_id', $active_term);
         }
-
-
+ 
         $grid->column('term_id', __('Due term'))->display(function ($x) {
             $t = Term::find($x);
             if ($t == null) {
