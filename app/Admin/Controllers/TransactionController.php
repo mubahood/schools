@@ -81,10 +81,20 @@ class TransactionController extends AdminController
                 })->ajax($ajax_url);
 
 
-            $filter->equal('term_id', 'Fliter by term')->select(Term::where([
-                'enterprise_id' => $u->enterprise_id
-            ])->get()
-                ->pluck('name_text', 'id'));
+            $terms = [];
+            $active_term = 0;
+            foreach (Term::where(
+                'enterprise_id',
+                Admin::user()->enterprise_id
+            )->orderBy('id', 'desc')->get() as $key => $term) {
+                $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
+                if ($term->is_active) {
+                    $active_term = $term->id;
+                }
+            }
+
+
+            $filter->equal('term_id', 'Fliter by term')->select($terms);
 
 
             $balancings = [];
@@ -119,12 +129,7 @@ class TransactionController extends AdminController
 
         /*         $grid->column('id', __('Id'))->sortable(); */
 
-        $grid->column('term_id', __('Term'))->display(function () {
-            if ($this->term == null) {
-            }
-            return 'Term ' . $this->term->name_text;
-        })
-            ->sortable()->hide();
+
 
         $grid->column('payment_date', __('Date'))->display(function () {
             return Utils::my_date_time($this->payment_date);
@@ -174,7 +179,9 @@ class TransactionController extends AdminController
                 "BALANCE_CARRIED_DOWN" => 'BALANCE CARRIED DOWN',
                 "other" => 'Other',
             ])
+            ->hide()
             ->sortable();
+
 
         $grid->column('source', __('Source'))
             ->label([
@@ -187,6 +194,31 @@ class TransactionController extends AdminController
                 "GENERATED" => 'GENERATED',
                 "MANUAL_ENTRY" => 'MANUAL_ENTRY',
             ])
+            ->sortable();
+
+        $terms = [];
+        $active_term = 0;
+        foreach (Term::where(
+            'enterprise_id',
+            Admin::user()->enterprise_id
+        )->orderBy('id', 'desc')->get() as $key => $term) {
+            $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
+            if ($term->is_active) {
+                $active_term = $term->id;
+            }
+        }
+        if (!isset($_GET['term_id'])) {
+            $grid->model()->where('term_id', $active_term);
+        }
+
+
+        $grid->column('term_id', __('Due term'))->display(function ($x) {
+            $t = Term::find($x);
+            if ($t == null) {
+                return $x;
+            }
+            return '<span style="float: right;">Term ' . $t->name_text . '</span>';
+        })
             ->sortable();
 
 

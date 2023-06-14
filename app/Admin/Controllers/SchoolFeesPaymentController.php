@@ -11,6 +11,7 @@ use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
+use Illuminate\Support\Str; 
 
 class SchoolFeesPaymentController extends AdminController
 {
@@ -47,19 +48,14 @@ class SchoolFeesPaymentController extends AdminController
                         . 'user_id=' . $u->id
                 ));
 
-            $filter->equal('term_id', 'Fliter by term')->select(Term::where([
-                'enterprise_id' => $u->enterprise_id
-            ])
-                ->orderBy('id', 'desc')
-                ->get()
-                ->pluck('name_text', 'id'));
+         
 
 
             $filter->group('amount', function ($group) {
                 $group->gt('greater than');
                 $group->lt('less than');
                 $group->equal('equal to');
-            }); 
+            });
             $filter->between('payment_date', 'Date between')->datetime();
         });
 
@@ -98,7 +94,11 @@ class SchoolFeesPaymentController extends AdminController
 
 
 
-        $grid->column('description', __('Description'));
+
+        $grid->column('description', __('Description'))->display(function ($x) {
+            return '<spap title="' . $x . '" >' . Str::limit($x, 40, '...') . '</span>';
+        });
+
         $grid->column('source', __('Source'))
             ->label([
                 "SCHOOL_PAY" => 'success',
@@ -113,12 +113,35 @@ class SchoolFeesPaymentController extends AdminController
             ->sortable();
 
         $grid->column('academic_year_id', __('Academic year id'))->hide();
-        $grid->column('term_id', __('Term'))->display(function () {
-            if ($this->term == null) {
+
+
+        $terms = [];
+        $active_term = 0;
+        foreach (Term::where(
+            'enterprise_id',
+            Admin::user()->enterprise_id
+        )->orderBy('id', 'desc')->get() as $key => $term) {
+            $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
+            if ($term->is_active) {
+                $active_term = $term->id;
             }
-            return 'Term ' . $this->term->name_text;
+        }
+        if (!isset($_GET['term_id'])) {
+            $grid->model()->where('term_id', $active_term);
+        }
+
+
+        $grid->column('term_id', __('Due term'))->display(function ($x) {
+            $t = Term::find($x);
+            if ($t == null) {
+                return $x;
+            }
+            return '<span style="float: right;">Term ' . $t->name_text . '</span>';
         })
-            ->sortable();
+            ->sortable()
+            ->filter($terms);
+
+
 
         $grid->column('documents', __('Print'))
             ->display(function () {

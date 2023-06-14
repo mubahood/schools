@@ -29,13 +29,13 @@ class AcademicClassFeeController extends AdminController
     protected function grid()
     {
 
-      
-/*         $fee = AcademicClassFee::find(42);
+
+        /*         $fee = AcademicClassFee::find(42);
         $fee->academic_class_id = 1;
         $fee->name .= '.';
         $fee->amount = 20000;
         $fee->save();   */
-      
+
 
 
         $grid = new Grid(new AcademicClassFee());
@@ -68,13 +68,32 @@ class AcademicClassFeeController extends AdminController
         $grid->column('amount', __('Amount'))->display(function () {
             return '<span style="float: right;">' . $this->amount_text . '</span>';
         })->sortable();
+
+        $terms = [];
+        $active_term = 0;
+        foreach (Term::where(
+            'enterprise_id',
+            Admin::user()->enterprise_id
+        )->orderBy('id', 'desc')->get() as $key => $term) {
+            $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
+            if ($term->is_active) {
+                $active_term = $term->id;
+            }
+        }
+        if (!isset($_GET['due_term_id'])) {
+            $grid->model()->where('due_term_id', $active_term);
+        }
+
+
         $grid->column('due_term_id', __('Due term'))->display(function ($x) {
             $t = Term::find($x);
-            if($t == null){
+            if ($t == null) {
                 return $x;
             }
-            return '<span style="float: right;">Term '. $t->name_text . '</span>';
-        })->sortable();
+            return '<span style="float: right;">Term ' . $t->name_text . '</span>';
+        })
+            ->sortable()
+            ->filter($terms);
 
         return $grid;
     }
@@ -169,7 +188,7 @@ class AcademicClassFeeController extends AdminController
                 'Termly' => 'Termly',
                 'One time' => 'One time',
             ])->rules('required');
- 
+
 
         return $form;
     }
