@@ -95,13 +95,9 @@ class ParentsController extends AdminController
         $grid->column('roles', 'Roles')->pluck('name')->label()->hide();
         $grid->column('phone_number_1', __('Phone number'))
             ->display(function ($x) {
-                $phone_number = "-";
-                if (strlen($this->phone_number_1) > 1) {
-                    $phone_number = $this->phone_number_1;
-                }
-
-                if (strlen($this->phone_number_2) > 2) {
-                    $phone_number .= "/" . $this->phone_number_2;
+                $phone_number = $this->getParentPhonNumber();
+                if ($phone_number == null) {
+                    return "-";
                 }
                 return $phone_number;
             })

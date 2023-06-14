@@ -44,6 +44,71 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
     use DefaultDatetimeFormat;
 
 
+    public function getParentPhonNumber()
+    {
+        if (
+            $this->phone_number_1 != null &&
+            strlen($this->phone_number_1) > 2
+        ) {
+            return $this->phone_number_1;
+        }
+        if (
+            $this->phone_number_2 != null &&
+            strlen($this->phone_number_2) > 2
+        ) {
+            return $this->phone_number_2;
+        }
+        if (
+            $this->spouse_phone != null &&
+            strlen($this->spouse_phone) > 2
+        ) {
+            return $this->spouse_phone;
+        }
+        if (
+            $this->father_phone != null &&
+            strlen($this->father_phone) > 2
+        ) {
+            return $this->father_phone;
+        }
+        if (
+            $this->mother_phone != null &&
+            strlen($this->mother_phone) > 2
+        ) {
+            return $this->mother_phone;
+        }
+        if (
+            $this->emergency_person_phone == null &&
+            strlen($this->emergency_person_phone) > 2
+        ) {
+            return $this->emergency_person_phone;
+        }
+        if ($this->username == null) {
+            return $this->username;
+        }
+
+        if ($this->user_type == 'parent') {
+            if ($this->kids != null) {
+                if (!empty($this->kids)) {
+                    $k = $this->kids[0];
+                    if ($k->user_type == 'student') {
+                        $this->phone_number_1 = $k->getParentPhonNumber();
+                        if ($this->phone_number_1 != null) {
+                            if (strlen($this->phone_number_1) > 3) {
+                                try {
+                                    $this->save();
+                                } catch (\Throwable $th) {
+                                }
+                                return $this->phone_number_1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
     public function getJWTIdentifier()
     {
         return $this->getKey();
