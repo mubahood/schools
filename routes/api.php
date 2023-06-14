@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ApiAuthController;
 use App\Http\Controllers\ApiMainController;
+use App\Http\Controllers\QuickSearchController;
 use App\Models\AcademicClass;
 use App\Models\AcademicClassSctream;
 use App\Models\Book;
@@ -339,3 +340,5 @@ Route::get('report-cards', function (Request $r) {
         'data' => $data
     ];
 });
+
+Route::get("studentsFinancialAccounts", [QuickSearchController::class, 'studentsFinancialAccounts']);

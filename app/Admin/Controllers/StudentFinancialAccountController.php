@@ -81,11 +81,8 @@ class StudentFinancialAccountController extends AdminController
 
             $u = Admin::user();
             $ajax_url = url(
-                '/api/ajax?'
-                    . 'enterprise_id=' . $u->enterprise_id
-                    . "&search_by_1=name"
-                    . "&search_by_2=id"
-                    . "&model=Account"
+                '/api/studentsFinancialAccounts?'
+                    . 'user_id=' . $u->id
             );
             $filter->equal('id', 'Student')
                 ->select(function ($id) {
@@ -195,7 +192,7 @@ class StudentFinancialAccountController extends AdminController
                 ) {
                     return $u->emergency_person_name;
                 }
-                 
+
                 return "-";
             });
         $grid->column('mother_phone', __('Parent\'s Contact'))
