@@ -12,6 +12,7 @@ use App\Models\FinancialRecord;
 use App\Models\Gen;
 use App\Models\StudentHasClass;
 use App\Models\Subject;
+use App\Models\Transaction;
 use App\Models\Utils;
 use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +27,30 @@ Route::match(['get', 'post'], '/report-cards', [PrintController2::class, 'second
 Route::get('/gen', function () {
   set_time_limit(-1);
   ini_set('memory_limit', '-1');
+
+
+  $i = 0;
+  foreach (Transaction::where([
+    'source' => NULL
+  ])->get() as $key => $tra) {
+    try {
+      if (
+        $tra->school_pay_transporter_id != null &&
+        strlen($tra->school_pay_transporter_id > 5)
+      ) {
+        $tra->source = 'SCHOOL_PAY';
+      }
+    } catch (\Throwable $th) {
+    }
+    if (strlen($tra->source) < 3) {
+      $tra->source = 'GENERATED';
+    }
+    $i++;
+    echo $i . " DONE WITH => {$tra->id} - {$tra->amount} -> {$tra->source}<br>";
+    $tra->save();
+  }
+  die("done");
+
   $types = [];
   $i = 0;
   foreach (Account::all() as $v) {

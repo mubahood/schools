@@ -814,6 +814,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
         'App\\Http\\Controllers\\MainController' => __DIR__ . '/../..' . '/app/Http/Controllers/MainController.php',
         'App\\Http\\Controllers\\PrintController2' => __DIR__ . '/../..' . '/app/Http/Controllers/PrintController2.php',
+        'App\\Http\\Controllers\\QuickSearchController' => __DIR__ . '/../..' . '/app/Http/Controllers/QuickSearchController.php',
         'App\\Http\\Kernel' => __DIR__ . '/../..' . '/app/Http/Kernel.php',
         'App\\Http\\Middleware\\Authenticate' => __DIR__ . '/../..' . '/app/Http/Middleware/Authenticate.php',
         'App\\Http\\Middleware\\EncryptCookies' => __DIR__ . '/../..' . '/app/Http/Middleware/EncryptCookies.php',

@@ -107,7 +107,7 @@ class TransactionController extends AdminController
                 $group->lt('less than');
                 $group->equal('equal to');
             });
-        }); 
+        });
 
         $grid->quickSearch('description');
 
@@ -115,7 +115,7 @@ class TransactionController extends AdminController
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
         ])
-            ->orderBy('id', 'Desc');
+            ->orderidden('id', 'Desc');
 
         /*         $grid->column('id', __('Id'))->sortable(); */
 
@@ -234,6 +234,10 @@ class TransactionController extends AdminController
         }
 
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
+        $form->hidden('created_by_id', __('By id'))->default($u->id)->rules('required');
+        $form->hidden('source', "Money deposited to")->default('MANUAL_ENTRY')
+            ->required()
+            ->readonly();
 
 
         if ($form->isCreating()) {

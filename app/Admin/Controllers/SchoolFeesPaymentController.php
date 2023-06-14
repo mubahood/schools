@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Models\Account;
+use App\Models\Term;
 use App\Models\Transaction;
 use App\Models\Utils;
 use Encore\Admin\Controllers\AdminController;
@@ -45,7 +46,14 @@ class SchoolFeesPaymentController extends AdminController
                     '/api/studentsFinancialAccounts?'
                         . 'user_id=' . $u->id
                 ));
-            $filter->between('payment_date', 'Created between')->datetime();
+
+            $filter->equal('term_id', 'Fliter by term')->select(Term::where([
+                'enterprise_id' => $u->enterprise_id
+            ])
+                ->orderBy('id', 'desc')
+                ->get()
+                ->pluck('name_text', 'id'));
+            $filter->between('payment_date', 'Date between')->datetime();
         });
 
 
@@ -59,7 +67,8 @@ class SchoolFeesPaymentController extends AdminController
             ->orderBy('id', 'DESC');
 
         $grid->column('id', __('ID'))->sortable()->hide();
-
+        $grid->column('source', __('source'))->sortable();
+        Source
         $grid->column('payment_date', __('Created'))->display(function () {
             return Utils::my_date_time($this->payment_date);
         })
@@ -73,8 +82,8 @@ class SchoolFeesPaymentController extends AdminController
             return $this->account->name;
         })->sortable();
 
-        $grid->column('amount', __('Amount'))->display(function () {
-            return "UGX " . number_format($this->amount);
+        $grid->column('amount', __('Amount (UGX)'))->display(function () {
+            return "" . number_format($this->amount);
         })->sortable()->totalRow(function ($x) {
             return  number_format($x);
         });
@@ -84,7 +93,12 @@ class SchoolFeesPaymentController extends AdminController
         $grid->column('description', __('Description'));
 
         $grid->column('academic_year_id', __('Academic year id'))->hide();
-        $grid->column('term_id', __('Term id'))->hide();
+        $grid->column('term_id', __('Term'))->display(function () {
+            if ($this->term == null) {
+            }
+            return 'Term ' . $this->term->name_text;
+        })
+            ->sortable();
 
         $grid->column('documents', __('Print'))
             ->display(function () {
@@ -133,17 +147,7 @@ class SchoolFeesPaymentController extends AdminController
         $form->hidden('created_by_id', __('created_by_id'))->default(Admin::user()->id)->rules('required');
         $form->hidden('is_contra_entry', __('is_contra_entry'))->default(0)->rules('required');
         $form->hidden('school_pay_transporter_id', __('is_contra_entry'))->default('-')->rules('required');
-
-        $ajax_url = url(
-            '/api/ajax?'
-                . 'enterprise_id=' . $u->enterprise_id
-                . "&search_by_1=name"
-                . "&search_by_2=id"
-                . "&query_type=STUDENT_ACCOUNT"
-                . "&model=Account"
-        );
-        $ajax_url = trim($ajax_url);
-
+ 
         $form->select('account_id', "Student Account")
             ->options(function ($id) {
                 $a = Account::find($id);
@@ -151,7 +155,10 @@ class SchoolFeesPaymentController extends AdminController
                     return [$a->id => "#" . $a->id . " - " . $a->name];
                 }
             })
-            ->ajax($ajax_url)->rules('required');
+            ->ajax(url(
+                '/api/studentsFinancialAccounts?'
+                    . 'user_id=' . $u->id
+            ))->rules('required');
 
         $form->text('amount', __('Amount'))
             ->attribute('type', 'number')
@@ -160,49 +167,16 @@ class SchoolFeesPaymentController extends AdminController
         $form->date('payment_date', __('Date'))
             ->rules('required');
 
-        $form->radio('source', "Money deposited to")
-            ->options([
-                'to_bank' => 'To bank',
-                'to_cash' => 'To cash',
-            ])
-            ->rules('required')
-            ->when('to_bank', function ($f) {
-                return $f->select('contra_entry_account_id', "Select bank account")
-                    ->options(
-                        Account::where([
-                            'enterprise_id' => Admin::user()->enterprise_id,
-                            'type' => 'BANK_ACCOUNT'
-                        ])->get()->pluck('name', 'id')
-                    )
-                    ->rules('required');
-            })
-            ->when('to_cash', function ($f) {
 
-                $acc =  Account::where([
-                    'enterprise_id' => Admin::user()->enterprise_id,
-                    'type' => 'CASH_ACCOUNT'
-                ])->first();
-                if ($acc == null) {
-                    die("Cash account not found.");
-                }
+        $form->hidden('source', "Money deposited to")->default('MANUAL_ENTRY')
+            ->required()
+            ->readonly();
 
-                return $f->select('contra_entry_account_id', "Cash account")
-                    ->options(
-                        Account::where([
-                            'enterprise_id' => Admin::user()->enterprise_id,
-                            'type' => 'CASH_ACCOUNT'
-                        ])->get()->pluck('name', 'id')
-                    )
-                    ->default($acc->id)
-                    ->readonly()
-                    ->rules('required');
-            });
         $form->disableCreatingCheck();
         $form->disableEditingCheck();
         $form->disableReset();
         $form->disableViewCheck();
 
-        $form->ignore(['source', 'source_account']);
 
         /* $form->saving(function (Form $form) {
             $form->ignore(['source']);

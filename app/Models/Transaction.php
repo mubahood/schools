@@ -17,7 +17,7 @@ class Transaction extends Model
 
         $amount = 0;
         $academic_year_id = 0;
-        $term_id = 0; 
+        $term_id = 0;
 
         if (isset($data['academic_year_id'])) {
             $academic_year_id = ((int)($data['academic_year_id']));
@@ -109,7 +109,7 @@ class Transaction extends Model
     public static function boot()
     {
         parent::boot();
-        self::deleting(function ($m) { 
+        self::deleting(function ($m) {
         });
         self::deleted(function ($m) {
             DB::table('transactions')->where('contra_entry_account_id', $m->id)->delete();
@@ -128,18 +128,18 @@ class Transaction extends Model
             Transaction::my_update($m);
         });
         self::creating(function ($m) {
-            
-            if(
+
+            if (
                 (!isset($m->created_by_id)) ||
                 ($m->created_by_id == null)
-            ){
+            ) {
                 $ent = Enterprise::find($m->enterprise_id);
-                if($ent == null){
-                    throw("Enterprise not found."); 
+                if ($ent == null) {
+                    throw ("Enterprise not found.");
                 }
                 $m->created_by_id = $ent->administrator_id;
             }
- 
+
             if ($m != false) {
                 if ($m->payment_date != null) {
                     $d = Carbon::parse($m->payment_date);
@@ -214,7 +214,7 @@ class Transaction extends Model
                 unset($m->is_debit);
             }
 
- 
+
 
             if ($m->description == null) {
                 if (strlen($m->description) < 3) {
@@ -226,9 +226,25 @@ class Transaction extends Model
                         } else {
                             $m->description = "UGX " . number_format((int)($m->amount)) .
                                 " on " . $m->account->name . "'s account.";
-                        } 
+                        }
                     }
                 }
+            }
+
+
+
+            try {
+                if (
+                    $m->school_pay_transporter_id != null &&
+                    strlen($m->school_pay_transporter_id > 5)
+                ) {
+                    $m->source = 'SCHOOL_PAY';
+                }
+            } catch (\Throwable $th) {
+            }
+
+            if (strlen($m->source) < 3) {
+                $m->source = 'GENERATED';
             }
 
             return $m;
