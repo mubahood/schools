@@ -89,16 +89,18 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
         if ($this->user_type == 'parent') {
             if ($this->kids != null) {
                 if (!empty($this->kids)) {
-                    $k = $this->kids[0];
-                    if ($k->user_type == 'student') {
-                        $this->phone_number_1 = $k->getParentPhonNumber();
-                        if ($this->phone_number_1 != null) {
-                            if (strlen($this->phone_number_1) > 3) {
-                                try {
-                                    $this->save();
-                                } catch (\Throwable $th) {
+                    if (isset($this->kids[0])) {
+                        $k = $this->kids[0];
+                        if ($k->user_type == 'student') {
+                            $this->phone_number_1 = $k->getParentPhonNumber();
+                            if ($this->phone_number_1 != null) {
+                                if (strlen($this->phone_number_1) > 3) {
+                                    try {
+                                        $this->save();
+                                    } catch (\Throwable $th) {
+                                    }
+                                    return $this->phone_number_1;
                                 }
-                                return $this->phone_number_1;
                             }
                         }
                     }
