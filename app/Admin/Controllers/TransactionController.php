@@ -107,7 +107,7 @@ class TransactionController extends AdminController
                 $group->lt('less than');
                 $group->equal('equal to');
             });
-        }); 
+        });
 
         $grid->quickSearch('description');
 
@@ -124,7 +124,7 @@ class TransactionController extends AdminController
             }
             return 'Term ' . $this->term->name_text;
         })
-            ->sortable();
+            ->sortable()->hide();
 
         $grid->column('payment_date', __('Date'))->display(function () {
             return Utils::my_date_time($this->payment_date);
@@ -161,7 +161,7 @@ class TransactionController extends AdminController
             return '<spap title="' . $x . '" >' . Str::limit($x, 40, '...') . '</span>';
         });
 
-        $grid->column('type', __('Transaction Type'))
+        $grid->column('type', __('Type'))
             ->label([
                 "FEES_PAYMENT" => 'success',
                 "FEES_BILL" => 'info',
@@ -176,12 +176,26 @@ class TransactionController extends AdminController
             ])
             ->sortable();
 
+        $grid->column('source', __('Source'))
+            ->label([
+                "SCHOOL_PAY" => 'success',
+                "GENERATED" => 'info',
+                "MANUAL_ENTRY" => 'warning',
+            ])
+            ->filter([
+                "SCHOOL_PAY" => 'SCHOOL_PAY',
+                "GENERATED" => 'GENERATED',
+                "MANUAL_ENTRY" => 'MANUAL_ENTRY',
+            ])
+            ->sortable();
+
 
         $grid->column('created_by_id', __('Created By'))->display(function () {
             if ($this->by == null) {
             }
             return  $this->by->name;
         })
+            ->hide()
             ->sortable();
         return $grid;
     }
@@ -238,7 +252,7 @@ class TransactionController extends AdminController
         $form->hidden('source', "Money deposited to")->default('MANUAL_ENTRY')
             ->required()
             ->readonly();
-            
+
 
         if ($form->isCreating()) {
             $form->radio('is_debit', "Transaction type")
