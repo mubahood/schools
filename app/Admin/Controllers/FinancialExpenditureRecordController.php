@@ -253,7 +253,6 @@ class FinancialExpenditureRecordController extends AdminController
 
         $term = $u->ent->active_term();
         $form->select('term_id', "Due term")
-            ->hide()
             ->options(Term::where([
                 'enterprise_id' => $u->enterprise_id
             ])
