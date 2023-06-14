@@ -80,17 +80,16 @@ class StudentFinancialAccountController extends AdminController
             $filter->disableIdFilter();
 
             $u = Admin::user();
-            $ajax_url = url(
-                '/api/studentsFinancialAccounts?'
-                    . 'user_id=' . $u->id
-            );
             $filter->equal('id', 'Student')
                 ->select(function ($id) {
                     $a = Account::find($id);
                     if ($a) {
                         return [$a->id => $a->name];
                     }
-                })->ajax($ajax_url);
+                })->ajax(url(
+                    '/api/studentsFinancialAccounts?'
+                        . 'user_id=' . $u->id
+                ));
 
             $ent = Admin::user()->ent;
             $year = $ent->dpYear();
@@ -513,26 +512,6 @@ class StudentFinancialAccountController extends AdminController
 
         $form->textarea('description', __('Account description'));
 
-
-        /*
-            ->when('OTHER_ACCOUNT', function ($f) {
-                $u = Admin::user();
-                $ajax_url = url(
-                    '/api/ajax?'
-                        . 'enterprise_id=' . $u->enterprise_id
-                        . "&search_by_1=name"
-                        . "&search_by_2=id"
-                        . "&model=User"
-                );
-                $f->select('administrator_id', "Account owner")
-                    ->options(function ($id) {
-                        $a = Account::find($id);
-                        if ($a) {
-                            return [$a->id => "#" . $a->id . " - " . $a->name];
-                        }
-                    })
-                    ->ajax($ajax_url)->rules('required');
-            });*/
 
 
 

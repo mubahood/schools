@@ -34,15 +34,17 @@ class SchoolFeesPaymentController extends AdminController
             $filter->disableIdFilter();
 
             $u = Admin::user();
-            $ajax_url = url(
-                '/api/ajax?'
-                    . 'enterprise_id=' . $u->enterprise_id
-                    . "&search_by_1=name"
-                    . "&search_by_2=id"
-                    . "&model=Account"
-            );
 
-            $filter->equal('account_id', 'Student')->select()->ajax($ajax_url);
+            $filter->equal('account_id', 'Student')
+                ->select(function ($id) {
+                    $a = Account::find($id);
+                    if ($a) {
+                        return [$a->id => $a->name];
+                    }
+                })->ajax(url(
+                    '/api/studentsFinancialAccounts?'
+                        . 'user_id=' . $u->id
+                ));
             $filter->between('payment_date', 'Created between')->datetime();
         });
 
@@ -50,11 +52,11 @@ class SchoolFeesPaymentController extends AdminController
         $grid->disableBatchActions();
         $grid->disableActions();
         $grid->model()
-        ->where([
-            'enterprise_id' => Admin::user()->enterprise_id,
-            'type' => 'FEES_PAYMENT', 
-        ]) 
-        ->orderBy('id', 'DESC');
+            ->where([
+                'enterprise_id' => Admin::user()->enterprise_id,
+                'type' => 'FEES_PAYMENT',
+            ])
+            ->orderBy('id', 'DESC');
 
         $grid->column('id', __('ID'))->sortable()->hide();
 
@@ -65,7 +67,7 @@ class SchoolFeesPaymentController extends AdminController
 
 
         $grid->column('account_id', __('Student Account'))->display(function ($x) {
-            if($this->account == null){
+            if ($this->account == null) {
                 return $x;
             }
             return $this->account->name;
