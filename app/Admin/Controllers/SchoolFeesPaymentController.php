@@ -53,6 +53,13 @@ class SchoolFeesPaymentController extends AdminController
                 ->orderBy('id', 'desc')
                 ->get()
                 ->pluck('name_text', 'id'));
+
+
+            $filter->group('amount', function ($group) {
+                $group->gt('greater than');
+                $group->lt('less than');
+                $group->equal('equal to');
+            }); 
             $filter->between('payment_date', 'Date between')->datetime();
         });
 
@@ -67,8 +74,9 @@ class SchoolFeesPaymentController extends AdminController
             ->orderBy('id', 'DESC');
 
         $grid->column('id', __('ID'))->sortable()->hide();
-        $grid->column('source', __('source'))->sortable();
-        Source
+
+
+
         $grid->column('payment_date', __('Created'))->display(function () {
             return Utils::my_date_time($this->payment_date);
         })
@@ -91,6 +99,18 @@ class SchoolFeesPaymentController extends AdminController
 
 
         $grid->column('description', __('Description'));
+        $grid->column('source', __('Source'))
+            ->label([
+                "SCHOOL_PAY" => 'success',
+                "GENERATED" => 'info',
+                "MANUAL_ENTRY" => 'warning',
+            ])
+            ->filter([
+                "SCHOOL_PAY" => 'SCHOOL_PAY',
+                "GENERATED" => 'GENERATED',
+                "MANUAL_ENTRY" => 'MANUAL_ENTRY',
+            ])
+            ->sortable();
 
         $grid->column('academic_year_id', __('Academic year id'))->hide();
         $grid->column('term_id', __('Term'))->display(function () {
@@ -147,7 +167,7 @@ class SchoolFeesPaymentController extends AdminController
         $form->hidden('created_by_id', __('created_by_id'))->default(Admin::user()->id)->rules('required');
         $form->hidden('is_contra_entry', __('is_contra_entry'))->default(0)->rules('required');
         $form->hidden('school_pay_transporter_id', __('is_contra_entry'))->default('-')->rules('required');
- 
+
         $form->select('account_id', "Student Account")
             ->options(function ($id) {
                 $a = Account::find($id);
