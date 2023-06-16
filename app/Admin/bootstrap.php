@@ -25,7 +25,10 @@ use App\Models\Enterprise;
 use App\Models\MainCourse;
 use App\Models\ParentCourse;
 use App\Models\Term;
+use App\Models\Transaction;
 use App\Models\Utils;
+use Encore\Admin\Auth\Database\Administrator;
+use Illuminate\Console\Scheduling\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -40,7 +43,11 @@ $u = Auth::user();
 
 Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
 
+
+
+
     $u = Auth::user();
+ 
     Utils::system_boot($u);
 
     if ($u != null) {

@@ -27,8 +27,33 @@ Route::match(['get', 'post'], '/report-cards', [PrintController2::class, 'second
 Route::get('/gen', function () {
   set_time_limit(-1);
   ini_set('memory_limit', '-1');
+  $i = 0;
+  foreach (Administrator::where([
+    'user_type' => 'student',
+    'enterprise_id' => 7
+  ])
+    ->where('status', '!=', 1)
+    ->get() as $key => $admin) {
+    if ($admin->status == 1) {
+      continue;
+    }
+    $t =  $admin->ent->active_term();
 
-
+    $tran = Transaction::where([
+      'account_id' => $admin->account->id,
+      'term_id' => $t->id
+    ])
+      ->orderBy('id', 'desc')
+      ->first();
+    if ($tran == null) {
+      continue;
+    }
+    $i++;
+    echo $i . ". " . $admin->name . "<br>";
+    $admin->status = 1;
+    $admin->save();
+  }
+  die('done');
   $i = 0;
   foreach (Transaction::where([
     'source' => NULL

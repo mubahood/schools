@@ -264,6 +264,26 @@ class Transaction extends Model
 
     public static function my_update($m)
     {
+        try {
+            if ($m->account != null) {
+                if ($m->account->owner != null) {
+                    if ($m->account->owner->status != 1) {
+                        if ($m->account->owner->ent != null) {
+                            $t = $m->account->owner->ent->active_term();
+                            if ($t != null) {
+                                if ($t->id == $m->term_id) {
+                                    $m->account->owner->status = 1;
+                                    $m->account->owner->save();
+                                    die("yess");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
         $acc = Account::find($m->account_id);
         if ($acc != null) {
             $bal = Transaction::where([
