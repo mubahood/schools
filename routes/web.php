@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\DummyDataController;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\PrintController2;
 use App\Models\AcademicClass;
@@ -17,6 +18,7 @@ use App\Models\Subject;
 use App\Models\Transaction;
 use App\Models\Utils;
 use Encore\Admin\Auth\Database\Administrator;
+use Faker\Core\Uuid;
 use Illuminate\Support\Facades\Route;
 use Mockery\Matcher\Subset;
 use Faker\Factory as Faker;
@@ -26,6 +28,33 @@ use Illuminate\Support\Facades\App;
 Route::match(['get', 'post'], '/print', [PrintController2::class, 'index']);
 Route::match(['get', 'post'], '/report-cards', [PrintController2::class, 'secondary_report_cards']);
 
+Route::get('/demo', function () {
+  set_time_limit(-1);
+  ini_set('memory_limit', '-1');
+  $ent_id = 10;
+  DummyDataController::account_parents($ent_id);
+  DummyDataController::accounts($ent_id);
+  DummyDataController::budget_and_expenses($ent_id);
+});
+/* 
+enterprise_id
+generate_teachers	
+number_of_teachers	
+temp	
+create_courses	
+courses_type	
+create_academic_year	
+create_term	
+create_classes	
+classes_type	
+create_subjects	
+create_grade_scale	
+grade_scale_type	
+generate_students	
+number_of_students	
+generate_marks	
+
+*/
 Route::get('/gen', function () {
   set_time_limit(-1);
   ini_set('memory_limit', '-1');
