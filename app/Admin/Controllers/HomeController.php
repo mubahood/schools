@@ -59,11 +59,12 @@ class HomeController extends Controller
 
         if (
             $u->isRole('admin') ||
+            $u->isRole('hm') ||
             $u->isRole('bursar')
         ) {
+            
             $content->row(function (Row $row) {
-
-                //$man = Utils::manifest(Auth::user()->ent); 
+ 
                 $row->column(3, function (Column $column) {
                     $column->append(Dashboard::count_expected_fees());
                 });
@@ -93,18 +94,25 @@ class HomeController extends Controller
                     $column->append(Dashboard::school_population());
                 });
             });
+
+
+            $content->row(function (Row $row) {
+                $row->column(4, function (Column $column) {
+                    $column->append(Dashboard::expenditure());
+                });
+            });
         }
 
-
+/* 
         if (
             $u->isRole('bursar')
         ) {
 
-            
+
             $content->row(function (Row $row) {
                 $row->column(12, function (Column $column) {
                     $column->append(Dashboard::bursarFeesServices());
-                }); 
+                });
             });
 
             $content->row(function (Row $row) {
@@ -117,10 +125,10 @@ class HomeController extends Controller
             });
         }
 
+ */
 
 
-
-        if ($u->isRole('teacher')) {
+/*         if ($u->isRole('teacher')) {
             $content->row(function (Row $row) {
                 $row->column(3, function (Column $column) {
                     $column->append(Dashboard::teacher_marks());
@@ -129,7 +137,7 @@ class HomeController extends Controller
                     $column->append(Dashboard::theology_teacher_marks());
                 });
             });
-        }
+        } */
 
         return $content;
     }

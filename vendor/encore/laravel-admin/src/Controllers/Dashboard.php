@@ -7,6 +7,7 @@ use App\Models\AcademicClassFee;
 use App\Models\Account;
 use App\Models\AccountParent;
 use App\Models\Enterprise;
+use App\Models\FinancialRecord;
 use App\Models\Mark;
 use App\Models\Service;
 use App\Models\ServiceCategory;
@@ -17,6 +18,7 @@ use App\Models\TheologyMark;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Utils;
+use Carbon\Carbon;
 use Encore\Admin\Admin;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
@@ -178,11 +180,11 @@ class Dashboard
             die("DP Year not found.");
         }
         $cats = [];
-         
+
         $labels = [];
         $accounts = [];
         $amounts = [];
-        $total = 0; 
+        $total = 0;
         foreach (AccountParent::where([
             'enterprise_id' => $u->enterprise_id,
         ])->get() as $key => $acc) {
@@ -190,16 +192,16 @@ class Dashboard
             $labels[] = $acc->name;
             $accounts[] = $acc;
             $amounts[] = $acc->total;
-            $total += $acc->total; 
+            $total += $acc->total;
         }
- 
- 
+
+
         return view('dashboard.bursarBedgets', [
             'accounts' => $accounts,
             'labels' => $labels,
             'amounts' => $amounts,
             'total' => $total,
-        ]); 
+        ]);
     }
 
 
@@ -392,15 +394,33 @@ class Dashboard
 
 
 
+    public static function expenditure()
+    {
+
+        $u = Auth::user();
+        $data = [];
+        for ($i = 14; $i >= 0; $i--) {
+            $min = new Carbon();
+            $max = new Carbon();
+            $max->subDays($i);
+            $min->subDays(($i + 1));
+            $count = FinancialRecord::whereBetween('payment_date', [$min, $max])
+                ->where([
+                    'enterprise_id' => $u->enterprise_id,
+                    'type' => 'EXPENDITURE',
+                ])
+                ->sum('amount');
+            $data['data'][] = -1 * $count;
+            $data['labels'][] = Utils::my_date($max);
+        }
+
+        return view('dashboard.expenditure', $data);
+    }
     public static function count_expected_fees()
     {
 
         $man = Utils::manifest(Auth::user()->ent);
         $enterprise_id = Auth::user()->enterprise_id;
-
-
-
-
         $sub_title =  "To be paid by $man->active_students active students.";
         return view('widgets.box-5', [
             'is_dark' => false,
