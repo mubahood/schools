@@ -35,6 +35,9 @@ Route::get('/gen', function () {
     ->get() as $key => $admin) {
     $t =  $admin->ent->active_term();
 
+    if($admin->account == null){
+      continue;
+    }
     $tran = Transaction::where([
       'account_id' => $admin->account->id,
       'term_id' => $t->id,
