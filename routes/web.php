@@ -32,20 +32,20 @@ Route::get('/gen', function () {
     'user_type' => 'student',
     'enterprise_id' => 7
   ])
-    ->where('status', '!=', 1)
     ->get() as $key => $admin) {
-    if ($admin->status == 1) {
-      continue;
-    }
     $t =  $admin->ent->active_term();
 
     $tran = Transaction::where([
       'account_id' => $admin->account->id,
-      'term_id' => $t->id
+      'term_id' => $t->id,
+      'type' => 'FEES_PAYMENT',
     ])
+      ->where('amount', '>', 1)
       ->orderBy('id', 'desc')
       ->first();
     if ($tran == null) {
+      $admin->status = 2;
+      $admin->save();
       continue;
     }
     $i++;

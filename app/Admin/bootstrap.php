@@ -46,8 +46,7 @@ Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
 
 
 
-    $u = Auth::user();
- 
+    $u = Auth::user(); 
     Utils::system_boot($u);
 
     if ($u != null) {
