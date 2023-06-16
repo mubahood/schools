@@ -398,7 +398,7 @@ class Dashboard
     {
 
         $u = Auth::user();
-        $term = $u->ent->dpTerm();
+        //$term = $u->ent->dpTerm();
 
         $data = [];
         for ($i = 14; $i >= 0; $i--) {
@@ -409,8 +409,7 @@ class Dashboard
             $count = FinancialRecord::whereBetween('payment_date', [$min, $max])
                 ->where([
                     'enterprise_id' => $u->enterprise_id,
-                    'type' => 'EXPENDITURE',
-                    'term_id' => $term->id
+                    'type' => 'EXPENDITURE', 
                 ])
                 ->sum('amount');
             $data['data'][] = -1 * $count;
