@@ -1466,9 +1466,7 @@ class Utils  extends Model
             $ent = Enterprise::where([
                 'subdomain' => $subdomain
             ])->first();
-        }
-
-
+        } 
         if ($ent == null) {
             $ent = Enterprise::find(1);
         }

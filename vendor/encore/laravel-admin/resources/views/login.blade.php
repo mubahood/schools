@@ -1,7 +1,6 @@
 <?php
 use App\Models\Utils;
 $ent = Utils::ent();
-
 ?>
 <!DOCTYPE html>
 <html>
@@ -11,7 +10,7 @@ $ent = Utils::ent();
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     {{-- <title>{{ config('admin.title') }} | {{ trans('admin.login') }}</title> --}}
     {{--     <title>School Dynamics | {{ trans('admin.login') }}</title> --}}
-    <title>School Dynamics | {{ trans('admin.login') }}</title>
+    <title>{{ $ent->name }} - Admin</title>
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
 
@@ -19,7 +18,7 @@ $ent = Utils::ent();
         <link rel="shortcut icon" href="{{ $favicon }}">
     @endif --}}
 
-    <link rel="shortcut icon" href="https://schooldynamics.ug/assets/logo.png">
+    <link rel="shortcut icon" href="{{ url('storage/' . $ent->logo) }}">
 
     <!-- Bootstrap 3.3.5 -->
     <link rel="stylesheet" href="{{ admin_asset('vendor/laravel-admin/AdminLTE/bootstrap/css/bootstrap.min.css') }}">
@@ -33,16 +32,16 @@ $ent = Utils::ent();
     <!--Start of Tawk.to Script-->
     <script type="text/javascript">
         /* var Tawk_API = Tawk_API || {},
-                Tawk_LoadStart = new Date();
-            (function() {
-                var s1 = document.createElement("script"),
-                    s0 = document.getElementsByTagName("script")[0];
-                s1.async = true;
-                s1.src = 'https://embed.tawk.to/6322adcd54f06e12d894cbb7/1gcvndrj2';
-                s1.charset = 'UTF-8';
-                s1.setAttribute('crossorigin', '*');
-                s0.parentNode.insertBefore(s1, s0);
-            })(); */
+                                        Tawk_LoadStart = new Date();
+                                    (function() {
+                                        var s1 = document.createElement("script"),
+                                            s0 = document.getElementsByTagName("script")[0];
+                                        s1.async = true;
+                                        s1.src = 'https://embed.tawk.to/6322adcd54f06e12d894cbb7/1gcvndrj2';
+                                        s1.charset = 'UTF-8';
+                                        s1.setAttribute('crossorigin', '*');
+                                        s0.parentNode.insertBefore(s1, s0);
+                                    })(); */
     </script>
     <!--End of Tawk.to Script-->
 
@@ -105,7 +104,7 @@ $ent = Utils::ent();
         <div class="col-md-6 fill pc-only " style="background-color: {{ $ent->color }}">
             <br>
             <br>
-            <img class="img-fluid center " width="25%" src="{{ url("storage/images/$ent->logo") }}" alt="">
+            <img class="img-fluid center " width="25%" src="{{ url('storage/' . $ent->logo) }}" alt="">
             <div class="description">
                 <h2>{{ $ent->name }}.</h2>
                 {!! $ent->welcome_message !!}
