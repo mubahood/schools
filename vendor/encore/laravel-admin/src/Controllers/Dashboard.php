@@ -398,6 +398,8 @@ class Dashboard
     {
 
         $u = Auth::user();
+        $term = $u->ent->dpTerm();
+
         $data = [];
         for ($i = 14; $i >= 0; $i--) {
             $min = new Carbon();
@@ -408,6 +410,7 @@ class Dashboard
                 ->where([
                     'enterprise_id' => $u->enterprise_id,
                     'type' => 'EXPENDITURE',
+                    'term_id' => $term->id
                 ])
                 ->sum('amount');
             $data['data'][] = -1 * $count;
