@@ -1,27 +1,28 @@
 @if (isset($u) && $u != null && $u->ent != null && $u->ent->active_academic_year() != null)
     <?php
     $canSwitchYears = false;
-    $dpYear = $u->ent->dpYear();
+    //$dpYear = $u->ent->dpYear();
+    $dpTerm = $u->ent->dpTerm();
     if ($u->isRole('admin') || $u->isRole('dos') || $u->isRole('hm') || $u->isRole('bursar')) {
         $canSwitchYears = true;
     }
     ?>
-    @if ($dpYear != null)
+    @if ($dpTerm != null)
 
 
         <li class="dropdown">
             <a href="#" class="dropdown-toggle auto-refresh" data-toggle="dropdown" title="Academic Year - Display"
                 aria-expanded="true">
                 <i class="fa fa-play"></i>&nbsp;&nbsp;
-                <span class="interval-text">{{ $dpYear->name }}</span>
+                <span class="interval-text">Term {{ $dpTerm->name_text }}</span>
             </a>
             @if ($canSwitchYears)
 
                 <ul class="dropdown-menu" style="width: 30px !important;">
-                    @foreach ($u->ent->academic_years as $year)
-                        <li><a href="{{ admin_url('?change_dpy_to=' . $year->id) }}"
-                                title='Change display academic year to {{ $year->name }}'
-                                data-interval="2">{{ $year->name }}</a></li>
+                    @foreach ($terms as $term)
+                        <li><a href="{{ admin_url('?change_dpy_to=' . $term->id) }}"
+                                title='Change display academic year to {{ $term->name_text }}'
+                                data-interval="2">Term {{ $term->name_text }}</a></li>
                     @endforeach
                 </ul>
             @endif

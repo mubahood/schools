@@ -90,6 +90,43 @@ class Enterprise extends Model
         return $dp;
     }
 
+    public function dpTerm()
+    {
+
+        $dt = Term::where([
+            'enterprise_id' => $this->id,
+            'id' => $this->dp_term_id,
+        ])->first();
+
+        if ($dt == null) {
+            $t = Term::where([
+                'enterprise_id' => $this->dp_term_id,
+                'is_active' => 1,
+            ])->first();
+            if ($t == null) {
+                $t = Term::where([
+                    'enterprise_id' => $this->id,
+                ])->first();
+            }
+            if ($t != null) {
+                DB::update(
+                    "update enterprises set dp_year = ?, dp_term_id = ? where id = ? ",
+                    [
+                        $t->academic_year_id,
+                        $t->id,
+                        $this->id,
+                    ]
+                );
+            }
+            $dt = Term::where([
+                'enterprise_id' => $this->id,
+                'id' => $t->id,
+            ])->first();
+        }
+
+        return $dt;
+    }
+
     public function academic_years()
     {
         return $this->hasMany(AcademicYear::class, 'enterprise_id');
@@ -119,7 +156,7 @@ class Enterprise extends Model
         return $fees_acc;
     }
     public static function my_update($m)
-    { 
+    {
         if ($m->id == 1) {
             return;
         }

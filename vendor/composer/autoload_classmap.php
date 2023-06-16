@@ -37,6 +37,8 @@ return array(
     'App\\Admin\\Controllers\\EmployeesController' => $baseDir . '/app/Admin/Controllers/EmployeesController.php',
     'App\\Admin\\Controllers\\EnterpriseController' => $baseDir . '/app/Admin/Controllers/EnterpriseController.php',
     'App\\Admin\\Controllers\\ExamController' => $baseDir . '/app/Admin/Controllers/ExamController.php',
+    'App\\Admin\\Controllers\\FinancialBudgetRecordController' => $baseDir . '/app/Admin/Controllers/FinancialBudgetRecordController.php',
+    'App\\Admin\\Controllers\\FinancialExpenditureRecordController' => $baseDir . '/app/Admin/Controllers/FinancialExpenditureRecordController.php',
     'App\\Admin\\Controllers\\FinancialRecordController' => $baseDir . '/app/Admin/Controllers/FinancialRecordController.php',
     'App\\Admin\\Controllers\\FundRequisitionController' => $baseDir . '/app/Admin/Controllers/FundRequisitionController.php',
     'App\\Admin\\Controllers\\GenController' => $baseDir . '/app/Admin/Controllers/GenController.php',

@@ -728,6 +728,8 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Admin\\Controllers\\EmployeesController' => __DIR__ . '/../..' . '/app/Admin/Controllers/EmployeesController.php',
         'App\\Admin\\Controllers\\EnterpriseController' => __DIR__ . '/../..' . '/app/Admin/Controllers/EnterpriseController.php',
         'App\\Admin\\Controllers\\ExamController' => __DIR__ . '/../..' . '/app/Admin/Controllers/ExamController.php',
+        'App\\Admin\\Controllers\\FinancialBudgetRecordController' => __DIR__ . '/../..' . '/app/Admin/Controllers/FinancialBudgetRecordController.php',
+        'App\\Admin\\Controllers\\FinancialExpenditureRecordController' => __DIR__ . '/../..' . '/app/Admin/Controllers/FinancialExpenditureRecordController.php',
         'App\\Admin\\Controllers\\FinancialRecordController' => __DIR__ . '/../..' . '/app/Admin/Controllers/FinancialRecordController.php',
         'App\\Admin\\Controllers\\FundRequisitionController' => __DIR__ . '/../..' . '/app/Admin/Controllers/FundRequisitionController.php',
         'App\\Admin\\Controllers\\GenController' => __DIR__ . '/../..' . '/app/Admin/Controllers/GenController.php',

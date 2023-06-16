@@ -24,13 +24,15 @@ use App\Admin\Extensions\Nav\Dropdown;
 use App\Models\Enterprise;
 use App\Models\MainCourse;
 use App\Models\ParentCourse;
+use App\Models\Term;
 use App\Models\Utils;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
- 
- 
-  
+
+
+
 
 Encore\Admin\Form::forget(['map', 'editor']);
 
@@ -43,12 +45,19 @@ Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
 
     if ($u != null) {
         if (isset($_GET['change_dpy_to'])) {
-            $ay = ((int)(trim($_GET['change_dpy_to'])));
-            if ($ay != null) {
-                DB::update("update enterprises set dp_year = ? where id = ? ", [$ay, $u->enterprise_id]);
-                Admin::disablePjax();
-                header('location: ' . admin_url());
-                die();
+            $t_id = ((int)(trim($_GET['change_dpy_to'])));
+            $t = Term::find($t_id);
+            if ($t != null) {
+                DB::update(
+                    "update enterprises set dp_year = ?, dp_term_id = ? where id = ? ",
+                    [
+                        $t->academic_year_id,
+                        $t->id,
+                        $t->enterprise_id,
+                    ]
+                );
+                Admin::script('window.location.replace("' . url('/') . '");');
+                return 'Loading...';
             }
         }
     }
@@ -93,10 +102,15 @@ Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
 
         if ($u != null) {
             $check_list = Utils::system_checklist($u);
-
+            $terms = Term::where([
+                'enterprise_id' => $u->enterprise_id
+            ])
+                ->orderBy('id', 'desc')
+                ->get();
             $navbar->right(view('widgets.admin-links', [
                 'items' => $check_list,
-                'u' => $u
+                'u' => $u,
+                'terms' => $terms
             ]));
         }
     }

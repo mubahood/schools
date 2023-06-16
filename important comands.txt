@@ -1,4 +1,5 @@
-php artisan make:migration add_cols_financial_records --table=financial_records
+php artisan make:migration add_term_coulmns_to_enterprises --table=enterprises
+php artisan make:migration add_cols_dp_ter --table=
 
 php artisan make:factory PostFactory
 
