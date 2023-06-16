@@ -8,9 +8,11 @@ use App\Models\Account;
 use App\Models\Book;
 use App\Models\BooksCategory;
 use App\Models\Course;
+use App\Models\Enterprise;
 use App\Models\FinancialRecord;
 use App\Models\Gen;
 use App\Models\StudentHasClass;
+use App\Models\StudentHasFee;
 use App\Models\Subject;
 use App\Models\Transaction;
 use App\Models\Utils;
@@ -28,17 +30,56 @@ Route::get('/gen', function () {
   set_time_limit(-1);
   ini_set('memory_limit', '-1');
   $i = 0;
-  foreach (Administrator::where([
+  $t =  Enterprise::find(7)->active_term();
+  $hasClasses = [];
+  $ads = Administrator::where([
     'user_type' => 'student',
     'enterprise_id' => 7
   ])
-    ->get() as $key => $admin) {
-    $t =  $admin->ent->active_term();
-
-    if($admin->account == null){
+    ->where('status', '!=', 1)
+    ->get();
+  foreach ($ads as $key => $admin) {
+    if ($admin->account == null) {
       continue;
     }
-    $tran = Transaction::where([
+    $f = StudentHasFee::where([
+      'administrator_id' => $admin->id,
+    ])->orderBy('id', 'desc')->first();
+
+    if ($f == null) {
+      continue;
+    }
+    $class = AcademicClass::find($f->academic_class_id);
+    if ($class == null) {
+      continue;
+    }
+    foreach ($class->academic_class_fees as $key => $fee) {
+      if ($fee->due_term_id != $t->id) {
+        continue;
+      }
+
+      $f1 = StudentHasFee::where([
+        'administrator_id' => $admin->id,
+      ])->orderBy('id', 'desc')->first();
+
+      if ($f1 == null) {
+        continue;
+      }
+      $f1->delete();
+      $trans = Transaction::where([
+        'account_id' => $admin->account->id,
+        'term_id' => $t->id
+      ])
+        ->where('amount', '<', -500000)
+        ->get();
+      foreach ($trans as $k) {
+        $i++;
+        echo $i . ". " . $admin->name . " - {$k->description} - $t->created_at <br>";
+      }
+    }
+
+
+    /*  $tran = Transaction::where([
       'account_id' => $admin->account->id,
       'term_id' => $t->id,
       'type' => 'FEES_PAYMENT',
@@ -50,11 +91,7 @@ Route::get('/gen', function () {
       $admin->status = 2;
       $admin->save();
       continue;
-    }
-    $i++;
-    echo $i . ". " . $admin->name . "<br>";
-    $admin->status = 1;
-    $admin->save();
+    } */
   }
   die('done');
   $i = 0;
