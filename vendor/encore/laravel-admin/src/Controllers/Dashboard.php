@@ -466,7 +466,7 @@ class Dashboard
             ->where('amount', '>', 0)->sum('amount');
 
         $bal = $fees_to_be_collected - $fees_paid;
-        $sub_title =  "NOT PAID SCHOOL FEES: " . number_format($bal);
+        $sub_title =  "UNPAID SCHOOL FEES: " . number_format($bal);
         return view('widgets.box-5', [
             'is_dark' => false,
             'title' => 'Expected school fees',
@@ -496,7 +496,7 @@ class Dashboard
 
         $bal = $fees_to_be_collected + $fees_paid;
         $percentage = 0;
-        if($fees_to_be_collected != 0){
+        if ($fees_to_be_collected != 0) {
             $percentage = ($fees_paid / $fees_to_be_collected) * 100;
         }
 
