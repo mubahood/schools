@@ -75,8 +75,8 @@ use App\Models\Utils;
                 responsive: true,
                 plugins: {
                     legend: {
-                        display: false,
-                        position: 'left',
+                        display: true,
+                        position: 'top',
                     },
 
                 }
