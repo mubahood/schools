@@ -496,7 +496,7 @@ class Dashboard
 
         $bal = $fees_to_be_collected + $fees_paid;
         $percentage = 0;
-        if($fees_to_be_collected>0){
+        if($fees_to_be_collected != 0){
             $percentage = ($fees_paid / $fees_to_be_collected) * 100;
         }
 
