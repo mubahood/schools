@@ -403,6 +403,8 @@ class Dashboard
         $data = [];
         $data['title'] = 'Budget for Term: ' . $term->name_text;
         $data['values'] = [];
+        $data['labels'] = [];
+        $data['data'] = [];
         foreach (AccountParent::where([
             'enterprise_id' => $u->enterprise_id,
         ])->get() as $key => $parent) {
