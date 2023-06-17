@@ -5,6 +5,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Facades\Admin;
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -135,7 +136,7 @@ class Transaction extends Model
             ) {
                 $ent = Enterprise::find($m->enterprise_id);
                 if ($ent == null) {
-                    throw ("Enterprise not found.");
+                    throw new Exception("Enterprise not found", 1);
                 }
                 $m->created_by_id = $ent->administrator_id;
             }

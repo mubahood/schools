@@ -66,7 +66,6 @@ use App\Models\Utils;
 
         };
 
-
         var ctx = document.getElementById('graph-budget').getContext('2d');
         new Chart(ctx, {
             type: 'pie',
@@ -78,7 +77,6 @@ use App\Models\Utils;
                         display: true,
                         position: 'top',
                     },
-
                 }
             }
         });

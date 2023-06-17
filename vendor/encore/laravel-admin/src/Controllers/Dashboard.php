@@ -451,18 +451,65 @@ class Dashboard
 
     public static function count_expected_fees()
     {
+        $u = Auth::user();
+        $term = $u->ent->dpTerm();
 
-        $man = Utils::manifest(Auth::user()->ent);
-        $enterprise_id = Auth::user()->enterprise_id;
-        $sub_title =  "To be paid by $man->active_students active students.";
+        $fees_to_be_collected = Transaction::where([
+            'enterprise_id' => $u->enterprise_id,
+            'term_id' => $term->id
+        ])
+            ->where('amount', '<', 0)->sum('amount');
+        $fees_paid = Transaction::where([
+            'enterprise_id' => $u->enterprise_id,
+            'term_id' => $term->id
+        ])
+            ->where('amount', '>', 0)->sum('amount');
+
+        $bal = $fees_to_be_collected - $fees_paid;
+        $sub_title =  "NOT PAID SCHOOL FEES: " . number_format($bal);
         return view('widgets.box-5', [
             'is_dark' => false,
             'title' => 'Expected school fees',
             'sub_title' => $sub_title,
-            'number' => "UGX " . number_format($man->expected_fees),
+            'number' => "UGX " . number_format(-1 * $fees_to_be_collected),
             'link' => admin_url('students')
         ]);
     }
+
+
+
+    public static function count_percentage_paid_fees()
+    {
+        $u = Auth::user();
+        $term = $u->ent->dpTerm();
+
+        $fees_to_be_collected = Transaction::where([
+            'enterprise_id' => $u->enterprise_id,
+            'term_id' => $term->id
+        ])
+            ->where('amount', '<', 0)->sum('amount');
+        $fees_paid = Transaction::where([
+            'enterprise_id' => $u->enterprise_id,
+            'term_id' => $term->id
+        ])
+            ->where('amount', '>', 0)->sum('amount');
+
+        $bal = $fees_to_be_collected + $fees_paid;
+
+        $percentage = ($fees_paid / $fees_to_be_collected) * 100;
+        $sub_title =  "PAID SCHOOL FEES: " . number_format($fees_paid) . "";
+        return view('widgets.box-5', [
+            'is_dark' => false,
+            'title' => 'Pecentage Paid',
+            'sub_title' => $sub_title,
+            'is_dark' => true,
+            'number' => round($percentage, 2) . "%",
+            'link' => admin_url('students')
+        ]);
+    }
+
+
+
 
 
 
@@ -482,38 +529,6 @@ class Dashboard
     }
 
 
-
-
-    public static function count_percentage_paid_fees()
-    {
-
-        $enterprise_id = Auth::user()->enterprise_id;
-
-
-        $man = Utils::manifest(Auth::user()->ent);
-
-        $expected_fees = $man->expected_fees;
-        $paid_fees = $man->paid_fees;
-        if ($expected_fees < 0) {
-            $expected_fees = -1 * $expected_fees;
-        }
-
-        $percentage = 0;
-        if ($expected_fees != 0) {
-            $percentage = ($paid_fees / $expected_fees) * 100;
-            $percentage = round($percentage, 2);
-        }
-
-
-        $sub_title =  "To be paid by $man->active_students active students.";
-        return view('widgets.box-5', [
-            'is_dark' => true,
-            'title' => 'Percentage paid',
-            'sub_title' => $sub_title,
-            'number' => $percentage . "%",
-            'link' => admin_url('students')
-        ]);
-    }
 
 
 
@@ -549,11 +564,16 @@ class Dashboard
             'sex' => 'Male',
             'status' => 1
         ])->count();
+        $parents = User::where([
+            'enterprise_id' => $u->enterprise_id,
+            'user_type' => 'Parent',
+        ])->count();
 
         $female_students = $all_students - $male_students;
 
         $sub_title = number_format($male_students) . ' Males, ';
-        $sub_title .= number_format($female_students) . ' Females.';
+        $sub_title .= number_format($female_students) . ' Females, ';
+        $sub_title .= number_format($parents) . ' Parents.';
         return view('widgets.box-5', [
             'is_dark' => false,
             'title' => 'Students',

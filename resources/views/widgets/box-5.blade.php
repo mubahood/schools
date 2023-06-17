@@ -32,7 +32,9 @@ if($style == 'danger'){
 ?><a href="{{ $link }}" class="card {{ $bg }} {{ $border }} mb-4 mb-md-5">
     <div class="card-body py-0">
         <p class="h3  text-bold mb-2 mb-md-3 {{ $text }} ">{{ $title }}</p>
-        <p class="  m-0 text-right {{ $text2 }} h3" style="line-height: 3.2rem">{{ $number }}</p>
-        <p class="mt-4 {{ $text2 }}">{{ $sub_title }}</p>
+        <p class="  m-0 text-right {{ $text2 }} h3" style="line-height: 3.2rem; 
+        font-weight: 800">{{ $number }}</p>
+        <p class="mt-4 {{ $text2 }}" style=" 
+        font-weight: 600">{{ $sub_title }}</p>
     </div>
 </a>

@@ -35,6 +35,8 @@ Route::get('/demo', function () {
   DummyDataController::account_parents($ent_id);
   DummyDataController::accounts($ent_id);
   DummyDataController::budget_and_expenses($ent_id);
+  DummyDataController::fees_billing($ent_id);
+  DummyDataController::transactions($ent_id);
 });
 /* 
 enterprise_id

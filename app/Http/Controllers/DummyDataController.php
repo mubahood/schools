@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AcademicClass;
+use App\Models\AcademicClassFee;
 use App\Models\Account;
 use App\Models\AccountParent;
 use App\Models\Demo;
@@ -9,6 +11,7 @@ use App\Models\Enterprise;
 use App\Models\FinancialRecord;
 use App\Models\StudentHasClass;
 use App\Models\Term;
+use App\Models\Transaction;
 use App\Models\Utils;
 use Carbon\Carbon;
 use Encore\Admin\Auth\Database\Administrator;
@@ -20,12 +23,148 @@ use function PHPUnit\Framework\fileExists;
 
 class DummyDataController extends Controller
 {
+    public static function transactions($ent_id)
+    {
+
+        // $faker = Faker::create();
+        $ent = Enterprise::find($ent_id);
+        $id = '1686231449';
+        $m = Demo::where([
+            'enterprise_id' => $ent_id,
+            'generate_teachers' => $id,
+        ])->first();
+        if ($m != null) {
+            return;
+        }
+
+        echo "<hr>========$id Transactions========";
+        $terms = Term::where(
+            'enterprise_id',
+            $ent_id,
+        )->get()->toArray();
+        $m = new Demo();
+        $m->enterprise_id = $ent_id;
+        $m->generate_teachers = $id;
+        $m->save();
+
+        foreach (Administrator::where([
+            'enterprise_id' => $ent_id,
+            'user_type' => 'Student',
+        ])->get() as  $u) {
+            shuffle($terms);
+            $term = $terms[0];
+            $tra = new Transaction();
+            $tra->payment_date = Carbon::now()->addDays(rand(-50, 100));
+            $acc = $u->getAccount();
+            if ($acc == null) {
+                die('acc not found');
+            }
+            $tra->account_id = $acc->id;
+            $tra->amount = [
+                150000,
+                120000,
+                420000,
+                420000,
+                820000,
+                850000,
+                890000,
+                760000,
+                500000,
+                850000,
+                890000,
+                500000,
+            ][rand(0, 9)];
+
+            $tra->enterprise_id = $ent_id;
+            $tra->description = $tra->amount . " School fees payment.";
+            $tra->academic_year_id = $term['academic_year_id'];
+            $tra->term_id = $term['id'];;
+            $tra->type = 'FEES_PAYMENT';
+
+            $tra->save();
+            echo "<br> $tra->id. ". ".$tra->name " . number_format($tra->amount);
+     
+        }
+
+        $m = new Demo();
+        $m->enterprise_id = $ent_id;
+        $m->generate_teachers = $id;
+        $m->save();
+    }
+
+
+
+
+    public static function fees_billing($ent_id)
+    {
+
+        // $faker = Faker::create();
+        $ent = Enterprise::find($ent_id);
+        $id = '1686211499';
+        $m = Demo::where([
+            'enterprise_id' => $ent_id,
+            'generate_teachers' => $id,
+        ])->first();
+        if ($m != null) {
+            return;
+        }
+
+        echo "<hr>========$id Fees Billing========";
+        $terms = [];
+        $m = new Demo();
+        $m->enterprise_id = $ent_id;
+        $m->generate_teachers = $id;
+        $m->save();
+
+        foreach (Term::where(
+            'enterprise_id',
+            $ent_id,
+        )->get() as  $term) {
+            foreach (AcademicClass::where(
+                'enterprise_id',
+                $ent_id,
+            )->get() as $class) {
+                $fee = new AcademicClassFee();
+                $fee->enterprise_id = $ent_id;
+                $fee->academic_class_id = $class->id;
+                $fee->amount = [
+                    150000,
+                    120000,
+                    420000,
+                    420000,
+                    820000,
+                    850000,
+                    890000,
+                    760000,
+                    500000,
+                    850000,
+                    890000,
+                    500000,
+                ][rand(0, 9)];
+                $fee->name = $class->name . " Tution";
+                $fee->due_term_id = $term->id;
+                $fee->type = 'Secular';
+                $fee->cycle = 'Termly';
+                $fee->save();
+                echo "<br> $fee->id. $fee->name " . number_format($fee->amount);
+            }
+        }
+
+        $m = new Demo();
+        $m->enterprise_id = $ent_id;
+        $m->generate_teachers = $id;
+        $m->save();
+    }
+
+
+
     public static function budget_and_expenses($ent_id)
     {
 
         // $faker = Faker::create();
         $ent = Enterprise::find($ent_id);
         $id = '1686931499';
+
         $m = Demo::where([
             'enterprise_id' => $ent_id,
             'generate_teachers' => $id,

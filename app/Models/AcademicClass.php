@@ -331,6 +331,14 @@ class AcademicClass extends Model
 
 
 
+        if ($m->ent == null) {
+            return;
+        }
+
+        $active_term = $m->ent->active_term();
+        if ($active_term == null) {
+            return;
+        }
         //billing for secular class
         foreach (StudentHasClass::where([
             'administrator_id' => $m->id,
@@ -340,7 +348,12 @@ class AcademicClass extends Model
                     if ($val->class->academic_class_fees != null) {
                         foreach ($val->class->academic_class_fees as $fee) {
                             if ($fee != null) {
-                             
+
+                                if ($active_term->id != $fee->due_term_id) {
+                                    continue;
+                                }
+
+
                                 $has_fee = StudentHasFee::where([
                                     'administrator_id' => $m->id,
                                     'academic_class_fee_id' => $fee->id,

@@ -62,13 +62,26 @@ class HomeController extends Controller
             $u->isRole('hm') ||
             $u->isRole('bursar')
         ) {
-            
+
             $content->row(function (Row $row) {
- 
+
                 $row->column(3, function (Column $column) {
-                    $column->append(Dashboard::count_expected_fees());
+                    $column->append(Dashboard::students());
                 });
 
+                $row->column(3, function (Column $column) {
+                    $column->append(Dashboard::teachers());
+                });
+                
+                $row->column(3, function (Column $column) {
+                    $column->append(Dashboard::count_expected_fees());
+                }); 
+                
+                $row->column(3, function (Column $column) {
+                    $column->append(Dashboard::count_percentage_paid_fees());
+                });
+ 
+/*                 
                 $row->column(3, function (Column $column) {
                     $column->append(Dashboard::count_paid_fees());
                 });
@@ -76,23 +89,13 @@ class HomeController extends Controller
                     $column->append(Dashboard::count_unpaid_fees());
                 });
 
-                $row->column(3, function (Column $column) {
-                    $column->append(Dashboard::count_percentage_paid_fees());
-                });
 
-
-                $row->column(3, function (Column $column) {
-                    $column->append(Dashboard::students());
-                });
-                $row->column(3, function (Column $column) {
-                    $column->append(Dashboard::teachers());
-                });
                 $row->column(3, function (Column $column) {
                     $column->append(Dashboard::staff());
                 });
                 $row->column(3, function (Column $column) {
                     $column->append(Dashboard::school_population());
-                });
+                }); */
             });
 
 
@@ -107,7 +110,7 @@ class HomeController extends Controller
             });
         }
 
-/* 
+        /* 
         if (
             $u->isRole('bursar')
         ) {
@@ -132,7 +135,7 @@ class HomeController extends Controller
  */
 
 
-/*         if ($u->isRole('teacher')) {
+        /*         if ($u->isRole('teacher')) {
             $content->row(function (Row $row) {
                 $row->column(3, function (Column $column) {
                     $column->append(Dashboard::teacher_marks());
