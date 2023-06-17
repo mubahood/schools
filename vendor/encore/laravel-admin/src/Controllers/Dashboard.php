@@ -402,6 +402,7 @@ class Dashboard
         $term = $u->ent->dpTerm();
         $data = [];
         $data['title'] = 'Budget for Term: ' . $term->name_text;
+        $data['values'] = [];
         foreach (AccountParent::where([
             'enterprise_id' => $u->enterprise_id,
         ])->get() as $key => $parent) {
