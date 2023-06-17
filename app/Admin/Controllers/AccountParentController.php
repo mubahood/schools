@@ -8,6 +8,7 @@ use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
+use Illuminate\Support\Facades\Auth;
 
 class AccountParentController extends AdminController
 {
@@ -16,7 +17,7 @@ class AccountParentController extends AdminController
      *
      * @var string
      */
-    protected $title = 'Account categories';
+    protected $title = 'Departments';
 
     /**
      * Make a grid builder.
@@ -25,17 +26,40 @@ class AccountParentController extends AdminController
      */
     protected function grid()
     {
-        $grid = new Grid(new AccountParent()); 
+        $grid = new Grid(new AccountParent());
 
         $grid->disableBatchActions();
         $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
             ->orderBy('name', 'Asc');
 
         $grid->column('name', __('Name'))->sortable();
+
+        $grid->column('budget', __('Budget'))->display(function () {
+            $term = Auth::user()->ent->dpTerm();
+            return 'UGX ' . number_format($this->getBudget($term));
+        });
+
+        $grid->column('expense', __('Expense'))->display(function () {
+            $term = Auth::user()->ent->dpTerm();
+            return 'UGX ' . number_format($this->getExpenditure($term));
+        });
+
+        $grid->column('balance', __('Balance'))->display(function () {
+            $term = Auth::user()->ent->dpTerm();
+            $bud = $this->getBudget($term);
+            $exp = $this->getExpenditure($term);
+            $bal = $bud + $exp;
+            $color = "green";
+            if ($bal < 0) {
+                $color = "red";
+            }
+            return '<span class="p-1 text-white" style="font-wight: 800!important; background-color: ' . $color . ';">UGX ' . number_format($bal) . '</span>';
+        });
+
         $grid->column('Accounts', __('Accounts'))->display(function () {
             return count($this->accounts);
-        }); 
-        $grid->column('description', __('Description'));
+        });
+        $grid->column('description', __('Description'))->hide();
 
         return $grid;
     }

@@ -13,6 +13,25 @@ class Account extends Model
     use HasFactory;
 
 
+    public function getBudget($term)
+    {
+        return FinancialRecord::where([
+            'term_id' => $term->id,
+            'account_id' => $this->id,
+            'type' => 'BUDGET',
+        ])->sum('amount');
+    }
+
+    public function getExpenditure($term)
+    {
+        return FinancialRecord::where([
+            'term_id' => $term->id,
+            'account_id' => $this->id,
+            'type' => 'EXPENDITURE',
+        ])->sum('amount');
+    }
+
+
     public static function doTransfer($m)
     {
         $m->transfer_keyword = trim($m->want_to_transfer);

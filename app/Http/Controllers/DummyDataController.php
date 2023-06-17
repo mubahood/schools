@@ -47,7 +47,7 @@ class DummyDataController extends Controller
         ])->get();
         $ex = 1;
         $bu = 1;
-        for ($i = 0; $i < 1000; $i++) {
+        for ($i = 0; $i < 10; $i++) {
             foreach ($accs as $key => $acc) {
                 shuffle($terms);
                 $t = $terms[0];

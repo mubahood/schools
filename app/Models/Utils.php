@@ -22,6 +22,28 @@ define('STATUS_ACTIVE', 1);
 define('STATUS_PENDING', 2);
 define('DOCUMENT_ADMISSION', 'Admission letter');
 define('DOCUMENT_RECEIPT', 'Receipt');
+define('COLORS',  [
+    '#FF6384',  // Red
+    '#36A2EB',  // Blue
+    '#FFCE56',  // Yellow
+    '#4BC0C0',  // Turquoise
+    '#9966FF',  // Purple
+    '#FF9F40',  // Orange
+    '#1E90FF',  // Dodger Blue
+    '#FFD700',  // Gold
+    '#32CD32',  // Lime Green
+    '#FF69B4',  // Hot Pink
+    '#8A2BE2',  // Blue Violet
+    '#FF6347',  // Tomato
+    '#00CED1',  // Dark Turquoise
+    '#FF00FF',  // Magenta
+    '#ADFF2F',  // Green Yellow
+    '#9370DB',  // Medium Purple
+    '#FF4500',  // Orange Red
+    '#40E0D0',  // Turquoise
+    '#FFC0CB',  // Pink
+    '#7FFF00'   // Chartreuse
+]);
 
 class Utils  extends Model
 {
@@ -578,7 +600,7 @@ class Utils  extends Model
                             echo $x . ". $v->name - $v->current_class_id <br>";
                             $x++;
                             $v->save();
-                            break; 
+                            break;
                         }
                     }
                 }
@@ -1466,7 +1488,7 @@ class Utils  extends Model
             $ent = Enterprise::where([
                 'subdomain' => $subdomain
             ])->first();
-        } 
+        }
         if ($ent == null) {
             $ent = Enterprise::find(1);
         }

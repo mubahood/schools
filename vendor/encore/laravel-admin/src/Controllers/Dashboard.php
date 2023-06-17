@@ -394,14 +394,39 @@ class Dashboard
 
 
 
-    public static function expenditure()
+
+    public static function budget()
     {
 
         $u = Auth::user();
-        //$term = $u->ent->dpTerm();
-
+        $term = $u->ent->dpTerm();
         $data = [];
-        for ($i = 14; $i >= 0; $i--) {
+        $data['title'] = 'Budget for Term: ' . $term->name_text;
+        foreach (AccountParent::where([
+            'enterprise_id' => $u->enterprise_id,
+        ])->get() as $key => $parent) {
+            $tot = $parent->getBudget($term);
+            if ($tot < 1) {
+                continue;
+            }
+            $data['data'][] = $tot;
+            $data['labels'][] = $parent->name;
+            $data['values'][] = [
+                'text' => $parent->name,
+                'value' => number_format($tot),
+            ];
+        }
+        return view('dashboard.budget', $data);
+    }
+
+
+
+
+    public static function expenditure()
+    {
+        $u = Auth::user();
+        $data = [];
+        for ($i = 29; $i >= 0; $i--) {
             $min = new Carbon();
             $max = new Carbon();
             $max->subDays($i);
@@ -409,7 +434,7 @@ class Dashboard
             $count = FinancialRecord::whereBetween('payment_date', [$min, $max])
                 ->where([
                     'enterprise_id' => $u->enterprise_id,
-                    'type' => 'EXPENDITURE', 
+                    'type' => 'EXPENDITURE',
                 ])
                 ->sum('amount');
             $data['data'][] = -1 * $count;
@@ -418,6 +443,9 @@ class Dashboard
 
         return view('dashboard.expenditure', $data);
     }
+
+
+
     public static function count_expected_fees()
     {
 

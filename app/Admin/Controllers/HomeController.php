@@ -96,9 +96,13 @@ class HomeController extends Controller
             });
 
 
+
             $content->row(function (Row $row) {
-                $row->column(4, function (Column $column) {
+                $row->column(6, function (Column $column) {
                     $column->append(Dashboard::expenditure());
+                });
+                $row->column(6, function (Column $column) {
+                    $column->append(Dashboard::budget());
                 });
             });
         }

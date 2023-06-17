@@ -25,6 +25,24 @@ class AccountParent extends Model
         return $this->hasMany(Account::class);
     }
 
+    public function getBudget($term)
+    {
+        return FinancialRecord::where([
+            'term_id' => $term->id,
+            'parent_account_id' => $this->id,
+            'type' => 'BUDGET',
+        ])->sum('amount');
+    }
+
+    public function getExpenditure($term)
+    {
+        return FinancialRecord::where([
+            'term_id' => $term->id,
+            'parent_account_id' => $this->id,
+            'type' => 'EXPENDITURE',
+        ])->sum('amount');
+    }
+     
     public function getSum($year)
     {
 
