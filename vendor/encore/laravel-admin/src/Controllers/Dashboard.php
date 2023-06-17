@@ -465,7 +465,7 @@ class Dashboard
         ])
             ->where('amount', '>', 0)->sum('amount');
 
-        $bal = $fees_to_be_collected - $fees_paid;
+        $bal = $fees_to_be_collected + $fees_paid;
         $sub_title =  "UNPAID SCHOOL FEES: " . number_format($bal);
         return view('widgets.box-5', [
             'is_dark' => false,
