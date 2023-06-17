@@ -495,8 +495,11 @@ class Dashboard
             ->where('amount', '>', 0)->sum('amount');
 
         $bal = $fees_to_be_collected + $fees_paid;
+        $percentage = 0;
+        if($fees_to_be_collected>0){
+            $percentage = ($fees_paid / $fees_to_be_collected) * 100;
+        }
 
-        $percentage = ($fees_paid / $fees_to_be_collected) * 100;
         if ($percentage < 0) {
             $percentage = -1 * $percentage;
         }
