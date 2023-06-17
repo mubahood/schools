@@ -22,10 +22,10 @@ class DummyDataController extends Controller
 {
     public static function budget_and_expenses($ent_id)
     {
+
         // $faker = Faker::create();
         $ent = Enterprise::find($ent_id);
-        $id = '1686931392';
-        echo "<hr>========$id Budget and Expenses========";
+        $id = '1686931499';
         $m = Demo::where([
             'enterprise_id' => $ent_id,
             'generate_teachers' => $id,
@@ -33,6 +33,9 @@ class DummyDataController extends Controller
         if ($m != null) {
             return;
         }
+
+        echo "<hr>========$id Budget and Expenses========";
+
 
         $terms = [];
         foreach (Term::where(
@@ -47,7 +50,7 @@ class DummyDataController extends Controller
         ])->get();
         $ex = 1;
         $bu = 1;
-        for ($i = 0; $i < 10; $i++) {
+        for ($i = 0; $i < 300; $i++) {
             foreach ($accs as $key => $acc) {
                 shuffle($terms);
                 $t = $terms[0];
