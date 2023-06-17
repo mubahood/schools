@@ -497,6 +497,9 @@ class Dashboard
         $bal = $fees_to_be_collected + $fees_paid;
 
         $percentage = ($fees_paid / $fees_to_be_collected) * 100;
+        if ($percentage < 0) {
+            $percentage = -1 * $percentage;
+        }
         $sub_title =  "PAID SCHOOL FEES: " . number_format($fees_paid) . "";
         return view('widgets.box-5', [
             'is_dark' => false,
