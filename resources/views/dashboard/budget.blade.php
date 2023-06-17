@@ -26,7 +26,7 @@ use App\Models\Utils;
             <b>{{ $title }}</b>
         </h3>
         <div>
-            <a href="{{ url('/financial-records-budget') }}" class="btn btn-sm btn-primary mt-md-4 mt-4">
+            <a href="{{ url('/accounts') }}" class="btn btn-sm btn-primary mt-md-4 mt-4">
                 View All
             </a>
         </div>
@@ -39,7 +39,7 @@ use App\Models\Utils;
                         <li class="list-group-item d-flex justify-content-between  align-items-center text-uppercase"
                             style="font-weight: 700;">
                             {{ $item['text'] }}
-                            <span class="text-primary">UGX {{ $item['value'] }}</span>
+                            <span class="text-primary">{{ $item['value'] }}</span>
                         </li>
                     @endforeach
                 </ul>
