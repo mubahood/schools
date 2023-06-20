@@ -275,7 +275,6 @@ class Transaction extends Model
                                 if ($t->id == $m->term_id) {
                                     $m->account->owner->status = 1;
                                     $m->account->owner->save();
-                                    die("yess");
                                 }
                             }
                         }
