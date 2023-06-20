@@ -488,7 +488,8 @@ class Dashboard
             $count = Transaction::whereBetween('created_at', [$min, $max])
                 ->where([
                     'enterprise_id' => $u->enterprise_id,
-                    'term_id' => $term->id
+                    'term_id' => $term->id,
+                    'type' => 'FEES_PAYMENT'
                 ])
                 ->where('amount', '>', 0)
                 ->sum('amount');
