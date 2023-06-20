@@ -123,6 +123,7 @@ return array(
     'App\\Http\\Controllers\\ApiAuthController' => $baseDir . '/app/Http/Controllers/ApiAuthController.php',
     'App\\Http\\Controllers\\ApiMainController' => $baseDir . '/app/Http/Controllers/ApiMainController.php',
     'App\\Http\\Controllers\\Controller' => $baseDir . '/app/Http/Controllers/Controller.php',
+    'App\\Http\\Controllers\\DummyDataController' => $baseDir . '/app/Http/Controllers/DummyDataController.php',
     'App\\Http\\Controllers\\MainController' => $baseDir . '/app/Http/Controllers/MainController.php',
     'App\\Http\\Controllers\\PrintController2' => $baseDir . '/app/Http/Controllers/PrintController2.php',
     'App\\Http\\Controllers\\QuickSearchController' => $baseDir . '/app/Http/Controllers/QuickSearchController.php',

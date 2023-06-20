@@ -72,16 +72,16 @@ class HomeController extends Controller
                 $row->column(3, function (Column $column) {
                     $column->append(Dashboard::teachers());
                 });
-                
+
                 $row->column(3, function (Column $column) {
                     $column->append(Dashboard::count_expected_fees());
-                }); 
-                
+                });
+
                 $row->column(3, function (Column $column) {
                     $column->append(Dashboard::count_percentage_paid_fees());
                 });
- 
-/*                 
+
+                /*                 
                 $row->column(3, function (Column $column) {
                     $column->append(Dashboard::count_paid_fees());
                 });
@@ -98,6 +98,18 @@ class HomeController extends Controller
                 }); */
             });
 
+
+            $content->row(function (Row $row) {
+                $row->column(3, function (Column $column) {
+                    $column->append(Dashboard::recent_fees_payment());
+                });
+                $row->column(6, function (Column $column) {
+                    $column->append(Dashboard::fees_collection());
+                });
+                $row->column(3, function (Column $column) {
+                    $column->append(Dashboard::recent_fees_bills());
+                });
+            });
 
 
             $content->row(function (Row $row) {

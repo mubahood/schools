@@ -5,12 +5,14 @@ namespace App\Admin\Controllers;
 use App\Models\FundRequisition;
 use App\Models\StockBatch;
 use App\Models\StockItemCategory;
+use App\Models\Term;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class StockBatchController extends AdminController
@@ -66,25 +68,45 @@ class StockBatchController extends AdminController
             ])
                 ->orderBy('id', 'Desc');
         }
-
+        $grid->disableBatchActions();
         $grid->column('id', __('Batch Number'))->sortable();
         $grid->column('stock_item_category_id', __('Item'))->display(function () {
             return $this->cat->name;
         })->sortable();
 
-        $grid->column('original_quantity', __('Original quantity'))
+        $grid->column('original_quantity', __('Original Quantity'))
+            ->display(function ($x) {
+                return number_format($x) . " " . Str::plural($this->cat->measuring_unit);
+            })->sortable()->totalRow(function ($x) {
+                return number_format($x);
+            });
+        $grid->column('price', __('Unit Price'))
+            ->display(function ($x) {
+                return number_format($x);
+            })->sortable();
+        $grid->column('current_quantity', __('Current Quantity'))
             ->display(function ($x) {
                 return number_format($x) . " " . Str::plural($this->cat->measuring_unit);
             })->sortable()->totalRow(function ($x) {
                 return number_format($x);
             });
 
-        $grid->column('current_quantity', __('Current quantity'))
+
+
+        $grid->column('worth', __('Current Worth'))
             ->display(function ($x) {
-                return number_format($x) . " " . Str::plural($this->cat->measuring_unit);
+                return 'UGX ' . number_format($x);
             })->sortable()->totalRow(function ($x) {
-                return number_format($x);
+                return 'UGX ' . number_format($x);
             });
+        $grid->column('term_id', __('Due Term'))
+            ->display(function ($x) {
+                if ($this->term == null) {
+                    return $x;
+                }
+                return $this->term->name_text;
+            })->sortable();
+
         $grid->column('description', __('Description'))->hide();
 
         $grid->column('supplier_id', __('Supplier'))->display(function () {
@@ -93,7 +115,7 @@ class StockBatchController extends AdminController
 
         $grid->column('manager', __('Stock manager'))->display(function () {
             return $this->stock_manager->name;
-        })->sortable();
+        })->sortable()->hide();
 
         $grid->column('purchase_date', __('Date'));
 
@@ -137,10 +159,21 @@ class StockBatchController extends AdminController
     {
         $form = new Form(new StockBatch());
 
-
+        $u = Auth::user();
         $form->date('purchase_date', __('Date'))->rules('required');
+        $term = $u->ent->active_term();
+        $form->select('term_id', "Due term")
+            ->options(Term::where([
+                'enterprise_id' => $u->enterprise_id
+            ])
+                ->orderBy('id', 'desc')
+                ->get()
+                ->pluck('name_text', 'id'))
+            ->default($term->id)
+            ->rules('required');
 
 
+        $form->divider();
         $form->hidden('enterprise_id')->rules('required')->default(Admin::user()->enterprise_id)
             ->value(Admin::user()->enterprise_id);
 
@@ -186,7 +219,7 @@ class StockBatchController extends AdminController
 
 
 
-        $forms = [];
+        /*         $forms = [];
         foreach (FundRequisition::where([
             'enterprise_id' => Admin::user()->enterprise_id,
         ])
@@ -194,11 +227,15 @@ class StockBatchController extends AdminController
             ->get() as $val) {
             $forms[$val->id] = $val->cat->name . " UGX " . number_format($val->total_amount)
                 . " - " . $val->created_at;
-        }
+        } */
 
 
 
         $form->decimal('original_quantity', __('Quantity (in Units)'))
+            ->attribute('type', 'number')
+            ->rules('required');
+
+        $form->decimal('price', __('Unit Price (in UGX)'))
             ->attribute('type', 'number')
             ->rules('required');
 
@@ -207,6 +244,7 @@ class StockBatchController extends AdminController
                 ->options(
                     $employees
                 )
+                ->default($u->id)
                 ->rules('required');
         } else {
             $form->select('manager', __('Stock Manager'))
@@ -220,17 +258,18 @@ class StockBatchController extends AdminController
 
 
 
-        $form->textarea('description', __('Stock Description'));
+        $form->text('description', __('Stock Description'));
 
         $form->image('photo', __('Stock Photo'));
 
-        $form->select('fund_requisition_id', 'Funds requisition form')
-            ->options($forms);
+        /* $form->select('fund_requisition_id', 'Funds requisition form')
+            ->options($forms); */
 
 
 
 
-
+        $form->disableReset();
+        $form->disableViewCheck();
         return $form;
     }
 }

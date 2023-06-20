@@ -42,9 +42,7 @@ class FinancialRecordController extends AdminController
         });
 
         $grid->disableBatchActions();
-
-
-
+ 
         $grid->filter(function ($filter) {
             // Remove the default id filter
             $filter->disableIdFilter();

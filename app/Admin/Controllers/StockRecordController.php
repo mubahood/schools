@@ -176,7 +176,6 @@ class StockRecordController extends AdminController
         $cats = [];
         foreach (StockBatch::where([
             'enterprise_id' => Admin::user()->enterprise_id,
-            'manager' => Admin::user()->id,
         ])
             ->where('current_quantity', '>', 0)
             ->get() as $val) {

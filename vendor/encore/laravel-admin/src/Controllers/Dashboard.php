@@ -394,6 +394,56 @@ class Dashboard
 
 
 
+    public static function recent_fees_payment()
+    {
+
+        $u = Auth::user();
+        $term = $u->ent->dpTerm();
+        $data = [];
+        $data['title'] = 'Recent payments';
+        $data['values'] = [];
+        $data['labels'] = [];
+        $data['data'] = Transaction::where([
+            'enterprise_id' => $u->enterprise_id,
+            'term_id' => $term->id,
+        ])
+            ->where(
+                'amount',
+                '>',
+                0
+            )
+            ->orderBy('id', 'desc')
+            ->limit(8)
+            ->get();
+        return view('dashboard.recent_fees_payment', $data);
+    }
+
+
+    public static function recent_fees_bills()
+    {
+
+        $u = Auth::user();
+        $term = $u->ent->dpTerm();
+        $data = [];
+        $data['title'] = 'Recent billings';
+        $data['values'] = [];
+        $data['labels'] = [];
+        $data['data'] = Transaction::where([
+            'enterprise_id' => $u->enterprise_id,
+            'term_id' => $term->id,
+        ])
+            ->where(
+                'amount',
+                '<',
+                0
+            )
+            ->orderBy('id', 'desc')
+            ->limit(8)
+            ->get();
+        return view('dashboard.recent_fees_bills', $data);
+    }
+
+
 
     public static function budget()
     {
@@ -424,6 +474,28 @@ class Dashboard
 
 
 
+
+    public static function fees_collection()
+    {
+        $u = Auth::user();
+        $data = [];
+        for ($i = 29; $i >= 0; $i--) {
+            $min = new Carbon();
+            $max = new Carbon();
+            $max->subDays($i);
+            $min->subDays(($i + 1));
+            $count = Transaction::whereBetween('payment_date', [$min, $max])
+                ->where([
+                    'enterprise_id' => $u->enterprise_id,
+                ])
+                ->where('amount', '>', 0)
+                ->sum('amount');
+            $data['data'][] = $count;
+            $data['labels'][] = Utils::my_date($max);
+        }
+
+        return view('dashboard.fees_collection', $data);
+    }
 
     public static function expenditure()
     {

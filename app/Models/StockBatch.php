@@ -20,7 +20,7 @@ class StockBatch extends Model
     {
         return $this->belongsTo(Administrator::class, 'supplier_id');
     }
-   
+
     public function stock_manager()
     {
         return $this->belongsTo(Administrator::class, 'manager');
@@ -37,6 +37,12 @@ class StockBatch extends Model
 
         self::creating(function ($m) {
             $m->current_quantity = $m->original_quantity;
+            $m->worth = $m->current_quantity * $m->price;
+            return $m;
+        });
+
+        self::updating(function ($m) {
+            $m->worth = $m->current_quantity * $m->price;
             return $m;
         });
 
@@ -59,5 +65,9 @@ class StockBatch extends Model
         self::deleted(function ($m) {
             StockItemCategory::update_quantity($m->enterprise_id);
         });
+    }
+    public function term()
+    {
+        return $this->belongsTo(Term::class);
     }
 }

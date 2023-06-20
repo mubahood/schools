@@ -107,6 +107,9 @@ class FinancialRecord extends Model
                 throw new Exception("Account  not found.", 1);
             }
             $m->parent_account_id = $acc->account_parent_id;
+
+            $m->amount = $m->quantity * $m->unit_price;
+
             if ($m->type == 'EXPENDITURE') {
                 $amount = ((int)($m->amount));
                 if ($amount < 0) {

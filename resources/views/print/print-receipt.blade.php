@@ -15,15 +15,12 @@ $owner = $account->owner;
 $ent = $owner->ent;
 $amount_in_words = Utils::convert_number_to_words($transaction->amount);
 
- 
- 
 if ($ent == null) {
     throw new Exception('School not found.', 1);
 }
 
 $logo_link = public_path('/storage/' . $ent->logo);
 
- 
 $requirements_rows = '';
 $requirements_row_count = 0;
 $requirements_total = 0;
@@ -39,7 +36,7 @@ $requirements_total = 0;
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="{{ public_path('css/bootstrap-print.css') }}">
     <title>Payment receipt</title>
- 
+
 </head>
 
 <body>
@@ -71,8 +68,11 @@ $requirements_total = 0;
         <p>Received sum of <b>UGX {{ number_format($transaction->amount) }}</b> in words:
             <b>{{ $amount_in_words }}</b>
             only from
-            <b>{{ $owner->name }} - {{ $owner->school_pay_payment_code }}</b> through school pay, Transaction ID:
-            <b>{{ $transaction->school_pay_transporter_id }}</b>
+            <b>{{ $owner->name }} - {{ $owner->school_pay_payment_code }}</b>
+            @if ($transaction->source == 'SCHOOL_PAY')
+                through school pay, Transaction ID:
+                <b>{{ $transaction->school_pay_transporter_id }}</b>
+            @endif
             being payment of school fees.
         </p>
         <p class="mt-3 mb-4">FEES BALANCE: <b>UGX {{ number_format($account->balance) }}</b></p>
@@ -80,7 +80,8 @@ $requirements_total = 0;
         <table style="width: 100%;">
             <tr>
                 <td>
-                    <div class="  d-inline p-2 px-3" style="font-weight: 800; font-size: 1.4rem; border: solid black .2rem;">
+                    <div class="  d-inline p-2 px-3"
+                        style="font-weight: 800; font-size: 1.4rem; border: solid black .2rem;">
                         UGX {{ number_format($transaction->amount) }}
                     </div>
                 </td>
@@ -90,7 +91,7 @@ $requirements_total = 0;
             </tr>
         </table>
 
- 
+
     </div>
 </body>
 
