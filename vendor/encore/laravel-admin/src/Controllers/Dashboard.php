@@ -485,7 +485,7 @@ class Dashboard
             $max->subDays($i);
             $min->subDays(($i + 1));
             $term = $u->ent->dpTerm();
-            $count = Transaction::whereBetween('payment_date', [$min, $max])
+            $count = Transaction::whereBetween('created_at', [$min, $max])
                 ->where([
                     'enterprise_id' => $u->enterprise_id,
                     'term_id' => $term->id
