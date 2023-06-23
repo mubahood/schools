@@ -31,6 +31,7 @@ Route::match(['get', 'post'], '/report-cards', [PrintController2::class, 'second
 Route::get('/temp', function () {
 
   $i = 0;
+  die("tmo");
   foreach (Administrator::where([
     'user_type' => 'Student',
     'enterprise_id' => 7,
