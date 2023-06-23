@@ -5,6 +5,7 @@ use App\Http\Controllers\DummyDataController;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\PrintController2;
 use App\Models\AcademicClass;
+use App\Models\AcademicClassFee;
 use App\Models\Account;
 use App\Models\Book;
 use App\Models\BooksCategory;
@@ -27,7 +28,89 @@ use Illuminate\Support\Facades\App;
 
 Route::match(['get', 'post'], '/print', [PrintController2::class, 'index']);
 Route::match(['get', 'post'], '/report-cards', [PrintController2::class, 'secondary_report_cards']);
+Route::get('/temp', function () {
 
+  $i = 0;
+  foreach (Administrator::where([
+    'user_type' => 'Student',
+    'enterprise_id' => 7,
+    'status' => 1,
+  ])->get() as $key => $stud) {
+    $acc = $stud->getAccount();
+    $trans = Transaction::where(
+      'description',
+      'like',
+      '%Fees Term 2%'
+    )
+      ->where([
+        'account_id' => $acc->id,
+      ])
+      ->get();
+    if ($trans->count() < 1) {
+      continue;
+    }
+
+
+    Transaction::where(
+      'description',
+      'like',
+      '%Tuition Fees Term 2%'
+    )
+      ->where([
+        'account_id' => $acc->id,
+        'term_id' => 8
+      ])
+      ->delete();
+    $i++;
+    $stud->status = 2;
+    $stud->save();
+
+    $hasFee = StudentHasFee::where([
+      'administrator_id' => $stud->id,
+      'academic_class_id' => $stud->current_class_id,
+    ])->delete();
+    echo $stud->id . ". " . $trans->count() . "<br>";
+  }
+  die("done");
+
+  $fees = AcademicClassFee::where([
+    'enterprise_id' => 7,
+    'due_term_id' => 8
+  ])->get();
+  foreach ($fees as $key => $fee) {
+    $hasFee = StudentHasFee::where([
+      'academic_class_id' => $fee->id
+    ])->get();
+    if ($hasFee->count() > 0) {
+      echo "DELETED => " . $hasFee->count() . " records for {$fee->id}<br>";
+      $hasFee = StudentHasFee::where([
+        'academic_class_id' => $fee->id
+      ])->delete();
+    } else {
+      echo "FOUND => " . $hasFee->count() . " records for {$fee->id}<br>";
+    }
+  }
+  $trans = Transaction::where(
+    'description',
+    'like',
+    '%Tuition Fees Term 2%'
+  )
+    ->where([
+      'enterprise_id' => 7,
+    ])
+    ->get();
+
+  echo "DELETE => " . ($trans->count());
+  Transaction::where(
+    'description',
+    'like',
+    '%Tuition Fees Term 2%'
+  )
+    ->where([
+      'enterprise_id' => 7,
+    ])->delete();
+  die("temp");
+});
 Route::get('/demo', function () {
   set_time_limit(-1);
   ini_set('memory_limit', '-1');

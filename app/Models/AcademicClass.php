@@ -357,7 +357,7 @@ class AcademicClass extends Model
                                 $has_fee = StudentHasFee::where([
                                     'administrator_id' => $m->id,
                                     'academic_class_fee_id' => $fee->id,
-                                ])->first();
+                                ])->first(); 
                                 if ($has_fee == null) {
 
                                     Transaction::my_create([
