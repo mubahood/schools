@@ -39,7 +39,7 @@ use App\Models\Utils;
                         <div class="d-flex justify-content-between  align-items-center text-uppercase p-0 m-0"
                             style="font-weight: 600; line-height: 10px; 
                             ">
-                            {{ $item->account->name }}
+                            {{ Str::substr($item->account->name, 0, 15) }}...
                             <span class="text-danger"> {{ number_format($item->amount) }}</span>
                         </div>
                         <div class="">

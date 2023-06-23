@@ -36,10 +36,11 @@ use App\Models\Utils;
             <div class="col-md-12">
                 @foreach ($data as $item)
                     <div class="py-1" title="{{ $item->description }}">
-                        <div class="d-flex justify-content-between  align-items-center text-uppercase p-0 m-0"
+                        <div title="{{ $item->account->name }}"
+                            class="d-flex justify-content-between  align-items-center text-uppercase p-0 m-0"
                             style="font-weight: 600; line-height: 10px; 
                             ">
-                            {{ $item->account->name }}
+                            {{ Str::substr($item->account->name, 0, 15) }}...
                             <span class="text-primary"> {{ number_format($item->amount) }}</span>
                         </div>
                         <div class="d-flex justify-content-between  align-items-center">
