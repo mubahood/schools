@@ -413,7 +413,7 @@ class Dashboard
                 0
             )
             ->orderBy('id', 'desc')
-            ->limit(8)
+            ->limit(7)
             ->get();
         return view('dashboard.recent_fees_payment', $data);
     }
@@ -438,7 +438,7 @@ class Dashboard
                 0
             )
             ->orderBy('id', 'desc')
-            ->limit(8)
+            ->limit(7)
             ->get();
         return view('dashboard.recent_fees_bills', $data);
     }
@@ -479,7 +479,7 @@ class Dashboard
     {
         $u = Auth::user();
         $data = [];
-        for ($i = 29; $i >= 0; $i--) {
+        for ($i = 13; $i >= 0; $i--) {
             $min = new Carbon();
             $max = new Carbon();
             $max->subDays($i);
@@ -504,7 +504,7 @@ class Dashboard
     {
         $u = Auth::user();
         $data = [];
-        for ($i = 29; $i >= 0; $i--) {
+        for ($i = 12; $i >= 0; $i--) {
             $min = new Carbon();
             $max = new Carbon();
             $max->subDays($i);

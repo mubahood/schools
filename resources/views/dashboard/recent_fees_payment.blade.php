@@ -38,7 +38,7 @@ use App\Models\Utils;
                     <div class="py-1" title="{{ $item->description }}">
                         <div title="{{ $item->account->name }}"
                             class="d-flex justify-content-between  align-items-center text-uppercase p-0 m-0"
-                            style="font-weight: 600; line-height: 10px; 
+                            style="font-weight: 600; line-height: 12px; font-size: 12px; 
                             ">
                             {{ Str::substr($item->account->name, 0, 15) }}...
                             <span class="text-primary"> {{ number_format($item->amount) }}</span>
@@ -49,7 +49,7 @@ use App\Models\Utils;
                                     title="PRINT RECEIPT">PRINT</a></small>
                         </div>
                     </div>
-                    <hr class="p-0 m-0 mb-2">
+                    <hr class="p-0 m-0 mb-1">
                 @endforeach
             </div>
         </div>
