@@ -494,7 +494,7 @@ class Dashboard
                 ->where('amount', '>', 0)
                 ->sum('amount');
             $data['data'][] = $count;
-            $data['labels'][] = Utils::my_date($max);
+            $data['labels'][] = Utils::my_date_3($max);
         }
 
         return view('dashboard.fees_collection', $data);
@@ -516,7 +516,7 @@ class Dashboard
                 ])
                 ->sum('amount');
             $data['data'][] = -1 * $count;
-            $data['labels'][] = Utils::my_date($max);
+            $data['labels'][] = Utils::my_date_3($max);
         }
 
         return view('dashboard.expenditure', $data);

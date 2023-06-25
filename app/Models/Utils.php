@@ -178,7 +178,14 @@ class Utils  extends Model
         return $is_single_file ? $single_file : $uploaded_images;
     }
 
-
+    public static function my_date_3($t)
+    {
+        $c = Carbon::parse($t);
+        if ($t == null) {
+            return $t;
+        }
+        return $c->format('D d-m-Y');
+    }
 
 
     public static function my_date($t)
