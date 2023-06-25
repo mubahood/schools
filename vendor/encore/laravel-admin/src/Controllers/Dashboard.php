@@ -413,7 +413,7 @@ class Dashboard
                 0
             )
             ->orderBy('id', 'desc')
-            ->limit(7)
+            ->limit(8)
             ->get();
         return view('dashboard.recent_fees_payment', $data);
     }
@@ -438,7 +438,7 @@ class Dashboard
                 0
             )
             ->orderBy('id', 'desc')
-            ->limit(7)
+            ->limit(8)
             ->get();
         return view('dashboard.recent_fees_bills', $data);
     }
