@@ -28,7 +28,7 @@ use Illuminate\Support\Facades\DB;
 
 Route::match(['get', 'post'], '/print', [PrintController2::class, 'index']);
 Route::match(['get', 'post'], '/report-cards', [PrintController2::class, 'secondary_report_cards']);
-Route::get('/temp', function () {
+Route::get('/temps', function () {
 
   $sql = "SELECT * FROM `transactions` WHERE  `description` LIKE '%Tuition Fees Term 2%' ORDER BY `id` DESC";
   $trans = DB::select($sql);
