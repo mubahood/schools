@@ -38,6 +38,15 @@ Route::get('/temps', function () {
   foreach ($trans as $key => $tra) {
     $i++;
     if (in_array($tra->account_id, $done)) {
+      $acc = Account::find($tra->account_id);
+      if ($acc == null) {
+        die("Acc not found");
+      }
+      $acc->status = 0;
+      //$acc->save();
+      /* Transaction::where([
+        'id' => $tra->id
+      ])->delete(); */
       $dups[] = $tra->account_id;
       continue;
     }
@@ -52,9 +61,17 @@ Route::get('/temps', function () {
       die("null");
     }
     $i++;
-    echo $i . ". " . $acc->owner->name . "<br>";
+    $clas = AcademicClass::where([
+      'id' => $acc->owner->current_class_id
+    ])->first();
+    $classss = "";
+    if($clas != null){
+      $classss = $clas->short_name;
+    }
+
+    echo $i . ". " . $acc->owner->name . " - " . $classss . "<br>";
   }
-  die('done'); 
+  die('done');
 
   dd($dups);
   die("romina");
