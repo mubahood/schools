@@ -42,11 +42,12 @@ Route::get('/temps', function () {
       if ($acc == null) {
         die("Acc not found");
       }
-      $acc->status = 0;
-      //$acc->save();
-      /* Transaction::where([
+
+      Transaction::where([
         'id' => $tra->id
-      ])->delete(); */
+      ])->delete();
+      $acc->status = 0;
+      $acc->save();
       $dups[] = $tra->account_id;
       continue;
     }
@@ -65,14 +66,20 @@ Route::get('/temps', function () {
       'id' => $acc->owner->current_class_id
     ])->first();
     $classss = "";
-    if($clas != null){
+    if ($clas != null) {
       $classss = $clas->short_name;
     }
 
     echo $i . ". " . $acc->owner->name . " - " . $classss . "<br>";
   }
   die('done');
-
+  /* 
+1. Raudha Namagembe Kabanda - P.2
+2. Rayhana Najjemba - B.C
+3. Hassan Adinan Wasswa - P.6
+4. Mukiibi Abdul Malik - B.C
+5. Raham Tabingwa Rashid - P.2
+*/
   dd($dups);
   die("romina");
 
