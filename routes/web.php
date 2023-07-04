@@ -24,13 +24,43 @@ use Illuminate\Support\Facades\Route;
 use Mockery\Matcher\Subset;
 use Faker\Factory as Faker;
 use Illuminate\Support\Facades\App;
-
+use Illuminate\Support\Facades\DB;
 
 Route::match(['get', 'post'], '/print', [PrintController2::class, 'index']);
 Route::match(['get', 'post'], '/report-cards', [PrintController2::class, 'secondary_report_cards']);
 Route::get('/temp', function () {
 
-  $i = 0; 
+  $sql = "SELECT * FROM `transactions` WHERE  `description` LIKE '%Tuition Fees Term 2%' ORDER BY `id` DESC";
+  $trans = DB::select($sql);
+  $i = 0;
+  $done = [];
+  $dups = [];
+  foreach ($trans as $key => $tra) {
+    $i++;
+    if (in_array($tra->account_id, $done)) {
+      $dups[] = $tra->account_id;
+      continue;
+    }
+    $done[] = $tra->account_id;
+    //echo $i . ". " . $tra->id . " - " . $tra->amount . " - " . $tra->description . " ==> $tra->account_id <br>";
+  }
+
+  $i = 0;
+  foreach ($dups as $key => $value) {
+    $acc = Account::find($value);
+    if ($acc == null) {
+      die("null");
+    }
+    $i++;
+    echo $i . ". " . $acc->owner->name . "<br>";
+  }
+  die();
+
+  dd($dups);
+  die("romina");
+
+  die("done");
+  $i = 0;
   foreach (Administrator::where([
     'user_type' => 'Student',
     'enterprise_id' => 7,
