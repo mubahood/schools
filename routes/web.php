@@ -54,7 +54,7 @@ Route::get('/temp', function () {
     $i++;
     echo $i . ". " . $acc->owner->name . "<br>";
   }
-  die();
+  die('done'); 
 
   dd($dups);
   die("romina");
