@@ -662,7 +662,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                 ) AND (
                     subjects.academic_class_id = academic_classes.id
                 ) AND (
-                    academic_year_id = {$year->id}
+                    academic_classes.academic_year_id = {$year->id}
                 )
             ";
 
