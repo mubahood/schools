@@ -593,7 +593,7 @@ class ApiMainController extends Controller
             $account->save();
             return $this->success(null, "Account balance changed to UGX $r->amount successfully!", 200);
         } catch (\Throwable $th) {
-            return $this->error('Failed to save record because ' . $th->getMessage());
+            return $this->error('Failed to save record because ' . $th);
         }
     }
 
