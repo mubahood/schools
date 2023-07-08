@@ -596,6 +596,38 @@ class ApiMainController extends Controller
             return $this->error('Failed to save record because ' . $th);
         }
     }
+    public function accounts_change_status(Request $r)
+    {
+        $u = auth('api')->user();
+        if (
+            !$u->isRole('bursar')
+        ) {
+            return $this->error('You are not allowed to perform this action.');
+        }
+
+        $account_owner = Administrator::find($r->account_id);
+        if ($account_owner == null) {
+            return $this->error('Account owner found.');
+        }
+        if ($account_owner->account == null) {
+            return $this->error('Account found.');
+        }
+        $account = $account_owner->account;
+
+        if (((int)($r->status)) ==  1) {
+            $account->status = 1;
+        } else {
+            $account->status = 0;
+        }
+
+
+        try {
+            $account->save();
+            return $this->success(null, "Account status updated successfully!", 200);
+        } catch (\Throwable $th) {
+            return $this->error('Failed to save record because ' . $th);
+        }
+    }
 
     public function my_subjects()
     {

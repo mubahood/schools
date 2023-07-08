@@ -34,6 +34,7 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::get("transactions", [ApiMainController::class, 'transactions']);
     Route::post("transactions", [ApiMainController::class, 'transactions_post']);
     Route::post("accounts-change-balance", [ApiMainController::class, 'accounts_change_balance']);
+    Route::post("accounts-change-status", [ApiMainController::class, 'accounts_change_status']);
     Route::get("my-sessions", [ApiMainController::class, 'my_sessions']);
     Route::get("my-students", [ApiMainController::class, 'get_my_students']);
     Route::post("post-media-upload", [ApiMainController::class, 'upload_media']);
