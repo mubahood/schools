@@ -5,6 +5,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Facades\Admin;
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -119,7 +120,16 @@ class Account extends Model
                         $trans->academic_year_id = $term->academic_year_id;
                         $trans->term_id = $term->id;
                         $trans->school_pay_transporter_id = "";
+
+                        $created_by = Admin::user();
+                        if ($created_by == null) {
+                            $created_by = auth('api')->user();
+                        }
+                        if ($created_by == null) {
+                            throw new Exception("Logged in user not found.", 1);
+                        }
                         $trans->created_by_id = Admin::user()->id;
+
                         $trans->is_contra_entry = false;
                         $bank = Enterprise::main_bank_account($ent);
                         $trans->type = 'FEES_PAYMENT';
