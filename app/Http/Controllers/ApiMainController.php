@@ -586,7 +586,7 @@ class ApiMainController extends Controller
         }
         $account = $account_owner->account;
 
-        $account->new_balance = "Change balance";
+        $account->new_balance = 1;
         $account->new_balance_amount = $r->amount;
 
         try {
