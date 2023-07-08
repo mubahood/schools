@@ -542,10 +542,14 @@ class ApiMainController extends Controller
         ) {
             return $this->error('Please set active term.');
         }
-        $account = Account::find($r->account_id);
-        if ($account == null) {
-            return $this->error('Account not found.');
+        $account_owner = Administrator::find($r->account_id);
+        if ($account_owner == null) {
+            return $this->error('Account owner found.');
         }
+        if ($account_owner->account == null) {
+            return $this->error('Account found.');
+        }
+        $account = $account_owner->account;
         $transaction = new Transaction();
         $transaction->enterprise_id = $u->enterprise_id;
         $transaction->type = 'FEES_PAYMENT';
