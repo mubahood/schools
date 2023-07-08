@@ -562,7 +562,7 @@ class ApiMainController extends Controller
         $transaction->source = "MOBILE_APP";
         try {
             $transaction->save();
-            return $this->success(null, $message = "Success", 200);
+            return $this->success(null, $message = "Transaction created successfully!", 200);
         } catch (\Throwable $th) {
             return $this->error('Failed to save record because ' . $th->getMessage());
         }
