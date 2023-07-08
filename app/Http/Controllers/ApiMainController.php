@@ -12,6 +12,7 @@ use App\Models\Service;
 use App\Models\ServiceSubscription;
 use App\Models\Session;
 use App\Models\StudentHasClass;
+use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Utils;
 use App\Traits\ApiResponser;
@@ -339,13 +340,15 @@ class ApiMainController extends Controller
 
         $s = Service::find($r->service_id);
         if (
-            $s == null ) {
+            $s == null
+        ) {
             return $this->error('Service not found.');
         }
-       
+
         $s = Administrator::find($r->administrator_id);
         if (
-            $s == null ) {
+            $s == null
+        ) {
             return $this->error('Service not found.');
         }
 
@@ -353,7 +356,7 @@ class ApiMainController extends Controller
         $sub->enterprise_id = $u->enterprise_id;
         $sub->service_id = $r->service_id;
         $sub->quantity = $r->quantity;
-        $sub->administrator_id = $r->administrator_id; 
+        $sub->administrator_id = $r->administrator_id;
         $sub->due_term_id = $term->id;
 
         try {
@@ -524,6 +527,42 @@ class ApiMainController extends Controller
         return $this->success($recs, $message = "Success", 200);
     }
 
+
+    public function transactions_post(Request $r)
+    {
+        $u = auth('api')->user();
+        if (
+            !$u->isRole('bursar')
+        ) {
+            return $this->error('You are not allowed to perform this action.');
+        }
+        $term = $u->ent->active_term();
+        if (
+            $term == null
+        ) {
+            return $this->error('Please set active term.');
+        }
+        $account = Account::find($r->account_id);
+        if ($account == null) {
+            return $this->error('Account not found.');
+        }
+        $transaction = new Transaction();
+        $transaction->enterprise_id = $u->enterprise_id;
+        $transaction->type = 'FEES_PAYMENT';
+        $transaction->created_by_id = $u->id;
+        $transaction->is_contra_entry = 0;
+        $transaction->school_pay_transporter_id = '-';
+        $transaction->account_id = $account->id;
+        $transaction->amount = $r->amount;
+        $transaction->payment_date = Carbon::parse($r->date);
+        $transaction->source = "MOBILE_APP";
+        try {
+            $transaction->save();
+            return $this->success(null, $message = "Success", 200);
+        } catch (\Throwable $th) {
+            return $this->error('Failed to save record because ' . $th->getMessage());
+        }
+    }
 
     public function my_subjects()
     {

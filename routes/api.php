@@ -30,8 +30,9 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::post("verify-student/{id}", [ApiMainController::class, 'verify_student']);
     Route::post("update-guardian/{id}", [ApiMainController::class, 'update_guardian']);
     Route::post("session-create", [ApiMainController::class, 'session_create']);
-    Route::get("my-subjects", [ApiMainController::class, 'my_subjects']);
+    Route::get("my-subjects", [ApiMainController::class, 'transactions_post']);
     Route::get("transactions", [ApiMainController::class, 'transactions']);
+    Route::post("transactions", [ApiMainController::class, 'transactions']);
     Route::get("my-sessions", [ApiMainController::class, 'my_sessions']);
     Route::get("my-students", [ApiMainController::class, 'get_my_students']);
     Route::post("post-media-upload", [ApiMainController::class, 'upload_media']);
