@@ -128,7 +128,7 @@ class Account extends Model
                         if ($created_by == null) {
                             throw new Exception("Logged in user not found.", 1);
                         }
-                        $trans->created_by_id = Admin::user()->id;
+                        $trans->created_by_id = $created_by->id;
 
                         $trans->is_contra_entry = false;
                         $bank = Enterprise::main_bank_account($ent);
