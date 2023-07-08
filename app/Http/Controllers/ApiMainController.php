@@ -568,6 +568,35 @@ class ApiMainController extends Controller
         }
     }
 
+    public function accounts_change_balance(Request $r)
+    {
+        $u = auth('api')->user();
+        if (
+            !$u->isRole('bursar')
+        ) {
+            return $this->error('You are not allowed to perform this action.');
+        }
+
+        $account_owner = Administrator::find($r->account_id);
+        if ($account_owner == null) {
+            return $this->error('Account owner found.');
+        }
+        if ($account_owner->account == null) {
+            return $this->error('Account found.');
+        }
+        $account = $account_owner->account;
+
+        $account->new_balance = "Change balance";
+        $account->new_balance_amount = $r->amount;
+
+        try {
+            $account->save();
+            return $this->success(null, "Account balance changed to UGX $r->amount successfully!", 200);
+        } catch (\Throwable $th) {
+            return $this->error('Failed to save record because ' . $th->getMessage());
+        }
+    }
+
     public function my_subjects()
     {
         $u = auth('api')->user();
