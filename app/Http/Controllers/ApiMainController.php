@@ -614,16 +614,19 @@ class ApiMainController extends Controller
         }
         $account = $account_owner->account;
 
+        $status = "";
         if (((int)($r->status)) ==  1) {
             $account->status = 1;
+            $status = "Verified";
         } else {
+            $status = "Not Verified";
             $account->status = 0;
         }
 
 
         try {
             $account->save();
-            return $this->success(null, "Account status updated successfully!", 200);
+            return $this->success(null, "Account status updated $status successfully!", 200);
         } catch (\Throwable $th) {
             return $this->error('Failed to save record because ' . $th);
         }
