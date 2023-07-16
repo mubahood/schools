@@ -24,7 +24,7 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::get("exams", [ApiMainController::class, 'exams_list']);
     Route::post("marks", [ApiMainController::class, 'mark_submit']);
     Route::get("users/me", [ApiAuthController::class, 'me']);
-    Route::get("my-classes", [ApiMainController::class, 'classes']);
+    Route::get("my-classes", [ApiMainController::class, 'classes']); 
     Route::get("class-streams", [ApiMainController::class, 'streams']);
     Route::post("update-bio/{id}", [ApiMainController::class, 'update_bio']);
     Route::post("verify-student/{id}", [ApiMainController::class, 'verify_student']);

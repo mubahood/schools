@@ -644,6 +644,81 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
     }
 
 
+    public function get_my_theology_classes()
+    {
+
+        $year =  $this->ent->active_academic_year();
+        if ($year == null) {
+            return [];
+        }
+        if ($this->user_type == 'employee') {
+            $sql1 = "SELECT theology_classes.id FROM theology_subjects,theology_classes WHERE
+                (
+                    subject_teacher = {$this->id} OR
+                    teacher_1 = {$this->id} OR
+                    teacher_2 = {$this->id} OR
+                    teacher_3 = {$this->id}
+                ) AND (
+                    theology_subjects.theology_class_id = theology_classes.id
+                ) AND (
+                    theology_classes.academic_year_id = {$year->id}
+                )
+            ";
+
+            if (
+                $this->isRole('dos') ||
+                $this->isRole('bursar') ||
+                $this->isRole('admin')
+            ) {
+                $sql1 = "SELECT theology_classes.id FROM theology_classes WHERE academic_year_id = {$year->id}";
+            }
+
+            $sql = "SELECT * FROM theology_classes WHERE id IN
+            ( $sql1 )
+            ";
+
+            $clases = [];
+            foreach (DB::select($sql) as $key => $v) {
+                $u = Administrator::find($v->class_teahcer_id);
+                if ($u != null) {
+                    $v->class_teacher_name = $u->name;
+                } else {
+                    $v->class_teacher_name  = "";
+                }
+                $v->students_count = 0;
+                foreach (StudentHasTheologyClass::where([
+                    'theology_class_id' => $v->id
+                ])->get() as $_value) {
+                    if ($_value->student == null) {
+                        continue;
+                    }
+                    if ($_value->student->status != 1) {
+                        continue;
+                    }
+                    $v->students_count++;
+                }
+
+                $clases[] = $v;
+            }
+            return $clases;
+        }
+    }
+
+
+    public function get_my_all_classes()
+    {
+        $theology_classes = $this->get_my_theology_classes();
+        $secular_classes = $this->get_my_classes();
+        foreach ($secular_classes as $key => $value) {
+            $value->section = 'Secular';
+            $classes[] = $value;
+        }
+        foreach ($theology_classes as $key => $value) {
+            $value->section = 'Theology';
+            $classes[] = $value;
+        }
+        return $classes;
+    }
 
     public function get_my_classes()
     {
@@ -686,9 +761,18 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                 } else {
                     $v->class_teacher_name  = "";
                 }
-                $v->students_count = StudentHasClass::where([
+                $v->students_count = 0;
+                foreach (StudentHasClass::where([
                     'academic_class_id' => $v->id
-                ])->count();
+                ])->get() as $_value) {
+                    if ($_value->student == null) {
+                        continue;
+                    }
+                    if ($_value->student->status != 1) {
+                        continue;
+                    }
+                    $v->students_count++;
+                }
                 $clases[] = $v;
             }
             return $clases;
@@ -740,32 +824,59 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
             }
         } else {
             $classes = $u->get_my_classes();
-            if ($classes != null)
+            $secular_students = [];
+            $theology_students = [];
+            if ($classes != null) {
                 foreach ($classes as $class) {
-                    foreach (Administrator::where([
-                        'current_class_id' => $class->id,
-                        'user_type' => 'student',
-                        'status' => 1,
-                    ])->get() as $user) {
-
-                        $user->balance = 0;
-                        $user->account_id = 0;
-
-                        $user->current_class_text = $user->current_class_id;
-                        $class = $user->getActiveClass();
-                        if ($class != null) {
-                            $user->current_class_text = $class->short_name;
-                        }
-
-                        $acc = $this->getAccount();
-                        if ($acc != null) {
-                            $user->balance = $acc->balance;
-                            $user->account_id = $acc->id;
-                        }
-                        $students[] = $user;
+                    $_class = AcademicClass::find($class->id);
+                    if ($_class == null) {
+                        continue;
+                    }
+                    foreach ($_class->get_active_students() as $_u) {
+                        $secular_students[] = $_u;
                     }
                 }
-        }
+            }
+
+            $theology_classes = $u->get_my_theology_classes();
+            if ($theology_classes != null) {
+                foreach ($theology_classes as $class) {
+                    $_class = TheologyClass::find($class->id);
+                    if ($_class == null) {
+                        continue;
+                    }
+                    foreach ($_class->get_active_students() as $_u) {
+                        $theology_students[] = $_u;
+                    }
+                }
+            }
+            foreach ($secular_students as $key => $value) {
+                $theology_students[] = $value;
+            }
+
+            $done = [];
+            foreach ($theology_students as $user) {
+                if (in_array($user->id, $done)) {
+                    continue;
+                }
+                $done[] = $user->id;
+                $user->balance = 0;
+                $user->account_id = 0;
+
+                $user->current_class_text = $user->current_class_id;
+                $class = $user->getActiveClass();
+                if ($class != null) {
+                    $user->current_class_text = $class->short_name;
+                }
+
+                $acc = $this->getAccount();
+                if ($acc != null) {
+                    $user->balance = $acc->balance;
+                    $user->account_id = $acc->id;
+                }
+                $students[] = $user;
+            }
+        } 
 
         if ($u->isRole('parent')) {
             foreach (Administrator::where([
@@ -809,7 +920,25 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
         if ($this->user_type == 'employee') {
 
 
-            $sql1 = "SELECT *, subjects.id as id FROM subjects,academic_classes WHERE
+            $isAdmin = false;
+
+            if (
+                $this->isRole('admin') ||
+                $this->isRole('dos') ||
+                $this->isRole('hm')
+            ) {
+                $isAdmin = true;
+            }
+
+            if ($isAdmin) {
+                $sql1 = "SELECT *, subjects.id as id FROM subjects,academic_classes WHERE  (
+                    subjects.academic_class_id = academic_classes.id
+                ) AND (
+                    academic_classes.academic_year_id = $active_academic_year_id
+                )
+            ";
+            } else {
+                $sql1 = "SELECT *, subjects.id as id FROM subjects,academic_classes WHERE
                 (
                     subject_teacher = {$this->id} OR
                     teacher_1 = {$this->id} OR
@@ -821,6 +950,8 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                     academic_classes.academic_year_id = $active_academic_year_id
                 )
             ";
+            }
+
 
 
             $data = [];
@@ -843,6 +974,74 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
             return $data;
         }
     }
+
+
+    public function get_my_theology_subjetcs()
+    {
+
+        $active_academic_year_id = 0;
+        if ($this->ent != null) {
+            $y = $this->ent->active_academic_year();
+            if ($y != null) {
+                $active_academic_year_id = $y->id;
+            }
+        }
+
+        if ($this->user_type == 'employee') {
+            $isAdmin = false;
+            if (
+                $this->isRole('admin') ||
+                $this->isRole('dos') ||
+                $this->isRole('hm')
+            ) {
+                $isAdmin = true;
+            }
+
+            if ($isAdmin) {
+                $sql1 = "SELECT *, theology_subjects.id as id FROM theology_subjects,theology_classes WHERE  (
+                    theology_subjects.theology_class_id = theology_classes.id
+                ) AND (
+                    theology_classes.academic_year_id = $active_academic_year_id
+                )
+            ";
+            } else {
+
+                $sql1 = "SELECT *, theology_subjects.id as id FROM theology_subjects,theology_classes WHERE (
+                    subject_teacher = {$this->id} OR
+                    teacher_1 = {$this->id} OR
+                    teacher_2 = {$this->id} OR
+                    teacher_3 = {$this->id}
+                ) AND (
+                    theology_subjects.theology_class_id = theology_classes.id
+                ) AND (
+                    theology_classes.academic_year_id = $active_academic_year_id
+                )
+                ";
+            }
+
+
+
+            $data = [];
+            foreach (DB::select($sql1) as $key => $v) {
+
+                $u = Administrator::where([
+                    'id' => $v->subject_teacher
+                ])
+                    ->orWhere('id', $v->teacher_1)
+                    ->orWhere('id', $v->teacher_2)
+                    ->orWhere('id', $v->teacher_3)->first();
+
+                if ($u != null) {
+                    $v->subject_teacher_name = $u->name;
+                } else {
+                    $v->subject_teacher_name  = "";
+                }
+                $data[] = $v;
+            }
+            return $data;
+        }
+    }
+
 
 
     public function theology_classes()

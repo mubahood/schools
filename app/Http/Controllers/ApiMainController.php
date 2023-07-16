@@ -12,6 +12,7 @@ use App\Models\Service;
 use App\Models\ServiceSubscription;
 use App\Models\Session;
 use App\Models\StudentHasClass;
+use App\Models\TheologyStream;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Utils;
@@ -170,15 +171,28 @@ class ApiMainController extends Controller
     public function classes()
     {
         $u = auth('api')->user();
-        return $this->success($u->get_my_classes(), $message = "Success", 200);
+        return $this->success($u->get_my_all_classes(), $message = "Success", 200);
     }
 
     public function streams()
     {
         $u = auth('api')->user();
-        $data = AcademicClassSctream::where([
+        $data1 = AcademicClassSctream::where([
             'enterprise_id' => $u->enterprise_id,
         ])->limit(10000)->orderBy('id', 'desc')->get();
+        $data2 = TheologyStream::where([
+            'enterprise_id' => $u->enterprise_id,
+        ])->limit(10000)->orderBy('id', 'desc')->get();
+
+        $data = [];
+        foreach ($data1 as $key => $value) {
+            $value->section = 'Secular';
+            $data[] = $value;
+        }
+        foreach ($data2 as $key => $value) {
+            $value->section = 'Theology';
+            $data[] = $value;
+        }
 
         return $this->success($data, $message = "Success", 200);
     }
@@ -439,13 +453,10 @@ class ApiMainController extends Controller
         terms.details as term_name
         FROM exams,terms WHERE exams.id in  ($exam_ids) AND terms.id = exams.term_id
     ";
-
-
             foreach (DB::select($_exams) as $key => $ex) {
                 $ex->items = [];
                 $exams[$ex->id] = $ex;
             }
-
 
             $_marks = DB::select("
             SELECT 
@@ -477,6 +488,66 @@ class ApiMainController extends Controller
             $data[] = $value;
         }
 
+
+        
+        /* =====theology===== */
+        if ($u->isRole('teacher')) {
+            $subs = "SELECT 
+        `id` FROM subjects
+        WHERE 
+        subject_teacher = $u->id OR
+        teacher_1 = $u->id OR
+        teacher_2 = $u->id OR
+        teacher_3 = $u->id";
+            $exam_ids = "
+            SELECT DISTINCT(exam_id) FROM marks WHERE subject_id in  ($subs)
+        ";
+            $_exams = "
+        SELECT 
+        exams.id,
+        term_id,
+        type,
+        exams.name,
+        max_mark,
+        marks_generated,
+        can_submit_marks,
+        terms.details as term_name
+        FROM exams,terms WHERE exams.id in  ($exam_ids) AND terms.id = exams.term_id
+    ";
+            foreach (DB::select($_exams) as $key => $ex) {
+                $ex->items = [];
+                $exams[$ex->id] = $ex;
+            }
+
+            $_marks = DB::select("
+            SELECT 
+            marks.id as id,
+            exam_id,
+            class_id,
+            subject_id,
+            student_id,
+            admin_users.name as student_name,
+            score,
+            remarks,
+            main_course_id,
+            is_submitted 
+            FROM
+            marks,admin_users
+            WHERE 
+            subject_id in  ($subs) AND
+            admin_users.id = marks.student_id 
+        ");
+
+            foreach ($_marks as $key => $mark) {
+                if (isset($exams[$mark->exam_id])) {
+                    $exams[$mark->exam_id]->items[] = $mark;
+                }
+            }
+        }
+
+        foreach ($exams as $key => $value) {
+            $data[] = $value;
+        }
         return $this->success($data, $message = "Success", 200);
     }
 
@@ -635,7 +706,20 @@ class ApiMainController extends Controller
     public function my_subjects()
     {
         $u = auth('api')->user();
-        return $this->success($u->get_my_subjetcs(), $message = "Success", 200);
+
+        $secula_subjects = $u->get_my_subjetcs();
+        $theology_subjects = $u->get_my_theology_subjetcs();
+        $subjects = [];
+        foreach ($secula_subjects as $key => $value) {
+            $value->section = 'Secular';
+            $subjects[] = $value;
+        }
+        foreach ($theology_subjects as $key => $value) {
+            $value->section = 'Theology';
+            $subjects[] = $value;
+        }
+
+        return $this->success($subjects, $message = "Success", 200);
     }
 
     public function my_sessions()

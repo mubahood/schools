@@ -357,7 +357,7 @@ class AcademicClass extends Model
                                 $has_fee = StudentHasFee::where([
                                     'administrator_id' => $m->id,
                                     'academic_class_fee_id' => $fee->id,
-                                ])->first(); 
+                                ])->first();
                                 if ($has_fee == null) {
 
                                     Transaction::my_create([
@@ -587,6 +587,20 @@ class AcademicClass extends Model
     function students()
     {
         return $this->hasMany(StudentHasClass::class, 'academic_class_id');
+    }
+    function get_active_students()
+    {
+        $students = [];
+        foreach ($this->students as $key => $value) {
+            if ($value->student == null) {
+                continue;
+            }
+            if ($value->student->status != 1) {
+                continue;
+            }
+            $students[] = $value->student;
+        }
+        return $students;
     }
 
     function getNameTextAttribute()
