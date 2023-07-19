@@ -137,7 +137,7 @@ class TermlyReportCard extends Model
 
                 if ($report_card != null) {
                     if ($report_card->id > 0) {
- 
+
                         $marks = Mark::where([
                             'student_id' => $student->id,
                             'class_id' => $class->id
@@ -168,8 +168,12 @@ class TermlyReportCard extends Model
 
                             if ($mark != null) {
 
+                                if ($mark->subject == null) {
+                                    return;
+                                }
                                 $report_item->total = $mark->score;
                                 $report_item->remarks = Utils::get_automaic_mark_remarks($report_item->total);
+
                                 $u = Administrator::find($mark->subject->subject_teacher);
 
                                 $initial = "";
