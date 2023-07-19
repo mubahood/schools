@@ -114,7 +114,7 @@ class TermlyReportCard extends Model
                 }
 
                 if ($student->status != 1) {
-                    continue;
+                    //continue;
                 }
                 $report_card = StudentReportCard::where([
                     'term_id' => $m->term_id,
