@@ -269,12 +269,14 @@ class TermlyReportCard extends Model
 
                 $marks = Mark::where([
                     'student_id' => $student->id,
+                    'exam_id' => 11,
                     'class_id' => $report_card->academic_class_id
                 ])
                     ->orderBy('id', 'desc')
                     ->get();
                 $total_marks = 0;
                 $total_aggregates = 0;
+
                 foreach ($marks as $mark) {
                     $subject = Subject::find($mark->subject_id);
 

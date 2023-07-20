@@ -186,7 +186,9 @@ class MarkController extends AdminController
             return $this->student->name;
         })->sortable();
 
-        $grid->column('score', __('Score'))->sortable()->editable();
+        $grid->column('score', __('Score'))->sortable()
+        ->totalRow()
+        ->editable();
         $grid->column('remarks', __('Remarks'))->editable();
 
         $grid->column('exam_id', __('Exam'))

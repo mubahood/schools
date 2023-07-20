@@ -16,6 +16,10 @@ if ($r->owner->stream != null) {
 if ($tr == null) {
     $tr = $r->get_theology_report();
 }
+if ($r->owner->account == null) {
+    $r->delete();
+    return "";
+}
 $bal = ((int) $r->owner->account->balance);
 $bal_text = '';
 if ($bal == 0) {

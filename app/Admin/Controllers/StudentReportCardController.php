@@ -36,10 +36,55 @@ class StudentReportCardController extends AdminController
 
     protected function print(Content $content)
     {
+
         return $content
             ->title('Batch report card printing')
             ->description('Dashboard')
             ->row(function (Row $row) {
+
+                $row->column(4, function (Column $column) {
+                    $u = Admin::user();
+                    $rows = [];
+
+                    foreach (AcademicClass::where([
+                        'enterprise_id' => $u->enterprise_id,
+                        'academic_year_id' => 3
+                    ])
+                        ->orderBy('id', 'Desc')
+                        ->get() as $v) {
+
+                        $term_id = 8;
+
+                        $rs = StudentReportCard::where([
+                            'term_id' => $term_id,
+                            'academic_class_id' => $v->id,
+                        ])->get();
+
+
+
+                        $rows[] = [
+                            $v->id,
+                            $v->name_text,
+                            count($rs),
+                            '<a target="_blank" href="' . url('print?calss_id=' . $v->id) . '&term_id=' . $term_id . '&termly_report_card_id=1">PRINT REPORTS</a>',
+
+                            '<a target="_blank" href="' . url('print?calss_id=' . $v->id) . '&term_id=' . $term_id . '&termly_report_card_id=1&task=blank">PRINT BLANK</a>'
+                        ];
+                    }
+
+                    $headers = ['Id', 'Class', 'Report cards', 'Print', 'Blank'];
+
+
+                    $table = new Table($headers, $rows);
+
+                    $box = new Box('2nd Term 2023', $table);
+
+                    $box->style('success');
+
+                    $column->append($box);
+                });
+
+
                 $row->column(4, function (Column $column) {
                     $u = Admin::user();
                     $rows = [];
@@ -161,7 +206,7 @@ class StudentReportCardController extends AdminController
                         ];
                     }
 
-                    $headers = ['Id', 'Class', 'Report cards', 'Print','Print Blank',];
+                    $headers = ['Id', 'Class', 'Report cards', 'Print', 'Print Blank',];
 
 
                     $table = new Table($headers, $rows);
@@ -209,10 +254,10 @@ class StudentReportCardController extends AdminController
         $r = TermlyReportCard::find(3);
         $r::grade_students($r);
      
-        die("simple test"); */  
+        die("simple test"); */
         $grid = new Grid(new StudentReportCard());
 
- 
+
         /*  $grid->header(function ($query) {
             return new Box('Gender ratio', 'Romina Love');
         });
@@ -286,6 +331,19 @@ class StudentReportCardController extends AdminController
             ->lightbox(['width' => 60, 'height' => 60]);
 
         $grid->column('student_id', __('Student'))->display(function () {
+
+            if ($this->total_marks < 1) {
+                TermlyReportCard::preocess_report_card($this);
+            }
+            if ($this->total_marks < 1) {
+                $this->delete();
+                dd("deleted " . $this->id);
+            }
+            if ($this->owner == null) {
+                $this->delete();
+                return "-";
+            }
+
             return $this->owner->name;
         });
         $grid->column('academic_class_id', __('Class'))

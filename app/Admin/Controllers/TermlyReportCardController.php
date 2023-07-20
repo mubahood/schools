@@ -116,21 +116,27 @@ class TermlyReportCardController extends AdminController
      */
     protected function form()
     {
-        $y = StudentReportCard::find(4108);
+        /* $x = StudentReportCard::find(4010);
+        TermlyReportCard::preocess_report_card($x);
+        dd('done'); */
+        //$y = StudentReportCard::find(4108);
+        /*  set_time_limit(-1);
+        ini_set('memory_limit', '-1'); 
         foreach (StudentReportCard::where('term_id', 8)->get() as $key => $y) {
-            if($y->total_marks>2){
-                continue;
-            }
+            // if ($y->total_marks > 2) {
+            //     continue;
+            // }
             TermlyReportCard::preocess_report_card($y);
             echo ($key . " ===> " . $y->owner->name . "<br>");
         }
-        dd($y);
-        TermlyReportCard::preocess_report_card($y);
+        dd('done');
+        $x = TermlyReportCard::find(4010);
+        TermlyReportCard::preocess_report_card($x);
         dd('done');
         $x = TermlyReportCard::find(6);
         TermlyReportCard::make_reports_for_secondary($x);
         die("done");
-
+ */
         $form = new Form(new TermlyReportCard());
         $u = Admin::user();
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
