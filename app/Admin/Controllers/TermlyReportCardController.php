@@ -31,7 +31,7 @@ class TermlyReportCardController extends AdminController
 
         $grid = new Grid(new TermlyReportCard());
 
-/*         $x = TermlyReportCard::find(3);
+        /*         $x = TermlyReportCard::find(3);
         if($x == null){
             die("not found"); 
         }
@@ -115,6 +115,9 @@ class TermlyReportCardController extends AdminController
      */
     protected function form()
     {
+        $x = TermlyReportCard::find(6);
+        TermlyReportCard::make_reports_for_secondary($x);
+        die("done");
 
         $form = new Form(new TermlyReportCard());
         $u = Admin::user();

@@ -83,10 +83,11 @@ $school_email = 'admin@kjs.com';
                     class="value text-lowercase">{{ $r->average_aggregates }}</span></span>
 
             <span><b class="text-uppercase">DIV:</b> <span class="value">{{ $r->grade }}</span></span>
-            <span><b class="text-uppercase">Position:</b> <span
+            {{-- <span><b class="text-uppercase">Position:</b> <span
                     class="value text-lowercase">{{ $numFormat->format($r->position) }}</span></span>
 
             <span><b class="text-uppercase">OUT OF :</b> <span class="value">{{ $r->total_students }}
+                </span></span> --}}
         </div>
 
     </div>

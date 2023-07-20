@@ -103,18 +103,37 @@ class TermlyReportCard extends Model
 
         set_time_limit(-1);
         ini_set('memory_limit', '-1');
+        $tot = 0;
+        $ent = Utils::ent();
+        $year =  $ent->active_academic_year();
 
         foreach ($m->term->academic_year->classes as $class) {
+
             foreach ($class->students as $_student) {
 
 
+
                 $student = $_student->student;
+
+                if ($student->enterprise_id != $student->enterprise_id) {
+                    continue;
+                }
+
                 if ($student == null) {
+                    throw new \Exception("Student not found.");
                     continue;
                 }
 
                 if ($student->status != 1) {
-                    //continue;
+                    continue;
+                }
+                if ($student->current_class == null) {
+                    continue;
+                }
+
+                $tot++;
+                if ($student->current_class->academic_year_id != $year->id) {
+                    continue;
                 }
                 $report_card = StudentReportCard::where([
                     'term_id' => $m->term_id,
@@ -490,7 +509,6 @@ class TermlyReportCard extends Model
 
     public static function make_reports_for_secondary($m)
     {
-        die("Secondary school");
         if (
             ($m->has_beginning_term  != 1)
         ) {
@@ -504,10 +522,16 @@ class TermlyReportCard extends Model
         foreach ($m->term->academic_year->classes as $class) {
             foreach ($class->students as $_student) {
                 $student = $_student->student;
+                if($student == null){
+                    continue;
+                }
+                if($student->status != 1){
+                    continue;
+                }
                 $report_card = StudentReportCard::where([
                     'term_id' => $m->term_id,
                     'termly_report_card_id' => $m->id,
-                    /*                     'student_id' => $student->id, */
+                    'student_id' => $student->id,
                 ])->first();
                 if ($report_card == null) {
                     $report_card = new StudentReportCard();
@@ -518,9 +542,11 @@ class TermlyReportCard extends Model
                     $report_card->academic_class_id = $class->id;
                     $report_card->termly_report_card_id = $m->id;
                     $report_card->save();
+                    die("Creating... ==> ".$student->id);
                 } else {
                     //do the update
                 }
+                continue;
 
                 if ($report_card != null) {
                     if ($report_card->id > 0) {
