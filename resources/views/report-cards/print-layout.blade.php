@@ -93,8 +93,8 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                         <span><b class="text-uppercase">Aggr:</b> <span
                                 class="value text-lowercase">{{ (int) $r->average_aggregates }}</span></span>
 
-                        {{-- <span><b class="text-uppercase">DIV:</b> <span class="value">{{ $r->grade }}</span></span>
-                        <span><b class="text-uppercase">Position:</b> <span class="value text-lowercase">
+                        <span><b class="text-uppercase">DIV:</b> <span class="value">{{ $r->grade }}</span></span>
+                        {{-- <span><b class="text-uppercase">Position:</b> <span class="value text-lowercase">
                          {{ $numFormat->format($r->position) }}  
                                 .........</span>
                             <span><b class="text-uppercase">OUT OF :</b> <span class="value">
@@ -125,7 +125,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                             if (in_array($v->main_course_id, $done)) {
                                 continue;
                             }
-                            if ( ((int)($v->total)) < 1 ) {
+                            if (((int) $v->total) < 1) {
                                 continue;
                             }
                             $done[] = $v->main_course_id; ?>
@@ -169,9 +169,9 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                         <br>
                         .............................................................................................................................................
                         <br>
-                         
 
-                 {{--        <b>CLASS TEACHER'S COMMENT:</b> 
+
+                        {{--        <b>CLASS TEACHER'S COMMENT:</b> 
                         <span class="comment">{{ Utils::getClassTeacherComment($r)['teacher'] }}</span> --}}
                         {{-- <span class="comment">{{  }}</span> --}}
                     </div>
@@ -188,11 +188,11 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                             {{-- <span><b class="text-uppercase">Aggre:</b> <span class="value">18</span></span> --}}
                             <span><b class="text-uppercase">DIV:</b> <span
                                     class="value">{{ $tr->grade }}</span></span>
-                            <span><b class="text-uppercase">Position in class:</b> <span class="value text-lowercase">
-                                    {{-- {{ $numFormat->format($tr->position) }} --}}
-                                    ..........
+                            {{-- <span><b class="text-uppercase">Position in class:</b> <span class="value text-lowercase"> --}}
+                            {{-- {{ $numFormat->format($tr->position) }} --}}
+                            {{--     ..........
                                 </span></span>
-                                OUT OF.........
+                            OUT OF......... --}}
 
                         </div>
                     @endif
@@ -264,8 +264,8 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                             <br>
                             .............................................................................................................................
                             <br>
-                         
-             {{--                
+
+                            {{--                
                             <b>CLASS TEACHER'S COMMENT:</b>
                             <span class="comment">{{ Utils::getClassTeacherComment($r)['theo'] }}</span> --}}
                         </div>
@@ -342,13 +342,13 @@ foreach ($r->termly_report_card->term->exams as $exam) {
         <table class="w-100">
             <tr>
                 <td style="width: 80%">
-{{--                     <b>HEAD TEACHER'S COMMENT:</b>
+                    {{--                     <b>HEAD TEACHER'S COMMENT:</b>
                     <span class="comment">{{ Utils::getClassTeacherComment($r)['hm'] }}</span> --}}
                     <div class="p-0 mt-0 mb-2 class-teacher">
                         <b>HEAD TEACHER'S COMMUNICATION:</b>
-                        <span class="comment">At Kira Junior School, we believe that every child is a genius who only needs a
-                            conducive environment to blossom. Please note that next term we have to prepare for the
-                            sports gala and the election of prefects InSha'Allah.</span>
+                        <span class="comment">Content coverage has been negatively affected this term because of the
+                            several breaks we've had. But, teachers are working tirelessly to ensure that the work
+                            designed for term 2 is completed.</span>
                     </div>
                 </td>
                 <td class=" pl-3 text-center">
@@ -368,9 +368,10 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     {{-- <span><b>NEXT TERM TUTION FEE:</b> <span class="value" style="font-size: 12px!important;">UGX
                 18,000</span></span> --}}
                     <span>&nbsp;&nbsp; <b>SCHOOL PAY CODE:</b> <span class="value"
-                            style="font-size: 16px!important;">{{ $r->owner->school_pay_payment_code }}</span></span> |
-                    <span>&nbsp;&nbsp;<b>NEXT TERM BEGINS ON:</b> <span class="value"
-                            style="font-size: 16px!important;">29<sup>th</sup> MAY,
+                            style="font-size: 16px!important;">{{ $r->owner->school_pay_payment_code }}</span></span>
+                    |
+                    <span>&nbsp;&nbsp;<b>THIS TERM ENDS ON:</b> <span class="value"
+                            style="font-size: 16px!important;">25<sup>th</sup> AUG,
                             2023</span></span>
         </div>
 

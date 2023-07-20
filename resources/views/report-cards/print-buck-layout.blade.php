@@ -244,11 +244,9 @@ $school_email = 'admin@kjs.com';
                     <div class="col-12 p-0">
                         <div class="p-0 mt-0 mb-2 class-teacher">
                             <b>HEAD TEACHER'S COMMUNICATION:</b>
-                            <span class="comment">We thank you for all the support you have accorded us since you joined
-                                Kira Junior School.
-                                We remain open to positive feedback, which we believe helps us to improve the services
-                                we provide to our children.
-                                <br>
+                            <span class="comment">Content coverage has been negatively affected this term because of the
+                                several breaks we've had. But, teachers are working tirelessly to ensure that the work
+                                designed for term 2 is completed.<br>
                                 <br>
                                 <br>
                             </span>
@@ -265,7 +263,8 @@ $school_email = 'admin@kjs.com';
                     18,000</span></span> --}}
             <span><b>SCHOOL PAY CODE:</b> <span class="value"
                     style="font-size: 12px!important;">{{ $r->owner->school_pay_payment_code }}</span></span>
-            <span><b>TERM ENDS ON:</b> <span class="value" style="font-size: 12px!important;">5<sup>th</sup> MAY,
+            <span>&nbsp;&nbsp;<b>THIS TERM ENDS ON:</b> <span class="value"
+                    style="font-size: 16px!important;">25<sup>th</sup> AUG,
                     2023</span></span>
         </div>
 

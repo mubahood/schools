@@ -85,7 +85,7 @@ $school_email = 'admin@kjs.com';
     </div>
 
     <div class="row">
-        <table >
+        <table>
             <tbody>
                 <tr>
                     <td style="width: 40%!important">
@@ -111,14 +111,14 @@ $school_email = 'admin@kjs.com';
                                 }
                                 $done[] = $_v['competance'];
                                 $dp = $_v['competance'];
-                                if($dp == 'Literacy 1A'){
+                                if ($dp == 'Literacy 1A') {
                                     $dp = 'Learning Area 1';
                                 }
-
-                                if($dp == 'Literacy 1B'){
+                                
+                                if ($dp == 'Literacy 1B') {
                                     $dp = 'Learning Area 2';
-                                } 
-
+                                }
+                                
                                 ?>
                                 <tr class="marks-1">
                                     <th style="font-size: 10px;">{{ $dp }}</th>
@@ -127,7 +127,7 @@ $school_email = 'admin@kjs.com';
                                         @if (!$isBlank)
                                             <b>{!! $_v['grade'] !!}</b>
                                         @else
-                                        @endif 
+                                        @endif
 
                                     </td>
                                     {{--  <td class="remarks text-center">{{ $v->initials }}</td> --}}
@@ -243,11 +243,9 @@ $school_email = 'admin@kjs.com';
                     <div class="col-12 p-0">
                         <div class="p-0 mt-0 mb-2 class-teacher">
                             <b>HEAD TEACHER'S COMMUNICATION:</b>
-                            <span class="comment">
-                                At Kira Junior School, we believe that every child is a genius who only needs a
-                                conducive environment to blossom. Please note that next term we have to prepare for the
-                                sports gala and the election of prefects InSha'Allah.
-                            </span>
+                            <span class="comment">Content coverage has been negatively affected this term because of the
+                                several breaks we've had. But, teachers are working tirelessly to ensure that the work
+                                designed for term 2 is completed.</span>
                         </div>
                     </div>
                 </div>

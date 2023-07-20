@@ -256,6 +256,117 @@ class TermlyReportCard extends Model
         TermlyReportCard::grade_students($m);
     }
 
+    public static function  preocess_report_card($report_card)
+    {
+        if ($report_card != null) {
+
+            $class = AcademicClass::find($report_card->academic_class_id);
+            if ($class == null) {
+                throw new \Exception("Class not found.");
+            }
+            if ($report_card->id > 0) {
+                $student = $report_card->owner;
+
+                $marks = Mark::where([
+                    'student_id' => $student->id,
+                    'class_id' => $report_card->academic_class_id
+                ])
+                    ->orderBy('id', 'desc')
+                    ->get();
+                $total_marks = 0;
+                $total_aggregates = 0;
+                foreach ($marks as $mark) {
+                    $subject = Subject::find($mark->subject_id);
+
+                    if ($subject == null) {
+                        continue;
+                    }
+
+                    $report_item =  StudentReportCardItem::where([
+                        'main_course_id' => $mark->subject_id,
+                        'student_report_card_id' => $report_card->id,
+                    ])->first();
+
+                    //did_bot	did_mot	did_eot	bot_mark	mot_mark	eot_mark	grade_name	aggregates	remarks	initials
+                    if ($report_item == null) {
+                        $report_item = new StudentReportCardItem();
+                        $report_item->enterprise_id = $report_card->enterprise_id;
+                        $report_item->main_course_id = $mark->subject_id;
+                        $report_item->student_report_card_id = $report_card->id;
+                    } else {
+                        //die("Updating...");
+
+                    }
+
+
+                    if ($mark != null) {
+
+                        if ($mark->subject == null) {
+                            return;
+                        }
+                        if ($mark->subject->main_course_id == 2) {
+                            continue;
+                        }
+                        $report_item->total = $mark->score;
+                        $report_item->remarks = Utils::get_automaic_mark_remarks($report_item->total);
+
+                        $u = Administrator::find($mark->subject->subject_teacher);
+
+                        $initial = "";
+                        if ($u != null) {
+                            if (strlen($u->first_name) > 0) {
+                                $initial = substr($u->first_name, 0, 1);
+                            }
+                            if (strlen($u->last_name) > 0) {
+                                $initial .= "." . substr($u->last_name, 0, 1);
+                            }
+                        }
+
+
+                        if ($class->class_type != 'Nursery') {
+                            if (
+                                $report_item->subject->main_course_id == 42 ||
+                                $report_item->subject->main_course_id == 44 ||
+                                $report_item->subject->main_course_id == 43 ||
+                                $report_item->subject->main_course_id == 45 ||
+                                $report_item->subject->main_course_id == 42
+                            ) {
+                                $report_item->grade_name = '';
+                                $report_item->aggregates = 0;
+                            } else {
+
+                                $report_item->initials = $initial;
+                                $scale = Utils::grade_marks($report_item);
+
+                                $report_item->grade_name = $scale->name;
+                                $report_item->aggregates = $scale->aggregates;
+                            }
+                        } else {
+
+                            $report_item->initials = $initial;
+                            $scale = Utils::grade_marks($report_item);
+                            $report_item->grade_name = $scale->name;
+                            $report_item->aggregates = $scale->aggregates;
+                        }
+
+                        $total_marks += $report_item->total;
+                        $total_aggregates += $report_item->aggregates;
+
+                        $report_item->save();
+                    }
+                    StudentReportCardItem::where([
+                        'main_course_id' => 74
+                    ])->delete();
+                }
+
+                $report_card->total_marks = $total_marks;
+                $report_card->total_aggregates = $total_aggregates;
+                $report_card->average_aggregates = $total_aggregates;
+                $report_card->save();
+                TermlyReportCard::grade_report_card($report_card);
+            }
+        }
+    }
 
     public static function grade_students($m)
     {
