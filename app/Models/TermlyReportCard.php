@@ -152,7 +152,7 @@ class TermlyReportCard extends Model
                 } else {
                     //do the update
                 }
-                continue; 
+
 
                 if ($report_card != null) {
                     if ($report_card->id > 0) {
