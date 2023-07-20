@@ -37,7 +37,6 @@ class StudentReportCardItem extends Model
 
         $sub = Subject::find($this->main_course_id);
         if ($sub == null) {
-            die("Subject not found.");
             $this->main_course_id = 2;
             $this->save();
         }

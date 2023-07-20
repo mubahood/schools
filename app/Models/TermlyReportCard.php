@@ -152,7 +152,7 @@ class TermlyReportCard extends Model
                 } else {
                     //do the update
                 }
-
+                continue; 
 
                 if ($report_card != null) {
                     if ($report_card->id > 0) {
@@ -166,6 +166,11 @@ class TermlyReportCard extends Model
                         foreach ($marks as $mark) {
 
 
+                            $subject = Subject::find($mark->subject_id);
+
+                            if ($subject == null) {
+                                continue;
+                            }
 
                             $report_item =  StudentReportCardItem::where([
                                 'main_course_id' => $mark->subject_id,
@@ -189,6 +194,9 @@ class TermlyReportCard extends Model
 
                                 if ($mark->subject == null) {
                                     return;
+                                }
+                                if ($mark->subject->main_course_id == 2) {
+                                    continue;
                                 }
                                 $report_item->total = $mark->score;
                                 $report_item->remarks = Utils::get_automaic_mark_remarks($report_item->total);
@@ -522,10 +530,10 @@ class TermlyReportCard extends Model
         foreach ($m->term->academic_year->classes as $class) {
             foreach ($class->students as $_student) {
                 $student = $_student->student;
-                if($student == null){
+                if ($student == null) {
                     continue;
                 }
-                if($student->status != 1){
+                if ($student->status != 1) {
                     continue;
                 }
                 $report_card = StudentReportCard::where([
@@ -542,11 +550,9 @@ class TermlyReportCard extends Model
                     $report_card->academic_class_id = $class->id;
                     $report_card->termly_report_card_id = $m->id;
                     $report_card->save();
-                    die("Creating... ==> ".$student->id);
                 } else {
                     //do the update
                 }
-                continue;
 
                 if ($report_card != null) {
                     if ($report_card->id > 0) {
