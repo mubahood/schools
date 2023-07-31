@@ -41,7 +41,7 @@ Encore\Admin\Form::forget(['map', 'editor']);
 
 $u = Auth::user();
 
-$u = Auth::user();
+
 if ($u != null) {
     Utils::system_boot($u);
 }
@@ -51,7 +51,7 @@ Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
 
 
 
-
+    $u = Auth::user(); 
 
 
     if ($u != null) {
