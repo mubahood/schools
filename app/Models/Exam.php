@@ -90,6 +90,13 @@ class Exam extends Model
                             continue;
                         }
                         */
+                        if ($student->student == null) {
+                            continue;
+                        }
+
+                        if ($student->student->status != 1) {
+                            continue;
+                        }
 
                         $mark = Mark::where([
                             'exam_id' => $exam->id,
