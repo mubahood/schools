@@ -41,13 +41,18 @@ Encore\Admin\Form::forget(['map', 'editor']);
 
 $u = Auth::user();
 
+$u = Auth::user();
+if ($u != null) {
+    Utils::system_boot($u);
+}
+
+
 Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
 
 
 
 
-    $u = Auth::user(); 
-    Utils::system_boot($u);
+
 
     if ($u != null) {
         if (isset($_GET['change_dpy_to'])) {
