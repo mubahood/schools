@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -90,11 +91,12 @@ class Exam extends Model
                             continue;
                         }
                         */
-                        if ($student->student == null) {
+                        $_u = Administrator::find($student->administrator_id);
+                        if ($_u == null) {
                             continue;
                         }
 
-                        if ($student->student->status != 1) {
+                        if ($_u->status != 1) {
                             continue;
                         }
 
