@@ -221,7 +221,9 @@ class MarkController extends AdminController
             ->sortable();
 
         if (Admin::user()->isRole('dos')) {
-            $grid->column('teacher.name', __('Teacher'))->sortable();
+            $grid->column('teacher.name', __('Teacher'))
+            
+            ->sortable();
         } else {
             $grid->column('teacher.name', __('Teacher'))->sortable()->hide();
         }
@@ -229,7 +231,9 @@ class MarkController extends AdminController
 
         $grid->column('updated_at', __('Last Updat'))->display(function ($v) {
             return Utils::my_date_time($v);
-        })->sortable();
+        })
+        ->hide()
+        ->sortable();
 
         return $grid;
     }
