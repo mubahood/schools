@@ -131,11 +131,14 @@ class MarkController extends AdminController
             ])
                 ->orderBy('id', 'desc')
                 ->get() as $ex) {
-                if($ex->academic_class->academic_year_id != $year->id){
+                if ($ex->academic_class == null) {
+                    continue;
+                }
+                if ($ex->academic_class->academic_year_id != $year->id) {
                     continue;
                 }
 
-                
+
                 if (Admin::user()->isRole('dos')) {
                     $subs[$ex->id] = $ex->subject_name . " - " . $ex->academic_class->name_text;
                 } else {
@@ -144,7 +147,7 @@ class MarkController extends AdminController
                         $ex->teacher_1 == Admin::user()->id ||
                         $ex->teacher_2 == Admin::user()->id ||
                         $ex->teacher_3 == Admin::user()->id
-                    ) { 
+                    ) {
                         $subs[$ex->id] = $ex->subject_name . " - " . $ex->academic_class->name_text;
                     }
                 }
@@ -187,8 +190,8 @@ class MarkController extends AdminController
         })->sortable();
 
         $grid->column('score', __('Score'))->sortable()
-        ->totalRow()
-        ->editable();
+            ->totalRow()
+            ->editable();
         $grid->column('remarks', __('Remarks'))->editable();
 
         $grid->column('exam_id', __('Exam'))
@@ -211,11 +214,11 @@ class MarkController extends AdminController
             else
                 return '<span class="bagde bagde-danger">Missing</span>';
         })
-        ->filter([
-            1 => 'Submitted',
-            0 => 'Not Submitted',
-        ])
-        ->sortable();
+            ->filter([
+                1 => 'Submitted',
+                0 => 'Not Submitted',
+            ])
+            ->sortable();
 
         if (Admin::user()->isRole('dos')) {
             $grid->column('teacher.name', __('Teacher'))->sortable();
