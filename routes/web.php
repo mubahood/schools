@@ -60,6 +60,7 @@ Route::get('/temps', function () {
 
   //$old->termly_report_card_id
   $i = 0;
+  ini_set('memory_limit', '-1'); 
   set_time_limit(-1);
   foreach ($marks as $key => $old) {
 
