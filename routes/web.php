@@ -78,6 +78,15 @@ Route::get('/temps', function () {
     ])->first();
 
 
+  
+    $s = Administrator::find($old->student_id);
+
+    if($s == null){
+      echo ("===> Student not found <=======" . $old->student_id . "<br>");
+      $old->delete();
+      continue;
+    }
+
     $msg = " FOR => {$old->id} {$old->student->name} - {$old->subject->name} - {$old->exam->name} ==> {$old->score} <== <br>";
     if ($new == null) {
       echo "{$i} NEW {$msg}  ";
