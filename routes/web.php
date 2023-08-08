@@ -162,7 +162,12 @@ Route::get('/temps', function () {
       }
     }
 
-    $new->save();
+    try {
+      $new->save();
+    } catch (\Throwable $th) {
+      echo $th->getMessage();
+      continue;
+    }
   }
 
   die("done");
