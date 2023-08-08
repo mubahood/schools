@@ -35,7 +35,7 @@ Route::match(['get', 'post'], '/report-cards', [PrintController2::class, 'second
 Route::get('/temps', function () {
 
 
-/*   $terms = Term::where([])->get();
+  /*   $terms = Term::where([])->get();
   foreach ($terms as $key => $term) {
     echo $term->id . ". ".$term->enterprise->name." => " . $term->name . " ===> " . $term->mark_records->count() . "<br>";
   }
@@ -60,7 +60,7 @@ Route::get('/temps', function () {
 
   //$old->termly_report_card_id
   $i = 0;
-  ini_set('memory_limit', '-1'); 
+  ini_set('memory_limit', '-1');
   set_time_limit(-1);
   foreach ($marks as $key => $old) {
 
@@ -70,6 +70,19 @@ Route::get('/temps', function () {
     }
     $i++;
 
+
+
+
+    $news = DB::select("SELECT * FROM `mark_records` WHERE 
+    `term_id` = {$old->exam->term_id} AND 
+    `academic_class_id` = {$old->class_id} AND 
+    `subject_id` = {$old->subject_id} AND 
+    `administrator_id` = 
+    {$old->student_id} ORDER BY `id` DESC LIMIT 1");
+    if (count($news) > 0) {
+      continue;
+    }
+
     $new = MarkRecord::where([
       'term_id' => $old->exam->term_id,
       'academic_class_id' => $old->class_id,
@@ -78,10 +91,9 @@ Route::get('/temps', function () {
     ])->first();
 
 
-  
     $s = Administrator::find($old->student_id);
 
-    if($s == null){
+    if ($s == null) {
       echo ("===> Student not found <=======" . $old->student_id . "<br>");
       $old->delete();
       continue;
@@ -100,7 +112,7 @@ Route::get('/temps', function () {
         throw new Exception("Subject not found", 1);
         continue;
       }
-      
+
       $new->term_id = $old->exam->term_id;
       $new->administrator_id = $old->student_id;
       $new->academic_class_id = $old->class_id;
