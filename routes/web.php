@@ -18,6 +18,8 @@ use App\Models\MarkRecord;
 use App\Models\StudentHasClass;
 use App\Models\StudentHasFee;
 use App\Models\Subject;
+use App\Models\Term;
+use App\Models\TermlyReportCard;
 use App\Models\Transaction;
 use App\Models\Utils;
 use Encore\Admin\Auth\Database\Administrator;
@@ -31,12 +33,34 @@ use Illuminate\Support\Facades\DB;
 Route::match(['get', 'post'], '/print', [PrintController2::class, 'index']);
 Route::match(['get', 'post'], '/report-cards', [PrintController2::class, 'secondary_report_cards']);
 Route::get('/temps', function () {
+
+
+/*   $terms = Term::where([])->get();
+  foreach ($terms as $key => $term) {
+    echo $term->id . ". ".$term->enterprise->name." => " . $term->name . " ===> " . $term->mark_records->count() . "<br>";
+  }
+  dd($terms->count());
+
+
+  $termly_report_cards = TermlyReportCard::where([])->get();
+
+  foreach ($termly_report_cards as $key => $value) {
+    MarkRecord::where([
+      'term_id' => $value->term_id
+    ])->update([
+      'termly_report_card_id' => $value->id
+    ]);
+    echo ($value->term_id . ". " . $value->name . " ===> " . $value->mark_records->count() . " <br>");
+  }
+  die("done");
+  dd($termly_report_cards->count()); */
+
   $marks = Mark::where([])->get();
 
 
   //$old->termly_report_card_id
   $i = 0;
-  set_time_limit(-1); 
+  set_time_limit(-1);
   foreach ($marks as $key => $old) {
 
     if ($old->exam == null) {
@@ -74,7 +98,8 @@ Route::get('/temps', function () {
       $new->main_course_id = $old->main_course_id;
       $new->subject_id = $old->subject_id;
       $new->initials = '-';
-    }else{
+    } else {
+      continue;
       echo "{$i}. OLD {$msg}";
     }
 

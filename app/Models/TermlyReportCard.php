@@ -49,6 +49,11 @@ class TermlyReportCard extends Model
         });
     }
 
+    public function mark_records()
+    {
+        return $this->hasMany(MarkRecord::class);
+    }
+
     function grading_scale()
     {
         return $this->belongsTo(GradingScale::class);

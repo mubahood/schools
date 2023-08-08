@@ -70,5 +70,13 @@ class Term extends Model
     {
         return $this->hasMany(Exam::class);
     }
+    public function enterprise()
+    {
+        return $this->belongsTo(Enterprise::class);
+    }
+    public function mark_records()
+    {
+        return $this->hasMany(MarkRecord::class);
+    }
 
 }
