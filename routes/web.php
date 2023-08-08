@@ -87,7 +87,7 @@ Route::get('/temps', function () {
 
     $s = Administrator::find($old->student_id);
 
-    if ($s == null) {
+    if ($old->student == null) {
       echo ("===> Student not found <=======" . $old->student_id . "<br>");
       $old->delete();
       continue;
