@@ -83,7 +83,6 @@ Route::get('/temps', function () {
 
       $new = new MarkRecord();
       $new->updated_at = $old->updated_at;
-      $new->term_id = $old->exam->term_id;
       $new->created_at = $old->created_at;
       $new->enterprise_id = $old->enterprise_id;
       $new->termly_report_card_id = 1;
@@ -91,6 +90,7 @@ Route::get('/temps', function () {
         throw new Exception("Subject not found", 1);
         continue;
       }
+      
       $new->term_id = $old->exam->term_id;
       $new->administrator_id = $old->student_id;
       $new->academic_class_id = $old->class_id;
