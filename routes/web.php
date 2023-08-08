@@ -93,7 +93,7 @@ Route::get('/temps', function () {
       continue;
     }
 
-    $msg = " FOR => {$old->id} {$old->student->name} - {$old->subject->name} - {$old->exam->name} ==> {$old->score} <== <br>";
+    $msg = " FOR => {$old->id} {$old->student->name} <== <br>";
     if ($new == null) {
       echo "{$i} NEW {$msg}  ";
 
