@@ -389,7 +389,7 @@ php artisan make:migration add_due_term_column --table=academic_class_fees
 php artisan make:migration add_columns_to_stock_batches --table=stock_batches  
 php artisan make:migration add_columns_to_worth_stock_batches --table=stock_batches  
 php artisan make:migration add_secular_billing_to_student_has_fees_ --table=student_has_fees  
-php artisan make:migration add_mark_records_score --table=mark_records  
+php artisan make:migration add_mark_transfer --table=marks  
 
 php artisan make:migration add_strea_id_to_student_has_theology_classes --table=student_has_theology_classes 
 php artisan make:migration add_strea_id_to_student_report_cards --table=student_report_cards 

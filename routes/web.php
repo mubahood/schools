@@ -55,7 +55,7 @@ Route::get('/temps', function () {
   die("done");
   dd($termly_report_cards->count()); */
 
-  $marks = Mark::where([])->orderBy('id', 'desc')->get();
+  $marks = Mark::where(['transfered'=>'No'])->orderBy('id', 'desc')->get();
 
 
   //$old->termly_report_card_id
@@ -64,6 +64,8 @@ Route::get('/temps', function () {
   set_time_limit(-1);
   foreach ($marks as $key => $old) {
 
+    $old->transfered = 'Yes';
+    $old->save();
     if ($old->exam == null) {
       throw new Exception("Exam not found", 1);
       continue;
@@ -73,15 +75,7 @@ Route::get('/temps', function () {
 
 
 
-    $news = DB::select("SELECT * FROM `mark_records` WHERE 
-    `term_id` = {$old->exam->term_id} AND 
-    `academic_class_id` = {$old->class_id} AND 
-    `subject_id` = {$old->subject_id} AND 
-    `administrator_id` = 
-    {$old->student_id} ORDER BY `id` DESC LIMIT 1");
-    if (count($news) > 0) {
-      continue;
-    }
+    
 
     $new = MarkRecord::where([
       'term_id' => $old->exam->term_id,
