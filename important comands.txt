@@ -215,6 +215,7 @@ php artisan make:model SecondaryReportCardItem
 php artisan make:model SupplierOrder
 php artisan make:model SupplierOrder
 php artisan make:model SupplierOrderItem
+php artisan make:model MarkRecord
 
 
 php artisan admin:make TermController --model=App\\Models\\Term
@@ -317,6 +318,7 @@ php artisan admin:make SecondaryReportCardController --model=App\Models\Secondar
 php artisan admin:make SecondaryReportCardItemController --model=App\Models\SecondaryReportCardItem
 php artisan admin:make SupplierOrderController --model=App\Models\SupplierOrder 
 php artisan admin:make FinancialRecordController --model=App\Models\FinancialRecord 
+php artisan admin:make MarkRecordController --model=App\Models\MarkRecord 
 
 
 
@@ -387,6 +389,7 @@ php artisan make:migration add_due_term_column --table=academic_class_fees
 php artisan make:migration add_columns_to_stock_batches --table=stock_batches  
 php artisan make:migration add_columns_to_worth_stock_batches --table=stock_batches  
 php artisan make:migration add_secular_billing_to_student_has_fees_ --table=student_has_fees  
+php artisan make:migration add_mark_records_score --table=mark_records  
 
 php artisan make:migration add_strea_id_to_student_has_theology_classes --table=student_has_theology_classes 
 php artisan make:migration add_strea_id_to_student_report_cards --table=student_report_cards 

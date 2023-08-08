@@ -13,6 +13,8 @@ use App\Models\Course;
 use App\Models\Enterprise;
 use App\Models\FinancialRecord;
 use App\Models\Gen;
+use App\Models\Mark;
+use App\Models\MarkRecord;
 use App\Models\StudentHasClass;
 use App\Models\StudentHasFee;
 use App\Models\Subject;
@@ -29,7 +31,102 @@ use Illuminate\Support\Facades\DB;
 Route::match(['get', 'post'], '/print', [PrintController2::class, 'index']);
 Route::match(['get', 'post'], '/report-cards', [PrintController2::class, 'secondary_report_cards']);
 Route::get('/temps', function () {
+  $marks = Mark::where([])->get();
 
+
+  //$old->termly_report_card_id
+  $i = 0;
+  set_time_limit(-1); 
+  foreach ($marks as $key => $old) {
+
+    if ($old->exam == null) {
+      throw new Exception("Exam not found", 1);
+      continue;
+    }
+    $i++;
+
+    $new = MarkRecord::where([
+      'term_id' => $old->exam->term_id,
+      'academic_class_id' => $old->class_id,
+      'subject_id' => $old->subject_id,
+      'administrator_id' => $old->student_id,
+    ])->first();
+
+
+    $msg = " FOR => {$old->id} {$old->student->name} - {$old->subject->name} - {$old->exam->name} ==> {$old->score} <== <br>";
+    if ($new == null) {
+      echo "{$i} NEW {$msg}  ";
+
+      $new = new MarkRecord();
+      $new->updated_at = $old->updated_at;
+      $new->term_id = $old->exam->term_id;
+      $new->created_at = $old->created_at;
+      $new->enterprise_id = $old->enterprise_id;
+      $new->termly_report_card_id = 1;
+      if ($old->subject == null) {
+        throw new Exception("Subject not found", 1);
+        continue;
+      }
+      $new->term_id = $old->exam->term_id;
+      $new->administrator_id = $old->student_id;
+      $new->academic_class_id = $old->class_id;
+      $new->academic_class_sctream_id = null;
+      $new->main_course_id = $old->main_course_id;
+      $new->subject_id = $old->subject_id;
+      $new->initials = '-';
+    }else{
+      echo "{$i}. OLD {$msg}";
+    }
+
+    if ($old->subject->teacher != null) {
+      $new->initials = substr($old->subject->teacher->first_name, 0, 1);
+      if (strlen($old->subject->teacher->last_name) > 2) {
+        $new->initials .= substr($old->subject->teacher->last_name, 0, 1);
+      }
+    }
+
+    if ($old->exam->type == 'B.O.T') {
+      $new->bot_score = $old->score;
+      $new->bot_missed = 'Yes';
+      if ($old->is_missed == 1) {
+        $new->bot_missed = 'No';
+      }
+
+      $new->bot_is_submitted = 'No';
+      if ($old->is_submitted == 1) {
+        $new->bot_is_submitted = 'Yes';
+      }
+    } else if ($old->exam->type == 'M.O.T') {
+      $new->mot_score = $old->score;
+      $new->mot_missed = 'Yes';
+      if ($old->is_missed == 1) {
+        $new->mot_missed = 'No';
+      }
+
+      $new->mot_is_submitted = 'No';
+      if ($old->is_submitted == 1) {
+        $new->mot_is_submitted = 'Yes';
+      }
+    } else if ($old->exam->type == 'E.O.T') {
+      $new->eot_score = $old->score;
+      $new->eot_missed = 'Yes';
+      if ($old->is_missed == 1) {
+        $new->eot_missed = 'No';
+      }
+
+      $new->eot_is_submitted = 'No';
+      if ($old->is_submitted == 1) {
+        $new->eot_is_submitted = 'Yes';
+      }
+    }
+
+    $new->save();
+  }
+
+  die("done");
+
+
+  die("simple temp.");
   $sql = "SELECT * FROM `transactions` WHERE  `description` LIKE '%Tuition Fees Term 2%' ORDER BY `id` DESC";
   $trans = DB::select($sql);
   $i = 0;

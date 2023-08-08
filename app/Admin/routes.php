@@ -87,7 +87,7 @@ Route::group([
     $router->resource('financial-records', FinancialRecordController::class);
     $router->resource('financial-records-budget', FinancialBudgetRecordController::class);
     $router->resource('financial-records-expenditure', FinancialExpenditureRecordController::class);
- 
+    $router->resource('mark-records', MarkRecordController::class);
     //$router->resource('fees', StudentHasFeeController::class);
 
     $router->get('/statistics', 'HomeController@stats')->name('statistics');
