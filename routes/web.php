@@ -55,7 +55,7 @@ Route::get('/temps', function () {
   die("done");
   dd($termly_report_cards->count()); */
 
-  $marks = Mark::where([])->get();
+  $marks = Mark::where([])->orderBy('id', 'desc')->get();
 
 
   //$old->termly_report_card_id
