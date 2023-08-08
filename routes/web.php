@@ -103,7 +103,8 @@ Route::get('/temps', function () {
       $new->enterprise_id = $old->enterprise_id;
       $new->termly_report_card_id = 1;
       if ($old->subject == null) {
-        throw new Exception("Subject not found", 1);
+        $old->delete();
+        echo ("Subject not found" . $old->subject_id . "<br>");
         continue;
       }
 
