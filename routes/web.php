@@ -35,11 +35,11 @@ Route::match(['get', 'post'], '/report-cards', [PrintController2::class, 'second
 Route::get('/temps', function () {
 
 
-  /*   $terms = Term::where([])->get();
-  foreach ($terms as $key => $term) {
+$terms = Term::where([])->get();
+/*   foreach ($terms as $key => $term) {
     echo $term->id . ". ".$term->enterprise->name." => " . $term->name . " ===> " . $term->mark_records->count() . "<br>";
-  }
-  dd($terms->count());
+  } */
+ 
 
 
   $termly_report_cards = TermlyReportCard::where([])->get();
@@ -52,8 +52,8 @@ Route::get('/temps', function () {
     ]);
     echo ($value->term_id . ". " . $value->name . " ===> " . $value->mark_records->count() . " <br>");
   }
-  die("done");
-  dd($termly_report_cards->count()); */
+  die("done"); 
+  dd($termly_report_cards->count()); 
 
   $marks = Mark::where(['transfered'=>'No'])->orderBy('id', 'desc')->get();
 
