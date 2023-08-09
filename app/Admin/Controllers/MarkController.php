@@ -40,14 +40,6 @@ class MarkController extends AdminController
             $export->originalValue(['score', 'remarks']);
         });
 
-
-        /* foreach (Mark::where([
-            'exam_id' => 5
-        ])->get() as $key => $v) {
-            $v->score = rand(1000, 10000) % 41;
-            $v->save();
-        } */
-
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
         ])->orderBy('id', 'DESC');
@@ -59,11 +51,8 @@ class MarkController extends AdminController
         }
 
         $grid->disableCreateButton();
-        $grid->disableActions();
-
-        $grid->disableBatchActions();
-
-
+        $grid->disableActions(); 
+        $grid->disableBatchActions(); 
 
         if (
             (!Admin::user()->isRole('dos')) &&
@@ -151,19 +140,7 @@ class MarkController extends AdminController
                         $subs[$ex->id] = $ex->subject_name . " - " . $ex->academic_class->name_text;
                     }
                 }
-            }
-            /* /
-  "subject_name" => "Reading"
-    "demo_id" => 0
-    "is_optional" => 0
-    "main_course_id" => 20
-    "" => 0
-    "" => 0
-    "teacher_3" => 0
-    "parent_course_id" => null
-    "academic_year_id" => 3
-
-*/
+            } 
             $filter->equal('subject_id', 'Filter by subject')->select($subs);
 
 
@@ -179,8 +156,7 @@ class MarkController extends AdminController
             $filter->equal('student_id', 'Student')->select()->ajax($ajax_url);
         });
 
-
-
+ 
         $grid->column('id', __('#ID'))->hide()->sortable();
         $grid->column('student_id', __('Student'))->display(function () {
             if ($this->student == null) {

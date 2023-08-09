@@ -2,8 +2,13 @@
 
 namespace App\Admin\Controllers;
 
+use App\Models\AcademicClass;
 use App\Models\MarkRecord;
+use App\Models\ReportCard;
+use App\Models\Subject;
+use App\Models\TermlyReportCard;
 use Encore\Admin\Controllers\AdminController;
+use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
@@ -25,6 +30,128 @@ class MarkRecordController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new MarkRecord());
+
+        $grid->export(function ($export) {
+            $export->filename('School dynamics.csv');
+            $export->except(['is_submitted']);
+            $export->originalValue(['score', 'remarks']);
+        });
+
+        $grid->model()->where([
+            'enterprise_id' => Admin::user()->enterprise_id,
+        ])->orderBy('id', 'DESC');
+
+        if (!Admin::user()->isRole('dos')) {
+
+            $grid->model()->where([
+                /*                 'teacher_id' => Admin::user()->id, */]);
+        }
+
+        $grid->disableCreateButton();
+        $grid->disableActions();
+        $grid->disableBatchActions();
+
+        if (
+            (!Admin::user()->isRole('dos')) &&
+            ((!isset($_GET['academic_class_id'])) ||
+                (!isset($_GET['exam_id'])) ||
+                (!isset($_GET['subject_id'])) ||
+                (((int)($_GET['subject_id'])) < 1) ||
+                (((int)($_GET['exam_id'])) < 1) ||
+                (((int)($_GET['academic_class_id'])) < 1))
+        ) {
+            admin_success(
+                'Alert',
+                'Select class, exam and subject and press "search button" to enter marks.'
+            );
+            $grid->model()->where([
+                'enterprise_id' => 0,
+            ])->orderBy('id', 'DESC');
+        }
+
+        $grid->filter(function ($filter) {
+
+
+            if (
+                (!Admin::user()->isRole('dos')) &&
+                ((!isset($_GET['academic_class_id'])) ||
+                    (!isset($_GET['exam_id'])) ||
+                    (!isset($_GET['subject_id'])) ||
+                    (((int)($_GET['subject_id'])) < 1) ||
+                    (((int)($_GET['exam_id'])) < 1) ||
+                    (((int)($_GET['academic_class_id'])) < 1))
+            ) {
+                $filter->expand();
+            }
+
+
+            // Remove the default id filter 
+            $filter->disableIdFilter();
+            $ent = Admin::user()->ent;
+            $year = $ent->dpYear();
+            $term = $ent->active_term();
+
+            // Add a column filter 
+            $u = Admin::user();
+            $filter->equal('academic_class_id', 'Filter by class')->select(AcademicClass::where([
+                'enterprise_id' => $u->enterprise_id,
+                'academic_year_id' => $year->id
+            ])
+                ->orderBy('id', 'Desc')
+                ->get()->pluck('name_text', 'id'));
+
+
+            $exams = [];
+            foreach (TermlyReportCard::where([
+                'enterprise_id' => $u->enterprise_id,
+                'term_id' => $term->id,
+            ])->get() as $ex) {
+                $exams[$ex->id] = $ex->name;
+            } 
+
+            $filter->equal('temly_report_card_id', 'Filter by Report Card')->select($exams);
+
+            $subs = [];
+            foreach (Subject::where([
+                'enterprise_id' => $u->enterprise_id,
+            ])
+                ->orderBy('id', 'desc')
+                ->get() as $ex) {
+                if ($ex->academic_class == null) {
+                    continue;
+                }
+                if ($ex->academic_class->academic_year_id != $year->id) {
+                    continue;
+                }
+
+
+                if (Admin::user()->isRole('dos')) {
+                    $subs[$ex->id] = $ex->subject_name . " - " . $ex->academic_class->name_text;
+                } else {
+                    if (
+                        $ex->subject_teacher == Admin::user()->id ||
+                        $ex->teacher_1 == Admin::user()->id ||
+                        $ex->teacher_2 == Admin::user()->id ||
+                        $ex->teacher_3 == Admin::user()->id
+                    ) {
+                        $subs[$ex->id] = $ex->subject_name . " - " . $ex->academic_class->name_text;
+                    }
+                }
+            }
+            $filter->equal('subject_id', 'Filter by subject')->select($subs);
+
+
+            $u = Admin::user();
+            $ajax_url = url(
+                '/api/ajax?'
+                    . 'enterprise_id=' . $u->enterprise_id
+                    . "&search_by_1=name"
+                    . "&search_by_2=id"
+                    . "&model=User"
+            );
+
+            $filter->equal('student_id', 'Student')->select()->ajax($ajax_url);
+        });
 
         $grid->column('id', __('Id'));
         $grid->column('created_at', __('Created at'));

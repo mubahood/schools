@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Doctrine\DBAL\Schema\Schema;
 use Encore\Admin\Auth\Database\Administrator;
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -21,7 +22,13 @@ class TermlyReportCard extends Model
         self::creating(function ($m) {
             $term = Term::find($m->term_id);
             if ($term == null) {
-                die("Term not found.");
+                throw new Exception("Term not found.", 1);
+            }
+            $old = TermlyReportCard::where([
+                'term_id' => $term->id,
+            ])->first();
+            if ($old != null) {
+                throw new Exception("Termly report card already exists.", 1);
             }
             $m->academic_year_id = $term->academic_year_id;
             $m->term_id = $term->id;
@@ -33,18 +40,17 @@ class TermlyReportCard extends Model
             if ($term == null) {
                 die("Term not found.");
             }
-            $m->academic_year_id = $term->academic_year_id;
             $m->term_id = $term->id;
             return $m;
         });
 
         self::created(function ($m) {
-            TermlyReportCard::my_update($m);
+            TermlyReportCard::generate_marks($m);
         });
 
         self::updated(function ($m) {
             if ($m->do_update) {
-                TermlyReportCard::my_update($m);
+                TermlyReportCard::generate_marks($m);
             }
         });
     }
@@ -79,10 +85,10 @@ class TermlyReportCard extends Model
         return $this->hasMany(StudentReportCard::class, 'termly_report_card_id');
     }
 
-    public static function my_update($m)
+    public static function generate_marks($m)
     {
+        return $m;
         $ent = Utils::ent();
-
         if ($ent->type == 'Primary') {
             TermlyReportCard::make_reports_for_primary($m);
         } else if ($ent->type == 'Secondary') {
