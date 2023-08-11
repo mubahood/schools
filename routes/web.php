@@ -40,9 +40,9 @@ Route::get('/temps', function () {
     echo $term->id . ". ".$term->enterprise->name." => " . $term->name . " ===> " . $term->mark_records->count() . "<br>";
   } */
 
-  $tr = TermlyReportCard::find(7);
+  /*   $tr = TermlyReportCard::find(7);
   TermlyReportCard::generate_marks($tr);
-  die('done');
+  die('done'); */
 
 
   $termly_report_cards = TermlyReportCard::where([])->get();
@@ -81,8 +81,7 @@ Route::get('/temps', function () {
 
 
     $new = MarkRecord::where([
-      'term_id' => $old->exam->term_id,
-      'academic_class_id' => $old->class_id,
+      'term_id' => $old->exam->term_id, 
       'subject_id' => $old->subject_id,
       'administrator_id' => $old->student_id,
     ])->first();
