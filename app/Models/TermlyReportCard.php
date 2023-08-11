@@ -7,6 +7,7 @@ use Encore\Admin\Auth\Database\Administrator;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class TermlyReportCard extends Model
 {
@@ -41,20 +42,38 @@ class TermlyReportCard extends Model
                 die("Term not found.");
             }
             $m->term_id = $term->id;
+
             return $m;
         });
 
         self::created(function ($m) {
-            TermlyReportCard::generate_marks($m);
+            TermlyReportCard::do_generate_marks($m);
         });
 
         self::updated(function ($m) {
-            if ($m->do_update) {
-                TermlyReportCard::generate_marks($m);
+            set_time_limit(-1);
+            ini_set('memory_limit', '-1');
+
+            if ($m->generate_marks == 'Yes') {
+                TermlyReportCard::do_generate_marks($m);
             }
+            if ($m->delete_marks_for_non_active == 'Yes') {
+                TermlyReportCard::do_delete_marks_for_non_active($m);
+            }
+            DB::update("UPDATE termly_report_cards SET generate_marks = 'No' WHERE id = ?", [$m->id]);
+            DB::update("UPDATE termly_report_cards SET delete_marks_for_non_active = 'No' WHERE id = ?", [$m->id]);
         });
     }
 
+    public static function do_delete_marks_for_non_active($m)
+    {
+        $non_active = DB::select("SELECT DISTINCT mark_records.id FROM mark_records,admin_users WHERE mark_records.administrator_id = admin_users.id AND admin_users.status != 1 AND mark_records.termly_report_card_id = ?", [$m->id]);
+        if ($non_active != null) {
+            foreach ($non_active as $n) {
+                MarkRecord::find($n->id)->delete();
+            }
+        }
+    }
     public function mark_records()
     {
         return $this->hasMany(MarkRecord::class);
@@ -85,7 +104,7 @@ class TermlyReportCard extends Model
         return $this->hasMany(StudentReportCard::class, 'termly_report_card_id');
     }
 
-    public static function generate_marks($m)
+    public static function do_generate_marks($m)
     {
         MarkRecord::where([
             'term_id' => $m->term_id
@@ -120,8 +139,8 @@ class TermlyReportCard extends Model
 
             $subjects = Subject::where([
                 'academic_class_id' => $class->id,
-            ])->get(); 
-            if($subjects->count() < 1){
+            ])->get();
+            if ($subjects->count() < 1) {
                 continue;
             }
             foreach ($class->students as $student_has_class) {
@@ -138,50 +157,47 @@ class TermlyReportCard extends Model
                     continue;
                 }
 
-
                 foreach ($subjects as $subject) {
                     $markRecordOld = MarkRecord::where([
                         'administrator_id' => $student->id,
-                        'term_id' => $m->term_id, 
+                        'term_id' => $m->term_id,
                         'subject_id' => $subject->id,
-                    ])->first(); 
+                    ])->first();
                     if ($markRecordOld == null) {
-                        echo "Creating mark record for {$student->name} - {$subject->subject_name} - {$class->name_text} - {$m->term->name} <br>";
-                        $markRecordOld = new MarkRecord(); 
-                        $markRecordOld->enterprise_id = $m->enterprise_id; 
+                        $markRecordOld = new MarkRecord();
+                        $markRecordOld->enterprise_id = $m->enterprise_id;
                         $markRecordOld->termly_report_card_id = $m->id;
                         $markRecordOld->term_id = $m->term_id;
+                        $markRecordOld->subject_id = $subject->id;
                         $markRecordOld->administrator_id = $student->id;
-                        $markRecordOld->academic_class_id = $class->id;  
-                        $markRecordOld->bot_score = 0;  
-                        $markRecordOld->mot_score = 0;  
-                        $markRecordOld->eot_score = 0;  
-                        $markRecordOld->total_score = 0;  
-                        $markRecordOld->total_score_display = 0;  
-                        $markRecordOld->bot_is_submitted = 'No';  
-                        $markRecordOld->mot_is_submitted = 'No';  
-                        $markRecordOld->eot_is_submitted = 'No';  
-                        $markRecordOld->bot_missed = 'Yes';  
-                        $markRecordOld->mot_missed = 'Yes';  
-                        $markRecordOld->eot_missed = 'Yes';  
-                        $markRecordOld->remarks = null;  
+                        $markRecordOld->academic_class_id = $class->id;
+                        $markRecordOld->bot_score = 0;
+                        $markRecordOld->mot_score = 0;
+                        $markRecordOld->eot_score = 0;
+                        $markRecordOld->total_score = 0;
+                        $markRecordOld->total_score_display = 0;
+                        $markRecordOld->bot_is_submitted = 'No';
+                        $markRecordOld->mot_is_submitted = 'No';
+                        $markRecordOld->eot_is_submitted = 'No';
+                        $markRecordOld->bot_missed = 'Yes';
+                        $markRecordOld->mot_missed = 'Yes';
+                        $markRecordOld->eot_missed = 'Yes';
+                        $markRecordOld->remarks = null;
                     } else {
-                        echo "Updating mark record for {$student->name} - {$subject->subject_name} - {$class->name_text} - {$m->term->name} <br>";  
-                        //do the update
                     }
 
-                    if($subject->teacher != null){
+                    if ($subject->teacher != null) {
                         $markRecordOld->initials = $subject->teacher->get_initials();
                     }
 
                     $markRecordOld->academic_class_sctream_id = $student->stream_id;
                     $markRecordOld->main_course_id = $subject->main_course_id;
-                    try{
+                    try {
                         $markRecordOld->save();
-                    } catch(\Throwable $e){
-                        echo $e->getMessage();
+                    } catch (\Throwable $e) {
+                        throw new \Exception($e->getMessage());
                     }
-                } 
+                }
             }
         }
     }
@@ -529,34 +545,7 @@ class TermlyReportCard extends Model
     }
 
 
-    /* 
-    
-    $table->float('total_marks')->default(0)->nullable();
-    $table->float('total_aggregates')->default(0)->nullable();
-    $table->integer('position')->default(0)->nullable();
-    $table->text('class_teacher_comment')->nullable();
-    $table->text('head_teacher_comment')->nullable();
-    $table->boolean('class_teacher_commented')->default(0)->nullable();
-    $table->boolean('head_teacher_commented')->default(0)->nullable();
 
-    "id" => 1198
-    "created_at" => "2022-10-25 21:03:14"
-    "updated_at" => "2022-10-25 21:03:14"
-    "enterprise_id" => 7
-    "main_course_id" => 41
-    "student_report_card_id" => 192
-    "did_bot" => 0
-    "did_mot" => 1
-    "did_eot" => 0
-    "bot_mark" => 0
-    "mot_mark" => 76
-    "eot_mark" => 0
-    "grade_name" => "C4"
-    "aggregates" => 4
-    "remarks" => null
-    "initials" => null
-    "total" => 76.0
-*/
 
     public static function make_reports_for_secondary($m)
     {
@@ -586,7 +575,7 @@ class TermlyReportCard extends Model
                 ])->first();
                 if ($report_card == null) {
                     $report_card = new StudentReportCard();
-                    $report_card->enterprise_id = $m->enterprise_id; 
+                    $report_card->enterprise_id = $m->enterprise_id;
                     $report_card->term_id = $m->term_id;
                     $report_card->student_id = $student->id;
                     $report_card->academic_class_id = $class->id;

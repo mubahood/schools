@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Models\AcademicClass;
+use App\Models\AcademicClassSctream;
 use App\Models\MarkRecord;
 use App\Models\ReportCard;
 use App\Models\Subject;
@@ -100,14 +101,26 @@ class MarkRecordController extends AdminController
                 ->orderBy('id', 'Desc')
                 ->get()->pluck('name_text', 'id'));
 
+            $streams = [];
+            foreach (AcademicClassSctream::where(
+                [
+                    'enterprise_id' => $u->enterprise_id,
+                ]
+            )
+                ->orderBy('id', 'desc')
+                ->get() as $ex) {
+                $streams[$ex->id] = $ex->academic_class->short_name . " - " . $ex->name;
+            }
+
+            $filter->equal('academic_class_sctream_id', 'Filter by Stream')->select($streams);
 
             $exams = [];
             foreach (TermlyReportCard::where([
                 'enterprise_id' => $u->enterprise_id,
                 'term_id' => $term->id,
             ])->get() as $ex) {
-                $exams[$ex->id] = $ex->name;
-            } 
+                $exams[$ex->id] = $ex->report_title;
+            }
 
             $filter->equal('temly_report_card_id', 'Filter by Report Card')->select($exams);
 
@@ -153,28 +166,67 @@ class MarkRecordController extends AdminController
             $filter->equal('student_id', 'Student')->select()->ajax($ajax_url);
         });
 
-        $grid->column('id', __('Id'));
-        $grid->column('created_at', __('Created at'));
-        $grid->column('updated_at', __('Updated at'));
-        $grid->column('enterprise_id', __('Enterprise id'));
-        $grid->column('termly_report_card_id', __('Termly report card id'));
-        $grid->column('term_id', __('Term id'));
-        $grid->column('administrator_id', __('Administrator id'));
-        $grid->column('academic_class_id', __('Academic class id'));
-        $grid->column('academic_class_sctream_id', __('Academic class sctream id'));
-        $grid->column('main_course_id', __('Main course id'));
-        $grid->column('subject_id', __('Subject id'));
-        $grid->column('bot_score', __('Bot score'));
-        $grid->column('mot_score', __('Mot score'));
-        $grid->column('eot_score', __('Eot score'));
-        $grid->column('bot_is_submitted', __('Bot is submitted'));
-        $grid->column('mot_is_submitted', __('Mot is submitted'));
-        $grid->column('eot_is_submitted', __('Eot is submitted'));
-        $grid->column('bot_missed', __('Bot missed'));
-        $grid->column('mot_missed', __('Mot missed'));
-        $grid->column('eot_missed', __('Eot missed'));
-        $grid->column('initials', __('Initials'));
-        $grid->column('remarks', __('Remarks'));
+        $grid->column('id', __('Id'))->hide()->sortable();
+        $grid->column('created_at', __('Created'))->sortable()->hide();
+        $grid->column('updated_at', __('Updated'))->sortable()->hide();
+        $grid->column('termly_report_card_id', __('Termly Report'))->display(function ($termly_report_card_id) {
+            return $this->termlyReportCard->report_title;
+        })
+            ->hide()
+            ->sortable();
+        $grid->column('term_id', __('Term'))
+            ->display(function ($term_id) {
+                return 'Term ' . $this->term->name_text;
+            })
+            ->sortable();
+
+        $grid->column('academic_class_id', __('Class'))
+            ->display(function ($academic_class_id) {
+
+                return $this->academicClass->short_name;
+            })
+            ->sortable();
+
+        $grid->column('academic_class_sctream_id', __('Stream'))
+            ->display(function ($academic_class_sctream_id) {
+                $stream_name = '-';
+                if ($this->stream != null) {
+                    $stream_name = $this->stream->name;
+                }
+                return $stream_name;
+            })
+            ->sortable();
+
+        $grid->column('subject_id', __('Subject'))->display(function () {
+            if ($this->subject == null) {
+                return '-';
+            }
+            return $this->subject->subject_name;
+        })->sortable();
+
+        $grid->column('administrator_id', __('Student'))
+            ->display(function ($administrator_id) {
+                return $this->student->name;
+            })
+            ->sortable();
+        $grid->column('bot_score', __('B.o.T Score'))
+            ->editable()
+            ->sortable();
+        $grid->column('mot_score', __('M.o.T Score'))
+            ->editable()
+            ->sortable();
+        $grid->column('eot_score', __('E.o.T Score'))
+            ->editable()
+            ->sortable();
+        $grid->column('remarks', __('Remarks'))->editable()->sortable();
+        $grid->column('bot_is_submitted', __('B.o.T submitted'))->sortable();
+        $grid->column('mot_is_submitted', __('M.o.T submitted'))->sortable();
+        $grid->column('eot_is_submitted', __('E.o.T submitted'))->sortable();
+        $grid->column('bot_missed', __('Bot Missed'))->sortable();
+        $grid->column('mot_missed', __('Mot Missed'))->sortable();
+        $grid->column('eot_missed', __('Eot Missed'))->sortable();
+        $grid->column('initials', __('Initials'))->hide();
+
 
         return $grid;
     }
