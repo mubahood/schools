@@ -209,22 +209,74 @@ class MarkRecordController extends AdminController
                 return $this->student->name;
             })
             ->sortable();
-        $grid->column('bot_score', __('B.o.T Score'))
+        $grid->column('bot_score', __('B.o.T'))
             ->editable()
             ->sortable();
-        $grid->column('mot_score', __('M.o.T Score'))
+        $grid->column('mot_score', __('M.o.T'))
             ->editable()
             ->sortable();
-        $grid->column('eot_score', __('E.o.T Score'))
+        $grid->column('eot_score', __('E.o.T'))
             ->editable()
             ->sortable();
         $grid->column('remarks', __('Remarks'))->editable()->sortable();
-        $grid->column('bot_is_submitted', __('B.o.T submitted'))->sortable();
-        $grid->column('mot_is_submitted', __('M.o.T submitted'))->sortable();
-        $grid->column('eot_is_submitted', __('E.o.T submitted'))->sortable();
-        $grid->column('bot_missed', __('Bot Missed'))->sortable();
-        $grid->column('mot_missed', __('Mot Missed'))->sortable();
-        $grid->column('eot_missed', __('Eot Missed'))->sortable();
+        $grid->column('bot_is_submitted', __('B.o.T submitted'))
+            ->label([
+                'No' => 'danger',
+                'Yes' => 'success',
+            ])
+            ->filter([
+                'Yes' => 'Submitted',
+                'No' => 'Not Submitted',
+            ])
+            ->sortable();
+        $grid->column('mot_is_submitted', __('M.o.T submitted'))
+            ->label([
+                'No' => 'danger',
+                'Yes' => 'success',
+            ])
+            ->filter([
+                'Yes' => 'Submitted',
+                'No' => 'Not Submitted',
+            ])
+            ->sortable();
+        $grid->column('eot_is_submitted', __('E.o.T submitted'))
+            ->filter([
+                'Yes' => 'Submitted',
+                'No' => 'Not Submitted',
+            ])
+            ->label([
+                'No' => 'danger',
+                'Yes' => 'success',
+            ])->sortable();
+        $grid->column('bot_missed', __('B.O.T Missed'))
+
+            ->editable('select', [
+                'Yes' => 'Missed',
+                'No' => 'Not Missed',
+            ])
+            ->hide()
+            ->dot([
+                'No' => 'success',
+                'Yes' => 'danger',
+            ])->sortable();
+        $grid->column('mot_missed', __('M.O.T Missed'))->editable('select', [
+            'Yes' => 'Missed',
+            'No' => 'Not Missed',
+        ])
+            ->hide()
+            ->dot([
+                'No' => 'success',
+                'Yes' => 'danger',
+            ])->sortable();
+        $grid->column('eot_missed', __('E.O.T Missed'))->editable('select', [
+            'Yes' => 'Missed',
+            'No' => 'Not Missed',
+        ])
+            ->hide()
+            ->dot([
+                'No' => 'success',
+                'Yes' => 'danger',
+            ])->sortable();
         $grid->column('initials', __('Initials'))->hide();
 
 
