@@ -45,7 +45,7 @@ Route::get('/temps', function () {
   die('done'); */
 
 
-  $termly_report_cards = TermlyReportCard::where([])->get();
+/*   $termly_report_cards = TermlyReportCard::where([])->get();
 
   foreach ($termly_report_cards as $key => $value) {
     MarkRecord::where([
@@ -56,7 +56,7 @@ Route::get('/temps', function () {
     echo ($value->d . ". " . $value->name . " ===> " . $value->mark_records->count() . " <br>");
   }
   die("done");
-  dd($termly_report_cards->count());
+  dd($termly_report_cards->count()); */
 
   $marks = Mark::where(['transfered' => 'No'])->orderBy('id', 'desc')->get();
 
