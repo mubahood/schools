@@ -66,21 +66,54 @@ class TermlyReportCardController extends AdminController
         
         die("Anjane"); */
 
+        $grid->actions(function ($actions) {
+            $actions->disableView();
+            $actions->disableDelete();
+        });
+
+        $grid->disableBatchActions();
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
         ])->orderBy('id', 'DESC');
 
-        $grid->column('id', __('Id'));
-        $grid->column('enterprise_id', __('Enterprise id'));
-        $grid->column('academic_year_id', __('Academic year id'));
-        $grid->column('term_id', __('Term id'));
-        $grid->column('has_beginning_term', __('Has beginning term'))->bool();
-        $grid->column('has_mid_term', __('Has mid term'))->bool();
-        $grid->column('has_end_term', __('Has end term'))->bool();
-        $grid->column('report_title', __('Report title'));
+        $grid->column('id', __('ID'))->sortable();
+        $grid->column('academic_year.name', __('Academic Year'));
+        $grid->column('term.name', __('Term'));
+
+        $grid->column('report_title', __('Report title'))->hide();
+        $grid->column('marks', __('Marks'))->display(function () {
+            return number_format(count($this->mark_records));
+        });
+
+        $grid->column('bot', __('B.O.T'))->display(function () {
+            $total = count($this->mark_records);
+            $total_sub = count($this->mark_records->where('bot_is_submitted', 'Yes'));
+            $pecentage = ($total_sub / $total) * 100;
+            return number_format($total_sub) . " (" . number_format($pecentage) . "%)";
+        });
+
+
+        $grid->column('mot', __('M.O.T'))->display(function () {
+            $total = count($this->mark_records);
+            $total_mot = count($this->mark_records->where('mot_is_submitted', 'Yes'));
+            $pecentage = ($total_mot / $total) * 100;
+            return number_format($total_mot) . " (" . number_format($pecentage) . "%)";
+        });
+
+        $grid->column('eot', __('E.O.T'))->display(function () {
+            $total = count($this->mark_records);
+            $total_mot = count($this->mark_records->where('eot_is_submitted', 'Yes'));
+            $pecentage = ($total_mot / $total) * 100;
+            return number_format($total_mot) . " (" . number_format($pecentage) . "%)";
+        });
+
         $grid->column('report_cards', __('Report cards'))->display(function () {
             return count($this->report_cards);
         });
+
+        $grid->column('has_beginning_term', __('Has beginning term'))->bool()->hide();
+        $grid->column('has_mid_term', __('Has mid term'))->bool()->hide();
+        $grid->column('has_end_term', __('Has end term'))->bool()->hide();
 
         return $grid;
     }
@@ -159,8 +192,14 @@ class TermlyReportCardController extends AdminController
             $scales[$v->id] =  $v->name;
         }
 
-        $form->select('term_id', __('Term'))->options($terms)
-            ->creationRules(['required', "unique:termly_report_cards"]);
+        if ($form->isCreating()) {
+            $form->select('term_id', __('Term'))->options($terms)
+                ->creationRules(['required', "unique:termly_report_cards"]);
+        } else {
+            $form->select('term_id', __('Term'))->options($terms)
+                ->readOnly();
+        }
+
         $form->radio('has_beginning_term', __('Include beginning term exams?'))->options([1 => 'Yes', 0 => 'No'])->required();
         $form->radio('has_mid_term', __('Include Mid term exams?'))->options([1 => 'Yes', 0 => 'No'])->required();
         $form->radio('has_end_term', __('Include End of term exams?'))->options([1 => 'Yes', 0 => 'No'])->required();

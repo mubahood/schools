@@ -16,8 +16,7 @@ class MarkRecord extends Model
         self::creating(function ($m) {
             $old = MarkRecord::where([
                 //'termly_report_card_id' => $m->termly_report_card_id,
-                'term_id' => $m->term_id,
-                'academic_class_id' => $m->academic_class_id,
+                'term_id' => $m->term_id, 
                 'subject_id' => $m->subject_id,
                 'administrator_id' => $m->administrator_id,
             ])->first();

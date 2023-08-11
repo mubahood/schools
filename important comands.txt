@@ -3,6 +3,7 @@ php artisan make:migration add_term_coulmns_to_enterprises --table=enterprises
 php artisan make:migration create_d_datas_table
 
 php artisan make:migration add_cols_dp_ter --table=
+php artisan make:migration add_cols_to_termly_report_cards --table=termly_report_cards
 
 php artisan make:factory PostFactory
 

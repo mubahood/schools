@@ -87,11 +87,17 @@ class TermlyReportCard extends Model
 
     public static function generate_marks($m)
     {
-        return $m;
-        $ent = Utils::ent();
+        MarkRecord::where([
+            'term_id' => $m->term_id
+        ])->update([
+            'termly_report_card_id' => $m->id
+        ]);
+
+        $ent = Enterprise::find($m->enterprise_id);
         if ($ent->type == 'Primary') {
             TermlyReportCard::make_reports_for_primary($m);
         } else if ($ent->type == 'Secondary') {
+            die("Time to generate secondary marks.");
             TermlyReportCard::make_reports_for_secondary($m);
         } else {
             die("School type not found.");
@@ -102,169 +108,82 @@ class TermlyReportCard extends Model
     public static function make_reports_for_primary($m)
     {
 
-        if (
-            ($m->has_beginning_term  != 1)
-        ) {
-            if (($m->has_mid_term  != 1)) {
-                if ($m->has_end_term  != 1) {
-                    die("There must be at least a single exam set included in a report.");
-                }
-            }
-        }
-
         set_time_limit(-1);
         ini_set('memory_limit', '-1');
-        $tot = 0;
-        $ent = Utils::ent();
-        $year =  $ent->active_academic_year();
+        $ent = Enterprise::find($m->enterprise_id);
+        $year = Enterprise::find($m->academic_year_id);
+        if ($year == null) {
+            throw new \Exception("Academic year not found.");
+        }
 
         foreach ($m->term->academic_year->classes as $class) {
 
-            foreach ($class->students as $_student) {
-
-
-
-                $student = $_student->student;
-
-                if ($student->enterprise_id != $student->enterprise_id) {
-                    continue;
-                }
-
+            $subjects = Subject::where([
+                'academic_class_id' => $class->id,
+            ])->get(); 
+            if($subjects->count() < 1){
+                continue;
+            }
+            foreach ($class->students as $student_has_class) {
+                $student = $student_has_class->student;
                 if ($student == null) {
-                    throw new \Exception("Student not found.");
+                    $student_has_class->delete();
                     continue;
                 }
-
                 if ($student->status != 1) {
                     continue;
                 }
                 if ($student->current_class == null) {
+                    $student_has_class->delete();
                     continue;
                 }
 
-                $tot++;
-                if ($student->current_class->academic_year_id != $year->id) {
-                    continue;
-                }
-                $report_card = StudentReportCard::where([
-                    'term_id' => $m->term_id,
-                    'termly_report_card_id' => $m->id,
-                    'student_id' => $student->id,
-                ])->first();
-                if ($report_card == null) {
-                    $report_card = new StudentReportCard();
-                    $report_card->enterprise_id = $m->enterprise_id;
-                    $report_card->academic_year_id = $m->academic_year_id;
-                    $report_card->term_id = $m->term_id;
-                    $report_card->student_id = $student->id;
-                    $report_card->academic_class_id = $class->id;
-                    $report_card->termly_report_card_id = $m->id;
-                    $report_card->save();
-                } else {
-                    //do the update
-                }
 
-
-                if ($report_card != null) {
-                    if ($report_card->id > 0) {
-
-                        $marks = Mark::where([
-                            'student_id' => $student->id,
-                            'class_id' => $class->id
-                        ])
-                            ->orderBy('id', 'desc')
-                            ->get();
-                        foreach ($marks as $mark) {
-
-
-                            $subject = Subject::find($mark->subject_id);
-
-                            if ($subject == null) {
-                                continue;
-                            }
-
-                            $report_item =  StudentReportCardItem::where([
-                                'main_course_id' => $mark->subject_id,
-                                'student_report_card_id' => $report_card->id,
-                            ])->first();
-
-                            //did_bot	did_mot	did_eot	bot_mark	mot_mark	eot_mark	grade_name	aggregates	remarks	initials
-                            if ($report_item == null) {
-                                $report_item = new StudentReportCardItem();
-                                $report_item->enterprise_id = $m->enterprise_id;
-                                $report_item->main_course_id = $mark->subject_id;
-                                $report_item->student_report_card_id = $report_card->id;
-                            } else {
-                                //die("Updating...");
-
-                            }
-
-
-
-                            if ($mark != null) {
-
-                                if ($mark->subject == null) {
-                                    return;
-                                }
-                                if ($mark->subject->main_course_id == 2) {
-                                    continue;
-                                }
-                                $report_item->total = $mark->score;
-                                $report_item->remarks = Utils::get_automaic_mark_remarks($report_item->total);
-
-                                $u = Administrator::find($mark->subject->subject_teacher);
-
-                                $initial = "";
-                                if ($u != null) {
-                                    if (strlen($u->first_name) > 0) {
-                                        $initial = substr($u->first_name, 0, 1);
-                                    }
-                                    if (strlen($u->last_name) > 0) {
-                                        $initial .= "." . substr($u->last_name, 0, 1);
-                                    }
-                                }
-
-
-                                if ($class->class_type != 'Nursery') {
-                                    if (
-                                        $report_item->subject->main_course_id == 42 ||
-                                        $report_item->subject->main_course_id == 44 ||
-                                        $report_item->subject->main_course_id == 43 ||
-                                        $report_item->subject->main_course_id == 45 ||
-                                        $report_item->subject->main_course_id == 42
-                                    ) {
-                                        $report_item->grade_name = '';
-                                        $report_item->aggregates = 0;
-                                    } else {
-
-                                        $report_item->initials = $initial;
-                                        $scale = Utils::grade_marks($report_item);
-
-                                        $report_item->grade_name = $scale->name;
-                                        $report_item->aggregates = $scale->aggregates;
-                                    }
-                                } else {
-
-                                    $report_item->initials = $initial;
-                                    $scale = Utils::grade_marks($report_item);
-                                    $report_item->grade_name = $scale->name;
-                                    $report_item->aggregates = $scale->aggregates;
-                                }
-
-                                $report_item->save();
-                            }
-
-
-                            StudentReportCardItem::where([
-                                'main_course_id' => 74
-                            ])->delete();
-                        }
+                foreach ($subjects as $subject) {
+                    $markRecordOld = MarkRecord::where([
+                        'administrator_id' => $student->id,
+                        'term_id' => $m->term_id, 
+                        'subject_id' => $subject->id,
+                    ])->first(); 
+                    if ($markRecordOld == null) {
+                        echo "Creating mark record for {$student->name} - {$subject->subject_name} - {$class->name_text} - {$m->term->name} <br>";
+                        $markRecordOld = new MarkRecord(); 
+                        $markRecordOld->enterprise_id = $m->enterprise_id; 
+                        $markRecordOld->termly_report_card_id = $m->id;
+                        $markRecordOld->term_id = $m->term_id;
+                        $markRecordOld->administrator_id = $student->id;
+                        $markRecordOld->academic_class_id = $class->id;  
+                        $markRecordOld->bot_score = 0;  
+                        $markRecordOld->mot_score = 0;  
+                        $markRecordOld->eot_score = 0;  
+                        $markRecordOld->total_score = 0;  
+                        $markRecordOld->total_score_display = 0;  
+                        $markRecordOld->bot_is_submitted = 'No';  
+                        $markRecordOld->mot_is_submitted = 'No';  
+                        $markRecordOld->eot_is_submitted = 'No';  
+                        $markRecordOld->bot_missed = 'Yes';  
+                        $markRecordOld->mot_missed = 'Yes';  
+                        $markRecordOld->eot_missed = 'Yes';  
+                        $markRecordOld->remarks = null;  
+                    } else {
+                        echo "Updating mark record for {$student->name} - {$subject->subject_name} - {$class->name_text} - {$m->term->name} <br>";  
+                        //do the update
                     }
-                }
+
+                    if($subject->teacher != null){
+                        $markRecordOld->initials = $subject->teacher->get_initials();
+                    }
+
+                    $markRecordOld->academic_class_sctream_id = $student->stream_id;
+                    $markRecordOld->main_course_id = $subject->main_course_id;
+                    try{
+                        $markRecordOld->save();
+                    } catch(\Throwable $e){
+                        echo $e->getMessage();
+                    }
+                } 
             }
         }
-
-        TermlyReportCard::grade_students($m);
     }
 
     public static function  preocess_report_card($report_card)
@@ -667,8 +586,7 @@ class TermlyReportCard extends Model
                 ])->first();
                 if ($report_card == null) {
                     $report_card = new StudentReportCard();
-                    $report_card->enterprise_id = $m->enterprise_id;
-                    $report_card->academic_year_id = $m->academic_year_id;
+                    $report_card->enterprise_id = $m->enterprise_id; 
                     $report_card->term_id = $m->term_id;
                     $report_card->student_id = $student->id;
                     $report_card->academic_class_id = $class->id;

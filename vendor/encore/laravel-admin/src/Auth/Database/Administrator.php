@@ -489,6 +489,28 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
         });
     }
 
+    public function get_initials()
+    {
+        $letter1 = '';
+        $letter2 = '';
+        $letter3 = '';
+        if ($this->first_name != null) {
+            if (strlen($this->first_name) > 0) {
+                $letter1 = strtoupper(substr($this->first_name, 0, 1));
+            }
+        }
+        if ($this->given_name != null) {
+            if (strlen($this->given_name) > 0) {
+                $letter2 = strtoupper(substr($this->given_name, 0, 1));
+            }
+        }
+        if ($this->last_name != null) {
+            if (strlen($this->last_name) > 0) {
+                $letter3 = strtoupper(substr($this->last_name, 0, 1));
+            }
+        }
+        return $letter1 . $letter2 . $letter3;
+    }
     public static function my_update($m)
     {
         $acc = Account::create($m->id);
@@ -876,7 +898,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                 }
                 $students[] = $user;
             }
-        } 
+        }
 
         if ($u->isRole('parent')) {
             foreach (Administrator::where([

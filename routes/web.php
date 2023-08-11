@@ -35,11 +35,14 @@ Route::match(['get', 'post'], '/report-cards', [PrintController2::class, 'second
 Route::get('/temps', function () {
 
 
-$terms = Term::where([])->get();
-/*   foreach ($terms as $key => $term) {
+  $terms = Term::where([])->get();
+  /*   foreach ($terms as $key => $term) {
     echo $term->id . ". ".$term->enterprise->name." => " . $term->name . " ===> " . $term->mark_records->count() . "<br>";
   } */
- 
+
+  $tr = TermlyReportCard::find(7);
+  TermlyReportCard::generate_marks($tr);
+  die('done');
 
 
   $termly_report_cards = TermlyReportCard::where([])->get();
@@ -50,12 +53,12 @@ $terms = Term::where([])->get();
     ])->update([
       'termly_report_card_id' => $value->id
     ]);
-    echo ($value->term_id . ". " . $value->name . " ===> " . $value->mark_records->count() . " <br>");
+    echo ($value->d . ". " . $value->name . " ===> " . $value->mark_records->count() . " <br>");
   }
-  die("done"); 
-  dd($termly_report_cards->count()); 
+  die("done");
+  dd($termly_report_cards->count());
 
-  $marks = Mark::where(['transfered'=>'No'])->orderBy('id', 'desc')->get();
+  $marks = Mark::where(['transfered' => 'No'])->orderBy('id', 'desc')->get();
 
 
   //$old->termly_report_card_id
@@ -75,7 +78,7 @@ $terms = Term::where([])->get();
 
 
 
-    
+
 
     $new = MarkRecord::where([
       'term_id' => $old->exam->term_id,
