@@ -163,7 +163,7 @@ class MarkRecordController extends AdminController
                     . "&model=User"
             );
 
-            $filter->equal('student_id', 'Student')->select()->ajax($ajax_url);
+            $filter->equal('administrator_id', 'Student')->select()->ajax($ajax_url);
         });
 
         $grid->column('id', __('Id'))->hide()->sortable();
