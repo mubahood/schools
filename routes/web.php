@@ -46,7 +46,11 @@ Route::get('/temps', function () {
     ])->get();
     if ($exams->count() == 0) continue;
     foreach ($exams as $exam) {
-      foreach ($exam->marks->where('transfered', 'No') as $mark) {
+      $marks = Mark::where([
+        'exam_id' => $exam->id,
+        'transfered' => 'No'
+      ])->get();  
+      foreach ($marks as $mark) {
         if ($mark->student == null) continue;
         $mark_record = MarkRecord::where([
           'term_id' => $ternly_report_card->term_id,
