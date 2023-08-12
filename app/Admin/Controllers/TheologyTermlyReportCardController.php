@@ -52,6 +52,7 @@ class TheologyTermlyReportCardController extends AdminController
 
         $grid->column('bot', __('B.O.T'))->display(function () {
             $total = count($this->mark_records);
+            if($total == 0) return "0 (0%)";
             $total_sub = count($this->mark_records->where('bot_is_submitted', 'Yes'));
             $pecentage = ($total_sub / $total) * 100;
             return number_format($total_sub) . " (" . number_format($pecentage) . "%)";
@@ -60,6 +61,7 @@ class TheologyTermlyReportCardController extends AdminController
 
         $grid->column('mot', __('M.O.T'))->display(function () {
             $total = count($this->mark_records);
+            if($total == 0) return "0 (0%)";
             $total_mot = count($this->mark_records->where('mot_is_submitted', 'Yes'));
             $pecentage = ($total_mot / $total) * 100;
             return number_format($total_mot) . " (" . number_format($pecentage) . "%)";
@@ -67,6 +69,7 @@ class TheologyTermlyReportCardController extends AdminController
 
         $grid->column('eot', __('E.O.T'))->display(function () {
             $total = count($this->mark_records);
+            if($total == 0) return "0 (0%)"; 
             $total_mot = count($this->mark_records->where('eot_is_submitted', 'Yes'));
             $pecentage = ($total_mot / $total) * 100;
             return number_format($total_mot) . " (" . number_format($pecentage) . "%)";
