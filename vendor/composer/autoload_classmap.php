@@ -215,6 +215,7 @@ return array(
     'App\\Models\\TheologyExam' => $baseDir . '/app/Models/TheologyExam.php',
     'App\\Models\\TheologyExamHasClass' => $baseDir . '/app/Models/TheologyExamHasClass.php',
     'App\\Models\\TheologyMark' => $baseDir . '/app/Models/TheologyMark.php',
+    'App\\Models\\TheologyMarkRecord' => $baseDir . '/app/Models/TheologyMarkRecord.php',
     'App\\Models\\TheologyStream' => $baseDir . '/app/Models/TheologyStream.php',
     'App\\Models\\TheologyStudentReportCardItem' => $baseDir . '/app/Models/TheologyStudentReportCardItem.php',
     'App\\Models\\TheologySubject' => $baseDir . '/app/Models/TheologySubject.php',

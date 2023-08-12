@@ -21,7 +21,7 @@ class MarkRecordController extends AdminController
      *
      * @var string
      */
-    protected $title = 'MarkRecord';
+    protected $title = 'Marks';
 
     /**
      * Make a grid builder.
@@ -166,6 +166,18 @@ class MarkRecordController extends AdminController
             $filter->equal('administrator_id', 'Student')->select()->ajax($ajax_url);
         });
 
+        $ent = Admin::user()->ent;
+        $year = $ent->dpYear();
+        $term = $ent->active_term();
+        $reportCard = TermlyReportCard::where([
+            'enterprise_id' => Admin::user()->enterprise_id,
+            'term_id' => $term->id,
+        ])->first();
+        if ($reportCard == null) {
+            admin_error('Alert', 'No report card has been created for this term.');
+            return redirect()->back();
+        }
+
         $grid->column('id', __('Id'))->hide()->sortable();
         $grid->column('created_at', __('Created'))->sortable()->hide();
         $grid->column('updated_at', __('Updated'))->sortable()->hide();
@@ -209,45 +221,70 @@ class MarkRecordController extends AdminController
                 return $this->student->name;
             })
             ->sortable();
-        $grid->column('bot_score', __('B.o.T'))
-            ->editable()
-            ->sortable();
-        $grid->column('mot_score', __('M.o.T'))
-            ->editable()
-            ->sortable();
-        $grid->column('eot_score', __('E.o.T'))
-            ->editable()
-            ->sortable();
+
+        if ($reportCard->display_bot_to_teachers == 'Yes') {
+            $grid->column('bot_score', __('B.o.T'))
+                ->editable()
+                ->sortable();
+        }
+        if ($reportCard->display_mot_to_teachers == 'Yes') {
+            $grid->column('mot_score', __('M.o.T'))
+                ->editable()
+                ->sortable();
+        }
+
+        if ($reportCard->display_eot_to_teachers == 'Yes') {
+            $grid->column('eot_score', __('E.o.T'))
+                ->editable()
+                ->sortable();
+        }
         $grid->column('remarks', __('Remarks'))->editable()->sortable();
-        $grid->column('bot_is_submitted', __('B.o.T submitted'))
-            ->label([
-                'No' => 'danger',
-                'Yes' => 'success',
-            ])
-            ->filter([
-                'Yes' => 'Submitted',
-                'No' => 'Not Submitted',
-            ])
-            ->sortable();
-        $grid->column('mot_is_submitted', __('M.o.T submitted'))
-            ->label([
-                'No' => 'danger',
-                'Yes' => 'success',
-            ])
-            ->filter([
-                'Yes' => 'Submitted',
-                'No' => 'Not Submitted',
-            ])
-            ->sortable();
-        $grid->column('eot_is_submitted', __('E.o.T submitted'))
-            ->filter([
-                'Yes' => 'Submitted',
-                'No' => 'Not Submitted',
-            ])
-            ->label([
-                'No' => 'danger',
-                'Yes' => 'success',
-            ])->sortable();
+
+
+
+
+
+        if ($reportCard->display_bot_to_teachers == 'Yes') {
+            $grid->column('bot_is_submitted', __('B.o.T'))
+                ->label([
+                    'No' => 'danger',
+                    'Yes' => 'success',
+                ])
+                ->filter([
+                    'Yes' => 'Submitted',
+                    'No' => 'Not Submitted',
+                ])
+                ->sortable();
+        }
+        if ($reportCard->display_mot_to_teachers == 'Yes') {
+
+            $grid->column('mot_is_submitted', __('M.o.T'))
+                ->label([
+                    'No' => 'danger',
+                    'Yes' => 'success',
+                ])
+                ->filter([
+                    'Yes' => 'Submitted',
+                    'No' => 'Not Submitted',
+                ])
+                ->sortable();
+        }
+
+        if ($reportCard->display_eot_to_teachers == 'Yes') {
+            $grid->column('eot_is_submitted', __('E.o.T'))
+                ->filter([
+                    'Yes' => 'Submitted',
+                    'No' => 'Not Submitted',
+                ])
+                ->label([
+                    'No' => 'danger',
+                    'Yes' => 'success',
+                ])->sortable();
+        }
+
+
+
+
         $grid->column('bot_missed', __('B.O.T Missed'))
 
             ->editable('select', [

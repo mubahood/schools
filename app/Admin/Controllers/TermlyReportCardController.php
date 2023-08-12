@@ -149,57 +149,6 @@ class TermlyReportCardController extends AdminController
      */
     protected function form()
     {
-        //$tr = TermlyReportCard::find(7);
-        //$tr->generate_marks = 'Yes'; 
-        //$tr->delete_marks_for_non_active = 'Yes'; 
-        //$tr->hm_communication .= 1;
-        //$tr->save();
-        //die('.');
-        /* 
-            $table->integer('bot_max')->default(0)->nullable();
-            $table->integer('mot_max')->default(0)->nullable();
-            $table->integer('eot_max')->default(0)->nullable();
-            $table->string('display_bot_to_teachers')->default('No')->nullable();
-            $table->string('display_mot_to_teachers')->default('No')->nullable();
-            $table->string('display_eot_to_teachers')->default('No')->nullable();
-            $table->string('display_bot_to_others')->default('No')->nullable();
-            $table->string('display_mot_to_others')->default('No')->nullable();
-            $table->string('display_eot_to_others')->default('No')->nullable();
-            $table->string('can_submit_bot')->default('No')->nullable();
-            $table->string('can_submit_mot')->default('No')->nullable();
-            $table->string('can_submit_eot')->default('No')->nullable();
-            $table->string('reports_generate')->default('No')->nullable();
-            $table->string('reports_delete_for_non_active')->default('No')->nullable();
-            $table->string('reports_include_bot')->default('No')->nullable();
-            $table->string('reports_include_mot')->default('No')->nullable();
-            $table->string('reports_include_eot')->default('No')->nullable();
-            $table->string('reports_template')->nullable();
-            $table->string('reports_who_fees_balance')->default('No')->nullable();
-            $table->string('reports_display_report_to_parents')->default('No')->nullable();
-            $table->text('hm_communication')->nullable();
-        });
-        */
-        /* $x = StudentReportCard::find(4010);
-        TermlyReportCard::preocess_report_card($x);
-        dd('done'); */
-        //$y = StudentReportCard::find(4108);
-        /*  set_time_limit(-1);
-        ini_set('memory_limit', '-1'); 
-        foreach (StudentReportCard::where('term_id', 8)->get() as $key => $y) {
-            // if ($y->total_marks > 2) {
-            //     continue;
-            // }
-            TermlyReportCard::preocess_report_card($y);
-            echo ($key . " ===> " . $y->owner->name . "<br>");
-        }
-        dd('done');
-        $x = TermlyReportCard::find(4010);
-        TermlyReportCard::preocess_report_card($x);
-        dd('done');
-        $x = TermlyReportCard::find(6);
-        TermlyReportCard::make_reports_for_secondary($x);
-        die("done");
- */
         $form = new Form(new TermlyReportCard());
         $u = Admin::user();
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
@@ -230,16 +179,6 @@ class TermlyReportCardController extends AdminController
             $form->select('term_id', __('Term'))->options($terms)
                 ->readOnly();
         }
-
-        /*         $form->radio('has_beginning_term', __('Include beginning term exams?'))->options([1 => 'Yes', 0 => 'No'])->required();
-        $form->radio('has_mid_term', __('Include Mid term exams?'))->options([1 => 'Yes', 0 => 'No'])->required();
-        $form->radio('has_end_term', __('Include End of term exams?'))->options([1 => 'Yes', 0 => 'No'])->required(); 
-                    $form->radioCard('do_update', __('Do you want to update all related report cards?'))->options([1 => 'Yes', 0 => 'No'])
-                ->default(0);
-        */
-
-
-
         $form->disableCreatingCheck();
         $form->disableReset();
         $form->disableViewCheck();
@@ -325,21 +264,6 @@ class TermlyReportCardController extends AdminController
             $form->divider('Communication');
             $form->textarea('hm_communication', 'Head Teacher Communication');
         }
-
-        /* 
-            $table->string('reports_generate')->default('No')->nullable();
-            $table->string('reports_delete_for_non_active')->default('No')->nullable();
-            $table->string('reports_include_bot')->default('No')->nullable();
-            $table->string('reports_include_mot')->default('No')->nullable();
-            $table->string('reports_include_eot')->default('No')->nullable();
-            $table->string('reports_template')->nullable();
-            $table->string('reports_who_fees_balance')->default('No')->nullable();
-            $table->string('reports_display_report_to_parents')->default('No')->nullable();
-            $table->text('hm_communication')->nullable();
-        });
-*/
-
-
 
         return $form;
     }

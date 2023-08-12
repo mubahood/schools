@@ -4,6 +4,8 @@ php artisan make:migration create_d_datas_table
 
 php artisan make:migration add_cols_dp_ter --table=
 php artisan make:migration add_cols_to_termly_report_cards --table=termly_report_cards
+php artisan make:migration add_cols_to_termly_theology_termly_report_cards --table=theology_termly_report_cards
+
 
 php artisan make:factory PostFactory
 
@@ -217,6 +219,7 @@ php artisan make:model SupplierOrder
 php artisan make:model SupplierOrder
 php artisan make:model SupplierOrderItem
 php artisan make:model MarkRecord
+php artisan make:model TheologyMarkRecord -m
 
 
 php artisan admin:make TermController --model=App\\Models\\Term
@@ -259,6 +262,7 @@ php artisan make:migration create_theology_streams_table
 php artisan make:migration create_supplier_products_table
 php artisan make:migration create_supplier_order_items_table
 php artisan make:migration create_financial_records_table
+php artisan make:migration create_theology_mark_records_table
 
 --path=/database/migrations/fileName.php
 

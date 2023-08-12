@@ -119,8 +119,6 @@ class TheologyTermlyReportCardController extends AdminController
     protected function form()
     {
         $form = new Form(new TheologyTermlyReportCard());
-
-
         $u = Admin::user();
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
         $form->hidden('academic_year_id', __('Academic year id'));
@@ -136,38 +134,105 @@ class TheologyTermlyReportCardController extends AdminController
         }
 
         $scales = [];
+        $form->divider('Basic Information');
         foreach (GradingScale::where([])
             ->orderBy('id', 'DESC')
             ->get() as $v) {
             $scales[$v->id] =  $v->name;
         }
 
-
-
-        $form->select('term_id', __('Term'))->options($terms)
-            ->creationRules(['required', "unique:theology_termly_report_cards"]);
-
-
-        $form->text('report_title', __('Report title'));
-
-
-        $form->radio('has_beginning_term', __('Include beginning term exams?'))->options([1 => 'Yes', 0 => 'No'])->required();
-        $form->radio('has_mid_term', __('Include Mid term exams?'))->options([1 => 'Yes', 0 => 'No'])->required();
-        $form->radio('has_end_term', __('Include End of term exams?'))->options([1 => 'Yes', 0 => 'No'])->required();
-
-        $form->select('grading_scale_id', __('Grading scale'))->options($scales)->required();
-
-        if ($form->isEditing()) {
-            $form->radio('do_update', __('Do you want to update all related report cards?'))->options([1 => 'Yes', 0 => 'No'])
-                ->default(0);
+        if ($form->isCreating()) {
+            $form->select('term_id', __('Term'))->options($terms)
+                ->creationRules(['required', "unique:termly_report_cards"]);
+        } else {
+            $form->select('term_id', __('Term'))->options($terms)
+                ->readOnly();
         }
-
-
-
-        $form->disableEditingCheck();
         $form->disableCreatingCheck();
         $form->disableReset();
         $form->disableViewCheck();
+
+        if ($form->isEditing()) {
+            $form->tools(function (Form\Tools $tools) {
+                $tools->disableDelete();
+            });
+
+            $form->divider('Marks Settings');
+            $form->radioCard('generate_marks', 'Generate/Re-generate marks for all students?')
+                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->default('No');
+            $form->radioCard('delete_marks_for_non_active', 'Delete marks for non active students?')
+                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->default('No');
+            $form->decimal('bot_max', __('Max marks for Beginning Of Term exams'))->default(0);
+            $form->decimal('mot_max', __('Max marks for Middle Of Term exams'))->default(0);
+            $form->decimal('eot_max', __('Max marks for End Of Term exams'))->default(0);
+            $form->divider('Marks Display Settings');
+            $form->radioCard('display_bot_to_teachers', 'Display Beginning Of Term marks to teachers?')
+                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->default('No');
+            $form->radioCard('display_mot_to_teachers', 'Display Middle Of Term marks to teachers?')
+                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->default('No');
+            $form->radioCard('display_eot_to_teachers', 'Display End Of Term marks to teachers?')
+                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->default('No');
+            $form->radioCard('display_bot_to_others', 'Display Beginning Of Term marks to others?')
+                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->default('No');
+            $form->radioCard('display_mot_to_others', 'Display Middle Of Term marks to others?')
+                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->default('No');
+            $form->radioCard('display_eot_to_others', 'Display End Of Term marks to others?')
+                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->default('No');
+            $form->divider('Submission Settings');
+            $form->radioCard('can_submit_bot', 'Can teachers submit Beginning Of Term marks?')
+                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->default('No');
+            $form->radioCard('can_submit_mot', 'Can teachers submit Middle Of Term marks?')
+                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->default('No');
+            $form->radioCard('can_submit_eot', 'Can teachers submit End Of Term marks?')
+                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->default('No');
+            $form->divider('Reports Settings');
+            $form->text('report_title', __('Report title'));
+            $form->select('grading_scale_id', __('Grading scale'))->options($scales)->required();
+
+            $form->radioCard('reports_generate', 'Generate reports?')
+                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->default('No');
+            $form->radioCard('reports_delete_for_non_active', 'Delete reports for non active students?')
+                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->default('No');
+            $form->radioCard('reports_include_bot', 'Include Beginning Of Term marks in reports?')
+                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->default('No');
+            $form->radioCard('reports_include_mot', 'Include Middle Of Term marks in reports?')
+                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->default('No');
+            $form->radioCard('reports_include_eot', 'Include End Of Term marks in reports?')
+                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->default('No');
+            $form->divider('Reports Display Settings');
+            $form->radioCard('reports_who_fees_balance', 'Who should see fees balance in reports?')
+                ->options(['All' => 'All', 'Verified' => 'Verified Balance Only', 'None' => 'None'])
+                ->default('None');
+            $form->radioCard('reports_display_report_to_parents', 'Display reports to parents?')
+                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->default('No');
+            $form->divider('Reports Template');
+            $form->radioCard('reports_template', 'Reports template')
+                ->options([
+                    'Template_1' => 'Template 1',
+                    'Template_2' => 'Template 2',
+                    'Template_3' => 'Template 3',
+                    'Template_4' => 'Template 4',
+                ]);
+            $form->divider('Communication');
+            $form->textarea('hm_communication', 'Head Teacher Communication');
+        }
 
         return $form;
     }
