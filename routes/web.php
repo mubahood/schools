@@ -41,7 +41,7 @@ Route::get('/temps', function () {
 
   $i = 0;
   $marks = Mark::where([
-    'transfered' => 'No'
+    'transfered' => 'No',
     'enterprise_id' => 13,
   ])->get();
   foreach ($marks as $mark) {
