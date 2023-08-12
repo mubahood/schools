@@ -38,6 +38,98 @@ Route::get('/temps', function () {
   ini_set('memory_limit', '-1');
   set_time_limit(-1);
 
+
+  $i = 0;
+  $marks = Mark::where([
+    'transfered' => 'No'
+  ])->get();
+  foreach ($marks as $mark) {
+    $exam = $mark->exam;
+    if ($exam == null) {
+      die("Exam not found");
+    }
+    //if ($mark->student == null) continue;
+    $mark_record = MarkRecord::where([
+      'term_id' => $exam->term_id,
+      'subject_id' => $mark->subject_id,
+      'administrator_id' => $mark->student_id,
+    ])->first();
+
+    if ($mark_record == null) {
+      $mark_record = new MarkRecord();
+      $mark_record->term_id = $exam->term_id;
+      $mark_record->enterprise_id = $exam->enterprise_id;
+      $mark_record->subject_id = $mark->subject_id;
+      $mark_record->administrator_id = $mark->student_id;
+      $mark_record->academic_class_id = $mark->class_id;
+      $mark_record->main_course_id = $mark->student->main_course_id;
+    }
+
+    $termly_report_card = TermlyReportCard::where([
+      'term_id' => $exam->term_id,
+    ])->first();
+
+    if ($termly_report_card == null) {
+      $termly_report_card = new TermlyReportCard();
+      $termly_report_card->enterprise_id = $exam->enterprise_id;
+      $termly_report_card->term_id = $exam->term_id;
+      try {
+        $termly_report_card->save();
+      } catch (\Throwable $th) {
+        echo "FAILED => " . $th->getMessage() . "<br>";
+        die();
+      }
+    }
+
+    $mark_record->termly_report_card_id = $termly_report_card->id;
+    $mark_record->academic_class_sctream_id = $mark->student->stream_id;
+
+    if ($exam->type == 'B.O.T') {
+      $mark_record->bot_score = $mark->score;
+      $mark_record->bot_missed = 'Yes';
+      if ($mark->is_missed == 1) {
+        $mark_record->bot_missed = 'No';
+      }
+
+      $mark_record->bot_is_submitted = 'No';
+      if ($mark->is_submitted == 1) {
+        $mark_record->bot_is_submitted = 'Yes';
+      }
+    } else if ($exam->type == 'M.O.T') {
+      $mark_record->mot_score = $mark->score;
+      $mark_record->mot_missed = 'Yes';
+      if ($mark->is_missed == 1) {
+        $mark_record->mot_missed = 'No';
+      }
+
+      $mark_record->mot_is_submitted = 'No';
+      if ($mark->is_submitted == 1) {
+        $mark_record->mot_is_submitted = 'Yes';
+      }
+    } else if ($exam->type == 'E.O.T') {
+      $mark_record->eot_score = $mark->score;
+      $mark_record->eot_missed = 'Yes';
+      if ($mark->is_missed == 1) {
+        $mark_record->eot_missed = 'No';
+      }
+
+      $mark_record->eot_is_submitted = 'No';
+      if ($mark->is_submitted == 1) {
+        $mark_record->eot_is_submitted = 'Yes';
+      }
+      $i++;
+      try {
+        $mark_record->save();
+        $mark->transfered = 'Yes';
+        $mark->save();
+        echo "$i. TRANSFERED " . $mark->id . " -> " . $mark->student->name . ' - ' . $mark->student->name . "<br>";
+      } catch (\Throwable $th) {
+        echo "$i. FAILED => " . $th->getMessage() . $mark->id . " -> " . $mark->student->name . ' - ' . $mark->student->name . "<br>";
+      }
+    }
+  }
+  die("======DONE-1======");
+
   $termoly_report_cards = TermlyReportCard::where([])->get();
   $i = 0;
   foreach ($termoly_report_cards as $key => $ternly_report_card) {
@@ -49,7 +141,7 @@ Route::get('/temps', function () {
       $marks = Mark::where([
         'exam_id' => $exam->id,
         'transfered' => 'No'
-      ])->get();  
+      ])->get();
       foreach ($marks as $mark) {
         if ($mark->student == null) continue;
         $mark_record = MarkRecord::where([
@@ -110,7 +202,7 @@ Route::get('/temps', function () {
             $mark->save();
             echo "$i. TRANSFERED " . $mark->id . " -> " . $mark->student->name . ' - ' . $mark->student->name . "<br>";
           } catch (\Throwable $th) {
-            echo "$i. FAILED => ".$th->getMessage() . $mark->id . " -> " . $mark->student->name . ' - ' . $mark->student->name . "<br>";
+            echo "$i. FAILED => " . $th->getMessage() . $mark->id . " -> " . $mark->student->name . ' - ' . $mark->student->name . "<br>";
           }
         }
       }
