@@ -39,6 +39,7 @@ Route::get('/temps', function () {
   set_time_limit(-1);
 
   $termoly_report_cards = TermlyReportCard::where([])->get();
+  $i = 0;
   foreach ($termoly_report_cards as $key => $ternly_report_card) {
     $exams = Exam::where([
       'term_id' => $ternly_report_card->term_id
@@ -98,15 +99,15 @@ Route::get('/temps', function () {
           if ($mark->is_submitted == 1) {
             $mark_record->eot_is_submitted = 'Yes';
           }
+          $i++;
           try {
             $mark_record->save();
             $mark->transfered = 'Yes';
             $mark->save();
-            echo "TRANSFERED" . $mark->id . " -> " . $mark->student->name . ' - ' . $mark->student->name . "<br>";
+            echo "$i. TRANSFERED " . $mark->id . " -> " . $mark->student->name . ' - ' . $mark->student->name . "<br>";
           } catch (\Throwable $th) {
-            echo $th->getMessage() . "<br>";
+            echo "$i. FAILED => ".$th->getMessage() . $mark->id . " -> " . $mark->student->name . ' - ' . $mark->student->name . "<br>";
           }
-          die("STEP 1");
         }
       }
     }
