@@ -66,7 +66,6 @@ Route::get('/temps', function () {
       $mark_record->academic_class_id = $mark->class_id;
       $mark_record->main_course_id = $mark->student->main_course_id;
     }
-    die("Mark record found");
 
     $termly_report_card = TermlyReportCard::where([
       'term_id' => $exam->term_id,
@@ -123,12 +122,14 @@ Route::get('/temps', function () {
       }
       $i++;
       try {
+        die("SAVINGING");
         $mark_record->save();
         // $mark->transfered = 'Yes';
         // $mark->save();
         DB::update('update marks set transfered = "Yes" where id = ?', [$mark->id]);
         echo "$i. TRANSFERED " . $mark->id . " -> " . $mark->student->name . ' - ' . $mark->student->name . "<br>";
       } catch (\Throwable $th) {
+        die("FAILED SAVINGING");
         echo "$i. FAILED => " . $th->getMessage() . $mark->id . " -> " . $mark->student->name . ' - ' . $mark->student->name . "<br>";
       }
     }
