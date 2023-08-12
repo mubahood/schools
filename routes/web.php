@@ -86,7 +86,6 @@ Route::get('/temps', function () {
       }
     }
 
-    dd($termly_report_card->id); 
     $mark_record->termly_report_card_id = $termly_report_card->id;
     $mark_record->academic_class_sctream_id = $mark->student->stream_id;
 
