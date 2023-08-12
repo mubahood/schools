@@ -98,13 +98,20 @@ Route::get('/temps', function () {
           if ($mark->is_submitted == 1) {
             $mark_record->eot_is_submitted = 'Yes';
           }
-
-          $mark->transfered = 'Yes';
-          $mark->save();
+          try {
+            $mark_record->save();
+            $mark->transfered = 'Yes';
+            $mark->save();
+            echo "TRANSFERED" . $mark->id . " -> " . $mark->student->name . ' - ' . $mark->student->name . "<br>";
+          } catch (\Throwable $th) {
+            echo $th->getMessage() . "<br>";
+          }
+          die("STEP 1");
         }
       }
     }
   }
+  die('done');
   /* 	 	
 	
 bot_score	
