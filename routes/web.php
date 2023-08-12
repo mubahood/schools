@@ -15,12 +15,14 @@ use App\Models\Exam;
 use App\Models\FinancialRecord;
 use App\Models\Gen;
 use App\Models\Mark;
-use App\Models\MarkRecord;
+use App\Models\TheologyMarkRecord;
 use App\Models\StudentHasClass;
 use App\Models\StudentHasFee;
 use App\Models\Subject;
 use App\Models\Term;
 use App\Models\TermlyReportCard;
+use App\Models\TheologyMark;
+use App\Models\TheologyTermlyReportCard;
 use App\Models\Transaction;
 use App\Models\Utils;
 use Encore\Admin\Auth\Database\Administrator;
@@ -40,8 +42,8 @@ Route::get('/temps', function () {
 
 
   $i = 0;
-  $marks = Mark::where([
-    'transfered' => 'No', 
+  $marks = TheologyMark::where([
+    'transfered' => 'No',
   ])->get();
   foreach ($marks as $mark) {
     $exam = $mark->exam;
@@ -49,29 +51,28 @@ Route::get('/temps', function () {
       die("Exam not found");
     }
     //if ($mark->student == null) continue;
-    $mark_record = MarkRecord::where([
+    $mark_record = TheologyMarkRecord::where([
       'term_id' => $exam->term_id,
-      'subject_id' => $mark->subject_id,
+      'theology_subject_id' => $mark->theology_subject_id,
       'administrator_id' => $mark->student_id,
     ])->first();
 
     if ($mark_record == null) {
-      $mark_record = new MarkRecord();
+      $mark_record = new TheologyMarkRecord();
       $mark_record->term_id = $exam->term_id;
       $mark_record->enterprise_id = $exam->enterprise_id;
-      $mark_record->subject_id = $mark->subject_id;
+      $mark_record->theology_subject_id = $mark->theology_subject_id;
       $mark_record->administrator_id = $mark->student_id;
-      $mark_record->academic_class_id = $mark->class_id;
-      $mark_record->main_course_id = $mark->student->main_course_id;
+      $mark_record->theology_class_id = $mark->theology_class_id;
+    } else { 
     }
 
-    $termly_report_card = DB::table('termly_report_cards')
-      ->where([
+    $termly_report_card = TheologyTermlyReportCard::where([
         'term_id' => $exam->term_id,
       ])->first();
 
     if ($termly_report_card == null) {
-      $termly_report_card = new TermlyReportCard();
+      $termly_report_card = new TheologyTermlyReportCard();
       $termly_report_card->enterprise_id = $exam->enterprise_id;
       $termly_report_card->term_id = $exam->term_id;
       $termly_report_card->grading_scale_id = 1;
@@ -79,8 +80,7 @@ Route::get('/temps', function () {
       try {
         $termly_report_card->save();
       } catch (\Throwable $th) {
-        echo "FAILED => " . $th->getMessage() . "<br>";
-        die();
+        echo "FAILED => " . $th->getMessage() . "<br>"; 
       }
     }
 
@@ -88,8 +88,8 @@ Route::get('/temps', function () {
       die("Termly report card not found");
     }
 
-    $mark_record->termly_report_card_id = $termly_report_card->id;
-    $mark_record->academic_class_sctream_id = $mark->student->stream_id;
+    $mark_record->theology_termly_report_card_id = $termly_report_card->id;
+    //$mark_record->academic_class_sctream_id = $mark->student->theology_stream_id;
     if ($exam->type == 'B.O.T') {
       $mark_record->bot_score = $mark->score;
       $mark_record->bot_missed = 'Yes';
@@ -133,9 +133,8 @@ Route::get('/temps', function () {
       DB::update('update marks set transfered = "Yes" where id = ?', [$mark->id]);
       echo "$i. TRANSFERED " . $mark->id . " -> " . $mark->student->name . ' - ' . $mark->student->name . "<br>";
     } catch (\Throwable $th) {
-      die("FAILED SAVINGING");
       echo "$i. FAILED => " . $th->getMessage() . $mark->id . " -> " . $mark->student->name . ' - ' . $mark->student->name . "<br>";
-    }
+    } 
   }
   die("======DONE-1======");
 
@@ -153,19 +152,19 @@ Route::get('/temps', function () {
       ])->get();
       foreach ($marks as $mark) {
         if ($mark->student == null) continue;
-        $mark_record = MarkRecord::where([
+        $mark_record = TheologyMarkRecord::where([
           'term_id' => $ternly_report_card->term_id,
           'subject_id' => $mark->subject_id,
           'administrator_id' => $mark->student_id,
         ])->first();
 
         if ($mark_record == null) {
-          $mark_record = new MarkRecord();
+          $mark_record = new TheologyMarkRecord();
           $mark_record->term_id = $ternly_report_card->term_id;
           $mark_record->enterprise_id = $ternly_report_card->enterprise_id;
           $mark_record->subject_id = $mark->subject_id;
           $mark_record->administrator_id = $mark->student_id;
-          $mark_record->academic_class_id = $mark->class_id;
+          $mark_record->theology_class_id = $mark->theology_class_id;
           $mark_record->main_course_id = $mark->student->main_course_id;
         }
         $mark_record->termly_report_card_id = $ternly_report_card->id;
@@ -270,7 +269,7 @@ total_score_display
   $termly_report_cards = TermlyReportCard::where([])->get();
 
   foreach ($termly_report_cards as $key => $value) {
-    MarkRecord::where([
+    TheologyMarkRecord::where([
       'term_id' => $value->term_id
     ])->update([
       'termly_report_card_id' => $value->id
@@ -301,7 +300,7 @@ total_score_display
 
 
 
-    $new = MarkRecord::where([
+    $new = TheologyMarkRecord::where([
       'term_id' => $old->exam->term_id,
       'subject_id' => $old->subject_id,
       'administrator_id' => $old->student_id,
@@ -320,7 +319,7 @@ total_score_display
     if ($new == null) {
       echo "{$i} NEW {$msg}  ";
 
-      $new = new MarkRecord();
+      $new = new TheologyMarkRecord();
       $new->updated_at = $old->updated_at;
       $new->created_at = $old->created_at;
       $new->enterprise_id = $old->enterprise_id;
@@ -333,7 +332,7 @@ total_score_display
 
       $new->term_id = $old->exam->term_id;
       $new->administrator_id = $old->student_id;
-      $new->academic_class_id = $old->class_id;
+      $new->theology_class_id = $old->theology_class_id;
       $new->academic_class_sctream_id = null;
       $new->main_course_id = $old->main_course_id;
       $new->subject_id = $old->subject_id;
