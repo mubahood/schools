@@ -42,6 +42,7 @@ Route::get('/temps', function () {
   $i = 0;
   $marks = Mark::where([
     'transfered' => 'No'
+    'enterprise_id' => 13,
   ])->get();
   foreach ($marks as $mark) {
     $exam = $mark->exam;
@@ -53,7 +54,6 @@ Route::get('/temps', function () {
       'term_id' => $exam->term_id,
       'subject_id' => $mark->subject_id,
       'administrator_id' => $mark->student_id,
-      'enterprise_id' => 13,
     ])->first();
 
     if ($mark_record == null) {
