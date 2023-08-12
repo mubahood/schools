@@ -67,11 +67,13 @@ Route::get('/temps', function () {
       $mark_record->main_course_id = $mark->student->main_course_id;
     }
 
-    $termly_report_card = TermlyReportCard::where([
-      'term_id' => $exam->term_id,
-    ])->first();
+    $termly_report_card = DB::table('termly_report_cards')
+      ->where([
+        'term_id' => $exam->term_id,
+      ])->first();
 
     if ($termly_report_card == null) {
+      die("Termly report card not found");
       $termly_report_card = new TermlyReportCard();
       $termly_report_card->enterprise_id = $exam->enterprise_id;
       $termly_report_card->term_id = $exam->term_id;
@@ -84,6 +86,7 @@ Route::get('/temps', function () {
       }
     }
 
+    dd($termly_report_card->id); 
     $mark_record->termly_report_card_id = $termly_report_card->id;
     $mark_record->academic_class_sctream_id = $mark->student->stream_id;
 
