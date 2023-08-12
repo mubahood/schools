@@ -122,8 +122,9 @@ Route::get('/temps', function () {
       $i++;
       try {
         $mark_record->save();
-        $mark->transfered = 'Yes';
-        $mark->save();
+        // $mark->transfered = 'Yes';
+        // $mark->save();
+        DB::update('update marks set transfered = "Yes" where id = ?', [$mark->id]);
         echo "$i. TRANSFERED " . $mark->id . " -> " . $mark->student->name . ' - ' . $mark->student->name . "<br>";
       } catch (\Throwable $th) {
         echo "$i. FAILED => " . $th->getMessage() . $mark->id . " -> " . $mark->student->name . ' - ' . $mark->student->name . "<br>";
