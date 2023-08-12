@@ -11,6 +11,7 @@ use App\Models\Book;
 use App\Models\BooksCategory;
 use App\Models\Course;
 use App\Models\Enterprise;
+use App\Models\Exam;
 use App\Models\FinancialRecord;
 use App\Models\Gen;
 use App\Models\Mark;
@@ -34,6 +35,114 @@ Route::match(['get', 'post'], '/print', [PrintController2::class, 'index']);
 Route::match(['get', 'post'], '/report-cards', [PrintController2::class, 'secondary_report_cards']);
 Route::get('/temps', function () {
 
+  ini_set('memory_limit', '-1');
+  set_time_limit(-1);
+
+  $termoly_report_cards = TermlyReportCard::where([])->get();
+  foreach ($termoly_report_cards as $key => $ternly_report_card) {
+    $exams = Exam::where([
+      'term_id' => $ternly_report_card->term_id
+    ])->get();
+    if ($exams->count() == 0) continue;
+    foreach ($exams as $exam) {
+      foreach ($exam->marks->where('transfered', 'No') as $mark) {
+        if ($mark->student == null) continue;
+        $mark_record = MarkRecord::where([
+          'term_id' => $ternly_report_card->term_id,
+          'subject_id' => $mark->subject_id,
+          'administrator_id' => $mark->student_id,
+        ])->first();
+
+        if ($mark_record == null) {
+          $mark_record = new MarkRecord();
+          $mark_record->term_id = $ternly_report_card->term_id;
+          $mark_record->enterprise_id = $ternly_report_card->enterprise_id;
+          $mark_record->subject_id = $mark->subject_id;
+          $mark_record->administrator_id = $mark->student_id;
+          $mark_record->academic_class_id = $mark->class_id;
+          $mark_record->main_course_id = $mark->student->main_course_id;
+        }
+        $mark_record->termly_report_card_id = $ternly_report_card->id;
+        $mark_record->academic_class_sctream_id = $mark->student->stream_id;
+
+        if ($exam->type == 'B.O.T') {
+          $mark_record->bot_score = $mark->score;
+          $mark_record->bot_missed = 'Yes';
+          if ($mark->is_missed == 1) {
+            $mark_record->bot_missed = 'No';
+          }
+
+          $mark_record->bot_is_submitted = 'No';
+          if ($mark->is_submitted == 1) {
+            $mark_record->bot_is_submitted = 'Yes';
+          }
+        } else if ($exam->type == 'M.O.T') {
+          $mark_record->mot_score = $mark->score;
+          $mark_record->mot_missed = 'Yes';
+          if ($mark->is_missed == 1) {
+            $mark_record->mot_missed = 'No';
+          }
+
+          $mark_record->mot_is_submitted = 'No';
+          if ($mark->is_submitted == 1) {
+            $mark_record->mot_is_submitted = 'Yes';
+          }
+        } else if ($exam->type == 'E.O.T') {
+          $mark_record->eot_score = $mark->score;
+          $mark_record->eot_missed = 'Yes';
+          if ($mark->is_missed == 1) {
+            $mark_record->eot_missed = 'No';
+          }
+
+          $mark_record->eot_is_submitted = 'No';
+          if ($mark->is_submitted == 1) {
+            $mark_record->eot_is_submitted = 'Yes';
+          }
+
+          $mark->transfered = 'Yes';
+          $mark->save();
+        }
+      }
+    }
+  }
+  /* 	 	
+	
+bot_score	
+mot_score	
+eot_score	
+bot_is_submitted	
+mot_is_submitted Descending 1	
+eot_is_submitted	
+bot_missed	
+mot_missed	
+eot_missed	
+initials	
+remarks	
+total_score	
+total_score_display	
+ 
+*/  /* 
+    "id" => 1
+    "created_at" => "2022-10-22 05:22:49"
+    "updated_at" => "2023-08-09 09:46:48"
+    "enterprise_id" => 7
+    "exam_id" => 1
+    "" => 8
+    "subject_id" => 29
+    "student_id" => 2473
+    "teacher_id" => 2997
+    "score" => 84.0
+    "remarks" => "V.Good"
+    "is_submitted" => 1
+    "is_missed" => 1
+    "main_course_id" => 18
+    "transfered" => "Yes"
+  */
+  dd("done");
+
+
+
+  dd(count($marks));
 
   $terms = Term::where([])->get();
   /*   foreach ($terms as $key => $term) {
@@ -45,7 +154,7 @@ Route::get('/temps', function () {
   die('done'); */
 
 
-/*   $termly_report_cards = TermlyReportCard::where([])->get();
+  $termly_report_cards = TermlyReportCard::where([])->get();
 
   foreach ($termly_report_cards as $key => $value) {
     MarkRecord::where([
@@ -56,7 +165,7 @@ Route::get('/temps', function () {
     echo ($value->d . ". " . $value->name . " ===> " . $value->mark_records->count() . " <br>");
   }
   die("done");
-  dd($termly_report_cards->count()); */
+  dd($termly_report_cards->count());
 
   $marks = Mark::where(['transfered' => 'No'])->orderBy('id', 'desc')->get();
 
@@ -67,8 +176,7 @@ Route::get('/temps', function () {
   set_time_limit(-1);
   foreach ($marks as $key => $old) {
 
-    $old->transfered = 'Yes';
-    $old->save();
+
     if ($old->exam == null) {
       throw new Exception("Exam not found", 1);
       continue;
@@ -81,7 +189,7 @@ Route::get('/temps', function () {
 
 
     $new = MarkRecord::where([
-      'term_id' => $old->exam->term_id, 
+      'term_id' => $old->exam->term_id,
       'subject_id' => $old->subject_id,
       'administrator_id' => $old->student_id,
     ])->first();
@@ -170,6 +278,8 @@ Route::get('/temps', function () {
       echo $th->getMessage();
       continue;
     }
+    $old->transfered = 'Yes';
+    $old->save();
   }
 
   die("done");
