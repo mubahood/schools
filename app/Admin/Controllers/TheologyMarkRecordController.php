@@ -4,24 +4,29 @@ namespace App\Admin\Controllers;
 
 use App\Models\AcademicClass;
 use App\Models\AcademicClassSctream;
-use App\Models\MarkRecord;
+use App\Models\Enterprise;
+use App\Models\TheologyMarkRecord;
 use App\Models\ReportCard;
 use App\Models\Subject;
 use App\Models\TermlyReportCard;
+use App\Models\TheologyClass;
+use App\Models\TheologyStream;
+use App\Models\TheologySubject;
+use App\Models\TheologyTermlyReportCard;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
 
-class MarkRecordController extends AdminController
+class TheologyMarkRecordController extends AdminController
 {
     /**
      * Title for current resource.
      *
      * @var string
      */
-    protected $title = 'Marks';
+    protected $title = 'Theology Marks';
 
     /**
      * Make a grid builder.
@@ -30,7 +35,7 @@ class MarkRecordController extends AdminController
      */
     protected function grid()
     {
-        $grid = new Grid(new MarkRecord());
+        $grid = new Grid(new TheologyMarkRecord());
 
         $grid->export(function ($export) {
             $export->filename('School dynamics.csv');
@@ -42,24 +47,73 @@ class MarkRecordController extends AdminController
             'enterprise_id' => Admin::user()->enterprise_id,
         ])->orderBy('id', 'DESC');
 
-        if (!Admin::user()->isRole('dos')) {
+        $grid->disableActions();
+        $grid->disableCreateButton();
 
-            $grid->model()->where([
-                /*                 'teacher_id' => Admin::user()->id, */]);
+        $subs_ids = [];
+        $u = Admin::user();
+        $ent = Enterprise::find($u->enterprise_id);
+        $dpYear =  $ent->dpYear();
+        if ($dpYear == null) {
+            die("Display year not found.");
+        }
+        if (Admin::user()->isRole('dos')) {
+            foreach (TheologySubject::where([
+                'enterprise_id' => $u->enterprise_id
+            ])
+                ->orderBy('theology_course_id', 'asc')
+                ->get() as $ex) {
+                if ($ex->theology_class->academic_year_id != $dpYear->id) {
+                    continue;
+                }
+                $subs[$ex->id] = $ex->course->name . " - " . $ex->theology_class->name . " - " . $dpYear->name;
+            }
+        } else {
+            foreach (TheologySubject::where([
+                'enterprise_id' => $u->enterprise_id
+            ])
+                ->orderBy('theology_course_id', 'asc')
+                ->get() as $ex) {
+                if (
+                    $ex->subject_teacher == Admin::user()->id ||
+                    $ex->teacher_1 == Admin::user()->id ||
+                    $ex->teacher_2 == Admin::user()->id ||
+                    $ex->teacher_3 == Admin::user()->id
+                ) {
+                    if ($ex->theology_class->academic_year_id != $dpYear->id) {
+                        continue;
+                    }
+                    $subs_ids[] = $ex->id;
+                }
+            }
         }
 
-        $grid->disableCreateButton();
-        $grid->disableActions();
+        $grid->model()->where([
+            'enterprise_id' => Admin::user()->enterprise_id,
+        ])->orderBy('id', 'DESC');
+
+        if (!Admin::user()->isRole('dos')) {
+            $grid->disableCreateButton();
+            $grid->disableExport();
+            $grid->disableActions();
+        }
+
         $grid->disableBatchActions();
+
+        $grid->export(function ($export) {
+            $export->filename('School dynamics.csv');
+            $export->except(['is_submitted']);
+            $export->originalValue(['score', 'remarks']);
+        });
 
         if (
             (!Admin::user()->isRole('dos')) &&
-            ((!isset($_GET['academic_class_id'])) ||
-                (!isset($_GET['exam_id'])) ||
-                (!isset($_GET['subject_id'])) ||
-                (((int)($_GET['subject_id'])) < 1) ||
-                (((int)($_GET['exam_id'])) < 1) ||
-                (((int)($_GET['academic_class_id'])) < 1))
+            ((!isset($_GET['theology_class_id'])) ||
+                (!isset($_GET['theology_exam_id'])) ||
+                (!isset($_GET['theology_subject_id'])) ||
+                (((int)($_GET['theology_subject_id'])) < 1) ||
+                (((int)($_GET['theology_exam_id'])) < 1) ||
+                (((int)($_GET['theology_class_id'])) < 1))
         ) {
             admin_success(
                 'Alert',
@@ -71,51 +125,37 @@ class MarkRecordController extends AdminController
         }
 
         $grid->filter(function ($filter) {
-
-
             if (
                 (!Admin::user()->isRole('dos')) &&
-                ((!isset($_GET['academic_class_id'])) ||
-                    (!isset($_GET['exam_id'])) ||
-                    (!isset($_GET['subject_id'])) ||
-                    (((int)($_GET['subject_id'])) < 1) ||
-                    (((int)($_GET['exam_id'])) < 1) ||
-                    (((int)($_GET['academic_class_id'])) < 1))
+                ((!isset($_GET['theology_class_id'])) ||
+                    (!isset($_GET['theology_exam_id'])) ||
+                    (!isset($_GET['theology_subject_id'])) ||
+                    (((int)($_GET['theology_subject_id'])) < 1) ||
+                    (((int)($_GET['theology_exam_id'])) < 1) ||
+                    (((int)($_GET['theology_class_id'])) < 1))
             ) {
                 $filter->expand();
             }
 
 
-            // Remove the default id filter 
+            // Remove the default id filter
             $filter->disableIdFilter();
             $ent = Admin::user()->ent;
             $year = $ent->dpYear();
             $term = $ent->active_term();
 
-            // Add a column filter 
+            // Add a column filter
             $u = Admin::user();
-            $filter->equal('academic_class_id', 'Filter by class')->select(AcademicClass::where([
+            $filter->equal('theology_class_id', 'Filter by class')->select(TheologyClass::where([
                 'enterprise_id' => $u->enterprise_id,
                 'academic_year_id' => $year->id
             ])
                 ->orderBy('id', 'Desc')
                 ->get()->pluck('name_text', 'id'));
 
-            $streams = [];
-            foreach (AcademicClassSctream::where(
-                [
-                    'enterprise_id' => $u->enterprise_id,
-                ]
-            )
-                ->orderBy('id', 'desc')
-                ->get() as $ex) {
-                $streams[$ex->id] = $ex->academic_class->short_name . " - " . $ex->name;
-            }
 
-            $filter->equal('academic_class_sctream_id', 'Filter by Stream')->select($streams);
-
-      /*       $exams = [];
-            foreach (TermlyReportCard::where([
+            /*             $exams = [];
+            foreach (TheologyTermlyReportCard::where([
                 'enterprise_id' => $u->enterprise_id,
                 'term_id' => $term->id,
             ])->get() as $ex) {
@@ -125,33 +165,46 @@ class MarkRecordController extends AdminController
             $filter->equal('termly_report_card_id', 'Filter by Report Card')->select($exams); */
 
             $subs = [];
-            foreach (Subject::where([
-                'enterprise_id' => $u->enterprise_id,
-            ])
-                ->orderBy('id', 'desc')
-                ->get() as $ex) {
-                if ($ex->academic_class == null) {
-                    continue;
+            $u = Admin::user();
+            $ent = Enterprise::find($u->enterprise_id);
+            $dpYear =  $ent->dpYear();
+            if ($dpYear == null) {
+                die("Display year not found.");
+            }
+            if (Admin::user()->isRole('dos')) {
+                foreach (TheologySubject::where([
+                    'enterprise_id' => $u->enterprise_id
+                ])
+                    ->orderBy('theology_course_id', 'asc')
+                    ->get() as $ex) {
+                    if ($ex->theology_class->academic_year_id != $dpYear->id) {
+                        continue;
+                    }
+                    $subs[$ex->id] = $ex->course->name . " - " . $ex->theology_class->name . " - " . $dpYear->name;
                 }
-                if ($ex->academic_class->academic_year_id != $year->id) {
-                    continue;
-                }
-
-
-                if (Admin::user()->isRole('dos')) {
-                    $subs[$ex->id] = $ex->subject_name . " - " . $ex->academic_class->name_text;
-                } else {
+            } else {
+                foreach (TheologySubject::where([
+                    'enterprise_id' => $u->enterprise_id
+                ])
+                    ->orderBy('theology_course_id', 'asc')
+                    ->get() as $ex) {
                     if (
                         $ex->subject_teacher == Admin::user()->id ||
                         $ex->teacher_1 == Admin::user()->id ||
                         $ex->teacher_2 == Admin::user()->id ||
                         $ex->teacher_3 == Admin::user()->id
                     ) {
-                        $subs[$ex->id] = $ex->subject_name . " - " . $ex->academic_class->name_text;
+                        if ($ex->theology_class->academic_year_id != $dpYear->id) {
+                            continue;
+                        }
+                        $subs[$ex->id] = $ex->course->name . " - " . $ex->theology_class->name . " - " . $dpYear->name;
                     }
                 }
             }
-            $filter->equal('subject_id', 'Filter by subject')->select($subs);
+
+
+
+            $filter->equal('theology_subject_id', 'Filter by subject')->select($subs);
 
 
             $u = Admin::user();
@@ -163,8 +216,23 @@ class MarkRecordController extends AdminController
                     . "&model=User"
             );
 
+
+            $streams = [];
+            foreach (TheologyStream::where(
+                [
+                    'enterprise_id' => $u->enterprise_id,
+                ]
+            )
+                ->orderBy('id', 'desc')
+                ->get() as $ex) { 
+                $streams[$ex->id] = $ex->theology_class->short_name . " - " . $ex->name;
+            }
+            $filter->equal('theology_stream_id', 'Filter by Stream')->select($streams);
+
             $filter->equal('administrator_id', 'Student')->select()->ajax($ajax_url);
         });
+
+
 
         $ent = Admin::user()->ent;
         $year = $ent->dpYear();
@@ -199,7 +267,10 @@ class MarkRecordController extends AdminController
             })
             ->sortable();
 
-        $grid->column('academic_class_sctream_id', __('Stream'))
+
+
+
+        $grid->column('theology_stream_id', __('Stream'))
             ->display(function ($academic_class_sctream_id) {
                 $stream_name = '-';
                 if ($this->stream != null) {
@@ -213,7 +284,7 @@ class MarkRecordController extends AdminController
             if ($this->subject == null) {
                 return '-';
             }
-            return $this->subject->subject_name;
+            return $this->subject->name;
         })->sortable();
 
         $grid->column('administrator_id', __('Student'))
@@ -328,7 +399,7 @@ class MarkRecordController extends AdminController
      */
     protected function detail($id)
     {
-        $show = new Show(MarkRecord::findOrFail($id));
+        $show = new Show(TheologyMarkRecord::findOrFail($id));
 
         $show->field('id', __('Id'));
         $show->field('created_at', __('Created at'));
@@ -363,7 +434,7 @@ class MarkRecordController extends AdminController
      */
     protected function form()
     {
-        $form = new Form(new MarkRecord());
+        $form = new Form(new TheologyMarkRecord());
 
         $form->number('enterprise_id', __('Enterprise id'));
         $form->number('termly_report_card_id', __('Termly report card id'));

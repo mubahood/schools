@@ -174,7 +174,7 @@ class TermlyReportCardController extends AdminController
 
         if ($form->isCreating()) {
             $form->select('term_id', __('Term'))->options($terms)
-                ->creationRules(['required', "unique:termly_report_cards"]);
+                ->creationRules(['required', "unique:termly_report_cards,term_id,NULL,id,enterprise_id,{$u->enterprise_id}"]);
         } else {
             $form->select('term_id', __('Term'))->options($terms)
                 ->readOnly();

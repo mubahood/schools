@@ -36,34 +36,11 @@ class TheologyMarkController extends AdminController
 
 
 
-
-        /*         
-
-
-
-
-
-"" => 1
-        "" => 1
-        "" => 1
-        "" => 2891
-        "teacher_id" => 3025
-        "score" => 0.0
-        "remarks" => ""
-        "is_submitted" => 0
-        "is_missed" => 1 
-        
-        */
+ 
         $grid = new Grid(new TheologyMark());
         $grid->disableActions();
         $grid->disableCreateButton();
-        /* foreach (Mark::where([
-            'theology_exam_id' => 5
-        ])->get() as $key => $v) {
-            $v->score = rand(1000, 10000) % 41;
-            $v->save();
-        } */
-
+     
         $subs_ids = [];
         $u = Admin::user(); 
         $ent = Enterprise::find($u->enterprise_id);
@@ -106,11 +83,7 @@ class TheologyMarkController extends AdminController
             'enterprise_id' => Admin::user()->enterprise_id,
         ])->orderBy('id', 'DESC');
 
-        if (!Admin::user()->isRole('dos')) {
-
-       /*        $grid->model()->where(
-                'theology_subject_id', 'in', '(89,98)' 
-            );  */
+        if (!Admin::user()->isRole('dos')) { 
             $grid->disableCreateButton();
             $grid->disableExport();
             $grid->disableActions();
@@ -142,11 +115,7 @@ class TheologyMarkController extends AdminController
             ])->orderBy('id', 'DESC');
         }
 
-        $grid->filter(function ($filter) {
-
-           
-
-
+        $grid->filter(function ($filter) { 
             if (
                 (!Admin::user()->isRole('dos')) &&
                 ((!isset($_GET['theology_class_id'])) ||

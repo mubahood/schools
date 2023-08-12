@@ -76,6 +76,12 @@ class TermlyReportCard extends Model
             }
         }
     }
+    
+    public function theology_classes()
+    {
+        return $this->hasMany(TheologyClass::class);
+    }
+
     public function mark_records()
     {
         return $this->hasMany(MarkRecord::class);
@@ -132,7 +138,7 @@ class TermlyReportCard extends Model
         set_time_limit(-1);
         ini_set('memory_limit', '-1');
         $ent = Enterprise::find($m->enterprise_id);
-        $year = Enterprise::find($m->academic_year_id);
+        $year = AcademicYear::find($m->academic_year_id);
         if ($year == null) {
             throw new \Exception("Academic year not found.");
         }
@@ -152,10 +158,6 @@ class TermlyReportCard extends Model
                     continue;
                 }
                 if ($student->status != 1) {
-                    continue;
-                }
-                if ($student->current_class == null) {
-                    $student_has_class->delete();
                     continue;
                 }
 
@@ -192,7 +194,7 @@ class TermlyReportCard extends Model
                         $markRecordOld->initials = $subject->teacher->get_initials();
                     }
 
-                    $markRecordOld->academic_class_sctream_id = $student->stream_id;
+                    $markRecordOld->academic_class_sctream_id = $student_has_class->stream_id; 
                     $markRecordOld->main_course_id = $subject->main_course_id;
                     try {
                         $markRecordOld->save();

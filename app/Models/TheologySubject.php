@@ -31,28 +31,28 @@ class TheologySubject extends Model
     function theology_class()
     {
         $c = TheologyClass::find($this->theology_class_id);
-        if($c == null){
-            dd("Class not found => ".  $this->theology_class_id);
+        if ($c == null) {
+            dd("Class not found => " .  $this->theology_class_id);
         }
 
-        return $this->belongsTo(TheologyClass::class,'theology_class_id');
+        return $this->belongsTo(TheologyClass::class, 'theology_class_id');
     }
 
     function course()
     {
         $c = TheologyCourse::find($this->theology_course_id);
-        if($c == null){
-            dd("Course not found => ".  $this->theology_course_id);
+        if ($c == null) {
+            dd("Course not found => " .  $this->theology_course_id);
         }
-        return $this->belongsTo(TheologyCourse::class,'theology_course_id');
+        return $this->belongsTo(TheologyCourse::class, 'theology_course_id');
     }
     function theology_course()
     {
         $c = TheologyCourse::find($this->theology_course_id);
-        if($c == null){
-            dd("Course not found => ".  $this->theology_course_id);
+        if ($c == null) {
+            dd("Course not found => " .  $this->theology_course_id);
         }
-        return $this->belongsTo(TheologyCourse::class,'theology_course_id');
+        return $this->belongsTo(TheologyCourse::class, 'theology_course_id');
     }
 
 
@@ -79,7 +79,7 @@ class TheologySubject extends Model
                 'theology_class_id' => $m->theology_class_id,
             ])->first();
             if ($current != null) {
-                throw('A certain subject can not be in same class twice.');
+                throw ('A certain subject can not be in same class twice.');
                 return false;
             }
         });
@@ -102,4 +102,14 @@ class TheologySubject extends Model
             die("You cannot delete this item.");
         });
     }
+
+    public function getNameAttribute()
+    {
+        $parent = TheologyCourse::find($this->theology_course_id);
+        if ($parent == null) {
+            return '-';
+        }
+        return $parent->name;
+    }
+    protected $appends = ['name'];
 }

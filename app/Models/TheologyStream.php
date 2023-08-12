@@ -14,4 +14,8 @@ class TheologyStream extends Model
         'name',
     ];
 
+    public function theology_class()
+    {
+        return $this->belongsTo(TheologyClass::class, 'theology_class_id',);
+    }
 }

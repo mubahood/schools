@@ -52,31 +52,26 @@ class TheologyTermlyReportCard extends Model
 
     public static function do_delete_marks_for_non_active($m)
     {
-        $non_active = DB::select("SELECT DISTINCT theology_mark_records.id FROM theology_mark_records,admin_users WHERE theology_mark_records.administrator_id = admin_users.id AND admin_users.status != 1 AND theology_mark_records.termly_report_card_id = ?", [$m->id]);
+        $non_active = DB::select("SELECT DISTINCT theology_mark_records.id FROM theology_mark_records,admin_users WHERE theology_mark_records.administrator_id = admin_users.id AND admin_users.status != 1 AND theology_mark_records.theology_termly_report_card_id = ?", [$m->id]);
         if ($non_active != null) {
             foreach ($non_active as $n) {
-                MarkRecord::find($n->id)->delete();
+                TheologyMarkRecord::find($n->id)->delete();
             }
         }
     }
 
     public static function do_generate_marks($m)
     {
-        die("Time to generate marks");
-
         set_time_limit(-1);
         ini_set('memory_limit', '-1');
         $ent = Enterprise::find($m->enterprise_id);
-        $year = Enterprise::find($m->academic_year_id);
+        $year = AcademicYear::find($m->academic_year_id);
         if ($year == null) {
             throw new \Exception("Academic year not found.");
         }
 
-        foreach ($m->term->academic_year->classes as $class) {
-
-            $subjects = Subject::where([
-                'academic_class_id' => $class->id,
-            ])->get();
+        foreach ($m->term->academic_year->theology_classes as $class) {
+            $subjects = $class->subjects;
             if ($subjects->count() < 1) {
                 continue;
             }
@@ -89,25 +84,21 @@ class TheologyTermlyReportCard extends Model
                 if ($student->status != 1) {
                     continue;
                 }
-                if ($student->current_class == null) {
-                    $student_has_class->delete();
-                    continue;
-                }
 
                 foreach ($subjects as $subject) {
-                    $markRecordOld = MarkRecord::where([
+                    $markRecordOld = TheologyMarkRecord::where([
                         'administrator_id' => $student->id,
                         'term_id' => $m->term_id,
-                        'subject_id' => $subject->id,
+                        'theology_subject_id' => $subject->id,
                     ])->first();
                     if ($markRecordOld == null) {
-                        $markRecordOld = new MarkRecord();
+                        $markRecordOld = new TheologyMarkRecord();
                         $markRecordOld->enterprise_id = $m->enterprise_id;
-                        $markRecordOld->termly_report_card_id = $m->id;
+                        $markRecordOld->theology_termly_report_card_id = $m->id;
                         $markRecordOld->term_id = $m->term_id;
-                        $markRecordOld->subject_id = $subject->id;
+                        $markRecordOld->theology_subject_id = $subject->id;
                         $markRecordOld->administrator_id = $student->id;
-                        $markRecordOld->academic_class_id = $class->id;
+                        $markRecordOld->theology_class_id = $class->id;
                         $markRecordOld->bot_score = 0;
                         $markRecordOld->mot_score = 0;
                         $markRecordOld->eot_score = 0;
@@ -123,12 +114,12 @@ class TheologyTermlyReportCard extends Model
                     } else {
                     }
 
+
                     if ($subject->teacher != null) {
                         $markRecordOld->initials = $subject->teacher->get_initials();
                     }
 
-                    $markRecordOld->academic_class_sctream_id = $student->stream_id;
-                    $markRecordOld->main_course_id = $subject->main_course_id;
+                    $markRecordOld->theology_stream_id = $student_has_class->theology_stream_id;
                     try {
                         $markRecordOld->save();
                     } catch (\Throwable $e) {
@@ -139,6 +130,15 @@ class TheologyTermlyReportCard extends Model
         }
     }
 
+    public function enterprise()
+    {
+        return $this->belongsTo(Enterprise::class);
+    }
+
+    public function mark_records()
+    {
+        return $this->hasMany(TheologyMarkRecord::class, 'theology_termly_report_card_id');
+    }
 
     public function term()
     {

@@ -26,62 +26,59 @@ class TheologyTermlyReportCardController extends AdminController
      * @return Grid
      */
     protected function grid()
-    {  /*
-     $x = TheologyTermlyReportCard::find(6); 
-     TheologyTermlyReportCard::my_update($x);
-     die("done");
-   
-        if($x == null){
-            die("not found"); 
-        }
-        foreach ($x->report_cards as $r) {
-            foreach ($r->items as $student_report) { 
-                $student_report->delete(); 
-                echo($student_report->id."<br>"); 
-            }
-            $r->delete();
-            echo($r->id."<br>");  
-            //echo($r->id."<br>");
-        }
-        
-        $x->delete();
-        dd($x->id); 
-        $x->do_update = 1;
-        $x->report_title .= rand(1, 10);
-        $x->save();  */
-
-        /* 
-        $r->report_title .= 1;
-        $r->save();
-        die("romina");    */
-        /*  
-        TheologyTermlyReportCard::grade_students($r);
-
-
-       $x = TermlyReportCard::find(1);
-        TermlyReportCard::grade_students($x);
-        die("Anjane");
-        $x->report_title = rand(1, 10);
-        $x->save(); 
- */
+    {
 
         $grid = new Grid(new TheologyTermlyReportCard());
 
 
+        $grid->actions(function ($actions) {
+            $actions->disableView();
+            $actions->disableDelete();
+        });
+
+        $grid->disableBatchActions();
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
         ])->orderBy('id', 'DESC');
 
-        $grid->column('id', __('Id'))->sortable();
-        $grid->column('academic_year_id', __('Academic year'));
-        $grid->column('term_id', __('Term'));
-        $grid->column('has_beginning_term', __('Has beginning term'))->bool();
-        $grid->column('has_mid_term', __('Has mid term'))->bool();
-        $grid->column('has_end_term', __('Has end term'))->bool();
-        $grid->column('report_title', __('Report title'));
+        $grid->column('id', __('ID'))->sortable();
+        $grid->column('academic_year.name', __('Academic Year'));
+        $grid->column('term.name', __('Term'));
+
+        $grid->column('report_title', __('Report title'))->hide();
+        $grid->column('marks', __('Marks'))->display(function () {
+            return number_format(count($this->mark_records));
+        });
+
+        $grid->column('bot', __('B.O.T'))->display(function () {
+            $total = count($this->mark_records);
+            $total_sub = count($this->mark_records->where('bot_is_submitted', 'Yes'));
+            $pecentage = ($total_sub / $total) * 100;
+            return number_format($total_sub) . " (" . number_format($pecentage) . "%)";
+        });
+
+
+        $grid->column('mot', __('M.O.T'))->display(function () {
+            $total = count($this->mark_records);
+            $total_mot = count($this->mark_records->where('mot_is_submitted', 'Yes'));
+            $pecentage = ($total_mot / $total) * 100;
+            return number_format($total_mot) . " (" . number_format($pecentage) . "%)";
+        });
+
+        $grid->column('eot', __('E.O.T'))->display(function () {
+            $total = count($this->mark_records);
+            $total_mot = count($this->mark_records->where('eot_is_submitted', 'Yes'));
+            $pecentage = ($total_mot / $total) * 100;
+            return number_format($total_mot) . " (" . number_format($pecentage) . "%)";
+        });
+
         $grid->column('report_cards', __('Report cards'))->display(function () {
             return count($this->report_cards);
         });
+
+        $grid->column('has_beginning_term', __('Has beginning term'))->bool()->hide();
+        $grid->column('has_mid_term', __('Has mid term'))->bool()->hide();
+        $grid->column('has_end_term', __('Has end term'))->bool()->hide();
 
         return $grid;
     }
@@ -118,6 +115,12 @@ class TheologyTermlyReportCardController extends AdminController
      */
     protected function form()
     {
+        /* $tr = TheologyTermlyReportCard::find(7);
+        //$tr->generate_marks = 'Yes';
+        $tr->hm_communication .= '1';
+        $tr->delete_marks_for_non_active = 'Yes';
+        $tr->save();
+        die(); */
         $form = new Form(new TheologyTermlyReportCard());
         $u = Admin::user();
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
@@ -143,7 +146,7 @@ class TheologyTermlyReportCardController extends AdminController
 
         if ($form->isCreating()) {
             $form->select('term_id', __('Term'))->options($terms)
-                ->creationRules(['required', "unique:termly_report_cards"]);
+                ->creationRules(['required', "unique:theology_termly_report_cards,term_id,NULL,id,enterprise_id,{$u->enterprise_id}"]);
         } else {
             $form->select('term_id', __('Term'))->options($terms)
                 ->readOnly();
@@ -198,7 +201,9 @@ class TheologyTermlyReportCardController extends AdminController
                 ->default('No');
             $form->divider('Reports Settings');
             $form->text('report_title', __('Report title'));
-            $form->select('grading_scale_id', __('Grading scale'))->options($scales)->required();
+            $form->select('grading_scale_id', __('Grading scale'))->options($scales)
+                ->default(1)
+                ->required();
 
             $form->radioCard('reports_generate', 'Generate reports?')
                 ->options(['Yes' => 'Yes', 'No' => 'No'])
