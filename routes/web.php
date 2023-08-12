@@ -44,6 +44,7 @@ Route::get('/temps', function () {
     'transfered' => 'No',
     'enterprise_id' => 13,
   ])->get();
+  dd(count($marks));  
   foreach ($marks as $mark) {
     $exam = $mark->exam;
     if ($exam == null) {
