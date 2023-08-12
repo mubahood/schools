@@ -122,7 +122,7 @@ class MarkRecordController extends AdminController
                 $exams[$ex->id] = $ex->report_title;
             }
 
-            $filter->equal('temly_report_card_id', 'Filter by Report Card')->select($exams);
+            $filter->equal('termly_report_card_id', 'Filter by Report Card')->select($exams);
 
             $subs = [];
             foreach (Subject::where([
