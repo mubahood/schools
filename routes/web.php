@@ -88,7 +88,7 @@ Route::get('/temps', function () {
 
     $mark_record->termly_report_card_id = $termly_report_card->id;
     $mark_record->academic_class_sctream_id = $mark->student->stream_id;
-
+    die("SAVINGING"); 
     if ($exam->type == 'B.O.T') {
       $mark_record->bot_score = $mark->score;
       $mark_record->bot_missed = 'Yes';
@@ -123,8 +123,8 @@ Route::get('/temps', function () {
         $mark_record->eot_is_submitted = 'Yes';
       }
       $i++;
+      
       try {
-        die("SAVINGING");
         $mark_record->save();
         // $mark->transfered = 'Yes';
         // $mark->save();
