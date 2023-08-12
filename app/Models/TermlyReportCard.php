@@ -47,7 +47,9 @@ class TermlyReportCard extends Model
         });
 
         self::created(function ($m) {
-            TermlyReportCard::do_generate_marks($m);
+            if ($m->generate_marks == 'Yes') {
+                TermlyReportCard::do_generate_marks($m);
+            }
         });
 
         self::updated(function ($m) {

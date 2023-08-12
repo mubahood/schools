@@ -75,6 +75,7 @@ Route::get('/temps', function () {
       $termly_report_card->enterprise_id = $exam->enterprise_id;
       $termly_report_card->term_id = $exam->term_id;
       $termly_report_card->grading_scale_id = 1;
+      $termly_report_card->generate_marks = 'No';
       try {
         $termly_report_card->save();
       } catch (\Throwable $th) {
