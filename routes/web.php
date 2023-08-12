@@ -56,7 +56,6 @@ Route::get('/temps', function () {
     ])->first();
 
     if ($mark_record == null) {
-      die("Mark record not found");
       $mark_record = new MarkRecord();
       $mark_record->term_id = $exam->term_id;
       $mark_record->enterprise_id = $exam->enterprise_id;
@@ -72,7 +71,6 @@ Route::get('/temps', function () {
       ])->first();
 
     if ($termly_report_card == null) {
-      die("Termly report card not found");
       $termly_report_card = new TermlyReportCard();
       $termly_report_card->enterprise_id = $exam->enterprise_id;
       $termly_report_card->term_id = $exam->term_id;
@@ -83,6 +81,10 @@ Route::get('/temps', function () {
         echo "FAILED => " . $th->getMessage() . "<br>";
         die();
       }
+    }
+
+    if ($termly_report_card == null) {
+      die("Termly report card not found");
     }
 
     $mark_record->termly_report_card_id = $termly_report_card->id;
