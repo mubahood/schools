@@ -237,7 +237,7 @@ class TheologyMarkRecordController extends AdminController
         $ent = Admin::user()->ent;
         $year = $ent->dpYear();
         $term = $ent->active_term();
-        $reportCard = TermlyReportCard::where([
+        $reportCard = TheologyTermlyReportCard::where([
             'enterprise_id' => Admin::user()->enterprise_id,
             'term_id' => $term->id,
         ])->first();
