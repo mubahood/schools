@@ -16,7 +16,7 @@ class TheologyMarkRecord extends Model
     {
         parent::boot();
         self::creating(function ($m) {
-            $old = TheologyMark::where([
+            $old = TheologyMarkRecord::where([
                 //'termly_report_card_id' => $m->termly_report_card_id,
                 'term_id' => $m->term_id,
                 'theology_subject_id' => $m->theology_subject_id,
