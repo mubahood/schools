@@ -43,8 +43,7 @@ Route::get('/temps', function () {
   $marks = Mark::where([
     'transfered' => 'No',
     'enterprise_id' => 13,
-  ])->get();
-  dd(count($marks));  
+  ])->get();  
   foreach ($marks as $mark) {
     $exam = $mark->exam;
     if ($exam == null) {
@@ -58,6 +57,7 @@ Route::get('/temps', function () {
     ])->first();
 
     if ($mark_record == null) {
+      die("Mark record not found");
       $mark_record = new MarkRecord();
       $mark_record->term_id = $exam->term_id;
       $mark_record->enterprise_id = $exam->enterprise_id;
@@ -66,6 +66,7 @@ Route::get('/temps', function () {
       $mark_record->academic_class_id = $mark->class_id;
       $mark_record->main_course_id = $mark->student->main_course_id;
     }
+    die("Mark record found");
 
     $termly_report_card = TermlyReportCard::where([
       'term_id' => $exam->term_id,
