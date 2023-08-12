@@ -43,7 +43,7 @@ Route::get('/temps', function () {
   $marks = Mark::where([
     'transfered' => 'No',
     'enterprise_id' => 13,
-  ])->get();  
+  ])->get();
   foreach ($marks as $mark) {
     $exam = $mark->exam;
     if ($exam == null) {
@@ -88,7 +88,6 @@ Route::get('/temps', function () {
 
     $mark_record->termly_report_card_id = $termly_report_card->id;
     $mark_record->academic_class_sctream_id = $mark->student->stream_id;
-    die("SAVINGING"); 
     if ($exam->type == 'B.O.T') {
       $mark_record->bot_score = $mark->score;
       $mark_record->bot_missed = 'Yes';
@@ -122,18 +121,18 @@ Route::get('/temps', function () {
       if ($mark->is_submitted == 1) {
         $mark_record->eot_is_submitted = 'Yes';
       }
-      $i++;
-      
-      try {
-        $mark_record->save();
-        // $mark->transfered = 'Yes';
-        // $mark->save();
-        DB::update('update marks set transfered = "Yes" where id = ?', [$mark->id]);
-        echo "$i. TRANSFERED " . $mark->id . " -> " . $mark->student->name . ' - ' . $mark->student->name . "<br>";
-      } catch (\Throwable $th) {
-        die("FAILED SAVINGING");
-        echo "$i. FAILED => " . $th->getMessage() . $mark->id . " -> " . $mark->student->name . ' - ' . $mark->student->name . "<br>";
-      }
+    }
+
+    $i++;
+    try {
+      $mark_record->save();
+      // $mark->transfered = 'Yes';
+      // $mark->save();
+      DB::update('update marks set transfered = "Yes" where id = ?', [$mark->id]);
+      echo "$i. TRANSFERED " . $mark->id . " -> " . $mark->student->name . ' - ' . $mark->student->name . "<br>";
+    } catch (\Throwable $th) {
+      die("FAILED SAVINGING");
+      echo "$i. FAILED => " . $th->getMessage() . $mark->id . " -> " . $mark->student->name . ' - ' . $mark->student->name . "<br>";
     }
   }
   die("======DONE-1======");
