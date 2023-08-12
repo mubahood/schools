@@ -146,7 +146,7 @@ class TheologyTermlyReportCardController extends AdminController
 
         if ($form->isCreating()) {
             $form->select('term_id', __('Term'))->options($terms)
-                ->creationRules(['required', "unique:theology_termly_report_cards,term_id,NULL,id,enterprise_id,{$u->enterprise_id}"]);
+                ->creationRules(['required']);
         } else {
             $form->select('term_id', __('Term'))->options($terms)
                 ->readOnly();
