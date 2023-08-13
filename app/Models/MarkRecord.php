@@ -46,7 +46,7 @@ class MarkRecord extends Model
     {
         return $this->belongsTo(AcademicClass::class);
     }
-
+ 
     public function termlyReportCard()
     {
         return $this->belongsTo(TermlyReportCard::class);

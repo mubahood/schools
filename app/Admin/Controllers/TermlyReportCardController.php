@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Models\AcademicClass;
 use App\Models\GradingScale;
 use App\Models\StudentReportCard;
 use App\Models\Term;
@@ -28,6 +29,14 @@ class TermlyReportCardController extends AdminController
      */
     protected function grid()
     {
+
+
+        // $x = TermlyReportCard::find(8);
+        // $x->reports_generate = 'No';
+        // $x->reports_include_bot = 'Yes';
+        // $x->hm_communication .= '1';
+        // $x->save();
+        // dd($x);
 
 
         $grid = new Grid(new TermlyReportCard());
@@ -233,19 +242,38 @@ class TermlyReportCardController extends AdminController
 
             $form->radioCard('reports_generate', 'Generate reports?')
                 ->options(['Yes' => 'Yes', 'No' => 'No'])
-                ->default('No');
+                ->default('No')
+                ->when('Yes', function (Form $form) {
+                    $u = Admin::user();
+                    $year = $u->ent->active_academic_year();
+                    $academicClasses = AcademicClass::where([
+                        'enterprise_id' => $u->enterprise_id,
+                        'academic_year_id' => $year->id,
+                    ])
+                        ->orderBy('id', 'DESC')
+                        ->get();
+                    $classes = [];
+                    foreach ($academicClasses as  $v) {
+                        $classes[$v->id] = $v->name_text;
+                    }
+                    $form->multipleSelect('classes', 'Generate reports for which classes?')
+                        ->options($classes);
+
+                    $form->radioCard('reports_include_bot', 'Include Beginning Of Term marks in reports?')
+                        ->options(['Yes' => 'Yes', 'No' => 'No'])
+                        ->default('No');
+                    $form->radioCard('reports_include_mot', 'Include Middle Of Term marks in reports?')
+                        ->options(['Yes' => 'Yes', 'No' => 'No'])
+                        ->default('No');
+                    $form->radioCard('reports_include_eot', 'Include End Of Term marks in reports?')
+                        ->options(['Yes' => 'Yes', 'No' => 'No'])
+                        ->default('No');
+                });
+
             $form->radioCard('reports_delete_for_non_active', 'Delete reports for non active students?')
                 ->options(['Yes' => 'Yes', 'No' => 'No'])
                 ->default('No');
-            $form->radioCard('reports_include_bot', 'Include Beginning Of Term marks in reports?')
-                ->options(['Yes' => 'Yes', 'No' => 'No'])
-                ->default('No');
-            $form->radioCard('reports_include_mot', 'Include Middle Of Term marks in reports?')
-                ->options(['Yes' => 'Yes', 'No' => 'No'])
-                ->default('No');
-            $form->radioCard('reports_include_eot', 'Include End Of Term marks in reports?')
-                ->options(['Yes' => 'Yes', 'No' => 'No'])
-                ->default('No');
+
             $form->divider('Reports Display Settings');
             $form->radioCard('reports_who_fees_balance', 'Who should see fees balance in reports?')
                 ->options(['All' => 'All', 'Verified' => 'Verified Balance Only', 'None' => 'None'])

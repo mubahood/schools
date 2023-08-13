@@ -46,6 +46,29 @@ class PrintController2 extends Controller
         ini_set('display_startup_errors', 1);
         error_reporting(E_ALL);
 
+        if (
+            isset($_GET['academic_class_id']) &&
+            isset($_GET['report_card_id'])
+        ) {
+            die("time to print batch");
+        } else if (isset($_GET['id'])) {
+            $student_report_card = StudentReportCard::find($_GET['id']);
+            if ($student_report_card == null || $student_report_card->termly_report_card == null) {
+                die("No report card found");
+            }
+            if ($student_report_card->termly_report_card->reports_template == 'template_1') {
+                $pdf = App::make('dompdf.wrapper');
+                $pdf->loadHTML(view('report-cards.template-1.print', ['items' => [$student_report_card]]));
+                return $pdf->stream();
+            } else {
+                $pdf = App::make('dompdf.wrapper');
+                $pdf->loadHTML(view('report-cards.template-1.print', ['items' => [$student_report_card]]));
+                return $pdf->stream();
+            }
+        }
+
+        die("Nothing to print.");
+
         $term_id = 0;
         if (isset($_GET['term_id'])) {
             $term_id = (int)($_GET['term_id']);

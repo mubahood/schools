@@ -21,7 +21,7 @@ class StudentReportCard extends Model
     {
 
         parent::boot();
-        self::updating(function ($m) {
+        /*       self::updating(function ($m) {
             $stream = StudentHasClass::where([
                 'academic_class_id' => $m->academic_class_id,
                 'administrator_id' => $m->student_id
@@ -35,10 +35,10 @@ class StudentReportCard extends Model
                 }
             }
             return $m;
-        });
+        }); */
         self::updating(function ($m) {
 
-            $stream = StudentHasClass::where([
+            /*     $stream = StudentHasClass::where([
                 'academic_class_id' => $m->academic_class_id,
                 'administrator_id' => $m->student_id
             ])
@@ -60,7 +60,7 @@ class StudentReportCard extends Model
                 $m->head_teacher_commented = 0;
             } else {
                 $m->head_teacher_commented = 1;
-            }
+            } */
         });
     }
 

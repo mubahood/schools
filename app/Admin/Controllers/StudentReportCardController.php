@@ -332,7 +332,7 @@ class StudentReportCardController extends AdminController
 
         $grid->column('student_id', __('Student'))->display(function () {
 
-            if ($this->total_marks < 1) {
+            /* if ($this->total_marks < 1) {
                 TermlyReportCard::preocess_report_card($this);
             }
             if ($this->total_marks < 1) {
@@ -342,7 +342,7 @@ class StudentReportCardController extends AdminController
             if ($this->owner == null) {
                 $this->delete();
                 return "-";
-            }
+            } */
 
             return $this->owner->name;
         });

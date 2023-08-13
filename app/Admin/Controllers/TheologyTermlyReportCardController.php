@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Models\GradingScale;
 use App\Models\Term;
+use App\Models\TheologyClass;
 use App\Models\TheologyTermlyReportCard;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -52,7 +53,7 @@ class TheologyTermlyReportCardController extends AdminController
 
         $grid->column('bot', __('B.O.T'))->display(function () {
             $total = count($this->mark_records);
-            if($total == 0) return "0 (0%)";
+            if ($total == 0) return "0 (0%)";
             $total_sub = count($this->mark_records->where('bot_is_submitted', 'Yes'));
             $pecentage = ($total_sub / $total) * 100;
             return number_format($total_sub) . " (" . number_format($pecentage) . "%)";
@@ -61,7 +62,7 @@ class TheologyTermlyReportCardController extends AdminController
 
         $grid->column('mot', __('M.O.T'))->display(function () {
             $total = count($this->mark_records);
-            if($total == 0) return "0 (0%)";
+            if ($total == 0) return "0 (0%)";
             $total_mot = count($this->mark_records->where('mot_is_submitted', 'Yes'));
             $pecentage = ($total_mot / $total) * 100;
             return number_format($total_mot) . " (" . number_format($pecentage) . "%)";
@@ -69,7 +70,7 @@ class TheologyTermlyReportCardController extends AdminController
 
         $grid->column('eot', __('E.O.T'))->display(function () {
             $total = count($this->mark_records);
-            if($total == 0) return "0 (0%)"; 
+            if ($total == 0) return "0 (0%)";
             $total_mot = count($this->mark_records->where('eot_is_submitted', 'Yes'));
             $pecentage = ($total_mot / $total) * 100;
             return number_format($total_mot) . " (" . number_format($pecentage) . "%)";
@@ -118,12 +119,16 @@ class TheologyTermlyReportCardController extends AdminController
      */
     protected function form()
     {
-        /* $tr = TheologyTermlyReportCard::find(7);
+        //$tr = TheologyTermlyReportCard::find(7);
         //$tr->generate_marks = 'Yes';
-        $tr->hm_communication .= '1';
-        $tr->delete_marks_for_non_active = 'Yes';
-        $tr->save();
-        die(); */
+        // $tr->hm_communication .= '1';
+        // $tr->reports_generate = 'Yes';
+        // $tr->reports_include_bot = 'Yes';
+        // $tr->bot_max = 100;
+        // $tr->mot_max = 100;
+        // $tr->eot_max = 100;
+        // $tr->save();
+        // die('DONE');
         $form = new Form(new TheologyTermlyReportCard());
         $u = Admin::user();
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
@@ -158,6 +163,7 @@ class TheologyTermlyReportCardController extends AdminController
         $form->disableReset();
         $form->disableViewCheck();
 
+
         if ($form->isEditing()) {
             $form->tools(function (Form\Tools $tools) {
                 $tools->disableDelete();
@@ -170,9 +176,9 @@ class TheologyTermlyReportCardController extends AdminController
             $form->radioCard('delete_marks_for_non_active', 'Delete marks for non active students?')
                 ->options(['Yes' => 'Yes', 'No' => 'No'])
                 ->default('No');
-            $form->decimal('bot_max', __('Max marks for Beginning Of Term exams'))->default(0);
-            $form->decimal('mot_max', __('Max marks for Middle Of Term exams'))->default(0);
-            $form->decimal('eot_max', __('Max marks for End Of Term exams'))->default(0);
+            $form->decimal('bot_max', __('Max marks for Beginning Of Term exams'))->default(100);
+            $form->decimal('mot_max', __('Max marks for Middle Of Term exams'))->default(100);
+            $form->decimal('eot_max', __('Max marks for End Of Term exams'))->default(100);
             $form->divider('Marks Display Settings');
             $form->radioCard('display_bot_to_teachers', 'Display Beginning Of Term marks to teachers?')
                 ->options(['Yes' => 'Yes', 'No' => 'No'])
@@ -204,25 +210,42 @@ class TheologyTermlyReportCardController extends AdminController
                 ->default('No');
             $form->divider('Reports Settings');
             $form->text('report_title', __('Report title'));
-            $form->select('grading_scale_id', __('Grading scale'))->options($scales)
-                ->default(1)
-                ->required();
+            $form->select('grading_scale_id', __('Grading scale'))->options($scales)->required();
 
             $form->radioCard('reports_generate', 'Generate reports?')
                 ->options(['Yes' => 'Yes', 'No' => 'No'])
-                ->default('No');
+                ->default('No')
+                ->when('Yes', function (Form $form) {
+                    $u = Admin::user();
+                    $year = $u->ent->active_academic_year();
+                    $academicClasses = TheologyClass::where([
+                        'enterprise_id' => $u->enterprise_id,
+                        'academic_year_id' => $year->id,
+                    ])
+                        ->orderBy('id', 'DESC')
+                        ->get();
+                    $classes = [];
+                    foreach ($academicClasses as  $v) {
+                        $classes[$v->id] = $v->name_text;
+                    }
+                    $form->multipleSelect('classes', 'Generate reports for which classes?')
+                        ->options($classes);
+
+                    $form->radioCard('reports_include_bot', 'Include Beginning Of Term marks in reports?')
+                        ->options(['Yes' => 'Yes', 'No' => 'No'])
+                        ->default('No');
+                    $form->radioCard('reports_include_mot', 'Include Middle Of Term marks in reports?')
+                        ->options(['Yes' => 'Yes', 'No' => 'No'])
+                        ->default('No');
+                    $form->radioCard('reports_include_eot', 'Include End Of Term marks in reports?')
+                        ->options(['Yes' => 'Yes', 'No' => 'No'])
+                        ->default('No');
+                });
+
             $form->radioCard('reports_delete_for_non_active', 'Delete reports for non active students?')
                 ->options(['Yes' => 'Yes', 'No' => 'No'])
                 ->default('No');
-            $form->radioCard('reports_include_bot', 'Include Beginning Of Term marks in reports?')
-                ->options(['Yes' => 'Yes', 'No' => 'No'])
-                ->default('No');
-            $form->radioCard('reports_include_mot', 'Include Middle Of Term marks in reports?')
-                ->options(['Yes' => 'Yes', 'No' => 'No'])
-                ->default('No');
-            $form->radioCard('reports_include_eot', 'Include End Of Term marks in reports?')
-                ->options(['Yes' => 'Yes', 'No' => 'No'])
-                ->default('No');
+
             $form->divider('Reports Display Settings');
             $form->radioCard('reports_who_fees_balance', 'Who should see fees balance in reports?')
                 ->options(['All' => 'All', 'Verified' => 'Verified Balance Only', 'None' => 'None'])
