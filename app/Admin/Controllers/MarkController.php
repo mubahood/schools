@@ -60,7 +60,6 @@ class MarkController extends AdminController
                 (!isset($_GET['exam_id'])) ||
                 (!isset($_GET['subject_id'])) ||
                 (((int)($_GET['subject_id'])) < 1) ||
-                (((int)($_GET['exam_id'])) < 1) ||
                 (((int)($_GET['class_id'])) < 1))
         ) {
             admin_success(
@@ -80,8 +79,7 @@ class MarkController extends AdminController
                 ((!isset($_GET['class_id'])) ||
                     (!isset($_GET['exam_id'])) ||
                     (!isset($_GET['subject_id'])) ||
-                    (((int)($_GET['subject_id'])) < 1) ||
-                    (((int)($_GET['exam_id'])) < 1) ||
+                    (((int)($_GET['subject_id'])) < 1) || 
                     (((int)($_GET['class_id'])) < 1))
             ) {
                 $filter->expand();

@@ -36,18 +36,18 @@ class TheologyMarkController extends AdminController
 
 
 
- 
+
         $grid = new Grid(new TheologyMark());
         $grid->disableActions();
         $grid->disableCreateButton();
-     
+
         $subs_ids = [];
-        $u = Admin::user(); 
+        $u = Admin::user();
         $ent = Enterprise::find($u->enterprise_id);
         $dpYear =  $ent->dpYear();
         if ($dpYear == null) {
             die("Display year not found.");
-        } 
+        }
         if (Admin::user()->isRole('dos')) {
             foreach (TheologySubject::where([
                 'enterprise_id' => $u->enterprise_id
@@ -69,21 +69,21 @@ class TheologyMarkController extends AdminController
                     $ex->subject_teacher == Admin::user()->id ||
                     $ex->teacher_1 == Admin::user()->id ||
                     $ex->teacher_2 == Admin::user()->id ||
-                    $ex->teacher_3 == Admin::user()->id 
-                    ) {
+                    $ex->teacher_3 == Admin::user()->id
+                ) {
                     if ($ex->theology_class->academic_year_id != $dpYear->id) {
                         continue;
                     }
-                    $subs_ids[] = $ex->id; 
+                    $subs_ids[] = $ex->id;
                 }
             }
         }
-        
+
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
         ])->orderBy('id', 'DESC');
 
-        if (!Admin::user()->isRole('dos')) { 
+        if (!Admin::user()->isRole('dos')) {
             $grid->disableCreateButton();
             $grid->disableExport();
             $grid->disableActions();
@@ -99,12 +99,10 @@ class TheologyMarkController extends AdminController
 
         if (
             (!Admin::user()->isRole('dos')) &&
-            ((!isset($_GET['theology_class_id'])) ||
-                (!isset($_GET['theology_exam_id'])) ||
+            (
                 (!isset($_GET['theology_subject_id'])) ||
-                (((int)($_GET['theology_subject_id'])) < 1) ||
-                (((int)($_GET['theology_exam_id'])) < 1) ||
-                (((int)($_GET['theology_class_id'])) < 1))
+                (((int)($_GET['theology_subject_id'])) < 1)
+            )
         ) {
             admin_success(
                 'Alert',
@@ -115,15 +113,12 @@ class TheologyMarkController extends AdminController
             ])->orderBy('id', 'DESC');
         }
 
-        $grid->filter(function ($filter) { 
+        $grid->filter(function ($filter) {
             if (
                 (!Admin::user()->isRole('dos')) &&
-                ((!isset($_GET['theology_class_id'])) ||
-                    (!isset($_GET['theology_exam_id'])) ||
+                (
                     (!isset($_GET['theology_subject_id'])) ||
-                    (((int)($_GET['theology_subject_id'])) < 1) ||
-                    (((int)($_GET['theology_exam_id'])) < 1) ||
-                    (((int)($_GET['theology_class_id'])) < 1))
+                    (((int)($_GET['theology_subject_id'])) < 1)
             ) {
                 $filter->expand();
             }
@@ -155,12 +150,12 @@ class TheologyMarkController extends AdminController
             $filter->equal('theology_exam_id', 'Filter by exam')->select($exams);
 
             $subs = [];
-            $u = Admin::user(); 
+            $u = Admin::user();
             $ent = Enterprise::find($u->enterprise_id);
             $dpYear =  $ent->dpYear();
             if ($dpYear == null) {
                 die("Display year not found.");
-            } 
+            }
             if (Admin::user()->isRole('dos')) {
                 foreach (TheologySubject::where([
                     'enterprise_id' => $u->enterprise_id
@@ -182,17 +177,17 @@ class TheologyMarkController extends AdminController
                         $ex->subject_teacher == Admin::user()->id ||
                         $ex->teacher_1 == Admin::user()->id ||
                         $ex->teacher_2 == Admin::user()->id ||
-                        $ex->teacher_3 == Admin::user()->id 
-                        ) {
+                        $ex->teacher_3 == Admin::user()->id
+                    ) {
                         if ($ex->theology_class->academic_year_id != $dpYear->id) {
                             continue;
                         }
-                        $subs[$ex->id] = $ex->course->name . " - " . $ex->theology_class->name . " - " . $dpYear->name; 
+                        $subs[$ex->id] = $ex->course->name . " - " . $ex->theology_class->name . " - " . $dpYear->name;
                     }
                 }
             }
-            
-        
+
+
 
             $filter->equal('theology_subject_id', 'Filter by subject')->select($subs);
 

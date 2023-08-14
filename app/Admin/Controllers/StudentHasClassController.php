@@ -93,6 +93,20 @@ class StudentHasClassController extends AdminController
                 'enterprise_id' => $u->enterprise_id
             ])->orderBy('id', 'Desc')->get()->pluck('name_text', 'id'));
 
+            $streams = [];
+            foreach (AcademicClassSctream::where(
+                [
+                    'enterprise_id' => $u->enterprise_id,
+                ]
+            )
+                ->orderBy('id', 'desc')
+                ->get() as $ex) {
+                $streams[$ex->id] = $ex->academic_class->short_name . " - " . $ex->name;
+            }
+
+            $filter->equal('stream_id', 'Filter by Stream')->select($streams);
+            
+
             $filter->equal('academic_year_id', 'Filter by academic year')->select(AcademicYear::where([
                 'enterprise_id' => $u->enterprise_id
             ])->orderBy('id', 'Desc')->get()->pluck('name', 'id'));

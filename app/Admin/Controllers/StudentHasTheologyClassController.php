@@ -8,6 +8,7 @@ use App\Models\AcademicYear;
 use App\Models\Course;
 use App\Models\StudentHasTheologyClass;
 use App\Models\StudentHasOptionalSubject;
+use App\Models\TheologyStream;
 use App\Models\User;
 use App\Models\Utils;
 use Dflydev\DotAccessData\Util;
@@ -77,6 +78,19 @@ class StudentHasTheologyClassController extends AdminController
             $filter->equal('theology_class_id', 'Filter by class')->select(TheologyClass::where([
                 'enterprise_id' => $u->enterprise_id
             ])->orderBy('id', 'Desc')->get()->pluck('name_text', 'id'));
+
+            $streams = [];
+            foreach (TheologyStream::where(
+                [
+                    'enterprise_id' => $u->enterprise_id,
+                ]
+            )
+                ->orderBy('id', 'desc')
+                ->get() as $ex) { 
+                $streams[$ex->id] = $ex->theology_class->short_name . " - " . $ex->name;
+            }
+            $filter->equal('theology_stream_id', 'Filter by Stream')->select($streams);
+
 
 
             $u = Admin::user();

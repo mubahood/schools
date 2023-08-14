@@ -54,12 +54,10 @@ class MarkRecordController extends AdminController
 
         if (
             (!Admin::user()->isRole('dos')) &&
-            ((!isset($_GET['academic_class_id'])) ||
-                (!isset($_GET['exam_id'])) ||
+            (
                 (!isset($_GET['subject_id'])) ||
-                (((int)($_GET['subject_id'])) < 1) ||
-                (((int)($_GET['exam_id'])) < 1) ||
-                (((int)($_GET['academic_class_id'])) < 1))
+                (((int)($_GET['subject_id'])) < 1)
+            )
         ) {
             admin_success(
                 'Alert',
@@ -75,12 +73,8 @@ class MarkRecordController extends AdminController
 
             if (
                 (!Admin::user()->isRole('dos')) &&
-                ((!isset($_GET['academic_class_id'])) ||
-                    (!isset($_GET['exam_id'])) ||
-                    (!isset($_GET['subject_id'])) ||
-                    (((int)($_GET['subject_id'])) < 1) ||
-                    (((int)($_GET['exam_id'])) < 1) ||
-                    (((int)($_GET['academic_class_id'])) < 1))
+                (!isset($_GET['subject_id'])) ||
+                (((int)($_GET['subject_id'])) < 1)
             ) {
                 $filter->expand();
             }
@@ -114,7 +108,7 @@ class MarkRecordController extends AdminController
 
             $filter->equal('academic_class_sctream_id', 'Filter by Stream')->select($streams);
 
-      /*       $exams = [];
+            /*       $exams = [];
             foreach (TermlyReportCard::where([
                 'enterprise_id' => $u->enterprise_id,
                 'term_id' => $term->id,
