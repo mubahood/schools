@@ -76,11 +76,8 @@ class MarkController extends AdminController
 
             if (
                 (!Admin::user()->isRole('dos')) &&
-                ((!isset($_GET['class_id'])) ||
-                    (!isset($_GET['exam_id'])) ||
-                    (!isset($_GET['subject_id'])) ||
-                    (((int)($_GET['subject_id'])) < 1) || 
-                    (((int)($_GET['class_id'])) < 1))
+                (
+                    (!isset($_GET['subject_id'])) 
             ) {
                 $filter->expand();
             }

@@ -55,8 +55,7 @@ class MarkRecordController extends AdminController
         if (
             (!Admin::user()->isRole('dos')) &&
             (
-                (!isset($_GET['subject_id'])) ||
-                (((int)($_GET['subject_id'])) < 1)
+                (!isset($_GET['subject_id']))
             )
         ) {
             admin_success(
@@ -73,8 +72,7 @@ class MarkRecordController extends AdminController
 
             if (
                 (!Admin::user()->isRole('dos')) &&
-                (!isset($_GET['subject_id'])) ||
-                (((int)($_GET['subject_id'])) < 1)
+                (!isset($_GET['subject_id']))
             ) {
                 $filter->expand();
             }
