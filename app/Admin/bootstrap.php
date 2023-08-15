@@ -23,6 +23,7 @@ use App\Admin\Extensions\Nav\Shortcut;
 use App\Admin\Extensions\Nav\Dropdown;
 use App\Models\Enterprise;
 use App\Models\MainCourse;
+use App\Models\MarkRecord;
 use App\Models\ParentCourse;
 use App\Models\Term;
 use App\Models\Transaction;
@@ -33,6 +34,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
+
+MarkRecord::where('bot_score', '>', 0)->update([
+    'bot_is_submitted' => 'Yes'
+]);
+MarkRecord::where('mot_score', '>', 0)->update([
+    'mot_is_submitted' => 'Yes'
+]);
+MarkRecord::where('eot_score', '>', 0)->update([
+    'eot_is_submitted' => 'Yes'
+]); 
 
 
 
@@ -51,7 +62,7 @@ Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
 
 
 
-    $u = Auth::user(); 
+    $u = Auth::user();
 
 
     if ($u != null) {

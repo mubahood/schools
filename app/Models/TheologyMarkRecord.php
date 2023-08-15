@@ -28,6 +28,16 @@ class TheologyMarkRecord extends Model
         });
 
         self::updating(function ($m) {
+            if (((int)($m->bot_score)) > 0) {
+                $m->bot_is_submitted = 'Yes';
+            }
+            if (((int)($m->mot_score)) > 0) {
+                $m->mot_is_submitted = 'Yes';
+            }
+            if (((int)($m->eot_score)) > 0) {
+                $m->eot_is_submitted = 'Yes';
+            }
+            return $m;
         });
     }
 
