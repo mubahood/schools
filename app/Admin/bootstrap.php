@@ -34,20 +34,7 @@ use Illuminate\Console\Scheduling\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-
-
-TheologyMarkRecord::where('bot_score', '>', 0)->update([
-    'bot_is_submitted' => 'Yes'
-]);
-TheologyMarkRecord::where('mot_score', '>', 0)->update([
-    'mot_is_submitted' => 'Yes'
-]); 
-TheologyMarkRecord::where('eot_score', '>', 0)->update([
-    'eot_is_submitted' => 'Yes'
-]); 
-
-
-
+ 
 
 Encore\Admin\Form::forget(['map', 'editor']);
 
