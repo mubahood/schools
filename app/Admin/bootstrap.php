@@ -26,6 +26,7 @@ use App\Models\MainCourse;
 use App\Models\MarkRecord;
 use App\Models\ParentCourse;
 use App\Models\Term;
+use App\Models\TheologyMarkRecord;
 use App\Models\Transaction;
 use App\Models\Utils;
 use Encore\Admin\Auth\Database\Administrator;
@@ -35,13 +36,13 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 
-MarkRecord::where('bot_score', '>', 0)->update([
+TheologyMarkRecord::where('bot_score', '>', 0)->update([
     'bot_is_submitted' => 'Yes'
 ]);
-MarkRecord::where('mot_score', '>', 0)->update([
+TheologyMarkRecord::where('mot_score', '>', 0)->update([
     'mot_is_submitted' => 'Yes'
 ]);
-MarkRecord::where('eot_score', '>', 0)->update([
+TheologyMarkRecord::where('eot_score', '>', 0)->update([
     'eot_is_submitted' => 'Yes'
 ]); 
 
