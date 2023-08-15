@@ -41,7 +41,7 @@ TheologyMarkRecord::where('bot_score', '>', 0)->update([
 ]);
 TheologyMarkRecord::where('mot_score', '>', 0)->update([
     'mot_is_submitted' => 'Yes'
-]);
+]); 
 TheologyMarkRecord::where('eot_score', '>', 0)->update([
     'eot_is_submitted' => 'Yes'
 ]); 
