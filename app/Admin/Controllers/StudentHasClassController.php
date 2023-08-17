@@ -42,7 +42,7 @@ class StudentHasClassController extends AdminController
     {
 
 
-      /*   $enterprise_id = 8;
+        /*   $enterprise_id = 8;
         $users = StudentHasClass::where([
             'enterprise_id' => $enterprise_id
         ])->get();
@@ -66,7 +66,7 @@ class StudentHasClassController extends AdminController
 
         $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
             ->orderBy('id', 'Desc');
-        if (!Admin::user()->isRole('dos')) { 
+        if (!Admin::user()->isRole('dos')) {
             $grid->disableCreateButton();
             $grid->disableExport();
             $grid->disableActions();
@@ -78,7 +78,7 @@ class StudentHasClassController extends AdminController
 
         $grid->batchActions(function ($batch) {
             $batch->disableDelete();
-            $batch->add(new ChangeStudentsClass()); 
+            $batch->add(new ChangeStudentsClass());
         });
 
         $grid->disableExport();
@@ -105,7 +105,7 @@ class StudentHasClassController extends AdminController
             }
 
             $filter->equal('stream_id', 'Filter by Stream')->select($streams);
-            
+
 
             $filter->equal('academic_year_id', 'Filter by academic year')->select(AcademicYear::where([
                 'enterprise_id' => $u->enterprise_id
@@ -120,7 +120,12 @@ class StudentHasClassController extends AdminController
                     . "&model=User"
             );
 
-            $filter->equal('administrator_id', 'Student')->select()->ajax($ajax_url);
+            $filter->equal('administrator_id', 'Student')->select(function ($id) {
+                $a = User::find($id);
+                if ($a) {
+                    return [$a->id => $a->name];
+                }
+            })->ajax($ajax_url);
         });
 
 
@@ -136,7 +141,7 @@ class StudentHasClassController extends AdminController
 
 
         $grid->column('id', __('Id'))->sortable();
-     /*    $grid->column('done_selecting_option_courses', __('FROM P7'))
+        /*    $grid->column('done_selecting_option_courses', __('FROM P7'))
         ->using([
             1 => 'From P.7',
             0 => 'From P.6',

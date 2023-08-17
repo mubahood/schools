@@ -6,6 +6,7 @@ use App\Models\AcademicYear;
 use App\Models\Term;
 use App\Models\TheologryStudentReportCard;
 use App\Models\TheologyClass;
+use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -65,7 +66,12 @@ class TheologryStudentReportCardController extends AdminController
                     . "&search_by_2=id"
                     . "&model=User"
             );
-            $filter->equal('student_id', 'Student')->select()->ajax($ajax_url);
+            $filter->equal('student_id', 'Student')->select(function ($id) {
+                $a = Administrator::find($id);
+                if ($a) {
+                    return [$a->id => $a->name];
+                }
+            })->ajax($ajax_url);
         });
 
 

@@ -8,6 +8,7 @@ use App\Models\MarkRecord;
 use App\Models\ReportCard;
 use App\Models\Subject;
 use App\Models\TermlyReportCard;
+use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -155,7 +156,13 @@ class MarkRecordController extends AdminController
                     . "&model=User"
             );
 
-            $filter->equal('administrator_id', 'Student')->select()->ajax($ajax_url);
+            $filter->equal('administrator_id', 'Student')->select(function ($id) {
+                $a = Administrator::find($id);
+                if ($a) {
+                    return [$a->id => $a->name];
+                }
+            })
+                ->ajax($ajax_url);
         });
 
         $ent = Admin::user()->ent;

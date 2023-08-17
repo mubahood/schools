@@ -105,7 +105,8 @@ class BookBorrowController extends AdminController
                         return [$b->id => $b->title];
                     }
                 })
-                ->ajax(url('/api/books?enterprise_id=' . $u->enterprise_id))->rules('required');
+                ->ajax(url('/api/books?enterprise_id=' . $u->enterprise_id))
+                ->rules('required');
         });
 
 

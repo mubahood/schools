@@ -86,7 +86,7 @@ class StudentHasTheologyClassController extends AdminController
                 ]
             )
                 ->orderBy('id', 'desc')
-                ->get() as $ex) { 
+                ->get() as $ex) {
                 $streams[$ex->id] = $ex->theology_class->short_name . " - " . $ex->name;
             }
             $filter->equal('theology_stream_id', 'Filter by Stream')->select($streams);
@@ -102,7 +102,12 @@ class StudentHasTheologyClassController extends AdminController
                     . "&model=User"
             );
 
-            $filter->equal('administrator_id', 'Student')->select()->ajax($ajax_url);
+            $filter->equal('administrator_id', 'Student')->select(function ($id) {
+                $a = User::find($id);
+                if ($a) {
+                    return [$a->id => $a->name];
+                }
+            })->ajax($ajax_url);
         });
 
 
@@ -213,7 +218,7 @@ class StudentHasTheologyClassController extends AdminController
             $ajax_url = url(
                 '/api/ajax?'
                     . 'enterprise_id=' . $u->enterprise_id
-                    . "&search_by_1=theology_class_id" 
+                    . "&search_by_1=theology_class_id"
                     . "&model=TheologyStream"
             );
 
@@ -229,8 +234,6 @@ class StudentHasTheologyClassController extends AdminController
                 ->rules('required')
                 ->load('theology_stream_id', $ajax_url);
             $form->select('theology_stream_id', 'Stream');
-
-
         } else {
             $form->select('administrator_id', 'Student')->options(function () {
                 return Administrator::where([

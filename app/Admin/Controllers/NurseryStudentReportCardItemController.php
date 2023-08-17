@@ -6,6 +6,7 @@ use App\Models\AcademicClass;
 use App\Models\Competence;
 use App\Models\NurseryStudentReportCardItem;
 use App\Models\Utils;
+use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -59,7 +60,12 @@ class NurseryStudentReportCardItemController extends AdminController
                     . "&model=User"
             );
 
-            $filter->equal('student_id', 'Student')->select()->ajax($ajax_url);
+            $filter->equal('student_id', 'Student')->select(function ($id) {
+                $a = Administrator::find($id);
+                if ($a) {
+                    return [$a->id => $a->name];
+                }
+            })->ajax($ajax_url);
         });
 
 

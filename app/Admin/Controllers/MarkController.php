@@ -148,7 +148,8 @@ class MarkController extends AdminController
                     . "&model=User"
             );
 
-            $filter->equal('student_id', 'Student')->select()->ajax($ajax_url);
+            $filter->equal('student_id', 'Student')
+            ->select()->ajax($ajax_url);
         });
 
  

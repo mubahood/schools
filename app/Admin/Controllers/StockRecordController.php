@@ -65,8 +65,18 @@ class StockRecordController extends AdminController
                     . "&model=User"
             );
 
-            $filter->equal('created_by', 'Supplied by')->select()->ajax($ajax_url);
-            $filter->equal('received_by', 'Received by')->select()->ajax($ajax_url);
+            $filter->equal('created_by', 'Supplied by')->select(function ($id) {
+                $a = Administrator::find($id);
+                if ($a) {
+                    return [$a->id => $a->name];
+                }
+            })->ajax($ajax_url);
+            $filter->equal('received_by', 'Received by')->select(function ($id) {
+                $a = Administrator::find($id);
+                if ($a) {
+                    return [$a->id => $a->name];
+                }
+            })->ajax($ajax_url);
 
             $cats = [];
             foreach (StockItemCategory::where([

@@ -201,7 +201,12 @@ class TheologyMarkController extends AdminController
                     . "&model=User"
             );
 
-            $filter->equal('student_id', 'Student')->select()->ajax($ajax_url);
+            $filter->equal('student_id', 'Student')->select(function ($id) {
+                $a = Administrator::find($id);
+                if ($a) {
+                    return [$a->id => $a->name];
+                }
+            })->ajax($ajax_url);
         });
 
 

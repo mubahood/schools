@@ -13,6 +13,7 @@ use App\Models\TheologyClass;
 use App\Models\TheologyStream;
 use App\Models\TheologySubject;
 use App\Models\TheologyTermlyReportCard;
+use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -229,7 +230,12 @@ class TheologyMarkRecordController extends AdminController
             }
             $filter->equal('theology_stream_id', 'Filter by Stream')->select($streams);
 
-            $filter->equal('administrator_id', 'Student')->select()->ajax($ajax_url);
+            $filter->equal('administrator_id', 'Student')->select(function ($id) {
+                $a = Administrator::find($id);
+                if ($a) {
+                    return [$a->id => $a->name];
+                }
+            })->ajax($ajax_url);
         });
 
 
