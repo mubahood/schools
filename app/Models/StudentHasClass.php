@@ -43,7 +43,6 @@ class StudentHasClass extends Model
 
         self::updating(function ($m) {
 
-            return $m; 
             $_m = AcademicClass::find($m->academic_class_id);
             if ($_m == null) {
                 die("Class not found.");
@@ -54,7 +53,7 @@ class StudentHasClass extends Model
         });
 
         self::created(function ($m) {
-            return $m;
+
             $class = AcademicClass::find($m->academic_class_id);
             if (isset($m->academic_class_id)) {
                 $class = AcademicClass::find($m->academic_class_id);
@@ -90,7 +89,7 @@ class StudentHasClass extends Model
         });
 
         self::updated(function ($m) {
-            return $m; 
+
             $u = Administrator::find($m->administrator_id);
             $classes = StudentHasClass::where('administrator_id', $m->administrator_id)
                 ->orderBy('id', 'desc')
