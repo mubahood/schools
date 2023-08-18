@@ -43,6 +43,7 @@ class StudentHasClass extends Model
 
         self::updating(function ($m) {
 
+            return $m; 
             $_m = AcademicClass::find($m->academic_class_id);
             if ($_m == null) {
                 die("Class not found.");
