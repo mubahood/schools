@@ -39,9 +39,9 @@ Route::match(['get', 'post'], '/report-cards', [PrintController2::class, 'second
 Route::get('/temps', function () {
 
   $marks = DB::select('select * 
-  from admin_users,mark_records WHERE   
-  admin_users.id  = mark_records.administrator_id AND 
-  admin_users.enterprise_id  != mark_records.enterprise_id  
+  from admin_users,theology_mark_records WHERE   
+  admin_users.id  = theology_mark_records.administrator_id AND 
+  admin_users.enterprise_id  != theology_mark_records.enterprise_id  
   ');
 
   echo (count($marks));
@@ -50,8 +50,9 @@ Route::get('/temps', function () {
     echo ($v->eot_score . "<br>");
     echo ($v->mot_score . "<br>");
     echo ($v->bot_score . "<br><hr>");
-    $m = MarkRecord::find($v->id);
+    $m = TheologyMarkRecord::find($v->id);
     $m->delete(); 
+    die();
   }
 
   die("done");
