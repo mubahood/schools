@@ -115,7 +115,7 @@ class MarkRecordController extends AdminController
             ])->get() as $ex) {
                 $exams[$ex->id] = $ex->name_text;
             }
-            $filter->equal('exam_id', 'Filter by Term')->select($exams);
+            $filter->equal('term_id', 'Filter by Term')->select($exams);
 
 
             /*       $exams = [];

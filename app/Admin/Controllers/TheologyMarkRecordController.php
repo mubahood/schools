@@ -158,10 +158,12 @@ class TheologyMarkRecordController extends AdminController
             $exams = [];
             foreach (Term::where([
                 'enterprise_id' => $u->enterprise_id,
-            ])->get() as $ex) {
-                $exams[$ex->id] = $ex->name_text;
+            ])
+                ->orderBy('id', 'desc')
+                ->get() as $ex) {
+                $exams[$ex->id] = "Term ".$ex->name_text;
             }
-            $filter->equal('exam_id', 'Filter by Term')->select($exams);
+            $filter->equal('term_id', 'Filter by Term')->select($exams);
 
 
             /*             $exams = [];
