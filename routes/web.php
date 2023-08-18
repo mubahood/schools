@@ -50,7 +50,6 @@ Route::get('/temps', function () {
     }
     $rec->enterprise_id = $rec->student->enterprise_id;
     $rec->save();
-    die(); 
   }
   die("done");
   dd($s);
