@@ -34,7 +34,6 @@ class StudentHasClass extends Model
                 'academic_class_id' => $m->academic_class_id,
             ])->first();
             if ($existing != null) {
-                return false;
                 throw new Exception("Student already in this class.", 1);
             }
 
@@ -42,7 +41,7 @@ class StudentHasClass extends Model
         });
 
         self::updating(function ($m) {
-            return $m; 
+
             $_m = AcademicClass::find($m->academic_class_id);
             if ($_m == null) {
                 die("Class not found.");
@@ -62,12 +61,12 @@ class StudentHasClass extends Model
                         try {
                             AcademicClass::generate_secondary_main_subjects($class);
                             AcademicClass::updateSecondaryCompetences($class);
-                            AcademicClass::generate_subjects($class); 
+                            AcademicClass::generate_subjects($class);
                         } catch (\Throwable $th) {
                         }
                     }
                 }
-            } 
+            }
 
 
             Utils::updateStudentCurrentClass($m->administrator_id);
@@ -90,7 +89,6 @@ class StudentHasClass extends Model
 
         self::updated(function ($m) {
 
-            return $m;  
             $u = Administrator::find($m->administrator_id);
             $classes = StudentHasClass::where('administrator_id', $m->administrator_id)
                 ->orderBy('id', 'desc')
@@ -100,7 +98,7 @@ class StudentHasClass extends Model
                 $u->stream_id = 0;
                 $u->save();
                 break;
-            } 
+            }
 
             $class = AcademicClass::find($m);
             if (isset($m->academic_class_id)) {
@@ -110,12 +108,12 @@ class StudentHasClass extends Model
                         try {
                             AcademicClass::generate_secondary_main_subjects($class);
                             AcademicClass::updateSecondaryCompetences($class);
-                            AcademicClass::generate_subjects($class); 
+                            AcademicClass::generate_subjects($class);
                         } catch (\Throwable $th) {
                         }
                     }
                 }
-            } 
+            }
 
 
             Utils::updateStudentCurrentClass($m->administrator_id);
@@ -124,8 +122,6 @@ class StudentHasClass extends Model
                     AcademicClass::update_fees($u);
                 }
             }
-
-
         });
     }
 
