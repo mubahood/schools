@@ -110,12 +110,10 @@ class TheologyMarkRecordController extends AdminController
 
         if (
             (!Admin::user()->isRole('dos')) &&
-            ((!isset($_GET['theology_class_id'])) ||
-                (!isset($_GET['theology_exam_id'])) ||
+            (
+
                 (!isset($_GET['theology_subject_id'])) ||
-                (((int)($_GET['theology_subject_id'])) < 1) ||
-                (((int)($_GET['theology_exam_id'])) < 1) ||
-                (((int)($_GET['theology_class_id'])) < 1))
+                (((int)($_GET['theology_subject_id'])) < 1))
         ) {
             admin_success(
                 'Alert',
