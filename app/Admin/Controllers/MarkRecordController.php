@@ -8,6 +8,7 @@ use App\Models\Exam;
 use App\Models\MarkRecord;
 use App\Models\ReportCard;
 use App\Models\Subject;
+use App\Models\Term;
 use App\Models\TermlyReportCard;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
@@ -109,13 +110,11 @@ class MarkRecordController extends AdminController
             $filter->equal('academic_class_sctream_id', 'Filter by Stream')->select($streams);
 
             $exams = [];
-            foreach (Exam::where([
+            foreach (Term::where([
                 'enterprise_id' => $u->enterprise_id,
-                'term_id' => $term->id,
             ])->get() as $ex) {
                 $exams[$ex->id] = $ex->name_text;
             }
-
             $filter->equal('exam_id', 'Filter by Term')->select($exams);
 
 

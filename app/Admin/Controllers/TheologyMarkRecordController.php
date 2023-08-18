@@ -8,6 +8,7 @@ use App\Models\Enterprise;
 use App\Models\TheologyMarkRecord;
 use App\Models\ReportCard;
 use App\Models\Subject;
+use App\Models\Term;
 use App\Models\TermlyReportCard;
 use App\Models\TheologyClass;
 use App\Models\TheologyStream;
@@ -154,6 +155,14 @@ class TheologyMarkRecordController extends AdminController
                 ->orderBy('id', 'Desc')
                 ->get()->pluck('name_text', 'id'));
 
+            $exams = [];
+            foreach (Term::where([
+                'enterprise_id' => $u->enterprise_id,
+            ])->get() as $ex) {
+                $exams[$ex->id] = $ex->name_text;
+            }
+            $filter->equal('exam_id', 'Filter by Term')->select($exams);
+
 
             /*             $exams = [];
             foreach (TheologyTermlyReportCard::where([
@@ -225,7 +234,7 @@ class TheologyMarkRecordController extends AdminController
                 ]
             )
                 ->orderBy('id', 'desc')
-                ->get() as $ex) { 
+                ->get() as $ex) {
                 $streams[$ex->id] = $ex->theology_class->short_name . " - " . $ex->name;
             }
             $filter->equal('theology_stream_id', 'Filter by Stream')->select($streams);
