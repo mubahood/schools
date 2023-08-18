@@ -143,10 +143,9 @@ class StudentHasClassController extends AdminController
         $grid->column('id', __('Id'))
             ->display(function ($title) {
                 $u = Admin::user();
-                $data =  $this->enterprise_id . "<==>" . $u->enterprise_id." ==> ".$this->student->enterprise_id." ==> ".$this->class->enterprise_id;
-                if($u->enterprise_id != $this->enterprise_id){
-                    $u->enterprise_id = $this->student->enterprise_id;
-                    $u->save();
+                if ($u->enterprise_id != $this->enterprise_id) {
+                    $this->enterprise_id = $this->student->enterprise_id;
+                    $this->save();
                 }
                 return $data;
             })

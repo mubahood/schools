@@ -37,6 +37,7 @@ Route::match(['get', 'post'], '/print', [PrintController2::class, 'index']);
 Route::match(['get', 'post'], '/report-cards', [PrintController2::class, 'secondary_report_cards']);
 Route::get('/temps', function () {
 
+  die("done"); 
   ini_set('memory_limit', '-1');
   set_time_limit(-1);
   $s = DB::select('select * from student_has_classes,admin_users WHERE 
