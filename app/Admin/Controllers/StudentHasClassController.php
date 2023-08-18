@@ -140,7 +140,12 @@ class StudentHasClassController extends AdminController
             ->lightbox(['width' => 60, 'height' => 60]);
 
 
-        $grid->column('id', __('Id'))->sortable();
+        $grid->column('id', __('Id'))
+            ->display(function ($title) {
+                $u = Admin::user();
+                return $this->enterprise_id . "<==>" . $u->enterprise_id." ==> ".$this->student->enterprise_id." ==> ".$this->class->enterprise_id;
+            })
+            ->sortable();
         /*    $grid->column('done_selecting_option_courses', __('FROM P7'))
         ->using([
             1 => 'From P.7',

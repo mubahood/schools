@@ -39,6 +39,23 @@ Route::get('/temps', function () {
 
   ini_set('memory_limit', '-1');
   set_time_limit(-1);
+  $s = DB::select('select * from student_has_classes,admin_users WHERE 
+  admin_users.enterprise_id  != student_has_classes.enterprise_id 
+  ');
+  echo count($s);
+  foreach ($s as $key => $s) {
+    $rec = StudentHasClass::find($s->id);
+    if ($rec == null) {
+      die("has class not found");
+    }
+    $rec->enterprise_id = $rec->student->enterprise_id;
+    $rec->save();
+    die(); 
+  }
+  die("done");
+  dd($s);
+  ini_set('memory_limit', '-1');
+  set_time_limit(-1);
 
 
   $i = 0;
@@ -64,12 +81,12 @@ Route::get('/temps', function () {
       $mark_record->theology_subject_id = $mark->theology_subject_id;
       $mark_record->administrator_id = $mark->student_id;
       $mark_record->theology_class_id = $mark->theology_class_id;
-    } else { 
+    } else {
     }
 
     $termly_report_card = TheologyTermlyReportCard::where([
-        'term_id' => $exam->term_id,
-      ])->first();
+      'term_id' => $exam->term_id,
+    ])->first();
 
     if ($termly_report_card == null) {
       $termly_report_card = new TheologyTermlyReportCard();
@@ -80,7 +97,7 @@ Route::get('/temps', function () {
       try {
         $termly_report_card->save();
       } catch (\Throwable $th) {
-        echo "FAILED => " . $th->getMessage() . "<br>"; 
+        echo "FAILED => " . $th->getMessage() . "<br>";
       }
     }
 
@@ -134,7 +151,7 @@ Route::get('/temps', function () {
       echo "$i. TRANSFERED " . $mark->id . " -> " . $mark->student->name . ' - ' . $mark->student->name . "<br>";
     } catch (\Throwable $th) {
       echo "$i. FAILED => " . $th->getMessage() . $mark->id . " -> " . $mark->student->name . ' - ' . $mark->student->name . "<br>";
-    } 
+    }
   }
   die("======DONE-1======");
 
