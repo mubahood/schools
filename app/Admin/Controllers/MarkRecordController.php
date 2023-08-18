@@ -189,7 +189,10 @@ class MarkRecordController extends AdminController
             return redirect()->back();
         }
 
-        $grid->column('id', __('Id'))->hide()->sortable();
+        $grid->column('id', __('Id'))
+            ->display(function ($id) {
+                return $id;
+            })->hide()->sortable();
         $grid->column('created_at', __('Created'))->sortable()->hide();
         $grid->column('updated_at', __('Updated'))->sortable()->hide();
         $grid->column('termly_report_card_id', __('Termly Report'))->display(function ($termly_report_card_id) {

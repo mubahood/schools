@@ -15,6 +15,7 @@ use App\Models\Exam;
 use App\Models\FinancialRecord;
 use App\Models\Gen;
 use App\Models\Mark;
+use App\Models\MarkRecord;
 use App\Models\TheologyMarkRecord;
 use App\Models\StudentHasClass;
 use App\Models\StudentHasFee;
@@ -37,7 +38,23 @@ Route::match(['get', 'post'], '/print', [PrintController2::class, 'index']);
 Route::match(['get', 'post'], '/report-cards', [PrintController2::class, 'secondary_report_cards']);
 Route::get('/temps', function () {
 
-  die("done"); 
+  $marks = DB::select('select * 
+  from admin_users,mark_records WHERE   
+  admin_users.id  = mark_records.administrator_id AND 
+  admin_users.enterprise_id  != mark_records.enterprise_id  
+  ');
+
+  echo (count($marks));
+  foreach ($marks as $key => $v) {
+    echo ("<br>");
+    echo ($v->eot_score . "<br>");
+    echo ($v->mot_score . "<br>");
+    echo ($v->bot_score . "<br><hr>");
+    $m = MarkRecord::find($v->id);
+    $m->delete(); 
+  }
+
+  die("done");
   ini_set('memory_limit', '-1');
   set_time_limit(-1);
   $s = DB::select('select * from student_has_classes,admin_users WHERE 
