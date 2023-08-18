@@ -149,7 +149,7 @@ class StudentHasClassController extends AdminController
                     $this->save();
                 }
                 return $data;
-            })->hide(); 
+            })->hide()
             ->sortable();
         /*    $grid->column('done_selecting_option_courses', __('FROM P7'))
         ->using([
