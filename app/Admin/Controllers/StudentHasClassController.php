@@ -149,7 +149,7 @@ class StudentHasClassController extends AdminController
                     $this->save();
                 }
                 if ($this->class->enterprise_id != $u->enterprise_id) {
-                    $this->dalete(); 
+                    $this->delete(); 
                 }
                 return $data;
             })->hide()
