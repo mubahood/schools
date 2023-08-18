@@ -109,14 +109,6 @@ class MarkRecordController extends AdminController
 
             $filter->equal('academic_class_sctream_id', 'Filter by Stream')->select($streams);
 
-            $exams = [];
-            foreach (Term::where([
-                'enterprise_id' => $u->enterprise_id,
-            ])->get() as $ex) {
-                $exams[$ex->id] = $ex->name_text;
-            }
-            $filter->equal('term_id', 'Filter by Term')->select($exams);
-
 
             /*       $exams = [];
             foreach (TermlyReportCard::where([
@@ -174,6 +166,15 @@ class MarkRecordController extends AdminController
                 }
             })
                 ->ajax($ajax_url);
+
+
+            $exams = [];
+            foreach (Term::where([
+                'enterprise_id' => $u->enterprise_id,
+            ])->get() as $ex) {
+                $exams[$ex->id] = $ex->name_text;
+            }
+            $filter->equal('term_id', 'Filter by Term')->select($exams);
         });
 
         $ent = Admin::user()->ent;

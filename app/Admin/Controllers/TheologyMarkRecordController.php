@@ -155,15 +155,7 @@ class TheologyMarkRecordController extends AdminController
                 ->orderBy('id', 'Desc')
                 ->get()->pluck('name_text', 'id'));
 
-            $exams = [];
-            foreach (Term::where([
-                'enterprise_id' => $u->enterprise_id,
-            ])
-                ->orderBy('id', 'desc')
-                ->get() as $ex) {
-                $exams[$ex->id] = "Term ".$ex->name_text;
-            }
-            $filter->equal('term_id', 'Filter by Term')->select($exams);
+
 
 
             /*             $exams = [];
@@ -247,6 +239,17 @@ class TheologyMarkRecordController extends AdminController
                     return [$a->id => $a->name];
                 }
             })->ajax($ajax_url);
+
+
+            $exams = [];
+            foreach (Term::where([
+                'enterprise_id' => $u->enterprise_id,
+            ])
+                ->orderBy('id', 'desc')
+                ->get() as $ex) {
+                $exams[$ex->id] = "Term " . $ex->name_text;
+            }
+            $filter->equal('term_id', 'Filter by Term')->select($exams);
         });
 
 
