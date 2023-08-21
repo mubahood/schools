@@ -51,7 +51,7 @@ Route::get('/temps', function () {
     echo ($v->mot_score . "<br>");
     echo ($v->bot_score . "<br><hr>");
     $m = TheologyMarkRecord::find($v->id);
-    $m->delete();  
+    $m->delete();
   }
 
   die("done");

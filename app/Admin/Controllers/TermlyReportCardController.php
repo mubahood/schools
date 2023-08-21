@@ -96,7 +96,7 @@ class TermlyReportCardController extends AdminController
 
         $grid->column('bot', __('B.O.T'))->display(function () {
             $total = count($this->mark_records);
-            if($total == 0){
+            if ($total == 0) {
                 return "0 (0%)";
             }
             $total_sub = count($this->mark_records->where('bot_is_submitted', 'Yes'));
@@ -107,7 +107,7 @@ class TermlyReportCardController extends AdminController
 
         $grid->column('mot', __('M.O.T'))->display(function () {
             $total = count($this->mark_records);
-            if($total == 0){
+            if ($total == 0) {
                 return "0 (0%)";
             }
             $total_mot = count($this->mark_records->where('mot_is_submitted', 'Yes'));
@@ -117,9 +117,9 @@ class TermlyReportCardController extends AdminController
 
         $grid->column('eot', __('E.O.T'))->display(function () {
             $total = count($this->mark_records);
-            if($total == 0){
+            if ($total == 0) {
                 return "0 (0%)";
-            }   
+            }
             $total_mot = count($this->mark_records->where('eot_is_submitted', 'Yes'));
             $pecentage = ($total_mot / $total) * 100;
             return number_format($total_mot) . " (" . number_format($pecentage) . "%)";
@@ -298,7 +298,18 @@ class TermlyReportCardController extends AdminController
                     'Template_3' => 'Template 3',
                     'Template_4' => 'Template 4',
                 ]);
-            $form->divider('Communication');
+            $form->radioCard('user_custom_header', 'Use custom header?')
+                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->default('No')
+                ->when('Yes', function (Form $form) {
+                    $form->image('custom_header_image', 'Custom header');
+                });
+            $form->radioCard('use_background_image', 'Use background image?')
+                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->default('No')
+                ->when('Yes', function (Form $form) {
+                    $form->image('background_image', 'Background image');
+                });
             $form->textarea('hm_communication', 'Head Teacher Communication');
         }
 

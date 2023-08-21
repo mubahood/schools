@@ -56,15 +56,16 @@ class PrintController2 extends Controller
             if ($student_report_card == null || $student_report_card->termly_report_card == null) {
                 die("No report card found");
             }
+            $pdf = App::make('dompdf.wrapper');
             if ($student_report_card->termly_report_card->reports_template == 'template_1') {
-                $pdf = App::make('dompdf.wrapper');
                 $pdf->loadHTML(view('report-cards.template-1.print', ['items' => [$student_report_card]]));
-                return $pdf->stream();
+            } else if ($student_report_card->termly_report_card->reports_template == 'Template_2') {
+                $pdf->loadHTML(view('report-cards.template-2.print', ['items' => [$student_report_card]]));
             } else {
-                $pdf = App::make('dompdf.wrapper');
                 $pdf->loadHTML(view('report-cards.template-1.print', ['items' => [$student_report_card]]));
-                return $pdf->stream();
             }
+
+            return $pdf->stream();
         }
 
         die("Nothing to print.");
