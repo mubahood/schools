@@ -233,6 +233,11 @@ class MarkRecordController extends AdminController
         $grid->column('administrator_id', __('Student'))
             ->display(function ($administrator_id) {
                 if ($this->student == null) {
+                    try {
+                        $this->delete();
+                    } catch (\Throwable $th) {
+                        //throw $th;
+                    }
                     return '-';
                 }
                 return $this->student->name;
