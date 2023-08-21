@@ -425,7 +425,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 </td>
             </tr>
         </table>
-        <hr style="background-color:  {{ $r->ent->color }}; ">
+ {{--        <hr style="background-color:  {{ $r->ent->color }}; "> --}}
         <div class=" mt-0 d-flex justify-content-between p-0 pt-0 " style="font-size: 14px;">
             {{--    <span><b>SCHOOL FEES BALANCE:</b> <span class="value" style="font-size: 14px!important;">
                     {{ $bal_text }}</span></span> | --}}
