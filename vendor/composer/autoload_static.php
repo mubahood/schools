@@ -781,6 +781,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Admin\\Controllers\\TheologyCourseController' => __DIR__ . '/../..' . '/app/Admin/Controllers/TheologyCourseController.php',
         'App\\Admin\\Controllers\\TheologyExamCourseController' => __DIR__ . '/../..' . '/app/Admin/Controllers/TheologyExamCourseController.php',
         'App\\Admin\\Controllers\\TheologyMarkController' => __DIR__ . '/../..' . '/app/Admin/Controllers/TheologyMarkController.php',
+        'App\\Admin\\Controllers\\TheologyMarkRecordController' => __DIR__ . '/../..' . '/app/Admin/Controllers/TheologyMarkRecordController.php',
         'App\\Admin\\Controllers\\TheologyTermlyReportCardController' => __DIR__ . '/../..' . '/app/Admin/Controllers/TheologyTermlyReportCardController.php',
         'App\\Admin\\Controllers\\TransactionController' => __DIR__ . '/../..' . '/app/Admin/Controllers/TransactionController.php',
         'App\\Admin\\Controllers\\UserBatchImporterController' => __DIR__ . '/../..' . '/app/Admin/Controllers/UserBatchImporterController.php',

@@ -119,7 +119,7 @@ class TheologyTermlyReportCardController extends AdminController
      */
     protected function form()
     {
-        //$tr = TheologyTermlyReportCard::find(7);
+        //$tr = TheologyTermlyReportCard::find(6);
         //$tr->generate_marks = 'Yes';
         // $tr->hm_communication .= '1';
         // $tr->reports_generate = 'Yes';
@@ -246,10 +246,20 @@ class TheologyTermlyReportCardController extends AdminController
                 ->options(['Yes' => 'Yes', 'No' => 'No'])
                 ->default('No');
 
-            $form->divider('Reports Display Settings');
-            $form->radioCard('reports_who_fees_balance', 'Who should see fees balance in reports?')
-                ->options(['All' => 'All', 'Verified' => 'Verified Balance Only', 'None' => 'None'])
-                ->default('None');
+            $form->radioCard('generate_class_teacher_comment', 'Generate Class Teacher\'s comment?')
+                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->default('No');
+            $form->radioCard('generate_head_teacher_comment', 'Generate Head Teacher\'s comment?')
+                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->default('No');
+            $form->radioCard('generate_positions', 'Generate positions?')
+                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->default('No');
+            $form->radioCard('display_positions', 'Display positions on report cards?')
+                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->default('No');
+
+
             $form->radioCard('reports_display_report_to_parents', 'Display reports to parents?')
                 ->options(['Yes' => 'Yes', 'No' => 'No'])
                 ->default('No');

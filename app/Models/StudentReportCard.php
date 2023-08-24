@@ -14,9 +14,7 @@ class StudentReportCard extends Model
     {
         return $this->belongsTo(TermlyReportCard::class);
     }
-
-
-
+ 
     public static function boot()
     {
 

@@ -32,6 +32,8 @@ class TermlyReportCardController extends AdminController
 
 
         // $x = TermlyReportCard::find(8);
+        // $x::do_generate_positions($x);
+        // die("done"); 
         // $x->reports_generate = 'No';
         // $x->reports_include_bot = 'Yes';
         // $x->hm_communication .= '1';
@@ -42,7 +44,7 @@ class TermlyReportCardController extends AdminController
         $grid = new Grid(new TermlyReportCard());
 
         /*         $x = TermlyReportCard::find(3);
-        if($x == null){
+        if($x == null){ 
             die("not found"); 
         }
         foreach ($x->report_cards as $r) {
@@ -283,10 +285,22 @@ class TermlyReportCardController extends AdminController
                 ->options(['Yes' => 'Yes', 'No' => 'No'])
                 ->default('No');
 
+            $form->radioCard('generate_class_teacher_comment', 'Generate Class Teacher\'s comment?')
+                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->default('No');
+            $form->radioCard('generate_head_teacher_comment', 'Generate Head Teacher\'s comment?')
+                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->default('No');
+            $form->radioCard('generate_positions', 'Generate positions?')
+                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->default('No');
+            $form->radioCard('display_positions', 'Display positions on report cards?')
+                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->default('No');
             $form->divider('Reports Display Settings');
-            $form->radioCard('reports_who_fees_balance', 'Who should see fees balance in reports?')
-                ->options(['All' => 'All', 'Verified' => 'Verified Balance Only', 'None' => 'None'])
-                ->default('None');
+            $form->radioCard('reports_who_fees_balance', 'Display fees balance?')
+                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->default('No');
             $form->radioCard('reports_display_report_to_parents', 'Display reports to parents?')
                 ->options(['Yes' => 'Yes', 'No' => 'No'])
                 ->default('No');
@@ -311,6 +325,7 @@ class TermlyReportCardController extends AdminController
                     $form->image('background_image', 'Background image');
                 });
             $form->textarea('hm_communication', 'Head Teacher Communication');
+            $form->quill('bottom_message', 'Bottom Message');
         }
 
         return $form;

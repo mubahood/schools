@@ -63,12 +63,12 @@ foreach ($r->termly_report_card->term->exams as $exam) {
     "use_background_image" => "Yes"
     "background_image" => "images/WhatsApp Image 2023-06-01 at 17.12.03.jpg"
 --}}
-    <div class="row">
+    <div class="row p-0">
         @if ($termly_report_card->user_custom_header != 'Yes')
             <table class="w-100">
                 <tr>
                     <td>
-                        <img style="width: 100px;" src="{{ public_path('storage/' . $ent->logo) }}">
+                        <img style="width: 100px;  " src="{{ public_path('storage/' . $ent->logo) }}">
                     </td>
                     <td style="width: 100%">
                         <p class="text-center p-0 m-0 text-uppercase"
@@ -82,12 +82,12 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                         <p class="text-center p font-serif mt-0 mb-0 title-2" style="font-size: 16px;"><b>TELEPHONE
                                 NUMBER:</b>
                             {{ $ent->phone_number }} </p>
-                        <p class="text-center p font-serif  fs-3 m-0 p-0 mt-1 mb-2" style="font-size: 2rem">
+                        <p class="text-center p font-serif  m-0 p-0 mt-1 mb-2" style="font-size: 18px">
                             <u><b>{{ $r->termly_report_card->report_title }}</b></u>
                         </p>
                     </td>
                     <td>
-                        <img style="height: 120px; width: 100px;" src="{{ public_path($r->owner->getAvatarPath()) }}">
+                        <img style="  width: 100px;" src="{{ public_path($r->owner->getAvatarPath()) }}">
                     </td>
                 </tr>
             </table>
@@ -105,14 +105,21 @@ foreach ($r->termly_report_card->term->exams as $exam) {
         <hr style="border: solid {{ $r->ent->color }} 1px; " class="m-0 mt-1  mb-0">
     </div> --}}
 
-    <div class="mt-4 row" style="border: solid 2px black; border-radius: 15px">
+    <div class="mt-2 row" style="border: solid 2px black; border-radius: 15px">
         <div
             class=" mx-3 my-3 d-flex justify-content-between summary"style="
         font-size: 20px!important; 
         line-height: 14px;">
             <span><b>NAME:</b> <span class="value">{{ $r->owner->name }}</span></span>
-            <span><b>GENDER:</b> <span class="value">{{ $r->owner->sex }}</span></span>
-            <span><b>REG NO.:</b> <span class="value">{{ $r->owner->id }}</span></span>
+            @if ($r->owner->sex != null && strlen($r->owner->sex) > 1)
+                <span><b>GENDER:</b> <span class="value">{{ $r->owner->sex }}</span></span>
+            @endif
+            {{-- <span><b>REG NO.:</b> <span class="value">{{ $r->owner->id }}</span></span> --}}
+            @if ($r->termly_report_card->reports_who_fees_balance == 'Yes')
+                <span><b>SCHOOL FEES BALANCE:</b> <span class="value">{{ $bal_text }}</span></span>
+            @endif
+            <span><b>SCHOOL PAY CODE:</b> <span class="value">{{ $r->owner->school_pay_payment_code }}</span></span>
+
         </div>
     </div>
 
@@ -120,7 +127,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
         <table class="w-100" style="width: 100%!important;">
             <tbody>
                 <tr>
-                    <td style="width: 50%;" class="">
+                    <td style="width: 50%; " class="  pr-2">
                         {{-- START SECULAR SECTION --}}
                         <p class="text-center text-uppercase mt-2" style="font-size: 18px; font-weight: bold;">
                             <u>secular studies</u>
@@ -134,12 +141,15 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                             &nbsp;&nbsp;
                             <span><b class="text-uppercase">DIV:</b> <span
                                     class="value">&nbsp;{{ $r->grade }}&nbsp;</span></span>&nbsp;&nbsp;
-                            <span><b class="text-uppercase">Position in class:</b> <span class="value text-lowercase">
-                                    {{ $numFormat->format($r->position) }} </span>&nbsp;&nbsp;
-                                <span><b class="text-uppercase">OUT OF :</b> <span class="value">
-                                        {{ $r->total_students }}</span> </span>
+                            @if ($r->termly_report_card->display_positions == 'Yes')
+                                <span><b class="text-uppercase">Position:</b> <span class="value text-lowercase">
+                                        {{ $numFormat->format($r->position) }} </span>&nbsp;&nbsp;
+                                    <span><b class="text-uppercase">OUT OF :</b> <span class="value">
+                                            {{ $r->total_students }}</span> </span>
+                            @endif
+
                         </div>
-                        <table class="table table-bordered marks-table p-0 m-0 w-100">
+                        <table class="table table-bordered marks-table p-0 m-0 w-100 mt-2">
                             <thead class="p-0 m-0 text-center" style="line-height: 12px;">
                                 <th class="text-left p-1"><b>SUBJECTS</b></th>
                                 @if ($termly_report_card->reports_include_bot == 'Yes')
@@ -206,17 +216,14 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                                 <td colspan="1"></td>
                             </tr>
                         </table>
-                        <div class="p-0 mt-0 mb-0 class-teacher mt-1">
-                            <b class="d-block">CLASS TEACHER'S COMMENT:</b>
-                            ....................................................
-                            <br> <b>CLASS TEACHER'S COMMENT:</b>
-                            ....................................................
-                            {{--                             <span class="comment">{{ Utils::getClassTeacherComment($r)['teacher'] }}</span> --}}
+                        <div class="p-0 mt-0 mb-0 class-teacher mt-2">
+                            <span class="d-block"><b>CLASS TEACHER'S COMMENT:</b>
+                                <span class="comment">{{ $r->class_teacher_comment }}</span>
+                            </span>
                         </div>
-                        {{-- END SECULAR SECTION --}}
 
                     </td>
-                    <td style="width: 50%;" class="">
+                    <td style="width: 50%;" class="pl-2">
 
                         @if ($tr != null)
                             <p class="text-center text-uppercase mt-4" style="font-size: 18px; font-weight: bold;">
@@ -231,8 +238,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                                 &nbsp;&nbsp;
                                 <span><b class="text-uppercase">DIV:</b> <span
                                         class="value">&nbsp;{{ $tr->grade }}&nbsp;</span></span>&nbsp;&nbsp;
-                                <span><b class="text-uppercase">Position in class:</b> <span
-                                        class="value text-lowercase">
+                                <span><b class="text-uppercase">Position:</b> <span class="value text-lowercase">
                                         {{ $numFormat->format($tr->position) }} </span>&nbsp;&nbsp;
                                     <span><b class="text-uppercase">OUT OF :</b> <span class="value">
                                             {{ $tr->total_students }}</span>
@@ -301,41 +307,28 @@ foreach ($r->termly_report_card->term->exams as $exam) {
 
                                     <tr class="marks">
                                         <th><b>TOTAL</b></th>
-                                        <th colspan="{{ $span }}"></th>
-                                        <td><b>{{ $r->total_marks }}</b></td>
-                                        <td><b>{{ $r->total_aggregates }}</b></td>
-                                        <td colspan="2"></td>
+                                        <th></th>
+                                        <td><b>{{ $tr->total_marks }}</b></td>
+                                        <td><b>{{ $tr->total_aggregates }}</b></td>
+                                        <td colspan="1"></td>
                                     </tr>
 
                                 </table>
 
                                 <div class="p-0 mt-0 mb-0 class-teacher mt-1">
                                     <b class="d-block">CLASS TEACHER'S COMMENT:</b>
-                                    ....................................................
-                                    <br> <b>CLASS TEACHER'S COMMENT:</b>
-                                    ....................................................
-                                    {{--                                     <span class="comment">{{ Utils::getClassTeacherComment($r)['teacher'] }}</span> --}}
-
+                                    <span class="comment">{{ $tr->class_teacher_comment }}</span>
                                 </div>
                             </div>
                         @endif
-
                     </td>
                 </tr>
             </tbody>
         </table>
     </div>
 
-
-
-
-
-
-
-
-
     <div class="row mt-1">
-        <table>
+        <table class="w-100">
             <tbody>
                 <tr>
                     <td>
@@ -404,15 +397,14 @@ foreach ($r->termly_report_card->term->exams as $exam) {
     </div>
 
     <div class="row">
-
         <table class="w-100">
             <tr>
                 <td style="width: 80%">
-                    {{--                     <b>HEAD TEACHER'S COMMENT:</b>
-                    <span class="comment">{{ Utils::getClassTeacherComment($r)['hm'] }}</span> --}}
+                    <b>HEAD TEACHER'S COMMENT:</b>
+                    <span class="comment">{{ $r->head_teacher_comment }}</span>
                     <div class="p-0 mt-0 mb-2 class-teacher">
                         <b>HEAD TEACHER'S COMMUNICATION:</b>
-                        <span class="comment">....................................................</span>
+                        <span class="comment">{{ $r->termly_report_card->hm_communication }}</span>
                     </div>
                 </td>
                 <td class=" pl-3 text-center">
@@ -425,18 +417,9 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 </td>
             </tr>
         </table>
- {{--        <hr style="background-color:  {{ $r->ent->color }}; "> --}}
+        <hr style="background-color:  {{ $r->ent->color }}; ">
         <div class=" mt-0 d-flex justify-content-between p-0 pt-0 " style="font-size: 14px;">
-            {{--    <span><b>SCHOOL FEES BALANCE:</b> <span class="value" style="font-size: 14px!important;">
-                    {{ $bal_text }}</span></span> | --}}
-            {{-- <span><b>NEXT TERM TUTION FEE:</b> <span class="value" style="font-size: 12px!important;">UGX
-                18,000</span></span> --}}
-            {{--  <span>&nbsp;&nbsp; <b>SCHOOL PAY CODE:</b> <span class="value"
-                    style="font-size: 14px!important;">{{ $r->owner->school_pay_payment_code }}</span></span>
-            |
-            <span>&nbsp;&nbsp;<b>THIS TERM ENDS ON:</b> <span class="value"
-                    style="font-size: 14px!important;">25<sup>th</sup> AUG,
-                    2023</span></span> --}}
+            {!! $r->termly_report_card->bottom_message !!}
         </div>
     </div>
 </article>

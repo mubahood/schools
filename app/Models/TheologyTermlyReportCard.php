@@ -49,11 +49,56 @@ class TheologyTermlyReportCard extends Model
                 TheologyTermlyReportCard::do_reports_generate($m);
             }
 
+            if ($m->generate_class_teacher_comment == 'Yes') {
+                TermlyReportCard::do_generate_class_teacher_comment($m);
+            }
+            if ($m->generate_head_teacher_comment == 'Yes') {
+                TermlyReportCard::do_generate_head_teacher_comment($m);
+            }
+
+            if ($m->generate_positions == 'Yes') {
+                TheologyTermlyReportCard::do_generate_positions($m);
+            }
+
             DB::update("UPDATE theology_termly_report_cards SET generate_marks = 'No' WHERE id = ?", [$m->id]);
             DB::update("UPDATE theology_termly_report_cards SET delete_marks_for_non_active = 'No' WHERE id = ?", [$m->id]);
             DB::update("UPDATE theology_termly_report_cards SET reports_generate = 'No' WHERE id = ?", [$m->id]);
+            DB::update("UPDATE theology_termly_report_cards SET generate_class_teacher_comment = 'No' WHERE id = ?", [$m->id]);
+            DB::update("UPDATE theology_termly_report_cards SET generate_head_teacher_comment = 'No' WHERE id = ?", [$m->id]);
+            DB::update("UPDATE theology_termly_report_cards SET generate_positions = 'No' WHERE id = ?", [$m->id]);
         });
     }
+
+
+    public static function do_generate_positions($m)
+    {
+        if (!is_array($m->classes)) {
+            return;
+        }
+
+        foreach ($m->classes as $class_id) {
+            $reports = TheologryStudentReportCard::where([
+                'theology_class_id' => $class_id,
+                'theology_termly_report_card_id' => $m->id,
+            ])
+                ->orderBy('total_marks', 'DESC')
+                ->get();
+            $prev_mark = 0;
+            $pos = 1;
+            foreach ($reports as $key => $report) {
+                if ($report->total_marks == $prev_mark) {
+                    $report->position = $pos;
+                } else {
+                    $pos = ($key + 1);
+                    $report->position = $pos;
+                }
+                $prev_mark = $report->total_marks;
+                $report->total_students = count($reports);
+                $report->save();
+            }
+        }
+    }
+
 
     public static function do_reports_generate($m)
     {

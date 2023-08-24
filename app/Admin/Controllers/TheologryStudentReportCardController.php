@@ -48,7 +48,7 @@ class TheologryStudentReportCardController extends AdminController
 
             $filter->equal('term_id', 'Filter by term')->select(Term::where([
                 'enterprise_id' => Admin::user()->enterprise_id
-            ])->orderBy('id', 'Desc')->get()->pluck('name', 'id'));
+            ])->orderBy('id', 'Desc')->get()->pluck('name_text', 'id')); 
 
 
             $u = Admin::user();
@@ -121,9 +121,9 @@ class TheologryStudentReportCardController extends AdminController
         $grid->column('class_teacher_comment', __('Class Teacher Remarks'))->editable()->sortable();
         $grid->column('head_teacher_comment', __('Head Teacher Remarks'))->editable()->sortable();
 
-        $grid->column('print', __('Print'))->display(function ($m) {
+/*         $grid->column('print', __('Print'))->display(function ($m) {
             return '<a target="_blank" href="' . url('print?theo_id=' . $this->id) . '" >print</a>';
-        });
+        }); */
 
         return $grid;
     }

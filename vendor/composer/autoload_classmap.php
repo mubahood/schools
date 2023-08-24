@@ -90,6 +90,7 @@ return array(
     'App\\Admin\\Controllers\\TheologyCourseController' => $baseDir . '/app/Admin/Controllers/TheologyCourseController.php',
     'App\\Admin\\Controllers\\TheologyExamCourseController' => $baseDir . '/app/Admin/Controllers/TheologyExamCourseController.php',
     'App\\Admin\\Controllers\\TheologyMarkController' => $baseDir . '/app/Admin/Controllers/TheologyMarkController.php',
+    'App\\Admin\\Controllers\\TheologyMarkRecordController' => $baseDir . '/app/Admin/Controllers/TheologyMarkRecordController.php',
     'App\\Admin\\Controllers\\TheologyTermlyReportCardController' => $baseDir . '/app/Admin/Controllers/TheologyTermlyReportCardController.php',
     'App\\Admin\\Controllers\\TransactionController' => $baseDir . '/app/Admin/Controllers/TransactionController.php',
     'App\\Admin\\Controllers\\UserBatchImporterController' => $baseDir . '/app/Admin/Controllers/UserBatchImporterController.php',

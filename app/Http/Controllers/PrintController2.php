@@ -51,18 +51,39 @@ class PrintController2 extends Controller
             isset($_GET['report_card_id'])
         ) {
             die("time to print batch");
-        } else if (isset($_GET['id'])) {
-            $student_report_card = StudentReportCard::find($_GET['id']);
-            if ($student_report_card == null || $student_report_card->termly_report_card == null) {
-                die("No report card found");
+        } else if (isset($_GET['id']) || (isset($_GET['calss_id']) && isset($_GET['term_id']))) {
+            $items = [];
+            $student_report_card = null;
+            $termly_report_card = null;
+            if (isset($_GET['id'])) {
+                $student_report_card = StudentReportCard::find($_GET['id']);
             }
-            $pdf = App::make('dompdf.wrapper');
-            if ($student_report_card->termly_report_card->reports_template == 'template_1') {
-                $pdf->loadHTML(view('report-cards.template-1.print', ['items' => [$student_report_card]]));
-            } else if ($student_report_card->termly_report_card->reports_template == 'Template_2') {
-                $pdf->loadHTML(view('report-cards.template-2.print', ['items' => [$student_report_card]]));
+
+            if ($student_report_card == null || $student_report_card->termly_report_card == null) {
+                $cards = StudentReportCard::where([
+                    'academic_class_id' => $_GET['calss_id'],
+                    'term_id' => $_GET['term_id'],
+                ])
+                ->orderBy('position', 'asc')
+                ->get();
+                foreach ($cards as $key => $value) {
+                    if ($termly_report_card == null) {
+                        $termly_report_card = $value->termly_report_card;
+                    }
+                    $items[] = $value; 
+                }
             } else {
-                $pdf->loadHTML(view('report-cards.template-1.print', ['items' => [$student_report_card]]));
+                $termly_report_card = $student_report_card->termly_report_card;
+                $items[] = $student_report_card;
+            }
+
+            $pdf = App::make('dompdf.wrapper');
+            if ($termly_report_card->reports_template == 'template_1') {
+                $pdf->loadHTML(view('report-cards.template-1.print', ['items' => $items]));
+            } else if ($termly_report_card->reports_template == 'Template_2') {
+                $pdf->loadHTML(view('report-cards.template-2.print', ['items' => $items]));
+            } else {
+                $pdf->loadHTML(view('report-cards.template-1.print', ['items' => $items]));
             }
 
             return $pdf->stream();

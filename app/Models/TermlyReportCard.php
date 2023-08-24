@@ -67,8 +67,20 @@ class TermlyReportCard extends Model
             if ($m->reports_generate == 'Yes') {
                 TermlyReportCard::do_reports_generate($m);
             }
+            if ($m->generate_class_teacher_comment == 'Yes') {
+                TermlyReportCard::do_generate_class_teacher_comment($m);
+            }
+            if ($m->generate_positions == 'Yes') {
+                TermlyReportCard::do_generate_positions($m);
+            }
+            if ($m->generate_head_teacher_comment == 'Yes') {
+                TermlyReportCard::do_generate_head_teacher_comment($m);
+            }
             DB::update("UPDATE termly_report_cards SET 
             generate_marks = 'No',
+            generate_class_teacher_comment = 'No',
+            generate_head_teacher_comment = 'No',
+            generate_positions = 'No',
             delete_marks_for_non_active = 'No',
             reports_generate = 'No'
              WHERE id = ?", [$m->id]);
@@ -140,8 +152,52 @@ class TermlyReportCard extends Model
     }
 
 
-    
 
+
+
+    public static function do_generate_class_teacher_comment($m)
+    {
+        foreach ($m->report_cards as $key => $report) {
+            $report->class_teacher_comment = Utils::getClassTeacherComment($report)['teacher'];
+            $report->save();
+        }
+    }
+    public static function do_generate_head_teacher_comment($m)
+    {
+        foreach ($m->report_cards as $key => $report) {
+            $report->head_teacher_comment = Utils::getClassTeacherComment($report)['hm'];
+            $report->save();
+        }
+    }
+
+    public static function do_generate_positions($m)
+    {
+        if (!is_array($m->classes)) {
+            return;
+        }
+
+        foreach ($m->classes as $class_id) {
+            $reports = StudentReportCard::where([
+                'academic_class_id' => $class_id,
+                'termly_report_card_id' => $m->id,
+            ])
+                ->orderBy('total_marks', 'DESC')
+                ->get();
+            $prev_mark = 0;
+            $pos = 1;
+            foreach ($reports as $key => $report) {
+                if ($report->total_marks == $prev_mark) {
+                    $report->position = $pos;
+                } else {
+                    $pos = ($key + 1);
+                    $report->position = $pos;
+                }
+                $prev_mark = $report->total_marks;
+                $report->total_students = count($reports);
+                $report->save();
+            }
+        }
+    }
 
     public static function do_reports_generate($m)
     {
@@ -171,7 +227,7 @@ class TermlyReportCard extends Model
 
                 $report = StudentReportCard::where([
                     'student_id' => $student->id,
-                    'termly_report_card_id' => $m->id, 
+                    'termly_report_card_id' => $m->id,
                 ])
                     ->orderBy('id', 'DESC')
                     ->first();
@@ -254,14 +310,6 @@ class TermlyReportCard extends Model
                     $report->grade = 'U';
                 }
                 $report->save();
-                /* 
-class_teacher_comment	
-head_teacher_comment	
-class_teacher_commented	
-head_teacher_commented	
-total_students	 
-
-*/
             }
         }
     }
