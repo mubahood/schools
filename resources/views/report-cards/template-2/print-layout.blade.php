@@ -412,8 +412,8 @@ foreach ($r->termly_report_card->term->exams as $exam) {
         <table class="w-100">
             <tr>
                 <td style="width: 80%">
-                    <b>HEAD TEACHER'S COMMENT:</b>
-                    <span class="comment">{{ $r->head_teacher_comment }}</span>
+                    {{-- <b>HEAD TEACHER'S COMMENT:</b>
+                    <span class="comment">{{ $r->head_teacher_comment }}</span> --}}
                     <div class="p-0 mt-0 mb-2 class-teacher">
                         <b>HEAD TEACHER'S COMMUNICATION:</b>
                         <span class="comment">{{ $r->termly_report_card->hm_communication }}</span>
