@@ -191,6 +191,12 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                             @endphp
                             @foreach ($termly_report_card->get_student_marks($owner->id) as $v)
                                 <tr class="marks">
+                                    @php
+                                        if ($v->subject == null) {
+                                            $v->delete();
+                                            continue;
+                                        }
+                                    @endphp
                                     <th>{{ $v->subject->subject_name }}</th>
                                     @if ($termly_report_card->reports_include_bot == 'Yes')
                                         <td>{{ (int) $v->bot_score }}</td>
@@ -288,6 +294,12 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                                     @endphp
                                     @foreach ($theology_termly_report_card->get_student_marks($owner->id) as $v)
                                         <tr class="marks">
+                                            @php
+                                                if ($v->subject == null) {
+                                                    $v->delete();
+                                                    continue;
+                                                }
+                                            @endphp
                                             <th>{{ $v->subject->name }}</th>
                                             @if ($termly_report_card->reports_include_bot == 'Yes')
                                                 <td>{{ (int) $v->bot_score }}</td>
