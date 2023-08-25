@@ -111,7 +111,6 @@ class TheologryStudentReportCardController extends AdminController
         $grid->column('grade', __('Grade'))->editable()->sortable();
 
         $grid->column('total_aggregates', __('Total aggregates'))->hide()->sortable();
-        $grid->column('total_students', __('Total students'))->editable()->sortable();
         $grid->column('position', __('Position in class'))->display(function ($position) {
             if ($position < 1) {
                 return "-";
