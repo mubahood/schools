@@ -1353,6 +1353,7 @@ class Utils  extends Model
     }
     public static function get_automaic_mark_remarks($score)
     {
+        $score = ((int)($score));
         $remarks = "Improve";
         if ($score < 39) {
             $remarks = 'Improve';
@@ -1364,7 +1365,7 @@ class Utils  extends Model
             $remarks = 'Q.Good';
         } else if ($score < 79) {
             $remarks = 'Good';
-        } else if ($score < 89) {
+        } else if ($score < 90) {
             $remarks = 'V.Good';
         } else {
             $remarks = 'Excellent';

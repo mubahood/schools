@@ -287,9 +287,7 @@ class TermlyReportCard extends Model
                     $average_mark = (int)($average_mark);
                     $mark->total_score = $total_scored_marks;
                     $mark->total_score_display = $average_mark;
-                    if ($mark->remarks == null || $mark->remarks == '') {
-                        $mark->remarks = Utils::get_automaic_mark_remarks($mark->total_score_display);
-                    }
+                    $mark->remarks = Utils::get_automaic_mark_remarks($mark->total_score_display);
 
                     $mark->aggr_value = null;
                     $mark->aggr_name = null;
