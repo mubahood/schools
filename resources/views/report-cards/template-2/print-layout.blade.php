@@ -135,7 +135,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                         </p>
                         <div class=" mt-2 mb-1" style="font-size: 12px">
                             <span><b>CLASS:</b> <span class="value">&nbsp;{{ $r->academic_class->name }} -
-                                    Blue&nbsp;</span></span>
+                                    {{ $stream_class }}&nbsp;</span></span>
                             &nbsp;&nbsp;
                             <span><b class="text-uppercase">Aggr:</b> <span
                                     class="value text-lowercase">&nbsp;{{ (int) $r->average_aggregates }}&nbsp;</span></span>
