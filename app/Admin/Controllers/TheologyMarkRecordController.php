@@ -100,7 +100,7 @@ class TheologyMarkRecordController extends AdminController
             $grid->disableActions();
         }
 
-        $grid->disableBatchActions();
+
 
         $grid->export(function ($export) {
             $export->filename('School dynamics.csv');
