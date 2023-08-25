@@ -53,7 +53,7 @@ class MarkRecordController extends AdminController
 
         $grid->disableCreateButton();
         $grid->disableActions();
-        $grid->disableBatchActions();
+        //$grid->disableBatchActions();
 
         if (
             (!Admin::user()->isRole('dos')) &&
