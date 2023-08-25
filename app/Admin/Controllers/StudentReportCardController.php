@@ -376,6 +376,7 @@ class StudentReportCardController extends AdminController
             $numFormat = new NumberFormatter('en_US', NumberFormatter::ORDINAL);
             return $numFormat->format($position);
         })->editable()->sortable();
+        $grid->column('total_students', __('Total Students'))->editable()->sortable();
 
         $grid->column('class_teacher_comment', __('Class Teacher Remarks'))->editable()->sortable();
         $grid->column('head_teacher_comment', __('Head Teacher Remarks'))->editable()->sortable();
