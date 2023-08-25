@@ -14,26 +14,24 @@ class StudentReportCard extends Model
     {
         return $this->belongsTo(TermlyReportCard::class);
     }
- 
+
     public static function boot()
     {
 
         parent::boot();
-        /*       self::updating(function ($m) {
-            $stream = StudentHasClass::where([
-                'academic_class_id' => $m->academic_class_id,
-                'administrator_id' => $m->student_id
-            ])
-                ->orderBy('id', 'desc')
-                ->first();
+        self::creating(function ($m) {
 
-            if ($stream != null) {
-                if ($stream->stream_id != null) {
-                    $m->stream_id = $stream->stream_id;
-                }
+            $old = StudentReportCard::where([
+                'student_id' => $m->student_id,
+                'termly_report_card_id' => $m->termly_report_card_id,
+            ])->first();
+
+            if ($old) {
+                return false;
             }
+
             return $m;
-        }); */
+        });
         self::updating(function ($m) {
 
             /*     $stream = StudentHasClass::where([

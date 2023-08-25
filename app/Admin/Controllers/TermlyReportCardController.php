@@ -31,9 +31,9 @@ class TermlyReportCardController extends AdminController
     {
 
 
-        // $x = TermlyReportCard::find(8);
-        // $x::do_generate_positions($x);
-        // die("done"); 
+        //$x = TermlyReportCard::find(8);
+        //$x::do_reports_generate($x); 
+        //die("done"); 
         // $x->reports_generate = 'No';
         // $x->reports_include_bot = 'Yes';
         // $x->hm_communication .= '1';

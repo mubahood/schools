@@ -206,9 +206,22 @@ class TermlyReportCard extends Model
         }
         $grading_scale = $m->grading_scale;
         $ranges = $grading_scale->grade_ranges;
+        $graddeble = [
+            38,
+            72,
+            73,
+            38,
+            41,
+            40,
+            39,
+            52,
+        ];
         if ($grading_scale == null) {
             throw new Exception("Grading scale not found.", 1);
         }
+        // $m->classes = ["90", "89", "88", "87", "86", "85", "84"];
+        // $m->classes = ["84"];
+
         foreach ($m->classes as $class_id) {
             $class = AcademicClass::find(((int)($class_id)));
             if ($class == null) {
@@ -278,17 +291,25 @@ class TermlyReportCard extends Model
                         $mark->remarks = Utils::get_automaic_mark_remarks($mark->total_score_display);
                     }
 
-                    $mark->aggr_value = 9;
-                    $mark->aggr_name = 'F9';
-                    foreach ($ranges as $range) {
-                        if ($mark->total_score_display >= $range->min_mark && $mark->total_score_display <= $range->max_mark) {
-                            $mark->aggr_value = $range->aggregates;
-                            $mark->aggr_name = $range->name;
-                            break;
+                    $mark->aggr_value = null;
+                    $mark->aggr_name = null;
+
+                    if ($mark->subject != null) {
+                        if ($mark->subject->course != null) {
+                            if (in_array($mark->subject->course->id, $graddeble)) {
+                                //echo "{$mark->subject->course->id}. {$mark->subject->course->name} <br>";
+                                foreach ($ranges as $range) {
+                                    if ($mark->total_score_display > $range->min_mark && $mark->total_score_display < $range->max_mark) {
+                                        $mark->aggr_value = $range->aggregates;
+                                        $mark->aggr_name = $range->name;
+                                        break;
+                                    }
+                                }
+                                $_total_aggregates += $mark->aggr_value;
+                            }
                         }
                     }
 
-                    $_total_aggregates += $mark->aggr_value;
                     $_total_scored_marks += $mark->total_score_display;
                     $_total_max_marks += 100;
                     $mark->save();
