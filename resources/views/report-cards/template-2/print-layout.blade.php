@@ -105,18 +105,19 @@ foreach ($r->termly_report_card->term->exams as $exam) {
         <hr style="border: solid {{ $r->ent->color }} 1px; " class="m-0 mt-1  mb-0">
     </div> --}}
 
-    <div class="mt-2 row" style="border: solid 2px black; border-radius: 15px">
+    <div class="mt-2 row" style="border: solid 2px {{ $r->ent->color }}; border-radius: 15px">
         <div
             class=" mx-3 my-3 d-flex justify-content-between summary"style="
         font-size: 20px!important; 
         line-height: 14px;">
-            <span><b>NAME:</b> <span class="value">{{ $r->owner->name }}</span></span>
+            <span><b>NAME:</b> <span class="value">{{ $r->owner->name }}</span></span> &nbsp;&nbsp;
             @if ($r->owner->sex != null && strlen($r->owner->sex) > 1)
-                <span><b>GENDER:</b> <span class="value">{{ $r->owner->sex }}</span></span>
+                <span><b>GENDER:</b> <span class="value">{{ $r->owner->sex }}</span></span> &nbsp;&nbsp;
             @endif
             {{-- <span><b>REG NO.:</b> <span class="value">{{ $r->owner->id }}</span></span> --}}
             @if ($r->termly_report_card->reports_who_fees_balance == 'Yes')
                 <span><b>SCHOOL FEES BALANCE:</b> <span class="value">{{ $bal_text }}</span></span>
+                &nbsp;&nbsp;
             @endif
             <span><b>SCHOOL PAY CODE:</b> <span class="value">{{ $r->owner->school_pay_payment_code }}</span></span>
 
@@ -152,7 +153,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                         <table class="table table-bordered marks-table p-0 m-0 w-100 mt-2">
                             <thead class="p-0 m-0 text-center" style="line-height: 12px;">
                                 <th class="text-left p-1"><b>SUBJECTS</b></th>
-                                @if ($termly_report_card->reports_include_bot == 'Yes')
+                                {{-- @if ($termly_report_card->reports_include_bot == 'Yes')
                                     <th class="p-1 m-0">
                                         <b>B.O.T</b>
                                         <small class="d-block">({{ $termly_report_card->bot_max }})</small>
@@ -169,9 +170,9 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                                         <b>E.O.T</b>
                                         <small class="d-block">({{ $termly_report_card->eot_max }})</small>
                                     </th>
-                                @endif
+                                @endif --}}
                                 <th class="p-1"><b>MARKS</b>
-                                    <small class="d-block">average - ({{ $max_mot }}%)</small>
+                                    <small class="d-block"> ({{ $max_mot }}%)</small>
                                 </th>
                                 <th class="p-1">AGGR</th>
                                 <th class="remarks p-1"><b class="text-uppercase">Remarks</b></th>
@@ -180,13 +181,13 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                             @php
                                 $span = 0;
                                 if ($termly_report_card->reports_include_bot == 'Yes') {
-                                    $span++;
+                                    //$span++;
                                 }
                                 if ($termly_report_card->reports_include_mot == 'Yes') {
-                                    $span++;
+                                    //$span++;
                                 }
                                 if ($termly_report_card->reports_include_eot == 'Yes') {
-                                    $span++;
+                                    //$span++;
                                 }
                             @endphp
                             @foreach ($termly_report_card->get_student_marks($owner->id) as $v)
@@ -198,7 +199,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                                         }
                                     @endphp
                                     <th>{{ $v->subject->subject_name }}</th>
-                                    @if ($termly_report_card->reports_include_bot == 'Yes')
+                                    {{-- @if ($termly_report_card->reports_include_bot == 'Yes')
                                         <td>{{ (int) $v->bot_score }}</td>
                                     @endif
                                     @if ($termly_report_card->reports_include_mot == 'Yes')
@@ -206,7 +207,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                                     @endif
                                     @if ($termly_report_card->reports_include_eot == 'Yes')
                                         <td>{{ (int) $v->eot_score }}</td>
-                                    @endif
+                                    @endif --}}
                                     <td>{{ (int) $v->total_score_display }}</td>
                                     <td>{{ $v->aggr_name }}</td>
                                     <td class="remarks">{{ $v->remarks }}</td>
@@ -216,9 +217,9 @@ foreach ($r->termly_report_card->term->exams as $exam) {
 
                             <tr class="marks">
                                 <th><b>TOTAL</b></th>
-                                <th colspan="{{ $span }}"></th>
                                 <td><b>{{ $r->total_marks }}</b></td>
                                 <td><b>{{ $r->total_aggregates }}</b></td>
+                                {{-- <th colspan="{{ $span }}"></th> --}}
                                 <td colspan="1"></td>
                             </tr>
                         </table>
@@ -254,7 +255,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                                 <table class="table table-bordered marks-table p-0 m-0 w-100">
                                     <thead class="p-0 m-0 text-center" style="line-height: 12px;">
                                         <th class="text-left p-1"><b>SUBJECTS</b></th>
-                                        @if ($theology_termly_report_card->reports_include_bot == 'Yes')
+                                        {{-- @if ($theology_termly_report_card->reports_include_bot == 'Yes')
                                             <th class="p-1 m-0">
                                                 <b>B.O.T</b>
                                                 <small class="d-block">({{ $termly_report_card->bot_max }})</small>
@@ -271,7 +272,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                                                 <b>E.O.T</b>
                                                 <small class="d-block">({{ $termly_report_card->eot_max }})</small>
                                             </th>
-                                        @endif
+                                        @endif --}}
                                         <th class="p-1"><b>MARKS</b>
                                             <small class="d-block">average - ({{ '100' }}%)</small>
                                         </th>
@@ -301,7 +302,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                                                 }
                                             @endphp
                                             <th>{{ $v->subject->name }}</th>
-                                            @if ($termly_report_card->reports_include_bot == 'Yes')
+                                            {{-- @if ($termly_report_card->reports_include_bot == 'Yes')
                                                 <td>{{ (int) $v->bot_score }}</td>
                                             @endif
                                             @if ($termly_report_card->reports_include_mot == 'Yes')
@@ -309,7 +310,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                                             @endif
                                             @if ($termly_report_card->reports_include_eot == 'Yes')
                                                 <td>{{ (int) $v->eot_score }}</td>
-                                            @endif
+                                            @endif --}}
                                             <td>{{ (int) $v->total_score_display }}</td>
                                             <td>{{ $v->aggr_name }}</td>
                                             <td class="remarks">{{ $v->remarks }}</td>
@@ -319,7 +320,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
 
                                     <tr class="marks">
                                         <th><b>TOTAL</b></th>
-                                        <th></th>
+                                        {{-- <th></th> --}}
                                         <td><b>{{ $tr->total_marks }}</b></td>
                                         <td><b>{{ $tr->total_aggregates }}</b></td>
                                         <td colspan="1"></td>
@@ -339,12 +340,12 @@ foreach ($r->termly_report_card->term->exams as $exam) {
         </table>
     </div>
 
-    <div class="row mt-1">
+    <div class="row mt-0">
         <table class="w-100">
             <tbody>
                 <tr>
                     <td>
-                        <h2 class="p-1 text-center m-0 bg-black text-uppercase" style="font-size: 16px;">Aggregates
+                        <h2 class="p-0 text-center m-0 bg-black text-uppercase" style="font-size: 14px;">Aggregates
                             Scale</h2>
                         <table class="table table-bordered grade-table w-100">
                             <tbody>
@@ -377,7 +378,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     </td>
                     <td>
 
-                        <h2 class="p-1 text-center m-0  bg-black text-uppercase m-0" style="font-size: 16px;">Grading
+                        <h2 class="p-0 text-center m-0  bg-black text-uppercase m-0" style="font-size: 14px;">Grading
                             Scale
                         </h2>
                         <table class="table table-bordered grade-table">
@@ -420,7 +421,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     </div>
                 </td>
                 <td class=" pl-3 text-center">
-                    <img width="70%" style=" " class="text-center "
+                    <img width="60%" style=" " class="text-center "
                         src="{{ public_path('storage/images/kira-hm.png') }}">
                     <h2 class="text-center"
                         style="line-height: .6rem;font-size: 14px;   margin-bottom: 0px; padding:0px;">
@@ -429,8 +430,9 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 </td>
             </tr>
         </table>
-        <hr style="background-color:  {{ $r->ent->color }}; ">
-        <div class=" mt-0 d-flex justify-content-between p-0 pt-0 " style="font-size: 14px;">
+        <hr style="background-color:  {{ $r->ent->color }}; height: 2px; 
+        padding: 0px; margin: 0px; ">
+        <div class=" mt-0 d-flex justify-content-between p-0 pt-1 " style="font-size: 14px;">
             {!! $r->termly_report_card->bottom_message !!}
         </div>
     </div>
