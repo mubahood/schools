@@ -321,7 +321,15 @@ class StudentReportCardController extends AdminController
         $grid->disableBatchActions();
         $grid->disableCreateButton();
 
-        $grid->column('id', __('#ID'))->sortable();
+        $grid->column('id', __('#ID'))
+            ->display(function ($id) {
+                $u = Admin::user();
+                if ($this->owner->enterprise_id != $u->enterprise_id) {
+                    $this->delete();
+                }
+                return $id;
+            })
+            ->sortable();
         $grid->column('academic_year_id', __('Academic year'))->sortable()->hide();
         $grid->column('term_id', __('Term id'))->hide();
 
