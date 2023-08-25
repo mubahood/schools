@@ -178,14 +178,14 @@ class TheologyTermlyReportCard extends Model
                     $average_mark = (int)($average_mark);
                     $mark->total_score = $total_scored_marks;
                     $mark->total_score_display = $average_mark;
-                    if ($mark->remarks == null || $mark->remarks == '') {
-                        $mark->remarks = Utils::get_automaic_mark_remarks($mark->total_score_display);
-                    }
+
+                    $mark->remarks = Utils::get_automaic_mark_remarks($mark->total_score_display);
+
 
                     $mark->aggr_value = 9;
                     $mark->aggr_name = 'F9';
                     foreach ($ranges as $range) {
-                        if ($mark->total_score_display >= $range->min_mark && $mark->total_score_display <= $range->max_mark) {
+                        if ($mark->total_score_display > $range->min_mark && $mark->total_score_display < $range->max_mark) {
                             $mark->aggr_value = $range->aggregates;
                             $mark->aggr_name = $range->name;
                             break;
