@@ -1,5 +1,7 @@
 <?php
 use App\Models\Utils;
+use App\Models\StudentHasClass;
+use App\Models\StudentHasTheologyClass;
 
 $max_bot = 30;
 $max_mot = 40;
@@ -13,12 +15,22 @@ $termly_report_card = $r->termly_report_card;
 $theology_termly_report_card = null;
 
 $stream_class = '.......';
-if ($r->owner->stream != null) {
-    if ($r->owner->stream->name != null) {
-        $stream_class = $r->owner->stream->name;
+$theo_stream_class = '.......';
+$hasClass = StudentHasClass::where(['administrator_id' => $r->owner->id, 'academic_class_id' => $r->academic_class_id])->first();
+if ($hasClass != null) {
+    if ($hasClass->stream != null) {
+        $stream_class = ' - ' . $hasClass->stream->name;
     }
 }
 
+if ($tr != null) {
+    $hasClass = StudentHasTheologyClass::where(['administrator_id' => $tr->owner->id, 'theology_class_id' => $tr->theology_class_id])->first();
+    if ($hasClass != null) {
+        if ($hasClass->stream != null) {
+            $theo_stream_class = ' - ' . $hasClass->stream->name;
+        }
+    }
+}
 if ($tr == null) {
     $tr = $r->get_theology_report();
 }
@@ -237,8 +249,8 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                                 <u>theology studies</u>
                             </p>
                             <div class=" mt-2 mb-1" style="font-size: 12px">
-                                <span><b>CLASS:</b> <span class="value">&nbsp;{{ $tr->theology_class->name }} -
-                                        Blue&nbsp;</span></span>
+                                <span><b>CLASS:</b> <span class="value">&nbsp;{{ $tr->theology_class->name }}
+                                        {{ $theo_stream_class }}&nbsp;</span></span>
                                 &nbsp;&nbsp;
                                 <span><b class="text-uppercase">Aggr:</b> <span
                                         class="value text-lowercase">&nbsp;{{ (int) $tr->average_aggregates }}&nbsp;</span></span>
