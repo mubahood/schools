@@ -18,7 +18,7 @@ if ($ent == null) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    {{-- <link rel="stylesheet" href="{{ public_path('css/bootstrap-print.css') }}"> --}}
+    <link rel="stylesheet" href="{{ public_path('css/bootstrap-print.css') }}">
     <style>
         body {
             background: #FFF;
@@ -182,16 +182,11 @@ if ($ent == null) {
             font-size: 14px;
         }
 
-        @font-face {
-            font-family: 'Tilt Prism';
-            src: url('<?= url('fonts/TiltPrism-Regular.ttf') ?>');
-        }
-
         p {
             font-size: 14px;
             padding: 0%;
             margin: 0%;
-            font-family: 'Tilt Prism';
+            font-family: 'sans-serif';
         }
     </style>
 
@@ -199,7 +194,7 @@ if ($ent == null) {
 
 
 <body>
-    {{public_path('fonts/TiltPrism-Regular.ttf')}}
+    {{ public_path('fonts/TiltPrism-Regular.ttf') }}
     @foreach ($items as $item)
         @include('report-cards.template-3.print-layout', ['r' => $item])
     @endforeach
