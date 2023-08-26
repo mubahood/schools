@@ -184,7 +184,7 @@ if ($ent == null) {
 
         @font-face {
             font-family: 'Tilt Prism';
-            src: url('<?= public_path('fonts/TiltPrism-Regular.ttf') ?>');
+            src: url('<?= url('fonts/TiltPrism-Regular.ttf') ?>');
         }
 
         p {
