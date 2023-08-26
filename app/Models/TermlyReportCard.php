@@ -909,4 +909,9 @@ class TermlyReportCard extends Model
             }
         }
     }
+
+    public function ent()
+    {
+        return $this->belongsTo(Enterprise::class);
+    }
 }

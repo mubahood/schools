@@ -64,13 +64,13 @@ class PrintController2 extends Controller
                     'academic_class_id' => $_GET['calss_id'],
                     'term_id' => $_GET['term_id'],
                 ])
-                ->orderBy('position', 'asc')
-                ->get();
+                    ->orderBy('position', 'asc')
+                    ->get();
                 foreach ($cards as $key => $value) {
                     if ($termly_report_card == null) {
                         $termly_report_card = $value->termly_report_card;
                     }
-                    $items[] = $value; 
+                    $items[] = $value;
                 }
             } else {
                 $termly_report_card = $student_report_card->termly_report_card;
@@ -82,6 +82,9 @@ class PrintController2 extends Controller
                 $pdf->loadHTML(view('report-cards.template-1.print', ['items' => $items]));
             } else if ($termly_report_card->reports_template == 'Template_2') {
                 $pdf->loadHTML(view('report-cards.template-2.print', ['items' => $items]));
+            } else if ($termly_report_card->reports_template == 'Template_3') {
+                //return(view('report-cards.template-3.print', ['items' => $items]));
+                $pdf->loadHTML(view('report-cards.template-3.print', ['items' => $items]));
             } else {
                 $pdf->loadHTML(view('report-cards.template-1.print', ['items' => $items]));
             }
