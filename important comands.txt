@@ -6,6 +6,7 @@ php artisan make:migration add_cols_dp_ter --table=
 php artisan make:migration add_cols_to_gens_termly_report_card_bottom_message --table=termly_report_cards
 php artisan make:migration add_cols_to_termly_theology_termly_report_card_bottom_message --table=theology_termly_report_cards
 
+php artisan make:migration add_cols_to_enterprises_website --table=enterprises
 
 php artisan make:factory PostFactory
 

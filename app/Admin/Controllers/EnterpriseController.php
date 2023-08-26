@@ -18,7 +18,7 @@ class EnterpriseController extends AdminController
      *
      * @var string
      */
-    protected $title = 'Enterprise';
+    protected $title = 'Enterprises';
 
     /**
      * Make a grid builder.
@@ -111,6 +111,7 @@ class EnterpriseController extends AdminController
 
         $form->text('name', __('Name'))->required();
         $form->text('short_name', __('Short name'))->required();
+        $form->text('motto', __('School Motto'))->required();
 
         $form->select('type', __('School type'))
             ->options([
@@ -133,6 +134,7 @@ class EnterpriseController extends AdminController
         $form->text('color', __('Primary color'))->required();
         $form->text('phone_number', __('Phone number'))->attribute('type', 'number');
         $form->text('email', __('Email'))->attribute('type', 'email')->required();
+        $form->text('website', __('Website'))->attribute('type', 'Website')->required();
         $form->text('address', __('Address'));
         $form->date('expiry', __('Expiry'))->required();
         $form->textarea('details', __('Details'));

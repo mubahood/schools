@@ -174,16 +174,24 @@ if ($ent == null) {
         }
 
         body {
-            padding: 5px;
+            padding: 15px;
             border: 4px solid <?=$ent->color ?>;
-            margin: 10px;
+            margin: 20px;
             border-radius: 15px;
             font-family: sans-serif;
             font-size: 14px;
         }
 
+        .text-primary {
+            color: <?=$ent->color ?> !important;
+        }
+
+        .bg-primary {
+            background-color: <?=$ent->color ?> !important;
+        }
+
         p {
-            font-size: 14px;
+            font-size: 12px;
             padding: 0%;
             margin: 0%;
             font-family: 'sans-serif';
@@ -194,7 +202,6 @@ if ($ent == null) {
 
 
 <body>
-    {{ public_path('fonts/TiltPrism-Regular.ttf') }}
     @foreach ($items as $item)
         @include('report-cards.template-3.print-layout', ['r' => $item])
     @endforeach

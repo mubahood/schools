@@ -11,7 +11,7 @@ return array(
     | in dompdf_config.inc.php. You can also override the entire config file.
     |
     */
-    'show_warnings' => true,   // Throw an Exception on warnings from dompdf
+    'show_warnings' => false,   // Throw an Exception on warnings from dompdf
 
     'public_path' => null,  // Override the public path if needed
 
@@ -45,7 +45,7 @@ return array(
          * Times-Roman, Times-Bold, Times-BoldItalic, Times-Italic,
          * Symbol, ZapfDingbats.
          */
-        "font_dir" => public_path('fonts'), // advised by dompdf (https://github.com/dompdf/dompdf/pull/782)
+        "font_dir" => storage_path('fonts'), // advised by dompdf (https://github.com/dompdf/dompdf/pull/782)
 
         /**
          * The location of the DOMPDF font cache directory
@@ -55,7 +55,7 @@ return array(
          *
          * Note: This directory must exist and be writable by the webserver process.
          */
-        "font_cache" => public_path('fonts'),
+        "font_cache" => storage_path('fonts'),
 
         /**
          * The location of a temporary directory.
@@ -104,7 +104,7 @@ return array(
         /**
          * Whether to enable font subsetting or not.
          */
-        "enable_font_subsetting" => true,
+        "enable_font_subsetting" => false,
 
         /**
          * The PDF rendering backend to use
@@ -235,7 +235,7 @@ return array(
          *
          * @var bool
          */
-        "enable_php" => true,
+        "enable_php" => false,
 
         /**
          * Enable inline Javascript

@@ -14,12 +14,12 @@ $tr = $r->get_theology_report();
 $termly_report_card = $r->termly_report_card;
 $theology_termly_report_card = null;
 
-$stream_class = '.......';
+$stream_class = '';
 $theo_stream_class = '.......';
 $hasClass = StudentHasClass::where(['administrator_id' => $r->owner->id, 'academic_class_id' => $r->academic_class_id])->first();
 if ($hasClass != null) {
     if ($hasClass->stream != null) {
-        $stream_class = ' - ' . $hasClass->stream->name;
+        $stream_class = $hasClass->stream->name;
     }
 }
 
@@ -27,7 +27,7 @@ if ($tr != null) {
     $hasClass = StudentHasTheologyClass::where(['administrator_id' => $tr->owner->id, 'theology_class_id' => $tr->theology_class_id])->first();
     if ($hasClass != null) {
         if ($hasClass->stream != null) {
-            $theo_stream_class = ' - ' . $hasClass->stream->name;
+            $theo_stream_class = $hasClass->stream->name;
         }
     }
 }
@@ -39,7 +39,7 @@ if ($tr != null) {
 }
 
 $bal = ((int) $r->owner->account->balance);
-$bal_text = '';
+$bal_text = '........';
 if ($bal == 0) {
     $bal_text = 'NIL BALANCE';
 } else {
@@ -67,8 +67,396 @@ foreach ($r->termly_report_card->term->exams as $exam) {
 }
 ?>
 <article>
-    <p class="text-center bg-info" style="font-family: 'Tilt Prism'; font-size: 50px; "><b>
 
-            This is simple Test Message الله الرحمن </b></p>
-    <p class="text-center bg-success"><b>بسم الله الرحمن الرحيم</b></p>
+    <table class="w-100">
+        <tr>
+            <td style="width: 16%">
+                <img style="width: 100%; " src="{{ public_path('storage/' . $ent->logo) }}">
+            </td>
+            <td>
+                <div class="text-center">
+                    <p><b>Bismillahi Alrah'man Alharahim</b></p>
+                    <p class="fs-28 text-center fw-200 mt-3 text-uppercase text-primary">{{ $ent->name }}</p>
+                    <p><i>"{{ $ent->motto }}"</i></p>
+                    <p class="fs-16 lh-6 mt-2">TEL: {{ $ent->phone_number }},&nbsp;{{ $ent->phone_number_2 }}</p>
+                    <p class="fs-16 lh-6 mt-1">EMAIL: {{ $ent->email }}, WEBSITE: {{ $ent->website }}</p>
+                    <p class="fs-16 mt-1">{{ $ent->p_o_box }}, &nbsp; {{ $ent->address }}</p>
+                </div>
+            </td>
+            <td style="width: 16%">
+                <img style="width: 100%;" src="{{ public_path($r->owner->getAvatarPath()) }}">
+            </td>
+        </tr>
+    </table>
+
+    <hr class="my-3" style="background-color:  {{ $r->ent->color }}; height: 2px; padding: 0px; margin: 0px; ">
+
+    <p class="fs-20 text-center"><u>{{ $termly_report_card->report_title }}</u></p>
+
+    <div class="text-left mt-3 fs-16 text-uppercase">
+        NAME: <b>{{ $r->owner->name }}</b> &nbsp;
+
+        @if ($r->owner->sex != null && strlen($r->owner->sex) > 1)
+            GENDER: <b>{{ $r->owner->sex }}</b> &nbsp;
+        @endif
+
+        @if ($r->termly_report_card->reports_who_fees_balance == 'Yes')
+            SCHOOL FEES BALANCE: <b>{{ $bal_text }}</b> &nbsp;
+        @endif
+        SCHOOL PAY CODE: <b>{{ $r->owner->school_pay_payment_code }}</b> &nbsp;
+    </div>
+
+    <p class="text-center my-3 mt-4">
+        <span
+            style="
+                    padding: 8px;
+                    border-radius: 10px;
+                    border: 3px <?= $ent->color ?> solid; "
+            class="text-center text-uppercase fs-16 fw-200">secular studies</span>
+    </p>
+
+    <div class="text-uppercase">
+        CLASS: <b>{{ $r->academic_class->short_name }} {{ $stream_class }}&nbsp;</b>
+        STREAM: <b> {{ $stream_class }}&nbsp;</b>
+        TERM: <b>{{ $r->termly_report_card->term->name }}</b> &nbsp;
+        YEAR: <b>{{ $r->termly_report_card->academic_year->name }}</b> &nbsp;
+        Aggregates: <b class="text-danger">{{ (int) $r->average_aggregates }}</b> &nbsp;
+        DIVISION: <b class="text-danger">{{ (int) $r->grade }}</b> &nbsp;
+        position: <b class="text-danger">{{ (int) $r->position }}</b> &nbsp;
+        OUT OF: <b class="text-danger">{{ (int) $r->total_students }}</b> &nbsp;
+    </div>
+
+    <table class="table table-bordered marks-table p-0 m-0 w-100 mt-2">
+        <thead class="p-0 m-0 text-center" style="line-height: 12px;">
+            <th class="text-left p-1"><b>SUBJECTS</b></th>
+            @if ($termly_report_card->reports_include_bot == 'Yes')
+                <th class="p-1 m-0">
+                    <b>B.O.T</b>
+                    <small class="d-block">({{ $termly_report_card->bot_max }})</small>
+                </th>
+            @endif
+            @if ($termly_report_card->reports_include_mot == 'Yes')
+                <th class="p-1 m-0">
+                    <b>M.O.T</b>
+                    <small class="d-block">({{ $termly_report_card->mot_max }})</small>
+                </th>
+            @endif
+            @if ($termly_report_card->reports_include_eot == 'Yes')
+                <th class="p-1 m-0">
+                    <b>E.O.T</b>
+                    <small class="d-block">({{ $termly_report_card->eot_max }})</small>
+                </th>
+            @endif
+            <th class="p-1"><b>MARKS</b>
+                <small class="d-block"> ({{ $max_mot }}%)</small>
+            </th>
+            <th class="p-1">AGGR</th>
+            <th class="remarks p-1"><b class="text-uppercase">Remarks</b></th>
+            <th class="remarks text-center p-1"><b class="text-uppercase">Initials</b></th>
+        </thead>
+        @php
+            $span = 0;
+            if ($termly_report_card->reports_include_bot == 'Yes') {
+                $span++;
+            }
+            if ($termly_report_card->reports_include_mot == 'Yes') {
+                $span++;
+            }
+            if ($termly_report_card->reports_include_eot == 'Yes') {
+                $span++;
+            }
+        @endphp
+        @foreach ($termly_report_card->get_student_marks($owner->id) as $v)
+            <tr class="marks">
+                @php
+                    if ($v->subject == null) {
+                        $v->delete();
+                        continue;
+                    }
+                @endphp
+                <th>{{ $v->subject->subject_name }}</th>
+                @if ($termly_report_card->reports_include_bot == 'Yes')
+                    <td>{{ (int) $v->bot_score }}</td>
+                @endif
+                @if ($termly_report_card->reports_include_mot == 'Yes')
+                    <td>{{ (int) $v->mot_score }}</td>
+                @endif
+                @if ($termly_report_card->reports_include_eot == 'Yes')
+                    <td>{{ (int) $v->eot_score }}</td>
+                @endif
+                <td>{{ (int) $v->total_score_display }}</td>
+                <td>{{ $v->aggr_name }}</td>
+                <td class="remarks">{{ $v->remarks }}</td>
+                <td class="remarks text-center">{{ $v->initials }}</td>
+            </tr>
+        @endforeach
+        <tr class="marks">
+            <th><b>TOTAL</b></th>
+            <th colspan="{{ $span }}"></th>
+            <td><b>{{ $r->total_marks }}</b></td>
+            <td><b>{{ $r->total_aggregates }}</b></td>
+            <td colspan="2"></td>
+        </tr>
+    </table>
+    <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's comment:</span> <b class="comment"
+            style="font-size: 14px">{{ $r->class_teacher_comment }}</b></p>
+
+    @if ($tr != null)
+        <p class="text-center my-3 mt-4">
+            <span
+                style="
+                    padding: 8px;
+                    border-radius: 10px;
+                    border: 3px <?= $ent->color ?> solid; "
+                class="text-center text-uppercase fs-16 fw-200">theology studies</span>
+        </p>
+        <div class="text-uppercase">
+            CLASS: <b>{{ $tr->theology_class->short_name }}&nbsp;</b>
+            STREAM: <b> {{ $theo_stream_class }}&nbsp;</b>
+            Aggregates: <b class="text-danger">{{ (int) $tr->average_aggregates }}</b> &nbsp;
+            DIVISION: <b class="text-danger">{{ (int) $tr->grade }}</b> &nbsp;
+            position: <b class="text-danger">{{ (int) $tr->position }}</b> &nbsp;
+            OUT OF: <b class="text-danger">{{ (int) $tr->total_students }}</b> &nbsp;
+        </div>
+        <table class="table table-bordered marks-table p-0 m-0 w-100 mt-2">
+            <thead class="p-0 m-0 text-center" style="line-height: 12px;">
+                <th class="text-left p-1"><b>SUBJECTS</b></th>
+                @if ($theology_termly_report_card->reports_include_bot == 'Yes')
+                    <th class="p-1 m-0">
+                        <b>B.O.T</b>
+                        <small class="d-block">({{ $termly_report_card->bot_max }})</small>
+                    </th>
+                @endif
+                @if ($theology_termly_report_card->reports_include_mot == 'Yes')
+                    <th class="p-1 m-0">
+                        <b>M.O.T</b>
+                        <small class="d-block">({{ $termly_report_card->mot_max }})</small>
+                    </th>
+                @endif
+                @if ($theology_termly_report_card->reports_include_eot == 'Yes')
+                    <th class="p-1 m-0">
+                        <b>E.O.T</b>
+                        <small class="d-block">({{ $termly_report_card->eot_max }})</small>
+                    </th>
+                @endif
+                <th class="p-1"><b>MARKS</b>
+                    <small class="d-block">average - ({{ '100' }}%)</small>
+                </th>
+                <th class="p-1">AGGR</th>
+                <th class="remarks p-1"><b class="text-uppercase">Remarks</b></th>
+                <th class="remarks text-center p-1"><b class="text-uppercase">Initials</b>
+                </th>
+            </thead>
+            @php
+                $span = 0;
+                if ($theology_termly_report_card->reports_include_bot == 'Yes') {
+                    $span++;
+                }
+                if ($theology_termly_report_card->reports_include_mot == 'Yes') {
+                    $span++;
+                }
+                if ($theology_termly_report_card->reports_include_eot == 'Yes') {
+                    $span++;
+                }
+            @endphp
+            @foreach ($theology_termly_report_card->get_student_marks($owner->id) as $v)
+                <tr class="marks">
+                    @php
+                        if ($v->subject == null) {
+                            $v->delete();
+                            continue;
+                        }
+                    @endphp
+                    <th>{{ $v->subject->name }}</th>
+                    @if ($termly_report_card->reports_include_bot == 'Yes')
+                        <td>{{ (int) $v->bot_score }}</td>
+                    @endif
+                    @if ($termly_report_card->reports_include_mot == 'Yes')
+                        <td>{{ (int) $v->mot_score }}</td>
+                    @endif
+                    @if ($termly_report_card->reports_include_eot == 'Yes')
+                        <td>{{ (int) $v->eot_score }}</td>
+                    @endif
+                    <td>{{ (int) $v->total_score_display }}</td>
+                    <td>{{ $v->aggr_name }}</td>
+                    <td class="remarks">{{ $v->remarks }}</td>
+                    <td class="remarks text-center">{{ $v->initials }}</td>
+                </tr>
+            @endforeach
+            <tr class="marks">
+                <th><b>TOTAL</b></th>
+                <th colspan="{{ $span }}"></th>
+                <td><b>{{ $tr->total_marks }}</b></td>
+                <td><b>{{ $tr->total_aggregates }}</b></td>
+                <td colspan="2"></td>
+            </tr>
+
+        </table>
+        <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's comment:</span> <b class="comment"
+                style="font-size: 14px">{{ $tr->class_teacher_comment }}</b></p>
+    @endif
+
+    <table class="w-100 mt-2">
+        <tbody>
+            <tr>
+                <td>
+                    <h2 class="p-0 text-center m-0 bg-black text-uppercase" style="font-size: 14px;">Aggregates
+                        Scale</h2>
+                    <table class="table table-bordered grade-table w-100">
+                        <tbody>
+                            <tr class="text-center">
+                                <th class="text-left">Mark</th>
+                                <th>00 - 39</th>
+                                <th>40 - 44</th>
+                                <th>45 - 49</th>
+                                <th>50 - 54</th>
+                                <th>55 - 59</th>
+                                <th>60 - 69</th>
+                                <th>70 - 79</th>
+                                <th>80 - 89</th>
+                                <th>90 - 100</th>
+                            </tr>
+                            <tr>
+                                <th class="text-left">Aggregates</th>
+                                <td class="bordered-table text-center value ">F9</td>
+                                <td class="bordered-table text-center value">P8</td>
+                                <td class="bordered-table text-center value">P7</td>
+                                <td class="bordered-table text-center value">C6</td>
+                                <td class="bordered-table text-center value">C5</td>
+                                <td class="bordered-table text-center value">C4</td>
+                                <td class="bordered-table text-center value">C3</td>
+                                <td class="bordered-table text-center value">D2</td>
+                                <td class="bordered-table text-center value">D1</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+                <td>
+
+                    <h2 class="p-0 text-center m-0  bg-black text-uppercase m-0" style="font-size: 14px;">Grading
+                        Scale
+                    </h2>
+                    <table class="table table-bordered grade-table">
+                        <tbody>
+                            <tr class="text-center">
+                                <th class="text-left">Aggregates</th>
+                                <th>4 - 12</th>
+                                <th>13 - 23</th>
+                                <th>24 - 29</th>
+                                <th>30 - 33</th>
+                                <th>34 - 36</th>
+                            </tr>
+                            <tr>
+                                <th class="text-left">DIVISION</th>
+                                <td class="bordered-table text-center value ">1</td>
+                                <td class="bordered-table text-center value ">2</td>
+                                <td class="bordered-table text-center value ">3</td>
+                                <td class="bordered-table text-center value ">4</td>
+                                <td class="bordered-table text-center value ">U</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p class="mt-2 fw-16"><span class="text-uppercase">HEAD TEACHER'S COMMENT:</span> <b class="comment"
+            style="font-size: 14px">{{ $r->head_teacher_comment }}</b></p>
+    <p class="mt-2 fw-16"><span class="text-uppercase">Mentor's comment:</span> <b class="comment"
+            style="font-size: 14px">{{ $r->owner->name }} is disciplined, social and co-operative.</b></p>
+    <p class="mt-2 fw-16"><span class="text-uppercase">Co-Curricular Activities comment:</span> <b class="comment"
+            style="font-size: 14px">{{ $r->owner->name }} enjoys reading novels and swinging.</b></p>
+
+    <br>
+
+    <div class=" mt-0 d-flex justify-content-between p-0 pt-1 " style="font-size: 14px;">
+        {!! $r->termly_report_card->bottom_message !!}
+    </div>
+    <hr style="background-color:  {{ $r->ent->color }}; height: 2px; 
+            padding: 0px; margin: 0px; ">
+
+    <p class="text-right"><small>Issued on: <b>{{ Utils::my_date_3(now()) }}</b></small></p>
+
+
 </article>
+{{-- 
+        "id" => 7
+    "created_at" => "2022-09-17 04:25:22"
+    "updated_at" => "2023-04-25 04:09:52"
+    "name" => "Kira Junior School - Kito"
+    "short_name" => "kjs"
+    "details" => "<p><strong>Kira Junior School</strong> – <em>Kito</em> is a private mixed school located in a serene and conducive atmosphere for learning.</p><p>It is <u>found ▶"
+    "logo" => "images/kira.jpg"
+    "phone_number" => null
+    "email" => "kirajuniorschool@gmail.com"
+    "address" => "Kira, Kito, Nsasa. (1Km Off Mamerito Road)."
+    "expiry" => "2022-09-16"
+    "administrator_id" => 2206
+    "subdomain" => "kjs"
+    "color" => "#225b4c"
+    "welcome_message" => "<blockquote><strong>Welcome to our beloved school</strong><strong class="ql-size-small">﻿</strong></blockquote>"
+    "type" => "Primary"
+    "phone_number_2" => "077 865 7171" 
+    "hm_signature" => "images/fda26bdc7f6fd2524780abffc74abad0.jpg"
+    "dos_signature" => "images/Mr. Nate Ahmed Signature Black.png"
+    "bursar_signature" => null
+    "dp_year" => 3
+    "school_pay_code" => "16241"
+    "school_pay_password" => "%K$no!&7ATAW42cB455pV"
+    "has_theology" => "Yes"
+    "dp_term_id" => 8
+    "motto" => "School Motto"
+  ]
+    --}}
+{{-- 
+    
+    
+      "created_at" => "2023-07-20 09:09:35"
+    "updated_at" => "2023-08-26 16:18:59"
+    "enterprise_id" => 7
+    "academic_year_id" => 3
+    "term_id" => 8
+    "has_beginning_term" => 0
+    "has_mid_term" => 1
+    "has_end_term" => 0
+    "report_title" => "MID TERM III 2023 REPORT CARD."
+    "grading_scale_id" => 7
+    "do_update" => 0
+    "generate_marks" => "No"
+    "delete_marks_for_non_active" => "No"
+    "bot_max" => 100
+    "mot_max" => 100
+    "eot_max" => 100
+    "display_bot_to_teachers" => "No"
+    "display_mot_to_teachers" => "No"
+    "display_eot_to_teachers" => "Yes"
+    "display_bot_to_others" => "No"
+    "display_mot_to_others" => "No"
+    "display_eot_to_others" => "No"
+    "can_submit_bot" => "No"
+    "can_submit_mot" => "No"
+    "can_submit_eot" => "Yes"
+    "reports_generate" => "No"
+    "reports_delete_for_non_active" => "No"
+    "reports_include_bot" => "No"
+    "reports_include_mot" => "No"
+    "reports_include_eot" => "Yes"
+    "reports_template" => "Template_3"
+    "reports_who_fees_balance" => "None"
+    "reports_display_report_to_parents" => "Yes"
+    "hm_communication" => "Comment.."
+    "classes" => "["27","26","25","24","23","22","21","20","19","18"]"
+    "user_custom_header" => "No"
+    "custom_header_image" => "No"
+    "use_background_image" => "No"
+    "background_image" => null
+    "generate_class_teacher_comment" => "No"
+    "generate_head_teacher_comment" => "No"
+    "generate_positions" => "No"
+    "display_positions" => "Yes"
+    "bottom_message" => "<p>&nbsp;NEXT TERM TUTION FEE: <strong>UGX 18,000</strong> | THIS TERM ENDS ON: <strong>25 AUG, 2023</strong></p>"
+
+    --}}
