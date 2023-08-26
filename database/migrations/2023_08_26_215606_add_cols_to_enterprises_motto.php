@@ -14,7 +14,7 @@ class AddColsToEnterprisesMotto extends Migration
     public function up()
     {
         Schema::table('enterprises', function (Blueprint $table) {
-            $table->text('motto')->default("School Motto")->nullable();
+            $table->text('motto')->nullable();
         });
     }
 
