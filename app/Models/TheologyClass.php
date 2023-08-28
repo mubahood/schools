@@ -26,7 +26,7 @@ class TheologyClass extends Model
     {
         parent::boot();
         static::deleting(function ($m) {
-            die("You cannot delete this item.");
+            //die("You cannot delete this item.");
         });
         static::creating(function ($m) {
             $class = TheologyClass::where([
