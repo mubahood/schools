@@ -10,6 +10,7 @@ use App\Models\Subject;
 use App\Models\TermlyReportCard;
 use App\Models\User;
 use App\Models\Utils;
+use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -24,7 +25,7 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::get("exams", [ApiMainController::class, 'exams_list']);
     Route::post("marks", [ApiMainController::class, 'mark_submit']);
     Route::get("users/me", [ApiAuthController::class, 'me']);
-    Route::get("my-classes", [ApiMainController::class, 'classes']); 
+    Route::get("my-classes", [ApiMainController::class, 'classes']);
     Route::get("class-streams", [ApiMainController::class, 'streams']);
     Route::post("update-bio/{id}", [ApiMainController::class, 'update_bio']);
     Route::post("verify-student/{id}", [ApiMainController::class, 'verify_student']);
@@ -43,6 +44,7 @@ Route::group(['middleware' => 'api'], function ($router) {
 
 
 Route::get('git', function (Request $r) {
+    die("done");
     //$resp = shell_exec('git pull --rebase=interactive -s recursive -X theirs');
     //$resp = shell_exec('git commit --romina');
     // $resp = shell_exec('cd public_html/ && git pull');
@@ -275,6 +277,19 @@ Route::get('reconcile', function (Request $r) {
 });
 Route::get('school-pay-reconcile', function (Request $r) {
     Utils::schoool_pay_sync();
+});
+
+Route::get('process-balance', function (Request $r) {
+    foreach (Administrator::where([
+        'status' => 1,
+        'user_type' => 'student'
+    ])->get() as $key => $value) {
+        if ($value->account == null) {
+            continue;
+        }
+        $value->account->processBalance();
+    }
+    die("done processing");
 });
 
 Route::get('books', function (Request $r) {

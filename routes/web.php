@@ -38,6 +38,26 @@ Route::match(['get', 'post'], '/print', [PrintController2::class, 'index']);
 Route::match(['get', 'post'], '/report-cards', [PrintController2::class, 'secondary_report_cards']);
 Route::get('/temps', function () {
 
+  $start = microtime(true);
+
+
+  
+  $end = microtime(true);
+
+  // Calculate the time difference
+  $executionTime = $end - $start;
+
+  // Convert execution time to minutes and seconds
+  $minutes = floor($executionTime / 60);
+  $seconds = $executionTime % 60;
+
+  echo "<hr>Execution Time: {$minutes} minutes and {$seconds} seconds<br>";
+
+  //dd($accs[0]);
+  //dd($accs->count());
+
+  die('done');
+
   $marks = DB::select('select * 
   from admin_users,theology_mark_records WHERE   
   admin_users.id  = theology_mark_records.administrator_id AND 

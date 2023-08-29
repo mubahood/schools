@@ -122,6 +122,12 @@ class Transaction extends Model
             Transaction::my_update($m);
         });
 
+        self::deleted(function ($m) {
+            if ($m->is_contra_entry == 1) {
+                return false;
+            }
+            Transaction::my_update($m);
+        });
         self::created(function ($m) {
             if ($m->is_contra_entry == 1) {
                 return false;
