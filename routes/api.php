@@ -280,6 +280,7 @@ Route::get('school-pay-reconcile', function (Request $r) {
 });
 
 Route::get('process-balance', function (Request $r) {
+    $start = microtime(true);
     foreach (Administrator::where([
         'status' => 1,
         'user_type' => 'student'
@@ -289,7 +290,19 @@ Route::get('process-balance', function (Request $r) {
         }
         $value->account->processBalance();
     }
-    die("done processing");
+
+
+  
+    $end = microtime(true);
+  
+    // Calculate the time difference
+    $executionTime = $end - $start;
+  
+    // Convert execution time to minutes and seconds
+    $minutes = floor($executionTime / 60);
+    $seconds = $executionTime % 60;
+  
+    echo "<hr>Execution Time: {$minutes} minutes and {$seconds} seconds<br>";
 });
 
 Route::get('books', function (Request $r) {
