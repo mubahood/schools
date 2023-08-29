@@ -19,7 +19,7 @@ $theo_stream_class = '.......';
 $hasClass = StudentHasClass::where(['administrator_id' => $r->owner->id, 'academic_class_id' => $r->academic_class_id])->first();
 if ($hasClass != null) {
     if ($hasClass->stream != null) {
-        $stream_class = $hasClass->stream->name;
+        $stream_class = ' - ' . $hasClass->stream->name;
     }
 }
 
@@ -27,7 +27,7 @@ if ($tr != null) {
     $hasClass = StudentHasTheologyClass::where(['administrator_id' => $tr->owner->id, 'theology_class_id' => $tr->theology_class_id])->first();
     if ($hasClass != null) {
         if ($hasClass->stream != null) {
-            $theo_stream_class = $hasClass->stream->name;
+            $theo_stream_class = ' - ' . $hasClass->stream->name;
         }
     }
 }
@@ -75,12 +75,14 @@ foreach ($r->termly_report_card->term->exams as $exam) {
             </td>
             <td>
                 <div class="text-center">
-                    <p><b>Bismillahi Alrah'man Alharahim</b></p>
-                    <p class="fs-28 text-center fw-200 mt-3 text-uppercase text-primary">{{ $ent->name }}</p>
+                    <p>
+                        <img style="width: 40%; " src="{{ public_path('assets/bismillah.png') }}">
+                    </p>
+                    <p class="fs-28 text-center fw-200 mt-2 text-uppercase text-primary">{{ $ent->name }}</p>
                     <p><i>"{{ $ent->motto }}"</i></p>
-                    <p class="fs-16 lh-6 mt-2">TEL: {{ $ent->phone_number }},&nbsp;{{ $ent->phone_number_2 }}</p>
-                    <p class="fs-16 lh-6 mt-1">EMAIL: {{ $ent->email }}, WEBSITE: {{ $ent->website }}</p>
-                    <p class="fs-16 mt-1">{{ $ent->p_o_box }}, &nbsp; {{ $ent->address }}</p>
+                    <p class="fs-14 lh-6 mt-2">TEL: {{ $ent->phone_number }},&nbsp;{{ $ent->phone_number_2 }}</p>
+                    <p class="fs-14 lh-6 mt-1">EMAIL: {{ $ent->email }}, WEBSITE: {{ $ent->website }}</p>
+                    <p class="fs-14 mt-1">{{ $ent->p_o_box }}, &nbsp; {{ $ent->address }}</p>
                 </div>
             </td>
             <td style="width: 16%">
@@ -89,11 +91,11 @@ foreach ($r->termly_report_card->term->exams as $exam) {
         </tr>
     </table>
 
-    <hr class="my-3" style="background-color:  {{ $r->ent->color }}; height: 2px; padding: 0px; margin: 0px; ">
+    <hr class="my-2" style="background-color:  {{ $r->ent->color }}; height: 2px; padding: 0px; margin: 0px; ">
 
     <p class="fs-20 text-center"><u>{{ $termly_report_card->report_title }}</u></p>
 
-    <div class="text-left mt-3 fs-16 text-uppercase">
+    <div class="text-left mt-2 fs-14 text-uppercase">
         NAME: <b>{{ $r->owner->name }}</b> &nbsp;
 
         @if ($r->owner->sex != null && strlen($r->owner->sex) > 1)
@@ -112,12 +114,12 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     padding: 8px;
                     border-radius: 10px;
                     border: 3px <?= $ent->color ?> solid; "
-            class="text-center text-uppercase fs-16 fw-200">secular studies</span>
+            class="text-center text-uppercase fs-14 fw-200">secular report</span>
     </p>
 
     <div class="text-uppercase">
         CLASS: <b>{{ $r->academic_class->short_name }} {{ $stream_class }}&nbsp;</b>
-        STREAM: <b> {{ $stream_class }}&nbsp;</b>
+        {{-- STREAM: <b> {{ $stream_class }}&nbsp;</b> --}}
         TERM: <b>{{ $r->termly_report_card->term->name }}</b> &nbsp;
         YEAR: <b>{{ $r->termly_report_card->academic_year->name }}</b> &nbsp;
         Aggregates: <b class="text-danger">{{ (int) $r->average_aggregates }}</b> &nbsp;
@@ -208,11 +210,11 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     padding: 8px;
                     border-radius: 10px;
                     border: 3px <?= $ent->color ?> solid; "
-                class="text-center text-uppercase fs-16 fw-200">theology studies</span>
+                class="text-center text-uppercase fs-14 fw-200">theology report</span>
         </p>
         <div class="text-uppercase">
-            CLASS: <b>{{ $tr->theology_class->short_name }}&nbsp;</b>
-            STREAM: <b> {{ $theo_stream_class }}&nbsp;</b>
+            CLASS: <b>{{ $tr->theology_class->short_name . $theo_stream_class }}&nbsp;</b>
+            {{-- STREAM: <b> {{ $theo_stream_class }}&nbsp;</b> --}}
             Aggregates: <b class="text-danger">{{ (int) $tr->average_aggregates }}</b> &nbsp;
             DIVISION: <b class="text-danger">{{ (int) $tr->grade }}</b> &nbsp;
             position: <b class="text-danger">{{ (int) $tr->position }}</b> &nbsp;
@@ -296,7 +298,25 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 style="font-size: 14px">{{ $tr->class_teacher_comment }}</b></p>
     @endif
 
-    <table class="w-100 mt-2">
+    <hr
+        style="background-color:  {{ $r->ent->color }}; height: 2px; 
+            padding: 0px; margin-bottom: 6px; margin-top: 10px; ">
+
+    <p class="mt-2 fw-16"><span class="text-uppercase">Mentor's comment:</span> <b class="comment"
+            style="font-size: 14px">{{ $r->mentor_comment }}</b></p>
+    <p class="mt-2 fw-16"><span class="text-uppercase">Co-Curricular Activities comment:</span> <b class="comment"
+            style="font-size: 14px">{{ $r->sports_comment }}</b></p>
+    <p class="mt-2 fw-16"><span class="text-uppercase">Nurse's comment:</span> <b class="comment"
+            style="font-size: 14px">{{ $r->nurse_comment }}</b></p>
+
+
+
+    <p class="mt-2 fw-16"><span class="text-uppercase">HEAD TEACHER'S COMMENT:</span> <b class="comment"
+            style="font-size: 14px">{{ $r->head_teacher_comment }}</b></p>
+    <br>
+
+
+    <table class="w-100 mt-0">
         <tbody>
             <tr>
                 <td>
@@ -305,28 +325,28 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     <table class="table table-bordered grade-table w-100">
                         <tbody>
                             <tr class="text-center">
-                                <th class="text-left">Mark</th>
-                                <th>00 - 39</th>
-                                <th>40 - 44</th>
-                                <th>45 - 49</th>
-                                <th>50 - 54</th>
-                                <th>55 - 59</th>
-                                <th>60 - 69</th>
-                                <th>70 - 79</th>
-                                <th>80 - 89</th>
-                                <th>90 - 100</th>
+                                <th class="text-left fs-12 lh-1 pt-2">Mark</th>
+                                <th class="fs-10 p-0 lh-1 pt-2">00 - 39</th>
+                                <th class="fs-10 p-0 lh-1 pt-2">40 - 44</th>
+                                <th class="fs-10 p-0 lh-1 pt-2">45 - 49</th>
+                                <th class="fs-10 p-0 lh-1 pt-2">50 - 54</th>
+                                <th class="fs-10 p-0 lh-1 pt-2">55 - 59</th>
+                                <th class="fs-10 p-0 lh-1 pt-2">60 - 69</th>
+                                <th class="fs-10 p-0 lh-1 pt-2">70 - 79</th>
+                                <th class="fs-10 p-0 lh-1 pt-2">80 - 89</th>
+                                <th class="fs-10 p-0 lh-1 pt-2">90 - 100</th>
                             </tr>
                             <tr>
-                                <th class="text-left">Aggregates</th>
-                                <td class="bordered-table text-center value ">F9</td>
-                                <td class="bordered-table text-center value">P8</td>
-                                <td class="bordered-table text-center value">P7</td>
-                                <td class="bordered-table text-center value">C6</td>
-                                <td class="bordered-table text-center value">C5</td>
-                                <td class="bordered-table text-center value">C4</td>
-                                <td class="bordered-table text-center value">C3</td>
-                                <td class="bordered-table text-center value">D2</td>
-                                <td class="bordered-table text-center value">D1</td>
+                                <th class="text-left fs-12 lh-1 pt-2">Aggregates</th>
+                                <td class="bordered-table text-center value fs-12 lh-1 pt-2">F9</td>
+                                <td class="bordered-table text-center value fs-12 lh-1 pt-2">P8</td>
+                                <td class="bordered-table text-center value fs-12 lh-1 pt-2">P7</td>
+                                <td class="bordered-table text-center value fs-12 lh-1 pt-2">C6</td>
+                                <td class="bordered-table text-center value fs-12 lh-1 pt-2">C5</td>
+                                <td class="bordered-table text-center value fs-12 lh-1 pt-2">C4</td>
+                                <td class="bordered-table text-center value fs-12 lh-1 pt-2">C3</td>
+                                <td class="bordered-table text-center value fs-12 lh-1 pt-2">D2</td>
+                                <td class="bordered-table text-center value fs-12 lh-1 pt-2">D1</td>
                             </tr>
                         </tbody>
                     </table>
@@ -339,45 +359,35 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     <table class="table table-bordered grade-table">
                         <tbody>
                             <tr class="text-center">
-                                <th class="text-left">Aggregates</th>
-                                <th>4 - 12</th>
-                                <th>13 - 23</th>
-                                <th>24 - 29</th>
-                                <th>30 - 33</th>
-                                <th>34 - 36</th>
+                                <th class="text-left  fs-12 lh-1 pt-2">Aggregates</th>
+                                <th class=" fs-12 lh-1 pt-2">4 - 12</th>
+                                <th class=" fs-12 lh-1 pt-2">13 - 23</th>
+                                <th class=" fs-12 lh-1 pt-2">24 - 29</th>
+                                <th class=" fs-12 lh-1 pt-2">30 - 33</th>
+                                <th class=" fs-12 lh-1 pt-2">34 - 36</th>
                             </tr>
                             <tr>
-                                <th class="text-left">DIVISION</th>
-                                <td class="bordered-table text-center value ">1</td>
-                                <td class="bordered-table text-center value ">2</td>
-                                <td class="bordered-table text-center value ">3</td>
-                                <td class="bordered-table text-center value ">4</td>
-                                <td class="bordered-table text-center value ">U</td>
+                                <th class="text-left fs-12 lh-1 pt-2">DIVISION</th>
+                                <td class="bordered-table text-center value fs-12 lh-1 pt-2 ">1</td>
+                                <td class="bordered-table text-center value fs-12 lh-1 pt-2 ">2</td>
+                                <td class="bordered-table text-center value  fs-12 lh-1 pt-2">3</td>
+                                <td class="bordered-table text-center value  fs-12 lh-1 pt-2">4</td>
+                                <td class="bordered-table text-center value  fs-12 lh-1 pt-2">U</td>
                             </tr>
                         </tbody>
                     </table>
-
-
                 </td>
             </tr>
         </tbody>
     </table>
 
-    <p class="mt-2 fw-16"><span class="text-uppercase">HEAD TEACHER'S COMMENT:</span> <b class="comment"
-            style="font-size: 14px">{{ $r->head_teacher_comment }}</b></p>
-    <p class="mt-2 fw-16"><span class="text-uppercase">Mentor's comment:</span> <b class="comment"
-            style="font-size: 14px">{{ $r->owner->name }} is disciplined, social and co-operative.</b></p>
-    <p class="mt-2 fw-16"><span class="text-uppercase">Co-Curricular Activities comment:</span> <b class="comment"
-            style="font-size: 14px">{{ $r->owner->name }} enjoys reading novels and swinging.</b></p>
 
-    <br>
+
+
 
     <div class=" mt-0 d-flex justify-content-between p-0 pt-1 " style="font-size: 14px;">
         {!! $r->termly_report_card->bottom_message !!}
     </div>
-    <hr style="background-color:  {{ $r->ent->color }}; height: 2px; 
-            padding: 0px; margin: 0px; ">
-
     <p class="text-right"><small>Issued on: <b>{{ Utils::my_date_3(now()) }}</b></small></p>
 
 

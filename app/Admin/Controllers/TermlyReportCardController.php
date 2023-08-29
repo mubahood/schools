@@ -32,8 +32,9 @@ class TermlyReportCardController extends AdminController
 
 
         //$x = TermlyReportCard::find(8);
-        //$x::do_reports_generate($x); 
-        //die("done"); 
+        //$x->positioning_type = 'Stream';
+        //$x::do_generate_positions($x);
+        //die("done");
         // $x->reports_generate = 'No';
         // $x->reports_include_bot = 'Yes';
         // $x->hm_communication .= '1';
@@ -42,7 +43,6 @@ class TermlyReportCardController extends AdminController
 
 
         $grid = new Grid(new TermlyReportCard());
-
         /*         $x = TermlyReportCard::find(3);
         if($x == null){ 
             die("not found"); 
@@ -293,6 +293,10 @@ class TermlyReportCardController extends AdminController
                 ->default('No');
             $form->radioCard('generate_positions', 'Generate positions?')
                 ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->when('Yes', function (Form $form) {
+                    $form->radioCard('positioning_type', 'Positioning method')
+                        ->options(['Stream' => 'By Stream', 'Class' => 'By Class']);
+                })
                 ->default('No');
             $form->radioCard('display_positions', 'Display positions on report cards?')
                 ->options(['Yes' => 'Yes', 'No' => 'No'])

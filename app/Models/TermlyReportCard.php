@@ -176,25 +176,67 @@ class TermlyReportCard extends Model
             return;
         }
 
-        foreach ($m->classes as $class_id) {
-            $reports = StudentReportCard::where([
-                'academic_class_id' => $class_id,
-                'termly_report_card_id' => $m->id,
-            ])
-                ->orderBy('total_marks', 'DESC')
-                ->get();
-            $prev_mark = 0;
-            $pos = 1;
-            foreach ($reports as $key => $report) {
-                if ($report->total_marks == $prev_mark) {
-                    $report->position = $pos;
-                } else {
-                    $pos = ($key + 1);
-                    $report->position = $pos;
+        if ($m->positioning_type == 'Stream') {
+            foreach ($m->classes as $class_id) {
+                $class = AcademicClass::find(((int)($class_id)));
+                if ($class == null) {
+                    continue;
                 }
-                $prev_mark = $report->total_marks;
-                $report->total_students = count($reports);
-                $report->save();
+                StudentReportCard::where([
+                    'academic_class_id' => $class_id,
+                    'termly_report_card_id' => $m->id,
+                ])->update([
+                    'position' => 0
+                ]);
+                foreach ($class->streams as $stream) {
+                    $studentHasClasses = $stream->studentHasClasses;
+                    $totalStudents = count($studentHasClasses);
+                    $students_ids_array = [];
+                    foreach ($studentHasClasses as $studentHasClass) {
+                        $students_ids_array[] = $studentHasClass->administrator_id;
+                    }
+                    $reports = StudentReportCard::where([
+                        'academic_class_id' => $class_id,
+                        'termly_report_card_id' => $m->id,
+                    ])->whereIn('student_id', $students_ids_array)
+                        ->orderBy('total_marks', 'DESC')
+                        ->get();
+                    $prev_mark = 0;
+                    $pos = 1;
+                    foreach ($reports as $key => $report) {
+                        if ($report->total_marks == $prev_mark) {
+                            $report->position = $pos;
+                        } else {
+                            $pos = ($key + 1);
+                            $report->position = $pos;
+                        }
+                        $prev_mark = $report->total_marks;
+                        $report->total_students = count($reports);
+                        $report->save();
+                    }
+                }
+            }
+        } else {
+            foreach ($m->classes as $class_id) {
+                $reports = StudentReportCard::where([
+                    'academic_class_id' => $class_id,
+                    'termly_report_card_id' => $m->id,
+                ])
+                    ->orderBy('total_marks', 'DESC')
+                    ->get();
+                $prev_mark = 0;
+                $pos = 1;
+                foreach ($reports as $key => $report) {
+                    if ($report->total_marks == $prev_mark) {
+                        $report->position = $pos;
+                    } else {
+                        $pos = ($key + 1);
+                        $report->position = $pos;
+                    }
+                    $prev_mark = $report->total_marks;
+                    $report->total_students = count($reports);
+                    $report->save();
+                }
             }
         }
     }

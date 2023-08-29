@@ -18,4 +18,8 @@ class TheologyStream extends Model
     {
         return $this->belongsTo(TheologyClass::class, 'theology_class_id',);
     }
+
+    public function studentHasTheologyClasses(){
+        return $this->hasMany(StudentHasTheologyClass::class,'theology_stream_id');
+    }
 }

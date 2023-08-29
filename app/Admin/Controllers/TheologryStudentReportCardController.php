@@ -48,7 +48,7 @@ class TheologryStudentReportCardController extends AdminController
 
             $filter->equal('term_id', 'Filter by term')->select(Term::where([
                 'enterprise_id' => Admin::user()->enterprise_id
-            ])->orderBy('id', 'Desc')->get()->pluck('name_text', 'id')); 
+            ])->orderBy('id', 'Desc')->get()->pluck('name_text', 'id'));
 
 
             $u = Admin::user();
@@ -100,6 +100,16 @@ class TheologryStudentReportCardController extends AdminController
             ->display(function () {
                 return $this->theology_class->name;
             })->sortable();
+
+        /* $grid->column('stream_id', __('Stream'))
+            ->display(function () {
+                if ($this->stream == null) {
+                    return "-";
+                }
+                return $this->stream->name;
+            })
+            ->sortable(); */
+
         $grid->column('theology_termly_report_card_id', __('Theology termly report card id'))->hide();
         $grid->column('position', __('Position in class'))->display(function ($position) {
             $numFormat = new NumberFormatter('en_US', NumberFormatter::ORDINAL);
@@ -121,7 +131,7 @@ class TheologryStudentReportCardController extends AdminController
         $grid->column('class_teacher_comment', __('Class Teacher Remarks'))->editable()->sortable();
         $grid->column('head_teacher_comment', __('Head Teacher Remarks'))->editable()->sortable();
 
-/*         $grid->column('print', __('Print'))->display(function ($m) {
+        /*         $grid->column('print', __('Print'))->display(function ($m) {
             return '<a target="_blank" href="' . url('print?theo_id=' . $this->id) . '" >print</a>';
         }); */
 

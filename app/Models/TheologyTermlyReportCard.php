@@ -76,25 +76,67 @@ class TheologyTermlyReportCard extends Model
             return;
         }
 
-        foreach ($m->classes as $class_id) {
-            $reports = TheologryStudentReportCard::where([
-                'theology_class_id' => $class_id,
-                'theology_termly_report_card_id' => $m->id,
-            ])
-                ->orderBy('total_marks', 'DESC')
-                ->get();
-            $prev_mark = 0;
-            $pos = 1;
-            foreach ($reports as $key => $report) {
-                if ($report->total_marks == $prev_mark) {
-                    $report->position = $pos;
-                } else {
-                    $pos = ($key + 1);
-                    $report->position = $pos;
+        if ($m->positioning_type == 'Stream') {
+
+            foreach ($m->classes as $class_id) {
+                $class = TheologyClass::find(((int)($class_id)));
+                if ($class == null) {
+                    continue;
                 }
-                $prev_mark = $report->total_marks;
-                $report->total_students = count($reports);
-                $report->save();
+                TheologryStudentReportCard::where([
+                    'theology_class_id' => $class_id,
+                    'theology_termly_report_card_id' => $m->id,
+                ])->update([
+                    'position' => 0
+                ]);
+                foreach ($class->streams as $stream) {
+                    $studentHasTheologyClasses = $stream->studentHasTheologyClasses;
+                    $students_ids_array = [];
+                    foreach ($studentHasTheologyClasses as $studentHasClass) {
+                        $students_ids_array[] = $studentHasClass->administrator_id;
+                    }
+                    $reports = TheologryStudentReportCard::where([
+                        'theology_class_id' => $class_id,
+                        'theology_termly_report_card_id' => $m->id,
+                    ])->whereIn('student_id', $students_ids_array)
+                        ->orderBy('total_marks', 'DESC')
+                        ->get();
+                    $prev_mark = 0;
+                    $pos = 1;
+                    foreach ($reports as $key => $report) {
+                        if ($report->total_marks == $prev_mark) {
+                            $report->position = $pos;
+                        } else {
+                            $pos = ($key + 1);
+                            $report->position = $pos;
+                        }
+                        $prev_mark = $report->total_marks;
+                        $report->total_students = count($reports);
+                        $report->save();
+                    }
+                }
+            }
+        } else {
+            foreach ($m->classes as $class_id) {
+                $reports = TheologryStudentReportCard::where([
+                    'theology_class_id' => $class_id,
+                    'theology_termly_report_card_id' => $m->id,
+                ])
+                    ->orderBy('total_marks', 'DESC')
+                    ->get();
+                $prev_mark = 0;
+                $pos = 1;
+                foreach ($reports as $key => $report) {
+                    if ($report->total_marks == $prev_mark) {
+                        $report->position = $pos;
+                    } else {
+                        $pos = ($key + 1);
+                        $report->position = $pos;
+                    }
+                    $prev_mark = $report->total_marks;
+                    $report->total_students = count($reports);
+                    $report->save();
+                }
             }
         }
     }

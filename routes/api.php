@@ -292,16 +292,16 @@ Route::get('process-balance', function (Request $r) {
     }
 
 
-  
+
     $end = microtime(true);
-  
+
     // Calculate the time difference
     $executionTime = $end - $start;
-  
+
     // Convert execution time to minutes and seconds
     $minutes = floor($executionTime / 60);
     $seconds = $executionTime % 60;
-  
+
     echo "<hr>Execution Time: {$minutes} minutes and {$seconds} seconds<br>";
 });
 

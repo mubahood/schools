@@ -15,4 +15,8 @@ class AcademicClassSctream extends Model
     {
         return $this->belongsTo(AcademicClass::class);
     }
+    public function studentHasClasses()
+    {
+        return $this->hasMany(StudentHasClass::class,'stream_id');
+    }
 }

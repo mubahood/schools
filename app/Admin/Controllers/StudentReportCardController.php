@@ -378,8 +378,13 @@ class StudentReportCardController extends AdminController
         })->editable()->sortable();
         $grid->column('total_students', __('Total Students'))->editable()->sortable();
 
-        $grid->column('class_teacher_comment', __('Class Teacher Remarks'))->editable()->sortable();
-        $grid->column('head_teacher_comment', __('Head Teacher Remarks'))->editable()->sortable();
+        $grid->column('class_teacher_comment', __('Class Teacher Remarks'))->editable('textarea')->sortable();
+        $grid->column('head_teacher_comment', __('Head Teacher Remarks'))->editable('textarea')->sortable();
+        $grid->column('sports_comment', __('Sports Comment'))->editable('textarea')->sortable();
+        $grid->column('mentor_comment', __('Mentor\'s Comment'))->editable('textarea')->sortable();
+        $grid->column('nurse_comment', __('Nurse\'s Comment'))->editable('textarea')->sortable();
+
+
 
         $grid->column('print', __('Print'))->display(function ($m) {
             $d = '<a target="_blank" href="' . url('print?id=' . $this->id) . '" >PRINT</a>';
@@ -456,6 +461,11 @@ class StudentReportCardController extends AdminController
         $form->decimal('total_students', 'Total students in class')->rules('required');
         $form->text('class_teacher_comment', 'Class teacher\'s comment');
         $form->text('head_teacher_comment', 'Head teacher\'s comment');
+        $form->text('sports_comment');
+        $form->text('mentor_comment');
+        $form->text('nurse_comment');
+
+
 
 
         return $form;

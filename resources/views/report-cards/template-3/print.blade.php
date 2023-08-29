@@ -174,12 +174,14 @@ if ($ent == null) {
         }
 
         body {
-            padding: 15px;
+            padding-left: 10px;
+            padding-right: 10px;
+            padding-top: 5px;
             border: 4px solid <?=$ent->color ?>;
             margin: 20px;
             border-radius: 15px;
             font-family: sans-serif;
-            font-size: 14px;
+            font-size: 12px;
         }
 
         .text-primary {
