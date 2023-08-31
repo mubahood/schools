@@ -2283,4 +2283,23 @@ class Utils  extends Model
 
         return $string;
     }
+
+
+    public static function generateAggregates($grading_scale, $mark)
+    {
+        $ranges = $grading_scale->grade_ranges;
+        if ($grading_scale == null) {
+            throw new Exception("Grading scale not found.", 1);
+        }
+        $resp['aggr_value'] = 0;
+        $resp['aggr_name'] = 'X';
+        foreach ($ranges as $range) {
+            if ($mark > $range->min_mark && $mark < $range->max_mark) {
+                $resp['aggr_value'] = $range->aggregates;
+                $resp['aggr_name'] = $range->name;
+                break;
+            }
+        }
+        return $resp;
+    }
 }

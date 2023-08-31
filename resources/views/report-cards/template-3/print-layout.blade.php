@@ -14,6 +14,8 @@ $tr = $r->get_theology_report();
 $termly_report_card = $r->termly_report_card;
 $theology_termly_report_card = null;
 
+$grading_scale = $termly_report_card->grading_scale;
+
 $stream_class = '';
 $theo_stream_class = '.......';
 $hasClass = StudentHasClass::where(['administrator_id' => $r->owner->id, 'academic_class_id' => $r->academic_class_id])->first();
@@ -179,9 +181,18 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 <th>{{ $v->subject->subject_name }}</th>
                 @if ($termly_report_card->reports_include_bot == 'Yes')
                     <td>{{ (int) $v->bot_score }}</td>
+                    <td>{{ Utils::generateAggregates($grading_scale, $v->bot_score)->name }}</td>
                 @endif
                 @if ($termly_report_card->reports_include_mot == 'Yes')
+                    @php
+                        $_grade = '';
+                        $grade = Utils::generateAggregates($grading_scale, $v->mot_score);
+                        if (isset($grade['aggr_name'])) {
+                            $_grade = $grade['aggr_name'];
+                        }
+                    @endphp
                     <td>{{ (int) $v->mot_score }}</td>
+                    <td>{{ $_grade }}</td>
                 @endif
                 @if ($termly_report_card->reports_include_eot == 'Yes')
                     <td>{{ (int) $v->eot_score }}</td>
@@ -320,8 +331,8 @@ foreach ($r->termly_report_card->term->exams as $exam) {
         <tbody>
             <tr>
                 <td>
-                    <h2 class="p-0 text-center m-0 bg-black text-uppercase" style="font-size: 14px;">Aggregates
-                        Scale</h2>
+                    <h2 class="p-0 text-center m-0 bg-black text-uppercase" style="font-size: 14px;">Aggregates Scale
+                    </h2>
                     <table class="table table-bordered grade-table w-100">
                         <tbody>
                             <tr class="text-center">

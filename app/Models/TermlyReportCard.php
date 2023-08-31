@@ -310,20 +310,35 @@ class TermlyReportCard extends Model
                     $total_max_marks = 0;
                     $total_scored_marks = 0;
 
-                    if ($m->reports_include_bot == 'Yes') {
-                        $total_scored_marks += (int)$mark->bot_score;
-                        $total_max_marks += (int)$m->bot_max;
-                    }
-                    if ($m->reports_include_mot == 'Yes') {
-                        $total_scored_marks += (int)$mark->mot_score;
-                        $total_max_marks += (int)$m->mot_max;
-                    }
-                    if ($m->reports_include_eot == 'Yes') {
-                        $total_scored_marks += (int)$mark->eot_score;
-                        $total_max_marks += (int)$m->eot_max;
-                    }
-                    if ($total_max_marks == 0) {
-                        throw new Exception("Total max marks is zero.", 1);
+                    if ($m->positioning_method == 'Specific') {
+                        if ($m->positioning_exam == 'bot') {
+                            $total_scored_marks = (int)$mark->bot_score;
+                            $total_max_marks = (int)$m->bot_max;
+                        } else if ($m->positioning_exam == 'mot') {
+                            $total_scored_marks = (int)$mark->mot_score;
+                            $total_max_marks = (int)$m->mot_max;
+                        } else if ($m->positioning_exam == 'eot') {
+                            $total_scored_marks = (int)$mark->eot_score;
+                            $total_max_marks = (int)$m->eot_max;
+                        } else {
+                            throw new Exception("Positioning exam not found.", 1);
+                        }
+                    } else {
+                        if ($m->reports_include_bot == 'Yes') {
+                            $total_scored_marks += (int)$mark->bot_score;
+                            $total_max_marks += (int)$m->bot_max;
+                        }
+                        if ($m->reports_include_mot == 'Yes') {
+                            $total_scored_marks += (int)$mark->mot_score;
+                            $total_max_marks += (int)$m->mot_max;
+                        }
+                        if ($m->reports_include_eot == 'Yes') {
+                            $total_scored_marks += (int)$mark->eot_score;
+                            $total_max_marks += (int)$m->eot_max;
+                        }
+                        if ($total_max_marks == 0) {
+                            throw new Exception("Total max marks is zero.", 1);
+                        }
                     }
                     $average_mark = ($total_scored_marks / $total_max_marks) * 100;
                     $average_mark = (int)($average_mark);

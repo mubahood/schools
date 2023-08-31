@@ -31,10 +31,10 @@ class TermlyReportCardController extends AdminController
     {
 
 
-        //$x = TermlyReportCard::find(8);
-        //$x->positioning_type = 'Stream';
-        //$x::do_generate_positions($x);
-        //die("done");
+        // $x = TermlyReportCard::find(8);
+        // $x->positioning_type = 'Stream';
+        // TermlyReportCard::do_generate_positions($x);
+        // die("done");
         // $x->reports_generate = 'No';
         // $x->reports_include_bot = 'Yes';
         // $x->hm_communication .= '1';
@@ -279,6 +279,18 @@ class TermlyReportCardController extends AdminController
                     $form->radioCard('reports_include_eot', 'Include End Of Term marks in reports?')
                         ->options(['Yes' => 'Yes', 'No' => 'No'])
                         ->default('No');
+                    $form->divider();
+                    $form->radioCard('positioning_method', 'Positioning method')
+                        ->options(['Average' => 'Use Average Mark', 'Specific' => 'Use Specific'])
+                        ->when('Specific', function (Form $form) {
+                            $form->radio('positioning_exam', 'Use marks for which exam')
+                                ->options([
+                                    'bot' => 'Use Beginning Of Term exams marks',
+                                    'mot' => 'Use Middle Of Term exams marks',
+                                    'eot' => 'Use End Of Term exams marks',
+                                ])->rules('required');
+                        })
+                        ->rules('required');
                 });
 
             $form->radioCard('reports_delete_for_non_active', 'Delete reports for non active students?')
@@ -294,10 +306,12 @@ class TermlyReportCardController extends AdminController
             $form->radioCard('generate_positions', 'Generate positions?')
                 ->options(['Yes' => 'Yes', 'No' => 'No'])
                 ->when('Yes', function (Form $form) {
-                    $form->radioCard('positioning_type', 'Positioning method')
+                    $form->radio('positioning_type', 'Positioning Type')
                         ->options(['Stream' => 'By Stream', 'Class' => 'By Class']);
                 })
                 ->default('No');
+
+
             $form->radioCard('display_positions', 'Display positions on report cards?')
                 ->options(['Yes' => 'Yes', 'No' => 'No'])
                 ->default('No');
