@@ -182,7 +182,7 @@ class StudentHasClassController extends AdminController
                 return "-";
             }
             return  $this->stream->name;
-        });
+        })->sortable();
         $grid->column('academic_year_id', __('Academic year'))->display(function () {
             if (!$this->year) {
                 return "-";

@@ -342,6 +342,7 @@ class TermlyReportCard extends Model
                             throw new Exception("Total max marks is zero.", 1);
                         }
                     }
+                    
                     $average_mark = ($total_scored_marks / $total_max_marks) * 100;
                     $average_mark = (int)($average_mark);
                     $mark->total_score = $total_scored_marks;

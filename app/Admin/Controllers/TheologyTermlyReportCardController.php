@@ -240,6 +240,17 @@ class TheologyTermlyReportCardController extends AdminController
                     $form->radioCard('reports_include_eot', 'Include End Of Term marks in reports?')
                         ->options(['Yes' => 'Yes', 'No' => 'No'])
                         ->default('No');
+                    $form->radioCard('positioning_method', 'Positioning method')
+                        ->options(['Average' => 'Use Average Mark', 'Specific' => 'Use Specific'])
+                        ->when('Specific', function (Form $form) {
+                            $form->radio('positioning_exam', 'Use marks for which exam')
+                                ->options([
+                                    'bot' => 'Use Beginning Of Term exams marks',
+                                    'mot' => 'Use Middle Of Term exams marks',
+                                    'eot' => 'Use End Of Term exams marks',
+                                ])->rules('required');
+                        })
+                        ->rules('required');
                 });
 
             $form->radioCard('reports_delete_for_non_active', 'Delete reports for non active students?')
