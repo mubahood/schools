@@ -73,4 +73,14 @@ class MarkRecord extends Model
     {
         return $this->belongsTo(Administrator::class, 'administrator_id');
     }
+
+    public function get_grade($grading_scale, $score)
+    {
+        $_grade = '';
+        $grade = Utils::generateAggregates($grading_scale, $score);
+        if (isset($grade['aggr_name'])) {
+            $_grade = $grade['aggr_name'];
+        }
+        return $_grade;
+    }
 }

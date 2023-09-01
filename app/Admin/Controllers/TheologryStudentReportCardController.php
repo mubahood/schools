@@ -129,7 +129,7 @@ class TheologryStudentReportCardController extends AdminController
             return $numFormat->format(((int)($position)));
         })->editable()->sortable();
         $grid->column('class_teacher_comment', __('Class Teacher Remarks'))->editable()->sortable();
-        $grid->column('head_teacher_comment', __('Head Teacher Remarks'))->editable()->sortable();
+        $grid->column('head_teacher_comment', __('Head Teacher Remarks'))->hide()->editable()->sortable();
 
         /*         $grid->column('print', __('Print'))->display(function ($m) {
             return '<a target="_blank" href="' . url('print?theo_id=' . $this->id) . '" >print</a>';

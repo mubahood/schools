@@ -134,32 +134,37 @@ foreach ($r->termly_report_card->term->exams as $exam) {
         <thead class="p-0 m-0 text-center" style="line-height: 12px;">
             <th class="text-left p-1"><b>SUBJECTS</b></th>
             @if ($termly_report_card->reports_include_bot == 'Yes')
-                <th class="p-1 m-0">
+                <th class="p-1 m-0" colspan="2">
                     <b>B.O.T</b>
                     <small class="d-block">({{ $termly_report_card->bot_max }})</small>
                 </th>
             @endif
             @if ($termly_report_card->reports_include_mot == 'Yes')
-                <th class="p-1 m-0">
+                <th class="p-1 m-0" colspan="2">
                     <b>M.O.T</b>
                     <small class="d-block">({{ $termly_report_card->mot_max }})</small>
                 </th>
             @endif
             @if ($termly_report_card->reports_include_eot == 'Yes')
-                <th class="p-1 m-0">
+                <th class="p-1 m-0" colspan="2">
                     <b>E.O.T</b>
                     <small class="d-block">({{ $termly_report_card->eot_max }})</small>
                 </th>
             @endif
-            <th class="p-1"><b>MARKS</b>
-                <small class="d-block"> ({{ $max_mot }}%)</small>
-            </th>
-            <th class="p-1">AGGR</th>
+            @if ($termly_report_card->positioning_method != 'Specific')
+                <th class="p-1"><b>MARKS</b>
+                    <small class="d-block"> ({{ $max_mot }}%)</small>
+                </th>
+                <th class="p-1">AGGR</th>
+            @endif
             <th class="remarks p-1"><b class="text-uppercase">Remarks</b></th>
             <th class="remarks text-center p-1"><b class="text-uppercase">Initials</b></th>
         </thead>
         @php
             $span = 0;
+            $bot_tot = 0;
+            $mot_tot = 0;
+            $eot_tot = 0;
             if ($termly_report_card->reports_include_bot == 'Yes') {
                 $span++;
             }
@@ -171,6 +176,11 @@ foreach ($r->termly_report_card->term->exams as $exam) {
             }
         @endphp
         @foreach ($termly_report_card->get_student_marks($owner->id) as $v)
+            @php
+                $bot_tot += $v->bot_score;
+                $mot_tot += $v->mot_score;
+                $eot_tot += $v->eot_score;
+            @endphp
             <tr class="marks">
                 @php
                     if ($v->subject == null) {
@@ -184,30 +194,39 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     <td>{{ Utils::generateAggregates($grading_scale, $v->bot_score)->name }}</td>
                 @endif
                 @if ($termly_report_card->reports_include_mot == 'Yes')
-                    @php
-                        $_grade = '';
-                        $grade = Utils::generateAggregates($grading_scale, $v->mot_score);
-                        if (isset($grade['aggr_name'])) {
-                            $_grade = $grade['aggr_name'];
-                        }
-                    @endphp
                     <td>{{ (int) $v->mot_score }}</td>
-                    <td>{{ $_grade }}</td>
+                    <td>{{ $v->get_grade($grading_scale, $v->mot_score) }}</td>
                 @endif
                 @if ($termly_report_card->reports_include_eot == 'Yes')
                     <td>{{ (int) $v->eot_score }}</td>
+                    <td>{{ $v->get_grade($grading_scale, $v->eot_score) }}</td>
                 @endif
-                <td>{{ (int) $v->total_score_display }}</td>
-                <td>{{ $v->aggr_name }}</td>
+                @if ($termly_report_card->positioning_method != 'Specific')
+                    <td>{{ (int) $v->total_score_display }}</td>
+                    <td>{{ $v->aggr_name }}</td>
+                @endif
                 <td class="remarks">{{ $v->remarks }}</td>
                 <td class="remarks text-center">{{ $v->initials }}</td>
             </tr>
         @endforeach
         <tr class="marks">
             <th><b>TOTAL</b></th>
-            <th colspan="{{ $span }}"></th>
-            <td><b>{{ $r->total_marks }}</b></td>
-            <td><b>{{ $r->total_aggregates }}</b></td>
+            @if ($termly_report_card->reports_include_bot == 'Yes')
+                <th class="text-center">{{ $bot_tot }}</th>
+                <th></th>
+            @endif
+            @if ($termly_report_card->reports_include_mot == 'Yes')
+                <th class="text-center">{{ $mot_tot }}</th>
+                <th></th>
+            @endif
+            @if ($termly_report_card->reports_include_eot == 'Yes')
+                <th class="text-center">{{ $eot_tot }}</th>
+                <th></th>
+            @endif
+            @if ($termly_report_card->positioning_method != 'Specific')
+                <td class="text-center"><b>{{ $r->total_marks }}</b></td>
+                <td><b>{{ $r->total_aggregates }}</b></td>
+            @endif
             <td colspan="2"></td>
         </tr>
     </table>
