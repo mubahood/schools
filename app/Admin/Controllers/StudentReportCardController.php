@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Models\AcademicClass;
+use App\Models\AcademicClassSctream;
 use App\Models\AcademicYear;
 use App\Models\StudentHasClass;
 use App\Models\StudentReportCard;
@@ -274,16 +275,18 @@ class StudentReportCardController extends AdminController
                 'enterprise_id' => Admin::user()->enterprise_id
             ])->orderBy('id', 'Desc')->get()->pluck('name', 'id'));
 
+            $u = Admin::user();
+
+
+
+
             $filter->equal('term_id', 'Filter by term')->select(Term::where([
                 'enterprise_id' => Admin::user()->enterprise_id
             ])->orderBy('id', 'Desc')->get()->pluck('name_text', 'id'));
 
 
-            $u = Admin::user();
 
 
-
-            $u = Admin::user();
             $ajax_url = url(
                 '/api/ajax?'
                     . 'enterprise_id=' . $u->enterprise_id
@@ -307,6 +310,19 @@ class StudentReportCardController extends AdminController
             ])
                 ->orderBy('id', 'Desc')
                 ->get()->pluck('name_text', 'id'));
+
+
+            $streams = [];
+            foreach (AcademicClassSctream::where(
+                [
+                    'enterprise_id' => $u->enterprise_id,
+                ]
+            )
+                ->orderBy('id', 'desc')
+                ->get() as $ex) {
+                $streams[$ex->id] = $ex->academic_class->short_name . " - " . $ex->name;
+            }
+            $filter->equal('stream_id', 'Filter by Stream')->select($streams);
             $filter->equal('grade', 'Filter by grade')->select([
                 '1' => "First grade",
                 '2' => "Second grade",

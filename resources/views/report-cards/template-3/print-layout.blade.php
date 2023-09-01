@@ -15,7 +15,24 @@ $termly_report_card = $r->termly_report_card;
 $theology_termly_report_card = null;
 
 $grading_scale = $termly_report_card->grading_scale;
+$class_teacher_name = '..........................................';
+$class_teacher_name_1 = '..........................................';
+$hm_name = '..........................................';
+if ($ent->hm_name != null && strlen($ent->hm_name) > 1) {
+    $hm_name = $ent->hm_name;
+}
+if ($r->academic_class != null) {
+    if ($r->academic_class->class_teacher != null) {
+        $class_teacher_name = $r->academic_class->class_teacher->name;
+    }
+}
 
+if ($tr->theology_class != null) {
+    $_teacher = $tr->theology_class->get_class_teacher();
+    if ($_teacher != null) {
+        $class_teacher_name_1 = $_teacher->name;
+    }
+}
 $stream_class = '';
 $theo_stream_class = '.......';
 $hasClass = StudentHasClass::where(['administrator_id' => $r->owner->id, 'academic_class_id' => $r->academic_class_id])->first();
@@ -176,17 +193,18 @@ foreach ($r->termly_report_card->term->exams as $exam) {
             }
         @endphp
         @foreach ($termly_report_card->get_student_marks($owner->id) as $v)
-            @php
-                $bot_tot += $v->bot_score;
-                $mot_tot += $v->mot_score;
-                $eot_tot += $v->eot_score;
-            @endphp
             <tr class="marks">
                 @php
                     if ($v->subject == null) {
                         $v->delete();
                         continue;
                     }
+                @endphp
+
+                @php
+                    $bot_tot += $v->bot_score;
+                    $mot_tot += $v->mot_score;
+                    $eot_tot += $v->eot_score;
                 @endphp
                 <th>{{ $v->subject->subject_name }}</th>
                 @if ($termly_report_card->reports_include_bot == 'Yes')
@@ -230,8 +248,12 @@ foreach ($r->termly_report_card->term->exams as $exam) {
             <td colspan="2"></td>
         </tr>
     </table>
-    <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's comment:</span> <b class="comment"
+    <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's Comment:</span> <b class="comment"
             style="font-size: 14px">{{ $r->class_teacher_comment }}</b></p>
+    <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's Name:</span> <b style="font-size: 14px"
+            class="text-uppercase">{{ $class_teacher_name }}</b>,&nbsp;
+        <span class="text-uppercase fs-16 ">Signature:<b>...............................</b></span>
+    </p>
 
     @if ($tr != null)
         <p class="text-center my-3 mt-4">
@@ -254,27 +276,29 @@ foreach ($r->termly_report_card->term->exams as $exam) {
             <thead class="p-0 m-0 text-center" style="line-height: 12px;">
                 <th class="text-left p-1"><b>SUBJECTS</b></th>
                 @if ($theology_termly_report_card->reports_include_bot == 'Yes')
-                    <th class="p-1 m-0">
+                    <th colspan="2" class="p-1 m-0">
                         <b>B.O.T</b>
                         <small class="d-block">({{ $termly_report_card->bot_max }})</small>
                     </th>
                 @endif
                 @if ($theology_termly_report_card->reports_include_mot == 'Yes')
-                    <th class="p-1 m-0">
+                    <th colspan="2" class="p-1 m-0">
                         <b>M.O.T</b>
                         <small class="d-block">({{ $termly_report_card->mot_max }})</small>
                     </th>
                 @endif
                 @if ($theology_termly_report_card->reports_include_eot == 'Yes')
-                    <th class="p-1 m-0">
+                    <th colspan="2" class="p-1 m-0">
                         <b>E.O.T</b>
                         <small class="d-block">({{ $termly_report_card->eot_max }})</small>
                     </th>
                 @endif
-                <th class="p-1"><b>MARKS</b>
-                    <small class="d-block">average - ({{ '100' }}%)</small>
-                </th>
-                <th class="p-1">AGGR</th>
+                @if ($termly_report_card->positioning_method != 'Specific')
+                    <th class="p-1"><b>MARKS</b>
+                        <small class="d-block">average - ({{ '100' }}%)</small>
+                    </th>
+                    <th class="p-1">AGGR</th>
+                @endif
                 <th class="remarks p-1"><b class="text-uppercase">Remarks</b></th>
                 <th class="remarks text-center p-1"><b class="text-uppercase">Initials</b>
                 </th>
@@ -291,6 +315,15 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     $span++;
                 }
             @endphp
+
+            @php
+                
+                $span = 0;
+                $bot_tot = 0;
+                $mot_tot = 0;
+                $eot_tot = 0;
+                
+            @endphp
             @foreach ($theology_termly_report_card->get_student_marks($owner->id) as $v)
                 <tr class="marks">
                     @php
@@ -298,34 +331,61 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                             $v->delete();
                             continue;
                         }
+                        $span = 0;
+                        $bot_tot += $v->bot_score;
+                        $mot_tot += $v->mot_score;
+                        $eot_tot += $v->eot_score;
+                        
                     @endphp
                     <th>{{ $v->subject->name }}</th>
                     @if ($termly_report_card->reports_include_bot == 'Yes')
                         <td>{{ (int) $v->bot_score }}</td>
+                        <td>{{ $v->get_grade($grading_scale, $v->eot_score) }}</td>
                     @endif
                     @if ($termly_report_card->reports_include_mot == 'Yes')
                         <td>{{ (int) $v->mot_score }}</td>
+                        <td>{{ $v->get_grade($grading_scale, $v->mot_score) }}</td>
                     @endif
                     @if ($termly_report_card->reports_include_eot == 'Yes')
                         <td>{{ (int) $v->eot_score }}</td>
+                        <td>{{ $v->get_grade($grading_scale, $v->eot_score) }}</td>
                     @endif
-                    <td>{{ (int) $v->total_score_display }}</td>
-                    <td>{{ $v->aggr_name }}</td>
+                    @if ($termly_report_card->positioning_method != 'Specific')
+                        <td>{{ (int) $v->total_score_display }}</td>
+                        <td>{{ $v->aggr_name }}</td>
+                    @endif
                     <td class="remarks">{{ $v->remarks }}</td>
                     <td class="remarks text-center">{{ $v->initials }}</td>
                 </tr>
             @endforeach
             <tr class="marks">
                 <th><b>TOTAL</b></th>
-                <th colspan="{{ $span }}"></th>
-                <td><b>{{ $tr->total_marks }}</b></td>
-                <td><b>{{ $tr->total_aggregates }}</b></td>
+                @if ($termly_report_card->reports_include_bot == 'Yes')
+                    <th class="text-center">{{ $bot_tot }}</th>
+                    <th></th>
+                @endif
+                @if ($termly_report_card->reports_include_mot == 'Yes')
+                    <th class="text-center">{{ $mot_tot }}</th>
+                    <th></th>
+                @endif
+                @if ($termly_report_card->reports_include_eot == 'Yes')
+                    <th class="text-center">{{ $eot_tot }}</th>
+                    <th></th>
+                @endif
+                @if ($termly_report_card->positioning_method != 'Specific')
+                    <td class="text-center"><b>{{ $tr->total_marks }}</b></td>
+                    <td><b>{{ $tr->total_aggregates }}</b></td>
+                @endif
                 <td colspan="2"></td>
             </tr>
 
         </table>
         <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's comment:</span> <b class="comment"
                 style="font-size: 14px">{{ $tr->class_teacher_comment }}</b></p>
+        <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's Name:</span> <b style="font-size: 14px"
+                class="text-uppercase">{{ $class_teacher_name_1 }}</b>,&nbsp;
+            <span class="text-uppercase fs-16 ">Signature:<b>...............................</b></span>
+        </p>
     @endif
 
     <hr
@@ -343,6 +403,10 @@ foreach ($r->termly_report_card->term->exams as $exam) {
 
     <p class="mt-2 fw-16"><span class="text-uppercase">HEAD TEACHER'S COMMENT:</span> <b class="comment"
             style="font-size: 14px">{{ $r->head_teacher_comment }}</b></p>
+    <p class="mt-2 fw-16"><span class="text-uppercase">HEAD Teacher's Name:</span> <b style="font-size: 14px"
+            class="text-uppercase">{{ $hm_name }}</b>,&nbsp;
+        <span class="text-uppercase fs-16 ">Signature:<b>...............................</b></span>
+    </p>
     <br>
 
 
@@ -422,81 +486,3 @@ foreach ($r->termly_report_card->term->exams as $exam) {
 
 
 </article>
-{{-- 
-        "id" => 7
-    "created_at" => "2022-09-17 04:25:22"
-    "updated_at" => "2023-04-25 04:09:52"
-    "name" => "Kira Junior School - Kito"
-    "short_name" => "kjs"
-    "details" => "<p><strong>Kira Junior School</strong> – <em>Kito</em> is a private mixed school located in a serene and conducive atmosphere for learning.</p><p>It is <u>found ▶"
-    "logo" => "images/kira.jpg"
-    "phone_number" => null
-    "email" => "kirajuniorschool@gmail.com"
-    "address" => "Kira, Kito, Nsasa. (1Km Off Mamerito Road)."
-    "expiry" => "2022-09-16"
-    "administrator_id" => 2206
-    "subdomain" => "kjs"
-    "color" => "#225b4c"
-    "welcome_message" => "<blockquote><strong>Welcome to our beloved school</strong><strong class="ql-size-small">﻿</strong></blockquote>"
-    "type" => "Primary"
-    "phone_number_2" => "077 865 7171" 
-    "hm_signature" => "images/fda26bdc7f6fd2524780abffc74abad0.jpg"
-    "dos_signature" => "images/Mr. Nate Ahmed Signature Black.png"
-    "bursar_signature" => null
-    "dp_year" => 3
-    "school_pay_code" => "16241"
-    "school_pay_password" => "%K$no!&7ATAW42cB455pV"
-    "has_theology" => "Yes"
-    "dp_term_id" => 8
-    "motto" => "School Motto"
-  ]
-    --}}
-{{-- 
-    
-    
-      "created_at" => "2023-07-20 09:09:35"
-    "updated_at" => "2023-08-26 16:18:59"
-    "enterprise_id" => 7
-    "academic_year_id" => 3
-    "term_id" => 8
-    "has_beginning_term" => 0
-    "has_mid_term" => 1
-    "has_end_term" => 0
-    "report_title" => "MID TERM III 2023 REPORT CARD."
-    "grading_scale_id" => 7
-    "do_update" => 0
-    "generate_marks" => "No"
-    "delete_marks_for_non_active" => "No"
-    "bot_max" => 100
-    "mot_max" => 100
-    "eot_max" => 100
-    "display_bot_to_teachers" => "No"
-    "display_mot_to_teachers" => "No"
-    "display_eot_to_teachers" => "Yes"
-    "display_bot_to_others" => "No"
-    "display_mot_to_others" => "No"
-    "display_eot_to_others" => "No"
-    "can_submit_bot" => "No"
-    "can_submit_mot" => "No"
-    "can_submit_eot" => "Yes"
-    "reports_generate" => "No"
-    "reports_delete_for_non_active" => "No"
-    "reports_include_bot" => "No"
-    "reports_include_mot" => "No"
-    "reports_include_eot" => "Yes"
-    "reports_template" => "Template_3"
-    "reports_who_fees_balance" => "None"
-    "reports_display_report_to_parents" => "Yes"
-    "hm_communication" => "Comment.."
-    "classes" => "["27","26","25","24","23","22","21","20","19","18"]"
-    "user_custom_header" => "No"
-    "custom_header_image" => "No"
-    "use_background_image" => "No"
-    "background_image" => null
-    "generate_class_teacher_comment" => "No"
-    "generate_head_teacher_comment" => "No"
-    "generate_positions" => "No"
-    "display_positions" => "Yes"
-    "bottom_message" => "<p>&nbsp;NEXT TERM TUTION FEE: <strong>UGX 18,000</strong> | THIS TERM ENDS ON: <strong>25 AUG, 2023</strong></p>"
-
-    --}}

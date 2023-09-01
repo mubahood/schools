@@ -64,6 +64,17 @@ class TheologyClass extends Model
     {
         return $this->belongsTo(Administrator::class, 'class_teahcer_id');
     }
+    function get_class_teacher()
+    { 
+        $t = Administrator::find($this->class_teahcer_id);
+        if ($t == null) {
+            $t = Administrator::find($this->class_teahcer_id);
+        }
+        if ($t == null) {
+            $t = Administrator::find($this->class_teahcer_id);
+        }
+        return $t;
+    }
 
 
     function students()

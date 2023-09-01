@@ -93,6 +93,7 @@ class ConfigurationController extends AdminController
         $form->color('color', __('School Color'))->default('color')->required();
         $form->quill('welcome_message', __('Welcome message'));
         $form->divider();
+        $form->image('hm_name', __('Head Teacher Name'));
         $form->image('hm_signature', __('Head Teacher signature'));
         $form->image('dos_signature', __('Head Teacher signature'));
         $form->image('bursar_signature', __('Bursar signature')); 
