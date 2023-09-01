@@ -68,13 +68,13 @@ class TermlyReportCard extends Model
                 TermlyReportCard::do_reports_generate($m);
             }
             if ($m->generate_class_teacher_comment == 'Yes') {
-                TermlyReportCard::do_generate_class_teacher_comment($m);
+                //TermlyReportCard::do_generate_class_teacher_comment($m);
             }
             if ($m->generate_positions == 'Yes') {
                 TermlyReportCard::do_generate_positions($m);
             }
             if ($m->generate_head_teacher_comment == 'Yes') {
-                TermlyReportCard::do_generate_head_teacher_comment($m);
+                //TermlyReportCard::do_generate_head_teacher_comment($m);
             }
             DB::update("UPDATE termly_report_cards SET 
             generate_marks = 'No',
@@ -157,6 +157,7 @@ class TermlyReportCard extends Model
 
     public static function do_generate_class_teacher_comment($m)
     {
+        return;
         foreach ($m->report_cards as $key => $report) {
             $report->class_teacher_comment = Utils::getClassTeacherComment($report)['teacher'];
             $report->save();
@@ -164,6 +165,7 @@ class TermlyReportCard extends Model
     }
     public static function do_generate_head_teacher_comment($m)
     {
+        return;
         foreach ($m->report_cards as $key => $report) {
             $report->head_teacher_comment = Utils::getClassTeacherComment($report)['hm'];
             $report->save();
