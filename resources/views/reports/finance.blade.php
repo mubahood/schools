@@ -44,7 +44,7 @@
 
 <hr style="height: 5px; background-color:  {{ $ent->color }};" class=" my-2 mb-4">
 <p class="fs-24 text-center fw-200 mt-2 text-uppercase black mb-4"><u>
-        Financial Termly Report for the TERM {{ $r->term->name }}</u></p>
+    Termly Financial Report for the TERM {{ $r->term->name }}</u></p>
 <p class="text-right mb-4"> <small><u>DATE: {{ $r->date }}</u></small></p>
 
 
