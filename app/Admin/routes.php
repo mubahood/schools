@@ -95,6 +95,8 @@ Route::group([
     $router->get('/dashboard', 'HomeController@index')->name('dashboard');
 
     $router->get('/', 'HomeController@stats')->name('home');
+    $router->get('/reports-finance', 'HomeController@reports_finance')->name('home');
+
     $router->resources([
         'enterprises' => EnterpriseController::class
     ]);

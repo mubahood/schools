@@ -65,7 +65,7 @@ class FinancialRecordController extends AdminController
             $segments = explode('/', trim($_SERVER['REQUEST_URI'], '/'));
             if (in_array('financial-records-expenditure', $segments)) {
 
-                $type = 'Expenditure ';
+                $type = 'Expenditure';
             }
 
             foreach (AccountParent::where([

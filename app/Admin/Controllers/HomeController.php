@@ -8,6 +8,7 @@ use App\Models\Account;
 use App\Models\Enterprise;
 use App\Models\MenuItem;
 use App\Models\ReportCard;
+use App\Models\ReportsFinance;
 use App\Models\StudentHasClass;
 use App\Models\StudentHasTheologyClass;
 use App\Models\StudentReportCard;
@@ -40,6 +41,19 @@ class HomeController extends Controller
         $u = Admin::user();
         return $content->view('admin.index', [
             'u' => $u
+        ]);
+    }
+
+
+    public function reports_finance(Content $content)
+    {
+
+        $u = Admin::user();
+        $r = new ReportsFinance($u->ent);
+        
+        
+        return $content->view('reports.finance', [
+            'r' => $r
         ]);
     }
     public function stats(Content $content)
@@ -78,7 +92,7 @@ class HomeController extends Controller
                 });
 
                 $row->column(3, function (Column $column) {
-                    $column->append(Dashboard::count_percentage_paid_fees());
+                    //$column->append(Dashboard::count_percentage_paid_fees());
                 });
 
                 /*                 

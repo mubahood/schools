@@ -130,4 +130,3 @@ Admin::css('/css/jquery-confirm.min.css');
 Admin::js('/js/charts.js');
 
 Admin::css(url('/assets/bootstrap.css'));
-Admin::css('/assets/styles.css');

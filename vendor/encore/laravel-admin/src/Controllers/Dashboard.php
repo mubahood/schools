@@ -527,6 +527,10 @@ class Dashboard
     public static function count_expected_fees()
     {
         $u = Auth::user();
+        return view('widgets.print-financial-report', [
+            'enterprise_id' => $u->enterprise_id,
+        ]);
+        $u = Auth::user();
         $term = $u->ent->dpTerm();
 
         $fees_to_be_collected = Transaction::where([

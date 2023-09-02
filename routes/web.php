@@ -16,6 +16,7 @@ use App\Models\FinancialRecord;
 use App\Models\Gen;
 use App\Models\Mark;
 use App\Models\MarkRecord;
+use App\Models\ReportsFinance;
 use App\Models\TheologyMarkRecord;
 use App\Models\StudentHasClass;
 use App\Models\StudentHasFee;
@@ -41,7 +42,7 @@ Route::get('/temps', function () {
   $start = microtime(true);
 
 
-  
+
   $end = microtime(true);
 
   // Calculate the time difference
@@ -786,6 +787,21 @@ Route::get('create-streams', [Utils::class, 'create_streams']);
 Route::get('generate-variables', [MainController::class, 'generate_variables']);
 Route::get('process-photos', [MainController::class, 'process_photos']);
 Route::get('student-data-import', [MainController::class, 'student_data_import']);
+
+Route::get('reports-finance-print', function () {
+  //return view('print/print-admission-letter');
+  $pdf = App::make('dompdf.wrapper');
+  //$pdf->setOption(['DOMPDF_ENABLE_REMOTE' => false]);
+
+  $ent = Enterprise::find($_GET['id']);
+  $r = new ReportsFinance($ent);
+
+  $pdf->loadHTML(view('reports.finance', [
+    'r' => $r
+  ]));
+  return $pdf->stream();
+});
+
 
 Route::get('print-admission-letter', function () {
   //return view('print/print-admission-letter');
