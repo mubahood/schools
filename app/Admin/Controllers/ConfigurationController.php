@@ -81,8 +81,7 @@ class ConfigurationController extends AdminController
         $form->disableReset();
         $form->disableViewCheck();
 
-        $form->text('name', __('School Name'))->required();
-        $form->text('short_name', __('Short name'))->required();
+        $form->text('name', __('School Name'))->required(); 
         $form->text('motto', __('School Motto'))->required(); 
         $form->image('logo', __('School badge'))->required();
         $form->text('address', __('School Address'))->required();
