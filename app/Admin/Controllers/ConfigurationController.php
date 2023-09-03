@@ -83,6 +83,7 @@ class ConfigurationController extends AdminController
 
         $form->text('name', __('School Name'))->required();
         $form->text('short_name', __('Short name'))->required();
+        $form->text('motto', __('School Motto'))->required(); 
         $form->image('logo', __('School badge'))->required();
         $form->text('address', __('School Address'))->required();
         $form->quill('details', __('School details'))->required();
