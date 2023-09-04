@@ -144,6 +144,7 @@ php artisan make:migration create_secondary_termly_report_cards_table
 php artisan make:migration create_secondary_termly_report_card_items_table 
 php artisan make:migration create_secondary_report_cards_table 
 php artisan make:migration create_termly_school_fees_balancings_table
+php artisan make:migration create_report_finances_table
 
 
 

@@ -31,9 +31,7 @@ class TermlyReportCardController extends AdminController
     {
 
 
-        // $x = TermlyReportCard::find(8);
-        // $x->positioning_type = 'Stream';
-        // TermlyReportCard::do_generate_positions($x);
+  
         // die("done");
         // $x->reports_generate = 'No';
         // $x->reports_include_bot = 'Yes';
@@ -169,6 +167,12 @@ class TermlyReportCardController extends AdminController
      */
     protected function form()
     {
+        // $x = TermlyReportCard::find(8);
+        // $x->positioning_type = 'Stream';
+        // $x->reports_generate = 'Yes';
+        // //TermlyReportCard::do_generate_positions($x);
+        // TermlyReportCard::do_reports_generate($x);
+        // dd("done");
         $form = new Form(new TermlyReportCard());
         $u = Admin::user();
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');

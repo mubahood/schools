@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class ReportsFinance
+class ReportsFinance extends Model
 {
 
     public  $ent = null;
@@ -35,7 +35,9 @@ class ReportsFinance
     public  $services_sub_category = [];
     public  $budget_vs_expenditure = [];
     public  $stocks = [];
-    public function __construct($ent = null)
+
+    protected $tabel = 'report_finances';
+    public function __construct($ent) {
     {
 
         $this->ent = $ent;
@@ -218,5 +220,6 @@ class ReportsFinance
         ])
             ->whereIn('administrator_id', $this->active_studentes_ids)
             ->sum('balance');
+        $this->save();
     }
 }

@@ -352,21 +352,14 @@ class TermlyReportCard extends Model
                     $mark->aggr_value = null;
                     $mark->aggr_name = null;
 
-                    if ($mark->subject != null) {
-                        if ($mark->subject->course != null) {
-                            if (in_array($mark->subject->course->id, $graddeble)) {
-                                //echo "{$mark->subject->course->id}. {$mark->subject->course->name} <br>";
-                                foreach ($ranges as $range) {
-                                    if ($mark->total_score_display > $range->min_mark && $mark->total_score_display < $range->max_mark) {
-                                        $mark->aggr_value = $range->aggregates;
-                                        $mark->aggr_name = $range->name;
-                                        break;
-                                    }
-                                }
-                                $_total_aggregates += $mark->aggr_value;
-                            }
+                    foreach ($ranges as $range) {
+                        if ($mark->total_score_display > $range->min_mark && $mark->total_score_display < $range->max_mark) {
+                            $mark->aggr_value = $range->aggregates;
+                            $mark->aggr_name = $range->name;
+                            break;
                         }
                     }
+                    $_total_aggregates += $mark->aggr_value; 
 
                     $_total_scored_marks += $mark->total_score_display;
                     $_total_max_marks += 100;

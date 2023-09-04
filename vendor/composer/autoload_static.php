@@ -876,6 +876,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Models\\QuaterlyOutputHasTopic' => __DIR__ . '/../..' . '/app/Models/QuaterlyOutputHasTopic.php',
         'App\\Models\\Reconciler' => __DIR__ . '/../..' . '/app/Models/Reconciler.php',
         'App\\Models\\ReportCard' => __DIR__ . '/../..' . '/app/Models/ReportCard.php',
+        'App\\Models\\ReportsFinance' => __DIR__ . '/../..' . '/app/Models/ReportsFinance.php',
         'App\\Models\\SecondaryCompetence' => __DIR__ . '/../..' . '/app/Models/SecondaryCompetence.php',
         'App\\Models\\SecondaryReportCard' => __DIR__ . '/../..' . '/app/Models/SecondaryReportCard.php',
         'App\\Models\\SecondaryReportCardItem' => __DIR__ . '/../..' . '/app/Models/SecondaryReportCardItem.php',

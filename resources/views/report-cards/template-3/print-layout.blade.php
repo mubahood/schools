@@ -143,8 +143,13 @@ foreach ($r->termly_report_card->term->exams as $exam) {
         YEAR: <b>{{ $r->termly_report_card->academic_year->name }}</b> &nbsp;
         Aggregates: <b class="text-danger">{{ (int) $r->average_aggregates }}</b> &nbsp;
         DIVISION: <b class="text-danger">{{ (int) $r->grade }}</b> &nbsp;
-        position: <b class="text-danger">{{ (int) $r->position }}</b> &nbsp;
-        OUT OF: <b class="text-danger">{{ (int) $r->total_students }}</b> &nbsp;
+
+        @if ($t->display_positions == 'Yes')
+            position: <b class="text-danger">{{ (int) $r->position }}</b> &nbsp;
+            OUT OF: <b class="text-danger">{{ (int) $r->total_students }}</b> &nbsp;
+        @endif
+
+
     </div>
 
     <table class="table table-bordered marks-table p-0 m-0 w-100 mt-2">
@@ -269,8 +274,10 @@ foreach ($r->termly_report_card->term->exams as $exam) {
             {{-- STREAM: <b> {{ $theo_stream_class }}&nbsp;</b> --}}
             Aggregates: <b class="text-danger">{{ (int) $tr->average_aggregates }}</b> &nbsp;
             DIVISION: <b class="text-danger">{{ (int) $tr->grade }}</b> &nbsp;
-            position: <b class="text-danger">{{ (int) $tr->position }}</b> &nbsp;
-            OUT OF: <b class="text-danger">{{ (int) $tr->total_students }}</b> &nbsp;
+            @if ($t->display_positions == 'Yes')
+                position: <b class="text-danger">{{ (int) $tr->position }}</b> &nbsp;
+                OUT OF: <b class="text-danger">{{ (int) $tr->total_students }}</b> &nbsp;
+            @endif
         </div>
         <table class="table table-bordered marks-table p-0 m-0 w-100 mt-2">
             <thead class="p-0 m-0 text-center" style="line-height: 12px;">
@@ -329,6 +336,9 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     @php
                         if ($v->subject == null) {
                             $v->delete();
+                            continue;
+                        }
+                        if ($v->total_score_display == 0) {
                             continue;
                         }
                         $span = 0;
