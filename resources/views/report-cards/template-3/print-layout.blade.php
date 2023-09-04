@@ -39,6 +39,7 @@ if ($tr != null) {
 }
 $stream_class = '';
 $theo_stream_class = '.......';
+$hasTheologyClass = null;
 $hasClass = StudentHasClass::where(['administrator_id' => $r->owner->id, 'academic_class_id' => $r->academic_class_id])->first();
 if ($hasClass != null) {
     if ($hasClass->stream != null) {
@@ -47,10 +48,10 @@ if ($hasClass != null) {
 }
 
 if ($tr != null) {
-    $hasClass = StudentHasTheologyClass::where(['administrator_id' => $tr->owner->id, 'theology_class_id' => $tr->theology_class_id])->first();
-    if ($hasClass != null) {
-        if ($hasClass->stream != null) {
-            $theo_stream_class = ' - ' . $hasClass->stream->name;
+    $hasTheologyClass = StudentHasTheologyClass::where(['administrator_id' => $tr->owner->id, 'theology_class_id' => $tr->theology_class_id])->first();
+    if ($hasTheologyClass != null) {
+        if ($hasTheologyClass->stream != null) {
+            $theo_stream_class = ' - ' . $hasTheologyClass->stream->name;
         }
     }
 }
@@ -59,6 +60,9 @@ if ($tr == null) {
 }
 if ($tr != null) {
     $theology_termly_report_card = $tr->termly_report_card;
+}
+if ($hasTheologyClass == null) {
+    $tr = null;
 }
 
 $bal = ((int) $r->owner->account->balance);
@@ -213,6 +217,11 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                         $v->delete();
                         continue;
                     }
+                    
+                    if ($hasClass->academic_class_id != $v->subject->academic_class_id) {
+                        continue;
+                    }
+                    
                 @endphp
 
                 @php
@@ -347,9 +356,11 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                             $v->delete();
                             continue;
                         }
-                        if ($v->total_score_display == 0) {
+                        
+                        if ($hasTheologyClass->theology_class_id != $v->subject->theology_class_id) {
                             continue;
                         }
+                        
                         $span = 0;
                         $bot_tot += $v->bot_score;
                         $mot_tot += $v->mot_score;
