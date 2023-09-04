@@ -81,8 +81,8 @@ class ConfigurationController extends AdminController
         $form->disableReset();
         $form->disableViewCheck();
 
-        $form->text('name', __('School Name'))->required(); 
-        $form->text('motto', __('School Motto'))->required(); 
+        $form->text('name', __('School Name'))->required();
+        $form->text('motto', __('School Motto'))->required();
         $form->image('logo', __('School badge'))->required();
         $form->text('address', __('School Address'))->required();
         $form->quill('details', __('School details'))->required();
@@ -96,7 +96,7 @@ class ConfigurationController extends AdminController
         $form->image('hm_name', __('Head Teacher Name'));
         $form->image('hm_signature', __('Head Teacher signature'));
         $form->image('dos_signature', __('Head Teacher signature'));
-        $form->image('bursar_signature', __('Bursar signature')); 
+        $form->image('bursar_signature', __('Bursar signature'));
 
         return $form;
     }
