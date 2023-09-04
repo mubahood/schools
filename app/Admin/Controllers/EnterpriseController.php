@@ -127,7 +127,7 @@ class EnterpriseController extends AdminController
             ])
             ->rules('required');
 
-        $form->image('hm_name', __('Head Teacher Name'));
+        $form->text('hm_name', __('Head Teacher Name'));
         //$form->textarea('welcome_message', __('Welcome_message'))->required();
         $form->quill('welcome_message', __('Welcome_message'))->required();
         $form->text('subdomain', __('Subdomain'))->required();
