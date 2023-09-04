@@ -45,16 +45,19 @@ class StudentReportCardController extends AdminController
 
                 $row->column(4, function (Column $column) {
                     $u = Admin::user();
+                    $ent = $u->enterprise;
+                    $term = $ent->dpTerm();
+                    $term_id = $term->id;
                     $rows = [];
 
                     foreach (AcademicClass::where([
                         'enterprise_id' => $u->enterprise_id,
-                        'academic_year_id' => 3
+                        'academic_year_id' => $term->academic_year_id 
                     ])
                         ->orderBy('id', 'Desc')
                         ->get() as $v) {
 
-                        $term_id = 8;
+                       
 
                         $rs = StudentReportCard::where([
                             'term_id' => $term_id,
@@ -69,11 +72,11 @@ class StudentReportCardController extends AdminController
                             count($rs),
                             '<a target="_blank" href="' . url('print?calss_id=' . $v->id) . '&term_id=' . $term_id . '&termly_report_card_id=1">PRINT REPORTS</a>',
 
-                            '<a target="_blank" href="' . url('print?calss_id=' . $v->id) . '&term_id=' . $term_id . '&termly_report_card_id=1&task=blank">PRINT BLANK</a>'
+/*                             '<a target="_blank" href="' . url('print?calss_id=' . $v->id) . '&term_id=' . $term_id . '&termly_report_card_id=1&task=blank">PRINT BLANK</a>' */
                         ];
                     }
 
-                    $headers = ['Id', 'Class', 'Report cards', 'Print', 'Blank'];
+                    $headers = ['Id', 'Class', 'Report cards', 'Print'];
 
 
                     $table = new Table($headers, $rows);
