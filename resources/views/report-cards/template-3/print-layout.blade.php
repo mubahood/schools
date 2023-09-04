@@ -109,7 +109,12 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 </div>
             </td>
             <td style="width: 16%">
-                <img style="width: 100%;" src="{{ public_path($r->owner->getAvatarPath()) }}">
+                @php
+                    $avatar = $r->owner->getAvatarPath();
+                @endphp
+                @if (!str_contains($avatar, 'user.jpeg'))
+                    <img style="width: 100%;" src="{{ public_path($avatar) }}">
+                @endif
             </td>
         </tr>
     </table>
@@ -402,9 +407,9 @@ foreach ($r->termly_report_card->term->exams as $exam) {
         </p>
     @endif
 
-    <hr
-        style="background-color:  {{ $r->ent->color }}; height: 2px; 
-            padding: 0px; margin-bottom: 6px; margin-top: 10px; ">
+    <hr style="background-color:  {{ $r->ent->color }}; height: 2px; 
+            padding: 0px; margin-bottom: 6px;   "
+        class="my-3">
 
     <p class="mt-2 fw-16"><span class="text-uppercase">Mentor's comment:</span> <b class="comment"
             style="font-size: 14px">{{ $r->mentor_comment }}</b></p>
@@ -423,8 +428,11 @@ foreach ($r->termly_report_card->term->exams as $exam) {
     </p>
     <br>
 
+    <hr
+        style="background-color:  {{ $r->ent->color }}; height: 2px; 
+            padding: 0px; margin-bottom: 6px; margin-top: 10px; ">
 
-   {{--  <table class="w-100 mt-0">
+    {{--  <table class="w-100 mt-0">
         <tbody>
             <tr>
                 <td>
@@ -496,7 +504,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
     <div class=" mt-0 d-flex justify-content-between p-0 pt-1 " style="font-size: 14px;">
         {!! $r->termly_report_card->bottom_message !!}
     </div>
-    <p class="text-right"><small>Issued on: <b>{{ Utils::my_date_3(now()) }}</b></small></p>
+    <p class="text-right"><small>Printed on: <b>{{ Utils::my_date_3(now()) }}</b></small></p>
 
 
 </article>
