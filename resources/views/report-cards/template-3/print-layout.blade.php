@@ -424,7 +424,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
     <br>
 
 
-    <table class="w-100 mt-0">
+   {{--  <table class="w-100 mt-0">
         <tbody>
             <tr>
                 <td>
@@ -488,7 +488,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
             </tr>
         </tbody>
     </table>
-
+ --}}
 
 
 
