@@ -27,10 +27,14 @@ if ($r->academic_class != null) {
     }
 }
 
-if ($tr->theology_class != null) {
-    $_teacher = $tr->theology_class->get_class_teacher();
-    if ($_teacher != null) {
-        $class_teacher_name_1 = $_teacher->name;
+if ($tr != null) {
+    $theology_termly_report_card = $tr->termly_report_card;
+
+    if ($tr->theology_class != null) {
+        $_teacher = $tr->theology_class->get_class_teacher();
+        if ($_teacher != null) {
+            $class_teacher_name_1 = $_teacher->name;
+        }
     }
 }
 $stream_class = '';
@@ -144,7 +148,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
         Aggregates: <b class="text-danger">{{ (int) $r->average_aggregates }}</b> &nbsp;
         DIVISION: <b class="text-danger">{{ (int) $r->grade }}</b> &nbsp;
 
-        @if ($t->display_positions == 'Yes')
+        @if ($r->display_positions == 'Yes')
             position: <b class="text-danger">{{ (int) $r->position }}</b> &nbsp;
             OUT OF: <b class="text-danger">{{ (int) $r->total_students }}</b> &nbsp;
         @endif
@@ -274,7 +278,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
             {{-- STREAM: <b> {{ $theo_stream_class }}&nbsp;</b> --}}
             Aggregates: <b class="text-danger">{{ (int) $tr->average_aggregates }}</b> &nbsp;
             DIVISION: <b class="text-danger">{{ (int) $tr->grade }}</b> &nbsp;
-            @if ($t->display_positions == 'Yes')
+            @if ($tr->display_positions == 'Yes')
                 position: <b class="text-danger">{{ (int) $tr->position }}</b> &nbsp;
                 OUT OF: <b class="text-danger">{{ (int) $tr->total_students }}</b> &nbsp;
             @endif
