@@ -417,6 +417,19 @@ class Utils  extends Model
             return;
         }
 
+        foreach (Term::all() as $key => $term) {
+            $r = ReportFinanceModel::where([
+              'term_id' => $term->id
+            ])->first();
+            if ($r == null) {
+              $r = new ReportFinanceModel();
+              $r->term_id = $term->id;
+              $r->academic_year_id = $term->academic_year_id; 
+              $r->enterprise_id = $term->enterprise_id;
+              $r->save();
+            }
+          }
+
         Utils::delete_contraentries($u);
         Utils::rectify_terms_forItransactions($u);
         Utils::create_make_parents($u);
