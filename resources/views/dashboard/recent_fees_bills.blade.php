@@ -49,7 +49,7 @@ use App\Models\Utils;
                         </div>
                         <div class="">
                             <small class="p-0 m-0">{{ $item->description }} -
-                                {{ Utils::my_date_time($item->created_at) }}</small>
+                                {{ $item->created_at }}</small>
                         </div>
                     </div>
                     <hr class="p-0 m-0 mb-1">
