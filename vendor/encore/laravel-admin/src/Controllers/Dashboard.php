@@ -9,6 +9,7 @@ use App\Models\AccountParent;
 use App\Models\Enterprise;
 use App\Models\FinancialRecord;
 use App\Models\Mark;
+use App\Models\ReportFinanceModel;
 use App\Models\Service;
 use App\Models\ServiceCategory;
 use App\Models\ServiceSubscription;
@@ -20,6 +21,7 @@ use App\Models\User;
 use App\Models\Utils;
 use Carbon\Carbon;
 use Encore\Admin\Admin;
+use Facade\FlareClient\Report;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -440,7 +442,7 @@ class Dashboard
             ->orderBy('id', 'desc')
             ->limit(8)
             ->get();
-        return view('dashboard.recent_fees_bills', $data);
+        return view('dashboard.recent_fees_bills', $data); 
     }
 
 
@@ -527,31 +529,27 @@ class Dashboard
     public static function count_expected_fees()
     {
         $u = Auth::user();
-        return view('widgets.print-financial-report', [
-            'enterprise_id' => $u->enterprise_id,
-        ]);
-        $u = Auth::user();
         $term = $u->ent->dpTerm();
-
-        $fees_to_be_collected = Transaction::where([
+        $r = ReportFinanceModel::where([
             'enterprise_id' => $u->enterprise_id,
             'term_id' => $term->id
-        ])
-            ->where('amount', '<', 0)->sum('amount');
-        $fees_paid = Transaction::where([
-            'enterprise_id' => $u->enterprise_id,
-            'term_id' => $term->id
-        ])
-            ->where('amount', '>', 0)->sum('amount');
+        ])->first();
+        if ($r == null) {
+            return view('widgets.box-5', [
+                'is_dark' => false,
+                'title' => 'Expected school fees',
+                'sub_title' => 'No data found.',
+                'number' => "UGX " . number_format(0),
+                'link' => admin_url('transactions')
+            ]);
+        }
 
-        $bal = $fees_to_be_collected + $fees_paid;
-        $sub_title =  "UNPAID SCHOOL FEES: " . number_format($bal);
         return view('widgets.box-5', [
             'is_dark' => false,
-            'title' => 'Expected school fees',
-            'sub_title' => $sub_title,
-            'number' => "UGX " . number_format(-1 * $fees_to_be_collected),
-            'link' => admin_url('students')
+            'title' => 'Expected Tution Fees',
+            'sub_title' => 'Total sum of tution fees of the term from all active students.',
+            'number' => "<small>UGX</small>" . number_format($r->total_expected_tuition),
+            'link' => admin_url('transactions')
         ]);
     }
 

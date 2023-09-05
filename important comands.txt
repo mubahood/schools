@@ -326,7 +326,8 @@ php artisan admin:make SecondaryReportCardController --model=App\Models\Secondar
 php artisan admin:make SecondaryReportCardItemController --model=App\Models\SecondaryReportCardItem
 php artisan admin:make SupplierOrderController --model=App\Models\SupplierOrder 
 php artisan admin:make FinancialRecordController --model=App\Models\FinancialRecord 
-php artisan admin:make MarkRecordController --model=App\Models\MarkRecord 
+php artisan admin:make ReportFinanceController --model=App\Models\ReportFinance 
+
 
 
 

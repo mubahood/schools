@@ -16,6 +16,7 @@ use App\Models\FinancialRecord;
 use App\Models\Gen;
 use App\Models\Mark;
 use App\Models\MarkRecord;
+use App\Models\ReportFinanceModel;
 use App\Models\ReportsFinance;
 use App\Models\TheologyMarkRecord;
 use App\Models\StudentHasClass;
@@ -28,10 +29,12 @@ use App\Models\TheologyTermlyReportCard;
 use App\Models\Transaction;
 use App\Models\Utils;
 use Encore\Admin\Auth\Database\Administrator;
+use Facade\FlareClient\Report;
 use Faker\Core\Uuid;
 use Illuminate\Support\Facades\Route;
 use Mockery\Matcher\Subset;
 use Faker\Factory as Faker;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 
@@ -788,16 +791,34 @@ Route::get('generate-variables', [MainController::class, 'generate_variables']);
 Route::get('process-photos', [MainController::class, 'process_photos']);
 Route::get('student-data-import', [MainController::class, 'student_data_import']);
 
-Route::get('reports-finance-print', function () {
+Route::get('reports-finance-process', function (Request $request) {
+  $rep = ReportFinanceModel::find($request->id);
+  if ($rep == null) return "Report not found";
+  ReportFinanceModel::process($rep);
+});
+Route::get('reports-finance-create', function () {
+  foreach (Term::all() as $key => $term) {
+    $r = ReportFinanceModel::where([
+      'term_id' => $term->id
+    ])->first();
+    if ($r == null) {
+      $r = new ReportFinanceModel();
+      $r->term_id = $term->id;
+      $r->enterprise_id = $term->enterprise_id;
+      $r->save();
+    }
+  }
+});
+Route::get('reports-finance-print', function (Request $request) {
   //return view('print/print-admission-letter');
   $pdf = App::make('dompdf.wrapper');
   //$pdf->setOption(['DOMPDF_ENABLE_REMOTE' => false]);
 
-  $ent = Enterprise::find($_GET['id']);
-  $r = new ReportsFinance($ent);
-
+  $r = ReportFinanceModel::find($request->id);
+  if($r == null) return "Report not found";
+  $ent = Enterprise::find($r->enterprise_id);
   $pdf->loadHTML(view('reports.finance', [
-    'r' => $r
+    'r' => new ReportsFinance($ent)
   ]));
   return $pdf->stream();
 });

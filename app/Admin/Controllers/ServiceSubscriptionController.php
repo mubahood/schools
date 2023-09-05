@@ -33,8 +33,31 @@ class ServiceSubscriptionController extends AdminController
         $s = ServiceSubscription::find(1667);
         //$s->delete();
         //die("romina");  
+
+
         $grid = new Grid(new ServiceSubscription());
 
+
+        $grid->export(function ($export) {
+
+            $export->filename('Accounts');
+
+            $export->except(['enterprise_id', 'type', 'owner.avatar', 'id']);
+
+            //$export->only(['column3', 'column4']);
+            $export->originalValue([]);
+            $export->column('administrator_id', function ($value, $original) {
+                $u = Administrator::find($original);
+                if ($u == null) {
+                    return $original;
+                }
+                return $u->name;
+            });
+            /*
+            $export->column('balance', function ($value, $original) {
+                return $original;
+            }); */
+        });
         $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
             ->orderBy('id', 'Desc');
 
@@ -142,10 +165,20 @@ class ServiceSubscriptionController extends AdminController
         })->sortable();
 
         $grid->column('quantity', __('Quantity'))->sortable();
-        $grid->column('total', __('Total fee'))->display(function () {
-            return "UGX " . number_format(((int)($this->total)));
+        $grid->column('total', __('Total fee (UGX)'))->display(function () {
+            return  number_format(((int)($this->total)));
         })->totalRow(function ($amount) {
-            return  "UGX " . number_format($amount);
+            return   number_format($amount);
+        });
+        $grid->column('balance', __('Student Balance'))->display(function () {
+            if ($this->sub == null) {
+                return '-';
+            }
+            if ($this->sub->account == null) {
+                return '-';
+            }
+
+            return  number_format(((int)($this->sub->account->balance)));
         });
 
 

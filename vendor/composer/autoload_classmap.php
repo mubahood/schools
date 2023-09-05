@@ -185,7 +185,7 @@ return array(
     'App\\Models\\QuaterlyOutputHasTopic' => $baseDir . '/app/Models/QuaterlyOutputHasTopic.php',
     'App\\Models\\Reconciler' => $baseDir . '/app/Models/Reconciler.php',
     'App\\Models\\ReportCard' => $baseDir . '/app/Models/ReportCard.php',
-    'App\\Models\\ReportsFinance' => $baseDir . '/app/Models/ReportsFinance.php',
+    'App\\Models\\ReportFinance' => $baseDir . '/app/Models/ReportFinance.php',
     'App\\Models\\SecondaryCompetence' => $baseDir . '/app/Models/SecondaryCompetence.php',
     'App\\Models\\SecondaryReportCard' => $baseDir . '/app/Models/SecondaryReportCard.php',
     'App\\Models\\SecondaryReportCardItem' => $baseDir . '/app/Models/SecondaryReportCardItem.php',

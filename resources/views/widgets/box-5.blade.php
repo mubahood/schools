@@ -27,13 +27,13 @@ if ($style == 'danger') {
     $text2 = 'text-white';
     $border = 'border-danger';
 }
-?><a href="{{ $link }}" class="card {{ $bg }} {{ $border }} mb-4 mb-md-5">
+?><a href="{!! $link !!}" class="card {!! $bg !!} {!! $border !!} mb-4 mb-md-5">
     <div class="card-body py-0">
-        <p class="h4  text-bold mb-2 mb-md-3 text-uppercase {{ $text }} ">{{ $title }}</p>
-        <p class="  m-0 text-right {{ $text2 }} h3" style="line-height: 3.2rem; 
+        <p class="h4  text-bold mb-2 mb-md-3 text-uppercase {!! $text !!} ">{!! $title !!}</p>
+        <p class="  m-0 text-right {!! $text2 !!} h3" style="line-height: 3.2rem; 
         font-weight: 800">
-            {{ $number }}</p>
-        <p class="mt-4 {{ $text2 }}" style=" 
-        font-weight: 600">{{ $sub_title }}</p>
+            {!! $number !!}</p>
+        <p class="mt-4 {!! $text2 !!}" style=" 
+        font-weight: 600">{!! $sub_title !!}</p>
     </div>
 </a>

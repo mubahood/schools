@@ -79,7 +79,7 @@
                 </div>
             </td>
         </tr>
-        <tr>
+        <tr> 
             <td style="width: 30%;" class="pt-2">
                 <div class="my-card mr-1">
                     <p class="black fs-14 fw-700">Total Income</p>

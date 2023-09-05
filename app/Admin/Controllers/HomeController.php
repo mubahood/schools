@@ -8,7 +8,7 @@ use App\Models\Account;
 use App\Models\Enterprise;
 use App\Models\MenuItem;
 use App\Models\ReportCard;
-use App\Models\ReportsFinance;
+use App\Models\ReportFinanceModel;
 use App\Models\StudentHasClass;
 use App\Models\StudentHasTheologyClass;
 use App\Models\StudentReportCard;
@@ -45,17 +45,6 @@ class HomeController extends Controller
     }
 
 
-    public function reports_finance(Content $content)
-    {
-
-        $u = Admin::user();
-        $r = new ReportsFinance($u->ent);
-        
-        
-        return $content->view('reports.finance', [
-            'r' => $r
-        ]);
-    }
     public function stats(Content $content)
     {
 
@@ -90,9 +79,166 @@ class HomeController extends Controller
                 $row->column(3, function (Column $column) {
                     $column->append(Dashboard::count_expected_fees());
                 });
+                $row->column(3, function (Column $column) {
+                    $term = Auth::user()->ent->dpTerm();
+                    $r = ReportFinanceModel::where([
+                        'enterprise_id' => $term->enterprise_id,
+                        'term_id' => $term->id
+                    ])->first();
+                    $val = 0;
+                    if ($r) {
+                        $val = $r->total_expected_service_fees;
+                    }
+                    $column->append(view('widgets.box-5', [
+                        'is_dark' => false,
+                        'title' => 'Expected Services Fees',
+                        'sub_title' => 'Total sum of service subscription fees of this term.',
+                        'number' => "<small>UGX</small>" . number_format($val, 0, '.', ','),
+                        'link' => admin_url('service-subscriptions')
+                    ]));
+                });
+                $row->column(3, function (Column $column) {
+                    $term = Auth::user()->ent->dpTerm();
+                    $r = ReportFinanceModel::where([
+                        'enterprise_id' => $term->enterprise_id,
+                        'term_id' => $term->id
+                    ])->first();
+                    $val = 0;
+                    if ($r) {
+                        $val = ($r->total_expected_service_fees + $r->total_expected_tuition);
+                    }
+                    $column->append(view('widgets.box-5', [
+                        'is_dark' => true,
+                        'title' => 'Total Expected Income',
+                        'sub_title' => 'Sum of tution fees and services subscriptions fees..',
+                        'number' => "<small>UGX</small>" . number_format($val),
+                        'link' => admin_url('transactions')
+                    ]));
+                });
 
                 $row->column(3, function (Column $column) {
-                    //$column->append(Dashboard::count_percentage_paid_fees());
+                    $term = Auth::user()->ent->dpTerm();
+                    $r = ReportFinanceModel::where([
+                        'enterprise_id' => $term->enterprise_id,
+                        'term_id' => $term->id
+                    ])->first();
+                    $val = 0;
+                    if ($r) {
+                        $val = ($r->total_payment_total);
+                    }
+                    $column->append(view('widgets.box-5', [
+                        'is_dark' => true,
+                        'title' => 'Total Income',
+                        'sub_title' => 'Total sum of all payments made this term.',
+                        'number' => "<small>UGX</small>" . number_format($val),
+                        'link' => admin_url('transactions')
+                    ]));
+                });
+
+                $row->column(3, function (Column $column) {
+                    $term = Auth::user()->ent->dpTerm();
+                    $r = ReportFinanceModel::where([
+                        'enterprise_id' => $term->enterprise_id,
+                        'term_id' => $term->id
+                    ])->first();
+                    $val = 0;
+                    if ($r) {
+                        $val = ($r->total_bursaries_funds);
+                    }
+                    $column->append(view('widgets.box-5', [
+                        'is_dark' => false,
+                        'title' => 'Total Bursaries Offered',
+                        'sub_title' => 'Total sum of all payments made this term.',
+                        'number' => "<small>UGX</small>" . number_format($val),
+                        'link' => admin_url('transactions')
+                    ]));
+                });
+
+                $row->column(3, function (Column $column) {
+                    $term = Auth::user()->ent->dpTerm();
+                    $r = ReportFinanceModel::where([
+                        'enterprise_id' => $term->enterprise_id,
+                        'term_id' => $term->id
+                    ])->first();
+                    $val = 0;
+                    if ($r) {
+                        $val = ($r->total_school_fees_balance);
+                    }
+                    $column->append(view('widgets.box-5', [
+                        'is_dark' => true,
+                        'title' => 'School Fees Balance',
+                        'sub_title' => 'Total school fees balance of all active students.',
+                        'number' => "<small>UGX</small>" . number_format($val),
+                        'link' => admin_url('students-financial-accounts')
+                    ]));
+                });
+
+                $row->column(3, function (Column $column) {
+                    $term = Auth::user()->ent->dpTerm();
+                    $r = ReportFinanceModel::where([
+                        'enterprise_id' => $term->enterprise_id,
+                        'term_id' => $term->id
+                    ])->first();
+                    $val = 0;
+                    if ($r) {
+                        $val = ($r->total_budget);
+                    }
+                    $column->append(view('widgets.box-5', [
+                        'is_dark' => false,
+                        'title' => 'Total Budget',
+                        'sub_title' => 'Planned to be spent this term.',
+                        'number' => "<small>UGX</small>" . number_format($val),
+                        'link' => admin_url('financial-records-budget')
+                    ]));
+                });
+
+                $row->column(3, function (Column $column) {
+                    $term = Auth::user()->ent->dpTerm();
+                    $r = ReportFinanceModel::where([
+                        'enterprise_id' => $term->enterprise_id,
+                        'term_id' => $term->id
+                    ])->first();
+                    $val = 0;
+                    if ($r) {
+                        $val = ($r->total_expense);
+                    }
+                    $column->append(view('widgets.box-5', [
+                        'is_dark' => false,
+                        'title' => 'Total Expenditure',
+                        'sub_title' => 'Total amount of money spent this term.',
+                        'number' => "<small>UGX</small>" . number_format($val),
+                        'link' => admin_url('financial-records-expenditure')
+                    ]));
+                });
+                $row->column(3, function (Column $column) {
+                    $term = Auth::user()->ent->dpTerm();
+                    $r = ReportFinanceModel::where([
+                        'enterprise_id' => $term->enterprise_id,
+                        'term_id' => $term->id
+                    ])->first();
+                    $val = 0;
+                    if ($r) {
+                        $val = ($r->total_stock_value);
+                    }
+                    $column->append(view('widgets.box-5', [
+                        'is_dark' => false,
+                        'title' => 'Stock Value',
+                        'sub_title' => 'Current total stock value in stores.',
+                        'number' => "<small>UGX</small>" . number_format($val),
+                        'link' => admin_url('stock-batches')
+                    ]));
+                });
+
+
+                $row->column(3, function (Column $column) {
+                    $term = Auth::user()->ent->dpTerm();
+                    $r = ReportFinanceModel::where([
+                        'enterprise_id' => $term->enterprise_id,
+                        'term_id' => $term->id
+                    ])->first();
+                    $column->append(view('widgets.print-financial-report', [
+                        'enterprise_id' => $r->id,
+                    ]));
                 });
 
                 /*                 
