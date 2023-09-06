@@ -220,6 +220,7 @@ class ReportsFinance
                 'enterprise_id' => $ent->id,
             ])
                 ->whereIn('administrator_id', $this->active_studentes_ids)
+                ->where('status', 1) 
                 ->sum('balance');
             $rep = ReportFinanceModel::where([
                 'term_id' => $this->term->id,
