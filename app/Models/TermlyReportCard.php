@@ -342,7 +342,7 @@ class TermlyReportCard extends Model
                             throw new Exception("Total max marks is zero.", 1);
                         }
                     }
-                    
+
                     $average_mark = ($total_scored_marks / $total_max_marks) * 100;
                     $average_mark = (int)($average_mark);
                     $mark->total_score = $total_scored_marks;
@@ -359,7 +359,7 @@ class TermlyReportCard extends Model
                             break;
                         }
                     }
-                    $_total_aggregates += $mark->aggr_value; 
+                    $_total_aggregates += $mark->aggr_value;
 
                     $_total_scored_marks += $mark->total_score_display;
                     $_total_max_marks += 100;
@@ -672,8 +672,9 @@ class TermlyReportCard extends Model
 
         $report_card->average_aggregates = ($total_aggregates / $number_of_marks) * 4;
 
-
-        if ($report_card->average_aggregates <= 12) {
+        if ($report_card->average_aggregates < 4) {
+            $report_card->grade = 'X';
+        } else if ($report_card->average_aggregates <= 12) {
             $report_card->grade = '1';
         } else if ($report_card->average_aggregates <= 23) {
             $report_card->grade = '2';
