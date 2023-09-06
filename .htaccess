@@ -22,6 +22,10 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^ server.php
 </IfModule>
+RewriteCond %{HTTP_HOST} ^nakalokess\.schooldynamics\.ug$
+RewriteRule ^/?$ "https\:\/\/nakalokess\.schooldynamics\.ug\/" [R=301,L]
+RewriteCond %{HTTP_HOST} ^emiratescs\.schooldynamics\.ug$
+RewriteRule ^/?$ "https\:\/\/emiratescs\.schooldynamics\.ug\/" [R=301,L]
 
 # php -- BEGIN cPanel-generated handler, do not edit
 # Set the “ea-php81” package as the default “PHP” programming language.
