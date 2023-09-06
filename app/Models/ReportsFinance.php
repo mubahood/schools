@@ -121,6 +121,7 @@ class ReportsFinance
                 $_c->total_balance = Account::where([
                     'enterprise_id' => $ent->id,
                 ])
+                    ->where('status', 1)
                     ->whereIn('administrator_id', $class_verified_studentes_ids)
                     ->sum('balance');
 
@@ -236,7 +237,7 @@ class ReportsFinance
                 $rep->total_stock_value = $this->total_stock_value;
                 $rep->messages = $this->messages;
                 $rep->total_bursaries_funds = $this->total_bursaries_funds;
-                $rep->save(); 
+                $rep->save();
             }
             //$this->save();
         }
