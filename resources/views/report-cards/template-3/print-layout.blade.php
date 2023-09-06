@@ -155,7 +155,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
         TERM: <b>{{ $r->termly_report_card->term->name }}</b> &nbsp;
         YEAR: <b>{{ $r->termly_report_card->academic_year->name }}</b> &nbsp;
         Aggregate: <b class="text-danger">{{ (int) $r->average_aggregates }}</b> &nbsp;
-        DIVISION: <b class="text-danger">{{ (int) $r->grade }}</b> &nbsp;
+        DIVISION: <b class="text-danger">{{  $r->grade }}</b> &nbsp;
 
         @if ($r->display_positions == 'Yes')
             position: <b class="text-danger">{{ (int) $r->position }}</b> &nbsp;
@@ -291,7 +291,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
             CLASS: <b>{{ $tr->theology_class->short_name . $theo_stream_class }}&nbsp;</b>
             {{-- STREAM: <b> {{ $theo_stream_class }}&nbsp;</b> --}}
             Aggregate: <b class="text-danger">{{ (int) $tr->average_aggregates }}</b> &nbsp;
-            DIVISION: <b class="text-danger">{{ (int) $tr->grade }}</b> &nbsp;
+            DIVISION: <b class="text-danger">{{ $tr->grade }}</b> &nbsp;
             @if ($tr->display_positions == 'Yes')
                 position: <b class="text-danger">{{ (int) $tr->position }}</b> &nbsp;
                 OUT OF: <b class="text-danger">{{ (int) $tr->total_students }}</b> &nbsp;
