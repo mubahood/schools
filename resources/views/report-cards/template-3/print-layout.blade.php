@@ -155,7 +155,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
         TERM: <b>{{ $r->termly_report_card->term->name }}</b> &nbsp;
         YEAR: <b>{{ $r->termly_report_card->academic_year->name }}</b> &nbsp;
         Aggregate: <b class="text-danger">{{ (int) $r->average_aggregates }}</b> &nbsp;
-        DIVISION: <b class="text-danger">{{  $r->grade }}</b> &nbsp;
+        DIVISION: <b class="text-danger">{{ $r->grade }}</b> &nbsp;
 
         @if ($r->display_positions == 'Yes')
             position: <b class="text-danger">{{ (int) $r->position }}</b> &nbsp;
@@ -215,6 +215,9 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 @php
                     if ($v->subject == null) {
                         $v->delete();
+                        continue;
+                    }
+                    if ($hasClass == null) {
                         continue;
                     }
                     
@@ -356,6 +359,10 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                             $v->delete();
                             continue;
                         }
+
+                        if ($hasTheologyClass == null) {
+                            continue;
+                        } 
                         
                         if ($hasTheologyClass->theology_class_id != $v->subject->theology_class_id) {
                             continue;
