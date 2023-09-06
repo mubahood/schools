@@ -68,7 +68,7 @@ class PrintController2 extends Controller
             }
 
             if ($student_report_card == null || $student_report_card->termly_report_card == null ) {
-                $cards = StudentReportCard::where([
+                $cards = StudentReportCard::where([ 
                     'academic_class_id' => $_GET['calss_id'],
                     'term_id' => $_GET['term_id'],
                 ])
