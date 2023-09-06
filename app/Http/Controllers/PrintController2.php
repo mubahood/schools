@@ -76,14 +76,14 @@ class PrintController2 extends Controller
                     ->get();
                 $count = 0;
                 foreach ($cards as $key => $value) {
-                    
+                    $count++; 
                     if($min > -1 && $max > -1){
                         if($count < $min || $count > $max){
                             continue;
                         }
                     }
 
-                    $count++;
+                    
                     if ($termly_report_card == null) {
                         $termly_report_card = $value->termly_report_card;
                     }
