@@ -192,7 +192,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 </th>
                 <th class="p-1">AGGR</th>
             @endif
-            <th class="remarks p-1"><b class="text-uppercase">Remarks</b></th>
+            <th class="remarks p-1 text-center"><b class="text-uppercase">Remarks</b></th>
             <th class="remarks text-center p-1"><b class="text-uppercase">Initials</b></th>
         </thead>
         @php
@@ -246,7 +246,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     <td>{{ (int) $v->total_score_display }}</td>
                     <td>{{ $v->aggr_name }}</td>
                 @endif
-                <td class="remarks">{{ $v->remarks }}</td>
+                <td class="remarks text-center">{{ $v->remarks }}</td>
                 <td class="remarks text-center">{{ $v->initials }}</td>
             </tr>
         @endforeach
@@ -324,7 +324,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     </th>
                     <th class="p-1">AGGR</th>
                 @endif
-                <th class="remarks p-1"><b class="text-uppercase">Remarks</b></th>
+                <th class="remarks p-1 text-center"><b class="text-uppercase">Remarks</b></th>
                 <th class="remarks text-center p-1"><b class="text-uppercase">Initials</b>
                 </th>
             </thead>

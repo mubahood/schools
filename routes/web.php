@@ -815,7 +815,7 @@ Route::get('reports-finance-print', function (Request $request) {
   //$pdf->setOption(['DOMPDF_ENABLE_REMOTE' => false]);
 
   $r = ReportFinanceModel::find($request->id);
-  if($r == null) return "Report not found";
+  if ($r == null) return "Report not found";
   $ent = Enterprise::find($r->enterprise_id);
   $pdf->loadHTML(view('reports.finance', [
     'r' => new ReportsFinance($ent)
