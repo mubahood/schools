@@ -45,6 +45,14 @@ class PrintController2 extends Controller
         ini_set('display_errors', 1);
         ini_set('display_startup_errors', 1);
         error_reporting(E_ALL);
+        $min = -1;
+        $max = -1;
+        if(isset($_GET['min'])){
+            $min = (int)($_GET['min']);
+        }
+        if(isset($_GET['max'])){
+            $max = (int)($_GET['max']);
+        }
 
         if (
             isset($_GET['academic_class_id']) &&
@@ -66,7 +74,16 @@ class PrintController2 extends Controller
                 ])
                     ->orderBy('position', 'asc')
                     ->get();
+                $count = 0;
                 foreach ($cards as $key => $value) {
+                    
+                    if($min > -1 && $max > -1){
+                        if($count < $min || $count > $max){
+                            continue;
+                        }
+                    }
+
+                    $count++;
                     if ($termly_report_card == null) {
                         $termly_report_card = $value->termly_report_card;
                     }
