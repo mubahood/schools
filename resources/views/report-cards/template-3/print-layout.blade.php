@@ -384,7 +384,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                         <td>{{ (int) $v->total_score_display }}</td>
                         <td>{{ $v->aggr_name }}</td>
                     @endif
-                    <td class="remarks">{{ $v->remarks }}</td>
+                    <td class="remarks text-center">{{ $v->remarks }}</td>
                     <td class="remarks text-center">{{ $v->initials }}</td>
                 </tr>
             @endforeach
