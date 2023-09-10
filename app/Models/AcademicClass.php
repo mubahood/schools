@@ -319,6 +319,9 @@ class AcademicClass extends Model
         if ($m == null) {
             return;
         }
+        if ($m->status != 1) {
+            return;
+        }
 
         if (strtolower($m->user_type) != 'student') {
             return;
@@ -330,7 +333,6 @@ class AcademicClass extends Model
 
 
 
-
         if ($m->ent == null) {
             return;
         }
@@ -339,6 +341,7 @@ class AcademicClass extends Model
         if ($active_term == null) {
             return;
         }
+
         //billing for secular class
         foreach (StudentHasClass::where([
             'administrator_id' => $m->id,
@@ -347,12 +350,12 @@ class AcademicClass extends Model
                 if ($val->class != null) {
                     if ($val->class->academic_class_fees != null) {
                         foreach ($val->class->academic_class_fees as $fee) {
+                            /*  dd($fee->due_term_id);
+                            dd($active_term->id . "<==>" . $fee->due_term_id); */
                             if ($fee != null) {
-
                                 if ($active_term->id != $fee->due_term_id) {
                                     continue;
-                                }
-
+                                } 
 
                                 $has_fee = StudentHasFee::where([
                                     'administrator_id' => $m->id,
@@ -381,7 +384,7 @@ class AcademicClass extends Model
             }
         }
 
-
+ 
         //bulling theology classes
         foreach (StudentHasTheologyClass::where([
             'administrator_id' => $m->id,

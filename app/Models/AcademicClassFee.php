@@ -13,6 +13,22 @@ class AcademicClassFee extends Model
     protected $fillable = ['enterprise_id', 'academic_class_id', 'name', 'amount'];
 
 
+    public static function process_bill($m)
+    {
+
+        if ($m->academic_class != null) {
+            if ($m->academic_class->students != null) {
+                foreach ($m->academic_class->students as $key => $val) {
+                    AcademicClass::update_fees(Administrator::find($val->administrator_id));
+                }
+            }
+        }
+    }
+
+    function due_term()
+    {
+        return $this->belongsTo(Term::class, 'due_term_id');
+    }
     function academic_class()
     {
         if ($this->type == 'Theology') {
@@ -25,22 +41,10 @@ class AcademicClassFee extends Model
     {
         parent::boot();
         self::created(function ($m) {
-            if ($m->academic_class != null) {
-                if ($m->academic_class->students != null) {
-                    foreach ($m->academic_class->students as $key => $val) {
-                        AcademicClass::update_fees(Administrator::find($val->administrator_id));
-                    }
-                }
-            }
+            AcademicClassFee::process_bill($m);
         });
         self::updated(function ($m) {
-            if ($m->academic_class != null) {
-                if ($m->academic_class->students != null) {
-                    foreach ($m->academic_class->students as $key => $val) {
-                        AcademicClass::update_fees(Administrator::find($val->administrator_id));
-                    }
-                }
-            }
+            AcademicClassFee::process_bill($m);
         });
     }
 

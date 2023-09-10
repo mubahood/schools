@@ -36,7 +36,9 @@ class AcademicClassFeeController extends AdminController
         $fee->amount = 20000;
         $fee->save();   */
 
-
+        // $fee = AcademicClassFee::find(117);
+        // AcademicClassFee::process_bill($fee);
+        // dd($fee);
 
         $grid = new Grid(new AcademicClassFee());
         $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
@@ -139,12 +141,14 @@ class AcademicClassFeeController extends AdminController
             ->when('Secular', function ($form) {
                 $u = Admin::user();
                 $year = $u->ent->active_academic_year();
-                $form->select('academic_class_id', 'Select Secular Class')
+                $form->select('academic_class_id', 'Select Class')
                     ->options(
                         AcademicClass::where([
                             'enterprise_id' => $u->enterprise_id,
-                            'academic_year_id' => $year->id
-                        ])->get()
+                            /* 'academic_year_id' => $year->id */
+                        ])
+                        ->orderBy('id','desc')
+                        ->get()
                             ->pluck('name_text', 'id')
                     )->rules('required');
             })
@@ -155,8 +159,10 @@ class AcademicClassFeeController extends AdminController
                     ->options(
                         TheologyClass::where([
                             'enterprise_id' => $u->enterprise_id,
-                            'academic_year_id' => $year->id
-                        ])->get()
+                      /*       'academic_year_id' => $year->id */
+                        ])
+                        ->orderBy('id','desc')
+                        ->get()
                             ->pluck('name_text', 'id')
                     )->rules('required');
             })

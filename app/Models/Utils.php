@@ -48,6 +48,25 @@ define('COLORS',  [
 class Utils  extends Model
 {
 
+    public static function get_system_warnings($ent)
+    {
+        $warnings = [];
+        $classFees = AcademicClassFee::where([
+            'enterprise_id' => $ent->id
+        ])->get();
+
+        foreach ($classFees as $key => $f) {
+            $due_term = Term::where([
+                'id' => $f->due_term_id,
+                'enterprise_id' => $ent->id
+            ])->first();
+            if ($f->due_term == null) {
+                $warnings[] = "Class fee bill {$f->name} - #{$f->id} has no due term.";
+            }
+        }
+        return $warnings;
+    }
+
     public static function manifest($ent)
     {
 
@@ -419,16 +438,16 @@ class Utils  extends Model
 
         foreach (Term::all() as $key => $term) {
             $r = ReportFinanceModel::where([
-              'term_id' => $term->id
+                'term_id' => $term->id
             ])->first();
             if ($r == null) {
-              $r = new ReportFinanceModel();
-              $r->term_id = $term->id;
-              $r->academic_year_id = $term->academic_year_id; 
-              $r->enterprise_id = $term->enterprise_id;
-              $r->save();
+                $r = new ReportFinanceModel();
+                $r->term_id = $term->id;
+                $r->academic_year_id = $term->academic_year_id;
+                $r->enterprise_id = $term->enterprise_id;
+                $r->save();
             }
-          }
+        }
 
         Utils::delete_contraentries($u);
         Utils::rectify_terms_forItransactions($u);
