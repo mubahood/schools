@@ -34,7 +34,7 @@ class TransactionController extends AdminController
     {
         $grid = new Grid(new Transaction());
 
-        $grid->disableActions();
+        //$grid->disableActions();
         $grid->export(function ($export) {
 
             $export->filename('Transactions');
@@ -210,7 +210,7 @@ class TransactionController extends AdminController
         if (!isset($_GET['term_id'])) {
             $grid->model()->where('term_id', $active_term);
         }
- 
+
         $grid->column('term_id', __('Due term'))->display(function ($x) {
             $t = Term::find($x);
             if ($t == null) {
@@ -264,6 +264,23 @@ class TransactionController extends AdminController
             'enterprise_id' => $u->enterprise_id,
             'type' => 'CASH_ACCOUNT'
         ])->get();
+
+        $terms = [];
+        $active_term = 0;
+        foreach (Term::where(
+            'enterprise_id',
+            Admin::user()->enterprise_id
+        )->orderBy('id', 'desc')->get() as $key => $term) {
+            $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
+            if ($term->is_active) {
+                $active_term = $term->id;
+            }
+        }
+
+        $form->select('term_id', 'Due term')->options($terms)
+            ->default($active_term)
+            ->rules('required');
+
         $accs_2 = Account::where([
             'enterprise_id' => $u->enterprise_id,
             'type' => 'BANK_ACCOUNT'
