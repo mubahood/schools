@@ -145,9 +145,13 @@ php artisan make:migration create_secondary_termly_report_card_items_table
 php artisan make:migration create_secondary_report_cards_table 
 php artisan make:migration create_termly_school_fees_balancings_table
 php artisan make:migration create_report_finances_table
+php artisan make:migration create_bulk_messages_table
+php artisan make:migration create_direct_messages_table
 
 
 
+php artisan make:model DirectMessage
+php artisan make:model BulkMessage
 php artisan make:model FinancialRecord
 php artisan make:model StudentHasTheologyClass
 php artisan make:model BooksCategory
@@ -169,7 +173,7 @@ php artisan make:migration create_marks_table
 php artisan make:migration create_grading_scales_table
 php artisan make:model TermlyReportCard
 php artisan make:model StudentReportCard
-php artisan make:model StudentReportCardItem
+php artisan make:model BulkMessage
 php artisan make:model GradingScale
 php artisan make:model Demo
 php artisan make:model AdminRoleUser
@@ -197,11 +201,11 @@ php artisan make:model TheologyMark
 php artisan make:model TheologyExamHasClass
 php artisan make:model TheologyTermlyReportCard
 php artisan make:model TheologryStudentReportCard
-php artisan make:model TheologyStudentReportCardItem
+php artisan make:model TheologyBulkMessage
 php artisan make:model Competence
 php artisan make:model NurseryTermlyReportCard
 php artisan make:model NurseryStudentReportCard
-php artisan make:model NurseryStudentReportCardItem
+php artisan make:model NurseryBulkMessage
 php artisan make:model AccountParent
 php artisan make:model ServiceCategory
 php artisan make:model AcademicClassLevel
@@ -279,7 +283,8 @@ php artisan admin:make AcademicClassController --model=App\\Models\\AcademicClas
 book_borrow_books
 php artisan admin:make SubjectController --model=App\\Models\\Subject
 php artisan admin:make StudentHasClassController --model=App\\Models\\StudentHasClass
-php artisan admin:make StudentReportCardItemController --model=App\Models\StudentReportCardItem
+php artisan admin:make BulkMessageController --model=App\Models\BulkMessage
+php artisan admin:make BulkMessageController --model=App\Models\BulkMessage
 
 php artisan admin:make TermlyReportCardController --model=App\\Models\\TermlyReportCard
 php artisan admin:make GradingScaleController --model=App\\Models\\GradingScale
@@ -306,7 +311,7 @@ php artisan admin:make TheologyTermlyReportCardController --model=App\\Models\\T
 php artisan admin:make TheologryStudentReportCardController --model=App\\Models\\TheologryStudentReportCard
 php artisan admin:make NurseryTermlyReportCardController --model=App\\Models\\NurseryTermlyReportCard
 php artisan admin:make NurseryStudentReportCardController --model=App\\Models\\NurseryStudentReportCard
-php artisan admin:make NurseryStudentReportCardItemController --model=App\\Models\\NurseryStudentReportCardItem
+php artisan admin:make NurseryBulkMessageController --model=App\\Models\\NurseryBulkMessage
 php artisan admin:make AccountParentController --model=App\\Models\\AccountParent
 php artisan admin:make ServiceCategoryController --model=App\\Models\\ServiceCategory
 php artisan admin:make AcademicClassLevelController --model=App\\Models\\AcademicClassLevel
@@ -428,6 +433,8 @@ php artisan make:migration add_stream_id --table=sessions
 php artisan make:migration add_stream_id_to_admin_users --table=admin_users
 php artisan make:migration add_coulmns_to_termly_school_fees_balancings --table=termly_school_fees_balancings
 php artisan make:migration add_balancing_to_transactions --table=transactions
+php artisan make:migration add_cols_to_bulk_messages --table=bulk_messages
+php artisan make:migration add_STUDENT_NAME_to_direct_messages --table=direct_messages
 
 git add --all
 git commit -am "Your commit message"

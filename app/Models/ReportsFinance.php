@@ -18,7 +18,7 @@ class ReportsFinance
     public  $total_expected_service_fees = 0;
     public  $total_payment_school_pay = 0;
     public  $total_payment_manual_pay = 0;
-    public  $total_payment_mobile_app = 0;
+    public  $total_payment_mobilNe_app = 0;
     public  $total_payment_total = 0;
     public  $total_school_fees_balance = 0;
     public  $total_budget = 0;

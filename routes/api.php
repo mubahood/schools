@@ -102,6 +102,40 @@ Route::get('classes', function (Request $r) {
         'data' => $data
     ];
 });
+Route::get('ajax-users', function (Request $r) {
+    $q = trim($r->get('q'));
+    $enterprise_id = $r->get('enterprise_id');
+    $user_type = $r->get('user_type');
+    $status = $r->get('status');
+    $conditions['enterprise_id'] =  $enterprise_id;
+    if ($user_type != null) {
+        $conditions['user_type'] =  $user_type;
+    }
+    if ($status != null) {
+        $conditions['status'] =  $status;
+    }
+
+    $c = Administrator::where($conditions)
+        ->where('name', 'like', "%$q%")
+        ->limit(100)->get();
+
+    $data = [];
+    $surfix = "";
+    foreach ($c as $key => $v) {
+        if ($user_type == 'student') {
+            if ($v->current_class != null) {
+                $surfix = " - " . $v->current_class->name_text;
+            }
+        }
+        $data[] = [
+            'id' => $v->id . "",
+            'text' => $v->name . $surfix
+        ];
+    }
+    return [
+        'data' => $data
+    ];
+});
 
 
 Route::get('promotion-to-class', function (Request $r) {
