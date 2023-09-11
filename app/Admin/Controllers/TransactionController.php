@@ -91,9 +91,7 @@ class TransactionController extends AdminController
                 if ($term->is_active) {
                     $active_term = $term->id;
                 }
-            }
-
-
+            } 
             $filter->equal('term_id', 'Fliter by term')->select($terms);
 
 
@@ -297,8 +295,7 @@ class TransactionController extends AdminController
 
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
         $form->hidden('created_by_id', __('By id'))->default($u->id)->rules('required');
-        $form->hidden('source', "Money deposited to")->default('MANUAL_ENTRY')
-            ->required()
+        $form->hidden('source', "Money deposited to")->default('MANUAL_ENTRY') 
             ->readonly();
 
 

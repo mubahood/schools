@@ -10,12 +10,20 @@ use Illuminate\Database\Eloquent\Model;
 class BulkMessage extends Model
 {
     use HasFactory;
-    /* 
-          
-            $table->text('PARENT_NAME')->nullable();
-            $table->text('STUDENT_CLASS')->nullable();
-            $table->text('TEACHER_NAME')->nullable(); 
-*/
+
+    public static function boot()
+    {
+        parent::boot();
+        self::deleting(function ($m) {
+            DirectMessage::where('bulk_message_id', $m->id)->delete();
+        });
+        self::created(function ($m) {
+            BulkMessage::do_prepare_messages($m);
+        });
+        self::updated(function ($m) {
+            BulkMessage::do_prepare_messages($m);
+        });
+    }
 
     public static function do_prepare_messages($m)
     {

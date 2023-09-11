@@ -28,9 +28,9 @@ class BulkMessageController extends AdminController
      */
     protected function grid()
     {
-        $m = BulkMessage::find(1);
+        /* $m = BulkMessage::find(1);
         BulkMessage::do_prepare_messages($m);
-        die();
+        die(); */
         $grid = new Grid(new BulkMessage());
 
         $grid->column('id', __('Id'));

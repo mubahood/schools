@@ -32,13 +32,26 @@ class BursaryBeneficiaryController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new BursaryBeneficiary());
-      /*   $x = BursaryBeneficiary::find(1);
+        /*   $x = BursaryBeneficiary::find(1);
         $x->description .= 1;
         $x->delete(); */
 
         $grid->filter(function ($filter) {
             $filter->disableIdFilter();
             $u = Admin::user();
+
+
+            $terms = [];
+            foreach (Term::where(
+                'enterprise_id',
+                Admin::user()->enterprise_id
+            )->orderBy('id', 'desc')->get() as $key => $term) {
+                $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
+            }
+
+            $filter->equal('due_term_id', 'Filter by term')
+                ->select($terms);
+
 
             $filter->equal('bursary_id', 'Fliter by class')->select(Bursary::where([
                 'enterprise_id' => $u->enterprise_id
@@ -69,6 +82,22 @@ class BursaryBeneficiaryController extends AdminController
             ->where([
                 'enterprise_id' => Auth::user()->enterprise_id
             ])->orderBy('id', 'desc');
+
+
+        $terms = [];
+        $active_term = 0;
+        foreach (Term::where(
+            'enterprise_id',
+            Admin::user()->enterprise_id
+        )->orderBy('id', 'desc')->get() as $key => $term) {
+            $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
+            if ($term->is_active) {
+                $active_term = $term->id;
+            }
+        }
+        if (!isset($_GET['due_term_id'])) {
+            $grid->model()->where('due_term_id', $active_term);
+        }
 
         $grid->column('created_at', __('Date'))
             ->display(function () {

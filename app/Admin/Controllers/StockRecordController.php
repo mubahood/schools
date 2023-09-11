@@ -5,6 +5,7 @@ namespace App\Admin\Controllers;
 use App\Models\StockBatch;
 use App\Models\StockItemCategory;
 use App\Models\StockRecord;
+use App\Models\Term;
 use App\Models\Utils;
 use Dflydev\DotAccessData\Util;
 use Encore\Admin\Auth\Database\Administrator;
@@ -49,6 +50,22 @@ class StockRecordController extends AdminController
                 'created_by' => Admin::user()->id,
             ])
                 ->orderBy('record_date', 'Desc');
+        }
+
+
+        $terms = [];
+        $active_term = 0;
+        foreach (Term::where(
+            'enterprise_id',
+            Admin::user()->enterprise_id
+        )->orderBy('id', 'desc')->get() as $key => $term) {
+            $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
+            if ($term->is_active) {
+                $active_term = $term->id;
+            }
+        }
+        if (!isset($_GET['due_term_id'])) {
+            $grid->model()->where('due_term_id', $active_term);
         }
 
 
@@ -206,7 +223,7 @@ class StockRecordController extends AdminController
                 . "&search_by_2=id"
                 . "&model=User"
         );
- 
+
         $form->decimal('quanity', __('Quanity'))->rules('required');
 
         $form->select('received_by', "Received by")

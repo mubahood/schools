@@ -79,9 +79,9 @@ class ServiceController extends AdminController
         });
 
 
-        $grid->column('subs', __('Subscribers'))->display(function () {
+       /*  $grid->column('subs', __('Subscribers'))->display(function () {
             return count($this->subs);
-        });
+        })->hide(); */
         $grid->column('description', __('Description'))->hide();
 
         return $grid;
