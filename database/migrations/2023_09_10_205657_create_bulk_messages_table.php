@@ -26,7 +26,7 @@ class CreateBulkMessagesTable extends Migration
             $table->enum('send_confirm', ['Yes', 'No'])->default('No')->nullable();
             $table->enum('clone_action', ['Duplicate', 'Dont Duplicate'])->default('Dont Duplicate')->nullable();
             $table->enum('clone_confirm', ['Yes', 'No'])->default('No')->nullable();
-            $table->enum('target_types', ['Individuals', 'To Teachers', 'To Parents'])->default('No')->nullable();
+            $table->enum('target_types', ['Individuals', 'To Teachers', 'To Parents'])->nullable();
             $table->text('target_individuals_phone_numbers')->nullable();
             $table->text('target_teachers_ids')->nullable();
             $table->enum('target_parents_condition_type', ['Fees Balance', 'Specific Parents'])->nullable();
