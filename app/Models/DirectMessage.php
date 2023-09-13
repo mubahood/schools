@@ -14,6 +14,11 @@ class DirectMessage extends Model
     {
         parent::boot();
 
+        self::deleting(function ($m) {
+            if ($m->status == 'Sent') {
+                throw new \Exception("Cannot delete a sent message.");
+            }
+        });
         self::creating(function ($m) {
             if (strlen($m->receiver_number) < 7) {
                 $u = Administrator::find($m->administrator_id);
@@ -70,9 +75,9 @@ class DirectMessage extends Model
         // $m->status = 'Sent';
         // $m->save();
         // return;
-        $url = "https://www.socnetsolutions.com/projects/bulk/amfphp/services/blast.php?username=8tech&passwd=8Tech@2023";
+        $url = "https://www.socnetsolutions.com/projects/bulk/amfphp/services/blast.php?username=mubaraka&passwd=muh1nd0@2023";
         //$m->receiver_number = '+256706638494';
-        $url .= "&msg=" . $m->message_body;
+        $url .= "&msg=" . trim($m->message_body);
         $url .= "&numbers=" . $m->receiver_number;
 
         try {
@@ -86,10 +91,14 @@ class DirectMessage extends Model
             $m->response = $result;
             if (str_contains($result, 'Send ok')) {
                 $m->status = 'Sent';
+                $no_of_messages  = 1;
+                if (strlen($m->message_body) > 160) {
+                    $no_of_messages = ceil(strlen($m->message_body) / 160);
+                }
                 $wallet_rec = new WalletRecord();
                 $wallet_rec->enterprise_id = $m->enterprise_id;
-                $wallet_rec->amount = -45;
-                $wallet_rec->details = 'Sent message to ' . $m->receiver_number . ", ref: $m->id";
+                $wallet_rec->amount = $no_of_messages * -45;
+                $wallet_rec->details = "Sent $no_of_messages messages to $m->receiver_number. ref: $m->id";
                 $wallet_rec->save();
             } else {
                 $m->status = 'Failed';

@@ -58,7 +58,6 @@ class DirectMessageController extends AdminController
             ->orderBy('id', 'desc');
 
         $grid->batchActions(function ($batch) {
-            $batch->disableDelete();
             $batch->add(new MessageStatus());
         });
         $grid->column('id', __('ID'))->sortable();
