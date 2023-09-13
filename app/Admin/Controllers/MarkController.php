@@ -51,8 +51,8 @@ class MarkController extends AdminController
         }
 
         $grid->disableCreateButton();
-        $grid->disableActions(); 
-        $grid->disableBatchActions(); 
+        $grid->disableActions();
+        $grid->disableBatchActions();
 
         if (
             (!Admin::user()->isRole('dos')) &&
@@ -77,7 +77,8 @@ class MarkController extends AdminController
             if (
                 (!Admin::user()->isRole('dos')) &&
                 (
-                    (!isset($_GET['subject_id'])) 
+                    (!isset($_GET['subject_id']))
+                )
             ) {
                 $filter->expand();
             }
@@ -135,7 +136,7 @@ class MarkController extends AdminController
                         $subs[$ex->id] = $ex->subject_name . " - " . $ex->academic_class->name_text;
                     }
                 }
-            } 
+            }
             $filter->equal('subject_id', 'Filter by subject')->select($subs);
 
 
@@ -149,10 +150,10 @@ class MarkController extends AdminController
             );
 
             $filter->equal('student_id', 'Student')
-            ->select()->ajax($ajax_url);
+                ->select()->ajax($ajax_url);
         });
 
- 
+
         $grid->column('id', __('#ID'))->hide()->sortable();
         $grid->column('student_id', __('Student'))->display(function () {
             if ($this->student == null) {
@@ -194,8 +195,8 @@ class MarkController extends AdminController
 
         if (Admin::user()->isRole('dos')) {
             $grid->column('teacher.name', __('Teacher'))
-            
-            ->sortable();
+
+                ->sortable();
         } else {
             $grid->column('teacher.name', __('Teacher'))->sortable()->hide();
         }
@@ -204,8 +205,8 @@ class MarkController extends AdminController
         $grid->column('updated_at', __('Last Updat'))->display(function ($v) {
             return Utils::my_date_time($v);
         })
-        ->hide()
-        ->sortable();
+            ->hide()
+            ->sortable();
 
         return $grid;
     }

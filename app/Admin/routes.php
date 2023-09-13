@@ -91,6 +91,10 @@ Route::group([
     $router->resource('theology-mark-records', TheologyMarkRecordController::class);
     $router->resource('report-finances', ReportFinanceController::class);
     $router->resource('bulk-messages', BulkMessageController::class);
+    $router->resource('direct-messages', DirectMessageController::class);
+    $router->resource('wallet-records', WalletRecordController::class);
+    $router->resource('credit-purchases', CreditPurchaseController::class);
+
     //$router->resource('fees', StudentHasFeeController::class);
 
     $router->get('/statistics', 'HomeController@stats')->name('statistics');

@@ -34,7 +34,7 @@ use Illuminate\Console\Scheduling\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
- 
+
 
 Encore\Admin\Form::forget(['map', 'editor']);
 
@@ -72,9 +72,9 @@ Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
         }
     }
 
-    $navbar->left(view('admin.search-bar', [
+    /* $navbar->left(view('admin.search-bar', [
         'u' => $u
-    ]));
+    ])); */
     $links = [];
 
     if ($u != null) {
@@ -103,12 +103,16 @@ Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
             ];
         }
 
-        $navbar->left(Shortcut::make($links, 'fa-plus')->title('ADD NEW'));
+        //$navbar->left(Shortcut::make($links, 'fa-plus')->title('ADD NEW'));
+        $u = Admin::user();
+        if ($u->isRole('dos', 'admin', 'bursar', 'super-admin', 'hm')) {
+            $navbar->left('<li><a href="javascript:;">WALLET: UGX ' . number_format($u->ent->wallet_balance) . '</a></li>');
+        }
 
-        $navbar->left(new Dropdown());
+
+        /* $navbar->left(new Dropdown()); */
 
         $check_list = [];
-        $u = Auth::user();
 
         if ($u != null) {
             $check_list = Utils::system_checklist($u);

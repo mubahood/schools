@@ -25,6 +25,8 @@ class BulkMessage extends Model
         });
     }
 
+
+
     public static function do_prepare_messages($m)
     {
 
@@ -53,7 +55,7 @@ class BulkMessage extends Model
                 }
             }
         } else if ($m->target_types == 'To Teachers') {
-            if ($m->target_teachers_ids != null && is_array($m->target_teachers_ids)) {
+            if (is_array($m->target_teachers_ids)) {
                 try {
                     foreach ($m->target_teachers_ids as $key => $target_teachers_id) {
                         $msg = DirectMessage::where([
@@ -86,7 +88,7 @@ class BulkMessage extends Model
                 }
             }
         } else if ($m->target_types == 'To Parents') {
-            if ($m->target_parents_condition_phone_numbers != null && is_array($m->target_parents_condition_phone_numbers)) {
+            if (is_array($m->target_parents_condition_phone_numbers)) {
                 try {
                     foreach ($m->target_parents_condition_phone_numbers as $key => $target_id) {
 
@@ -144,8 +146,86 @@ class BulkMessage extends Model
                     $errorMessage .= "Error in Individuals Phone Numbers. - " . $th->getMessage();
                 }
             }
-        }
+        } else if ($m->target_types == 'To Classes') {
+            $target_classes_ids = [];
+            if (strlen($m->target_classes_ids) > 0) {
+                try {
+                    $target_classes_ids = explode(',', $m->target_classes_ids);
+                } catch (\Throwable $th) {
+                    $target_classes_ids = [];
+                }
+            }
+            if (is_array($target_classes_ids)) {
+                try {
+                    foreach ($target_classes_ids as $key => $class_id) {
+                        $class = AcademicClass::find($class_id);
+                        if ($class == null) {
+                            $hasError = true;
+                            $errorMessage .= "Class #" . $class_id . ", was not found.";
+                            continue;
+                        }
 
+                        foreach ($class->students as $studentHasClass) {
+                            $administrator_id = $studentHasClass->administrator_id;
+                            $student = Administrator::find($administrator_id);
+                            $parent = Administrator::find($student->parent_id);
+                            if ($parent == null) {
+                                $hasError = true;
+                                $errorMessage .= "Parent of {$student->name}, #" . $student->parent_id . ", was not found.";
+                                continue;
+                            }
+
+
+                            $balance = 0;
+                            if ($m->target_parents_condition_type == 'Fees Balance') {
+                                $operator = '=';
+                                if ($m->target_parents_condition_fees_type == 'Less Than') {
+                                    $operator = '<';
+                                }
+
+                                $_acc_condition['administrator_id'] = $administrator_id;
+                                if ($m->target_parents_condition_fees_status == 'Only Verified') {
+                                    $_acc_condition['status'] = 1;
+                                }
+
+                                $acc = Account::where($_acc_condition)
+                                    ->where('balance', $operator, $m->target_parents_condition_fees_amount)->first();
+                                if ($acc == null) {
+                                    continue;
+                                }
+                                $balance = $acc->balance;
+                            }
+
+
+                            $msg = DirectMessage::where([
+                                'administrator_id' => $parent->id,
+                                'bulk_message_id' => $m->id
+                            ])->first();
+                            if ($msg == null) {
+                                $msg = new DirectMessage();
+                            }
+
+
+                            $msg->STUDENT_NAME = $student->name;
+                            $msg->TEACHER_NAME = $student->name;
+                            $msg->PARENT_NAME = $parent->name;
+
+                            $phone_number = $parent->phone_number_1;
+                            if ($phone_number == null || strlen($phone_number) < 2) {
+                                $phone_number = $parent->phone_number_2;
+                            }
+                            $msg->receiver_number = $phone_number;
+                            $msg->administrator_id = $parent->id;
+                            $msg->balance = $balance;
+                            $messages[] = $msg;
+                        }
+                    }
+                } catch (\Throwable $th) {
+                    $hasError = true;
+                    $errorMessage .= "Error in Individuals Phone Numbers. - " . $th->getMessage();
+                }
+            }
+        }
 
         foreach ($messages as $key => $_msg) {
             $msg = $_msg;
@@ -169,6 +249,20 @@ class BulkMessage extends Model
             $msg->message_body = str_replace('[FEES_BALANCE]', "UGX " . number_format($msg->balance), $msg->message_body);
             $msg->save();
         }
+        Utils::send_messages();
+    }
+
+
+    public function getArgetClassesIdsAttribute($value)
+    {
+        return explode(',', $value);
+    }
+
+    public function settArgetClassesIdsAttribute($value)
+    {
+        if (is_array($value)) {
+            $this->attributes['target_classes_ids'] = implode(',', $value);
+        }
     }
 
 
@@ -179,7 +273,7 @@ class BulkMessage extends Model
 
     public function setTargetTeachersIdsAttribute($value)
     {
-        if ($value != null && is_array($value)) {
+        if (is_array($value)) {
             $this->attributes['target_teachers_ids'] = implode(',', $value);
         }
     }
@@ -192,8 +286,12 @@ class BulkMessage extends Model
 
     public function setTargetParentsConditionPhoneNumbersAttribute($value)
     {
-        if ($value != null && is_array($value)) {
+        if (is_array($value)) {
             $this->attributes['target_parents_condition_phone_numbers'] = implode(',', $value);
         }
+    }
+    public function direct_messages()
+    {
+        return $this->hasMany(DirectMessage::class);
     }
 }

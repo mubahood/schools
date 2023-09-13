@@ -92,11 +92,17 @@ class ConfigurationController extends AdminController
         $form->email('email', __('Email'))->required();
         $form->color('color', __('School Color'))->default('color')->required();
         $form->quill('welcome_message', __('Welcome message'));
+        $form->radioCard('can_send_messages', __('Enable Message Sending'))
+            ->options([
+                'Yes' => 'Yes',
+                'No' => 'No',
+            ])->default('No');
         $form->divider();
         $form->text('hm_name', __('Head Teacher Name'));
         $form->image('hm_signature', __('Head Teacher signature'));
         $form->image('dos_signature', __('Head Teacher signature'));
         $form->image('bursar_signature', __('Bursar signature'));
+
 
         return $form;
     }

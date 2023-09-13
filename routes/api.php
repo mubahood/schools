@@ -6,6 +6,7 @@ use App\Http\Controllers\QuickSearchController;
 use App\Models\AcademicClass;
 use App\Models\AcademicClassSctream;
 use App\Models\Book;
+use App\Models\DirectMessage;
 use App\Models\Subject;
 use App\Models\TermlyReportCard;
 use App\Models\User;
@@ -305,6 +306,9 @@ Route::get('ajax', function (Request $r) {
     ];
 });
 
+Route::get('message-sender', function (Request $r) {
+    Utils::send_messages(); 
+});
 Route::get('reconcile', function (Request $r) {
     Utils::reconcile($r);
     Utils::schoool_pay_sync();

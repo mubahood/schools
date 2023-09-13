@@ -42,6 +42,13 @@ class Enterprise extends Model
         });
     }
 
+    public function updateWalletBalance()
+    {
+        $sql = "SELECT SUM(amount) as total FROM wallet_records WHERE enterprise_id = $this->id";
+        $total = DB::select($sql);
+        $this->wallet_balance = $total[0]->total;
+        $this->save();
+    }
     public function active_term()
     {
         $t = Term::where([
