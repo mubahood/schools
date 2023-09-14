@@ -445,6 +445,7 @@ php artisan make:migration add_balancing_to_transactions --table=transactions
 php artisan make:migration add_cols_to_bulk_messages --table=bulk_messages
 php artisan make:migration add_target_type_classes_to_bulk_messages --table=bulk_messages
 php artisan make:migration add_collumns_towallet_record --table=credit_purchase_records -m
+php artisan make:migration add_collumns_expiry_to_enterprises --table=enterprises
 
 git add --all
 git commit -am "Your commit message"

@@ -144,6 +144,13 @@ class EnterpriseController extends AdminController
         $form->text('school_pay_code', __('School-pay code'));
         $form->text('school_pay_password', __('School-pay password'));
 
+        $form->radio('has_valid_lisence', __('Has Valid License'))
+            ->options([
+                'Yes' => 'Yes',
+                'No' => 'No',
+            ])
+            ->rules('required');
+
         return $form;
     }
 }
