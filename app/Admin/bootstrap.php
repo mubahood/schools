@@ -39,9 +39,11 @@ use Illuminate\Support\Facades\DB;
 Encore\Admin\Form::forget(['map', 'editor']);
 
 $u = Auth::user();
-if ($u->ent != null) {
-    if ($u->ent->has_valid_lisence != 'Yes') {
-        die('License for <b>' . $u->ent->name . '</b> has expired. Please contact, <b>Newline Technologies Ltd</b>. for renewal.');
+if ($u != null) {
+    if ($u->ent != null) {
+        if ($u->ent->has_valid_lisence != 'Yes') {
+            die('License for <b>' . $u->ent->name . '</b> has expired. Please contact, <b>Newline Technologies Ltd</b>. for renewal.');
+        }
     }
 }
 
