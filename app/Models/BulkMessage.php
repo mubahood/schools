@@ -205,7 +205,6 @@ class BulkMessage extends Model
                                 $msg = new DirectMessage();
                             }
 
-
                             $msg->STUDENT_NAME = $student->name;
                             $msg->TEACHER_NAME = $student->name;
                             $msg->PARENT_NAME = $parent->name;

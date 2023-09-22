@@ -729,16 +729,16 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
 
     public function get_my_all_classes()
     {
-        $theology_classes = $this->get_my_theology_classes();
+        //$theology_classes = $this->get_my_theology_classes();
         $secular_classes = $this->get_my_classes();
         foreach ($secular_classes as $key => $value) {
             $value->section = 'Secular';
             $classes[] = $value;
         }
-        foreach ($theology_classes as $key => $value) {
+        /*         foreach ($theology_classes as $key => $value) {
             $value->section = 'Theology';
             $classes[] = $value;
-        }
+        } */
         return $classes;
     }
 
