@@ -61,8 +61,16 @@ ini_set('memory_limit', '-1');
   DummyDataController::fees_billing($ent_id);
   DummyDataController::transactions($ent_id);
 }); */
- 
- 
+
+
+Route::get('/gen', function () {
+  die(Gen::find($_GET['id'])->do_get());
+})->name("gen");
+Route::get('/gen-form', function () {
+  die(Gen::find($_GET['id'])->make_forms());
+})->name("gen-form");
+
+
 Route::get('create-streams', [Utils::class, 'create_streams']);
 Route::get('generate-variables', [MainController::class, 'generate_variables']);
 Route::get('process-photos', [MainController::class, 'process_photos']);

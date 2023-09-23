@@ -7,6 +7,7 @@ use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
+use Illuminate\Support\Facades\DB;
 
 class GenController extends AdminController
 {
@@ -26,16 +27,15 @@ class GenController extends AdminController
     {
         $grid = new Grid(new Gen());
 
-        $grid->column('id', __('Id'));
-        $grid->column('created_at', __('Created at'));
-        $grid->column('updated_at', __('Updated at'));
-        $grid->column('class_name', __('Class name'));
-        $grid->column('use_db_table', __('Use db table'));
-        $grid->column('table_name', __('Table name'));
-        $grid->column('fields', __('Fields'));
-        $grid->column('file_id', __('File id'));
-        $grid->column('gen', __('File'))->display(function () {
-            return '<a target="_blank" href="' . url('gen?id=' . $this->id) . '">Generate</a>';
+        $grid->model()->orderBy('id', 'desc');
+        $grid->column('id', __('Id'))->sortable();
+        $grid->column('class_name', __('Class'));
+        $grid->column('table_name', __('Table'));
+        $grid->column('gen', __('Gen-Model'))->display(function () {
+            return '<a target="_blank" href="' . url('gen?id=' . $this->id) . '">Make Model</a>';
+        });
+        $grid->column('gen-form', __('Gen-form'))->display(function () {
+            return '<a target="_blank" href="' . url('gen-form?id=' . $this->id) . '">Make Forms</a>';
         });
         return $grid;
     }
@@ -71,15 +71,19 @@ class GenController extends AdminController
     {
         $form = new Form(new Gen());
 
-        $form->text('class_name', __('Class name'));
-        $form->radio('use_db_table', __('Use db table'))->options([
-            'Yes' => 'Yes',
-            'No' => 'No',
-        ]);
-        $form->text('table_name', __('Table name'));
-        $form->text('end_point', __('end_point'));
-        $form->textarea('fields', __('Fields'));
-        $form->text('file_id', __('File ID'));
+        $form->text('class_name', __('Class Name'));
+        $tables = DB::select("SHOW TABLES");
+        $data = [];
+        foreach ($tables as $key => $table) {
+            //$tables[] = $table->Tables_in_ussd;
+            $db_name = 'Tables_in_' . env("DB_DATABASE");
+            $data[$table->$db_name] = $table->$db_name;
+        }
+        $form->select('table_name', __('Table name'))->options($data)->rules('required');
+        $form->text('end_point', __('end_point'))->rules('required');
+        $form->hidden('fields', __('Fields'))->default('');
+        $form->hidden('use_db_table', __('Fields'))->default('Yes');
+        $form->hidden('file_id', __('File ID'))->default('');
 
         return $form;
     }
