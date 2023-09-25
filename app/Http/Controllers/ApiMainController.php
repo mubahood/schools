@@ -203,11 +203,14 @@ class ApiMainController extends Controller
         if (
             $r->due_date == null ||
             $r->type == null ||
-            $r->stream_id == null ||
             $r->present == null
-
         ) {
             return $this->error('Some params are missing.');
+        }
+
+        $stream = AcademicClassSctream::find($r->stream_id);
+        if ($stream == null) {
+            return $this->error('Stream not found.');
         }
 
         $u = auth('api')->user();
@@ -220,6 +223,7 @@ class ApiMainController extends Controller
         $session->service_id = $r->service_id;
         $session->type = $r->type;
         $session->title = $r->title;
+        $session->stream_id = $r->stream_id;
         $session->is_open = 0;
         $session->prepared = 1;
         $session->administrator_id = $u->id;
@@ -237,11 +241,14 @@ class ApiMainController extends Controller
 
         $m = $session;
 
-        $cands = $m->getCandidates($r->stream_id);
-        foreach ($cands as $key =>  $candidate) {
+        //$cands = $m->getCandidates($r->stream_id);
+        $cands = StudentHasClass::where([
+            'stream_id' => $m->stream_id,
+        ])->get();
+        foreach ($cands as $key =>  $hasClass) {
             $p = new Participant();
             $p->enterprise_id = $m->enterprise_id;
-            $p->administrator_id = $key;
+            $p->administrator_id = $hasClass->administrator_id;
             $p->academic_year_id = $m->academic_year_id;
             $p->term_id = $m->term_id;
             $p->academic_class_id = $m->academic_class_id;
@@ -262,8 +269,7 @@ class ApiMainController extends Controller
         $session->prepared = 1;
         $session->save();
 
-
-        return $this->success(null, $message = "Success", 200);
+        return $this->success($session, $message = "Success", 200);
     }
 
     public function mark_submit(Request $r)
