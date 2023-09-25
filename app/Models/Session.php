@@ -174,5 +174,65 @@ class Session extends Model
         ])->pluck('administrator_id');
     }
 
-    protected $appends = ['present'];
+    public function getAdministratorTextAttribute()
+    {
+        $admin = Administrator::find($this->administrator_id);
+        $text = "-";
+        if ($admin != null) {
+            $text = $admin->name;
+        }
+        return $text;
+    }
+    public function getAcademicClassTextAttribute()
+    {
+        $admin = AcademicClass::find($this->academic_class_id);
+        $text = "-";
+        if ($admin != null) {
+            $text = $admin->name;
+        }
+        return $text;
+    }
+    public function getSubjectTextAttribute()
+    {
+        $admin = Subject::find($this->subject_id);
+        $text = "-";
+        if ($admin != null) {
+            $text = $admin->name;
+        }
+        return $text;
+    }
+    public function getStreamTextAttribute()
+    {
+        $admin = AcademicClassSctream::find($this->stream_id);
+        $text = "-";
+        if ($admin != null) {
+            $text = $admin->name;
+        }
+        return $text;
+    }
+    public function getPresentCountAttribute()
+    {
+        return DB::table('participants')->where([
+            'is_present' => 1,
+            'session_id' => $this->id,
+        ])->count();
+    }
+    public function getAbsentCountAttribute()
+    {
+        return DB::table('participants')->where([
+            'is_present' => 0,
+            'session_id' => $this->id,
+        ])->count();
+    }
+
+    protected $appends = [
+        'present',
+        'administrator_text',
+        'academic_class_text',
+        'subject_text',
+        'stream_text',
+        'present_count',
+        'absent_count'
+    ];
 }
+ 

@@ -748,8 +748,19 @@ class ApiMainController extends Controller
         $u = auth('api')->user();
         return $this->success(Session::where([
             'administrator_id' => $u->id,
-            'academic_year_id' => $u->ent->active_academic_year()->id,
-        ])->get(), $message = "Success", 200);
+            'term_id' => $u->ent->active_term()->id,
+        ])->get([
+            'id',
+            'title',
+            'type',
+            'created_at',
+            'administrator_id',
+            'academic_class_id',
+            'subject_id',
+            'service_id',
+            'due_date',
+            'type',
+        ]), $message = "Success", 200);
     }
 
     public function upload_media(Request $r)
