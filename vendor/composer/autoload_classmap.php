@@ -236,6 +236,7 @@ return array(
     'App\\Models\\User' => $baseDir . '/app/Models/User.php',
     'App\\Models\\UserBatchImporter' => $baseDir . '/app/Models/UserBatchImporter.php',
     'App\\Models\\Utils' => $baseDir . '/app/Models/Utils.php',
+    'App\\Models\\Visitor' => $baseDir . '/app/Models/Visitor.php',
     'App\\Models\\WalletRecord' => $baseDir . '/app/Models/WalletRecord.php',
     'App\\Providers\\AppServiceProvider' => $baseDir . '/app/Providers/AppServiceProvider.php',
     'App\\Providers\\AuthServiceProvider' => $baseDir . '/app/Providers/AuthServiceProvider.php',

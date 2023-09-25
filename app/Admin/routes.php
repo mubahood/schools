@@ -94,6 +94,7 @@ Route::group([
     $router->resource('direct-messages', DirectMessageController::class);
     $router->resource('wallet-records', WalletRecordController::class);
     $router->resource('credit-purchases', CreditPurchaseController::class);
+    $router->resource('visitors', VisitorController::class);
 
     //$router->resource('fees', StudentHasFeeController::class);
 
