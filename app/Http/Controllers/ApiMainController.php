@@ -245,7 +245,7 @@ class ApiMainController extends Controller
         $m = $session;
 
         //$cands = $m->getCandidates($r->stream_id);
-
+        
         $cands = StudentHasClass::where([
             'stream_id' => $m->stream_id,
         ])->get();
@@ -263,7 +263,7 @@ class ApiMainController extends Controller
             $p->service_id = $m->service_id;
             $p->is_done = 1;
             $p->session_id = $m->id;
-
+            
             if (in_array($p->administrator_id, $present)) {
                 $p->is_present = 1;
             } else {
