@@ -220,7 +220,7 @@ class ApiMainController extends Controller
         $session->enterprise_id = $u->enterprise_id;
         $session->academic_class_id = $r->academic_class_id;
         $session->subject_id = $r->subject_id;
-        $session->service_id = $r->service_id;
+        $session->service_id = (int)$r->service_id;
         $session->type = $r->type;
         $session->title = $r->title;
         $session->stream_id = $r->stream_id;
@@ -234,7 +234,10 @@ class ApiMainController extends Controller
 
         $present = [];
         try {
-            $present = json_decode($r['present']);
+            $_present = json_decode($r['present']);
+            foreach ($_present as $key => $value) {
+                $present[] = (int)$value;
+            }
         } catch (Throwable $t) {
             $present = [];
         }
@@ -242,9 +245,11 @@ class ApiMainController extends Controller
         $m = $session;
 
         //$cands = $m->getCandidates($r->stream_id);
+
         $cands = StudentHasClass::where([
             'stream_id' => $m->stream_id,
         ])->get();
+
         foreach ($cands as $key =>  $hasClass) {
             $p = new Participant();
             $p->enterprise_id = $m->enterprise_id;
@@ -257,7 +262,8 @@ class ApiMainController extends Controller
             $p->is_done = 1;
             $p->session_id = $m->id;
 
-            if (in_array($key, $present)) {
+            die($p->administrator_id . "");
+            if (in_array($p->administrator_id, $present)) {
                 $p->is_present = 1;
             } else {
                 $p->is_present = 0;
@@ -269,7 +275,7 @@ class ApiMainController extends Controller
         $session->prepared = 1;
         $session->save();
 
-        return $this->success($session, $message = "Success", 200);
+        return $this->success($session, $message = "Success", 1);
     }
 
     public function mark_submit(Request $r)
