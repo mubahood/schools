@@ -250,6 +250,8 @@ class ApiMainController extends Controller
             'stream_id' => $m->stream_id,
         ])->get();
 
+
+
         foreach ($cands as $key =>  $hasClass) {
             $p = new Participant();
             $p->enterprise_id = $m->enterprise_id;
@@ -262,7 +264,6 @@ class ApiMainController extends Controller
             $p->is_done = 1;
             $p->session_id = $m->id;
 
-            die($p->administrator_id . "");
             if (in_array($p->administrator_id, $present)) {
                 $p->is_present = 1;
             } else {
