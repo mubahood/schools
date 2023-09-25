@@ -235,4 +235,3 @@ class Session extends Model
         'absent_count'
     ];
 }
- 
