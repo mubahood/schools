@@ -489,7 +489,7 @@ class ApiMainController extends Controller
         }
 
 
-        
+
         /* =====theology===== */
         if ($u->isRole('teacher')) {
             $subs = "SELECT 
@@ -708,18 +708,39 @@ class ApiMainController extends Controller
         $u = auth('api')->user();
 
         $secula_subjects = $u->get_my_subjetcs();
-        $theology_subjects = $u->get_my_theology_subjetcs();
+        //$theology_subjects = $u->get_my_theology_subjetcs();
         $subjects = [];
         foreach ($secula_subjects as $key => $value) {
             $value->section = 'Secular';
             $subjects[] = $value;
         }
-        foreach ($theology_subjects as $key => $value) {
-            $value->section = 'Theology';
-            $subjects[] = $value;
-        }
+        // foreach ($theology_subjects as $key => $value) {
+        //     $value->section = 'Theology';
+        //     $subjects[] = $value;
+        // }
 
         return $this->success($subjects, $message = "Success", 200);
+    }
+
+    public function student_has_class()
+    {
+        $u = auth('api')->user();
+
+        $classes = $u->get_my_classes();
+        $class_ids = [];
+        foreach ($classes as $key => $value) {
+            $class_ids[] = $value->id;
+        }
+
+        $hasClasses = StudentHasClass::wherein('academic_class_id', $class_ids)->get([
+            'id',
+            'academic_class_id',
+            'administrator_id',
+            'stream_id',
+            'academic_year_id',
+        ]);
+
+        return $this->success($hasClasses, $message = "Success", 200);
     }
 
     public function my_sessions()

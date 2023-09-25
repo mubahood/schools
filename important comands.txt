@@ -450,9 +450,9 @@ php artisan make:migration add_collumns_expiry_to_enterprises --table=enterprise
 git add --all
 git commit -am "Your commit message"
 ssh schooics@gator4311.hostgator.com
-ssh-keygen -t rsa -C "schooics@gator4311.hostgator.com"
+ssh-keygen -t rsa -C "schooics@gator4311.hostgator.com" 
 
-ssh-keygen -f ~/.ssh/id_rsa -p
+ssh-keygen -f /Users/mac/.ssh/id_rsa -p
 
 
 

@@ -150,4 +150,38 @@ class StudentHasClass extends Model
     {
         return $this->hasMany(StudentHasOptionalSubject::class, 'student_has_class_id');
     }
+
+    function getAcademicClassTextAttribute()
+    {
+        $class = AcademicClass::find($this->academic_class_id);
+        if ($class != null) {
+            return $class->name;
+        }
+        return '-';
+    }
+    function getAdministratorPhotoAttribute()
+    {
+        $student = Administrator::find($this->administrator_id);
+        if ($student != null) {
+            return $student->avatar;
+        }
+        return '-';
+    }
+    function getStreamTextAttribute()
+    {
+        $stream = AcademicClassSctream::find($this->stream_id);
+        if ($stream != null) {
+            return $stream->name;
+        }
+        return '-';
+    }
+    function getAdministratorTextAttribute()
+    {
+        $student = Administrator::find($this->administrator_id);
+        if ($student != null) {
+            return $student->name;
+        }
+        return '-';
+    }
+    protected $appends = ['academic_class_text', 'administrator_photo', 'stream_text','administrator_text'];
 }

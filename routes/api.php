@@ -33,6 +33,7 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::post("update-guardian/{id}", [ApiMainController::class, 'update_guardian']);
     Route::post("session-create", [ApiMainController::class, 'session_create']);
     Route::get("my-subjects", [ApiMainController::class, 'my_subjects']);
+    Route::get("student-has-class", [ApiMainController::class, 'student_has_class']);
     Route::get("transactions", [ApiMainController::class, 'transactions']);
     Route::post("transactions", [ApiMainController::class, 'transactions_post']);
     Route::post("accounts-change-balance", [ApiMainController::class, 'accounts_change_balance']);
