@@ -95,6 +95,13 @@ Route::group([
     $router->resource('wallet-records', WalletRecordController::class);
     $router->resource('credit-purchases', CreditPurchaseController::class);
 
+    //Hostel Routes
+    $router->resource('buildings', BuildingController::class);
+    //Hostel Building rooms
+    $router->resource('rooms', RoomController::class);
+    //Hostel  room slots
+    $router->resource('slots', SlotController::class);
+
     //$router->resource('fees', StudentHasFeeController::class);
 
     $router->get('/statistics', 'HomeController@stats')->name('statistics');

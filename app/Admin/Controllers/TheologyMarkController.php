@@ -119,7 +119,7 @@ class TheologyMarkController extends AdminController
                 (
                     (!isset($_GET['theology_subject_id'])) ||
                     (((int)($_GET['theology_subject_id'])) < 1)
-            ) {
+                ) {
                 $filter->expand();
             }
 
