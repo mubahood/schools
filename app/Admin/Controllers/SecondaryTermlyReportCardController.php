@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Models\SecondaryTermlyReportCard;
+use App\Models\Term;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -31,7 +32,7 @@ class SecondaryTermlyReportCardController extends AdminController
     	do_update	
 
         */
-     /*    $rep = new SecondaryTermlyReportCard();
+        /*    $rep = new SecondaryTermlyReportCard();
         $u = Admin::user();
         $ent = Admin::user()->ent;
         $year = $ent->active_academic_year();
@@ -113,12 +114,29 @@ class SecondaryTermlyReportCardController extends AdminController
     {
         $form = new Form(new SecondaryTermlyReportCard());
 
-        $form->number('enterprise_id', __('Enterprise id'));
-        $form->number('academic_year_id', __('Academic year id'));
-        $form->number('term_id', __('Term id'));
-        $form->textarea('report_title', __('Report title'));
+        $form->hidden('enterprise_id')->default(Auth::user()->enterprise_id);
+
+        $u = Admin::user();
+        $term = $u->ent->active_term();
+        $form->select('term_id', "Due term")
+            ->options(Term::where([
+                'enterprise_id' => $u->enterprise_id
+            ])
+                ->orderBy('id', 'desc')
+                ->get()
+                ->pluck('name_text', 'id'))
+            ->default($term->id)
+            ->rules('required');
+
+        $form->text('report_title', __('Report title'));
         $form->textarea('general_commnunication', __('General commnunication'));
-        $form->text('do_update', __('Do update'))->default('No');
+        if ($form->isCreating()) {
+            $form->hidden('do_update')->default('Yes');
+        } else {
+            $form->radioCard('do_update', __('Update Marks'))
+                ->options(['Yes' => 'Yes', 'No' => 'No']);
+        }
+
 
         return $form;
     }

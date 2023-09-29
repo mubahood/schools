@@ -30,6 +30,8 @@ class SecondaryReportCardItem extends Model
 
     public function subject()
     {
+        $sub = SecondarySubject::find($this->secondary_subject_id);
+        dd($this->secondary_subject_id);
         return $this->belongsTo(SecondarySubject::class, 'secondary_subject_id');
     }
 
@@ -39,7 +41,7 @@ class SecondaryReportCardItem extends Model
     }
 
     public function getItemsAttribute(){
-        return $this->hasMany();
+        return $this->hasMany(SecondaryReportCardItem::class, 'secondary_report_card_id', 'secondary_report_card_id');  
     }
     public function items()
     {

@@ -50,7 +50,8 @@
             <?php
             
             if ($item->subject == null) {
-                dd($item);
+                //dd($item);
+                dd($item->secondary_subject_id);
                 echo ('Subject not found '.$item->secondary_subject_id);
                 continue;
             }

@@ -20,15 +20,24 @@ class SecondaryTermlyReportCard extends Model
         self::created(function ($m) {
             SecondaryTermlyReportCard::update_data($m);
         });
-        self::creating(function ($m) {
+        self::creating(function ($model) {
             $m = SecondaryTermlyReportCard::where([
-                'enterprise_id' => $m->enterprise_id,
-                'term_id' => $m->term_id
+                'enterprise_id' => $model->enterprise_id,
+                'term_id' => $model->term_id
             ])->first();
+
+    
+
             if ($m != null) {
                 SecondaryTermlyReportCard::update_data($m);
                 return false;
             }
+
+            $term = Term::find($model->term_id);
+            if($term == null){
+                throw new \Exception("Term not found");
+            }
+            $model->academic_year_id = $term->academic_year_id; 
         });
 
         self::deleting(function ($m) {
