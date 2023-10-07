@@ -343,13 +343,10 @@ class StudentHasClassController extends AdminController
                     $subs[((int)($s->course_id))] = $s->subject_name . " - " . $s->code;
                 }
 
-
                 $u = Admin::user();
-
                 $form->hidden('enterprise_id')->default($u->enterprise_id);
                 $form->hidden('administrator_id')->default($class->administrator_id);
                 $form->hidden('student_has_class_id')->default($class->id);
-
 
                 $form->select('subject_id', 'Select subject')
                     ->options(
