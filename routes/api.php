@@ -7,6 +7,7 @@ use App\Models\AcademicClass;
 use App\Models\AcademicClassSctream;
 use App\Models\Book;
 use App\Models\DirectMessage;
+use App\Models\SecondaryReportCard;
 use App\Models\StudentHasClass;
 use App\Models\Subject;
 use App\Models\TermlyReportCard;
@@ -133,7 +134,7 @@ Route::get('ajax-users', function (Request $r) {
         }
         $data[] = [
             'id' => $v->id . "",
-            'text' => $v->name . $surfix
+            'text' => "#{$v->id} - " . $v->name . $surfix
         ];
     }
     return [
@@ -417,6 +418,26 @@ Route::get("studentsFinancialAccounts", [QuickSearchController::class, 'students
 
 
 Route::get('select-student-has-class', function (Request $r) {
+    $q = trim($r->get('q'));
+    $hasClasses = StudentHasClass::where([
+        'administrator_id' => ((int)($q))
+    ])->get();
+    $data = [];
+    foreach ($hasClasses as $key => $v) {
+        $data[] = [
+            'id' => $v->id,
+            'text' => $v->class->name_text
+        ];
+    }
+    return [
+        'data' => $data
+    ];
+});
+
+Route::get('select-secondary-report-cards', function (Request $r) {
+
+    $cards = SecondaryReportCard::toDropdownArray($r->enterprise_id);
+
 
     $q = trim($r->get('q'));
     $hasClasses = StudentHasClass::where([

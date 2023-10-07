@@ -410,12 +410,15 @@ git fetch origin master
 git reset --hard orign/master
 
 
-php artisan make:migration add_theology_billing_classes --table=academic_class_fees  
+php artisan make:migration add_cols_to_secondary_termly_report_cards_3 --table=secondary_termly_report_cards 
 php artisan make:migration add_due_term_column --table=academic_class_fees  
 php artisan make:migration add_columns_to_stock_batches --table=stock_batches  
 php artisan make:migration add_columns_to_worth_stock_batches --table=stock_batches  
 php artisan make:migration add_secular_billing_to_student_has_fees_ --table=student_has_fees  
 php artisan make:migration add_cols_to_student_has_secondary_subjects --table=student_has_secondary_subjects  
+php artisan make:migration add_cols_to_secondary_report_card_items_2 --table=secondary_report_card_items  
+
+
 
 php artisan make:migration add_strea_id_to_student_has_theology_classes --table=student_has_theology_classes 
 php artisan make:migration add_strea_id_to_student_report_cards --table=student_report_cards 

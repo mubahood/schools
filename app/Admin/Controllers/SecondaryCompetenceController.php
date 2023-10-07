@@ -35,7 +35,6 @@ class SecondaryCompetenceController extends AdminController
         $grid->disableActions();
         $grid->disableCreateButton();
 
-
         $grid->filter(function ($filter) {
             $filter->disableIdFilter();
             $u = Admin::user();
@@ -53,7 +52,7 @@ class SecondaryCompetenceController extends AdminController
 
             $subs = [];
             foreach (SecondarySubject::where([
-                'enterprise_id' => $u->ent->id, 
+                'enterprise_id' => $u->ent->id,
                 'academic_year_id' => $u->ent->dpYear()->id
             ])->get() as $key => $value) {
                 $subs[$value->id] = $value->subject_name . " - " . $value->academic_class->short_name;
@@ -74,7 +73,7 @@ class SecondaryCompetenceController extends AdminController
                     if ($a) {
                         return [$a->id => $a->name];
                     }
-                })->ajax($ajax_url); 
+                })->ajax($ajax_url);
         });
 
 
@@ -121,10 +120,11 @@ class SecondaryCompetenceController extends AdminController
                 return $this->student->name;
             })
             ->sortable();
-        
+
 
         /*         $grid->column('academic_year_id', __('Academic year id')); */
-        $grid->column('score', __('Score'))->editable();
+        $grid->column('score', __('Score'))->editable()
+            ->sortable();
         $grid->column('submitted', __('Submitted'))
             ->using([
                 1 => 'Submitted',

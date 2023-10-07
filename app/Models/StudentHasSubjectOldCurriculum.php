@@ -16,6 +16,11 @@ class StudentHasSubjectOldCurriculum extends Model
         'administrator_id',
         'student_has_class_id',
     ];
+    //administrator_id getter
+    public function getAdministratorIdAttribute($value)
+    {
+        return (int) $value;
+    }
 
     //boot 
     public static function boot()
@@ -40,6 +45,13 @@ class StudentHasSubjectOldCurriculum extends Model
             if ($existing != null) {
                 throw new ("Student already in this class.");
             }
+            $has_class = StudentHasClass::find($m->student_has_class_id);
+            if ($has_class != null) {
+                $has_class->optional_subjects_picked = 1;
+                $has_class->save();
+            } else {
+                throw new \Exception("Student class not found.", 1);
+            }
         });
         self::updating(function ($m) {
             $sub = StudentHasSubjectOldCurriculum::find($m->subject_id);
@@ -56,6 +68,14 @@ class StudentHasSubjectOldCurriculum extends Model
             ])->first();
             if ($existing != null && $existing->id != $m->id) {
                 throw new ("Student already in this class.");
+            }
+
+            $has_class = StudentHasClass::find($m->student_has_class_id);
+            if ($has_class != null) {
+                $has_class->optional_subjects_picked = 1;
+                $has_class->save();
+            } else {
+                throw new \Exception("Student class not found.", 1);
             }
         });
     }

@@ -305,103 +305,102 @@ class StudentHasClassController extends AdminController
         }
 
 
+        if ($form->isEditing()) { 
+            if (Admin::user()->enterprise->type != 'Primary') {
+                $form->divider('Old Curriculum - Optional subjects');
+                $form->morphMany('optional_subjects', 'Click to add optional subject', function (Form\NestedForm $form) {
+                    $id = ((int)(FacadesRequest::segment(2)));
+                    if ($id < 1) {
+                        $id = ((int)(FacadesRequest::segment(1)));
+                    }
+                    if ($id < 1) {
+                        $id = ((int)(FacadesRequest::segment(0)));
+                    }
+                    if ($id < 1) {
+                        $id = ((int)(FacadesRequest::segment(3)));
+                    }
+                    if ($id < 1) {
+                        $id = ((int)(FacadesRequest::segment(4)));
+                    }
+                    if ($id < 1) {
+                        die("Class not found.");
+                    }
+                    $class = StudentHasClass::find($id);
+
+                    if ($class == null) {
+                        die("Class not found..");
+                    }
+
+                    $academic_class = AcademicClass::find($class->academic_class_id);
+                    if ($academic_class == null) {
+                        die("Academic class not found.");
+                    }
+
+                    $subs = [];
+                    foreach ($academic_class->getOptionalSubjectsItems() as  $s) {
+                        $subs[((int)($s->course_id))] = $s->subject_name . " - " . $s->code;
+                    }
+
+                    $u = Admin::user();
+
+                    $form->hidden('enterprise_id')->default($u->enterprise_id);
+                    $form->hidden('administrator_id')->default($class->administrator_id);
+                    $form->hidden('student_has_class_id')->default($class->id);
 
 
+                    $form->select('subject_id', 'Select subject')
+                        ->options(
+                            $subs
+                        );
+                });
+                $form->divider('New Curriculum - Optional subjects');
+                $form->morphMany('new_curriculum_optional_subjects', 'Click to add optional subject', function (Form\NestedForm $form) {
+                    $id = ((int)(FacadesRequest::segment(2)));
+                    if ($id < 1) {
+                        $id = ((int)(FacadesRequest::segment(1)));
+                    }
+                    if ($id < 1) {
+                        $id = ((int)(FacadesRequest::segment(0)));
+                    }
+                    if ($id < 1) {
+                        $id = ((int)(FacadesRequest::segment(3)));
+                    }
+                    if ($id < 1) {
+                        $id = ((int)(FacadesRequest::segment(4)));
+                    }
+                    if ($id < 1) {
+                        die("Class not found.");
+                    }
+                    $class = StudentHasClass::find($id);
 
-        if (Admin::user()->enterprise->type != 'Primary') {
-            $form->divider('Old Curriculum - Optional subjects');
-            $form->morphMany('optional_subjects', 'Click to add optional subject', function (Form\NestedForm $form) {
-                $id = ((int)(FacadesRequest::segment(2)));
-                if ($id < 1) {
-                    $id = ((int)(FacadesRequest::segment(1)));
-                }
-                if ($id < 1) {
-                    $id = ((int)(FacadesRequest::segment(0)));
-                }
-                if ($id < 1) {
-                    $id = ((int)(FacadesRequest::segment(3)));
-                }
-                if ($id < 1) {
-                    $id = ((int)(FacadesRequest::segment(4)));
-                }
-                if ($id < 1) {
-                    die("Class not found.");
-                }
-                $class = StudentHasClass::find($id);
+                    if ($class == null) {
+                        die("Class not found..");
+                    }
 
-                if ($class == null) {
-                    die("Class not found..");
-                }
+                    $academic_class = AcademicClass::find($class->academic_class_id);
+                    if ($academic_class == null) {
+                        die("Academic class not found.");
+                    }
 
-                $academic_class = AcademicClass::find($class->academic_class_id);
-                if ($academic_class == null) {
-                    die("Academic class not found.");
-                }
+                    $subs = [];
+                    foreach ($academic_class->getNewCurriculumOptionalSubjectsItems() as  $s) {
+                        $subs[((int)($s->id))] = $s->subject_name . " - " . $s->code;
+                    }
 
-                $subs = [];
-                foreach ($academic_class->getOptionalSubjectsItems() as  $s) {
-                    $subs[((int)($s->course_id))] = $s->subject_name . " - " . $s->code;
-                }
+                    $u = Admin::user();
 
-                $u = Admin::user();
-                $form->hidden('enterprise_id')->default($u->enterprise_id);
-                $form->hidden('administrator_id')->default($class->administrator_id);
-                $form->hidden('student_has_class_id')->default($class->id);
-
-                $form->select('subject_id', 'Select subject')
-                    ->options(
-                        $subs
-                    );
-            });
-            $form->divider('New Curriculum - Optional subjects');
-            $form->morphMany('new_curriculum_optional_subjects', 'Click to add optional subject', function (Form\NestedForm $form) {
-                $id = ((int)(FacadesRequest::segment(2)));
-                if ($id < 1) {
-                    $id = ((int)(FacadesRequest::segment(1)));
-                }
-                if ($id < 1) {
-                    $id = ((int)(FacadesRequest::segment(0)));
-                }
-                if ($id < 1) {
-                    $id = ((int)(FacadesRequest::segment(3)));
-                }
-                if ($id < 1) {
-                    $id = ((int)(FacadesRequest::segment(4)));
-                }
-                if ($id < 1) {
-                    die("Class not found.");
-                }
-                $class = StudentHasClass::find($id);
-
-                if ($class == null) {
-                    die("Class not found..");
-                }
-
-                $academic_class = AcademicClass::find($class->academic_class_id);
-                if ($academic_class == null) {
-                    die("Academic class not found.");
-                }
-
-                $subs = [];
-                foreach ($academic_class->getNewCurriculumOptionalSubjectsItems() as  $s) {
-                    $subs[((int)($s->id))] = $s->subject_name . " - " . $s->code;
-                }
-
-                $u = Admin::user();
-
-                $form->hidden('enterprise_id')->default($u->enterprise_id);
-                $form->hidden('administrator_id')->default($class->administrator_id);
-                $form->hidden('student_has_class_id')->default($class->id);
+                    $form->hidden('enterprise_id')->default($u->enterprise_id);
+                    $form->hidden('administrator_id')->default($class->administrator_id);
+                    $form->hidden('student_has_class_id')->default($class->id);
 
 
-                $form->select('secondary_subject_id', 'Select subject')
-                    ->options(
-                        $subs
-                    );
-            });
+                    $form->select('secondary_subject_id', 'Select subject')
+                        ->options(
+                            $subs
+                        );
+                });
+            }
         }
-
-
 
 
 

@@ -9,6 +9,17 @@ class Term extends Model
 {
     use HasFactory;
 
+
+    //getItemsToArray for dropdown
+    public static function getItemsToArray($conds)
+    {
+        $arr = [];
+        foreach (Term::where($conds)->orderBy('id', 'desc')->get() as $key => $value) {
+            $arr[$value->id] = "Term " . $value->name_text;
+        }
+        return $arr;
+    }
+
     public static function boot()
     {
         parent::boot();
@@ -20,7 +31,7 @@ class Term extends Model
                 'name' => $m->name,
                 'academic_year_id' => $m->academic_year_id,
             ])->first();
-        
+
             if ($_m_1 != null) {
                 die("Same term cannot be twice in a year.");
             }
@@ -53,7 +64,7 @@ class Term extends Model
 
     function getNameTextAttribute()
     {
-        return $this->name." - ".$this->academic_year->name;
+        return $this->name . " - " . $this->academic_year->name;
         return $this->belongsTo(AcademicYear::class);
     }
 
@@ -78,5 +89,4 @@ class Term extends Model
     {
         return $this->hasMany(MarkRecord::class);
     }
-
 }

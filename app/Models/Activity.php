@@ -49,33 +49,32 @@ class Activity extends Model
 
     public static function generateSecondaryCompetences($m)
     {
-        return $m;
+
         if ($m->academic_class == null) {
             throw new Exception("Class not found.", 1);
         }
         $class = $m->academic_class;
         $subject = $m->subject;
-        dd($subject);
         $students = [];
 
-        /*         id($subject->is_optional == 1){
-            $students = StudentHasOptionalSubject::where([
-                'parent_course_id' => $m->parent_course_id,
-                'academic_class_id' => $m->academic_class_id,
-            ])->get();
-        } */
+        if ($subject->is_optional == 1) {
+            foreach (StudentHasSecondarySubject::where([
+                'secondary_subject_id' => $subject->id,
+            ])->get() as $key => $value) {
+                if ($value->has_class != null) {
+                    $students[] = $value->has_class;
+                }
+            }
+        } else {
+            $students = $class->students;
+        }
 
-        foreach ($class->students as $key => $student) {
+
+        foreach ($students as $key => $student) {
             if ($m->subject == null) {
                 throw new Exception("Class not found.", 1);
             }
 
-
-            if ($subject->is_optional == 1) {
-                die("to be implemented");
-                continue;
-            }
-            continue;
 
             $c = SecondaryCompetence::where([
                 'administrator_id' => $student->administrator_id,
@@ -93,7 +92,7 @@ class Activity extends Model
             $competence->term_id = $m->term_id;
             $competence->academic_year_id = $m->academic_year_id;
             $competence->activity_id = $m->id;
-            $competence->score = null;
+            $competence->score = 0;
             $competence->submitted = 0;
             $competence->administrator_id = $student->administrator_id;
 

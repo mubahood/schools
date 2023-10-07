@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Models\SecondaryReportCard;
 use Encore\Admin\Controllers\AdminController;
+use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
@@ -15,7 +16,7 @@ class SecondaryReportCardController extends AdminController
      *
      * @var string
      */
-    protected $title = 'SecondaryReportCard';
+    protected $title = 'Secondary Report Cards';
 
     /**
      * Make a grid builder.
@@ -25,18 +26,40 @@ class SecondaryReportCardController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new SecondaryReportCard());
+        $u = Admin::user();
+        $grid->model()->where([
+            'enterprise_id' => $u->enterprise_id,
+        ])->orderBy('id', 'desc');
+        $grid->disableBatchActions();
 
-        $grid->column('id', __('Id'));
-        $grid->column('created_at', __('Created at'));
-        $grid->column('updated_at', __('Updated at'));
-        $grid->column('enterprise_id', __('Enterprise id'));
-        $grid->column('academic_year_id', __('Academic year id'));
-        $grid->column('term_id', __('Term id'));
-        $grid->column('secondary_termly_report_card_id', __('Secondary termly report card id'));
-        $grid->column('administrator_id', __('Administrator id'));
-        $grid->column('academic_class_id', __('Academic class id'));
-        $grid->column('class_teacher_comment', __('Class teacher comment'));
-        $grid->column('head_teacher_comment', __('Head teacher comment'));
+        $grid->column('id', __('Id'))->sortable();
+        $grid->column('academic_year_id', __('Academic Year'))->hide();
+        $grid->column('term_id', __('Term'))
+            ->display(function ($x) {
+                return "Term " . $this->term->name_text;
+            })->sortable();
+
+        $grid->column('administrator_id', __('Student'))
+            ->display(function ($x) {
+                if ($this->owner == null) {
+                    return $x;
+                }
+                return $this->owner->name;
+            })->sortable();
+        /*  $grid->column('secondary_termly_report_card_id', __('Termly Report Card'))
+            ->display(function ($x) {
+                return $this->termly_report_card->name_text;
+            })->sortable(); */
+        $grid->column('academic_class_id', __('Class'))
+            ->display(function ($x) {
+                if ($this->academic_class == null) {
+                    return '-';
+                }
+                return $this->academic_class->short_name;
+            })
+            ->sortable();
+        $grid->column('class_teacher_comment', __('Class teacher comment'))->editable();
+        $grid->column('head_teacher_comment', __('Head teacher comment'))->editable();
 
         return $grid;
     }

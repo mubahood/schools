@@ -10,6 +10,35 @@ class SecondaryTermlyReportCard extends Model
 {
     use HasFactory;
 
+    //to dropdown array
+    public static function toDropdownArray($enterprise_id)
+    {
+
+        $data = [];
+        $items = SecondaryTermlyReportCard::where('enterprise_id', $enterprise_id)->get();
+        foreach ($items as $item) {
+            $data[$item->id] = "Term " . $item->term->name_text;
+        }
+        return $data;
+    }
+
+
+
+    public function setClassesAttribute($Classes)
+    {
+        if (is_array($Classes)) {
+            $this->attributes['classes'] = json_encode($Classes);
+        }
+    }
+
+    public function getClassesAttribute($Classes)
+    {
+        return json_decode($Classes, true);
+    }
+
+
+
+
 
     public static function boot()
     {
@@ -26,18 +55,15 @@ class SecondaryTermlyReportCard extends Model
                 'term_id' => $model->term_id
             ])->first();
 
-    
-
             if ($m != null) {
                 SecondaryTermlyReportCard::update_data($m);
                 return false;
             }
-
             $term = Term::find($model->term_id);
-            if($term == null){
+            if ($term == null) {
                 throw new \Exception("Term not found");
             }
-            $model->academic_year_id = $term->academic_year_id; 
+            $model->academic_year_id = $term->academic_year_id;
         });
 
         self::deleting(function ($m) {
@@ -47,11 +73,21 @@ class SecondaryTermlyReportCard extends Model
 
     public static function update_data($exam)
     {
+
         set_time_limit(-1);
         ini_set('memory_limit', '-1');
-        foreach (AcademicClass::where([
-            'academic_year_id' => $exam->academic_year_id
-        ])->get() as $key => $class) {
+
+        $classes = [];
+        if ($exam->classes != null) {
+            foreach ($exam->classes as $key => $value) {
+                $class = AcademicClass::find((int)($value));
+                if ($class != null) {
+                    $classes[] = $class;
+                }
+            }
+        }
+
+        foreach ($classes as $key => $class) {
             if (count($class->students) < 1) {
                 continue;
             }
@@ -74,9 +110,22 @@ class SecondaryTermlyReportCard extends Model
 
 
 
-
                 foreach ($class->secondary_subjects as $key => $subject) {
-//                    dd($subject);
+                    if($subject->is_optional == 1){
+
+                    } 
+                    dd($student);
+                    $optional = StudentHasSecondarySubject::where([
+                        'secondary_subject_id' => $subject->id,
+                        'administrator_id' => $student->administrator_id,
+                    ])->first();
+                    if($optional == null){
+                        continue;
+                    }
+
+                    dd($subject); 
+                    die();
+                    
                     $reportItem = SecondaryReportCardItem::where([
                         'secondary_report_card_id' => $reportCard->id,
                         'secondary_subject_id' => $subject->id,
@@ -97,6 +146,8 @@ class SecondaryTermlyReportCard extends Model
                     $reportItem->teacher = $etacher_name;
                     $reportItem->save();
                 }
+                die('done'); 
+                dd($reportCard);  
             }
         }
     }
@@ -107,5 +158,10 @@ class SecondaryTermlyReportCard extends Model
     public function term()
     {
         return $this->belongsTo(Term::class, 'term_id');
+    }
+    //name_text getter
+    public function getNameTextAttribute()
+    {
+        return "Term " . $this->term->name_text;
     }
 }

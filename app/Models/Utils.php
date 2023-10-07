@@ -1371,7 +1371,7 @@ class Utils  extends Model
     public static function validateUgandanPhoneNumber($phoneNumber)
     {
         $num = Utils::prepareUgandanPhoneNumber($phoneNumber);
-        
+
         if ($num == '') {
             return false;
         }
@@ -2390,5 +2390,64 @@ class Utils  extends Model
             }
         }
         return $resp;
+    }
+
+
+    public static function generateDummyDataForSecondarySchool($class)
+    {
+
+
+        $ent = Enterprise::find($class->enterprise_id);
+        $term = $ent->active_term();
+        set_time_limit(-1);
+        ini_set('memory_limit', '-1');
+
+        //Utils::generateActivities($class);
+        //Utils::updateMarks($class);
+        SecondaryTermlyReportCard::update_data(SecondaryTermlyReportCard::find(1));
+    }
+
+
+
+    public static function updateMarks($class)
+    {
+        $secondaryCompetences = SecondaryCompetence::where('academic_class_id', $class->id)->get();
+        foreach ($secondaryCompetences as $key => $mark) {
+            $random_float = 0 + mt_rand() / mt_getrandmax() * (3 - 0);
+            $mark->score = $random_float;
+            $mark->save();
+        }
+    }
+    public static function generateActivities($class)
+    {
+        $ent = Enterprise::find($class->enterprise_id);
+        $term = $ent->active_term();
+
+
+        foreach ($class->secondarySubjects as $subject) {
+            $max = rand(2, 5);
+            for ($i = 0; $i < $max; $i++) {
+
+                $topic = "Topic " . ($i + 1);
+                $act = Activity::where('academic_class_id', $class->id)->where('subject_id', $subject->id)->where('topic', $topic)->first();
+                if ($act != null) {
+                    continue;
+                }
+
+                $activity = new Activity();
+                $activity->theme = "Theme " . ($i + 1);
+                $activity->topic = $topic;
+                $activity->description = "Description " . ($i + 1);
+                $activity->enterprise_id = $class->enterprise_id;
+                $activity->academic_year_id = $class->academic_year_id;
+                $activity->academic_class_id = $class->id;
+                $activity->parent_course_id = $subject->parent_course_id;
+                $activity->subject_id = $subject->id;
+                $activity->term_id = $term->id;
+                $activity->class_type = $class->class_type;
+                $activity->max_score = 3;
+                $activity->save();
+            } //
+        }
     }
 }

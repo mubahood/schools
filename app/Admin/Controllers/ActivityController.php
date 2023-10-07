@@ -6,6 +6,7 @@ use App\Models\AcademicClass;
 use App\Models\Activity;
 use App\Models\Enterprise;
 use App\Models\Term;
+use App\Models\Utils;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -22,16 +23,21 @@ class ActivityController extends AdminController
     protected $title = 'Activities';
 
     /**
-     * Make a grid builder.
+     * Make a grid builder.  
      *
      * @return Grid
      */
     protected function grid()
     {
-        $item = Activity::find(106);
-        Activity::generateSecondaryCompetences($item);
-        die('done');
+        $class = AcademicClass::find(75);   
 
+        
+        // ?&academic_year_id=&&teacher_1=&teacher_2=&teacher_3=&teacher_4=
+        Utils::generateDummyDataForSecondarySchool($class);
+        die("rominah k.");
+        //$item = Activity::find(106);
+        // Activity::generateSecondaryCompetences($item);
+        // die('done'); 
         $grid = new Grid(new Activity());
         $grid->disableBatchActions();
         //$grid->disableActions();
@@ -65,7 +71,6 @@ class ActivityController extends AdminController
             }
             $filter->equal('subject_id', 'Fliter by subject')->select($subs);
         });
-
 
         $grid->model()
             ->orderBy('id', 'Desc')

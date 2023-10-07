@@ -27,6 +27,12 @@ class SecondaryTermlyReportCardController extends AdminController
      */
     protected function grid()
     {
+
+
+        /*
+        $rep = SecondaryTermlyReportCard::find(2);
+        SecondaryTermlyReportCard::update_data($rep);
+        dd($rep); */
         /* 
 
     	do_update	
@@ -39,7 +45,7 @@ class SecondaryTermlyReportCardController extends AdminController
         $term = Admin::user()->ent->active_term();
         $rep->enterprise_id = 11;
         $rep->academic_year_id = $year->id;
-        $rep->term_id = $term->id;
+        $rep->term_id = $term->id; 
         $rep->report_title = 'End of term 1 2023' . rand(10000, 1000000);
         $rep->general_commnunication = 'Simple general communication go here. Simple general communication go here. Simple general communication go here. Simple general communication go here.';
         $rep->save();
@@ -129,6 +135,14 @@ class SecondaryTermlyReportCardController extends AdminController
             ->rules('required');
 
         $form->text('report_title', __('Report title'));
+        $form->checkbox('classes', __('Classes'))
+            ->options(\App\Models\AcademicClass::where([
+                'enterprise_id' => $u->enterprise_id
+            ])
+                ->orderBy('id', 'desc')
+                ->get()
+                ->pluck('name_text', 'id'));
+
         $form->textarea('general_commnunication', __('General commnunication'));
         if ($form->isCreating()) {
             $form->hidden('do_update')->default('Yes');

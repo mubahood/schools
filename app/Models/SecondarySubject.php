@@ -115,4 +115,31 @@ class SecondarySubject extends Model
     {
         return $this->belongsTo(Administrator::class, 'teacher_4');
     }
+
+    //get active subjects to array 
+    public static function get_active_subjects($academic_year_id, $forSelect = false)
+    {
+        $subjects = [];
+        foreach (AcademicClass::where([
+            'academic_year_id' => $academic_year_id,
+        ])->get() as $key => $class) {
+            foreach ($class->secondary_subjects as $key => $subject) {
+                if ($forSelect) {
+                    $pre = "";
+                    if ($subject->academic_class != null) {
+                        $pre = $subject->academic_class->short_name . " - ";
+                    }
+                    $subjects[$subject->id] = $pre . $subject->subject_name . " - " . $subject->code;
+                } else {
+                    $subjects[] = $subject;
+                }
+            }
+        }
+        return $subjects;
+    }
+    //append for name_text
+    public function getNameTextAttribute()
+    {
+        return $this->subject_name . " - " . $this->code;
+    }
 }

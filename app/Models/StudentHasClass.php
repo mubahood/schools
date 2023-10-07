@@ -147,9 +147,9 @@ class StudentHasClass extends Model
 
     function optional_subjects()
     {
-        return $this->hasMany(StudentHasSubjectOldCurriculum::class);
+        return $this->hasMany(StudentHasSubjectOldCurriculum::class, 'student_has_class_id');
     }
-    
+
     function  new_curriculum_optional_subjects()
     {
         return $this->hasMany(StudentHasSecondarySubject::class, 'student_has_class_id');

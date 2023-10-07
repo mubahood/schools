@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -28,20 +29,42 @@ class SecondaryReportCardItem extends Model
         });
     }
 
+    //AcademicClassSctream
+    public function academic_class_stream()
+    {
+        return $this->belongsTo(AcademicClassSctream::class, 'academic_class_sctream_id');
+    }
+
+    //class
+    public function academic_class()
+    {
+        return $this->belongsTo(AcademicClass::class, 'academic_class_id');
+    }
+
+    //student
+    public function student()
+    {
+        return $this->belongsTo(Administrator::class, 'administrator_id');
+    }
+
     public function subject()
     {
         $sub = SecondarySubject::find($this->secondary_subject_id);
-        dd($this->secondary_subject_id);
         return $this->belongsTo(SecondarySubject::class, 'secondary_subject_id');
     }
 
+    public function secondary_subject()
+    {
+        return $this->belongsTo(SecondarySubject::class, 'secondary_subject_id');
+    }
     public function report_card()
     {
         return $this->belongsTo(SecondaryReportCard::class, 'secondary_report_card_id');
     }
 
-    public function getItemsAttribute(){
-        return $this->hasMany(SecondaryReportCardItem::class, 'secondary_report_card_id', 'secondary_report_card_id');  
+    public function getItemsAttribute()
+    {
+        return $this->hasMany(SecondaryReportCardItem::class, 'secondary_report_card_id', 'secondary_report_card_id');
     }
     public function items()
     {
