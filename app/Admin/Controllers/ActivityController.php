@@ -28,9 +28,13 @@ class ActivityController extends AdminController
      */
     protected function grid()
     {
+        $item = Activity::find(106);
+        Activity::generateSecondaryCompetences($item);
+        die('done');
+
         $grid = new Grid(new Activity());
         $grid->disableBatchActions();
-        $grid->disableActions();
+        //$grid->disableActions();
 
         $grid->filter(function ($filter) {
             $filter->disableIdFilter();
@@ -157,7 +161,7 @@ class ActivityController extends AdminController
      */
     protected function form()
     {
-       /*  $a = new Activity();
+        /*  $a = new Activity();
         $a->enterprise_id = 11;
         $a->term_id = 16;
         $a->class_type = 'S.1';

@@ -5,11 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class StudentHasOptionalSubject extends Model
+class StudentHasOptionalSubject_1 extends Model
 {
     use HasFactory;
-
-
 
     public static function boot()
     {
@@ -23,12 +21,24 @@ class StudentHasOptionalSubject extends Model
                 $has_class->save();
             }
         });
+
+        self::creating(function ($m) {
+           dd($m);
+        });
     }
 
+    //fillables
+    protected $fillable = [
+        'enterprise_id',
+        'optional_subject_id',
+        'administrator_id',
+        'student_has_class_id',
+        'main_course_id',
+        'course_id',
+        'academic_class_id',
+        'enterprise_id',
+    ]; 
 
 
-    function class()
-    {
-        return $this->belongsTo(StudentHasClass::class, 'student_has_class_id');
-    }
+ 
 }

@@ -28,7 +28,6 @@ class StudentHasClass extends Model
             $m->academic_year_id = $_m->academic_year_id;
             $m->enterprise_id = $_m->enterprise_id;
 
-
             $existing = StudentHasClass::where([
                 'administrator_id' => $m->administrator_id,
                 'academic_class_id' => $m->academic_class_id,
@@ -148,7 +147,12 @@ class StudentHasClass extends Model
 
     function optional_subjects()
     {
-        return $this->hasMany(StudentHasOptionalSubject::class, 'student_has_class_id');
+        return $this->hasMany(StudentHasSubjectOldCurriculum::class);
+    }
+    
+    function  new_curriculum_optional_subjects()
+    {
+        return $this->hasMany(StudentHasSecondarySubject::class, 'student_has_class_id');
     }
 
     function getAcademicClassTextAttribute()
@@ -183,5 +187,5 @@ class StudentHasClass extends Model
         }
         return '-';
     }
-    protected $appends = ['academic_class_text', 'administrator_photo', 'stream_text','administrator_text'];
+    protected $appends = ['academic_class_text', 'administrator_photo', 'stream_text', 'administrator_text'];
 }

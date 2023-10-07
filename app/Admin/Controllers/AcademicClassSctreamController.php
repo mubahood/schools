@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Models\AcademicClass;
 use App\Models\AcademicClassSctream;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -42,7 +43,6 @@ class AcademicClassSctreamController extends AdminController
             })
             ->sortable();
 
-        $grid->disableCreateButton();
         $grid->disableActions();
         $grid->actions(function ($x) {
             $x->disableDelete();
@@ -81,10 +81,19 @@ class AcademicClassSctreamController extends AdminController
     protected function form()
     {
         $form = new Form(new AcademicClassSctream());
+        $u = Admin::user();
+        $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id);
 
-        $form->number('enterprise_id', __('Enterprise id'));
-        $form->number('academic_class_id', __('Academic class id'));
-        $form->textarea('name', __('Name'));
+        $form->select('academic_class_id', 'Class')
+            ->options(
+                AcademicClass::getAcademicClasses([
+                    'enterprise_id' => $u->enterprise_id,
+                    'academic_year_id' => $u->ent->dp_year,
+                ])
+            )->rules('required');
+
+
+        $form->text('name', __('Strem Name'))->rules('required');
 
         return $form;
     }

@@ -116,6 +116,8 @@ php artisan make:model TheologyStream
 php artisan make:model Enterprise
 php artisan make:model BursaryBeneficiary
 php artisan make:model Manifest
+php artisan make:model StudentHasSecondarySubject -m
+php artisan make:model StudentHasSubjectOldCurriculum -m
 php artisan make:migration create_books_categories_table
 php artisan make:migration create_books_table
 php artisan make:migration create_book_authors_table
@@ -341,6 +343,7 @@ php artisan admin:make SupplierOrderController --model=App\Models\SupplierOrder
 php artisan admin:make FinancialRecordController --model=App\Models\FinancialRecord 
 php artisan admin:make ReportFinanceController --model=App\Models\ReportFinance 
 php artisan admin:make CreditPurchaseController --model=App\Models\CreditPurchase 
+php artisan admin:make StudentHasOptionalSubjectController --model=App\\Models\\StudentHasOptionalSubject 
 
 
 
@@ -412,7 +415,7 @@ php artisan make:migration add_due_term_column --table=academic_class_fees
 php artisan make:migration add_columns_to_stock_batches --table=stock_batches  
 php artisan make:migration add_columns_to_worth_stock_batches --table=stock_batches  
 php artisan make:migration add_secular_billing_to_student_has_fees_ --table=student_has_fees  
-php artisan make:migration add_mark_transfer --table=marks  
+php artisan make:migration add_cols_to_student_has_secondary_subjects --table=student_has_secondary_subjects  
 
 php artisan make:migration add_strea_id_to_student_has_theology_classes --table=student_has_theology_classes 
 php artisan make:migration add_strea_id_to_student_report_cards --table=student_report_cards 

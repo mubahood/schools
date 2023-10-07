@@ -22,6 +22,7 @@ class Activity extends Model
                 //throw $th;
             }
         });
+
         self::updated(function ($m) {
             try {
                 Activity::generateSecondaryCompetences($m);
@@ -29,6 +30,7 @@ class Activity extends Model
                 //throw $th;
             }
         });
+
         self::creating(function ($m) {
             $sub = SecondarySubject::find($m->subject_id);
             if ($sub == null) {
@@ -47,19 +49,33 @@ class Activity extends Model
 
     public static function generateSecondaryCompetences($m)
     {
+        return $m;
         if ($m->academic_class == null) {
             throw new Exception("Class not found.", 1);
         }
         $class = $m->academic_class;
+        $subject = $m->subject;
+        dd($subject);
+        $students = [];
+
+        /*         id($subject->is_optional == 1){
+            $students = StudentHasOptionalSubject::where([
+                'parent_course_id' => $m->parent_course_id,
+                'academic_class_id' => $m->academic_class_id,
+            ])->get();
+        } */
+
         foreach ($class->students as $key => $student) {
             if ($m->subject == null) {
                 throw new Exception("Class not found.", 1);
             }
 
-            $subject = $m->subject;
+
             if ($subject->is_optional == 1) {
+                die("to be implemented");
                 continue;
             }
+            continue;
 
             $c = SecondaryCompetence::where([
                 'administrator_id' => $student->administrator_id,
@@ -123,23 +139,23 @@ class Activity extends Model
     {
         $ALL = DB::SELECT("SELECT count(id) as num FROM secondary_competences WHERE activity_id = $this->id");
         $all = 0;
-        if(isset($ALL[0]) && isset($ALL[0]->num)){
+        if (isset($ALL[0]) && isset($ALL[0]->num)) {
             $all = ((int)($ALL[0]->num));
         }
-        
+
         $DONE = DB::SELECT("SELECT count(id) as done FROM secondary_competences WHERE activity_id = $this->id AND submitted = 1");
         $done = 0;
-        if(isset($DONE[0]) && isset($DONE[0]->done)){
+        if (isset($DONE[0]) && isset($DONE[0]->done)) {
             $done = ((int)($DONE[0]->done));
         }
         $percentage = 0;
 
-        if($all > 0){
-            $percentage = (($done/$all)*100);
-            $percentage = round($percentage,2);
+        if ($all > 0) {
+            $percentage = (($done / $all) * 100);
+            $percentage = round($percentage, 2);
         }
 
-        return $percentage."%" ;
+        return $percentage . "%";
     }
 
     protected $appends = ['submitted_text'];

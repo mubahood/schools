@@ -9,6 +9,7 @@ use App\Models\Competence;
 use App\Models\ParentCourse;
 use App\Models\SecondaryCompetence;
 use App\Models\SecondarySubject;
+use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -32,49 +33,20 @@ class SecondarySubjectController extends AdminController
      */
     protected function grid()
     {
-   /*    
-        $u = Admin::user();
-        $ent = Admin::user()->ent; 
-        $term = Admin::user()->ent->active_term();
-        set_time_limit(-1);
-
-        foreach (SecondarySubject::where('enterprise_id', 11)->get() as $key => $sub) {
-            $acts = $sub->activities;
-            if (count($acts) < 3) {
-                for ($i = 0; $i < 3; $i++) {
-                    $a = new Activity();
-                    $a->enterprise_id = 11;
-                    $a->term_id = $term->id;
-                    $a->class_type = $sub->academic_class->short_name;
-                    $a->subject_id = $sub->id;
-                    $a->theme = $sub->subject_name . ' Theme';
-                    $a->topic = $sub->subject_name . ' Topic ' . $i;
-                    $a->description = 'Some details about this activity go here. Some details about this activity go here. Some details about this activity go here. Some details about this activity go here.';
-                    $a->max_score =  3;
-                    $a->save();
-                }
-            }
-        }
-        $comps = SecondaryCompetence::where(['enterprise_id' => 11,'score' => null])->get();
-        //dd(count($comps));
-        foreach ($comps as $key => $sub) {
-            $sub->score = rand(0,3);
-            if($sub->score < 3){
-                $sub->score = $sub->score.'.'.rand(1,9);
-            }else{
-                $sub->score = $sub->score.'.0';
-            }
-            $sub->score = ((float)($sub->score));
-            $sub->submitted = 1;
-            $sub->save(); 
-        }
-        dd("done");  */
-
         $grid = new Grid(new SecondarySubject());
 
         $grid->filter(function ($filter) {
             $filter->disableIdFilter();
             $u = Auth::user();
+            $teachers = [];
+            foreach (Administrator::where([
+                'enterprise_id' => $u->enterprise_id,
+                'user_type' => 'employee',
+            ])->get() as $key => $a) {
+                if ($a->isRole('teacher')) {
+                    $teachers[$a['id']] = $a['name'] . "  " . $a['id'];
+                }
+            }
             $filter->equal('academic_year_id', 'By Academic year')->select(AcademicYear::where([
                 'enterprise_id' => $u->enterprise_id,
             ])->get()->pluck('name', 'id'));
@@ -85,8 +57,11 @@ class SecondarySubjectController extends AdminController
             ])->orderBy('id', 'desc')->get() as $key => $class) {
                 $classes[$class->id] = $class->name_text;
             }
-
-            $filter->equal('academic_class_id', 'By class')->select($classes);
+            $filter->equal('academic_class_id', 'Filter By class')->select($classes);
+            $filter->equal('teacher_1', 'Filter By Main Teacher')->select($teachers);
+            $filter->equal('teacher_2', 'Filter By Teacher 2')->select($teachers);
+            $filter->equal('teacher_3', 'Filter By Teacher 3')->select($teachers);
+            $filter->equal('teacher_4', 'Filter By Teacher 4')->select($teachers);
         });
 
         $grid->actions(function ($act) {
@@ -173,7 +148,7 @@ class SecondarySubjectController extends AdminController
         $grid->column('teacher_1', __('Teacher'))
             ->display(function ($x) {
                 if ($this->teacher1 == null) {
-                    return $x;
+                    return '-';
                 }
                 return $this->teacher1->name;
             })
@@ -181,7 +156,7 @@ class SecondarySubjectController extends AdminController
         $grid->column('teacher_2', __('Teacher 2'))
             ->display(function ($x) {
                 if ($this->teacher2 == null) {
-                    return $x;
+                    return '-';
                 }
                 return $this->teacher2->name;
             })
@@ -190,7 +165,7 @@ class SecondarySubjectController extends AdminController
         $grid->column('teacher_3', __('Teacher 3'))
             ->display(function ($x) {
                 if ($this->teacher3 == null) {
-                    return $x;
+                    return '-';
                 }
                 return $this->teacher3->name;
             })
@@ -199,7 +174,7 @@ class SecondarySubjectController extends AdminController
         $grid->column('teacher_4', __('Teacher 4'))
             ->display(function ($x) {
                 if ($this->teacher4 == null) {
-                    return $x;
+                    return '-';
                 }
                 return $this->teacher4->name;
             })
@@ -209,8 +184,14 @@ class SecondarySubjectController extends AdminController
         $grid->column('code', __('Code'))->hide();
 
         $grid->column('is_optional', __('Is optional'))->using([
-            0 => 'Optional',
-            1 => 'Compulsory',
+            1 => 'Optional',
+            0 => 'Compulsory',
+        ])->filter([
+            1 => 'Optional',
+            0 => 'Compulsory',
+        ])->label([
+            1 => 'warning',
+            0 => 'success',
         ]);
 
         return $grid;
@@ -254,39 +235,77 @@ class SecondarySubjectController extends AdminController
     {
         $form = new Form(new SecondarySubject());
 
-        $form->hidden('enterprise_id', __('Enterprise id'))->value(Auth::user()->ent->id);
-
-        $form->select('academic_class_id', 'Class')
-            ->options(
-                AcademicClass::where([
-                    'enterprise_id' => Auth::user()->enterprise_id,
-                    'academic_year_id' => Auth::user()->ent->dp_year,
-                ])->get()
-                    ->pluck('name', 'id')
-            )->rules('required');
-
-
-        $form->select('parent_course_id', 'Subject')
-            ->options(
-                ParentCourse::where([
-                    'type' => 'Secondary',
-                ])
-                    ->orwhere([
-                        'type' => 'Advanced',
+        if ($form->isCreating()) {
+            $form->hidden('enterprise_id', __('Enterprise id'))->value(Auth::user()->ent->id);
+            $form->select('academic_class_id', 'Class')
+                ->options(
+                    AcademicClass::getAcademicClasses([
+                        'enterprise_id' => Auth::user()->enterprise_id,
+                        'academic_year_id' => Auth::user()->ent->dp_year,
                     ])
-                    ->get()
-                    ->pluck('name', 'id')
+                )->rules('required');
+
+
+            $form->select('parent_course_id', 'Subject')
+                ->options(
+                    ParentCourse::selectSecondaryArray()
+                )->rules('required');
+        } else {
+            $form->display('academic_class_id', 'Class')
+                ->with(function ($x) {
+                    if ($this->academic_class == null) {
+                        return $x;
+                    }
+                    return $this->academic_class->short_name;
+                });
+
+            $form->display('parent_course_id', 'Subject')
+                ->with(function ($x) {
+                    if ($this->parent_course == null) {
+                        return $x;
+                    }
+                    return $this->parent_course->name_text;
+                });
+            $form->text('subject_name', __('Subject name'));
+            $form->text('code', __('Code'));
+        }
+
+        $u = Admin::user();
+        $teachers = [];
+        foreach (Administrator::where([
+            'enterprise_id' => $u->enterprise_id,
+            'user_type' => 'employee',
+        ])->get() as $key => $a) {
+            if ($a->isRole('teacher')) {
+                $teachers[$a['id']] = $a['name'] . "  " . $a['id'];
+            }
+        }
+
+        $form->select('teacher_1', 'Subject Main Teacher')
+            ->options(
+                $teachers
             )->rules('required');
 
+        $form->select('teacher_2', 'Subject Teacher 2')
+            ->options(
+                $teachers
+            );
 
-        $form->number('teacher_1', __('Teacher 1'));
-        $form->number('teacher_2', __('Teacher 2'));
-        $form->number('teacher_3', __('Teacher 3'));
-        $form->number('teacher_4', __('Teacher 4'));
-        $form->textarea('subject_name', __('Subject name'));
-        $form->textarea('details', __('Details'));
-        $form->textarea('code', __('Code'));
-        $form->switch('is_optional', __('Is optional'));
+        $form->select('teacher_3', 'Subject Teacher 3')
+            ->options(
+                $teachers
+            );
+
+        $form->select('teacher_4', 'Subject Teacher 4')
+            ->options(
+                $teachers
+            );
+
+        $form->radio('is_optional', __('Is Optional'))
+            ->options([
+                1 => 'Is Optional',
+                0 => 'Is Compulsory',
+            ])->rules('required');
 
         return $form;
     }

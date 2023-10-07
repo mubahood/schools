@@ -99,14 +99,26 @@ class SubjectController extends AdminController
             ->display(function ($t) {
                 return $this->course->name;
             }); */
+ 
 
         $grid->column('subject_teacher', __('Subject Teacher'))
             ->display(function ($t) {
                 return $this->teacher->name;
             });
 
+
         $grid->column('code', __('Code'))->hide()->sortable();
         $grid->column('details', __('Details'))->hide();
+        $grid->column('is_optional', __('Is optional'))->using([
+            1 => 'Optional',
+            0 => 'Compulsory',
+        ])->filter([
+            1 => 'Optional',
+            0 => 'Compulsory',
+        ])->label([
+            1 => 'warning',
+            0 => 'success',
+        ]); 
 
         return $grid;
     }
@@ -168,7 +180,7 @@ class SubjectController extends AdminController
                 ])->get()
                     ->pluck('name', 'id')
             )->rules('required');
- 
+
         $ent = Utils::ent();
 
         $subjects = [];

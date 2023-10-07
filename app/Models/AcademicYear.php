@@ -165,7 +165,7 @@ class AcademicYear extends Model
         }
         $classes = [];
 
-        if ($ent->type == 'Primary') {
+        if ($ent->type == 'Primary') { 
             foreach (AcademicClassLevel::where(
                 'category',
                 'Primary'
@@ -182,7 +182,7 @@ class AcademicYear extends Model
             )->get() as $level) {
                 $classes[] = $level;
             }
-        } else if ($ent->type == 'Advanced') {
+        } else if ($ent->type == 'Advanced') { 
             foreach (AcademicClassLevel::where(
                 'category',
                 'Secondary'

@@ -7,6 +7,7 @@ use App\Models\AcademicClass;
 use App\Models\AcademicClassSctream;
 use App\Models\Book;
 use App\Models\DirectMessage;
+use App\Models\StudentHasClass;
 use App\Models\Subject;
 use App\Models\TermlyReportCard;
 use App\Models\User;
@@ -104,6 +105,7 @@ Route::get('classes', function (Request $r) {
         'data' => $data
     ];
 });
+
 Route::get('ajax-users', function (Request $r) {
     $q = trim($r->get('q'));
     $enterprise_id = $r->get('enterprise_id');
@@ -308,7 +310,7 @@ Route::get('ajax', function (Request $r) {
 });
 
 Route::get('message-sender', function (Request $r) {
-    Utils::send_messages(); 
+    Utils::send_messages();
 });
 Route::get('reconcile', function (Request $r) {
     Utils::reconcile($r);
@@ -412,3 +414,22 @@ Route::get('report-cards', function (Request $r) {
 });
 
 Route::get("studentsFinancialAccounts", [QuickSearchController::class, 'studentsFinancialAccounts']);
+
+
+Route::get('select-student-has-class', function (Request $r) {
+
+    $q = trim($r->get('q'));
+    $hasClasses = StudentHasClass::where([
+        'administrator_id' => ((int)($q))
+    ])->get();
+    $data = [];
+    foreach ($hasClasses as $key => $v) {
+        $data[] = [
+            'id' => $v->id,
+            'text' => $v->class->name_text
+        ];
+    }
+    return [
+        'data' => $data
+    ];
+});

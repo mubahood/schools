@@ -13,6 +13,17 @@ class AcademicClass extends Model
 {
     use HasFactory;
 
+    //get for select dropdwon
+    public static function getAcademicClasses($conds)
+    {
+        $classes = AcademicClass::where($conds)->get();
+        $arr = [];
+        foreach ($classes as $key => $value) {
+            $arr[$value->id] = $value->name_text;
+        }
+        return $arr;
+    }
+
     public static function boot()
     {
         parent::boot();
@@ -159,7 +170,6 @@ class AcademicClass extends Model
     public static function generate_subjects($m)
     {
 
-
         $category = $m->class_type;
         $courses = MainCourse::where([
             'subject_type' => $category
@@ -205,7 +215,7 @@ class AcademicClass extends Model
                         $sub->code = $paper->code;
                         $sub->details = $paper->name;
                         $sub->subject_name = $paper->name;
-                        $sub->is_optional = (!$paper->is_compulsory);
+                        $sub->is_optional = (!$pc->is_compulsory);
                         $sub->save();
                     }
                 }
@@ -355,7 +365,7 @@ class AcademicClass extends Model
                             if ($fee != null) {
                                 if ($active_term->id != $fee->due_term_id) {
                                     continue;
-                                } 
+                                }
 
                                 $has_fee = StudentHasFee::where([
                                     'administrator_id' => $m->id,
@@ -384,7 +394,7 @@ class AcademicClass extends Model
             }
         }
 
- 
+
         //bulling theology classes
         foreach (StudentHasTheologyClass::where([
             'administrator_id' => $m->id,
@@ -614,10 +624,19 @@ class AcademicClass extends Model
     {
         $subs = [];
         foreach ($this->main_subjects() as $sub) {
-            if (((bool)($sub->is_optional))) {
+            if ($sub->is_optional == 1) {
                 $subs[] = $sub;
             }
         }
+        return $subs;
+    }
+
+    function getNewCurriculumOptionalSubjectsItems()
+    {
+        $subs = SecondarySubject::where([
+            'academic_class_id' => $this->id,
+            'is_optional' => 1,
+        ])->get();
         return $subs;
     }
 
