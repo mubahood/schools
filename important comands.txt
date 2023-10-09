@@ -452,6 +452,7 @@ php artisan make:migration add_cols_to_bulk_messages --table=bulk_messages
 php artisan make:migration add_target_type_classes_to_bulk_messages --table=bulk_messages
 php artisan make:migration add_collumns_towallet_record --table=credit_purchase_records -m
 php artisan make:migration add_collumns_expiry_to_enterprises --table=enterprises
+php artisan make:migration add_cols_to_student_has_classes_1 --table=student_has_classes
 
 git add --all
 git commit -am "Your commit message"
