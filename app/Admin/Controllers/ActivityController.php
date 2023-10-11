@@ -33,8 +33,8 @@ class ActivityController extends AdminController
 
         
         // ?&academic_year_id=&&teacher_1=&teacher_2=&teacher_3=&teacher_4=
-        Utils::generateDummyDataForSecondarySchool($class);
-        die("rominah k.");
+        //Utils::generateDummyDataForSecondarySchool($class);
+        //die("rominah k.");
         //$item = Activity::find(106);
         // Activity::generateSecondaryCompetences($item);
         // die('done'); 

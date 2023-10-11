@@ -2423,7 +2423,7 @@ class Utils  extends Model
 
         //Utils::generateActivities($class);
         //Utils::updateMarks($class);
-        SecondaryTermlyReportCard::update_data(SecondaryTermlyReportCard::find(1));
+        //SecondaryTermlyReportCard::update_data(SecondaryTermlyReportCard::find(1));
     }
 
 

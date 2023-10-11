@@ -429,7 +429,6 @@ php artisan make:migration add_cols_to_secondary_report_card_items_2 --table=sec
 php artisan make:migration add_cols_to_subject_teacher_remarks --table=subject_teacher_remarks
 
 
-
 php artisan make:migration add_strea_id_to_student_has_theology_classes --table=student_has_theology_classes 
 php artisan make:migration add_strea_id_to_student_report_cards --table=student_report_cards 
 php artisan make:migration add_enterprise_id_to_streams --table=theology_streams 
@@ -464,13 +463,13 @@ php artisan make:migration add_collumns_towallet_record --table=credit_purchase_
 php artisan make:migration add_collumns_expiry_to_enterprises --table=enterprises
 php artisan make:migration add_cols_to_student_has_classes_1 --table=student_has_classes
 
+
 git add --all
 git commit -am "Your commit message"
 ssh schooics@gator4311.hostgator.com
 ssh-keygen -t rsa -C "schooics@gator4311.hostgator.com" 
 
 ssh-keygen -f /Users/mac/.ssh/id_rsa -p
-
 
 
 ()(+256@Kampala+)()
