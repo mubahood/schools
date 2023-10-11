@@ -193,16 +193,31 @@ class StudentHasClassController extends AdminController
 
         if ($u->enterprise->type != 'Primary') {
 
-            $grid->column('optional_subjects_picked', __('Selected optional subjects'))
+            $grid->column('optional_subjects_picked', __('Selected Optional Subjects'))
                 ->display(function ($title) {
-
                     if ($title == 1) {
                         return "<span style='color:green'>Done</span>";
                     } else {
                         return "<span style='color:red'>Not done</span>";
                     }
                 })
+                ->filter([
+                    1 => 'Done',
+                    0 => 'Not done',
+                ])
                 ->sortable();
+
+            $grid->column('pick_subject', __('Pick Optional Subjects'))
+                ->display(function ($title) {
+                    $x = $this->optional_subjects_picker;
+                    if ($x != null) {
+                        $url = admin_url('student-optional-subject-pickers/' . $x->id . '/edit');
+                    } else {
+                        $url = admin_url('student-optional-subject-pickers/create?student_has_class_id=' . $this->id);
+                    }
+
+                    return "<a href='$url' target='_blank'><b>Select</b></a>";
+                });
         }
 
         return $grid;
@@ -305,7 +320,7 @@ class StudentHasClassController extends AdminController
         }
 
 
-        if ($form->isEditing()) { 
+        /* if ($form->isEditing()) {
             if (Admin::user()->enterprise->type != 'Primary') {
                 $form->divider('Old Curriculum - Optional subjects');
                 $form->morphMany('optional_subjects', 'Click to add optional subject', function (Form\NestedForm $form) {
@@ -400,7 +415,7 @@ class StudentHasClassController extends AdminController
                         );
                 });
             }
-        }
+        } */
 
 
 

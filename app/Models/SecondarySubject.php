@@ -99,6 +99,24 @@ class SecondarySubject extends Model
     {
         return $this->belongsTo(AcademicYear::class, 'academic_year_id');
     }
+
+
+    public function get_teacher(){
+        //check teachers begining from first, if find any not null, return it
+        if($this->teacher1 != null){
+            return $this->teacher1;
+        }
+        if($this->teacher2 != null){
+            return $this->teacher2;
+        }
+        if($this->teacher3 != null){
+            return $this->teacher3;
+        }
+        if($this->teacher4 != null){
+            return $this->teacher4;
+        }
+        return null;
+    }
     public function teacher1()
     {
         return $this->belongsTo(Administrator::class, 'teacher_1');

@@ -105,6 +105,9 @@ AIzaSyCymVo9QxwffvO-tO2aciD96rnrnpxS2IU
 
 composer install --ignore-platform-reqs
 
+php artisan make:model HeadTeacherComment -m
+php artisan make:model ClassTeacherComment -m
+php artisan make:model StudentOptionalSubjectPicker -m
 php artisan make:migration create_enterprises_table
 php artisan make:migration create_service_subscriptions_table
 php artisan make:migration create_service_categories_table
@@ -232,9 +235,11 @@ php artisan make:model SupplierOrderItem
 php artisan make:model MarkRecord
 php artisan make:model TheologyMarkRecord -m
 php artisan make:model WalletRecord
+php artisan make:model GenericSkill -m
+php artisan make:model SubjectTeacherRemark -m
 
 
-php artisan admin:make TermController --model=App\\Models\\Term
+php artisan admin:make SubjectTeacherRemarkController --model=App\\Models\\SubjectTeacherRemark
 php artisan admin:make DirectMessageController --model=App\Models\DirectMessage
 php artisan admin:make EmployeesController --vendor\\encore\\laravel-admin\\src\\Auth\\Database\\Administrator
 
@@ -283,6 +288,9 @@ php artisan make:migration create_theology_mark_records_table
 --path=/database/migrations/fileName.php
 
 
+php artisan admin:make HeadTeacherCommentCommentController --model=App\\Models\\HeadTeacherComment
+php artisan admin:make ClassTeacherCommentController --model=App\\Models\\ClassTeacherComment
+php artisan admin:make GenericSkillController --model=App\\Models\\GenericSkill
 php artisan admin:make BooksCategoryController --model=App\\Models\\BooksCategory
 php artisan admin:make BooksCategoryController --model=App\\Models\\BooksCategory
 php artisan admin:make BookAuthorController --model=App\\Models\\BookAuthor
@@ -410,6 +418,7 @@ git fetch origin master
 git reset --hard orign/master
 
 
+php artisan make:migration add_max_score_to_secondary_termly_report_cards_4 --table=secondary_termly_report_cards 
 php artisan make:migration add_cols_to_secondary_termly_report_cards_3 --table=secondary_termly_report_cards 
 php artisan make:migration add_due_term_column --table=academic_class_fees  
 php artisan make:migration add_columns_to_stock_batches --table=stock_batches  
@@ -417,6 +426,7 @@ php artisan make:migration add_columns_to_worth_stock_batches --table=stock_batc
 php artisan make:migration add_secular_billing_to_student_has_fees_ --table=student_has_fees  
 php artisan make:migration add_cols_to_student_has_secondary_subjects --table=student_has_secondary_subjects  
 php artisan make:migration add_cols_to_secondary_report_card_items_2 --table=secondary_report_card_items  
+php artisan make:migration add_cols_to_subject_teacher_remarks --table=subject_teacher_remarks
 
 
 

@@ -13,6 +13,15 @@ class StudentHasClass extends Model
 
     protected $fillable = ['enterprise_id', 'academic_class_id', 'administrator_id', 'stream_id', 'academic_year_id'];
 
+
+    //has one student_optional_subject_picker relationship
+    public function optional_subjects_picker()
+    {
+        return $this->hasOne(StudentOptionalSubjectPicker::class, 'student_has_class_id');
+    }
+    
+
+
     public static function boot()
     {
 
@@ -150,10 +159,13 @@ class StudentHasClass extends Model
         return $this->hasMany(StudentHasSubjectOldCurriculum::class, 'student_has_class_id');
     }
 
-    function  new_curriculum_optional_subjects()
+  
+
+    //has many StudentHasSecondarySubject relationship
+    public function secondary_subjects()
     {
         return $this->hasMany(StudentHasSecondarySubject::class, 'student_has_class_id');
-    }
+    } 
 
     function getAcademicClassTextAttribute()
     {

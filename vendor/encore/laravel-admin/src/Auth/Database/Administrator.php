@@ -491,25 +491,32 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
 
     public function get_initials()
     {
-        $letter1 = '';
-        $letter2 = '';
-        $letter3 = '';
+        //get initials from first name, given name and last name if any not null or empty
+        $initials = "";
         if ($this->first_name != null) {
             if (strlen($this->first_name) > 0) {
-                $letter1 = strtoupper(substr($this->first_name, 0, 1));
+                $initials .= substr($this->first_name, 0, 1);
             }
         }
         if ($this->given_name != null) {
             if (strlen($this->given_name) > 0) {
-                $letter2 = strtoupper(substr($this->given_name, 0, 1));
+                $initials .= substr($this->given_name, 0, 1);
             }
         }
         if ($this->last_name != null) {
             if (strlen($this->last_name) > 0) {
-                $letter3 = strtoupper(substr($this->last_name, 0, 1));
+                $initials .= substr($this->last_name, 0, 1);
             }
         }
-        return $letter1 . $letter2 . $letter3;
+        //if $initials is empty, get initials from name
+        if (strlen($initials) < 1) {
+            if ($this->name != null) {
+                if (strlen($this->name) > 1) {
+                    $initials .= substr($this->name, 0, 2);
+                }
+            }
+        } 
+        return strtoupper($initials);
     }
     public static function my_update($m)
     {

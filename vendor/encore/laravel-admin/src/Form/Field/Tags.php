@@ -38,7 +38,7 @@ class Tags extends Field
     /**
      * @var array
      */
-    protected $separators = [',', ';', '，', '；', ' '];
+    protected $separators = [',', ';', '，', '；', ','];
 
     /**
      * @var array

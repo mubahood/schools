@@ -29,6 +29,12 @@ class StudentHasSecondarySubject extends Model
         return $this->belongsTo(Administrator::class);
     }
 
+    //belongs to secondary_subject_id 
+    public function secondary_subject()
+    {
+        return $this->belongsTo(SecondarySubject::class);
+    }
+
     //has class relationship
     public function has_class()
     {

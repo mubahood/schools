@@ -40,6 +40,7 @@ use Illuminate\Support\Facades\DB;
 
 Route::match(['get', 'post'], '/print', [PrintController2::class, 'index']);
 Route::match(['get', 'post'], '/report-cards', [PrintController2::class, 'secondary_report_cards']);
+Route::match(['get', 'post'], '/secondary-report-cards-print', [PrintController2::class, 'secondary_report_cards']);
 
 ini_set('memory_limit', '-1');
 set_time_limit(-1);

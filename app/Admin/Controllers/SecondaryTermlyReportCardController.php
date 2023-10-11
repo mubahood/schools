@@ -65,6 +65,11 @@ class SecondaryTermlyReportCardController extends AdminController
         $grid->column('id', __('ID'))->sortable();
 
         $grid->column('report_title', __('Report card'))->sortable();
+        $grid->column('secondary_report_cards', __('Report cards'))
+            ->display(function ($x) {
+                return count($x);
+            })
+            ->sortable();
 
         $grid->column('academic_year_id', __('Year'))
             ->display(function ($x) {
@@ -118,8 +123,14 @@ class SecondaryTermlyReportCardController extends AdminController
      */
     protected function form()
     {
+        /* $m = SecondaryTermlyReportCard::find(1);
+        $m->do_update = 'Yes';
+        $m->generate_head_teacher_comment = 'No';
+        $m->generate_class_teacher_comment = 'Yes';
+        $m->max_score = 3;
+        SecondaryTermlyReportCard::update_data($m); 
+        dd('done'); */
         $form = new Form(new SecondaryTermlyReportCard());
-
         $form->hidden('enterprise_id')->default(Auth::user()->enterprise_id);
 
         $u = Admin::user();
@@ -141,15 +152,21 @@ class SecondaryTermlyReportCardController extends AdminController
             ])
                 ->orderBy('id', 'desc')
                 ->get()
-                ->pluck('name_text', 'id'));
+                ->pluck('name_text', 'id'))->stacked();
+
+
+        $form->decimal('max_score')->rules('required');
+        $form->radioCard('do_update', __('Update Marks'))
+            ->options(['Yes' => 'Yes', 'No' => 'No']);
+
+        $form->radioCard('generate_class_teacher_comment', __('Generate Class Teachers Comment'))
+            ->options(['Yes' => 'Yes', 'No' => 'No']);
+        $form->radioCard('generate_head_teacher_comment', __('Generate Head Teachers Comment'))
+            ->options(['Yes' => 'Yes', 'No' => 'No']);
 
         $form->textarea('general_commnunication', __('General commnunication'));
-        if ($form->isCreating()) {
-            $form->hidden('do_update')->default('Yes');
-        } else {
-            $form->radioCard('do_update', __('Update Marks'))
-                ->options(['Yes' => 'Yes', 'No' => 'No']);
-        }
+        $form->textarea('bottom_message', __('Bottom Message'));
+
 
 
         return $form;

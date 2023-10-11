@@ -16,9 +16,14 @@ class PrintController2 extends Controller
     {
 
         $pdf = App::make('dompdf.wrapper');
-        $data = [
-            SecondaryReportCard::find(100)
-        ];
+        $data = [];
+        if (isset($_GET['secondary_report_card_id'])) {
+            $data =
+                SecondaryReportCard::where([
+                    'id' => $_GET['secondary_report_card_id'],
+                ])->get();
+        }
+
         $pdf->loadHTML(view('report-cards/secondary_report_cards', [
             'data' => $data,
         ]));
@@ -47,10 +52,10 @@ class PrintController2 extends Controller
         error_reporting(E_ALL);
         $min = -1;
         $max = -1;
-        if(isset($_GET['min'])){
+        if (isset($_GET['min'])) {
             $min = (int)($_GET['min']);
         }
-        if(isset($_GET['max'])){
+        if (isset($_GET['max'])) {
             $max = (int)($_GET['max']);
         }
 
@@ -67,8 +72,8 @@ class PrintController2 extends Controller
                 $student_report_card = StudentReportCard::find($_GET['id']);
             }
 
-            if ($student_report_card == null || $student_report_card->termly_report_card == null ) {
-                $cards = StudentReportCard::where([ 
+            if ($student_report_card == null || $student_report_card->termly_report_card == null) {
+                $cards = StudentReportCard::where([
                     'academic_class_id' => $_GET['calss_id'],
                     'term_id' => $_GET['term_id'],
                 ])
@@ -76,14 +81,14 @@ class PrintController2 extends Controller
                     ->get();
                 $count = 0;
                 foreach ($cards as $key => $value) {
-                    $count++; 
-                    if($min > -1 && $max > -1){
-                        if($count < $min || $count > $max){
+                    $count++;
+                    if ($min > -1 && $max > -1) {
+                        if ($count < $min || $count > $max) {
                             continue;
                         }
                     }
 
-                    
+
                     if ($termly_report_card == null) {
                         $termly_report_card = $value->termly_report_card;
                     }

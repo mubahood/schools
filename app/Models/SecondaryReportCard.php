@@ -38,6 +38,13 @@ class SecondaryReportCard extends Model
         return $this->belongsTo(AcademicClass::class, 'academic_class_id');
     }
 
+    //belongs to secondary_termly_report_card_id relationship
+    public function secondary_termly_report_card()
+    {
+        return $this->belongsTo(SecondaryTermlyReportCard::class, 'secondary_termly_report_card_id');
+    }
+
+
     //belongs to term
     public function term()
     {

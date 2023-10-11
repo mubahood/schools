@@ -61,6 +61,11 @@ class SecondaryReportCardController extends AdminController
         $grid->column('class_teacher_comment', __('Class teacher comment'))->editable();
         $grid->column('head_teacher_comment', __('Head teacher comment'))->editable();
 
+        $grid->column('print', __('PRINT'))
+            ->display(function ($x) {
+                return "<a href='" . url('/secondary-report-cards-print?secondary_report_card_id=' . $this->id . '') . "' target='_blank'>PRINT</a>";
+            });
+
         return $grid;
     }
 

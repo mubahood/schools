@@ -136,8 +136,7 @@ academic_year_id
         $grid->column('average_score', __('Score'))->sortable();
         $grid->column('generic_skills', __('Generic Skills'))->editable();
         $grid->column('remarks', __('Genral Remarks'))->editable();
-        $grid->column('teacher', __('Teacher'))->hide();
-
+        $grid->column('teacher', __('Teacher'))->editable();
         return $grid;
     }
 

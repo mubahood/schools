@@ -449,6 +449,7 @@ class Utils  extends Model
             }
         }
 
+        Utils::prepare_optional_subject_pickers();
         Utils::delete_contraentries($u);
         Utils::rectify_terms_forItransactions($u);
         Utils::create_make_parents($u);
@@ -601,6 +602,24 @@ class Utils  extends Model
         }
     }
 
+    public static function prepare_optional_subject_pickers()
+    {
+        //set unlimited time and memeory
+        set_time_limit(-1);
+        ini_set('memory_limit', '-1');
+        //get all student_has_classes without optional subjects in for of sql
+        $sql = "SELECT * FROM student_has_classes WHERE id NOT IN (SELECT student_has_class_id FROM student_optional_subject_pickers)"; //WHERE id = 1"        
+        $recs = DB::select($sql);
+        foreach ($recs as $key => $v) {
+            $rec = new StudentOptionalSubjectPicker();
+            $rec->student_has_class_id = $v->id;
+            $rec->enterprise_id = $v->enterprise_id;
+            $rec->administrator_id = $v->administrator_id;
+            $rec->student_class_id = $v->academic_class_id;
+            $rec->academic_year_id = $v->academic_year_id;
+            $rec->save();
+        }
+    }
     public static function delete_contraentries()
     {
 

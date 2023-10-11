@@ -94,7 +94,12 @@ Route::group([
     $router->resource('direct-messages', DirectMessageController::class);
     $router->resource('wallet-records', WalletRecordController::class);
     $router->resource('credit-purchases', CreditPurchaseController::class);
-    $router->resource('student-has-optional-subjects', StudentHasOptionalSubjectController::class); 
+    $router->resource('student-has-optional-subjects', StudentHasOptionalSubjectController::class);
+    $router->resource('student-optional-subject-pickers', StudentOptionalSubjectPickerController::class);
+    $router->resource('generic-skills', GenericSkillController::class);
+    $router->resource('subject-teacher-remarks', SubjectTeacherRemarkController::class);
+    $router->resource('class-teacher-comments', ClassTeacherCommentController::class);
+    $router->resource('head-teacher-comments', HeadTeacherCommentCommentController::class);
 
     //$router->resource('fees', StudentHasFeeController::class);
 
