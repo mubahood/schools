@@ -2427,7 +2427,6 @@ class Utils  extends Model
     }
 
 
-
     public static function updateMarks($class)
     {
         $secondaryCompetences = SecondaryCompetence::where('academic_class_id', $class->id)->get();
