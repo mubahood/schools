@@ -589,8 +589,8 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
     public function getAvatarAttribute($avatar)
     {
 
-        if ($avatar == null || strlen($avatar) < 3) {
-            $default = config('admin.default_avatar') ?: '/vendor/laravel-admin/AdminLTE/dist/img/user2-160x160.jpg';
+        if ($avatar == null || (strlen($avatar) < 3 || str_contains($avatar,'laravel-admin') )) {
+            $default = url('user.jpeg');
             return $default;
         }
         $avatar = str_replace('images/', '', $avatar);

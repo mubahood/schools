@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Models\Utils;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -10,7 +11,7 @@ use Encore\Admin\Grid;
 use Encore\Admin\Show;
 use Encore\Admin\Widgets\Tab;
 use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Support\MessageBag;
 
 class ParentsController extends AdminController
 {
@@ -162,62 +163,101 @@ class ParentsController extends AdminController
     protected function form()
     {
         $u = Admin::user();
-
         $form = new Form(new Administrator());
+        $form->tools(function (Form\Tools $tools) {
+            $tools->disableDelete();
+            $tools->disableView();
+        });
+        $form->divider('Personal Information');
+
+        $u = Admin::user();
+        $form->hidden('enterprise_id')->rules('required')->default($u->enterprise_id)
+            ->value($u->enterprise_id);
+
+        $form->hidden('user_type')->default('employee')->value('employee');
+
+        $form->text('first_name')->rules('required');
+        $form->text('last_name')->rules('required');
+        $form->select('sex', 'Gender')->options(['Male' => 'Male', 'Female' => 'Female'])->rules('required');
+        $form->text('current_address', 'Address');
+        $form->text('phone_number_1', 'Mobile phone number')->rules('required');
+        $form->text('phone_number_2', 'Home phone number');
+        $form->text('nationality');
+        $form->text('religion');
+
+        //SYSTEM ACCOUNT
+        $form->divider('System Account');
+        $roleModel = config('admin.database.roles_model');
+        $roles = $roleModel::where(['slug' => 'parent'])
+            ->get()->pluck('name', 'id');
+
+        $form->multipleSelect('roles', trans('admin.roles'))
+            ->attribute([
+                'autocomplete' => 'off'
+            ])
+            ->options($roles)->rules('required');
+
+        $ajax_url = url('/api/ajax-users?enterprise_id=' . $u->enterprise_id . "&user_type=student");
+        $form->multipleSelect('kids', "Children")
+            ->options(function ($ids) {
+                if (!is_array($ids)) {
+                    return [];
+                }
+                $data = Administrator::whereIn('id', $ids)->pluck('name', 'id');
+                return $data;
+            })
+            ->ajax($ajax_url)->rules('required');
 
 
 
-        $form->tab('BIO DATA', function (Form $form) {
+        $form->image('avatar', 'Profile photo');
 
-            $u = Admin::user();
-            $form->hidden('enterprise_id')->rules('required')->default($u->enterprise_id)
-                ->value($u->enterprise_id);
+        $form->text('email', 'Email address');
 
-            $form->hidden('user_type')->default('employee')->value('employee');
+        $form->password('password', trans('admin.password'))->rules('required|confirmed');
 
-            $form->text('first_name')->rules('required');
-            $form->text('last_name')->rules('required');
-            $form->select('sex', 'Gender')->options(['Male' => 'Male', 'Female' => 'Female'])->rules('required');
-            $form->text('current_address', 'Address');
-            $form->text('phone_number_1', 'Mobile phone number')->rules('required');
-            $form->text('phone_number_2', 'Home phone number');
-            $form->text('nationality');
-            $form->text('religion');
-        })
-            ->tab('SYSTEM ACCOUNT', function (Form $form) {
-                $form->image('avatar', trans('admin.avatar'));
-
-                $roleModel = config('admin.database.roles_model');
-                $form->multipleSelect('roles', trans('admin.roles'))
-                    ->attribute([
-                        'autocomplete' => 'off'
-                    ])
-                    ->options(
-                        $roleModel::where('slug', '==', 'parent')
-                            ->get()
-                            ->pluck('name', 'id')
-                    )->rules('required');
-
-                $form->email('email', 'Email address')
-                    ->creationRules(['required', "unique:admin_users"]);
-                $form->text('username', 'Username')
-                    ->creationRules(['required', "unique:admin_users"])
-                    ->updateRules(['required', "unique:admin_users,username,{{id}}"]);
-
-                $form->password('password', trans('admin.password'))->rules('required|confirmed');
-                $form->password('password_confirmation', trans('admin.password_confirmation'))->rules('required')
-                    ->default(function ($form) {
-                        return $form->model()->password;
-                    });
-
-                $form->ignore(['password_confirmation']);
-                $form->saving(function (Form $form) {
-                    if ($form->password && $form->model()->password != $form->password) {
-                        $form->password = Hash::make($form->password);
-                    }
-                });
+        $form->password('password_confirmation', trans('admin.password_confirmation'))->rules('required')
+            ->default(function ($form) {
+                return $form->model()->password;
             });
 
+        $form->ignore(['password_confirmation']);
+        $form->saving(function (Form $form) {
+            $prepared_phone_number_1 = Utils::prepare_phone_number($form->phone_number_1);
+            if (!Utils::phone_number_is_valid($prepared_phone_number_1)) {
+                $error = new MessageBag([
+                    'title'   => 'Error',
+                    'message' => 'First phone number is invalid.'
+                ]);
+                return back()->with(compact('error'));
+            }
+
+            if ($form->phone_number_2 != null) {
+                if (strlen($form->phone_number_2) > 3) {
+                    $prepared_phone_number_2 = Utils::prepare_phone_number($form->phone_number_2);
+                    if (!Utils::phone_number_is_valid($prepared_phone_number_2)) {
+                        $error = new MessageBag([
+                            'title'   => 'Error',
+                            'message' => 'Second phone number is invalid.'
+                        ]);
+                        return back()->with(compact('error'));
+                    }
+                }
+            }
+
+
+
+            if ($form->email == null || strlen($form->email) < 3) {
+                $form->email = $form->phone_number_1;
+            }
+
+            $form->phone_number_1 = $prepared_phone_number_1;
+            $form->username = $prepared_phone_number_1;
+
+            if ($form->password && $form->model()->password != $form->password) {
+                $form->password = Hash::make($form->password);
+            }
+        });
 
 
 

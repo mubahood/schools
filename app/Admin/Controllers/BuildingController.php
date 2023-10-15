@@ -68,10 +68,9 @@ class BuildingController extends AdminController
     protected function form()
     {
         $form = new Form(new Building());
-
+        //hidden enterprise_id 
+        $form->hidden('enterprise_id')->value(Admin::user()->enterprise_id);
         $form->text('buildingName', __('BuildingName'));
-       
-
         return $form;
     }
 }
