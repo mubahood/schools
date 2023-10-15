@@ -20,7 +20,7 @@ class CreateDirectMessagesTable extends Migration
             $table->id();
             $table->timestamps();
             $table->foreignIdFor(Enterprise::class);
-            $table->foreignIdFor(BulkMessage::class);
+            $table->foreignIdFor(BulkMessage::class); 
             $table->foreignIdFor(Administrator::class);
             $table->string('receiver_number')->nullable();
             $table->text('message_body')->nullable();

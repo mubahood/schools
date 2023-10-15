@@ -18,6 +18,7 @@ class AddSTUDENTNAMEToDirectMessages extends Migration
             $table->text('PARENT_NAME')->nullable();
             $table->text('STUDENT_CLASS')->nullable();
             $table->text('TEACHER_NAME')->nullable(); 
+               
         });
     }
 

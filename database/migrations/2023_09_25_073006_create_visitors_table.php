@@ -33,6 +33,7 @@ class CreateVisitorsTable extends Migration
             $table->foreignIdFor(Enterprise::class);
         });
     }
+    
 
     /**
      * Reverse the migrations.

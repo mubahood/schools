@@ -791,6 +791,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Admin\\Controllers\\TransactionController' => __DIR__ . '/../..' . '/app/Admin/Controllers/TransactionController.php',
         'App\\Admin\\Controllers\\UserBatchImporterController' => __DIR__ . '/../..' . '/app/Admin/Controllers/UserBatchImporterController.php',
         'App\\Admin\\Controllers\\UserPhotosBatchImporterController' => __DIR__ . '/../..' . '/app/Admin/Controllers/UserPhotosBatchImporterController.php',
+        'App\\Admin\\Controllers\\VisitorController' => __DIR__ . '/../..' . '/app/Admin/Controllers/VisitorController.php',
         'App\\Admin\\Controllers\\WalletRecordController' => __DIR__ . '/../..' . '/app/Admin/Controllers/WalletRecordController.php',
         'App\\Admin\\Extensions\\Column\\FloatBar' => __DIR__ . '/../..' . '/app/Admin/Extensions/Column/FloatBar.php',
         'App\\Admin\\Extensions\\Column\\OpenMap' => __DIR__ . '/../..' . '/app/Admin/Extensions/Column/OpenMap.php',

@@ -100,6 +100,7 @@ return array(
     'App\\Admin\\Controllers\\TransactionController' => $baseDir . '/app/Admin/Controllers/TransactionController.php',
     'App\\Admin\\Controllers\\UserBatchImporterController' => $baseDir . '/app/Admin/Controllers/UserBatchImporterController.php',
     'App\\Admin\\Controllers\\UserPhotosBatchImporterController' => $baseDir . '/app/Admin/Controllers/UserPhotosBatchImporterController.php',
+    'App\\Admin\\Controllers\\VisitorController' => $baseDir . '/app/Admin/Controllers/VisitorController.php',
     'App\\Admin\\Controllers\\WalletRecordController' => $baseDir . '/app/Admin/Controllers/WalletRecordController.php',
     'App\\Admin\\Extensions\\Column\\FloatBar' => $baseDir . '/app/Admin/Extensions/Column/FloatBar.php',
     'App\\Admin\\Extensions\\Column\\OpenMap' => $baseDir . '/app/Admin/Extensions/Column/OpenMap.php',

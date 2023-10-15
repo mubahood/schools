@@ -25,6 +25,7 @@ class VisitorController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Visitor());
+       
 
         $grid->column('id', __('Id'));
         $grid->column('created_at', __('Created at'));
@@ -37,6 +38,7 @@ class VisitorController extends AdminController
         $grid->column('relationship', __('Relationship'));
         $grid->column('time_in', __('Time in'));
         $grid->column('time_out', __('Time out'));
+        $grid->column('has_car', __('has_car'));
         $grid->column('vehicle_number', __('Vehicle Number'));
         $grid->column('students_id', __('Students'));
         $grid->column('employee_id', __('Employee'));
@@ -68,6 +70,7 @@ class VisitorController extends AdminController
         $show->field('relationship', __('Relationship'));
         $show->field('time_in', __('Time in'));
         $show->field('time_out', __('Time out'));
+        $show->field('has_car', __('has_car'));
         $show->field('vehicle_number', __('Vehicle number'));
         $show->field('students_id', __('Students id'));
         $show->field('employee_id', __('Employee id'));
@@ -95,26 +98,37 @@ class VisitorController extends AdminController
             ->options([
                 'Student' => 'Student',
                 'Employee' => 'Employee',
+                'Others' => 'Others',
                 'Non' => 'Non',
             ])->when('Student', function (Form $form) {
                 $form->number('students_id', __('Students'));
                 $form->text('relationship', __('Relationship'));
             })->when('Employee', function (Form $form) {
                 $form->number('employee_id', __('Employee'));
+            })->when('Others', function (Form $form) {
+                $form->text('others', __('Others'));
             });
 
         $form->time('time_in', __('Time in'))->default(date('H:i:s'));
         $form->time('time_out', __('Time out'))->default(date('H:i:s'));
-        $form->text('vehicle_number', __('Vehicle number'));
+        $form->radio('has_car', __('Has Vehicle'))->default('No')
+        ->options([
+            "NO"=>"NO",
+            "YES"=>"YES",
+        ])->when('YES', function (Form $form) {
+            $form->text('vehicle_number', __('Vehicle number'));
+        });
+       
 
 
-        //  $form->text('others', __('Others'));
+        //  
         $form->select('term', __('Term'))->options([
             'Term 1' => 'Term 1',
             'Term 2' => 'Term 2',
             'Term 3' => 'Term 3',
         ]);
-       $form->number('enterprise_id', __('Enterprise id'));
+       
+        $form->hidden('enterprise_id', __('Enterprise id'))        ->rules('required');
 
         return $form;
     }
