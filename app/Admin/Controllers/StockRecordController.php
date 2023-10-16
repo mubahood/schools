@@ -191,6 +191,10 @@ class StockRecordController extends AdminController
     {
         $form = new Form(new StockRecord());
 
+        $u = Auth('admin')->user();
+        $due_term = $u->ent->active_term();
+        $form->hidden('due_term_id')->default($due_term->id)->value($due_term->id);
+        // due_term_id
 
         $form->datetime('record_date', __('Date'))->rules('required');
 
