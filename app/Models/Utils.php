@@ -1174,8 +1174,9 @@ class Utils  extends Model
 
             if ($last_ent != $id) {
                 $ent = Enterprise::where('id', $id)
-                    ->where('school_pay_code', '!=', NULL)
-                    ->where('school_pay_password', '!=', NULL)
+                    ->where([
+                        'school_pay_status' => 'Yes'
+                    ])
                     ->first();
                 if ($ent != null) {
                     $last_ent = $id;
@@ -1183,12 +1184,14 @@ class Utils  extends Model
             }
         }
         $ent = Enterprise::where('id', $last_ent)
-            ->where('school_pay_code', '!=', NULL)
-            ->where('school_pay_password', '!=', NULL)
+            ->where([
+                'school_pay_status' => 'Yes'
+            ])
             ->first();
 
-        $ents = Enterprise::where('school_pay_code', '!=', NULL)
-            ->where('school_pay_password', '!=', NULL)
+        $ents = Enterprise::where([
+            'school_pay_status' => 'Yes'
+        ])
             ->get();
 
         $have_records = [];
@@ -1201,8 +1204,9 @@ class Utils  extends Model
         foreach ($ents as $key => $value) {
             if (!in_array($value->id, $have_records)) {
                 $_ent = Enterprise::where('id', $value->id)
-                    ->where('school_pay_code', '!=', NULL)
-                    ->where('school_pay_password', '!=', NULL)
+                    ->where([
+                        'school_pay_status' => 'Yes'
+                    ])
                     ->first();
                 if ($_ent != null) {
                     $ent = $_ent;
@@ -1212,8 +1216,9 @@ class Utils  extends Model
         }
 
         if ($ent == null) {
-            $ent = Enterprise::where('school_pay_code', '!=', NULL)
-                ->where('school_pay_password', '!=', NULL)
+            $ent = Enterprise::where([
+                'school_pay_status' => 'Yes'
+            ])
                 ->first();
         }
 
