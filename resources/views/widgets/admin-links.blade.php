@@ -10,7 +10,7 @@
     @if ($dpTerm != null)
 
 
-        <li class="dropdown">
+       {{--  <li class="dropdown">
             <a href="#" class="dropdown-toggle auto-refresh" data-toggle="dropdown" title="Academic Year - Display"
                 aria-expanded="true">
                 <i class="fa fa-play"></i>&nbsp;&nbsp;
@@ -27,7 +27,7 @@
                 </ul>
             @endif
 
-        </li>
+        </li> --}}
     @endif
 @endif
 {{-- 

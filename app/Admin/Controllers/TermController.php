@@ -107,7 +107,7 @@ class TermController extends AdminController
             ->options(
                 AcademicYear::where([
                     'enterprise_id' => $u->enterprise_id,
-                    'is_active' => 1,
+/*                     'is_active' => 1, */
                 ])->get()
                     ->pluck('name', 'id')
             )->rules('required');
