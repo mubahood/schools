@@ -1162,8 +1162,9 @@ class Utils  extends Model
             if ($last_ent == 0) {
 
                 $ent = Enterprise::where('id', $id)
-                    ->where('school_pay_code', '!=', NULL)
-                    ->where('school_pay_password', '!=', NULL)
+                    ->where([
+                        'school_pay_status' => 'Yes'
+                    ])
                     ->first();
                 if ($ent != null) {
                     $last_ent = $id;
@@ -1939,7 +1940,7 @@ class Utils  extends Model
         }
         return "+256" . $phone_number;
     }
- 
+
 
     public static function compute_competance($r)
     {

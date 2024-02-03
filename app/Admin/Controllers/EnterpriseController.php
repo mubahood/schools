@@ -141,8 +141,17 @@ class EnterpriseController extends AdminController
         $form->date('expiry', __('Expiry'))->required();
         $form->textarea('details', __('Details'));
         $form->divider('SCHOOL PAY INFO');
-        $form->text('school_pay_code', __('School-pay code'));
-        $form->text('school_pay_password', __('School-pay password'));
+
+
+        $form->radio('school_pay_status', __('School-pay Status'))
+            ->options([
+                'Yes' => 'Yes',
+                'No' => 'No',
+            ])
+            ->when('Yes', function ($form) {
+                $form->text('school_pay_code', __('School-pay code'));
+                $form->text('school_pay_password', __('School-pay password'));
+            });
 
         $form->radio('has_valid_lisence', __('Has Valid License'))
             ->options([

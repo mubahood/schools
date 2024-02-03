@@ -769,6 +769,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Admin\\Controllers\\ServiceController' => __DIR__ . '/../..' . '/app/Admin/Controllers/ServiceController.php',
         'App\\Admin\\Controllers\\ServiceSubscriptionController' => __DIR__ . '/../..' . '/app/Admin/Controllers/ServiceSubscriptionController.php',
         'App\\Admin\\Controllers\\SessionController' => __DIR__ . '/../..' . '/app/Admin/Controllers/SessionController.php',
+        'App\\Admin\\Controllers\\SlotController' => __DIR__ . '/../..' . '/app/Admin/Controllers/SlotController.php',
         'App\\Admin\\Controllers\\StockBatchController' => __DIR__ . '/../..' . '/app/Admin/Controllers/StockBatchController.php',
         'App\\Admin\\Controllers\\StockItemCategoryController' => __DIR__ . '/../..' . '/app/Admin/Controllers/StockItemCategoryController.php',
         'App\\Admin\\Controllers\\StockRecordController' => __DIR__ . '/../..' . '/app/Admin/Controllers/StockRecordController.php',

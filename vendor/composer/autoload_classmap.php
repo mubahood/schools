@@ -78,6 +78,7 @@ return array(
     'App\\Admin\\Controllers\\ServiceController' => $baseDir . '/app/Admin/Controllers/ServiceController.php',
     'App\\Admin\\Controllers\\ServiceSubscriptionController' => $baseDir . '/app/Admin/Controllers/ServiceSubscriptionController.php',
     'App\\Admin\\Controllers\\SessionController' => $baseDir . '/app/Admin/Controllers/SessionController.php',
+    'App\\Admin\\Controllers\\SlotController' => $baseDir . '/app/Admin/Controllers/SlotController.php',
     'App\\Admin\\Controllers\\StockBatchController' => $baseDir . '/app/Admin/Controllers/StockBatchController.php',
     'App\\Admin\\Controllers\\StockItemCategoryController' => $baseDir . '/app/Admin/Controllers/StockItemCategoryController.php',
     'App\\Admin\\Controllers\\StockRecordController' => $baseDir . '/app/Admin/Controllers/StockRecordController.php',
