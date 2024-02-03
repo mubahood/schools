@@ -200,9 +200,11 @@ class Utils  extends Model
     public static function my_date_3($t)
     {
         $c = Carbon::parse($t);
+        //set timezone
         if ($t == null) {
             return $t;
         }
+        $c->setTimezone('Africa/Nairobi');
         return $c->format('D d-m-Y');
     }
 
@@ -213,6 +215,7 @@ class Utils  extends Model
         if ($t == null) {
             return $t;
         }
+        $c->setTimezone('Africa/Nairobi');
         return $c->format('d M, Y');
     }
 
@@ -347,6 +350,8 @@ class Utils  extends Model
             $trans->payment_date = $v[0];
             if ($trans->payment_date != null) {
                 $d = Carbon::parse($trans->payment_date);
+                //set timezone
+                $d->setTimezone('Africa/Nairobi');
                 $min_data = Carbon::parse('15-08-2022');
                 if ($d != null) {
                     if ($d->isBefore($min_data)) {
@@ -590,6 +595,7 @@ class Utils  extends Model
 
         foreach ($trans as $key => $tra) {
             $tra_year = Carbon::parse($tra->payment_date)->format('Y');
+
 
             foreach ($tems as $term) {
                 $term_id = Carbon::parse($term->created_at)->format('Y');
