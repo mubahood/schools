@@ -218,7 +218,7 @@ class Utils  extends Model
 
     public static function my_date_time($t)
     {
-        $c = Carbon::parse(strtotime($t));
+        $c = Carbon::parse($t);
         if ($t == null) {
             return $t;
         }
