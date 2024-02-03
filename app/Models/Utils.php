@@ -219,6 +219,7 @@ class Utils  extends Model
     public static function my_date_time($t)
     {
         $c = Carbon::parse($t);
+        $c->setTimezone('Africa/Nairobi');
         if ($t == null) {
             return $t;
         }
