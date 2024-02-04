@@ -70,10 +70,10 @@ class StudentsController extends AdminController
 
         $grid = new Grid(new Administrator());
 
-        $grid->perPages([10,50,100,300,500]); 
+        $grid->perPages([10, 50, 100, 300, 500]);
         $grid->batchActions(function ($batch) {
             $batch->disableDelete();
-            $batch->add(new ChangeStudentsStatus()); 
+            $batch->add(new ChangeStudentsStatus());
         });
         $grid->actions(function ($actions) {
             if (!Auth::user()->isRole('admin')) {
@@ -131,17 +131,17 @@ class StudentsController extends AdminController
             );
 
             $filter->equal('parent_id', 'Filte by Parent')
-            ->select(function ($id) {
-                $a = User::find($id);
-                if ($a) {
-                    return [$a->id => "#" . $a->id . " - " . $a->name];
-                }
-            })
-            
-            ->ajax($ajax_url);
-        
+                ->select(function ($id) {
+                    $a = User::find($id);
+                    if ($a) {
+                        return [$a->id => "#" . $a->id . " - " . $a->name];
+                    }
+                })
 
-            
+                ->ajax($ajax_url);
+
+
+
             $filter->between('created_at', 'Admitted')->date();
             $filter->like('school_pay_payment_code', 'By school-pay code');
             $u = Admin::user();
@@ -202,11 +202,9 @@ class StudentsController extends AdminController
                 ])->orderBy('id', 'Desc')->get()->pluck('name_text', 'id'));
                 $classes[0] = 'No theology class';
                 $filter->equal('current_theology_class_id', 'Filter by theology class')->select($classes);
-
-               
             }
 
-            
+
 
 
             // Remove the default id filter
@@ -245,7 +243,7 @@ class StudentsController extends AdminController
         ]);
 
 
-        if (Admin::user()->isRole('dos')) {
+        /*  if (Admin::user()->isRole('dos')) {
             $grid->column('status', 'Status')
                 ->filter([
                     0 => 'Not active',
@@ -263,10 +261,10 @@ class StudentsController extends AdminController
                     1 => 'success',
                 ])
                 ->sortable();
-        }
+        } */
 
 
- 
+
 
         $grid->column('avatar', __('Photo'))
             ->lightbox(['width' => 60, 'height' => 60])
@@ -325,16 +323,16 @@ class StudentsController extends AdminController
         $grid->column('school_pay_payment_code', __('School pay payment code'))->sortable();
 
         $grid->column('parent_id', __('Parent'))
-        ->display(function($x){
-            if($this->parent == null){
-                return $x;
-            }
+            ->display(function ($x) {
+                if ($this->parent == null) {
+                    return $x;
+                }
 
-            $txt = '<a href="' . admin_url('parents/?id=' . $this->parent->id) . '" title="View parent" ><b>' . $this->parent->name . "</b></a>";
+                $txt = '<a href="' . admin_url('parents/?id=' . $this->parent->id) . '" title="View parent" ><b>' . $this->parent->name . "</b></a>";
 
-            return $txt; 
-        })
-        ->sortable(); 
+                return $txt;
+            })
+            ->sortable();
         $grid->column('documents', __('Print Documents'))
             ->display(function () {
                 $admission_letter = url('print-admission-letter?id=' . $this->id);
@@ -390,7 +388,7 @@ class StudentsController extends AdminController
     protected function form()
     {
 
-       /*  $u  = Administrator::find(10615);
+        /*  $u  = Administrator::find(10615);
         Administrator::my_update($u);
         die("done romina"); */
         $u = Admin::user();
@@ -439,8 +437,16 @@ class StudentsController extends AdminController
 
 
 
+            $active_academic_year = $u->ent->active_academic_year();
+            if ($active_academic_year == null) {
+                die("No active academic year");
+            }
+
             $classes = [];
-            foreach (AcademicClass::all() as $class) {
+            foreach (AcademicClass::where([
+                'enterprise_id' => $u->enterprise_id,
+                'academic_year_id' => $active_academic_year->id,
+            ])->get() as $class) {
                 if (((int)($class->academic_year->is_active)) != 1) {
                     continue;
                 }

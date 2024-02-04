@@ -200,6 +200,24 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
 
         self::creating(function ($model) {
 
+            if ($model->status == 1) {
+                $current_class = AcademicClass::find($model->current_class_id);
+                if ($current_class == null) {
+                    throw new Exception("Current class not found.", 1);
+                }
+                $ent = Enterprise::find($model->enterprise_id);
+                if ($ent == null) {
+                    throw new Exception("Enterprise not found.", 1);
+                }
+                $year = $ent->active_academic_year();
+                if ($year == null) {
+                    throw new Exception("Active academic year not found.", 1);
+                }
+                if ($current_class->academic_year_id != $year->id) {
+                    throw new Exception("Current class is not in active academic year.", 1);
+                }
+            }
+
             if (isset($model->phone_number_1)) {
                 if ($model->phone_number_1 != null) {
                     if (strlen($model->phone_number_1) > 5) {
@@ -320,6 +338,8 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                 $model->password = password_hash('4321', PASSWORD_DEFAULT);
             }
 
+
+
             return $model;
         });
 
@@ -337,6 +357,25 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
             if ($model->enterprise_id == null) {
                 die("enterprise is required");
             }
+
+            if ($model->status == 1) {
+                $current_class = AcademicClass::find($model->current_class_id);
+                if ($current_class == null) {
+                    throw new Exception("Current class not found.", 1);
+                }
+                $ent = Enterprise::find($model->enterprise_id);
+                if ($ent == null) {
+                    throw new Exception("Enterprise not found.", 1);
+                }
+                $year = $ent->active_academic_year();
+                if ($year == null) {
+                    throw new Exception("Active academic year not found.", 1);
+                }
+                if ($current_class->academic_year_id != $year->id) {
+                    throw new Exception("Current class is not in active academic year.", 1);
+                }
+            }
+
             $enterprise_id = ((int)($model->enterprise_id));
             $e = Enterprise::find($enterprise_id);
             if ($e == null) {
@@ -515,7 +554,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                     $initials .= substr($this->name, 0, 2);
                 }
             }
-        } 
+        }
         return strtoupper($initials);
     }
     public static function my_update($m)
@@ -589,7 +628,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
     public function getAvatarAttribute($avatar)
     {
 
-        if ($avatar == null || (strlen($avatar) < 3 || str_contains($avatar,'laravel-admin') )) {
+        if ($avatar == null || (strlen($avatar) < 3 || str_contains($avatar, 'laravel-admin'))) {
             $default = url('user.jpeg');
             return $default;
         }
