@@ -76,6 +76,7 @@ Route::get('create-streams', [Utils::class, 'create_streams']);
 Route::get('generate-variables', [MainController::class, 'generate_variables']);
 Route::get('process-photos', [MainController::class, 'process_photos']);
 Route::get('student-data-import', [MainController::class, 'student_data_import']);
+Route::get('prepare-things', [Utils::class, 'prepare_things']);
 
 Route::get('reports-finance-process', function (Request $request) {
   $rep = ReportFinanceModel::find($request->id);

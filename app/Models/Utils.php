@@ -800,15 +800,22 @@ class Utils  extends Model
         }
     }
 
-    public static function prepare_pending_things()
+    public static function prepare_things()
     {
-        $ent_id  = null;
-        $u = Auth::user();
-
-        if ($u != null) {
-            $ent_id = ((int)($u->enterprise_id));
+        //loop through all active enterprises
+        foreach (Enterprise::where([
+            'has_valid_lisence' => 'Yes',
+        ])->get() as $key => $ent) {
+            if ($ent->id != 7) {
+                continue;
+            }
+            Utils::prepare_pending_things($ent);
         }
+    }
+    public static function prepare_pending_things($ent)
+    {
 
+        $ent_id  = $ent->id;
         /* =============== start SUBJECTS WITH NO academic_year_id============= */
         foreach (Subject::where([
             'academic_year_id' => null,
@@ -818,7 +825,44 @@ class Utils  extends Model
                 $sub->save();
             }
         }
+
+        //date chrismas 2023-12-25 00:00:00
+        $date = Carbon::parse('2023-12-01 00:00:00');
+        $date->setTimezone('Africa/Nairobi');
+        //where created_at before date
+        StudentHasFee::wheredate('created_at', '<', $date)->delete();
+        Transaction::wheredate('created_at', '<', $date)->delete();
+
         /* =============== end SUBJECTS WITH NO academic_year_id============= */
+        //deactivate active students with in no active class
+        $students = Administrator::where([
+            'user_type' => 'student',
+            'status' => 1,
+            'enterprise_id' => $ent_id,
+        ])->get();
+        foreach ($students as $key => $student) {
+            //get current class
+            $class = AcademicClass::find($student->current_class_id);
+            if ($class == null) {
+                $student->status = 2;
+                $student->save();
+                //die("Deactivated student $student->name because class not found.");
+                continue;
+            }
+            $academic_year = AcademicYear::find($class->academic_year_id);
+            if ($academic_year == null) {
+                $student->status = 2;
+                $student->save();
+                //die("Deactivated student $student->name because academic year not found.");
+                continue;
+            }
+            if ($academic_year->is_active != 1) {
+                $student->status = 2;
+                $student->save();
+                //die("Deactivated student $student->name because academic year not active.");
+                continue;
+            }
+        }
     }
 
     public static function financial_accounts_creation()
