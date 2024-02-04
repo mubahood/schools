@@ -826,7 +826,7 @@ class Utils  extends Model
             }
         }
 
-        $term = $ent->active_term(); 
+        /* $term = $ent->active_term(); 
         Transaction::where([
             'enterprise_id' => $ent_id,
         ])->update([
@@ -839,7 +839,7 @@ class Utils  extends Model
             'term_id' => $term->id
         ])->get();
         dd($trans->count());
-        dd($trans->first());
+        dd($trans->first()); */
 
 
         //date chrismas 2023-12-25 00:00:00
