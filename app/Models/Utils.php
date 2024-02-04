@@ -826,6 +826,22 @@ class Utils  extends Model
             }
         }
 
+        $term = $ent->active_term(); 
+        Transaction::where([
+            'enterprise_id' => $ent_id,
+        ])->update([
+            'academic_year_id' => $term->academic_year_id,
+            'term_id' => $term->id
+        ]);
+
+        $trans = Transaction::where([
+            'enterprise_id' => $ent->id,
+            'term_id' => $term->id
+        ])->get();
+        dd($trans->count());
+        dd($trans->first());
+
+
         //date chrismas 2023-12-25 00:00:00
         $date = Carbon::parse('2023-12-01 00:00:00');
         $date->setTimezone('Africa/Nairobi');
