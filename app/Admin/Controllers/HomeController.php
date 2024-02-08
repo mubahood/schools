@@ -9,6 +9,7 @@ use App\Models\Enterprise;
 use App\Models\MenuItem;
 use App\Models\ReportCard;
 use App\Models\ReportFinanceModel;
+use App\Models\StockBatch;
 use App\Models\StudentHasClass;
 use App\Models\StudentHasTheologyClass;
 use App\Models\StudentReportCard;
@@ -223,14 +224,10 @@ class HomeController extends Controller
                 });
                 $row->column(3, function (Column $column) {
                     $term = Auth::user()->ent->dpTerm();
-                    $r = ReportFinanceModel::where([
+                    $val = StockBatch::where([
                         'enterprise_id' => $term->enterprise_id,
                         'term_id' => $term->id
-                    ])->first();
-                    $val = 0;
-                    if ($r) {
-                        $val = ($r->total_stock_value);
-                    }
+                    ])->sum('worth'); 
                     $column->append(view('widgets.box-5', [
                         'is_dark' => false,
                         'title' => 'Stock Value',
