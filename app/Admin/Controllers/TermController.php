@@ -32,7 +32,6 @@ class TermController extends AdminController
             ->where(
                 [
                     'enterprise_id' => Admin::user()->enterprise_id,
-                    'academic_year_id' => Admin::user()->ent->dp_year,
                 ]
             );
 
