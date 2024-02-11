@@ -469,6 +469,7 @@ class Utils  extends Model
             }
         }
 
+        Utils::prepare_pending_things($u);
         Utils::create_documents($u);
         return;
         Utils::prepare_optional_subject_pickers();
@@ -477,7 +478,6 @@ class Utils  extends Model
         Utils::create_make_parents($u);
         Utils::create_secondary_school_subjects($u);
         Utils::prepare_session_participations($u);
-        Utils::prepare_pending_things($u);
 
 
 
