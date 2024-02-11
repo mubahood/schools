@@ -469,8 +469,8 @@ class Utils  extends Model
             }
         }
 
-        Utils::prepare_pending_things($u);
         Utils::create_documents($u);
+        Utils::prepare_pending_things($u);
         return;
         Utils::prepare_optional_subject_pickers();
         Utils::delete_contraentries($u);
