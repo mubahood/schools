@@ -51,7 +51,7 @@ class HomeController extends Controller
 
         $u = Admin::user();
 
-        $warnings = Utils::get_system_warnings($u->ent);
+        //$warnings = Utils::get_system_warnings($u->ent);
 
         if (!empty($warnings)) {
             $content->row(function (Row $row) use ($warnings) {
