@@ -53,7 +53,7 @@ if ($u != null) {
 }
 
 if ($u != null) {
-    Utils::system_boot($u);
+    //Utils::system_boot($u);
 }
 
 
