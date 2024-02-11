@@ -72,6 +72,16 @@ class StudentHasClassController extends AdminController
             $grid->disableActions();
         }
 
+        $u = Admin::user();
+        $year = $u->ent->active_academic_year();
+        if ($year == null) {
+            die('No active academic year found.');
+        }
+
+        if((!isset($_GET['academic_year_id'])) && (!isset($_GET['academic_class_id']))){
+            $grid->model()->where('academic_year_id', $year->id);
+        }
+
         $grid->actions(function ($actions) {
             $actions->disableDelete();
         });
@@ -82,6 +92,7 @@ class StudentHasClassController extends AdminController
         });
 
         $grid->disableExport();
+        $grid->disableBatchActions();
 
         $grid->filter(function ($filter) {
             // Remove the default id filter
@@ -93,6 +104,11 @@ class StudentHasClassController extends AdminController
                 'enterprise_id' => $u->enterprise_id
             ])->orderBy('id', 'Desc')->get()->pluck('name_text', 'id'));
 
+            $year = $u->ent->active_academic_year();
+            if ($year == null) {
+                die('No active academic year found.');
+            }
+
             $streams = [];
             foreach (AcademicClassSctream::where(
                 [
@@ -101,6 +117,12 @@ class StudentHasClassController extends AdminController
             )
                 ->orderBy('id', 'desc')
                 ->get() as $ex) {
+                if ($ex->academic_class == null) {
+                    continue;
+                }
+                if ($ex->academic_class->academic_year_id != $year->id) {
+                    continue;
+                }
                 $streams[$ex->id] = $ex->academic_class->short_name . " - " . $ex->name;
             }
 
@@ -140,7 +162,7 @@ class StudentHasClassController extends AdminController
             ->lightbox(['width' => 60, 'height' => 60]);
 
 
-        $grid->column('id', __('Id'))
+        /*   $grid->column('id', __('Id'))
             ->display(function ($title) {
                 $u = Admin::user();
                 if ($this->class->enterprise_id != $u->enterprise_id) {
@@ -148,7 +170,7 @@ class StudentHasClassController extends AdminController
                 }
                 return $title;
             })
-            ->sortable();
+            ->sortable(); */
         /*    $grid->column('done_selecting_option_courses', __('FROM P7'))
         ->using([
             1 => 'From P.7',
@@ -176,7 +198,7 @@ class StudentHasClassController extends AdminController
                 return "-";
             }
             return  $this->class->name_text;
-        });
+        })->sortable();
         $grid->column('stream_id', __('Stream'))->display(function () {
             if (!$this->stream) {
                 return "-";

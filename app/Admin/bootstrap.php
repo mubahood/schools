@@ -35,8 +35,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
+$studentHasClass = \App\Models\StudentHasClass::find(5327);
 
-Encore\Admin\Form::forget(['map', 'editor']);
+
+/* $studentHasClass->new_curriculum_optional_subjects = rand(1, 100);
+$studentHasClass->save();
+dd($studentHasClass); 
+Encore\Admin\Form::forget(['map', 'editor']); */
 
 $u = Auth::user();
 if ($u != null) {

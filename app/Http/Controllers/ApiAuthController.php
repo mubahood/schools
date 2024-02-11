@@ -18,23 +18,6 @@ class ApiAuthController extends Controller
     use ApiResponser;
 
     /**
-     * Create a new AuthController instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-
-        /* $token = auth('api')->attempt([
-            'username' => 'admin',
-            'password' => 'admin',
-        ]);
-        die($token); */
-        $this->middleware('auth:api', ['except' => ['login', 'register']]);
-    }
-
-
-    /**
      * Get a JWT via given credentials.
      *
      * @return \Illuminate\Http\JsonResponse

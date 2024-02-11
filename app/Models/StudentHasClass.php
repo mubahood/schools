@@ -19,7 +19,7 @@ class StudentHasClass extends Model
     {
         return $this->hasOne(StudentOptionalSubjectPicker::class, 'student_has_class_id');
     }
-    
+
 
 
     public static function boot()
@@ -88,6 +88,12 @@ class StudentHasClass extends Model
                 ->orderBy('id', 'desc')
                 ->get();
             foreach ($classes as $cla) {
+                if ($cla->year == null) {
+                    continue;
+                }
+                if ($cla->year->is_active != 1) {
+                    continue;
+                }
                 $u->current_class_id = $cla->academic_class_id;
                 $u->stream_id = $cla->stream_id;
                 $u->save();
@@ -102,8 +108,14 @@ class StudentHasClass extends Model
                 ->orderBy('id', 'desc')
                 ->get();
             foreach ($classes as $cla) {
+                if ($cla->year == null) {
+                    continue;
+                }
+                if ($cla->year->is_active != 1) {
+                    continue;
+                }
                 $u->current_class_id = $cla->academic_class_id;
-                $u->stream_id = 0;
+                $u->stream_id = $cla->stream_id;
                 $u->save();
                 break;
             }
@@ -159,13 +171,13 @@ class StudentHasClass extends Model
         return $this->hasMany(StudentHasSubjectOldCurriculum::class, 'student_has_class_id');
     }
 
-  
+
 
     //has many StudentHasSecondarySubject relationship
     public function secondary_subjects()
     {
         return $this->hasMany(StudentHasSecondarySubject::class, 'student_has_class_id');
-    } 
+    }
 
     function getAcademicClassTextAttribute()
     {

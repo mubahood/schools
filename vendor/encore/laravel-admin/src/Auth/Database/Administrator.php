@@ -24,7 +24,6 @@ use Illuminate\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Tymon\JWTAuth\Contracts\JWTSubject;
@@ -38,7 +37,6 @@ use Mockery\Matcher\Subset;
  */
 class Administrator extends Model implements AuthenticatableContract, JWTSubject
 {
-    use SoftDeletes;
     use Authenticatable;
     use HasPermissions;
     use DefaultDatetimeFormat;
@@ -358,6 +356,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                 die("enterprise is required");
             }
 
+
             if ($model->status == 1) {
                 $current_class = AcademicClass::find($model->current_class_id);
                 if ($current_class == null) {
@@ -512,6 +511,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                     }
                 }
             } */
+
 
             return $model;
         });

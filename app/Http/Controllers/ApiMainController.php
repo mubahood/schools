@@ -30,18 +30,6 @@ class ApiMainController extends Controller
 
     use ApiResponser;
 
-    /**
-     * Create a new AuthController instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-
-
-        $this->middleware('auth:api');
-    }
-
 
     public function update_guardian($id, Request $r)
     {

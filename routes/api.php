@@ -3,6 +3,7 @@
 use App\Http\Controllers\ApiAuthController;
 use App\Http\Controllers\ApiMainController;
 use App\Http\Controllers\QuickSearchController;
+use App\Http\Middleware\JwtMiddleware;
 use App\Models\AcademicClass;
 use App\Models\AcademicClassSctream;
 use App\Models\Book;
@@ -20,7 +21,7 @@ use Illuminate\Support\Facades\Route;
 Route::POST("users/register", [ApiAuthController::class, "register"]);
 Route::POST("users/login", [ApiAuthController::class, "login"]);
 
-Route::group(['middleware' => 'api'], function ($router) {
+Route::middleware([JwtMiddleware::class])->group(function () {
     Route::get("student-verification", [ApiMainController::class, 'student_verification']);
     Route::get("service-subscriptions", [ApiMainController::class, 'service_subscriptions']);
     Route::post("service-subscriptions", [ApiMainController::class, 'service_subscriptions_store']);
