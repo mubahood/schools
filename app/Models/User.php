@@ -13,7 +13,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 
-class User extends Authenticatable implements JWTSubject
+class User extends Administrator implements JWTSubject
 {
     use HasApiTokens, HasFactory, Notifiable;
     protected $table = 'admin_users';

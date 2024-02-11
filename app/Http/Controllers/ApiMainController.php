@@ -159,7 +159,32 @@ class ApiMainController extends Controller
     public function classes()
     {
         $u = auth('api')->user();
+        if($u == null){
+            return $this->error('User not found.');
+        }
         return $this->success($u->get_my_all_classes(), $message = "Success", 200);
+    }
+
+    public function participants()
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        $ent = $u->ent;
+        if ($ent == null) {
+            return $this->error('Enterprise not found.');
+        }
+        $active_term = $ent->active_term();
+        if ($active_term == null) {
+            return $this->error('Active term not found.');
+        }
+        $data = Participant::where([
+            'enterprise_id' => $u->enterprise_id,
+            'term_id' => $active_term->id
+        ])->limit(100000)->orderBy('id', 'desc')->get();
+
+        return $this->success($data, $message = "Success", 200);
     }
 
     public function streams()
@@ -233,7 +258,7 @@ class ApiMainController extends Controller
         $m = $session;
 
         //$cands = $m->getCandidates($r->stream_id);
-        
+
         $cands = StudentHasClass::where([
             'stream_id' => $m->stream_id,
         ])->get();
@@ -251,7 +276,7 @@ class ApiMainController extends Controller
             $p->service_id = $m->service_id;
             $p->is_done = 1;
             $p->session_id = $m->id;
-            
+
             if (in_array($p->administrator_id, $present)) {
                 $p->is_present = 1;
             } else {
@@ -783,8 +808,19 @@ class ApiMainController extends Controller
                 return $this->success(null, $message = "File not found.", 200);
             }
 
-            $image = Utils::upload_images_1($_FILES, true);
+            //$image = Utils::upload_images_1($_FILES, true);
 
+            $image = null;
+            if (!empty($_FILES)) {
+                try {
+                    //$image = Utils::upload_images_2($_FILES, true);
+                    if ($r->file('file') != null) {
+                        $image = Utils::file_upload($r->file('file'));
+                    }
+                } catch (Throwable $t) {
+                    $image = null;
+                }
+            } 
             if ($image != null) {
                 if (strlen($image) > 3) {
                     $acc->avatar = $image;

@@ -44,6 +44,10 @@ Route::middleware([JwtMiddleware::class])->group(function () {
     Route::get("my-sessions", [ApiMainController::class, 'my_sessions']);
     Route::get("my-students", [ApiMainController::class, 'get_my_students']);
     Route::post("post-media-upload", [ApiMainController::class, 'upload_media']);
+
+    //=====ATTENDANCE========//
+    Route::get("participants", [ApiMainController::class, 'participants']);
+    /* ====== END OF ATTENDANCE ====== */
 });
 
 

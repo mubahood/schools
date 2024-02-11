@@ -17,4 +17,5 @@ class Participant extends Model
         return $this->belongsTo(Administrator::class, 'administrator_id');
     }
 
+    
 }

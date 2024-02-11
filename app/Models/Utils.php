@@ -48,6 +48,17 @@ define('COLORS',  [
 class Utils  extends Model
 {
 
+    public function file_uploading(Request $r)
+    {
+        $path = Utils::file_upload($r->file('photo'));
+        if ($path == '') {
+            Utils::error("File not uploaded.");
+        }
+        Utils::success([
+            'file_name' => $path,
+        ], "File uploaded successfully.");
+    }
+
     public static function get_system_warnings($ent)
     {
         $warnings = [];
