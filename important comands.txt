@@ -3,10 +3,7 @@ php artisan make:migration add_cols_to_enterprises --table=enterprises
 php artisan make:migration seed_settings_menus
 
 
-php artisan admin:make OnlineCourseStudentBatchImporterController --model=App\\Models\\OnlineCourseStudentBatchImporter
+php artisan admin:make DisciplinaryRecordController --model=App\\Models\\DisciplinaryRecord
 
-php artisan make:model OnlineCourseStudentBatchImporter -m
-
-php artisan make:seeder OnlineCourseStudentBatchImporter
-
+php artisan make:model DisciplinaryRecord -m
  

@@ -107,8 +107,7 @@ class UserPhotosBatchImporterController extends AdminController
 
 
         /* 
-        $users = Administrator::all();
-
+ 
         $X = 1;
         foreach ($users as $u) {
             $u->phone_number_1 = Utils::prepare_phone_number($u->phone_number_1);

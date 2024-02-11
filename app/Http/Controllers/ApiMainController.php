@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AcademicClass;
 use App\Models\AcademicClassSctream;
 use App\Models\Account;
+use App\Models\DisciplinaryRecord;
 use App\Models\Mark;
 use App\Models\Participant;
 use App\Models\Service;
@@ -19,6 +20,7 @@ use App\Models\Utils;
 use App\Traits\ApiResponser;
 use Carbon\Carbon;
 use Encore\Admin\Auth\Database\Administrator;
+use Encore\Admin\Form\Field\Display;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
@@ -159,10 +161,31 @@ class ApiMainController extends Controller
     public function classes()
     {
         $u = auth('api')->user();
-        if($u == null){
+        if ($u == null) {
             return $this->error('User not found.');
         }
         return $this->success($u->get_my_all_classes(), $message = "Success", 200);
+    }
+
+    public function disciplinary_records()
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        $ent = $u->ent;
+        if ($ent == null) {
+            return $this->error('Enterprise not found.');
+        }
+        $active_term = $ent->active_term();
+        if ($active_term == null) {
+            return $this->error('Active term not found.');
+        }
+        $data = DisciplinaryRecord::where([
+            'enterprise_id' => $u->enterprise_id,
+        ])->limit(100000)->orderBy('id', 'desc')->get();
+
+        return $this->success($data, $message = "Success", 200);
     }
 
     public function participants()
@@ -820,7 +843,7 @@ class ApiMainController extends Controller
                 } catch (Throwable $t) {
                     $image = null;
                 }
-            } 
+            }
             if ($image != null) {
                 if (strlen($image) > 3) {
                     $acc->avatar = $image;

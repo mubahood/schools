@@ -100,6 +100,8 @@ Route::group([
     $router->resource('subject-teacher-remarks', SubjectTeacherRemarkController::class);
     $router->resource('class-teacher-comments', ClassTeacherCommentController::class);
     $router->resource('head-teacher-comments', HeadTeacherCommentCommentController::class);
+    $router->resource('disciplinary-records', DisciplinaryRecordController::class);
+
 
     //Hostel Routes
     $router->resource('buildings', BuildingController::class);

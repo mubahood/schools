@@ -179,6 +179,7 @@ return array(
     'App\\Models\\CreditPurchase' => $baseDir . '/app/Models/CreditPurchase.php',
     'App\\Models\\Demo' => $baseDir . '/app/Models/Demo.php',
     'App\\Models\\DirectMessage' => $baseDir . '/app/Models/DirectMessage.php',
+    'App\\Models\\DisciplinaryRecord' => $baseDir . '/app/Models/DisciplinaryRecord.php',
     'App\\Models\\Document' => $baseDir . '/app/Models/Document.php',
     'App\\Models\\Enterprise' => $baseDir . '/app/Models/Enterprise.php',
     'App\\Models\\Exam' => $baseDir . '/app/Models/Exam.php',

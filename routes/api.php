@@ -47,6 +47,7 @@ Route::middleware([JwtMiddleware::class])->group(function () {
 
     //=====ATTENDANCE========//
     Route::get("participants", [ApiMainController::class, 'participants']);
+    Route::get("disciplinary-records", [ApiMainController::class, 'disciplinary_records']);
     /* ====== END OF ATTENDANCE ====== */
 });
 

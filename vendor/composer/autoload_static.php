@@ -870,6 +870,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Models\\CreditPurchase' => __DIR__ . '/../..' . '/app/Models/CreditPurchase.php',
         'App\\Models\\Demo' => __DIR__ . '/../..' . '/app/Models/Demo.php',
         'App\\Models\\DirectMessage' => __DIR__ . '/../..' . '/app/Models/DirectMessage.php',
+        'App\\Models\\DisciplinaryRecord' => __DIR__ . '/../..' . '/app/Models/DisciplinaryRecord.php',
         'App\\Models\\Document' => __DIR__ . '/../..' . '/app/Models/Document.php',
         'App\\Models\\Enterprise' => __DIR__ . '/../..' . '/app/Models/Enterprise.php',
         'App\\Models\\Exam' => __DIR__ . '/../..' . '/app/Models/Exam.php',

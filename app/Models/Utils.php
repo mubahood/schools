@@ -48,16 +48,19 @@ define('COLORS',  [
 class Utils  extends Model
 {
 
-    public function file_uploading(Request $r)
+    public static function file_upload($file)
     {
-        $path = Utils::file_upload($r->file('photo'));
-        if ($path == '') {
-            Utils::error("File not uploaded.");
+        if ($file == null) {
+            return '';
         }
-        Utils::success([
-            'file_name' => $path,
-        ], "File uploaded successfully.");
-    }
+        //get file extension
+        $file_extension = $file->getClientOriginalExtension();
+        $file_name = time() . "_" . rand(1000, 100000) . "." . $file_extension;
+        $public_path = public_path() . "/storage/images";
+        $file->move($public_path, $file_name);
+        $url = 'images/' . $file_name;
+        return $url;
+    }  
 
     public static function get_system_warnings($ent)
     {
@@ -466,11 +469,12 @@ class Utils  extends Model
             }
         }
 
+        Utils::create_documents($u);
+        return;
         Utils::prepare_optional_subject_pickers();
         Utils::delete_contraentries($u);
         Utils::rectify_terms_forItransactions($u);
         Utils::create_make_parents($u);
-        Utils::create_documents($u);
         Utils::create_secondary_school_subjects($u);
         Utils::prepare_session_participations($u);
         Utils::prepare_pending_things($u);
