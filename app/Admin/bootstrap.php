@@ -53,7 +53,6 @@ if ($u != null) {
 }
 
 if ($u != null) {
-    Utils::prepare_pending_things($u);
     Utils::system_boot($u);
 }
 
