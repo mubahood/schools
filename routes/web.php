@@ -21,6 +21,7 @@ use App\Models\ReportsFinance;
 use App\Models\TheologyMarkRecord;
 use App\Models\StudentHasClass;
 use App\Models\StudentHasFee;
+use App\Models\StudentReportCard;
 use App\Models\Subject;
 use App\Models\Term;
 use App\Models\TermlyReportCard;
@@ -77,6 +78,30 @@ Route::get('generate-variables', [MainController::class, 'generate_variables']);
 Route::get('process-photos', [MainController::class, 'process_photos']);
 Route::get('student-data-import', [MainController::class, 'student_data_import']);
 Route::get('prepare-things', [Utils::class, 'prepare_things']);
+Route::get('generate-report-card', function () {
+  $rep = StudentReportCard::find($_GET['id']);
+  $rep->download_self();
+  $url = url('storage/files/' . $rep->pdf_url);
+  header('Location: ' . $url);
+  die();
+});
+Route::get('generate-report-cards', function () {
+
+  $i = 0;
+  $reps = StudentReportCard::where(
+    [
+      'termly_report_card_id' => $_GET['id']
+    ]
+  )->get();
+  foreach ($reps as $key => $rep) {
+    if ($rep->owner == null) continue;
+    $i++;
+    $rep->download_self();
+    $url = url('storage/files/' . $rep->pdf_url);
+    echo $i . ". " . $rep->owner->name . ", <a href='$url' target='_blank'>Download</a><br>";
+  }
+  die();
+});
 
 Route::get('reports-finance-process', function (Request $request) {
   $rep = ReportFinanceModel::find($request->id);

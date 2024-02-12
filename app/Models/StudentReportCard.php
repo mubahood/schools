@@ -2,13 +2,55 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Encore\Admin\Auth\Database\Administrator;
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class StudentReportCard extends Model
 {
     use HasFactory;
+
+    public function download_self()
+    {
+        if ($this->owner == null) {
+            return;
+        }
+
+        if ($this->termly_report_card == null) {
+            return;
+        }
+
+        $download_url = url('print') . '?id=' . $this->id;
+        $public_path = public_path() . '/storage/files';
+
+        $name = strtolower($this->owner->first_name . "-" . $this->owner->last_name);
+        $name = strtolower($name);
+        $name = $name . "-" . $this->id . ".pdf";
+        $local_file_path = $public_path . '/' . $name;
+
+        //set unlimited time limit
+        set_time_limit(0);
+        ini_set('memory_limit', '-1');
+
+        try {
+            //download file
+            $ch = curl_init($download_url);
+            $fp = fopen($local_file_path, 'wb');
+            curl_setopt($ch, CURLOPT_FILE, $fp);
+            curl_setopt($ch, CURLOPT_HEADER, 0);
+            curl_exec($ch);
+            $this->pdf_url = $name;
+            $this->date_gnerated = Carbon::now();
+            $this->vatar = $this->owner->avatar;
+            $this->is_ready = $this->termly_report_card->reports_display_report_to_parents;
+            $this->save();
+        } catch (\Throwable $th) {
+            throw new Exception("Error Processing Request", 1);
+            return false;
+        }
+    }
 
     function termly_report_card()
     {
@@ -99,4 +141,69 @@ class StudentReportCard extends Model
     {
         return $this->hasMany(StudentReportCardItem::class);
     }
+
+    //getter for vatar
+    public function getVatarAttribute()
+    {
+        if ($this->owner == null) {
+            return "";
+        }
+        return $this->owner->avatar;
+    }
+    
+    //append for student_text
+    protected $appends = ['student_text','academic_class_text'];
+
+    //getter for student_text
+    public function getStudentTextAttribute()
+    {
+        if ($this->owner == null) {
+            return "N/A";
+        }
+        return $this->owner->name;
+    } 
+    //Getter for academic_class_text
+    public function getAcademicClassTextAttribute()
+    {
+        if ($this->academic_class == null) {
+            return "";
+        }
+        return $this->academic_class->name;
+    } 
+    
 }
+/* 
+  String enterprise_id = "";
+  String enterprise_text = "";
+  String academic_year_id = "";
+  String academic_year_text = "";
+  String term_id = "";
+  String term_text = "";
+  String student_id = "";
+  String  = "";
+  String academic_class_id = "";
+  String academic_class_text = "";
+  String termly_report_card_id = "";
+  String termly_report_card_text = "";
+  String total_marks = "";
+  String total_aggregates = "";
+  String position = "";
+  String class_teacher_comment = "";
+  String head_teacher_comment = "";
+  String class_teacher_commented = "";
+  String head_teacher_commented = "";
+  String total_students = "";
+  String average_aggregates = "";
+  String grade = "";
+  String stream_id = "";
+  String stream_text = "";
+  String sports_comment = "";
+  String mentor_comment = "";
+  String nurse_comment = "";
+  String parent_can_view = "";
+  String is_ready = "";
+  String date_gnerated = "";
+  String pdf_url = "";
+  String vatar = "";
+
+*/

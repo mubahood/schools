@@ -52,12 +52,12 @@ class StudentReportCardController extends AdminController
 
                     foreach (AcademicClass::where([
                         'enterprise_id' => $u->enterprise_id,
-                        'academic_year_id' => $term->academic_year_id 
+                        'academic_year_id' => $term->academic_year_id
                     ])
                         ->orderBy('id', 'Desc')
                         ->get() as $v) {
 
-                       
+
 
                         $rs = StudentReportCard::where([
                             'term_id' => $term_id,
@@ -72,7 +72,7 @@ class StudentReportCardController extends AdminController
                             count($rs),
                             '<a target="_blank" href="' . url('print?calss_id=' . $v->id) . '&term_id=' . $term_id . '&termly_report_card_id=1">PRINT REPORTS</a>',
 
-/*                             '<a target="_blank" href="' . url('print?calss_id=' . $v->id) . '&term_id=' . $term_id . '&termly_report_card_id=1&task=blank">PRINT BLANK</a>' */
+                            /*                             '<a target="_blank" href="' . url('print?calss_id=' . $v->id) . '&term_id=' . $term_id . '&termly_report_card_id=1&task=blank">PRINT BLANK</a>' */
                         ];
                     }
 
@@ -406,11 +406,21 @@ class StudentReportCardController extends AdminController
 
 
         $grid->column('print', __('Print'))->display(function ($m) {
-            $d = '<a target="_blank" href="' . url('print?id=' . $this->id) . '" >PRINT</a>';
-            $d .= '<br><a target="_blank" href="' . url('student-report-card-items?student_report_card_id=' . $this->id) . '" >EDIT</a>';
+            $d = '<a class="btn btn-sm btn-primary" target="_blank" href="' . url('print?id=' . $this->id) . '" >PRINT</a><br>';
+            $d .= '<a class="btn btn-sm btn-info" target="_blank" href="' . url('generate-report-card?id=' . $this->id) . '" >GENERATE PDF NOW</a><br>';
+            if (
+                ($this->pdf_url != null) &&
+                strlen($this->pdf_url) > 3
+            ) {
+                $url = url('storage/files/' . $this->pdf_url);
+                $d .= '<a class="btn btn-sm btn-success" target="_blank" href="' . $url . '" >DOWNLOAD PDF</a>';
+            }
+
+            $d .= '<br><a class="btn btn-sm btn-warning" target="_blank" href="' . url('student-report-card-items?student_report_card_id=' . $this->id) . '" >EDIT</a>';
             return $d;
         });
 
+        $grid->column('is_ready', __('Ready for parent view'))->editable('select', ['No' => 'No', 'Yes' => 'Yes'])->sortable();
         return $grid;
     }
 

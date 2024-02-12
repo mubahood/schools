@@ -1,4 +1,4 @@
-php artisan make:migration add_link_to_admin_users --table=admin_users
+php artisan make:migration add_download_and_pdf_student_report_cards --table=student_report_cards
 
 php artisan make:migration seed_settings_menus
 

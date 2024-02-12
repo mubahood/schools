@@ -31,7 +31,7 @@ class TermlyReportCardController extends AdminController
     {
 
 
-  
+
         // die("done");
         // $x->reports_generate = 'No';
         // $x->reports_include_bot = 'Yes';
@@ -132,6 +132,12 @@ class TermlyReportCardController extends AdminController
         $grid->column('has_beginning_term', __('Has beginning term'))->bool()->hide();
         $grid->column('has_mid_term', __('Has mid term'))->bool()->hide();
         $grid->column('has_end_term', __('Has end term'))->bool()->hide();
+
+        $grid->column('print', __('Print'))->display(function ($m) {
+            $d = '<a class="btn btn-sm btn-info" target="_blank" href="' . url('generate-report-cards?id=' . $this->id) . '" >BULK PDFs GENERATE</a><br>';
+            return $d;
+        });
+
 
         return $grid;
     }

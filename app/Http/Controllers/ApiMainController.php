@@ -13,6 +13,7 @@ use App\Models\Service;
 use App\Models\ServiceSubscription;
 use App\Models\Session;
 use App\Models\StudentHasClass;
+use App\Models\StudentReportCard;
 use App\Models\TheologyStream;
 use App\Models\Transaction;
 use App\Models\User;
@@ -165,6 +166,32 @@ class ApiMainController extends Controller
             return $this->error('User not found.');
         }
         return $this->success($u->get_my_all_classes(), $message = "Success", 200);
+    }
+
+    public function student_report_cards()
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        $ent = $u->ent;
+        if ($ent == null) {
+            return $this->error('Enterprise not found.');
+        }
+
+
+        $students = $u->get_my_students($u);
+        foreach ($students as $key => $value) {
+            $parents_conditions[] =  $value->id;
+        }
+
+        return $this->success(StudentReportCard::whereIn(
+            'student_id',
+            $parents_conditions
+        )
+            ->limit(10000)->orderBy('id', 'desc')->get(), $message = "Success", 200);
+
+        return $this->success($data, $message = "Success", 200);
     }
 
     public function disciplinary_records()

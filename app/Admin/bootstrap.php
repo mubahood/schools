@@ -25,6 +25,7 @@ use App\Models\Enterprise;
 use App\Models\MainCourse;
 use App\Models\MarkRecord;
 use App\Models\ParentCourse;
+use App\Models\StudentReportCard;
 use App\Models\Term;
 use App\Models\TheologyMarkRecord;
 use App\Models\Transaction;
@@ -35,7 +36,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-$studentHasClass = \App\Models\StudentHasClass::find(5327);
+/* $rep = StudentReportCard::find(5120);
+$rep->download_self(); */
 
 
 /* $studentHasClass->new_curriculum_optional_subjects = rand(1, 100);
