@@ -46,7 +46,7 @@ class EmployeesController extends AdminController
         if (strpos(url()->current(), 'not-active-employees') !== false) {
             $status = 0;
         }
- 
+
         /*         $ git add  .git/MERGE_MSG -f
 
 
@@ -134,19 +134,18 @@ class EmployeesController extends AdminController
         $grid->column('phd_university_name')->hide();
         $grid->column('phd_university_year_graduated')->hide();
         $grid->column('status', __('Status'))
-            ->display(function ($status) {
-                if ($status) {
-                    return "Active";
-                } else {
-                    return "Not Active";
-                }
-            })
-            ->sortable()
             ->label([
-                1 => 'success',
                 0 => 'danger',
+                1 => 'success'
+            ], 'Not Active')
+            ->using([
+                0 => 'Not Active',
+                1 => 'Active'
+            ], 'Not Active')
+            ->filter([
+                0 => 'Not Active',
+                1 => 'Active'
             ]);
-
         return $grid;
     }
 
