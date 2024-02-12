@@ -180,16 +180,26 @@ class ApiMainController extends Controller
         }
 
 
-        $students = $u->get_my_students($u);
-        foreach ($students as $key => $value) {
-            $parents_conditions[] =  $value->id;
-        }
 
-        return $this->success(StudentReportCard::whereIn(
-            'student_id',
-            $parents_conditions
-        )
-            ->limit(10000)->orderBy('id', 'desc')->get(), $message = "Success", 200);
+
+        $data = [];
+
+        if ($u->user_type == 'employee') {
+            $data = StudentReportCard::where([
+                'enterprise_id' => $u->enterprise_id,
+            ])
+                ->limit(10000)->orderBy('id', 'desc')->get();
+        } else {
+            $students = $u->get_my_students($u);
+            foreach ($students as $key => $value) {
+                $parents_conditions[] =  $value->id;
+            }
+            $data = StudentReportCard::whereIn(
+                'student_id',
+                $parents_conditions
+            )
+                ->limit(10000)->orderBy('id', 'desc')->get();
+        }
 
         return $this->success($data, $message = "Success", 200);
     }
