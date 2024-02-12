@@ -47,7 +47,7 @@ class StudentReportCard extends Model
             $this->is_ready = $this->termly_report_card->reports_display_report_to_parents;
             $this->save();
         } catch (\Throwable $th) {
-            throw new Exception("Error Processing Request", 1);
+            throw new Exception("error ".$th->getMessage());
             return false;
         }
     }

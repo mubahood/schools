@@ -15,7 +15,7 @@ class AddLinkToAdminUsers extends Migration
     {
         Schema::table('admin_users', function (Blueprint $table) {
             $table->string('lin')->nullable()->unique();
-            $table->string('occupation')->nullable();
+            $table->string('occupation')->nullable(); 
         });
     }
 
