@@ -442,7 +442,7 @@ class Dashboard
             ->orderBy('id', 'desc')
             ->limit(8)
             ->get();
-        return view('dashboard.recent_fees_bills', $data); 
+        return view('dashboard.recent_fees_bills', $data);
     }
 
 
@@ -672,12 +672,14 @@ class Dashboard
         $all_students = User::where([
             'enterprise_id' => $u->enterprise_id,
             'user_type' => 'employee',
+            'status' => 1
         ])->count();
 
         $male_students = User::where([
             'enterprise_id' => $u->enterprise_id,
             'user_type' => 'employee',
             'sex' => 'Male',
+            'status' => 1
         ])->count();
 
         $female_students = $all_students - $male_students;

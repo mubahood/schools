@@ -430,6 +430,7 @@ class StudentsController extends AdminController
             $form->text('first_name')->rules('required');
             $form->text('given_name');
             $form->text('last_name');
+            $form->text('lin', 'Student\'s LIN')->rules('unique:admin_users,lin,{{id}}');
 
             $form->text('school_pay_payment_code');
             $form->text('school_pay_account_id');
@@ -489,6 +490,7 @@ class StudentsController extends AdminController
             $form->text('father_phone', "Father's phone number");
             $form->text('mother_name', "Mother's name");
             $form->text('mother_phone', "Mother's phone number");
+            $form->text('occupation', 'Guardian occupation');
 
             $form->text('nationality');
         });

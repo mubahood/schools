@@ -21,6 +21,15 @@ class EmployeesController extends AdminController
      */
     protected $title = 'Teaching & non teaching staff';
 
+    protected function title()
+    {
+        //check if url contains 'not-active-employees'
+        if (strpos(url()->current(), 'not-active-employees') !== false) {
+            return "All employees";
+        }
+        return "Teaching & non teaching staff.";
+    }
+
     /**
      * Make a grid builder.
      *
@@ -33,16 +42,29 @@ class EmployeesController extends AdminController
             $actions->disableDelete();
         });
 
+        $status = 1;
+        if (strpos(url()->current(), 'not-active-employees') !== false) {
+            $status = 0;
+        }
+ 
         /*         $ git add  .git/MERGE_MSG -f
 
 
         UW PICO 5.09                 File: /home4/schooics/public_html/.git/MERGE_MSG                 Modified   */
+
+        $cons = [
+            'enterprise_id' => Admin::user()->enterprise_id,
+            'user_type' => 'employee',
+        ];
+        if ($status == 1) {
+            $cons['status'] = 1;
+        }
+
         $grid->model()
             ->orderBy('id', 'Desc')
-            ->where([
-                'enterprise_id' => Admin::user()->enterprise_id,
-                'user_type' => 'employee'
-            ]);
+            ->where(
+                $cons
+            );
         $grid->actions(function ($actions) {
             //$actions->disableView();
         });
@@ -111,6 +133,19 @@ class EmployeesController extends AdminController
         $grid->column('masters_university_year_graduated')->hide();
         $grid->column('phd_university_name')->hide();
         $grid->column('phd_university_year_graduated')->hide();
+        $grid->column('status', __('Status'))
+            ->display(function ($status) {
+                if ($status) {
+                    return "Active";
+                } else {
+                    return "Not Active";
+                }
+            })
+            ->sortable()
+            ->label([
+                1 => 'success',
+                0 => 'danger',
+            ]);
 
         return $grid;
     }
@@ -244,9 +279,9 @@ class EmployeesController extends AdminController
         $form->image('avatar', trans('admin.avatar'));
 
         $form->email('email', 'Email address')
-            ->creationRules([ "unique:admin_users"]);
+            ->creationRules(["unique:admin_users"]);
         $form->text('username', 'Username')
-            ->creationRules([ "unique:admin_users"])
+            ->creationRules(["unique:admin_users"])
             ->updateRules(['required', "unique:admin_users,username,{{id}}"]);
 
         $form->password('password', trans('admin.password'))->rules('confirmed');
@@ -264,7 +299,12 @@ class EmployeesController extends AdminController
 
 
 
- 
+        $form->radio('status')->options([
+            1 => 'Active',
+            0 => 'Not active',
+        ])
+            ->rules('required')->default(2);
+
         $form->disableReset();
         $form->disableViewCheck();
         return $form;

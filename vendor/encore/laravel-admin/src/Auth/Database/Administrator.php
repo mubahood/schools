@@ -199,20 +199,22 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
         self::creating(function ($model) {
 
             if ($model->status == 1) {
-                $current_class = AcademicClass::find($model->current_class_id);
-                if ($current_class == null) {
-                    throw new Exception("Current class not found.", 1);
-                }
-                $ent = Enterprise::find($model->enterprise_id);
-                if ($ent == null) {
-                    throw new Exception("Enterprise not found.", 1);
-                }
-                $year = $ent->active_academic_year();
-                if ($year == null) {
-                    throw new Exception("Active academic year not found.", 1);
-                }
-                if ($current_class->academic_year_id != $year->id) {
-                    throw new Exception("Current class is not in active academic year.", 1);
+                if ($model->user_type == 'student') {
+                    $current_class = AcademicClass::find($model->current_class_id);
+                    if ($current_class == null) {
+                        throw new Exception("Current class not found.", 1);
+                    }
+                    $ent = Enterprise::find($model->enterprise_id);
+                    if ($ent == null) {
+                        throw new Exception("Enterprise not found.", 1);
+                    }
+                    $year = $ent->active_academic_year();
+                    if ($year == null) {
+                        throw new Exception("Active academic year not found.", 1);
+                    }
+                    if ($current_class->academic_year_id != $year->id) {
+                        throw new Exception("Current class is not in active academic year.", 1);
+                    }
                 }
             }
 
@@ -357,21 +359,23 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
             }
 
 
-            if ($model->status == 1) {
-                $current_class = AcademicClass::find($model->current_class_id);
-                if ($current_class == null) {
-                    throw new Exception("Current class not found.", 1);
-                }
-                $ent = Enterprise::find($model->enterprise_id);
-                if ($ent == null) {
-                    throw new Exception("Enterprise not found.", 1);
-                }
-                $year = $ent->active_academic_year();
-                if ($year == null) {
-                    throw new Exception("Active academic year not found.", 1);
-                }
-                if ($current_class->academic_year_id != $year->id) {
-                    throw new Exception("Current class is not in active academic year.", 1);
+            if ($model->user_type == 'student') {
+                if ($model->status == 1) {
+                    $current_class = AcademicClass::find($model->current_class_id);
+                    if ($current_class == null) {
+                        throw new Exception("Current class not found.", 1);
+                    }
+                    $ent = Enterprise::find($model->enterprise_id);
+                    if ($ent == null) {
+                        throw new Exception("Enterprise not found.", 1);
+                    }
+                    $year = $ent->active_academic_year();
+                    if ($year == null) {
+                        throw new Exception("Active academic year not found.", 1);
+                    }
+                    if ($current_class->academic_year_id != $year->id) {
+                        throw new Exception("Current class is not in active academic year.", 1);
+                    }
                 }
             }
 

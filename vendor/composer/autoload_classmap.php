@@ -38,6 +38,7 @@ return array(
     'App\\Admin\\Controllers\\CreditPurchaseController' => $baseDir . '/app/Admin/Controllers/CreditPurchaseController.php',
     'App\\Admin\\Controllers\\DemoController' => $baseDir . '/app/Admin/Controllers/DemoController.php',
     'App\\Admin\\Controllers\\DirectMessageController' => $baseDir . '/app/Admin/Controllers/DirectMessageController.php',
+    'App\\Admin\\Controllers\\DisciplinaryRecordController' => $baseDir . '/app/Admin/Controllers/DisciplinaryRecordController.php',
     'App\\Admin\\Controllers\\DocumentController' => $baseDir . '/app/Admin/Controllers/DocumentController.php',
     'App\\Admin\\Controllers\\EmployeesBatchImporterController' => $baseDir . '/app/Admin/Controllers/EmployeesBatchImporterController.php',
     'App\\Admin\\Controllers\\EmployeesController' => $baseDir . '/app/Admin/Controllers/EmployeesController.php',
