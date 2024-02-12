@@ -434,6 +434,7 @@ class StudentsController extends AdminController
             $form->text('school_pay_payment_code');
             $form->text('school_pay_account_id');
             $form->radio('sex', 'Gender')->options(['Male' => 'Male', 'Female' => 'Female'])->rules('required');
+            $form->date('date_of_birth', 'Date of birth');
 
 
 
@@ -495,7 +496,7 @@ class StudentsController extends AdminController
 
         if (Admin::user()->isRole('dos')) {
             $form->tab('CLASSES', function (Form $form) {
-                $form->morphMany('classes', 'CLASS ALLOCATION', function (Form\NestedForm $form) {
+                $form->morphMany('classes', 'CLASS HISTORY', function (Form\NestedForm $form) {
                     $form->html('Click on new to add this student to a class');
                     $u = Admin::user();
                     $form->hidden('enterprise_id')->default($u->enterprise_id);
@@ -504,12 +505,13 @@ class StudentsController extends AdminController
                         return AcademicClass::where([
                             'enterprise_id' => Admin::user()->enterprise_id,
                         ])->get()->pluck('name_text', 'id');
-                    })
-                        ->rules('required')->load(
-                            'stream_id',
-                            url('/api/streams?enterprise_id=' . $u->enterprise_id)
-                        );
-                });
+                    })->load(
+                        'stream_id',
+                        url('/api/streams?enterprise_id=' . $u->enterprise_id)
+                    )->readOnly();
+                })
+                    ->disableCreate()
+                    ->disableDelete();
                 $form->divider();
             });
         }
