@@ -7,8 +7,10 @@ use App\Models\AcademicClass;
 use App\Models\AcademicClassSctream;
 use App\Models\Account;
 use App\Models\DisciplinaryRecord;
+use App\Models\Enterprise;
 use App\Models\Mark;
 use App\Models\Participant;
+use App\Models\Post;
 use App\Models\Service;
 use App\Models\ServiceSubscription;
 use App\Models\Session;
@@ -503,6 +505,15 @@ class ApiMainController extends Controller
     {
         $u = auth('api')->user();
         return $this->success(Service::where([
+            'enterprise_id' => $u->enterprise_id,
+        ])->limit(10000)->orderBy('id', 'desc')->get(), $message = "Success", 200);
+    }
+
+
+    public function posts()
+    {
+        $u = auth('api')->user();
+        return $this->success(Post::where([
             'enterprise_id' => $u->enterprise_id,
         ])->limit(10000)->orderBy('id', 'desc')->get(), $message = "Success", 200);
     }
@@ -1067,5 +1078,24 @@ class ApiMainController extends Controller
         $new_user->token = $token;
         $u->remember_token = $token;
         return $this->success($new_user, 'Account created successfully.');
+    }
+
+    public function manifest()
+    {
+        $query = auth('api')->user();
+        if ($query == null) {
+            return $this->error('User not found.');
+        }
+        $admin = Administrator::find($query->id);
+        if ($admin == null) {
+            return $this->error('User not found.');
+        }
+        $admin->last_seen = Carbon::now();
+        $admin->save();
+        $ent = Enterprise::find($admin->enterprise_id);
+        if ($ent == null) {
+            return $this->error('Enterprise not found.');
+        }
+        return $this->success($ent, $message = "Profile details", 200);
     }
 }

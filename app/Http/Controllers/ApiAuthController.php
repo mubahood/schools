@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Enterprise;
 use App\Models\User;
 use App\Models\Utils;
 use App\Traits\ApiResponser;
@@ -27,6 +28,7 @@ class ApiAuthController extends Controller
         $query = auth('api')->user();
         return $this->success($query, $message = "Profile details", 200);
     }
+
 
 
     public function login(Request $r)
@@ -81,14 +83,14 @@ class ApiAuthController extends Controller
         //auth('api')->factory()->setTTL(Carbon::now()->addMonth(12)->timestamp);
 
         JWTAuth::factory()->setTTL(60 * 24 * 30 * 365);
-        
-        if($u->user_type == 'student'){
+
+        if ($u->user_type == 'student') {
             $u = Administrator::find($u->parent_id);
             if ($u == null) {
                 return $this->error('Parent account not found.');
-            }    
+            }
         }
- 
+
         $token = auth('api')->attempt([
             'id' => $u->id,
             'password' => trim($r->password),
@@ -100,7 +102,7 @@ class ApiAuthController extends Controller
         }
         $u->token = $token;
         $u->remember_token = $token;
-        $u->roles_text = json_encode($u->roles); 
+        $u->roles_text = json_encode($u->roles);
 
         return $this->success($u, 'Logged in successfully.');
     }

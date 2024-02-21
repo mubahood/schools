@@ -1,9 +1,9 @@
-php artisan make:migration add_download_and_pdf_student_report_cards --table=student_report_cards
+php artisan make:migration add_last_seen_to_admin_users --table=admin_users
 
 php artisan make:migration seed_settings_menus
 
 
-php artisan admin:make DisciplinaryRecordController --model=App\\Models\\DisciplinaryRecord
+php artisan admin:make PostViewController --model=App\\Models\\PostView
 
-php artisan make:model DisciplinaryRecord -m
+php artisan make:model PostView -m
  

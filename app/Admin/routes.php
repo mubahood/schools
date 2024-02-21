@@ -102,7 +102,9 @@ Route::group([
     $router->resource('class-teacher-comments', ClassTeacherCommentController::class);
     $router->resource('head-teacher-comments', HeadTeacherCommentCommentController::class);
     $router->resource('disciplinary-records', DisciplinaryRecordController::class);
-
+    $router->resource('posts', PostController::class);
+    $router->resource('notice-board', PostController::class);
+    $router->resource('events', PostController::class);
 
     //Hostel Routes
     $router->resource('buildings', BuildingController::class);
