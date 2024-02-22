@@ -11,6 +11,7 @@ use App\Models\Enterprise;
 use App\Models\Mark;
 use App\Models\Participant;
 use App\Models\Post;
+use App\Models\PostView;
 use App\Models\Service;
 use App\Models\ServiceSubscription;
 use App\Models\Session;
@@ -516,6 +517,32 @@ class ApiMainController extends Controller
         return $this->success(Post::where([
             'enterprise_id' => $u->enterprise_id,
         ])->limit(10000)->orderBy('id', 'desc')->get(), $message = "Success", 200);
+    }
+
+    public function post_views()
+    {
+        $u = auth('api')->user();
+        return $this->success(PostView::where([
+            'user_id' => $u->id,
+        ])->limit(10000)->orderBy('id', 'desc')->get(), $message = "Success", 200);
+    }
+
+    public function post_view_create($r)
+    {
+        if ($r->post_id == null) {
+            return $this->error('Post ID is required.');
+        }
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        $p = new PostView();
+        $p->user_id = $u->id;
+        $p->enterprise_id = $u->enterprise_id;
+        $p->post_id = $r->post_id;
+        $p->save();
+        $p = PostView::find($p->id);
+        return $this->success($p, $message = "Success", 200);
     }
 
 
