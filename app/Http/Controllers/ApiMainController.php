@@ -527,7 +527,246 @@ class ApiMainController extends Controller
         ])->limit(10000)->orderBy('id', 'desc')->get(), $message = "Success", 200);
     }
 
-    public function post_view_create($r)
+    public function update_profile(Request $r)
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        $account = Administrator::find($u->id);
+        if ($account == null) {
+            return $this->error('Account not found.');
+        }
+
+        if ($r->username != null) {
+            $exist = Administrator::where(
+                'username',
+                $r->username
+            )->where(
+                'id',
+                '!=',
+                $account->id
+            )->first();
+            if ($exist != null) {
+                return $this->error('User with same username already exist.');
+            }
+            //by email
+            $exist = Administrator::where(
+                'email',
+                $r->username
+            )->where(
+                'id',
+                '!=',
+                $account->id
+            )->first();
+        }
+
+        if ($r->email != null) {
+            $exist = Administrator::where(
+                'email',
+                $r->email
+            )->where(
+                'id',
+                '!=',
+                $account->id
+            )->first();
+            if ($exist != null) {
+                return $this->error('User with same username already exist.');
+            }
+            //other account with same email by username
+            $exist = Administrator::where(
+                'username',
+                $r->email
+            )->where(
+                'id',
+                '!=',
+                $account->id
+            )->first();
+        }
+
+        if ($r->first_name != null) {
+            $account->first_name = $r->first_name;
+        }
+
+        if ($r->last_name != null) {
+            $account->last_name = $r->last_name;
+        }
+
+        if ($r->date_of_birth != null) {
+            try {
+                $account->date_of_birth = Carbon::parse($r->date_of_birth);
+            } catch (\Throwable $th) {
+            }
+        }
+
+        if ($r->date_of_birth != null) {
+            $account->place_of_birth = $r->place_of_birth;
+        }
+
+        if ($r->sex != null) {
+            $account->sex = $r->sex;
+        }
+
+        if ($r->home_address != null) {
+            $account->home_address = $r->home_address;
+        }
+        if ($r->current_address != null) {
+            $account->current_address = $r->current_address;
+        }
+        if ($r->phone_number_1 != null) {
+            try {
+                $account->phone_number_1 = Utils::prepare_phone_number($r->phone_number_1);
+                if (Utils::is_valid_phone_number($account->phone_number_1) == false) {
+                    return $this->error('Invalid phone number.');
+                }
+            } catch (\Throwable $th) {
+                //throw $th;
+            }
+            //other account with same phone number
+            $exist = Administrator::where(
+                'phone_number_1',
+                $account->phone_number_1
+            )->where(
+                'id',
+                '!=',
+                $account->id
+            )->first();
+            if ($exist != null) {
+                return $this->error('User with same phone number already exist.');
+            }
+
+            //other account with same phone number 2
+            $exist = Administrator::where(
+                'phone_number_2',
+                $account->phone_number_1
+            )->where(
+                'id',
+                '!=',
+                $account->id
+            )->first();
+            if ($exist != null) {
+                return $this->error('User with same phone number already exist.');
+            }
+        }
+
+        //phone_number_2
+        if ($r->phone_number_2 != null) {
+            try {
+                $account->phone_number_2 = Utils::prepare_phone_number($r->phone_number_2);
+                if (Utils::is_valid_phone_number($account->phone_number_2) == false) {
+                    return $this->error('Invalid phone number.');
+                }
+            } catch (\Throwable $th) {
+                //throw $th;
+            }
+            //other account with same phone number
+            $exist = Administrator::where(
+                'phone_number_1',
+                $account->phone_number_2
+            )->where(
+                'id',
+                '!=',
+                $account->id
+            )->first();
+            if ($exist != null) {
+                return $this->error('User with same phone number already exist.');
+            }
+
+            //other account with same phone number 2
+            $exist = Administrator::where(
+                'phone_number_2',
+                $account->phone_number_2
+            )->where(
+                'id',
+                '!=',
+                $account->id
+            )->first();
+            if ($exist != null) {
+                return $this->error('User with same phone number already exist.');
+            }
+        }
+
+        //religion
+        if ($r->religion != null) {
+            $account->religion = $r->religion;
+        }
+
+        //spouse_name	
+        if ($r->spouse_name != null) {
+            $account->spouse_name = $r->spouse_name;
+        }
+
+        /*
+spouse_phone	
+father_name	
+father_phone	
+mother_name	
+mother_phone	
+languages	
+emergency_person_name	
+emergency_person_phone	
+national_id_number	
+passport_number	
+tin	
+nssf_number	
+bank_name	
+bank_account_number	
+primary_school_name	
+primary_school_year_graduated	
+seconday_school_name	
+seconday_school_year_graduated	
+high_school_name	
+high_school_year_graduated	
+degree_university_name	
+degree_university_year_graduated	
+masters_university_name	
+masters_university_year_graduated	
+phd_university_name	
+phd_university_year_graduated	
+user_type	
+demo_id	
+user_id	
+user_batch_importer_id	
+school_pay_account_id	
+school_pay_payment_code	
+given_name	
+deleted_at	
+marital_status	
+verification	
+current_class_id	
+current_theology_class_id	
+status	
+parent_id	
+main_role_id	
+stream_id	
+account_id	
+has_personal_info	
+has_educational_info	
+has_account_info	
+diploma_school_name	
+diploma_year_graduated	
+certificate_school_name	
+certificate_year_graduated	
+theology_stream_id	
+lin		
+
+        */
+
+        //occupation
+        if ($r->occupation != null) {
+            $account->occupation = $r->occupation;
+        }
+
+        try {
+            $account->save();
+        } catch (\Throwable $th) {
+            return $this->error('Failed to save record because ' . $th);
+        }
+        $acc = Administrator::find($account->id);
+        return $this->success($acc, $message = "Success", 200);
+    }
+
+    public function post_view_create(Request $r)
     {
         if ($r->post_id == null) {
             return $this->error('Post ID is required.');
@@ -543,6 +782,36 @@ class ApiMainController extends Controller
         $p->save();
         $p = PostView::find($p->id);
         return $this->success($p, $message = "Success", 200);
+    }
+    public function password_change(Request $r)
+    {
+        if ($r->current_password == null) {
+            return $this->error('Current password is required.');
+        }
+        //password
+        if ($r->password == null) {
+            return $this->error('Password is required.');
+        }
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+
+        $acc = Administrator::find($u->id);
+        if ($acc == null) {
+            return $this->error('Account not found.');
+        }
+
+        if (password_verify($r->current_password, $u->password) == false) {
+            return $this->error('Current password is incorrect.');
+        }
+        $acc->password = password_hash($r->password, PASSWORD_DEFAULT);
+        try {
+            $acc->save();
+        } catch (\Throwable $th) {
+            return $this->error('Failed to save record because ' . $th);
+        }
+        return $this->success($u, $message = "Success", 200);
     }
 
 

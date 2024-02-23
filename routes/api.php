@@ -29,6 +29,8 @@ Route::middleware([JwtMiddleware::class])->group(function () {
     Route::get("posts", [ApiMainController::class, 'posts']);
     Route::get("post-views", [ApiMainController::class, 'post_views']);
     Route::post("post-views", [ApiMainController::class, 'post_view_create']);
+    Route::post("password-change", [ApiMainController::class, 'password_change']);
+    Route::post("update-profile", [ApiMainController::class, 'update_profile']);
     Route::get("exams", [ApiMainController::class, 'exams_list']);
     Route::post("marks", [ApiMainController::class, 'mark_submit']);
     Route::get("users/me", [ApiAuthController::class, 'me']);
