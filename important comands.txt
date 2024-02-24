@@ -1,9 +1,9 @@
-php artisan make:migration add_last_seen_to_admin_users --table=admin_users
+php artisan make:migration add_cost_to_medical_records --table=medical_records
 
 php artisan make:migration seed_settings_menus
 
 
-php artisan admin:make PostViewController --model=App\\Models\\PostView
+php artisan admin:make MedicalRecordController --model=App\\Models\\MedicalRecord
 
-php artisan make:model PostView -m
+php artisan make:model MedicalRecord -m
  

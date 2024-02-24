@@ -105,6 +105,8 @@ Route::group([
     $router->resource('posts', PostController::class);
     $router->resource('notice-board', PostController::class);
     $router->resource('events', PostController::class);
+    $router->resource('diseases', DiseaseController::class);
+    $router->resource('medical-records', MedicalRecordController::class);
 
     //Hostel Routes
     $router->resource('buildings', BuildingController::class);
