@@ -118,13 +118,16 @@ class MedicalRecordController extends AdminController
         $grid->column('administered_drugs', __('Administered Drugs'))->hide();
         $grid->column('recommended_drugs', __('Recommended drugs'))->hide();
         $grid->column('specialist_instructions', __('Specialist instructions'))->hide();
-        $grid->column('specialist_remarks', __('Specialist remarks'));
+
         $grid->column('has_disease', __('Results'))
             ->dot([
                 'Positive' => 'danger',
                 'Negative' => 'success',
             ]);
-
+        $grid->column('cost', __('Cost (UGX)'))
+            ->display(function ($r) {
+                return number_format($r);
+            })->sortable(); 
         $grid->column('posted_by_id', __('Created by'))
             ->display(function ($id) {
                 $a = Administrator::find($id);
@@ -257,7 +260,7 @@ class MedicalRecordController extends AdminController
         $form->textarea('recommended_drugs', __('Recommended drugs'));
         $form->textarea('specialist_instructions', __('Specialist instructions'));
         $form->textarea('specialist_remarks', __('Specialist remarks'));
-        $form->decimal('cost', __('Estimated cost of treatment'))->rules('required');
+        $form->decimal('cost', __('Estimated cost of treatment (in UGX)'))->rules('required');
 
 
         $form->disableCreatingCheck();
