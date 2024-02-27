@@ -35,6 +35,9 @@ use App\Models\Utils;
         <div class="row">
             <div class="col-md-12">
                 @foreach ($data as $item)
+                    @php
+                        if($item->account == null) continue;
+                    @endphp
                     <div class="py-1" title="{{ $item->description }}">
                         <div title="{{ $item->account->name }}"
                             class="d-flex justify-content-between  align-items-center text-uppercase p-0 m-0"
