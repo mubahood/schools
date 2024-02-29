@@ -55,6 +55,15 @@ if ($u != null) {
 }
 
 if ($u != null) {
+    try {
+        $active_term = Admin::user()->ent->active_term();
+        $ent = Admin::user()->ent;
+        $ent->dp_year = $active_term->academic_year_id;
+        $ent->dp_term_id = $active_term->id;
+        $ent->save();
+    } catch (\Exception $e) {
+        //die($e->getMessage());
+    }
     //Utils::system_boot($u);
 }
 
