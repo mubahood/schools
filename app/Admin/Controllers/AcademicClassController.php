@@ -33,6 +33,19 @@ class AcademicClassController extends AdminController
     protected function grid()
     {
 
+        $active_term = Admin::user()->ent->active_term();
+        $ent = Admin::user()->ent;
+        $ent->dp_year = $active_term->academic_year_id;
+        $ent->dp_term_id = $active_term->id; 
+        $ent->save();
+
+        /* 
+        "dp_year" => 9
+        "school_pay_code" => "15394"
+        "school_pay_password" => "l@mps#675!!ZX*&134@jkl"
+        "has_theology" => "Yes"
+        "dp_term_id" => 27
+        */
 
         //Utils::display_system_checklist();
 
@@ -58,14 +71,13 @@ class AcademicClassController extends AdminController
             return $this->class_teacher->name;
         });
 
-        
 
-        $grid->actions(function ($x)
-        {
+
+        $grid->actions(function ($x) {
             $x->disableDelete();
             $x->disableView();
         });
-        
+
         $grid->column('details', __('Details'))->hide();
         $grid->column('streams', __('Streams'))->display(function ($ay) {
             return $this->academic_class_sctreams->count();
@@ -240,19 +252,19 @@ class AcademicClassController extends AdminController
                         'subject_type' => 'Primary'
                     ])->orwhere([
                         'subject_type' =>  'Nursery'
-                    ]) ->orwhere([
+                    ])->orwhere([
                         'subject_type' =>  'Other'
                     ])->get();
-                }else{
+                } else {
                     $subjects = MainCourse::where([
                         'subject_type' => 'Secondary'
                     ])->get();
                 }
- 
+
 
                 $form->select('course_id', 'Subject')
                     ->options(
-                        $subjects->pluck('name','id')
+                        $subjects->pluck('name', 'id')
                     )->rules('required');
 
                 $form->radio('is_optional', 'Subject type')
