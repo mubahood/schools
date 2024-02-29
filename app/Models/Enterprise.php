@@ -70,6 +70,7 @@ class Enterprise extends Model
     public function dpYear()
     {
 
+        return $this->active_academic_year();
         $dp = AcademicYear::where([
             'enterprise_id' => $this->id,
             'id' => $this->dp_year,
