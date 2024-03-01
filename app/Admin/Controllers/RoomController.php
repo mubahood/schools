@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Models\Building;
 use App\Models\Enterprise;
 use App\Models\Room;
 use Encore\Admin\Controllers\AdminController;
@@ -17,7 +18,7 @@ class RoomController extends AdminController
      *
      * @var string
      */
-    protected $title = 'Room';
+    protected $title = 'Rooms';
 
     /**
      * Make a grid builder.
@@ -27,14 +28,27 @@ class RoomController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Room());
+        $grid->disableBatchActions();
         $ent = Enterprise::find(Admin::user()->enterprise_id);
         $grid->model()->where([
-            'enterprise_id' => Admin::user()->enterprise_id,
-            // 'administrator_id' => $ent->administrator_id,
+            'enterprise_id' => $ent->id,
         ]);
-         $grid->column('numberOfSlots', __('NumberOfSlots'));
-        $grid->column('created_at', __('Created at'));
-        $grid->column('updated_at', __('Updated at'));
+
+        $grid->quickSearch('name')->placeholder('Search Room Name');
+
+        $grid->column('photo', __('Photo'))->lightbox(['width' => 50, 'height' => 50])->width(100)->sortable();
+        $grid->column('name', __('Room Name'))->sortable();
+        $grid->column('details', __('details'))->hide();
+        $grid->column('total_slots', __('Capacity'))->sortable()
+            ->filter('range');
+        $grid->column('total_slots_occupied', __('Occupied Slots'))->sortable()
+            ->filter('range');
+        $grid->column('total_slots_vacant', __('Vacant Slots'))->sortable()
+            ->filter('range');
+        $grid->column('total_slots_occupied_percent', __('Occupied %'))->sortable()
+            ->filter('range')
+            ->progressBar('success');
+
 
         return $grid;
     }
@@ -63,15 +77,30 @@ class RoomController extends AdminController
     protected function form()
     {
         $form = new Form(new Room());
-        $form->text('roomName', __('Room Name'));
-        $form->text('numberOfSlots', __('Number Of Slots'));
+        $u = Admin::user();
+        $form->hidden('enterprise_id')->value(
+            $u->enterprise_id
+        );
 
-        $form->hasMany('slot', 'Slot',function($form){
+        $buildings = Building::where('enterprise_id', Admin::user()->enterprise_id)->get();
+
+        $form->text('name', __('Room Name'))->rules('required');
+        $form->select('building_id', __('Building'))->options($buildings->pluck('name', 'id'))->rules('required');
+        $form->text('details', __('Details'));
+        $form->image('photo', __('Photo'));
+
+
+        /*
+            $form->hasMany('slot', 'Slot', function ($form) {
             $form->text('slotName', __('Slot Name'));
-        $form->text('studentName', __('Student Name'));
+            $form->text('studentName', __('Student Name'));
+        }); */
 
+        $form->disableReset();
+        $form->disableViewCheck();
+        $form->tools(function (Form\Tools $tools) { 
+            $tools->disableDelete();
         });
-
 
         return $form;
     }

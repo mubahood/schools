@@ -2,31 +2,29 @@
 
 namespace App\Models;
 
+use GoldSpecDigital\LaravelEloquentUUID\Database\Eloquent\Uuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Building extends Model
 {
-    use HasFactory;
-    protected $fillable = [
-        'buildingName',
-    ];
 
-    //boot
+    use Uuid; 
+    protected $keyType = 'string';
     protected static function boot()
     {
         parent::boot();
-        static::creating(function ($building) {
+        self::creating(function ($model) {
+            $model->id = $model->generateUuid();
         });
-
-        //deleting not allowed
         static::deleting(function ($building) {
-            throw new \Exception('Deleting not allowed'); 
+            throw new \Exception('Deleting not allowed');
         });
     }
 
-    public function room()
+    public function rooms()
     {
         return $this->hasMany(Room::class, 'room_id');
     }
+
 }

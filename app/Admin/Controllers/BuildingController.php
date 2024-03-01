@@ -34,10 +34,17 @@ class BuildingController extends AdminController
         ]);
 
         $grid->disableBatchActions();
-        $grid->quickSearch('buildingName')->placeholder('Search Building Name');
+        $grid->quickSearch('name')->placeholder('Search Building Name');
 
-        $grid->column('buildingName', __('Building Name'))->sortable();
+        $grid->column('photo', __('Photo'))->lightbox(['width' => 50, 'height' => 50])->width(100)->sortable();
+        $grid->column('name', __('Building Name'))->sortable();
         $grid->column('created_at', __('Created'))->hide();
+        $grid->column('total_rooms', __('Total Rooms'))->sortable();
+        $grid->column('total_slots', __('Total Slots'))->sortable();
+        $grid->column('total_slots_occupied', __('Occupied Slots'))->sortable();
+        $grid->column('total_slots_vacant', __('Vacant Slots'))->sortable();
+        $grid->column('total_slots_occupied_percent', __('Occupied %'))->sortable()
+            ->progressBar('success');
 
         return $grid;
     }
@@ -70,7 +77,10 @@ class BuildingController extends AdminController
         $form = new Form(new Building());
         //hidden enterprise_id 
         $form->hidden('enterprise_id')->value(Admin::user()->enterprise_id);
-        $form->text('buildingName', __('Building Name'))->rules('required|string|max:255');
+        $form->text('name', __('Building Name'))->rules('required|string|max:255');
+        $form->image('photo', __('Photo'));
+        $form->textarea('details', __('Details'));
+
 
         $form->disableReset();
         $form->disableViewCheck();
