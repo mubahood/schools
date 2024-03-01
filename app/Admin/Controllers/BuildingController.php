@@ -17,7 +17,7 @@ class BuildingController extends AdminController
      *
      * @var string
      */
-    protected $title = 'Building';
+    protected $title = 'Hostel Buildings';
 
     /**
      * Make a grid builder.
@@ -30,14 +30,14 @@ class BuildingController extends AdminController
 
         $ent = Enterprise::find(Admin::user()->enterprise_id);
         $grid->model()->where([
-            'enterprise_id' => Admin::user()->enterprise_id,
-            // 'administrator_id' => $ent->administrator_id,
+            'enterprise_id' => $ent->id,
         ]);
 
-        $grid->column('buildingName', __('BuildingName'));
-        $grid->column('enterprise_id', __('Enterprise id'));
-        $grid->column('created_at', __('Created at'));
-        $grid->column('updated_at', __('Updated at'));
+        $grid->disableBatchActions();
+        $grid->quickSearch('buildingName')->placeholder('Search Building Name');
+
+        $grid->column('buildingName', __('Building Name'))->sortable();
+        $grid->column('created_at', __('Created'))->hide();
 
         return $grid;
     }
@@ -70,7 +70,14 @@ class BuildingController extends AdminController
         $form = new Form(new Building());
         //hidden enterprise_id 
         $form->hidden('enterprise_id')->value(Admin::user()->enterprise_id);
-        $form->text('buildingName', __('BuildingName'));
+        $form->text('buildingName', __('Building Name'))->rules('required|string|max:255');
+
+        $form->disableReset();
+        $form->disableViewCheck();
+        $form->tools(function (Form\Tools $tools) {
+            $tools->disableList();
+            $tools->disableDelete();
+        });
         return $form;
     }
 }

@@ -10,6 +10,7 @@
         "binarytorch/larecipe": "^2.5",
         "encore/laravel-admin": "1.*",
         "fruitcake/laravel-cors": "^3.0",
+        "goldspecdigital/laravel-eloquent-uuid": "^8.0",
         "guzzlehttp/guzzle": "^7.0.1",
         "jxlwqq/quill": "^1.0",
         "laravel-admin-ext/grid-lightbox": "^1.0",
