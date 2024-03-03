@@ -90,15 +90,25 @@ class RoomController extends AdminController
         $form->image('photo', __('Photo'));
 
 
-        /*
-            $form->hasMany('slot', 'Slot', function ($form) {
-            $form->text('slotName', __('Slot Name'));
-            $form->text('studentName', __('Student Name'));
-        }); */
+
+        $form->hasMany('slots', 'Slot', function ($form) {
+            $form->text('name', __('Slot Name'));
+            $form->text('status', __('status'))->default('Vacant');
+            $u = Admin::user();
+            $form->hidden('enterprise_id')->value(
+                $u->enterprise_id
+            );
+
+            /*
+            $table->foreignIdFor(Building::class);
+            $table->string('name')->nullable();
+            $table->string('')->nullable()->default('Vacant');
+            */
+        });
 
         $form->disableReset();
         $form->disableViewCheck();
-        $form->tools(function (Form\Tools $tools) { 
+        $form->tools(function (Form\Tools $tools) {
             $tools->disableDelete();
         });
 

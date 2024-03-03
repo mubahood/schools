@@ -19,7 +19,7 @@ class Slot extends Migration
     public function up()
     {
         //a
-        Schema::drop('slots');
+        //Schema::drop('slots');
         Schema::create('room_slots', function (Blueprint $table) {
             $table->timestamps();
             $table->id();

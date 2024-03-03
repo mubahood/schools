@@ -23,10 +23,11 @@ class Room extends Model
         });
     }
 
-    public function slot()
+    public function slots()
     {
-        return $this->hasMany(Slot::class, 'slot_id');
+        return $this->hasMany(RoomSlot::class, 'room_id');
     }
+
     public function building()
     {
         return $this->belongsTo(Building::class, 'building_id');

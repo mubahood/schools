@@ -3,7 +3,7 @@ php artisan make:migration add_id_to_buildings --table=buildings
 php artisan make:migration slot
 
 
-php artisan admin:make MedicalRecordController --model=App\\Models\\MedicalRecord
+php artisan admin:make RoomSlotController --model=App\\Models\\RoomSlot
 
-php artisan make:model Building -m
+php artisan make:model RoomSlot -m
  
