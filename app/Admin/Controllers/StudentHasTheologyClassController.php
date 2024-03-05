@@ -50,10 +50,20 @@ class StudentHasTheologyClassController extends AdminController
 
 
         $dpYear   =  Admin::user()->ent->dpYear();
+        //thrology calsses of this academic year
+        $classes = TheologyClass::where([
+            'enterprise_id' => Admin::user()->enterprise_id,
+            'academic_year_id' => $dpYear->id
+        ])->get()->pluck('id')->toArray();
+        //dd($classes);
+
+
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
         ])
+            ->whereIn('theology_class_id', $classes)
             ->orderBy('id', 'Desc');
+
         if (!Admin::user()->isRole('dos')) {
             $grid->disableCreateButton();
             $grid->disableExport();
@@ -95,12 +105,14 @@ class StudentHasTheologyClassController extends AdminController
 
             $u = Admin::user();
             $ajax_url = url(
-                '/api/ajax?'
+                '/api/ajax-users?'
                     . 'enterprise_id=' . $u->enterprise_id
                     . "&search_by_1=name"
                     . "&search_by_2=id"
+                    . "&user_type=student"
                     . "&model=User"
             );
+            $ajax_url = trim($ajax_url);
 
             $filter->equal('administrator_id', 'Student')->select(function ($id) {
                 $a = User::find($id);
