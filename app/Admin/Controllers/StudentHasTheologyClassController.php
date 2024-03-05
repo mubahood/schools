@@ -215,13 +215,24 @@ class StudentHasTheologyClassController extends AdminController
 
 
         if ($form->isCreating()) {
-            $form->select('administrator_id', 'Student')->options(function () {
-                return Administrator::where([
-                    'enterprise_id' => Admin::user()->enterprise_id,
-                    'user_type' => 'student',
-                    'status' => 1
-                ])->get()->pluck('name', 'id');
-            })
+
+            $ajax_url = url(
+                '/api/ajax-users?'
+                    . 'enterprise_id=' . $u->enterprise_id
+                    . "&search_by_1=name"
+                    . "&search_by_2=id"
+                    . "&user_type=student"
+                    . "&model=User"
+            );
+            $ajax_url = trim($ajax_url);
+
+            $form->select('administrator_id', __('Student'))
+                ->options(function ($id) {
+                    $a = Administrator::find($id);
+                    if ($a) {
+                        return [$a->id => $a->name];
+                    }
+                })->ajax($ajax_url)
                 ->rules('required');
 
             $dpYear   =  Admin::user()->ent->dpYear();
