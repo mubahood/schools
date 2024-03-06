@@ -2,8 +2,11 @@
 
 namespace App\Admin\Controllers;
 
+use App\Models\Building;
 use App\Models\Enterprise;
+use App\Models\Room;
 use App\Models\RoomSlot;
+use App\Models\User;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -28,21 +31,65 @@ class RoomSlotController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new RoomSlot());
-
-        $grid->quickCreate(function ($form) {
-
-            $ent = Enterprise::find(Admin::user()->enterprise_id); 
-            $form->text('name');
-            $form->text('enterprise_id')->default($ent->id);
-
+        $grid->filter(function ($filter) {
+            $filter->disableIdFilter();
+            //buildings 
+            $buildings = Building::getBuildingDropdown(Admin::user()->enterprise_id);
+            $filter->equal('room.building_id', __('Building'))->select($buildings);
+            $filter->equal('room_id', __('Room'))->select(Room::getRoomDropdown(Admin::user()->enterprise_id));
+            $u = Admin::user();
+            //by current student
+            $ajax_url = url('/api/ajax-users?enterprise_id=' . $u->enterprise_id . "&user_type=student");
+            $filter->equal('current_student_id', 'Filter by Current Student')
+                ->select(function ($id) {
+                    $a = User::find($id);
+                    if ($a) {
+                        return [$a->id => $a->name];
+                    }
+                })->ajax($ajax_url);
         });
 
-        $grid->column('enterprise_id', __('Enterprise id'));
-        $grid->column('building_id', __('Building id'));
-        $grid->column('room_id', __('Room id'));
-        $grid->column('current_student_id', __('Current student id'));
-        $grid->column('name', __('Name'));
-        $grid->column('status', __('Status'));
+
+        $grid->model()->where([
+            'enterprise_id' => Admin::user()->enterprise_id,
+        ]);
+        $grid->disableActions();
+        $grid->disableBatchActions();
+
+        $grid->column('name', __('Slot Name'))->sortable();
+        $grid->column('room_id', __('Room'))
+            ->display(function ($room_id) {
+                return Room::find($room_id)->name_text;
+            })
+            ->sortable();
+        $grid->column('current_student_id', __('Current Student'))
+            ->display(function ($current_student_id) {
+                if ($current_student_id == null) {
+                    return '-';
+                }
+                if ($this->current_student == null) {
+                    return '-';
+                }
+                return $this->current_student->name;
+            })
+            ->sortable();
+
+        $grid->column('status', __('Status'))
+            ->using([
+                'vacant' => 'Vacant',
+                'occupied' => 'Occupied',
+                'reserved' => 'Reserved',
+            ])
+            ->label([
+                'vacant' => 'success',
+                'occupied' => 'danger',
+                'reserved' => 'warning',
+            ])
+            ->filter([
+                'vacant' => 'Vacant',
+                'occupied' => 'Occupied',
+                'reserved' => 'Reserved',
+            ]);
 
         return $grid;
     }
@@ -78,13 +125,29 @@ class RoomSlotController extends AdminController
     protected function form()
     {
         $form = new Form(new RoomSlot());
+        $u = Admin::user();
+        $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id);
 
-        $form->number('enterprise_id', __('Enterprise id'));
-        $form->text('building_id', __('Building id'));
-        $form->text('room_id', __('Room id'));
-        $form->number('current_student_id', __('Current student id'));
-        $form->text('name', __('Name'));
-        $form->text('status', __('Status'))->default('Vacant');
+        //rooms
+        $rooms = Room::getRoomDropdown($u->enterprise_id);
+
+        if ($form->isCreating()) {
+            $form->select('room_id', __('Room'))->options($rooms)->rules('required');
+        } else {
+            $form->display('room.name_text', __('Room'));
+        }
+
+
+        $form->text('name', __('Room Slot Name'))->rules('required');
+
+
+        $form->disableReset();
+        $form->disableEditingCheck();
+        $form->disableViewCheck();
+        $form->tools(function (Form\Tools $tools) {
+            $tools->disableDelete();
+        });
+
 
         return $form;
     }

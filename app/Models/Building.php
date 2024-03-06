@@ -27,4 +27,14 @@ class Building extends Model
         return $this->hasMany(Room::class, 'room_id');
     }
 
+    //getBuildingDropdown
+    public static function getBuildingDropdown($enterprise_id)
+    {
+        $buildings = Building::where('enterprise_id', $enterprise_id)->get();
+        $arr = [];
+        foreach ($buildings as $building) {
+            $arr[$building->id] = $building->name;
+        }
+        return $arr;
+    } 
 }

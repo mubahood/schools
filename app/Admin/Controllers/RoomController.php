@@ -85,28 +85,28 @@ class RoomController extends AdminController
         $buildings = Building::where('enterprise_id', Admin::user()->enterprise_id)->get();
 
         $form->text('name', __('Room Name'))->rules('required');
-        $form->select('building_id', __('Building'))->options($buildings->pluck('name', 'id'))->rules('required');
+
+        if ($form->isCreating()) {
+            $form->select('building_id', __('Building'))->options($buildings->pluck('name', 'id'))->rules('required');
+        } else {
+            $form->display('building.name', __('Building'));
+        }
+
         $form->text('details', __('Details'));
         $form->image('photo', __('Photo'));
 
 
 
-        $form->hasMany('slots', 'Slot', function ($form) {
-            $form->text('name', __('Slot Name'));
-            $form->text('status', __('status'))->default('Vacant');
-            $u = Admin::user();
-            $form->hidden('enterprise_id')->value(
-                $u->enterprise_id
-            );
-
-            /*
-            $table->foreignIdFor(Building::class);
-            $table->string('name')->nullable();
-            $table->string('')->nullable()->default('Vacant');
-            */
-        });
+        $form->hasMany('slots', 'Room Slots', function ($form) {
+            $form->disaplay('name', __('Slot Name'));
+            $form->disaplay('status', __('status'))->default('Vacant');
+        })
+            ->mode('table')
+            ->disableDelete()
+            ->disableCreate();
 
         $form->disableReset();
+        $form->disableEditingCheck();
         $form->disableViewCheck();
         $form->tools(function (Form\Tools $tools) {
             $tools->disableDelete();

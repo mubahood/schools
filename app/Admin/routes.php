@@ -108,13 +108,13 @@ Route::group([
     $router->resource('diseases', DiseaseController::class);
     $router->resource('medical-records', MedicalRecordController::class);
     $router->resource('room-slots', RoomSlotController::class);
-
-    //Hostel Routes
+    $router->resource('room-slot-allocations', RoomSlotAllocationController::class);
     $router->resource('buildings', BuildingController::class);
-    //Hostel Building rooms
     $router->resource('rooms', RoomController::class);
-    //Hostel  room slots
     $router->resource('slots', SlotController::class);
+    $router->resource('fixed-assets', FixedAssetController::class);
+    $router->resource('fixed-asset-categories', FixedAssetCategoryController::class);
+
 
     //$router->resource('fees', StudentHasFeeController::class);
 

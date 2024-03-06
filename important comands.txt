@@ -1,9 +1,12 @@
-php artisan make:migration add_id_to_buildings --table=buildings
+php artisan make:migration change_warranty_expiry_date --table=fixed_assets
+
+       $form->date('warranty_expiry_date', __('Warranty expiry date'));
+        $form->date('maintenance_due_date', __('Next Maintenance date'));
 
 php artisan make:migration slot
 
 
-php artisan admin:make RoomSlotController --model=App\\Models\\RoomSlot
+php artisan admin:make FixedAssetCategoryController --model=App\\Models\\FixedAssetCategory
 
-php artisan make:model RoomSlot -m
+php artisan make:model FixedAssetCategoryCategory -m
  

@@ -254,4 +254,22 @@ class User extends Administrator implements JWTSubject
 
         return $this->belongsToMany($relatedModel, $pivotTable, 'user_id', 'role_id');
     }
+    //getter for name_text
+    public function getNameTextAttribute()
+    {
+        //if is student, add current class
+        if (strtolower($this->user_type) == 'student') {
+            $class = $this->academic_class;
+            if ($class == null) {
+                return $this->name;
+            }
+            return $this->name . ' - ' . $class->name_text;
+        }
+        return $this->name;
+    }
+
+    public function current_class()
+    {
+        return $this->belongsTo(AcademicClass::class, 'current_class_id');
+    }
 }

@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Str;
+use Milon\Barcode\DNS1D;
+use Milon\Barcode\DNS2D;
 use Zebra_Image;
 
 define('STATUS_NOT_ACTIVE', 0);
@@ -48,6 +50,36 @@ define('COLORS',  [
 class Utils  extends Model
 {
 
+
+    public static function generate_barcode($data)
+    {
+        $obj = new DNS1D();
+        $multiplier = 3;
+        $path = "";
+        try {
+            $path = $obj->getBarcodePNGPath($data, 'C128', 2 * $multiplier, 100 * $multiplier, array(0, 0, 0), true);
+        } catch (Exception $e) {
+            throw $e;
+        }
+        return $path;
+    }
+
+
+    public static function generate_qrcode($data)
+    {
+        $obj = new DNS2D();
+        $multiplier = 2;
+        $path = "";
+        try {
+            $multiplier = 3;
+            $path = $obj->getBarcodePNGPath($data, 'QRCODE', 3 * $multiplier, 3 * $multiplier, array(0, 0, 0), true);
+        } catch (Exception $e) {
+            throw $e;
+        }
+        return $path;
+    }
+
+
     public static function file_upload($file)
     {
         if ($file == null) {
@@ -60,7 +92,7 @@ class Utils  extends Model
         $file->move($public_path, $file_name);
         $url = 'images/' . $file_name;
         return $url;
-    }  
+    }
 
     public static function get_system_warnings($ent)
     {
