@@ -82,9 +82,9 @@ class StudentHasClassController extends AdminController
             $grid->model()->where('academic_year_id', $year->id);
         }
 
-        $grid->actions(function ($actions) {
-            $actions->disableDelete();
-        });
+        // $grid->actions(function ($actions) {
+        //     $actions->disableDelete();
+        // });
 
         $grid->batchActions(function ($batch) {
             $batch->disableDelete();

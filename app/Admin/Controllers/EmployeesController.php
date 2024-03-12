@@ -86,7 +86,7 @@ class EmployeesController extends AdminController
         $grid->disableBatchActions();
         $grid->column('id', __('Id'))->sortable();
         $grid->column('name', __('Name'))->sortable();
-        $grid->column('main_role_id', __('Main role'))
+        /*  $grid->column('main_role_id', __('Main role'))
             ->display(function ($x) {
                 if ($this->main_role == null) {
                     return $x;
@@ -94,9 +94,9 @@ class EmployeesController extends AdminController
                 return $this->main_role->name;
             })
             ->sortable()
-            ->label('success');
+            ->label('success'); */
         $grid->column('roles', 'Roles')->pluck('name')->label()->hide();
-        $grid->column('phone_number_1', __('Phone number'));
+        $grid->column('phone_number_1', __('Phone number'))->sortable();
         $grid->column('phone_number_2', __('Phone number 2'))->hide();
         $grid->column('email', __('Email'));
         $grid->column('date_of_birth', __('D.O.B'))->sortable();
@@ -134,17 +134,17 @@ class EmployeesController extends AdminController
         $grid->column('phd_university_name')->hide();
         $grid->column('phd_university_year_graduated')->hide();
         $grid->column('status', __('Status'))
+            ->display(function ($status) {
+                return $status == 1 ? 'Active' : 'Not Active';
+            })
             ->label([
-                0 => 'danger',
-                1 => 'success'
-            ], 'Not Active')
-            ->using([
-                0 => 'Not Active',
-                1 => 'Active'
-            ], 'Not Active')
+                '0' => 'danger',
+                '2' => 'danger',
+                '1' => 'success'
+            ], 'danger') 
             ->filter([
-                0 => 'Not Active',
-                1 => 'Active'
+                '0' => 'Not Active',
+                '1' => 'Active'
             ]);
         return $grid;
     }
