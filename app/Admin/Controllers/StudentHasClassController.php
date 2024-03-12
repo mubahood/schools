@@ -78,7 +78,7 @@ class StudentHasClassController extends AdminController
             die('No active academic year found.');
         }
 
-        if((!isset($_GET['academic_year_id'])) && (!isset($_GET['academic_class_id']))){
+        if ((!isset($_GET['academic_year_id'])) && (!isset($_GET['academic_class_id']))) {
             $grid->model()->where('academic_year_id', $year->id);
         }
 
@@ -203,7 +203,20 @@ class StudentHasClassController extends AdminController
             if (!$this->stream) {
                 return "-";
             }
-            return  $this->stream->name;
+            //active year
+            $year = $this->student->ent->active_academic_year();
+            $class = $this->stream->academic_class;
+            if ($year->id == $this->academic_year_id) {
+                if ($class->academic_year_id != $year->id) {
+                    $this->stream_id = 0;
+                    $this->student->stream_id = 0;
+                    $this->save();
+                    $this->student->save();
+                    return "-";
+                }
+                return  $this->stream->name . " - " . $class->name_text;
+            }
+            return  $this->stream->name_text;
         })->sortable();
         $grid->column('academic_year_id', __('Academic year'))->display(function () {
             if (!$this->year) {
