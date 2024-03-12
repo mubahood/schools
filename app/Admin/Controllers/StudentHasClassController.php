@@ -264,6 +264,14 @@ class StudentHasClassController extends AdminController
                 });
         }
 
+        $grid->column('student.status', __('Status'))->display(function ($title) {
+            if ($title . "" == '1') {
+                return "<span style='color:green'>Active</span>";
+            } else {
+                return "<span style='color:red'>Not active</span>";
+            }
+        });
+
         return $grid;
     }
 
