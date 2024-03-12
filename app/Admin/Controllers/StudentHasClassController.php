@@ -208,10 +208,19 @@ class StudentHasClassController extends AdminController
             $class = $this->stream->academic_class;
             if ($year->id == $this->academic_year_id) {
                 if ($class->academic_year_id != $year->id) {
-                    $this->stream_id = 0;
-                    $this->student->stream_id = 0;
-                    $this->save();
-                    $this->student->save();
+                    try {
+                        $this->stream_id = null;
+                        $this->save();
+                    } catch (\Throwable $th) {
+                        //throw $th;
+                    }
+                    try {
+                        $this->student->stream_id = null;
+                        $this->student->save();
+                    } catch (\Throwable $th) {
+                        //throw $th;
+                    }
+
                     return "-";
                 }
                 return  $this->stream->name . " - " . $class->name_text;
