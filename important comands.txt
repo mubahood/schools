@@ -6,7 +6,7 @@ php artisan make:migration change_warranty_expiry_date --table=fixed_assets
 php artisan make:migration slot
 
 
-php artisan admin:make FixedAssetCategoryController --model=App\\Models\\FixedAssetCategory
+php artisan admin:make FixedAssetPrintController --model=App\\Models\\FixedAssetPrint
 
-php artisan make:model FixedAssetCategoryCategory -m
+php artisan make:model FixedAssetPrint -m
  

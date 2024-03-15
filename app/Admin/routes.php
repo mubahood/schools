@@ -114,6 +114,7 @@ Route::group([
     $router->resource('slots', SlotController::class);
     $router->resource('fixed-assets', FixedAssetController::class);
     $router->resource('fixed-asset-categories', FixedAssetCategoryController::class);
+    $router->resource('fixed-asset-prints', FixedAssetPrintController::class);
 
 
     //$router->resource('fees', StudentHasFeeController::class);

@@ -897,6 +897,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Models\\FinancialRecord' => __DIR__ . '/../..' . '/app/Models/FinancialRecord.php',
         'App\\Models\\FixedAsset' => __DIR__ . '/../..' . '/app/Models/FixedAsset.php',
         'App\\Models\\FixedAssetCategory' => __DIR__ . '/../..' . '/app/Models/FixedAssetCategory.php',
+        'App\\Models\\FixedAssetPrint' => __DIR__ . '/../..' . '/app/Models/FixedAssetPrint.php',
         'App\\Models\\FundRequisition' => __DIR__ . '/../..' . '/app/Models/FundRequisition.php',
         'App\\Models\\Gen' => __DIR__ . '/../..' . '/app/Models/Gen.php',
         'App\\Models\\GenerateTheologyClass' => __DIR__ . '/../..' . '/app/Models/GenerateTheologyClass.php',

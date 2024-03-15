@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FixedAssetPrint;
 use App\Models\ReportCard;
 use App\Models\SecondaryReportCard;
 use App\Models\StudentReportCard;
@@ -424,6 +425,33 @@ class PrintController2 extends Controller
         $pdf->loadHTML('romina');
         return $pdf->stream();
     }
+
+
+    //fixed-asset-prints
+    public function fixed_asset_prints(Request $req)
+    {
+        $pdf = App::make('dompdf.wrapper');
+        $data = [];
+        $report = null;
+        if (isset($_GET['id'])) {
+            $report = FixedAssetPrint::find($_GET['id']);
+        }
+
+        if($report == null){
+            die("Report not found.");
+        }
+        $conds = [];
+        $conds['enterprise_id'] = $report->enterprise_id;
+        
+        if($report->start_date != null){
+            $conds['created_at'] = ['>=', $report->start_date];
+        }
+        
+        $pdf->loadHTML(view('fixed-asset-prints', [
+            'data' => $data,
+        ]));
+        return $pdf->stream();
+    } 
 
     // 
 }

@@ -40,6 +40,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 
 Route::match(['get', 'post'], '/print', [PrintController2::class, 'index']);
+Route::match(['get', 'post'], '/fixed-asset-prints', [PrintController2::class, 'fixed_asset_prints']);
 Route::match(['get', 'post'], '/report-cards', [PrintController2::class, 'secondary_report_cards']);
 Route::match(['get', 'post'], '/secondary-report-cards-print', [PrintController2::class, 'secondary_report_cards']);
 

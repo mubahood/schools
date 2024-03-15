@@ -197,6 +197,7 @@ return array(
     'App\\Models\\FinancialRecord' => $baseDir . '/app/Models/FinancialRecord.php',
     'App\\Models\\FixedAsset' => $baseDir . '/app/Models/FixedAsset.php',
     'App\\Models\\FixedAssetCategory' => $baseDir . '/app/Models/FixedAssetCategory.php',
+    'App\\Models\\FixedAssetPrint' => $baseDir . '/app/Models/FixedAssetPrint.php',
     'App\\Models\\FundRequisition' => $baseDir . '/app/Models/FundRequisition.php',
     'App\\Models\\Gen' => $baseDir . '/app/Models/Gen.php',
     'App\\Models\\GenerateTheologyClass' => $baseDir . '/app/Models/GenerateTheologyClass.php',
