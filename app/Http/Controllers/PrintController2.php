@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FixedAsset;
 use App\Models\FixedAssetPrint;
 use App\Models\ReportCard;
 use App\Models\SecondaryReportCard;
@@ -437,21 +438,36 @@ class PrintController2 extends Controller
             $report = FixedAssetPrint::find($_GET['id']);
         }
 
-        if($report == null){
+        if ($report == null) {
             die("Report not found.");
         }
         $conds = [];
         $conds['enterprise_id'] = $report->enterprise_id;
-        
-        if($report->start_date != null){
+
+        if (
+            ($report->start_date != null) &&
+            (strlen($report->start_date) > 0)
+        ) {
             $conds['created_at'] = ['>=', $report->start_date];
         }
-        
-        $pdf->loadHTML(view('fixed-asset-prints', [
-            'data' => $data,
-        ]));
+
+        if (
+            ($report->end_date != null) &&
+            (strlen($report->end_date) > 0)
+        ) {
+            $conds['created_at'] = ['<=', $report->end_date];
+        }
+
+        $recs = FixedAsset::where($conds)->get();
+        $html = $report->name;
+        foreach ($recs as $key => $value) {
+            $barcode = url('storage' . $value->barcode);
+            $html .= '<br><br><img style="width: 500px;" src="' . $barcode . '" />';
+        }
+
+        $pdf->loadHTML($html);
         return $pdf->stream();
-    } 
+    }
 
     // 
 }

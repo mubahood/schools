@@ -45,7 +45,7 @@ class FixedAssetPrintController extends AdminController
         $grid->column('status', __('Status'))->sortable();
         $grid->column('id', __('PRINT'))
             ->display(function ($id) {
-                $print_link = url('fixed-asset-prints?id=' . $id);
+                $print_link = url('fixed-asset-print?id=' . $id);
                 return "<a href='$print_link' target='_blank'>Print</a>"; 
             });
 

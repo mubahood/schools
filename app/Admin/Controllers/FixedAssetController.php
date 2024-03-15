@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Models\FixedAsset;
 use App\Models\Utils;
+use Carbon\Carbon;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -28,6 +29,41 @@ class FixedAssetController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new FixedAsset());
+
+        $grid->filter(function ($filter) {
+            $filter->disableIdFilter();
+            $fixed_assets = [];
+            $u = Admin::user();
+
+            $filter->between('purchase_date', __('Filter by Purchase Date'))->date();
+            $filter->equal('status', __('Status'))
+                ->select([
+                    'Active' => 'Active',
+                    'Disposed' => 'Disposed',
+                    'Damaged' => 'Damaged',
+                    'Lost' => 'Lost',
+                ]);
+            $filter->equal('assigned_to_id', __('Assigned to'))
+                ->select(
+                    Administrator::where([
+                        'enterprise_id' => $u->enterprise_id,
+                        'user_type' => 'employee',
+                    ])->get()->pluck('name', 'id')
+                );
+            $filter->equal('due_term_id', __('Due term'))
+                ->select(
+                    \App\Models\Term::where([
+                        'enterprise_id' => $u->enterprise_id,
+                    ])->get()->pluck('name_text', 'id')
+                );
+            $filter->equal('category', __('Category'))
+                ->select(
+                    \App\Models\FixedAssetCategory::where([
+                        'enterprise_id' => $u->enterprise_id,
+                    ])->get()->pluck('name', 'id')
+                );
+        });
+
         $u = Admin::user();
         $grid->model()->where([
             'enterprise_id' => $u->enterprise_id,
@@ -76,13 +112,18 @@ class FixedAssetController extends AdminController
             ->filter('range')
             ->display(function ($purchase_price) {
                 return 'UGX ' . Utils::number_format($purchase_price, '');
-            });
+            })
+            ->totalRow(function ($amount) {
+                return "<strong>UGX " . Utils::number_format($amount, '') . "</strong>";
+            })->sortable();
         $grid->column('current_value', __('Current value'))
             ->sortable()
             ->filter('range')
             ->display(function ($current_value) {
                 return 'UGX ' . Utils::number_format($current_value, '');
-            });
+            })->totalRow(function ($amount) {
+                return "<strong>UGX " . Utils::number_format($amount, '') . "</strong>";
+            })->sortable();
         $grid->column('remarks', __('Remarks'))->hide();
         $grid->column('serial_number', __('Serial number'))->hide();
         $grid->column('qr_code', __('Qr code'))->hide();
@@ -93,6 +134,10 @@ class FixedAssetController extends AdminController
             ->width(200);
         $grid->column('created_at', __('Created'))->sortable()->hide();
         $grid->column('updated_at', __('Updated'))->sortable()->hide();
+        $grid->column('last_seen', __('Last Seen'))->sortable()
+            ->display(function ($last_seen) {
+                return Carbon::parse($last_seen)->diffForHumans();
+            })->sortable();
 
         return $grid;
     }
@@ -172,14 +217,18 @@ class FixedAssetController extends AdminController
 
         $form->text('serial_number', __('Serial number'));
 
-        $form->radio('status', __('Status'))
-            ->options([
-                'Active' => 'Active',
-                'Disposed' => 'Disposed',
-                'Damaged' => 'Damaged',
-                'Lost' => 'Lost',
-            ])->default('Active')
-            ->rules('required');
+        if ($form->isCreating()) {
+            $form->radio('status', __('Status'))
+                ->options([
+                    'Active' => 'Active',
+                    'Disposed' => 'Disposed',
+                    'Damaged' => 'Damaged',
+                    'Lost' => 'Lost',
+                ])->default('Active')
+                ->rules('required');
+        }
+
+
 
         $active_term = Admin::user()->ent->active_term();
         $form->select('due_term_id', __('Due term id'))
