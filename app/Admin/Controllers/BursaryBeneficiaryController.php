@@ -173,13 +173,13 @@ class BursaryBeneficiaryController extends AdminController
 
         $u = Admin::user();
         $ajax_url = url(
-            '/api/ajax?'
+            '/api/ajax-users?'
                 . 'enterprise_id=' . $u->enterprise_id
                 . "&search_by_1=name"
                 . "&search_by_2=id"
+                . "&user_type=student"
                 . "&model=User"
         );
-
 
 
 

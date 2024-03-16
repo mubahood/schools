@@ -1,4 +1,4 @@
-php artisan make:migration add_colls_to_fixed_assets --table=fixed_assets
+php artisan make:migration add_colls_to_transport_vehicles --table=transport_vehicles
 
        $form->date('warranty_expiry_date', __('Warranty expiry date'));
         $form->date('maintenance_due_date', __('Next Maintenance date'));
@@ -6,7 +6,7 @@ php artisan make:migration add_colls_to_fixed_assets --table=fixed_assets
 php artisan make:migration slot
 
 
-php artisan admin:make FixedAssetRecordController --model=App\\Models\\FixedAssetRecord
+php artisan admin:make TransportSubscriptionController --model=App\\Models\\TransportSubscription
 
-php artisan make:model FixedAssetRecord -m
+php artisan make:model TransportSubscription -m
  

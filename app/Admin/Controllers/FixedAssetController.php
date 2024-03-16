@@ -10,6 +10,7 @@ use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
+use Encore\Admin\Layout\Content;
 use Encore\Admin\Show;
 
 class FixedAssetController extends AdminController
@@ -20,6 +21,11 @@ class FixedAssetController extends AdminController
      * @var string
      */
     protected $title = 'Fixed Assets';
+
+
+    public function stats(Content $content){
+        die('stats');
+    }
 
     /**
      * Make a grid builder.
@@ -231,7 +237,7 @@ class FixedAssetController extends AdminController
 
 
         $active_term = Admin::user()->ent->active_term();
-        $form->select('due_term_id', __('Due term id'))
+        $form->select('due_term_id', __('Due term'))
             ->options(
                 \App\Models\Term::where([
                     'enterprise_id' => $u->enterprise_id,

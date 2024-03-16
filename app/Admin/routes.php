@@ -116,6 +116,12 @@ Route::group([
     $router->resource('fixed-asset-categories', FixedAssetCategoryController::class);
     $router->resource('fixed-asset-prints', FixedAssetPrintController::class);
     $router->resource('fixed-asset-records', FixedAssetRecordController::class);
+    $router->resource('transport-routes', TransportRouteController::class);
+    $router->resource('transport-vehicles', TransportVehicleController::class);
+    $router->resource('transport-subscriptions', TransportSubscriptionController::class);
+
+
+    //$router->get('/fixed-asset-records-stats', 'FixedAssetRecordController@stats');
 
 
     //$router->resource('fees', StudentHasFeeController::class);
