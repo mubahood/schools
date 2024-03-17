@@ -272,4 +272,27 @@ class User extends Administrator implements JWTSubject
     {
         return $this->belongsTo(AcademicClass::class, 'current_class_id');
     }
+
+    //get my subjects
+    public function my_subjects()
+    {
+        $active_term = $this->ent->active_term();
+        $academic_year_id = $active_term->academic_year_id;
+        $subjects = Subject::where([
+            'academic_year_id' => $academic_year_id,
+        ])->get();
+        $my_subjects = [];
+        foreach ($subjects as $key => $val) {
+            $teacher_ids = [
+                $val->subject_teacher,
+                $val->teacher_1,
+                $val->teacher_2,
+                $val->teacher_3,
+            ];
+            if (in_array($this->id, $teacher_ids)) {
+                $my_subjects[] = $val;
+            }
+        }
+        return $my_subjects;
+    }
 }

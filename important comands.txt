@@ -1,4 +1,4 @@
-php artisan make:migration add_colls_to_transport_vehicles --table=transport_vehicles
+php artisan make:migration add_supervisor_to_admin_users --table=admin_users
 
        $form->date('warranty_expiry_date', __('Warranty expiry date'));
         $form->date('maintenance_due_date', __('Next Maintenance date'));
@@ -6,7 +6,7 @@ php artisan make:migration add_colls_to_transport_vehicles --table=transport_veh
 php artisan make:migration slot
 
 
-php artisan admin:make TransportSubscriptionController --model=App\\Models\\TransportSubscription
+php artisan admin:make SchemWorkItemController --model=App\\Models\\SchemWorkItem
 
-php artisan make:model TransportSubscription -m
+php artisan make:model SchemWorkItem -m
  

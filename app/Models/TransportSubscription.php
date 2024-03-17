@@ -39,6 +39,15 @@ class TransportSubscription extends Model
             $model->amount = $route->single_trip_fare;
         }
 
+        $student_sub = TransportSubscription::where('user_id', $model->user_id)
+            ->where('term_id', $model->term_id)
+            ->first();
+        if ($student_sub != null) {
+            if ($student_sub->id != $model->id) {
+                throw new \Exception("Student already subscribed to a route for this term.", 1);
+            }
+        }
+
         return $model;
     }
 
@@ -58,6 +67,5 @@ class TransportSubscription extends Model
     public function term()
     {
         return $this->belongsTo(Term::class, 'term_id');
-    } 
-    
+    }
 }

@@ -141,7 +141,7 @@ class EmployeesController extends AdminController
                 '0' => 'danger',
                 '2' => 'danger',
                 '1' => 'success'
-            ], 'danger') 
+            ], 'danger')
             ->filter([
                 '0' => 'Not Active',
                 '1' => 'Active'
@@ -184,8 +184,31 @@ class EmployeesController extends AdminController
         $form->hidden('enterprise_id')->rules('required')->default($u->enterprise_id)
             ->value($u->enterprise_id);
         $form->hidden('user_type')->default('employee')->value('employee');
+
+
+        $ajax_url = url(
+            '/api/ajax-users?'
+                . 'enterprise_id=' . $u->enterprise_id
+                . "&search_by_1=name"
+                . "&search_by_2=id"
+                . "&user_type=employee"
+                . "&model=User"
+        );
+
+
+
         $form->text('first_name')->rules('required');
         $form->text('last_name')->rules('required');
+
+        $form->select('supervisor_id', "Supervisor")
+            ->options(function ($id) {
+                $a = Administrator::find($id);
+                if ($a) {
+                    return [$a->id => "#" . $a->id . " - " . $a->name];
+                }
+            })
+            ->ajax($ajax_url)->rules('required');
+
         $form->date('date_of_birth');
         $form->text('place_of_birth');
         $form->radioCard('sex', 'Gender')->options(['Male' => 'Male', 'Female' => 'Female'])->rules('required');

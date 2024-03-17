@@ -51,14 +51,14 @@ class Subject extends Model
             if (strlen($m->subject_name) < 2) {
                 $c = MainCourse::find($m->course_id);
                 $m->main_course_id = $c->main_course_id;
-                $m->subject_name = $c->name;  
+                $m->subject_name = $c->name;
                 $m->code = $c->code;
             }
             return $m;
         });
 
-        static::updating(function ($m) { 
-            if(isset($m->name)){
+        static::updating(function ($m) {
+            if (isset($m->name)) {
                 unset($m->name);
             }
             return $m;
@@ -95,8 +95,9 @@ class Subject extends Model
         return $this->belongsTo(MainCourse::class, 'course_id');
     }
 
-    function parent(){
-        return $this->belongsTo(ParentCourse::class,'parent_course_id');
+    function parent()
+    {
+        return $this->belongsTo(ParentCourse::class, 'parent_course_id');
     }
     function teacher()
     {
@@ -114,8 +115,12 @@ class Subject extends Model
 
     function getNameAttribute()
     {
-       
-        return  $this->subject_name;
+        $text = "";
+        if ($this->academic_class != null) {
+            $text = $this->academic_class->name_text . " - ";
+        }
+
+        return  $this->subject_name . " - " . $text;
     }
 
 
