@@ -41,7 +41,7 @@ class TermlyReportCardController extends AdminController
 
 
         $grid = new Grid(new TermlyReportCard());
-        $x = TermlyReportCard::find(16);
+        /*  $x = TermlyReportCard::find(16);
         if ($x == null) {
             die("not found");
         }
@@ -65,7 +65,7 @@ class TermlyReportCardController extends AdminController
         dd($x->delete);
         $x->do_update = 1;
         $x->report_title .= rand(1, 10);
-        $x->save();
+        $x->save(); */
 
 
 
