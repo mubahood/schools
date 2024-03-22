@@ -32,6 +32,7 @@ class TheologySubject extends Model
     {
         $c = TheologyClass::find($this->theology_class_id);
         if ($c == null) {
+            $this->delete();
             dd("Class not found => " .  $this->theology_class_id);
         }
 

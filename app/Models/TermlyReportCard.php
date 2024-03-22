@@ -479,6 +479,7 @@ class TermlyReportCard extends Model
                     $markRecordOld->main_course_id = $subject->main_course_id;
                     try {
                         $markRecordOld->save();
+                        echo "{$markRecordOld->id}. {$student->name} - {$subject->name} - {$class->name} <br> ";
                     } catch (\Throwable $e) {
                         throw new \Exception($e->getMessage());
                     }

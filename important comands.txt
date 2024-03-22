@@ -9,4 +9,4 @@ php artisan make:migration slot
 php artisan admin:make SchemWorkItemController --model=App\\Models\\SchemWorkItem
 
 php artisan make:model SchemWorkItem -m
- 
+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
