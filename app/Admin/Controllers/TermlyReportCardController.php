@@ -42,46 +42,6 @@ class TermlyReportCardController extends AdminController
 
         $grid = new Grid(new TermlyReportCard());
 
-        /*  $x = TermlyReportCard::find(16);
-        if ($x == null) {
-            die("not found");
-        }
-
-        $x->generate_marks = 'Yes';
-        TermlyReportCard::do_generate_marks($x); 
-        die();
-        dd($x->generate_marks);
-
-        die("Good to go!");
-        foreach ($x->report_cards as $r) {
-            foreach ($r->items as $student_report) {
-                $student_report->delete();
-                echo ($student_report->id . "<br>");
-            }
-            $r->delete();
-            echo ($r->id . "<br>");
-        }
-        $x->delete();
-
-        dd($x->delete);
-        $x->do_update = 1;
-        $x->report_title .= rand(1, 10);
-        $x->save(); */
-
-
-
-        /*      
-
-        dd("dpme"); */
-        /*
-        $x = TermlyReportCard::find(1);
-        TermlyReportCard::grade_students($x);
-        dd("remove");  */
-        /*
-
-     
-        
-        die("Anjane"); */
 
         $grid->actions(function ($actions) {
             $actions->disableView();
@@ -182,7 +142,11 @@ class TermlyReportCardController extends AdminController
      */
     protected function form()
     {
-        // $x = TermlyReportCard::find(8);
+       /*  $x = TermlyReportCard::find(16);
+        $x->generate_marks = 'Yes';
+        TermlyReportCard::do_generate_marks($x);
+
+        die('termly-report-cards'); */
         // $x->positioning_type = 'Stream';
         // $x->reports_generate = 'Yes';
         // //TermlyReportCard::do_generate_positions($x);

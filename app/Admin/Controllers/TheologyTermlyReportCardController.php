@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Models\GradingScale;
 use App\Models\Term;
+use App\Models\TheologryStudentReportCard;
 use App\Models\TheologyClass;
 use App\Models\TheologyTermlyReportCard;
 use Encore\Admin\Controllers\AdminController;
@@ -11,6 +12,7 @@ use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
+use Illuminate\Support\Facades\DB;
 
 class TheologyTermlyReportCardController extends AdminController
 {
@@ -77,7 +79,10 @@ class TheologyTermlyReportCardController extends AdminController
         });
 
         $grid->column('report_cards', __('Report cards'))->display(function () {
-            return count($this->report_cards);
+            $table = (new TheologryStudentReportCard())->getTable();
+            $sql = "SELECT COUNT(*) as count FROM $table WHERE theology_termly_report_card_id = $this->id";
+            $count = DB::select($sql);
+            return $count[0]->count;
         });
 
         $grid->column('has_beginning_term', __('Has beginning term'))->bool()->hide();

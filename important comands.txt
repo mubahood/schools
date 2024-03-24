@@ -10,3 +10,6 @@ php artisan admin:make SchemWorkItemController --model=App\\Models\\SchemWorkIte
 
 php artisan make:model SchemWorkItem -m
 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
+
+git config --global user.name "mubahood"
+$ git config --global user.email muhindomubaraka@iut-dhaka.edu
