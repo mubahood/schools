@@ -53,7 +53,7 @@ class MarkRecordController extends AdminController
 
         $grid->disableCreateButton();
         $grid->disableActions();
-        
+
 
         if (
             (!Admin::user()->isRole('dos')) &&
@@ -104,7 +104,15 @@ class MarkRecordController extends AdminController
             )
                 ->orderBy('id', 'desc')
                 ->get() as $ex) {
-                $streams[$ex->id] = $ex->academic_class->short_name . " - " . $ex->name;
+                if ($ex->academic_class == null) {
+                    continue;
+                }
+                if (
+                    $year->id != $ex->academic_class->academic_year_id
+                ) {
+                    continue;
+                }
+                $streams[$ex->id] = $ex->academic_class->short_name . " - " . $ex->name . " - " . $year->name;
             }
 
             $filter->equal('academic_class_sctream_id', 'Filter by Stream')->select($streams);
@@ -151,14 +159,7 @@ class MarkRecordController extends AdminController
 
 
             $u = Admin::user();
-            $ajax_url = url(
-                '/api/ajax?'
-                    . 'enterprise_id=' . $u->enterprise_id
-                    . "&search_by_1=name"
-                    . "&search_by_2=id"
-                    . "&model=User"
-            );
-
+            $ajax_url = url('/api/ajax-users?enterprise_id=' . $u->enterprise_id . "&user_type=student");
             $filter->equal('administrator_id', 'Student')->select(function ($id) {
                 $a = Administrator::find($id);
                 if ($a) {
@@ -171,7 +172,9 @@ class MarkRecordController extends AdminController
             $exams = [];
             foreach (Term::where([
                 'enterprise_id' => $u->enterprise_id,
-            ])->get() as $ex) {
+            ])
+                ->orderBy('id', 'desc')
+                ->get() as $ex) {
                 $exams[$ex->id] = $ex->name_text;
             }
             $filter->equal('term_id', 'Filter by Term')->select($exams);

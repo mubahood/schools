@@ -41,6 +41,7 @@ class TermlyReportCardController extends AdminController
 
 
         $grid = new Grid(new TermlyReportCard());
+
         /*  $x = TermlyReportCard::find(16);
         if ($x == null) {
             die("not found");
@@ -91,7 +92,6 @@ class TermlyReportCardController extends AdminController
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
         ])->orderBy('id', 'DESC');
-
         $grid->column('id', __('ID'))->sortable();
         $grid->column('academic_year.name', __('Academic Year'));
         $grid->column('term.name', __('Term'));
@@ -131,19 +131,21 @@ class TermlyReportCardController extends AdminController
             $pecentage = ($total_mot / $total) * 100;
             return number_format($total_mot) . " (" . number_format($pecentage) . "%)";
         });
-
-        $grid->column('report_cards', __('Report cards'))->display(function () {
-            return count($this->report_cards);
+        $grid->column('report_cards_count', __('Report cards'))->display(function () {
+            $table = (new StudentReportCard())->getTable();
+            $sql = "SELECT COUNT(*) as count FROM $table WHERE termly_report_card_id = $this->id";
+            $count = \DB::select($sql);
+            return $count[0]->count;
         });
 
         $grid->column('has_beginning_term', __('Has beginning term'))->bool()->hide();
         $grid->column('has_mid_term', __('Has mid term'))->bool()->hide();
         $grid->column('has_end_term', __('Has end term'))->bool()->hide();
 
-        $grid->column('print', __('Print'))->display(function ($m) {
+        /* $grid->column('print', __('Print'))->display(function ($m) {
             $d = '<a class="btn btn-sm btn-info" target="_blank" href="' . url('generate-report-cards?id=' . $this->id) . '" >BULK PDFs GENERATE</a><br>';
             return $d;
-        });
+        }); */
 
 
         return $grid;
