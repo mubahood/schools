@@ -35,13 +35,13 @@ class SubjectController extends AdminController
     {
 
 
-        foreach (Subject::where([])->get() as $key => $s) {
+      /*   foreach (Subject::where([])->get() as $key => $s) {
             $s->demo_id = 111;
             try {
                 $s->save();
             } catch (\Throwable $th) { 
             }    
-        }
+        } */
 
         $grid = new Grid(new Subject());
 
