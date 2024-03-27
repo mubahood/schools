@@ -253,4 +253,14 @@ class Enterprise extends Model
             AcademicYear::generate_classes($ay);
         }
     }
+
+    //getter for dp_year
+    public function getDpYearAttribute()
+    {
+        $d = $this->dpYear();
+        if ($d == null) {
+            return null;
+        }
+        return $d->id;
+    }
 }

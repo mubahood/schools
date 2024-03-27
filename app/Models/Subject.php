@@ -54,6 +54,13 @@ class Subject extends Model
                 $m->subject_name = $c->name;
                 $m->code = $c->code;
             }
+
+            $academic_class = AcademicClass::find($m->academic_class_id);
+            if ($academic_class == null) {
+                throw new Exception("Class not found.", 1);
+            }
+            $m->academic_year_id = $academic_class->academic_year_id;
+
             return $m;
         });
 
@@ -61,6 +68,11 @@ class Subject extends Model
             if (isset($m->name)) {
                 unset($m->name);
             }
+            $academic_class = AcademicClass::find($m->academic_class_id);
+            if ($academic_class == null) {
+                throw new Exception("Class not found.", 1);
+            }
+            $m->academic_year_id = $academic_class->academic_year_id; 
             return $m;
             /*   $c = MainCourse::find($m->course_id);
 
