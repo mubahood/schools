@@ -72,7 +72,7 @@ class Subject extends Model
             if ($academic_class == null) {
                 throw new Exception("Class not found.", 1);
             }
-            $m->academic_year_id = $academic_class->academic_year_id; 
+            $m->academic_year_id = $academic_class->academic_year_id;
             return $m;
             /*   $c = MainCourse::find($m->course_id);
 

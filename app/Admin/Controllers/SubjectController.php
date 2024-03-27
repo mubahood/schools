@@ -35,6 +35,13 @@ class SubjectController extends AdminController
     {
 
 
+        foreach (Subject::where([])->get() as $key => $s) {
+            $s->demo_id = 111;
+            try {
+                $s->save();
+            } catch (\Throwable $th) { 
+            }    
+        }
 
         $grid = new Grid(new Subject());
 
@@ -99,7 +106,7 @@ class SubjectController extends AdminController
             ->display(function ($t) {
                 return $this->course->name;
             }); */
- 
+
 
         $grid->column('subject_teacher', __('Subject Teacher'))
             ->display(function ($t) {
@@ -118,7 +125,7 @@ class SubjectController extends AdminController
         ])->label([
             1 => 'warning',
             0 => 'success',
-        ]); 
+        ]);
 
         return $grid;
     }
