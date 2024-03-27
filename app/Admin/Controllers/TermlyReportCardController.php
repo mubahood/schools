@@ -193,7 +193,24 @@ class TermlyReportCardController extends AdminController
             $form->divider('Marks Settings');
             $form->radioCard('generate_marks', 'Generate/Re-generate marks for all students?')
                 ->options(['Yes' => 'Yes', 'No' => 'No'])
-                ->default('No');
+                ->default('No')
+                ->when('Yes', function (Form $form) {
+                    $u = Admin::user();
+                    $year = $u->ent->active_academic_year();
+                    $academicClasses = AcademicClass::where([
+                        'enterprise_id' => $u->enterprise_id,
+                        'academic_year_id' => $year->id,
+                    ])
+                        ->orderBy('id', 'DESC')
+                        ->get();
+                    $classes = [];
+                    foreach ($academicClasses as  $v) {
+                        $classes[$v->id] = $v->name_text;
+                    }
+                    $form->multipleSelect('generate_marks_for_classes', 'Generate marks for which classes?')
+                        ->options($classes);
+                });
+
             $form->radioCard('delete_marks_for_non_active', 'Delete marks for non active students?')
                 ->options(['Yes' => 'Yes', 'No' => 'No'])
                 ->default('No');

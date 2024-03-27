@@ -778,6 +778,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Admin\\Controllers\\RoomController' => __DIR__ . '/../..' . '/app/Admin/Controllers/RoomController.php',
         'App\\Admin\\Controllers\\RoomSlotAllocationController' => __DIR__ . '/../..' . '/app/Admin/Controllers/RoomSlotAllocationController.php',
         'App\\Admin\\Controllers\\RoomSlotController' => __DIR__ . '/../..' . '/app/Admin/Controllers/RoomSlotController.php',
+        'App\\Admin\\Controllers\\SchemWorkItemController' => __DIR__ . '/../..' . '/app/Admin/Controllers/SchemWorkItemController.php',
         'App\\Admin\\Controllers\\SchoolFeesPaymentController' => __DIR__ . '/../..' . '/app/Admin/Controllers/SchoolFeesPaymentController.php',
         'App\\Admin\\Controllers\\SecondaryCompetenceController' => __DIR__ . '/../..' . '/app/Admin/Controllers/SecondaryCompetenceController.php',
         'App\\Admin\\Controllers\\SecondaryReportCardController' => __DIR__ . '/../..' . '/app/Admin/Controllers/SecondaryReportCardController.php',

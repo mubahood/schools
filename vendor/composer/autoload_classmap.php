@@ -78,6 +78,7 @@ return array(
     'App\\Admin\\Controllers\\RoomController' => $baseDir . '/app/Admin/Controllers/RoomController.php',
     'App\\Admin\\Controllers\\RoomSlotAllocationController' => $baseDir . '/app/Admin/Controllers/RoomSlotAllocationController.php',
     'App\\Admin\\Controllers\\RoomSlotController' => $baseDir . '/app/Admin/Controllers/RoomSlotController.php',
+    'App\\Admin\\Controllers\\SchemWorkItemController' => $baseDir . '/app/Admin/Controllers/SchemWorkItemController.php',
     'App\\Admin\\Controllers\\SchoolFeesPaymentController' => $baseDir . '/app/Admin/Controllers/SchoolFeesPaymentController.php',
     'App\\Admin\\Controllers\\SecondaryCompetenceController' => $baseDir . '/app/Admin/Controllers/SecondaryCompetenceController.php',
     'App\\Admin\\Controllers\\SecondaryReportCardController' => $baseDir . '/app/Admin/Controllers/SecondaryReportCardController.php',

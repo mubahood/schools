@@ -1,4 +1,4 @@
-php artisan make:migration add_supervisor_to_admin_users --table=admin_users
+php artisan make:migration add_classes_to_generate_to_termly_report_cards --table=termly_report_cards
 q
        $form->date('warranty_expiry_date', __('Warranty expiry date'));
         $form->date('maintenance_due_date', __('Next Maintenance date'));

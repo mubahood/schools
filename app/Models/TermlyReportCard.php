@@ -79,12 +79,33 @@ class TermlyReportCard extends Model
             DB::update("UPDATE termly_report_cards SET 
             generate_marks = 'No',
             generate_class_teacher_comment = 'No',
+            /* generate_marks_for_classes = '', */
             generate_head_teacher_comment = 'No',
             generate_positions = 'No',
             delete_marks_for_non_active = 'No',
             reports_generate = 'No'
              WHERE id = ?", [$m->id]);
         });
+    }
+
+    //getter for generate_marks_for_classes
+    public function getGenerateMarksForClassesAttribute($value)
+    {
+        try {
+            return json_decode($value, true);
+        } catch (\Throwable $th) {
+            return null;
+        }
+    }
+
+    //setter for generate_marks_for_classes
+    public function setGenerateMarksForClassesAttribute($value)
+    {
+        try {
+            $this->attributes['generate_marks_for_classes'] = json_encode($value);
+        } catch (\Throwable $th) {
+            $this->attributes['generate_marks_for_classes'] = null;
+        }
     }
 
     public static function do_delete_marks_for_non_active($m)
@@ -416,6 +437,7 @@ class TermlyReportCard extends Model
     public static function make_reports_for_primary($m)
     {
 
+
         set_time_limit(-1);
         ini_set('memory_limit', '-1');
         $ent = Enterprise::find($m->enterprise_id);
@@ -424,7 +446,24 @@ class TermlyReportCard extends Model
             throw new \Exception("Academic year not found.");
         }
 
+        if ($m->generate_marks_for_classes == null) {
+            return;
+        }
+        if ($m->generate_marks_for_classes == '') {
+            return;
+        }
+
+        //is not array, return $m->generate_marks_for_classes
+        if (!is_array($m->generate_marks_for_classes)) {
+            return;
+        }
+
         foreach ($m->term->academic_year->classes as $class) {
+
+            //id not in arre $m->generate_marks_for_classes continue
+            if (!in_array($class->id, $m->generate_marks_for_classes)) {
+                continue;
+            }
 
             $subjects = Subject::where([
                 'academic_class_id' => $class->id,
@@ -443,20 +482,20 @@ class TermlyReportCard extends Model
                 }
 
                 foreach ($subjects as $subject) {
-                    
+
                     $sql = "SELECT * FROM mark_records WHERE administrator_id = ? AND term_id = ? AND subject_id = ?";
                     $rec = DB::select($sql, [$student->id, $m->term_id, $subject->id]);
                     //check if mark record exists
                     if (count($rec) > 0) {
                         continue;
                     }
-                    
+
                     $markRecordOld = MarkRecord::where([
                         'administrator_id' => $student->id,
                         'term_id' => $m->term_id,
                         'subject_id' => $subject->id,
                     ])->first();
-                    
+
                     if ($markRecordOld == null) {
                         $markRecordOld = new MarkRecord();
                         $markRecordOld->enterprise_id = $m->enterprise_id;
