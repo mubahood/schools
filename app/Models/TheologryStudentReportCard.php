@@ -19,7 +19,7 @@ class TheologryStudentReportCard extends Model
     }
     public function owner()
     {
-        return $this->belongsTo(Administrator::class,'student_id');
+        return $this->belongsTo(Administrator::class, 'student_id');
     }
     public function term()
     {
@@ -32,5 +32,25 @@ class TheologryStudentReportCard extends Model
     public function items()
     {
         return $this->hasMany(TheologyStudentReportCardItem::class, 'theologry_student_report_card_id');
+    }
+
+    //getter for generate_marks_for_classes
+    public function getGenerateMarksForClassesAttribute($value)
+    {
+        try {
+            return json_decode($value, true);
+        } catch (\Throwable $th) {
+            return null;
+        }
+    }
+
+    //setter for generate_marks_for_classes
+    public function setGenerateMarksForClassesAttribute($value)
+    {
+        try {
+            $this->attributes['generate_marks_for_classes'] = json_encode($value);
+        } catch (\Throwable $th) {
+            $this->attributes['generate_marks_for_classes'] = null;
+        }
     }
 }

@@ -210,14 +210,7 @@ class TheologyMarkRecordController extends AdminController
 
 
             $u = Admin::user();
-            $ajax_url = url(
-                '/api/ajax?'
-                    . 'enterprise_id=' . $u->enterprise_id
-                    . "&search_by_1=name"
-                    . "&search_by_2=id"
-                    . "&model=User"
-            );
-
+            $ajax_url = url('/api/ajax-users?enterprise_id=' . $u->enterprise_id . "&user_type=student");
 
             $streams = [];
             foreach (TheologyStream::where(
@@ -231,7 +224,7 @@ class TheologyMarkRecordController extends AdminController
             }
             $filter->equal('theology_stream_id', 'Filter by Stream')->select($streams);
 
-            $filter->equal('administrator_id', 'Student')->select(function ($id) {
+            $filter->equal('administrator_id', 'Filter by Student')->select(function ($id) {
                 $a = Administrator::find($id);
                 if ($a) {
                     return [$a->id => $a->name];

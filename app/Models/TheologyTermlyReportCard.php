@@ -322,7 +322,26 @@ total_students
             throw new \Exception("Academic year not found.");
         }
 
+        if ($m->generate_marks_for_classes == null) {
+            return;
+        }
+        if ($m->generate_marks_for_classes == '') {
+            return;
+        }
+
+        //is not array, return $m->generate_marks_for_classes
+        if (!is_array($m->generate_marks_for_classes)) {
+            return;
+        }
+
         foreach ($m->term->academic_year->theology_classes as $class) {
+
+            //id not in arre $m->generate_marks_for_classes continue
+            if (!in_array($class->id, $m->generate_marks_for_classes)) {
+                continue;
+            }
+
+
             $subjects = $class->subjects;
             if ($subjects->count() < 1) {
                 continue;
@@ -412,5 +431,26 @@ total_students
     public function getClassesAttribute($Classes)
     {
         return json_decode($Classes, true);
+    }
+
+
+    //getter for generate_marks_for_classes
+    public function getGenerateMarksForClassesAttribute($value)
+    {
+        try {
+            return json_decode($value, true);
+        } catch (\Throwable $th) {
+            return null;
+        }
+    }
+
+    //setter for generate_marks_for_classes
+    public function setGenerateMarksForClassesAttribute($value)
+    {
+        try {
+            $this->attributes['generate_marks_for_classes'] = json_encode($value);
+        } catch (\Throwable $th) {
+            $this->attributes['generate_marks_for_classes'] = null;
+        }
     }
 }
