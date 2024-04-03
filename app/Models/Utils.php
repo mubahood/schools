@@ -610,7 +610,7 @@ class Utils  extends Model
         $image->preserve_aspect_ratio = true;
         $image->enlarge_smaller_images = true;
         $image->preserve_time = true;
-        $image->jpeg_quality = 10;
+        $image->jpeg_quality = 30;
         //$file_path size
         $file_path_size = filesize($file_path);
         //to mb
