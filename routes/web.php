@@ -14,6 +14,7 @@ use App\Models\Enterprise;
 use App\Models\Exam;
 use App\Models\FinancialRecord;
 use App\Models\Gen;
+use App\Models\IdentificationCard;
 use App\Models\Mark;
 use App\Models\MarkRecord;
 use App\Models\ReportFinanceModel;
@@ -28,6 +29,7 @@ use App\Models\TermlyReportCard;
 use App\Models\TheologyMark;
 use App\Models\TheologyTermlyReportCard;
 use App\Models\Transaction;
+use App\Models\User;
 use App\Models\Utils;
 use Encore\Admin\Auth\Database\Administrator;
 use Facade\FlareClient\Report;
@@ -38,6 +40,27 @@ use Faker\Factory as Faker;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
+
+
+Route::get('gen-code', function () {
+  $data = '1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcefghijklmnopqrstuvwxyz';
+  $code_type = 'qr';
+});
+
+Route::get('identification-cards-generation', function () {
+
+
+  $idCard = IdentificationCard::find($_GET['id']);
+  $pdf = App::make('dompdf.wrapper');
+  $ent = Enterprise::find($idCard->enterprise_id);
+ 
+  $pdf->loadHTML(view('id_cards.id_cards', [
+    'idCard' => $idCard,
+    'ent' => $ent,
+    'users' => $idCard->get_users(),
+  ]));
+  return $pdf->stream();
+});
 
 Route::match(['get', 'post'], '/print', [PrintController2::class, 'index']);
 Route::match(['get', 'post'], '/fixed-asset-print', [PrintController2::class, 'fixed_asset_prints']);

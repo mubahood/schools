@@ -1,14 +1,11 @@
-php artisan make:migration add_classes_generate_to_theology_termly_report_cards --table=theology_termly_report_cards
-q
-       $form->date('warranty_expiry_date', __('Warranty expiry date'));
-        $form->date('maintenance_due_date', __('Next Maintenance date'));
+php artisan make:migration add_template_identification_cards --table=identification_cards
 
 php artisan make:migration slot
 
 
-php artisan admin:make SchemWorkItemController --model=App\\Models\\SchemWorkItem
+php artisan admin:make IdentificationCardController --model=App\\Models\\IdentificationCard
 
-php artisan make:model SchemWorkItem -m
+php artisan make:model IdentificationCard -m
 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
 
 git config --global user.name "mubahood"
