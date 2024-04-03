@@ -609,7 +609,7 @@ class Utils  extends Model
         $image->preserve_aspect_ratio = true;
         $image->enlarge_smaller_images = true;
         $image->preserve_time = true;
-        $image->jpeg_quality = 80;
+        $image->jpeg_quality = 40;
 
         $file_path_2 = str_replace($file_name_1, $file_name_2, $file_path);
 
