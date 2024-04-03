@@ -76,7 +76,7 @@ class MainController extends Controller
                 $user->school_pay_payment_code = $school_pay;
                 $user->school_pay_account_id = $school_pay;
             } else {
-                continue; 
+                continue;
             }
 
             $user->first_name     = $v[1];
@@ -180,6 +180,10 @@ class MainController extends Controller
 
         set_time_limit(-1);
         $i = 1;
+        $limit = 10;
+        if (isset($_GET['limit'])) {
+            $limit = ((int)$_GET['limit']);
+        }
         $dir = public_path("storage/images/"); // replace with your directory path
         if (is_dir($dir)) {
             if ($dh = opendir($dir)) {
@@ -233,6 +237,9 @@ class MainController extends Controller
                             echo  $i . '<=== <img src="' . url('storage/images/' . $file) . '" width="300" /><br>';
                             $i++;
                             rename($thumb, $original_file);
+                            if ($i > $limit) {
+                                die("done");
+                            }
 
                             // unlink($thumb);
 
