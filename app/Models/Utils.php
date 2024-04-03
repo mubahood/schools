@@ -601,7 +601,8 @@ class Utils  extends Model
             return null;
         }
         $file_name_1 = basename($file_path);
-        $file_name_2 = 'temp_' . $file_name_1;
+        //$file_name_2 = 'temp_' . $file_name_1;
+        $file_name_2 = $file_name_1;
 
 
         $image = new Zebra_Image();
@@ -609,7 +610,14 @@ class Utils  extends Model
         $image->preserve_aspect_ratio = true;
         $image->enlarge_smaller_images = true;
         $image->preserve_time = true;
-        $image->jpeg_quality = 40;
+        $image->jpeg_quality = 10;
+        //$file_path size
+        $file_path_size = filesize($file_path);
+        //to mb
+        $file_path_size = $file_path_size / 1024 / 1024;
+        if ($file_path_size > .5) {
+            $image->jpeg_quality = 10;
+        }
 
         $file_path_2 = str_replace($file_name_1, $file_name_2, $file_path);
 

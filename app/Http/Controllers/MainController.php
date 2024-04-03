@@ -232,8 +232,16 @@ class MainController extends Controller
                                 continue;
                             }
 
+                            $original_file_size = filesize($original_file);
+                            //to mb
+                            $original_file_size = $original_file_size / 1000000;
+                            $thumb_file_size = filesize($thumb);
+                            $thumb_file_size = $thumb_file_size / 1000000;
 
 
+                            echo '<br><hr>';
+                            echo "Original: $original_file_size MB <br>";
+                            echo "Thumb: $thumb_file_size MB <br>";
                             echo  $i . '<=== <img src="' . url('storage/images/' . $file) . '" width="300" /><br>';
                             $i++;
                             rename($thumb, $original_file);
