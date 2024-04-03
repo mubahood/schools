@@ -65,12 +65,21 @@ class IdentificationCardController extends AdminController
                     return 'All Employees';
                 }
             });
-        $grid->column('do_generate_pdf', __('generate pdf'))
+        $grid->column('do_generate_pdf', __('Generate PDF'))
             ->display(function ($do_generate_pdf) {
                 $url = url('identification-cards-generation?id=' . $this->id);
+                if ($this->pdf_generated == 'Yes') {
+                    return "<a target='_blank' href='$url'>Re-Generate PDF</a>";
+                }
                 return "<a target='_blank' href='$url'>Generate PDF</a>";
             });
-        $grid->column('pdf_generated', __('Pdf generated'));
+        //identification-cards-print
+        $grid->column('PRINT', __('PRINT PDF '))
+            ->display(function () {
+                $url = url('identification-cards-print?id=' . $this->id);
+                return "<a target='_blank' href='$url'>Print PDF</a>";
+            });
+        $grid->column('pdf_generated', __('Pdf Generated'));
 
         return $grid;
     }

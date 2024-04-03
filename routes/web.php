@@ -48,18 +48,35 @@ Route::get('gen-code', function () {
 });
 
 Route::get('identification-cards-generation', function () {
-
-
   $idCard = IdentificationCard::find($_GET['id']);
   $pdf = App::make('dompdf.wrapper');
   $ent = Enterprise::find($idCard->enterprise_id);
- 
   $pdf->loadHTML(view('id_cards.id_cards', [
     'idCard' => $idCard,
     'ent' => $ent,
     'users' => $idCard->get_users(),
   ]));
-  return $pdf->stream();
+
+  $pdf->render();
+  $output = $pdf->output();
+  $store_file_path = public_path('storage/files/' . $idCard->id . '.pdf');
+  file_put_contents($store_file_path, $output);
+  $idCard->pdf_generated = 'Yes';
+  $idCard->file_link = $store_file_path;
+  $idCard->save();
+  //redirect to the print
+  return redirect('identification-cards-print?id=' . $idCard->id);
+});
+Route::get('identification-cards-print', function () {
+  $idCard = IdentificationCard::find($_GET['id']);
+  if ($idCard->pdf_generated == 'No') {
+    return "PDF not generated yet";
+  }
+  //file_link is the path to the generated pdf
+  if (!file_exists($idCard->file_link)) {
+    return "PDF not found";
+  }
+  return response()->file($idCard->file_link);
 });
 
 Route::match(['get', 'post'], '/print', [PrintController2::class, 'index']);
