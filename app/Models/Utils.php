@@ -2598,6 +2598,16 @@ class Utils  extends Model
     ) {
         $STUDENT_NAME = $name;
         $sex = strtolower($sex);
+        $sex = strtolower('Male');
+
+        //check if $sex contains  f
+        if (strpos($sex, 'f') !== false) {
+            $STUDENT_HE_SHE = "she";
+            $STUDENT_HIM_HER = "her";
+        } else {
+            $STUDENT_HE_SHE = "he";
+            $STUDENT_HIM_HER = "him";
+        }
 
         $comments = [];
         if (!strrpos($score, '0')) {
