@@ -2858,4 +2858,21 @@ class Utils  extends Model
         shuffle($data);
         return $data[rand(0, count($data) - 1)];
     }
+
+
+    public static function capitalizeSentences($text)
+    {
+        // Split the text into an array of sentences
+        $sentences = preg_split('/(?<=[.?!])\s+(?=[a-z])/i', $text, -1, PREG_SPLIT_NO_EMPTY);
+
+        // Capitalize the first letter of each sentence
+        foreach ($sentences as &$sentence) {
+            $sentence = ucfirst(strtolower(trim($sentence)));
+        }
+
+        // Join the sentences back together
+        $result = implode(' ', $sentences);
+
+        return $result;
+    }
 }

@@ -275,7 +275,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
         </tr>
     </table>
     <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's Comment:</span> <b class="comment"
-            style="font-size: 14px">{{ $r->class_teacher_comment }}</b></p>
+            style="font-size: 14px">{{ Utils::capitalizeSentences($r->class_teacher_comment) }}</b></p>
     <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's Name:</span>
         {{-- <b style="font-size: 14px" class="text-uppercase">{{ $class_teacher_name }}</b>,&nbsp; --}}
         <b style="font-size: 14px"
@@ -420,7 +420,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
 
         </table>
         <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's comment:</span> <b class="comment"
-                style="font-size: 14px">{{ $tr->class_teacher_comment }}</b></p>
+                style="font-size: 14px">{{ Utils::capitalizeSentences($tr->class_teacher_comment) }}</b></p>
         <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's Name:</span>
             {{-- <b style="font-size: 14px" class="text-uppercase">{{ $class_teacher_name_1 }}</b>,&nbsp; --}}
             <b style="font-size: 14px"
@@ -443,7 +443,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
 
 
     <p class="mt-2 fw-16"><span class="text-uppercase">HEAD TEACHER'S COMMENT:</span> <b class="comment"
-            style="font-size: 14px">{{ $r->head_teacher_comment }}</b></p>
+            style="font-size: 14px">{{ Utils::capitalizeSentences($r->head_teacher_comment) }}</b></p>
     <p class="mt-2 fw-16"><span class="text-uppercase">HEAD Teacher's Name:</span> <b style="font-size: 14px"
             class="text-uppercase">{{ $hm_name }}</b>,&nbsp;
         <span class="text-uppercase fs-16 ">Signature:
