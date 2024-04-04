@@ -6,6 +6,8 @@ use App\Models\AcademicYear;
 use App\Models\Term;
 use App\Models\TheologryStudentReportCard;
 use App\Models\TheologyClass;
+use App\Models\User;
+use App\Models\Utils;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -128,7 +130,37 @@ class TheologryStudentReportCardController extends AdminController
             $numFormat = new NumberFormatter('en_US', NumberFormatter::ORDINAL);
             return $numFormat->format(((int)($position)));
         })->editable()->sortable();
-        $grid->column('class_teacher_comment', __('Class Teacher Remarks'))->editable()->sortable();
+        $grid->column('class_teacher_comment', __('Class Teacher Remarks'))
+            ->display(function ($position) {
+                
+                if ($position == null || strlen($position) < 3) {
+
+
+                    $max_score = 400;
+                    $total_marks = $this->total_marks;
+                    $percentage = ($total_marks / $max_score) * 100;
+
+                    $student = User::find($this->student_id);
+                    if ($student == null) {
+                        die("iuser not found");
+                    }
+                    $comment = Utils::get_autometed_comment(
+                        $percentage,
+                        $student->name,
+                        $student->sex
+                    );
+
+                    $this->class_teacher_comment = $comment;
+                    dd($this->class_teacher_comment);
+                    $report->save();
+
+                    return "-";
+                }
+                return $position;
+                $numFormat = new NumberFormatter('en_US', NumberFormatter::ORDINAL);
+                return $numFormat->format(((int)($position)));
+            })->editable()
+            ->sortable();
         $grid->column('head_teacher_comment', __('Head Teacher Remarks'))->hide()->editable()->sortable();
 
         /*         $grid->column('print', __('Print'))->display(function ($m) {
