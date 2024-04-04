@@ -278,8 +278,9 @@ foreach ($r->termly_report_card->term->exams as $exam) {
             style="font-size: 14px">{{ $r->class_teacher_comment }}</b></p>
     <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's Name:</span>
         {{-- <b style="font-size: 14px" class="text-uppercase">{{ $class_teacher_name }}</b>,&nbsp; --}}
-        <b style="font-size: 14px" class="text-uppercase">......................................</b>&nbsp;
-        <span class="text-uppercase fs-16 ">Signature:<b>...............................</b></span>
+        <b style="font-size: 14px"
+            class="text-uppercase">......................................................</b>&nbsp;
+        <span class="text-uppercase fs-16 ">Signature:<b>.......................</b></span>
     </p>
 
     @if ($tr != null)
@@ -422,7 +423,8 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 style="font-size: 14px">{{ $tr->class_teacher_comment }}</b></p>
         <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's Name:</span>
             {{-- <b style="font-size: 14px" class="text-uppercase">{{ $class_teacher_name_1 }}</b>,&nbsp; --}}
-            <b style="font-size: 14px" class="text-uppercase">......................................</b>,&nbsp;
+            <b style="font-size: 14px"
+                class="text-uppercase">......................................................</b>,&nbsp;
             <span class="text-uppercase fs-16 ">Signature:<b>...............................</b></span>
         </p>
     @endif
@@ -444,7 +446,9 @@ foreach ($r->termly_report_card->term->exams as $exam) {
             style="font-size: 14px">{{ $r->head_teacher_comment }}</b></p>
     <p class="mt-2 fw-16"><span class="text-uppercase">HEAD Teacher's Name:</span> <b style="font-size: 14px"
             class="text-uppercase">{{ $hm_name }}</b>,&nbsp;
-        <span class="text-uppercase fs-16 ">Signature:<b>...............................</b></span>
+        <span class="text-uppercase fs-16 ">Signature:
+            <img style="width: 70px; " src="{{ public_path('storage/' . $ent->hm_signature) }}">
+        </span>
     </p>
     <br>
 
