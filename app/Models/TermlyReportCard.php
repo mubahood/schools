@@ -414,7 +414,7 @@ class TermlyReportCard extends Model
                         continue;
                     }
 
-                    if ($sub->is_optional == 1) {
+                    if (((int)$sub->is_optional) == 1) {
                         $mark->aggr_value = 0;
                         $mark->aggr_name = '-';
                         $mark->save();
@@ -431,7 +431,6 @@ class TermlyReportCard extends Model
                         }
                         $_total_aggregates += $mark->aggr_value;
                     }
-
                     $_total_scored_marks += $mark->total_score_display;
                     $_total_max_marks += 100;
                     $mark->save();
