@@ -141,8 +141,10 @@ class TermlyReportCardController extends AdminController
      * @return Form
      */
     protected function form()
-    {
-        // $x = TermlyReportCard::find(16);
+    { 
+        //$x = TermlyReportCard::find(16);
+        // TermlyReportCard::do_generate_class_teacher_comment($x);
+        // dd($x);
         // $x->generate_marks = 'Yes';
         // TermlyReportCard::do_generate_marks($x);
         // die('termly-report-cards');

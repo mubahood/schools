@@ -50,10 +50,10 @@ class TheologyTermlyReportCard extends Model
             }
 
             if ($m->generate_class_teacher_comment == 'Yes') {
-                TermlyReportCard::do_generate_class_teacher_comment($m);
+                TheologyTermlyReportCard::do_generate_class_teacher_comment($m);
             }
             if ($m->generate_head_teacher_comment == 'Yes') {
-                TermlyReportCard::do_generate_head_teacher_comment($m);
+                //TermlyReportCard::do_generate_head_teacher_comment($m);
             }
 
             if ($m->generate_positions == 'Yes') {
@@ -451,6 +451,38 @@ total_students
             $this->attributes['generate_marks_for_classes'] = json_encode($value);
         } catch (\Throwable $th) {
             $this->attributes['generate_marks_for_classes'] = null;
+        }
+    }
+
+
+    public static function do_generate_class_teacher_comment($m)
+    {
+
+        foreach ($m->report_cards as $key => $report) {
+
+            $max_score = 400;
+            $total_marks = $report->total_marks;
+            $percentage = ($total_marks / $max_score) * 100;
+
+            $student = User::find($report->student_id);
+            if ($student == null) {
+                continue;
+            }
+            $comment = Utils::get_autometed_comment(
+                $percentage,
+                $student->name,
+                $student->sex
+            );
+            $report->class_teacher_comment = $comment;
+            continue;
+
+
+            $total_score = MarkRecord::where([
+                'administrator_id' => $report->student_id,
+                'termly_report_card_id' => $m->id,
+            ])->sum('total_score');
+            $report->class_teacher_comment = Utils::getClassTeacherComment($report)['teacher'];
+            $report->save();
         }
     }
 }

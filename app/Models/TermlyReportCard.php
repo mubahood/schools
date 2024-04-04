@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Dflydev\DotAccessData\Util;
 use Doctrine\DBAL\Schema\Schema;
 use Encore\Admin\Auth\Database\Administrator;
 use Exception;
@@ -178,12 +179,48 @@ class TermlyReportCard extends Model
 
     public static function do_generate_class_teacher_comment($m)
     {
-        return;
+
         foreach ($m->report_cards as $key => $report) {
+            $count = MarkRecord::where([
+                'administrator_id' => $report->student_id,
+                'termly_report_card_id' => $m->id,
+            ])->count();
+            $max_score = $count * 100;
+            if ($max_score == 0) {
+                continue;
+            }
+            $total_marks = $report->total_marks;
+            $percentage = ($total_marks / $max_score) * 100;
+
+            $student = User::find($report->student_id);
+            if ($student == null) {
+                continue;
+            }
+            $comment = Utils::get_autometed_comment(
+                $percentage,
+                $student->name,
+                $student->sex
+            );
+            $report->class_teacher_comment = $comment;
+            $comment = Utils::get_autometed_comment(
+                $percentage,
+                $student->name,
+                $student->sex
+            );
+            $report->head_teacher_comment = $comment;
+            $report->save();
+            continue;
+
+
+            $total_score = MarkRecord::where([
+                'administrator_id' => $report->student_id,
+                'termly_report_card_id' => $m->id,
+            ])->sum('total_score');
             $report->class_teacher_comment = Utils::getClassTeacherComment($report)['teacher'];
             $report->save();
         }
     }
+    
     public static function do_generate_head_teacher_comment($m)
     {
         return;
@@ -320,6 +357,7 @@ class TermlyReportCard extends Model
                 $report->stream_id = $student_has_class->stream_id;
                 $report->academic_class_id = $student_has_class->academic_class_id;
 
+
                 $marks = MarkRecord::where([
                     'administrator_id' => $student->id,
                     'termly_report_card_id' => $m->id,
@@ -370,17 +408,29 @@ class TermlyReportCard extends Model
                     $mark->total_score_display = $average_mark;
                     $mark->remarks = Utils::get_automaic_mark_remarks($mark->total_score_display);
 
-                    $mark->aggr_value = null;
-                    $mark->aggr_name = null;
+                    $sub = Subject::find($mark->subject_id);
 
-                    foreach ($ranges as $range) {
-                        if ($mark->total_score_display > $range->min_mark && $mark->total_score_display < $range->max_mark) {
-                            $mark->aggr_value = $range->aggregates;
-                            $mark->aggr_name = $range->name;
-                            break;
-                        }
+                    if ($sub == null) {
+                        continue;
                     }
-                    $_total_aggregates += $mark->aggr_value;
+
+                    if ($sub->is_optional == 1) {
+                        $mark->aggr_value = 0;
+                        $mark->aggr_name = '-';
+                        $mark->save();
+                        continue;
+                    } else {
+                        $mark->aggr_value = null;
+                        $mark->aggr_name = null;
+                        foreach ($ranges as $range) {
+                            if ($mark->total_score_display > $range->min_mark && $mark->total_score_display < $range->max_mark) {
+                                $mark->aggr_value = $range->aggregates;
+                                $mark->aggr_name = $range->name;
+                                break;
+                            }
+                        }
+                        $_total_aggregates += $mark->aggr_value;
+                    }
 
                     $_total_scored_marks += $mark->total_score_display;
                     $_total_max_marks += 100;

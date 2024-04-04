@@ -2589,4 +2589,273 @@ class Utils  extends Model
             } //
         }
     }
+
+
+    public static function get_autometed_comment(
+        $score,
+        $name,
+        $sex,
+    ) {
+        $STUDENT_NAME = $name;
+        $sex = strtolower($sex);
+
+        $comments = [];
+        if (!strrpos($score, '0')) {
+            $STUDENT_HE_SHE = "she";
+            $STUDENT_HIM_HER = "her";
+        } else {
+            $STUDENT_HE_SHE = "he";
+            $STUDENT_HIM_HER = "him";
+        }
+        $comment = "";
+        if ($score < 21) {
+            $comment = Utils::comment_0_20();
+        } else if ($score < 41) {
+            $comment = Utils::comment_20_40();
+        } else if ($score < 61) {
+            $comment = Utils::comment_40_60();
+        } else if ($score < 81) {
+            $comment = Utils::comment_60_80();
+        } else {
+            $comment = Utils::comment_80_100();
+        }
+        //replacing the student name
+        $comment = str_replace("STUDENT_NAME", $STUDENT_NAME, $comment);
+        $comment = str_replace("STUDENT_HE_SHE", $STUDENT_HE_SHE, $comment);
+        $comment = str_replace("STUDENT_HIM_HER", $STUDENT_HIM_HER, $comment);
+        $comment = str_replace("STUDENT_HIS_HER", $STUDENT_HIM_HER, $comment);
+        return $comment;
+    }
+
+    public static function comment_0_20()
+    {
+        $data = [
+            "STUDENT_NAME is struggling with STUDENT_HIS_HER studies and needs to focus more on STUDENT_HIS_HER academics.",
+            "STUDENT_NAME's performance is below expectations. STUDENT_HE_SHE needs to seek help and put in extra effort to improve.",
+            "STUDENT_NAME is not meeting the required standards academically. STUDENT_HE_SHE should consider seeking additional support.",
+            "STUDENT_NAME's academic performance needs significant improvement. STUDENT_HE_SHE should work closely with teachers to address STUDENT_HIS_HER weaknesses.",
+            "STUDENT_NAME's grades indicate a lack of understanding in several subjects. STUDENT_HE_SHE needs to dedicate more time to studying.",
+            "STUDENT_NAME is facing challenges in STUDENT_HIS_HER studies and needs to develop better study habits.",
+            "STUDENT_NAME's academic progress is unsatisfactory. STUDENT_HE_SHE needs to take STUDENT_HIS_HER studies more seriously.",
+            "STUDENT_NAME's performance in class is concerning. STUDENT_HE_SHE needs to seek assistance from teachers to improve.",
+            "STUDENT_NAME's grades are far below expectations. STUDENT_HE_SHE needs to demonstrate more effort and commitment to STUDENT_HIS_HER studies.",
+            "STUDENT_NAME is struggling to grasp key concepts in several subjects. STUDENT_HE_SHE should seek help and review STUDENT_HIS_HER study strategies.",
+            "STUDENT_NAME's academic performance requires significant improvement. STUDENT_HIS_HER lack of focus is hindering STUDENT_HIS_HER progress.",
+            "STUDENT_NAME is struggling to grasp fundamental concepts in several subjects. STUDENT_HIS_HER commitment to studying needs enhancement.",
+            "STUDENT_NAME's grades reflect a need for intensive remedial work. STUDENT_HE_SHE should seek additional support outside of class.",
+            "STUDENT_NAME's academic progress has been unsatisfactory. STUDENT_HE_SHE needs to demonstrate more initiative in STUDENT_HIS_HER studies.",
+            "STUDENT_NAME's performance in class is concerning. STUDENT_HE_SHE should utilize available resources to improve STUDENT_HIS_HER understanding.",
+            "STUDENT_NAME is failing to meet academic expectations. STUDENT_HE_SHE must take immediate action to address STUDENT_HIS_HER deficiencies.",
+            "STUDENT_NAME's grades are among the lowest in the class. STUDENT_HE_SHE needs to prioritize STUDENT_HIS_HER studies to catch up.",
+            "STUDENT_NAME's academic performance is worrisome. STUDENT_HE_SHE should consider seeking tutoring or additional help from teachers.",
+            "STUDENT_NAME's current grades are not indicative of STUDENT_HIS_HER potential. STUDENT_HE_SHE must work harder to improve STUDENT_HIS_HER academic standing.",
+            "STUDENT_NAME's lack of academic progress is a cause for concern. STUDENT_HE_SHE should meet with teachers to develop a plan for improvement.",
+            "STUDENT_NAME's academic performance requires significant improvement. STUDENT_HIS_HER lack of focus is hindering STUDENT_HIS_HER progress.",
+            "STUDENT_NAME is struggling to grasp fundamental concepts in several subjects. STUDENT_HIS_HER commitment to studying needs enhancement.",
+            "STUDENT_NAME's grades reflect a need for intensive remedial work. STUDENT_HE_SHE should seek additional support outside of class.",
+            "STUDENT_NAME's academic progress has been unsatisfactory. STUDENT_HE_SHE needs to demonstrate more initiative in STUDENT_HIS_HER studies.",
+            "STUDENT_NAME's performance in class is concerning. STUDENT_HE_SHE should utilize available resources to improve STUDENT_HIS_HER understanding.",
+            "STUDENT_NAME is failing to meet academic expectations. STUDENT_HE_SHE must take immediate action to address STUDENT_HIS_HER deficiencies.",
+            "STUDENT_NAME's grades are among the lowest in the class. STUDENT_HE_SHE needs to prioritize STUDENT_HIS_HER studies to catch up.",
+            "STUDENT_NAME's academic performance is worrisome. STUDENT_HE_SHE should consider seeking tutoring or additional help from teachers.",
+            "STUDENT_NAME's current grades are not indicative of STUDENT_HIS_HER potential. STUDENT_HE_SHE must work harder to improve STUDENT_HIS_HER academic standing.",
+            "STUDENT_NAME's lack of academic progress is a cause for concern. STUDENT_HE_SHE should meet with teachers to develop a plan for improvement.",
+            "STUDENT_NAME's consistent poor performance in tests and assignments is alarming. STUDENT_HE_SHE needs to take immediate action to address this.",
+            "STUDENT_NAME's lack of participation in class activities is affecting STUDENT_HIS_HER grades. STUDENT_HE_SHE needs to engage more actively in lessons.",
+            "STUDENT_NAME's frequent absenteeism is hindering STUDENT_HIS_HER academic progress. STUDENT_HE_SHE must attend classes regularly to improve.",
+            "STUDENT_NAME's disregard for homework assignments is reflected in STUDENT_HIS_HER grades. STUDENT_HE_SHE should complete and submit assignments on time.",
+            "STUDENT_NAME's academic performance shows little improvement despite repeated warnings. STUDENT_HE_SHE must take STUDENT_HIS_HER studies more seriously.",
+            "STUDENT_NAME's lack of motivation is evident in STUDENT_HIS_HER academic performance. STUDENT_HE_SHE needs to rediscover STUDENT_HIS_HER enthusiasm for learning."
+        ];
+        //shuffle data
+        shuffle($data);
+        return $data[rand(0, count($data) - 1)];
+    }
+
+    public static function comment_20_40()
+    {
+        $data = [
+            "STUDENT_NAME is showing some improvement in STUDENT_HIS_HER studies, but STUDENT_HE_SHE still has a long way to go.",
+            "STUDENT_NAME is making an effort to improve STUDENT_HIS_HER grades, but STUDENT_HE_SHE needs to be more consistent in STUDENT_HIS_HER efforts.",
+            "STUDENT_NAME's academic performance is slowly improving. With determination and perseverance, STUDENT_HE_SHE can achieve better results.",
+            "STUDENT_NAME's grades are showing signs of progress, but STUDENT_HE_SHE needs to stay focused and continue working hard.",
+            "STUDENT_NAME is making some strides academically, but there is still room for improvement in several areas.",
+            "STUDENT_NAME's efforts are commendable, but STUDENT_HE_SHE needs to work on strengthening STUDENT_HIS_HER understanding of certain subjects.",
+            "STUDENT_NAME is on the right track academically, but STUDENT_HE_SHE should strive for more consistent performance.",
+            "STUDENT_NAME's progress is noticeable, but STUDENT_HE_SHE needs to push STUDENT_HIM_HERSELF further to reach STUDENT_HIS_HER full potential.",
+            "STUDENT_NAME is demonstrating improvement in STUDENT_HIS_HER studies, but STUDENT_HE_SHE must maintain this momentum to achieve better grades.",
+            "STUDENT_NAME's grades are improving gradually, but STUDENT_HE_SHE needs to put in more effort to see significant progress.",
+            "STUDENT_NAME is making progress, but STUDENT_HE_SHE must remain focused and dedicated to reach STUDENT_HIS_HER full potential.",
+            "STUDENT_NAME's academic performance is improving gradually. STUDENT_HE_SHE should continue to seek opportunities for growth.",
+            "STUDENT_NAME's grades are showing improvement, indicating STUDENT_HIS_HER commitment to success. Keep up the good work!",
+            "STUDENT_NAME is demonstrating perseverance in STUDENT_HIS_HER studies. With continued effort, STUDENT_HE_SHE can achieve better results.",
+            "STUDENT_NAME's academic progress is commendable, but there is still room for growth. Keep pushing STUDENT_HIM_HERSELF to excel.",
+            "STUDENT_NAME's efforts in class are paying off, but STUDENT_HE_SHE should strive for greater consistency in STUDENT_HIS_HER performance.",
+            "STUDENT_NAME is showing potential for improvement in STUDENT_HIS_HER studies. STUDENT_HE_SHE should seize opportunities for extra help.",
+            "STUDENT_NAME's academic performance is on an upward trajectory. Keep up the momentum!",
+            "STUDENT_NAME's grades have improved since the last assessment. STUDENT_HE_SHE should maintain this positive trend.",
+            "STUDENT_NAME's dedication to STUDENT_HIS_HER studies is evident in STUDENT_HIS_HER recent progress. Keep aiming for success!",
+            "STUDENT_NAME is making progress, but STUDENT_HE_SHE must remain focused and dedicated to reach STUDENT_HIS_HER full potential.",
+            "STUDENT_NAME's academic performance is improving gradually. STUDENT_HE_SHE should continue to seek opportunities for growth.",
+            "STUDENT_NAME's grades are showing improvement, indicating STUDENT_HIS_HER commitment to success. Keep up the good work!",
+            "STUDENT_NAME is demonstrating perseverance in STUDENT_HIS_HER studies. With continued effort, STUDENT_HE_SHE can achieve better results.",
+            "STUDENT_NAME's academic progress is commendable, but there is still room for growth. Keep pushing STUDENT_HIM_HERSELF to excel.",
+            "STUDENT_NAME's efforts in class are paying off, but STUDENT_HE_SHE should strive for greater consistency in STUDENT_HIS_HER performance.",
+            "STUDENT_NAME is showing potential for improvement in STUDENT_HIS_HER studies. STUDENT_HE_SHE should seize opportunities for extra help.",
+            "STUDENT_NAME's academic performance is on an upward trajectory. Keep up the momentum!",
+            "STUDENT_NAME's grades have improved since the last assessment. STUDENT_HE_SHE should maintain this positive trend.",
+            "STUDENT_NAME's dedication to STUDENT_HIS_HER studies is evident in STUDENT_HIS_HER recent progress. Keep aiming for success!",
+            "STUDENT_NAME's consistent tardiness is affecting STUDENT_HIS_HER academic performance. STUDENT_HE_SHE should make punctuality a priority.",
+            "STUDENT_NAME's lack of organization is evident in STUDENT_HIS_HER academic work. STUDENT_HE_SHE should develop better study habits.",
+            "STUDENT_NAME's performance in group projects is subpar. STUDENT_HE_SHE should collaborate more effectively with peers.",
+            "STUDENT_NAME's weak grasp of basic concepts is evident in STUDENT_HIS_HER grades. STUDENT_HE_SHE should review foundational material.",
+            "STUDENT_NAME's tendency to procrastinate is affecting STUDENT_HIS_HER academic performance. STUDENT_HE_SHE should work on time management skills.",
+            "STUDENT_NAME's inconsistent attendance is impacting STUDENT_HIS_HER ability to keep up with coursework. STUDENT_HE_SHE should attend classes regularly."
+        ];
+        shuffle($data);
+        return $data[rand(0, count($data) - 1)];
+    }
+
+    public static function comment_40_60()
+    {
+        $data = [
+            "STUDENT_NAME is performing satisfactorily in STUDENT_HIS_HER studies. With continued effort, STUDENT_HE_SHE can excel.",
+            "STUDENT_NAME's academic performance is decent, but STUDENT_HE_SHE should aim higher and challenge STUDENT_HIM_HERSELF.",
+            "STUDENT_NAME is meeting the academic standards expected at this level. Keep up the good work!",
+            "STUDENT_NAME's grades reflect consistent effort and understanding of the material covered in class.",
+            "STUDENT_NAME is making good progress in STUDENT_HIS_HER studies and should continue to strive for improvement.",
+            "STUDENT_NAME's performance in class is respectable. Keep pushing STUDENT_HIM_HERSELF to reach new heights!",
+            "STUDENT_NAME is demonstrating competence in STUDENT_HIS_HER studies and should maintain STUDENT_HIS_HER current level of effort.",
+            "STUDENT_NAME's grades indicate a solid understanding of the subjects taught. Keep up the great work!",
+            "STUDENT_NAME is performing well academically and is on track to achieve success.",
+            "STUDENT_NAME's efforts in class are paying off, resulting in satisfactory grades.",
+            "STUDENT_NAME is meeting expectations academically. With sustained effort, STUDENT_HE_SHE can achieve even greater success.",
+            "STUDENT_NAME's grades are satisfactory, but STUDENT_HE_SHE should aim for excellence in all subjects.",
+            "STUDENT_NAME consistently completes assignments on time and demonstrates a solid understanding of the material.",
+            "STUDENT_NAME's academic performance is stable. Keep up the good work!",
+            "STUDENT_NAME's efforts in class are commendable and reflect STUDENT_HIS_HER commitment to STUDENT_HIS_HER studies.",
+            "STUDENT_NAME's progress in STUDENT_HIS_HER studies is commendable. Keep striving for improvement!",
+            "STUDENT_NAME is demonstrating steady progress in STUDENT_HIS_HER academics. Keep pushing forward!",
+            "STUDENT_NAME's grades reflect STUDENT_HIS_HER dedication and hard work. Keep aiming high!",
+            "STUDENT_NAME consistently participates in class activities and shows enthusiasm for learning.",
+            "STUDENT_NAME's academic performance is respectable. Keep up the positive momentum!",
+            "STUDENT_NAME is meeting expectations academically. With sustained effort, STUDENT_HE_SHE can achieve even greater success.",
+            "STUDENT_NAME's grades are satisfactory, but STUDENT_HE_SHE should aim for excellence in all subjects.",
+            "STUDENT_NAME consistently completes assignments on time and demonstrates a solid understanding of the material.",
+            "STUDENT_NAME's academic performance is stable. Keep up the good work!",
+            "STUDENT_NAME's efforts in class are commendable and reflect STUDENT_HIS_HER commitment to STUDENT_HIS_HER studies.",
+            "STUDENT_NAME's progress in STUDENT_HIS_HER studies is commendable. Keep striving for improvement!",
+            "STUDENT_NAME is demonstrating steady progress in STUDENT_HIS_HER academics. Keep pushing forward!",
+            "STUDENT_NAME's grades reflect STUDENT_HIS_HER dedication and hard work. Keep aiming high!",
+            "STUDENT_NAME consistently participates in class activities and shows enthusiasm for learning.",
+            "STUDENT_NAME's academic performance is respectable. Keep up the positive momentum!",
+            "STUDENT_NAME's performance in assessments is inconsistent. STUDENT_HE_SHE should review material regularly to maintain understanding.",
+            "STUDENT_NAME's lack of focus during class discussions is evident in STUDENT_HIS_HER grades. STUDENT_HE_SHE should actively engage in lessons.",
+            "STUDENT_NAME's performance in practical assignments needs improvement. STUDENT_HE_SHE should seek additional practice outside of class.",
+            "STUDENT_NAME's failure to complete homework assignments is negatively impacting STUDENT_HIS_HER grades. STUDENT_HE_SHE should prioritize homework.",
+            "STUDENT_NAME's academic performance fluctuates. STUDENT_HE_SHE should work on maintaining consistent effort and focus.",
+            "STUDENT_NAME's performance in group activities needs improvement. STUDENT_HE_SHE should collaborate more effectively with peers."
+
+        ];
+        shuffle($data);
+        return $data[rand(0, count($data) - 1)];
+    }
+
+    public static function comment_60_80()
+    {
+        $data = [
+            "STUDENT_NAME is performing above average academically. Keep up the good work!",
+            "STUDENT_NAME consistently produces high-quality work and demonstrates a strong understanding of the material.",
+            "STUDENT_NAME's grades reflect STUDENT_HIS_HER dedication to STUDENT_HIS_HER studies and STUDENT_HIS_HER ability to grasp complex concepts.",
+            "STUDENT_NAME is excelling in STUDENT_HIS_HER academic pursuits and should continue to challenge STUDENT_HIM_HERSELF.",
+            "STUDENT_NAME's performance in class is outstanding. Keep striving for excellence!",
+            "STUDENT_NAME consistently meets or exceeds expectations in all academic areas. Well done!",
+            "STUDENT_NAME's commitment to STUDENT_HIS_HER studies is commendable, resulting in excellent grades.",
+            "STUDENT_NAME is a top-performing student who consistently produces exceptional work.",
+            "STUDENT_NAME's academic achievements are impressive and reflect STUDENT_HIS_HER hard work and determination.",
+            "STUDENT_NAME is a model student who consistently excels in all academic endeavors.",
+            "STUDENT_NAME's academic performance is commendable and reflects STUDENT_HIS_HER strong work ethic.",
+            "STUDENT_NAME consistently produces high-quality work and demonstrates a deep understanding of the material.",
+            "STUDENT_NAME's grades reflect STUDENT_HIS_HER dedication to excellence. Keep up the exceptional work!",
+            "STUDENT_NAME's performance in class is exemplary. STUDENT_HE_SHE consistently goes above and beyond expectations.",
+            "STUDENT_NAME's academic achievements are impressive and reflect STUDENT_HIS_HER commitment to STUDENT_HIS_HER studies.",
+            "STUDENT_NAME's dedication to STUDENT_HIS_HER studies sets a positive example for classmates.",
+            "STUDENT_NAME's academic performance is outstanding across all subjects. Keep aiming for excellence!",
+            "STUDENT_NAME consistently exceeds expectations in STUDENT_HIS_HER studies. Well done!",
+            "STUDENT_NAME's achievements in the classroom are remarkable. Keep up the fantastic work!",
+            "STUDENT_NAME is a role model for academic excellence. Keep striving for greatness!",
+            "STUDENT_NAME's academic performance is commendable and reflects STUDENT_HIS_HER strong work ethic.",
+            "STUDENT_NAME consistently produces high-quality work and demonstrates a deep understanding of the material.",
+            "STUDENT_NAME's grades reflect STUDENT_HIS_HER dedication to excellence. Keep up the exceptional work!",
+            "STUDENT_NAME's performance in class is exemplary. STUDENT_HE_SHE consistently goes above and beyond expectations.",
+            "STUDENT_NAME's academic achievements are impressive and reflect STUDENT_HIS_HER commitment to STUDENT_HIS_HER studies.",
+            "STUDENT_NAME's dedication to STUDENT_HIS_HER studies sets a positive example for classmates.",
+            "STUDENT_NAME's academic performance is outstanding across all subjects. Keep aiming for excellence!",
+            "STUDENT_NAME consistently exceeds expectations in STUDENT_HIS_HER studies. Well done!",
+            "STUDENT_NAME's achievements in the classroom are remarkable. Keep up the fantastic work!",
+            "STUDENT_NAME is a role model for academic excellence. Keep striving for greatness!",
+            "STUDENT_NAME's academic performance reflects STUDENT_HIS_HER dedication and hard work. Keep up the excellent effort!",
+            "STUDENT_NAME consistently demonstrates a strong understanding of complex concepts. Well done!",
+            "STUDENT_NAME's academic achievements are exceptional and reflect STUDENT_HIS_HER commitment to excellence.",
+            "STUDENT_NAME consistently exceeds expectations and sets a high standard for academic excellence.",
+            "STUDENT_NAME's performance in class is exemplary. STUDENT_HE_SHE consistently demonstrates outstanding abilities.",
+            "STUDENT_NAME's dedication to STUDENT_HIS_HER studies is admirable and leads to exceptional academic performance.",
+            "STUDENT_NAME's academic achievements are outstanding and reflect STUDENT_HIS_HER passion for learning.",
+            "STUDENT_NAME consistently goes above and beyond in STUDENT_HIS_HER studies, setting a remarkable example for peers.",
+            "STUDENT_NAME's exceptional academic performance is a testament to STUDENT_HIS_HER hard work and dedication.",
+            "STUDENT_NAME consistently produces work of the highest quality and earns top marks in all subjects.",
+            "STUDENT_NAME's academic performance is exemplary and sets a high standard for peers to follow.",
+            "STUDENT_NAME's achievements in the classroom are remarkable and reflect STUDENT_HIS_HER dedication to excellence.",
+            "STUDENT_NAME's academic excellence is unparalleled. Keep up the phenomenal work!",
+            "STUDENT_NAME is a shining example of academic achievement. Congratulations on STUDENT_HIS_HER outstanding performance!",
+            "STUDENT_NAME consistently demonstrates exceptional abilities and earns the highest marks in all subjects."
+
+
+        ];
+        shuffle($data);
+        return $data[rand(0, count($data) - 1)];
+    }
+
+    public static function comment_80_100()
+    {
+        $data = [
+            "STUDENT_NAME is excelling in STUDENT_HIS_HER studies and consistently demonstrates outstanding performance. Keep it up!",
+            "STUDENT_NAME's academic achievements are exceptional and set a high standard for STUDENT_HIS_HER peers.",
+            "STUDENT_NAME consistently produces work of the highest quality and exceeds all expectations.",
+            "STUDENT_NAME is a top achiever who consistently earns top marks in all subjects.",
+            "STUDENT_NAME's academic performance is exemplary and reflects STUDENT_HIS_HER dedication and passion for learning.",
+            "STUDENT_NAME is an outstanding student who consistently demonstrates exceptional academic ability.",
+            "STUDENT_NAME's academic achievements are unparalleled. Congratulations on STUDENT_HIS_HER outstanding performance!",
+            "STUDENT_NAME consistently goes above and beyond in STUDENT_HIS_HER studies, setting a remarkable example for STUDENT_HIS_HER classmates.",
+            "STUDENT_NAME's commitment to excellence is evident in STUDENT_HIS_HER exceptional academic performance.",
+            "STUDENT_NAME is a shining example of academic excellence. Keep up the phenomenal work!",
+            "STUDENT_NAME is excelling in STUDENT_HIS_HER studies and consistently demonstrates outstanding performance. Keep it up!",
+            "STUDENT_NAME's academic achievements are exceptional and set a high standard for STUDENT_HIS_HER peers.",
+            "STUDENT_NAME consistently produces work of the highest quality and exceeds all expectations.",
+            "STUDENT_NAME is a top achiever who consistently earns top marks in all subjects.",
+            "STUDENT_NAME's academic performance is exemplary and reflects STUDENT_HIS_HER dedication and passion for learning.",
+            "STUDENT_NAME is an outstanding student who consistently demonstrates exceptional academic ability.",
+            "STUDENT_NAME's academic achievements are unparalleled. Congratulations on STUDENT_HIS_HER outstanding performance!",
+            "STUDENT_NAME consistently goes above and beyond in STUDENT_HIS_HER studies, setting a remarkable example for STUDENT_HIS_HER classmates.",
+            "STUDENT_NAME's commitment to excellence is evident in STUDENT_HIS_HER exceptional academic performance.",
+            "STUDENT_NAME is a shining example of academic excellence. Keep up the phenomenal work!",
+            "STUDENT_NAME's academic performance is exceptional and sets a benchmark for excellence.",
+            "STUDENT_NAME consistently demonstrates unparalleled mastery of all subjects. Well done!",
+            "STUDENT_NAME's academic achievements are extraordinary and reflect STUDENT_HIS_HER dedication to learning.",
+            "STUDENT_NAME consistently exceeds expectations and achieves the highest possible standards.",
+            "STUDENT_NAME's performance in class is unparalleled. STUDENT_HE_SHE is truly exceptional.",
+            "STUDENT_NAME's commitment to STUDENT_HIS_HER studies is unwavering, resulting in unparalleled academic success.",
+            "STUDENT_NAME's academic achievements are unparalleled and reflect STUDENT_HIS_HER relentless pursuit of excellence.",
+            "STUDENT_NAME consistently sets the standard for academic excellence and inspires peers to strive for greatness.",
+            "STUDENT_NAME consistently produces work of the highest caliber and earns top honors in all subjects.",
+            "STUDENT_NAME's academic performance is exemplary in every aspect. Keep up the outstanding work!",
+            "STUDENT_NAME's achievements in the classroom are unmatched and reflect STUDENT_HIS_HER dedication to excellence.",
+            "STUDENT_NAME's academic excellence is unmatched. Congratulations on STUDENT_HIS_HER exceptional performance!",
+            "STUDENT_NAME is a role model for academic achievement and sets a standard of excellence for peers.",
+            "STUDENT_NAME consistently demonstrates exceptional abilities and achieves the highest level of success in all endeavors.",
+            "STUDENT_NAME's academic prowess is unparalleled and reflects STUDENT_HIS_HER unwavering commitment to excellence."
+        ];
+        shuffle($data);
+        return $data[rand(0, count($data) - 1)];
+    }
 }
