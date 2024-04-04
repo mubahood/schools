@@ -69,7 +69,7 @@ class TermlyReportCard extends Model
                 TermlyReportCard::do_reports_generate($m);
             }
             if ($m->generate_class_teacher_comment == 'Yes') {
-                //TermlyReportCard::do_generate_class_teacher_comment($m);
+                TermlyReportCard::do_generate_class_teacher_comment($m);
             }
             if ($m->generate_positions == 'Yes') {
                 TermlyReportCard::do_generate_positions($m);
@@ -220,7 +220,7 @@ class TermlyReportCard extends Model
             $report->save();
         }
     }
-    
+
     public static function do_generate_head_teacher_comment($m)
     {
         return;
