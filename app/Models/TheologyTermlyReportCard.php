@@ -473,6 +473,7 @@ total_students
                 $student->name,
                 $student->sex
             );
+
             $report->class_teacher_comment = $comment;
             continue;
 

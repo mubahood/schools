@@ -220,11 +220,11 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     if ($hasClass == null) {
                         continue;
                     }
-                    
+
                     if ($hasClass->academic_class_id != $v->subject->academic_class_id) {
                         continue;
                     }
-                    
+
                 @endphp
 
                 @php
@@ -276,8 +276,9 @@ foreach ($r->termly_report_card->term->exams as $exam) {
     </table>
     <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's Comment:</span> <b class="comment"
             style="font-size: 14px">{{ $r->class_teacher_comment }}</b></p>
-    <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's Name:</span> <b style="font-size: 14px"
-            class="text-uppercase">{{ $class_teacher_name }}</b>,&nbsp;
+    <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's Name:</span>
+        {{-- <b style="font-size: 14px" class="text-uppercase">{{ $class_teacher_name }}</b>,&nbsp; --}}
+        <b style="font-size: 14px" class="text-uppercase">......................................</b>&nbsp;
         <span class="text-uppercase fs-16 ">Signature:<b>...............................</b></span>
     </p>
 
@@ -345,12 +346,12 @@ foreach ($r->termly_report_card->term->exams as $exam) {
             @endphp
 
             @php
-                
+
                 $span = 0;
                 $bot_tot = 0;
                 $mot_tot = 0;
                 $eot_tot = 0;
-                
+
             @endphp
             @foreach ($theology_termly_report_card->get_student_marks($owner->id) as $v)
                 <tr class="marks">
@@ -362,17 +363,17 @@ foreach ($r->termly_report_card->term->exams as $exam) {
 
                         if ($hasTheologyClass == null) {
                             continue;
-                        } 
-                        
+                        }
+
                         if ($hasTheologyClass->theology_class_id != $v->subject->theology_class_id) {
                             continue;
                         }
-                        
+
                         $span = 0;
                         $bot_tot += $v->bot_score;
                         $mot_tot += $v->mot_score;
                         $eot_tot += $v->eot_score;
-                        
+
                     @endphp
                     <th>{{ $v->subject->name }}</th>
                     @if ($termly_report_card->reports_include_bot == 'Yes')
@@ -419,8 +420,9 @@ foreach ($r->termly_report_card->term->exams as $exam) {
         </table>
         <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's comment:</span> <b class="comment"
                 style="font-size: 14px">{{ $tr->class_teacher_comment }}</b></p>
-        <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's Name:</span> <b style="font-size: 14px"
-                class="text-uppercase">{{ $class_teacher_name_1 }}</b>,&nbsp;
+        <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's Name:</span>
+            {{-- <b style="font-size: 14px" class="text-uppercase">{{ $class_teacher_name_1 }}</b>,&nbsp; --}}
+            <b style="font-size: 14px" class="text-uppercase">......................................</b>,&nbsp;
             <span class="text-uppercase fs-16 ">Signature:<b>...............................</b></span>
         </p>
     @endif
@@ -429,12 +431,12 @@ foreach ($r->termly_report_card->term->exams as $exam) {
             padding: 0px; margin-bottom: 6px;   "
         class="my-3">
 
-    <p class="mt-2 fw-16"><span class="text-uppercase">Mentor's comment:</span> <b class="comment"
+    {{-- <p class="mt-2 fw-16"><span class="text-uppercase">Mentor's comment:</span> <b class="comment"
             style="font-size: 14px">{{ $r->mentor_comment }}</b></p>
     <p class="mt-2 fw-16"><span class="text-uppercase">Co-Curricular Activities comment:</span> <b class="comment"
             style="font-size: 14px">{{ $r->sports_comment }}</b></p>
     <p class="mt-2 fw-16"><span class="text-uppercase">Nurse's comment:</span> <b class="comment"
-            style="font-size: 14px">{{ $r->nurse_comment }}</b></p>
+            style="font-size: 14px">{{ $r->nurse_comment }}</b></p> --}}
 
 
 

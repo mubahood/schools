@@ -35,6 +35,7 @@ class MedicalRecordController extends AdminController
             ->orderBy('id', 'desc');
 
 
+
         //filter
         $grid->filter(function ($filter) {
             $filter->disableIdFilter();
@@ -76,6 +77,7 @@ class MedicalRecordController extends AdminController
                 ]);
         });
 
+
         $grid->column('created_at', __('Date'))
             ->display(function ($d) {
                 return date('d M, Y', strtotime($d));
@@ -107,6 +109,7 @@ class MedicalRecordController extends AdminController
 
         $grid->column('other_diseases', __('Other Diseases'))
             ->display(function ($ids) {
+                return 'N/A';
                 $a = Disease::whereIn('id', $ids)->get();
                 if ($a) {
                     return $a->pluck('name')->implode(', ');
@@ -127,7 +130,7 @@ class MedicalRecordController extends AdminController
         $grid->column('cost', __('Cost (UGX)'))
             ->display(function ($r) {
                 return number_format($r);
-            })->sortable(); 
+            })->sortable();
         $grid->column('posted_by_id', __('Created by'))
             ->display(function ($id) {
                 $a = Administrator::find($id);
