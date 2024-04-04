@@ -2610,13 +2610,7 @@ class Utils  extends Model
         }
 
         $comments = [];
-        if (!strrpos($score, '0')) {
-            $STUDENT_HE_SHE = "she";
-            $STUDENT_HIM_HER = "her";
-        } else {
-            $STUDENT_HE_SHE = "he";
-            $STUDENT_HIM_HER = "him";
-        }
+    
         $comment = "";
         if ($score < 21) {
             $comment = Utils::comment_0_20();

@@ -475,7 +475,7 @@ total_students
             );
 
             $report->class_teacher_comment = $comment;
-            $report->save();
+            
             continue;
 
 
