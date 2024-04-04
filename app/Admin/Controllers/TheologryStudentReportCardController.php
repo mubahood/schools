@@ -132,7 +132,7 @@ class TheologryStudentReportCardController extends AdminController
         })->editable()->sortable();
         $grid->column('class_teacher_comment', __('Class Teacher Remarks'))
             ->display(function ($position) {
-                
+
                 if ($position == null || strlen($position) < 3) {
 
 
@@ -151,7 +151,6 @@ class TheologryStudentReportCardController extends AdminController
                     );
 
                     $this->class_teacher_comment = $comment;
-                    dd($this->class_teacher_comment);
                     $report->save();
 
                     return "-";
