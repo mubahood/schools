@@ -2598,19 +2598,21 @@ class Utils  extends Model
     ) {
         $STUDENT_NAME = $name;
         $sex = strtolower($sex);
-        $sex = strtolower('Male');
 
-        //check if $sex contains  f
+        
+        $STUDENT_HIS_HER = "";
         if (strpos($sex, 'f') !== false) {
             $STUDENT_HE_SHE = "she";
             $STUDENT_HIM_HER = "her";
+            $STUDENT_HIS_HER = "her";
         } else {
             $STUDENT_HE_SHE = "he";
             $STUDENT_HIM_HER = "him";
+            $STUDENT_HIS_HER = "his";
         }
 
         $comments = [];
-    
+
         $comment = "";
         if ($score < 21) {
             $comment = Utils::comment_0_20();
@@ -2627,7 +2629,7 @@ class Utils  extends Model
         $comment = str_replace("STUDENT_NAME", $STUDENT_NAME, $comment);
         $comment = str_replace("STUDENT_HE_SHE", $STUDENT_HE_SHE, $comment);
         $comment = str_replace("STUDENT_HIM_HER", $STUDENT_HIM_HER, $comment);
-        $comment = str_replace("STUDENT_HIS_HER", $STUDENT_HIM_HER, $comment);
+        $comment = str_replace("STUDENT_HIS_HER", $STUDENT_HIS_HER, $comment);
         return $comment;
     }
 
