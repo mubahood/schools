@@ -250,6 +250,13 @@ class Enterprise extends Model
             $ay->process_data = 'Yes';
             $ay->save();
         } else {
+        }
+        //get classes in this academic year
+        $classes = AcademicClass::where([
+            'academic_year_id' => $ay->id,
+        ])->get();
+        //if no class, create a default class
+        if ($classes->count() == 0) {
             AcademicYear::generate_classes($ay);
         }
     }
