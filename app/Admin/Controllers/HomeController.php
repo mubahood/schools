@@ -97,6 +97,16 @@ class HomeController extends Controller
                         'enterprise_id' => $term->enterprise_id,
                         'term_id' => $term->id
                     ])->first();
+                    if($r == null){
+                        $r = new ReportFinanceModel();
+                        $r->enterprise_id = $term->enterprise_id;
+                        $r->term_id = $term->id;
+                        $r->save();
+                        $r = ReportFinanceModel::where([
+                            'enterprise_id' => $term->enterprise_id,
+                            'term_id' => $term->id
+                        ])->first(); 
+                    }
                     $val = 0;
                     if ($r) {
                         $val = $r->total_expected_service_fees;
