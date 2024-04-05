@@ -89,7 +89,7 @@ class ConfigurationController extends AdminController
         $form->text('phone_number', __('Phone number'));
         $form->text('phone_number_2', __('Alternative phone number'));
         $form->text('p_o_box', __('P.O.BOX'));
-        $form->email('email', __('Email'));
+        $form->text('email', __('Email'));
         $form->color('color', __('School Color'))->default('color')->required();
         $form->quill('welcome_message', __('Welcome message'));
         $form->radioCard('can_send_messages', __('Enable Message Sending'))
