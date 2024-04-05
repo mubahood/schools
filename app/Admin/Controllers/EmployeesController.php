@@ -207,7 +207,7 @@ class EmployeesController extends AdminController
                     return [$a->id => "#" . $a->id . " - " . $a->name];
                 }
             })
-            ->ajax($ajax_url)->rules('required');
+            ->ajax($ajax_url);
 
         $form->date('date_of_birth');
         $form->text('place_of_birth');
