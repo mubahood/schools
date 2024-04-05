@@ -18,6 +18,18 @@ class User extends Administrator implements JWTSubject
     use HasApiTokens, HasFactory, Notifiable;
     protected $table = 'admin_users';
 
+    //creating
+    
+    //boot
+    public static function boot()
+    {
+        parent::boot();
+        //deleting
+        self::deleting(function ($m) {
+            return false; 
+        }); 
+    } 
+
     /**
      * The attributes that are mass assignable.
      *

@@ -129,6 +129,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
         parent::boot();
 
         self::deleting(function ($m) {
+            return false;
             if ($m->account != null) {
                 $m->account->delete();
             }

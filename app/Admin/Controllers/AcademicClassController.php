@@ -8,6 +8,7 @@ use App\Models\AcademicClassLevel;
 use App\Models\AcademicYear;
 use App\Models\Course;
 use App\Models\MainCourse;
+use App\Models\User;
 use App\Models\Utils;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
@@ -55,17 +56,27 @@ class AcademicClassController extends AdminController
             return $this->academic_year->name;
         })->sortable();
         $grid->column('class_teahcer_id', __('Class teahcer'))->display(function ($ay) {
+            if ($this->class_teacher == null) {
+                $this->class_teahcer_id = $this->ent->administrator_id;
+                $u = User::find($this->class_teahcer_id);
+                if ($u == null) {
+                    die("Enterprise admin not found");
+                }
+                $this->save();
+            }
+            if($this->class_teacher == null){
+                return "No teacher assigned";
+            }
             return $this->class_teacher->name;
         });
 
-        
 
-        $grid->actions(function ($x)
-        {
+
+        $grid->actions(function ($x) {
             $x->disableDelete();
             $x->disableView();
         });
-        
+
         $grid->column('details', __('Details'))->hide();
         $grid->column('streams', __('Streams'))->display(function ($ay) {
             return $this->academic_class_sctreams->count();
@@ -240,19 +251,19 @@ class AcademicClassController extends AdminController
                         'subject_type' => 'Primary'
                     ])->orwhere([
                         'subject_type' =>  'Nursery'
-                    ]) ->orwhere([
+                    ])->orwhere([
                         'subject_type' =>  'Other'
                     ])->get();
-                }else{
+                } else {
                     $subjects = MainCourse::where([
                         'subject_type' => 'Secondary'
                     ])->get();
                 }
- 
+
 
                 $form->select('course_id', 'Subject')
                     ->options(
-                        $subjects->pluck('name','id')
+                        $subjects->pluck('name', 'id')
                     )->rules('required');
 
                 $form->radio('is_optional', 'Subject type')
