@@ -38,7 +38,7 @@ class Enterprise extends Model
         });
 
         self::updated(function ($m) {
-            //Enterprise::my_update($m);
+            Enterprise::my_update($m);
         });
     }
 
