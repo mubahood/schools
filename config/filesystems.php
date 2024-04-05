@@ -58,7 +58,7 @@ return [
         'admin' => [
             'driver' => 'local',
             'root' => public_path('storage'),
-            'url' => 'storage',
+            'url' => '/storage',
             'visibility' => 'public',
         ],
     ],
