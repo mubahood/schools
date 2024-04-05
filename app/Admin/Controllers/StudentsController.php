@@ -457,7 +457,7 @@ class StudentsController extends AdminController
 
             $form->select('current_class_id', 'Class')->options($classes)->rules('required');
 
-            $form->image('avatar', 'Student\'s photo');
+            $form->image('avatar', 'Student\'s photo')->uniqueName();
 
             $form->divider();
             $form->radio('status')->options([

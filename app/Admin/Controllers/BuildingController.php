@@ -78,7 +78,7 @@ class BuildingController extends AdminController
         //hidden enterprise_id 
         $form->hidden('enterprise_id')->value(Admin::user()->enterprise_id);
         $form->text('name', __('Building Name'))->rules('required|string|max:255');
-        $form->image('photo', __('Photo'));
+        $form->image('photo', __('Photo'))->uniqueName();
         $form->textarea('details', __('Details'));
 
 

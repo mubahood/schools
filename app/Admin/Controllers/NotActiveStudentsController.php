@@ -499,7 +499,8 @@ class NotActiveStudentsController extends AdminController
         if (Admin::user()->isRole('dos')) {
             $form->tab('SYSTEM ACCOUNT', function (Form $form) {
 
-                $form->image('avatar', 'Student\'s photo');
+                $form->image('avatar', 'Student\'s photo')
+                ->uniqueName();
 
                 $form->text('email', 'Email address')
                     ->creationRules(["unique:admin_users"])

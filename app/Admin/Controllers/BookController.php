@@ -149,7 +149,7 @@ class BookController extends AdminController
             'Other' => 'Other',
         ])
             ->rules('required');
-        $form->image('thumbnail', __('Cover photo'));
+        $form->image('thumbnail', __('Cover photo'))->uniqueName();
         $form->text('price', __('Price'))->attribute('type', 'number');
 
         $form->file('pdf', __('PDF'));
