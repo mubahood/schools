@@ -83,13 +83,13 @@ class ConfigurationController extends AdminController
 
         $form->text('name', __('School Name'))->required();
         $form->text('motto', __('School Motto'))->required();
-        $form->image('logo', __('School badge'))->required();
+        $form->image('logo', __('School badge'));
         $form->text('address', __('School Address'))->required();
-        $form->quill('details', __('School details'))->required();
-        $form->text('phone_number', __('Phone number'))->required();
-        $form->text('phone_number_2', __('Alternative phone number'))->required();
-        $form->text('p_o_box', __('P.O.BOX'))->required();
-        $form->email('email', __('Email'))->required();
+        $form->quill('details', __('School details'));
+        $form->text('phone_number', __('Phone number'));
+        $form->text('phone_number_2', __('Alternative phone number'));
+        $form->text('p_o_box', __('P.O.BOX'));
+        $form->email('email', __('Email'));
         $form->color('color', __('School Color'))->default('color')->required();
         $form->quill('welcome_message', __('Welcome message'));
         $form->radioCard('can_send_messages', __('Enable Message Sending'))
@@ -102,7 +102,6 @@ class ConfigurationController extends AdminController
         $form->image('hm_signature', __('Head Teacher signature'));
         $form->image('dos_signature', __('Head Teacher signature'));
         $form->image('bursar_signature', __('Bursar signature'));
-
 
         return $form;
     }
