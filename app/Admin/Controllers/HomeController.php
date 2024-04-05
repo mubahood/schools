@@ -101,6 +101,7 @@ class HomeController extends Controller
                         $r = new ReportFinanceModel();
                         $r->enterprise_id = $term->enterprise_id;
                         $r->term_id = $term->id;
+                        $r->academic_year_id = $term->academic_year_id;
                         $r->save();
                         $r = ReportFinanceModel::where([
                             'enterprise_id' => $term->enterprise_id,
