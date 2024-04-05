@@ -2868,6 +2868,7 @@ class Utils  extends Model
 
     public static function capitalizeSentences($text)
     {
+        return $text;
         // Split the text into an array of sentences
         $sentences = preg_split('/(?<=[.?!])\s+(?=[a-z])/i', $text, -1, PREG_SPLIT_NO_EMPTY);
 
