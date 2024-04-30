@@ -132,13 +132,13 @@ class ReportCardPrintController extends AdminController
                     ])->default('No');
             })->when('Theology', function ($form) {
                 $u = Admin::user();
-                /* $reports = TheologyTermlyReportCard::where([
+                $reports = TheologyTermlyReportCard::where([
                     'enterprise_id' => $u->enterprise_id
                 ])
                     ->orderBy('id', 'desc')
                     ->get()->pluck('report_title', 'id');
                 $form->select('theology_termly_report_card_id', __('Theology Termly report card'))
-                    ->options($reports)->rules('required'); */
+                    ->options($reports)->rules('required');
 
 
                 $classes = TheologyClass::where([

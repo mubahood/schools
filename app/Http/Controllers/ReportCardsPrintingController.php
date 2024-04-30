@@ -92,10 +92,11 @@ class ReportCardsPrintingController extends Controller
                     'r' => $r,
                     'tr' => $tr,
                 ];
-                //break;
+                break;
             }
         } else if ($printing->type == 'Secular') {
         }
+        
 
         if ($printing->theology_tempate == 'Template_6') {
             $pdf->loadHTML(view('report-cards.template-6.print', [
