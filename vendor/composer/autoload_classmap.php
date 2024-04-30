@@ -232,6 +232,7 @@ return array(
     'App\\Models\\QuaterlyOutputHasTopic' => $baseDir . '/app/Models/QuaterlyOutputHasTopic.php',
     'App\\Models\\Reconciler' => $baseDir . '/app/Models/Reconciler.php',
     'App\\Models\\ReportCard' => $baseDir . '/app/Models/ReportCard.php',
+    'App\\Models\\ReportCardPrint' => $baseDir . '/app/Models/ReportCardPrint.php',
     'App\\Models\\ReportFinanceModel' => $baseDir . '/app/Models/ReportFinanceModel.php',
     'App\\Models\\ReportsFinance' => $baseDir . '/app/Models/ReportsFinance.php',
     'App\\Models\\Room' => $baseDir . '/app/Models/Room.php',

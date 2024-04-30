@@ -314,6 +314,7 @@ class TheologyTermlyReportCardController extends AdminController
                     'Template_2' => 'Template 2',
                     'Template_3' => 'Template 3',
                     'Template_4' => 'Template 4',
+                    'Template_5' => 'Template 5',
                 ]);
             $form->divider('Communication');
             $form->textarea('hm_communication', 'Head Teacher Communication');

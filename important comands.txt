@@ -3,9 +3,9 @@ php artisan make:migration add_template_identification_cards --table=identificat
 php artisan make:migration slot
 
 
-php artisan admin:make IdentificationCardController --model=App\\Models\\IdentificationCard
+php artisan admin:make ReportCardPrintController --model=App\\Models\\ReportCardPrint
 
-php artisan make:model IdentificationCard -m
+php artisan make:model ReportCardPrint -m
 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
 
 git config --global user.name "mubahood"

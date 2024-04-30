@@ -4,6 +4,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\DummyDataController;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\PrintController2;
+use App\Http\Controllers\ReportCardsPrintingController;
 use App\Models\AcademicClass;
 use App\Models\AcademicClassFee;
 use App\Models\Account;
@@ -41,6 +42,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 
+
+Route::get('report-card-printings', [ReportCardsPrintingController::class, 'index']);
 
 Route::get('gen-code', function () {
   $data = '1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcefghijklmnopqrstuvwxyz';
