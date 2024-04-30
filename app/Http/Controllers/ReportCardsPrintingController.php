@@ -108,7 +108,7 @@ class ReportCardsPrintingController extends Controller
                     'r' => $r,
                     'tr' => $tr,
                 ];
-                break;
+                //break;
             } 
         }
 
