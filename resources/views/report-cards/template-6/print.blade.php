@@ -12,7 +12,8 @@ if (isset($items[0])) {
     }
 }
 if ($ent == null) {
-    die('Ent not found.');
+    echo('Ent not found.');
+    dd($items);
 }
 ?>
 <!DOCTYPE html>
