@@ -31,31 +31,54 @@ class ReportCardPrintController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new ReportCardPrint());
+        $grid->disableBatchActions();
         $u = Admin::user();
         $grid->model()->where([
             'enterprise_id' => $u->enterprise_id
         ])->orderBy('id', 'desc');
         $grid->column('title', __('Title'))->sortable();
         $grid->column('type', __('Type'))->sortable();
-        $grid->column('theology_termly_report_card_id', __('Theology Report Card'))
+
+        $grid->column('termly_report_card_id', __('Secular Report Card'))
             ->display(function ($f) {
-                $rep = TheologyMarkRecord::find($f);
+                $rep = TermlyReportCard::find($f);
                 if ($rep == null) {
                     return "N/A";
                 }
-                return $rep->title;
+                return $rep->report_title;
             })->sortable();
-        $grid->column('termly_report_card_id', __('Termly report card id'));
-        $grid->column('academic_class_id', __('Academic class id'));
-        $grid->column('theology_class_id', __('Theology class id'));
-        $grid->column('download_link', __('Download link'));
-        $grid->column('re_generate', __('Re generate'));
-        $grid->column('theology_tempate', __('Theology tempate'));
-        $grid->column('secular_tempate', __('Secular tempate'));
+
+
+        $grid->column('theology_termly_report_card_id', __('Theology Report Card'))
+            ->display(function ($f) {
+                $rep = TheologyTermlyReportCard::find($f);
+                if ($rep == null) {
+                    return "N/A";
+                }
+                return $rep->report_title;
+            })->sortable();
+
+
+        $grid->column('academic_class_id', __('Class'))
+            ->display(function ($f) {
+                $rep = AcademicClass::find($f);
+                if ($rep == null) {
+                    return "N/A";
+                }
+                return $rep->name_text;
+            })->sortable();
+        $grid->column('theology_class_id', __('Theology Class'))
+            ->display(function ($f) {
+                $rep = TheologyClass::find($f);
+                if ($rep == null) {
+                    return "N/A";
+                }
+                return $rep->name_text;
+            })->sortable();
         $grid->column('print', __('PRINT'))
             ->display(function ($f) {
                 $url = url("/report-card-printings?id=$this->id");
-                return "<a href='$url' target='_blank'>Print</a>";
+                return "<a href='$url' target='_blank' class='btn btn-primary'>Print</a>";
             });
 
         return $grid;
@@ -110,14 +133,14 @@ class ReportCardPrintController extends AdminController
             ->get()->pluck('report_title', 'id');
         $form->select('termly_report_card_id', __('Termly report card'))
             ->options($reports)->rules('required');
-            
+
         $form->radio('type', __('Type'))->options([
             'Secular' => 'Secular',
             'Theology' => 'Theology',
         ])->rules('required')
             ->when('Secular', function ($form) {
                 $u = Admin::user();
-            
+
 
                 $classes = AcademicClass::where([
                     'enterprise_id' => $u->enterprise_id

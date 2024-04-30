@@ -95,15 +95,33 @@ class ReportCardsPrintingController extends Controller
                 break;
             }
         } else if ($printing->type == 'Secular') {
+            $reps = StudentReportCard::where([
+                'termly_report_card_id' => $printing->termly_report_card_id,
+                'academic_class_id' => $printing->academic_class_id
+            ])->get();
+            foreach ($reps as $key => $r) {
+                $tr = TheologryStudentReportCard::where([
+                    'student_id' => $r->student_id,
+                    'term_id' => $r->term_id,
+                ])->first();
+                $items[] = [
+                    'r' => $r,
+                    'tr' => $tr,
+                ];
+                break;
+            } 
         }
-        
 
-        if ($printing->theology_tempate == 'Template_6') {
-            $pdf->loadHTML(view('report-cards.template-6.print', [
-                'items' => $items,
-                'report_type' => $printing->type,
-            ]));
-        }
+        //check if $items is empty
+        if (count($items) == 0) {
+            die("Nothing to print.");
+        } 
+
+
+        $pdf->loadHTML(view('report-cards.template-6.print', [
+            'items' => $items,
+            'report_type' => $printing->type,
+        ]));
 
         return $pdf->stream();
 
