@@ -124,11 +124,11 @@ foreach ($r->termly_report_card->term->exams as $exam) {
         </tr>
     </table>
 
-    <hr class="my-2" style="background-color:  {{ $r->ent->color }}; height: 2px; padding: 0px; margin: 0px; ">
+    <hr class="mt-4 mb-4" style="background-color:  {{ $r->ent->color }}; height: 2px; padding: 0px; margin: 0px; ">
 
-    <p class="fs-20 text-center"><u>{{ $termly_report_card->report_title }}</u></p>
+    <p class="fs-26 mb-4 text-center"><u>{{ $termly_report_card->report_title }}</u></p>
 
-    <div class="text-left mt-2 fs-16 text-uppercase">
+    <div class="text-left mt-2 fs-16 text-uppercase mb-5">
         NAME: <b>{{ $r->owner->name }}</b> &nbsp;
 
         @if ($r->owner->sex != null && strlen($r->owner->sex) > 1)
@@ -283,8 +283,8 @@ foreach ($r->termly_report_card->term->exams as $exam) {
         <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's Name:</span>
             {{-- <b style="font-size: 14px" class="text-uppercase">{{ $class_teacher_name }}</b>,&nbsp; --}}
             <b style="font-size: 14px"
-                class="text-uppercase">......................................................</b>&nbsp;
-            <span class="text-uppercase fs-16 ">Signature:<b>.......................</b></span>
+                class="text-uppercase">...................................</b>&nbsp;
+            <span class="text-uppercase fs-16 ">Signature:<b>.................</b></span>
         </p>
 
     @endif
@@ -292,15 +292,15 @@ foreach ($r->termly_report_card->term->exams as $exam) {
     @if ($tr != null)
 
         @if ($report_type == 'Theology')
-            <p class="text-center my-3 mt-4">
+            <p class="text-center my-4 mt-4">
                 <span
                     style="
                     padding: 8px;
                     border-radius: 10px;
                     border: 3px <?= $ent->color ?> solid; "
-                    class="text-center text-uppercase fs-16 fw-200">theology report</span>
+                    class="text-center text-uppercase fs-24 fw-800">theology report</span>
             </p>
-            <div class="text-uppercase" style="font-size: 16px">
+            <div class="text-uppercase" style="font-size: 18px">
                 CLASS: <b>{{ $tr->theology_class->short_name . $theo_stream_class }}&nbsp;</b>
                 {{-- STREAM: <b> {{ $theo_stream_class }}&nbsp;</b> --}}
                 Aggregate: <b class="text-danger">{{ (int) $tr->average_aggregates }}</b> &nbsp;
@@ -312,34 +312,34 @@ foreach ($r->termly_report_card->term->exams as $exam) {
             </div>
             <table class="table table-bordered marks-table p-0 m-0 w-100 mt-2">
                 <thead class="p-0 m-0 text-center" style="line-height: 12px;">
-                    <th class="text-left p-1" style="font-size: 16px"><b>SUBJECTS</b></th>
+                    <th class="text-left p-1" style="font-size: 18px"><b>SUBJECTS</b></th>
                     @if ($theology_termly_report_card->reports_include_bot == 'Yes')
-                        <th colspan="2" class="p-1 m-0" style="font-size: 16px">
+                        <th colspan="2" class="p-1 m-0" style="font-size: 18px">
                             <b>B.O.T</b>
                             <small class="d-block">({{ $termly_report_card->bot_max }})</small>
                         </th>
                     @endif
                     @if ($theology_termly_report_card->reports_include_mot == 'Yes')
-                        <th colspan="2" class="p-1 m-0" style="font-size: 16px">
+                        <th colspan="2" class="p-1 m-0" style="font-size: 18px">
                             <b>M.O.T</b>
                             <small class="d-block">({{ $termly_report_card->mot_max }})</small>
                         </th>
                     @endif
                     @if ($theology_termly_report_card->reports_include_eot == 'Yes')
-                        <th colspan="2" class="p-1 m-0" style="font-size: 16px">
+                        <th colspan="2" class="p-1 m-0" style="font-size: 18px">
                             <b>E.O.T</b>
                             <small class="d-block">({{ $termly_report_card->eot_max }})</small>
                         </th>
                     @endif
                     @if ($termly_report_card->positioning_method != 'Specific')
-                        <th class="p-1" style="font-size: 16px"><b>MARKS</b>
+                        <th class="p-1" style="font-size: 18px"><b>MARKS</b>
                             <small class="d-block">average - ({{ '100' }}%)</small>
                         </th>
-                        <th class="p-1" style="font-size: 16px">AGGR</th>
+                        <th class="p-1" style="font-size: 18px">AGGR</th>
                     @endif
-                    <th class="remarks p-1 text-center" style="font-size: 16px"><b class="text-uppercase">Remarks</b>
+                    <th class="remarks p-1 text-center" style="font-size: 18px"><b class="text-uppercase">Remarks</b>
                     </th>
-                    <th class="remarks text-center p-1" style="font-size: 16px"><b class="text-uppercase">Initials</b>
+                    <th class="remarks text-center p-1" style="font-size: 18px"><b class="text-uppercase">Initials</b>
                     </th>
                 </thead>
                 @php
@@ -364,7 +364,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
 
                 @endphp
                 @foreach ($theology_termly_report_card->get_student_marks($owner->id) as $v)
-                    <tr class="marks" style="font-size: 16px">
+                    <tr class="marks" style="font-size: 18px">
                         @php
                             if ($v->subject == null) {
                                 $v->delete();
@@ -385,63 +385,63 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                             $eot_tot += $v->eot_score;
 
                         @endphp
-                        <th style="font-size: 16px">{{ $v->subject->name }}</th>
+                        <th style="font-size: 18px">{{ $v->subject->name }}</th>
                         @if ($termly_report_card->reports_include_bot == 'Yes')
-                            <td style="font-size: 16px">{{ (int) $v->bot_score }}</td>
-                            <td style="font-size: 16px">{{ $v->get_grade($grading_scale, $v->eot_score) }}</td>
+                            <td style="font-size: 18px">{{ (int) $v->bot_score }}</td>
+                            <td style="font-size: 18px">{{ $v->get_grade($grading_scale, $v->eot_score) }}</td>
                         @endif
                         @if ($termly_report_card->reports_include_mot == 'Yes')
-                            <td style="font-size: 16px">{{ (int) $v->mot_score }}</td>
-                            <td style="font-size: 16px">{{ $v->get_grade($grading_scale, $v->mot_score) }}</td>
+                            <td style="font-size: 18px">{{ (int) $v->mot_score }}</td>
+                            <td style="font-size: 18px">{{ $v->get_grade($grading_scale, $v->mot_score) }}</td>
                         @endif
                         @if ($termly_report_card->reports_include_eot == 'Yes')
-                            <td style="font-size: 16px">{{ (int) $v->eot_score }}</td>
-                            <td style="font-size: 16px">{{ $v->get_grade($grading_scale, $v->eot_score) }}</td>
+                            <td style="font-size: 18px">{{ (int) $v->eot_score }}</td>
+                            <td style="font-size: 18px">{{ $v->get_grade($grading_scale, $v->eot_score) }}</td>
                         @endif
                         @if ($termly_report_card->positioning_method != 'Specific')
-                            <td style="font-size: 16px">{{ (int) $v->total_score_display }}</td>
-                            <td style="font-size: 16px">{{ $v->aggr_name }}</td>
+                            <td style="font-size: 18px">{{ (int) $v->total_score_display }}</td>
+                            <td style="font-size: 18px">{{ $v->aggr_name }}</td>
                         @endif
-                        <td class="remarks text-center" style="font-size: 16px">{{ $v->remarks }}</td>
-                        <td class="remarks text-center" style="font-size: 16px">{{ $v->initials }}</td>
+                        <td class="remarks text-center" style="font-size: 18px">{{ $v->remarks }}</td>
+                        <td class="remarks text-center" style="font-size: 18px">{{ $v->initials }}</td>
                     </tr>
                 @endforeach
-                <tr class="marks" style="font-size: 16px">
-                    <th style="font-size: 16px"><b>TOTAL</b></th>
+                <tr class="marks" style="font-size: 18px">
+                    <th style="font-size: 18px"><b>TOTAL</b></th>
                     @if ($termly_report_card->reports_include_bot == 'Yes')
-                        <th class="text-center" style="font-size: 16px">{{ $bot_tot }}</th>
+                        <th class="text-center" style="font-size: 18px">{{ $bot_tot }}</th>
                         <th></th>
                     @endif
                     @if ($termly_report_card->reports_include_mot == 'Yes')
-                        <th class="text-center" style="font-size: 16px">{{ $mot_tot }}</th>
+                        <th class="text-center" style="font-size: 18px">{{ $mot_tot }}</th>
                         <th></th>
                     @endif
                     @if ($termly_report_card->reports_include_eot == 'Yes')
-                        <th class="text-center" style="font-size: 16px">{{ $eot_tot }}</th>
+                        <th class="text-center" style="font-size: 18px">{{ $eot_tot }}</th>
                         <th></th>
                     @endif
                     @if ($termly_report_card->positioning_method != 'Specific')
-                        <td class="text-center" style="font-size: 16px"><b>{{ $tr->total_marks }}</b></td>
+                        <td class="text-center" style="font-size: 18px"><b>{{ $tr->total_marks }}</b></td>
                         <td><b>{{ $tr->total_aggregates }}</b></td>
                     @endif
                     <td colspan="2"></td>
                 </tr>
 
             </table>
-            <p class="mt-2 fw-16" style="font-size: 16px"><span class="text-uppercase">Class Teacher's
-                    comment:</span> <b class="comment" style="font-size: 16px"
-                    style="font-size: 16px">{{ Utils::capitalizeSentences($tr->class_teacher_comment) }}</b></p>
-            <p class="mt-2 fw-16"><span class="text-uppercase" style="font-size: 16px">Class Teacher's Name:</span>
+            <p class="mt-3 fw-16" style="font-size: 18px"><span class="text-uppercase">Class Teacher's
+                    comment:</span> <b class="comment" style="font-size: 18px"
+                    style="font-size: 18px">{{ Utils::capitalizeSentences($tr->class_teacher_comment) }}</b></p>
+            <p class="mt-2 fw-16"><span class="text-uppercase" style="font-size: 18px">Class Teacher's Name:</span>
                 {{-- <b style="font-size: 14px" class="text-uppercase">{{ $class_teacher_name_1 }}</b>,&nbsp; --}}
-                <b style="font-size: 16px"
-                    class="text-uppercase">......................................................</b>,&nbsp;
-                <span class="text-uppercase fs-16 ">Signature:<b>...............................</b></span>
+                <b style="font-size: 18px"
+                    class="text-uppercase">.............................................</b>,&nbsp;
+                <span class="text-uppercase fs-16 ">Signature:<b>............................</b></span>
             </p>
         @endif
     @endif
 
     <hr style="background-color:  {{ $r->ent->color }}; 
-            font-size: 16px;
+            font-size: 18px;
             height: 2px; 
             padding: 0px; margin-bottom: 6px;   "
         class="my-3">
@@ -455,8 +455,8 @@ foreach ($r->termly_report_card->term->exams as $exam) {
 
 
 
-    <p class="mt-2 fw-16"><span class="text-uppercase" style="font-size: 16px">HEAD TEACHER'S COMMENT:</span> <b
-            class="comment" style="font-size: 16px">{{ Utils::capitalizeSentences($r->head_teacher_comment) }}</b>
+    <p class="mt-2 fw-16"><span class="text-uppercase" style="font-size: 18px">HEAD TEACHER'S COMMUNICATION:</span> <b
+            class="comment" style="font-size: 18px">{{ Utils::capitalizeSentences($r->termly_report_card->hm_communication) }}</b>
     </p>
     <p class="mt-2 fw-16"><span class="text-uppercase">HEAD Teacher's Name:</span> <b style="font-size: 14px"
             class="text-uppercase">{{ $hm_name }}</b>,&nbsp;
