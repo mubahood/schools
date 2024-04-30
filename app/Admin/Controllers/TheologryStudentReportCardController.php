@@ -131,7 +131,7 @@ class TheologryStudentReportCardController extends AdminController
             return $numFormat->format(((int)($position)));
         })->editable()->sortable();
         $grid->column('class_teacher_comment', __('Class Teacher Remarks'))
-            ->display(function ($position) {
+            /* ->display(function ($position) {
 
                 if ($position == null || strlen($position) < 3) {
 
@@ -155,10 +155,8 @@ class TheologryStudentReportCardController extends AdminController
 
                     return "-";
                 }
-                return $position;
-                $numFormat = new NumberFormatter('en_US', NumberFormatter::ORDINAL);
-                return $numFormat->format(((int)($position)));
-            })->editable()
+                return $position; 
+            }) */->editable()
             ->sortable();
         $grid->column('head_teacher_comment', __('Head Teacher Remarks'))->hide()->editable()->sortable();
 
