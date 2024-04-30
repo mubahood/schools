@@ -151,7 +151,7 @@ class TheologryStudentReportCardController extends AdminController
                     );
 
                     $this->class_teacher_comment = $comment;
-                    $report->save();
+                    $this->save();
 
                     return "-";
                 }
