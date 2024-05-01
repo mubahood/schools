@@ -92,7 +92,7 @@ class ReportCardsPrintingController extends Controller
                     'r' => $r,
                     'tr' => $tr,
                 ];
-                break;
+                //break;
             }
         } else if ($printing->type == 'Secular') {
             $reps = StudentReportCard::where([
