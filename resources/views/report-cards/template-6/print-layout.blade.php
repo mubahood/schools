@@ -278,8 +278,11 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 <td colspan="2"></td>
             </tr>
         </table>
-        <p class="mt-3 fw-16"   style="font-size: 14!important;" ><span class="text-uppercase">Class Teacher's Comment:</span> <b class="comment"
-                style="font-size: 14px">{{ Utils::capitalizeSentences($r->class_teacher_comment) }}</b></p>
+        <p class="mt-3 fw-16"   style="font-size: 14!important;" ><span class="text-uppercase">Class Teacher's Comment:</span> <b class=""
+                style="font-size: 14px">
+                ........................................................................................................<br><br>........................................................................................
+                ........................................................................................
+                {{-- {{ Utils::capitalizeSentences($r->class_teacher_comment) }} --}}</b></p>
         <p class="mt-2 "   style="font-size: 14!important;" ><span class="text-uppercase">Class Teacher's Name:</span>
             {{-- <b style="font-size: 14px" class="text-uppercase">{{ $class_teacher_name }}</b>,&nbsp; --}}
             <b style="font-size: 16px"

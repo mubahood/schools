@@ -92,7 +92,7 @@ class ReportCardsPrintingController extends Controller
                     'r' => $r,
                     'tr' => $tr,
                 ];
-                //break;
+                break;
             }
         } else if ($printing->type == 'Secular') {
             $reps = StudentReportCard::where([
@@ -109,13 +109,13 @@ class ReportCardsPrintingController extends Controller
                     'tr' => $tr,
                 ];
                 //break;
-            } 
+            }
         }
 
         //check if $items is empty
         if (count($items) == 0) {
             die("Nothing to print.");
-        } 
+        }
 
 
         $pdf->loadHTML(view('report-cards.template-6.print', [
