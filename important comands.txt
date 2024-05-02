@@ -10,3 +10,16 @@ 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
 
 git config --global user.name "mubahood"
 $ git config --global user.email muhindomubaraka@iut-dhaka.edu
+
+
+Control Panel https://cp1.muni.ac.ug:8083
+Username:mrif02004
+Password: rpnkAML@8
+SSH port: 20002
+Subdomain:mobi-save.muni.ac.ug
+Email:  mobi-save@muni.ac.ug
+Email password: rpnkAML@8
+
+ssh -p 20002 mrif02004@137.63.168.25 
+
+/home/mrif02004/web/mobi-save.muni.ac.ug/public_html 
