@@ -124,11 +124,11 @@ foreach ($r->termly_report_card->term->exams as $exam) {
         </tr>
     </table>
 
-    <hr class="mt-4 mb-4" style="background-color:  {{ $r->ent->color }}; height: 2px; padding: 0px; margin: 0px; ">
+    <hr class="mt-4 mb-3" style="background-color:  {{ $r->ent->color }}; height: 2px; padding: 0px; margin: 0px; ">
 
-    <p class="fs-26 mb-4 text-center"><u>{{ $termly_report_card->report_title }}</u></p>
+    <p class="fs-26 mb-3 text-center"><u>{{ $termly_report_card->report_title }}</u></p>
 
-    <div class="text-left mt-2 fs-16 text-uppercase mb-5">
+    <div class="text-left  fs-16 text-uppercase mb-1">
         NAME: <b>{{ $r->owner->name }}</b> &nbsp;
 
         @if ($r->owner->sex != null && strlen($r->owner->sex) > 1)
@@ -144,7 +144,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
     @if ($report_type == 'Secular')
 
 
-        <p class="text-center my-4 mt-4">
+        <p class="text-center my-2 mt-2">
             <span
                 style="
                     padding: 8px;
@@ -285,9 +285,9 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 {{-- {{ Utils::capitalizeSentences($r->class_teacher_comment) }} --}}</b></p>
         <p class="mt-2 "   style="font-size: 14!important;" ><span class="text-uppercase">Class Teacher's Name:</span>
             {{-- <b style="font-size: 14px" class="text-uppercase">{{ $class_teacher_name }}</b>,&nbsp; --}}
-            <b style="font-size: 16px"
+            <b style="font-size: 14px"
                 class="text-uppercase">.......................................</b>&nbsp;
-            <span class="text-uppercase fs-16 ">Signature:<b>.....................</b></span>
+            <span class="text-uppercase fs-14 ">Signature:<b>.....................</b></span>
         </p>
 
     @endif
@@ -458,20 +458,20 @@ foreach ($r->termly_report_card->term->exams as $exam) {
 
 
 
-    <p class="mt-2 fw-16"><span class="text-uppercase" style="font-size: 18px">HEAD TEACHER'S COMMUNICATION:</span> <b
-            class="comment" style="font-size: 18px">{{ Utils::capitalizeSentences($r->termly_report_card->hm_communication) }}</b>
+    <p class="mt-2 fw-14"><span class="text-uppercase" style="font-size: 14px">HEAD TEACHER'S COMMUNICATION:</span> <b
+            class="comment" style="font-size: 14px">{{ Utils::capitalizeSentences($r->termly_report_card->hm_communication) }}</b>
     </p>
-    <p class="mt-2 fw-16"><span class="text-uppercase">HEAD Teacher's Name:</span> <b style="font-size: 14px"
+    <p class="mt-2 fw-14"><span class="text-uppercase">HEAD Teacher's Name:</span> <b style="font-size: 14px"
             class="text-uppercase">{{ $hm_name }}</b>,&nbsp;
-        <span class="text-uppercase fs-16 ">Signature:
+        <span class="text-uppercase fs-14 ">Signature:
             <img style="width: 70px; " src="{{ public_path('storage/' . $ent->hm_signature) }}">
         </span>
     </p>
     <br>
 
-    <hr
+{{--     <hr
         style="background-color:  {{ $r->ent->color }}; height: 2px; 
-            padding: 0px; margin-bottom: 6px; margin-top: 10px; ">
+            padding: 0px; margin-bottom: 2px; margin-top: 5px; "> --}}
 
     <table class="w-100 mt-0">
         <tbody>
