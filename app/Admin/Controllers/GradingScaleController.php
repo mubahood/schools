@@ -27,9 +27,10 @@ class GradingScaleController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new GradingScale()); 
-
- 
-
+        $u = Admin::user();
+        $grid->model()->where('enterprise_id', $u->enterprise_id);
+        $grid->disableBatchActions();
+        $grid->quickSearch('name')->placeholder('Search by name');
         $grid->column('name', __('Name'));
         return $grid;
     }

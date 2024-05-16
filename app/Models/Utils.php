@@ -49,8 +49,39 @@ define('COLORS',  [
 
 class Utils  extends Model
 {
+    //0782664225
 
+    public static function copy_default_grading($u)
+    {
+        if ($u == null) {
+            return;
+        }
+        $x = GradingScale::where([
+            'enterprise_id' => $u->enterprise_id
+        ])->first();
+        if ($x != null) {
+            return;
+        }
 
+        $y = GradingScale::where([])
+            ->orderBy('id', 'asc')
+            ->first();
+        if ($y == null) {
+            return;
+        }
+
+        $new_scale = $y->replicate();
+        $new_scale->enterprise_id = $u->enterprise_id;
+        $new_scale->id = null;
+        $new_scale->save();
+        foreach ($y->grade_ranges as $key => $range) {
+            $new_range = $range->replicate();
+            $new_range->id = null;
+            $new_range->grading_scale_id = $new_scale->id;
+            $new_range->enterprise_id = $u->enterprise_id;
+            $new_range->save();
+        }
+    }
     public static function generate_barcode($data)
     {
         $obj = new DNS1D();
@@ -483,6 +514,7 @@ class Utils  extends Model
         if ($u == null) {
             return;
         }
+        self::copy_default_grading($u);
 
         if ($u->enterprise_id == 1) {
             return;
@@ -2599,7 +2631,7 @@ class Utils  extends Model
         $STUDENT_NAME = $name;
         $sex = strtolower($sex);
 
-        
+
         $STUDENT_HIS_HER = "";
         if (strpos($sex, 'f') !== false) {
             $STUDENT_HE_SHE = "she";

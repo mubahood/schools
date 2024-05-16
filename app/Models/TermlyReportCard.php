@@ -532,12 +532,12 @@ class TermlyReportCard extends Model
 
                 foreach ($subjects as $subject) {
 
-                    $sql = "SELECT * FROM mark_records WHERE administrator_id = ? AND term_id = ? AND subject_id = ?";
+                    /* $sql = "SELECT * FROM mark_records WHERE administrator_id = ? AND term_id = ? AND subject_id = ?";
                     $rec = DB::select($sql, [$student->id, $m->term_id, $subject->id]);
                     //check if mark record exists
                     if (count($rec) > 0) {
                         continue;
-                    }
+                    } */
 
                     $markRecordOld = MarkRecord::where([
                         'administrator_id' => $student->id,
@@ -566,7 +566,7 @@ class TermlyReportCard extends Model
                         $markRecordOld->eot_missed = 'Yes';
                         $markRecordOld->remarks = null;
                     } else {
-                        continue;
+                        //continue;
                     }
 
                     if ($subject->teacher != null) {
@@ -577,7 +577,7 @@ class TermlyReportCard extends Model
                     $markRecordOld->main_course_id = $subject->main_course_id;
                     try {
                         $markRecordOld->save();
-                        echo "{$markRecordOld->id}. {$student->name} - {$subject->name} - {$class->name} <br> ";
+                        //echo "{$markRecordOld->id}. {$student->name} - {$subject->name} - {$class->name} <br> ";
                         //die();
                     } catch (\Throwable $e) {
                         throw new \Exception($e->getMessage());

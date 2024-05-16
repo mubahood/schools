@@ -35,6 +35,7 @@ use Illuminate\Console\Scheduling\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+Utils::system_boot(Admin::user());
 
 /* $rep = StudentReportCard::find(5120);
 $rep->download_self(); */

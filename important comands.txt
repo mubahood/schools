@@ -1,4 +1,4 @@
-php artisan make:migration add_template_identification_cards --table=identification_cards
+php artisan make:migration add_ent_id_grading_scales --table=grading_scales
 
 php artisan make:migration slot
 
@@ -19,6 +19,7 @@ SSH port: 20002
 Subdomain:mobi-save.muni.ac.ug
 Email:  mobi-save@muni.ac.ug
 Email password: rpnkAML@8
+mrif02004_mobi_save
 
 ssh -p 20002 mrif02004@137.63.168.25 
 
