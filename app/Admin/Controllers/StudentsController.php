@@ -320,6 +320,7 @@ class StudentsController extends AdminController
         $grid->column('place_of_birth', __('Address'))->sortable()->hide();
         $grid->column('home_address', __('Home address'))->hide();
 
+        $grid->column('lin', __('LIN'))->sortable()->editable();
         $grid->column('school_pay_payment_code', __('School pay payment code'))->sortable();
 
         $grid->column('parent_id', __('Parent'))
