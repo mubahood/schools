@@ -27,7 +27,7 @@ class AcademicClassSctreamController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new AcademicClassSctream());
-        $grid->disableBatchActions();
+        //$grid->disableBatchActions();
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
         ])
