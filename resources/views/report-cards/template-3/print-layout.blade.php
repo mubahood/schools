@@ -447,7 +447,9 @@ foreach ($r->termly_report_card->term->exams as $exam) {
     <p class="mt-2 fw-16"><span class="text-uppercase">HEAD Teacher's Name:</span> <b style="font-size: 14px"
             class="text-uppercase">{{ $hm_name }}</b>,&nbsp;
         <span class="text-uppercase fs-16 ">Signature:
-            <img style="width: 70px; " src="{{ public_path('storage/' . $ent->hm_signature) }}">
+            @if ($ent->hm_signature != null && strlen($ent->hm_signature) > 5)
+                <img style="width: 70px; " src="{{ public_path('storage/' . $ent->hm_signature) }}">
+            @endif
         </span>
     </p>
     <br>

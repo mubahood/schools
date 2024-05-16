@@ -130,9 +130,14 @@ class ReportCardPrintController extends AdminController
             'enterprise_id' => $u->enterprise_id
         ])
             ->orderBy('id', 'desc')
-            ->get()->pluck('report_title', 'id');
+            ->get();
+        $reports_text = [];
+        foreach ($reports as $key => $value) {
+            $reports_text[$value->id] = $value->report_title . " - " . $value->academic_year->name;
+        }
+
         $form->select('termly_report_card_id', __('Termly report card'))
-            ->options($reports)->rules('required');
+            ->options($reports_text)->rules('required');
 
         $form->radio('type', __('Type'))->options([
             'Secular' => 'Secular',
@@ -151,6 +156,7 @@ class ReportCardPrintController extends AdminController
 
                 $form->radioCard('secular_tempate', __('Theology tempate'))
                     ->options([
+                        'Template_3' => 'Template 3',
                         'Template_5' => 'Template 5',
                     ])->default('No');
             })->when('Theology', function ($form) {

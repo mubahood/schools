@@ -3,10 +3,10 @@ if (!isset($isBlank)) {
     $isBlank = false;
 }
 
-$ent = null;
+/* $ent = null;
 if (isset($items[0])) {
     $ent = $items[0]->ent;
-}
+} */
 if ($ent == null) {
     die('No Report card to print.');
 }

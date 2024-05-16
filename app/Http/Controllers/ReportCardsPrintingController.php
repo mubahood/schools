@@ -46,37 +46,7 @@ class ReportCardsPrintingController extends Controller
 
         $items = [];
 
-        $pdf = App::make('dompdf.wrapper');
-        /* dd($printing);
-        if ($termly_report_card->reports_template == 'template_1') {
-            $pdf->loadHTML(view('report-cards.template-1.print', ['items' => $items]));
-        } else if ($termly_report_card->reports_template == 'Template_2') {
-            $pdf->loadHTML(view('report-cards.template-2.print', ['items' => $items]));
-        } else if ($termly_report_card->reports_template == 'Template_3') {
-            //return(view('report-cards.template-3.print', ['items' => $items]));
-            $pdf->loadHTML(view('report-cards.template-3.print', ['items' => $items]));
-        } else {
-            $pdf->loadHTML(view('report-cards.template-1.print', ['items' => $items]));
-        } */
-
-
-        /* 
-        
-        "id" => 1
-        "created_at" => "2024-04-29 18:11:21"
-        "updated_at" => "2024-04-29 18:39:43"
-        "enterprise_id" => 7
-        "title" => "P.4 ARABIC"
-        "type" => "Theology"
-        "theology_termly_report_card_id" => 13
-        "termly_report_card_id" => 16
-        "academic_class_id" => null
-        "theology_class_id" => 62
-        "download_link" => null
-        "re_generate" => "Yes"
-        "theology_tempate" => "Template_6"
-        "secular_tempate" => null
-        */
+        $pdf = App::make('dompdf.wrapper'); 
         if ($printing->type == 'Theology') {
             $theologgy_reps = TheologryStudentReportCard::where([
                 'theology_termly_report_card_id' => $printing->theology_termly_report_card_id,
@@ -92,7 +62,7 @@ class ReportCardsPrintingController extends Controller
                     'r' => $r,
                     'tr' => $tr,
                 ];
-                //break;
+                break;
             }
         } else if ($printing->type == 'Secular') {
             $reps = StudentReportCard::where([
@@ -108,20 +78,34 @@ class ReportCardsPrintingController extends Controller
                     'r' => $r,
                     'tr' => $tr,
                 ];
-                //break;
-            } 
+                break;
+            }
         }
 
         //check if $items is empty
         if (count($items) == 0) {
             die("Nothing to print.");
-        } 
+        }
 
 
-        $pdf->loadHTML(view('report-cards.template-6.print', [
-            'items' => $items,
-            'report_type' => $printing->type,
-        ]));
+        if ($printing->secular_tempate == 'Template_3') {
+            $pdf->loadHTML(view('report-cards.template-3.print', [
+                'items' => $reps,
+                'ent' => $printing->enterprise,
+                'report_type' => $printing->type,
+            ]));
+        } elseif ($printing->secular_tempate == 'Template_6') {
+            $pdf->loadHTML(view('report-cards.template-6.print', [
+                'items' => $items,
+                'report_type' => $printing->type,
+            ]));
+        } else {
+            $pdf->loadHTML(view('report-cards.template-6.print', [
+                'items' => $items,
+                'report_type' => $printing->type,
+            ]));
+        }
+
 
         return $pdf->stream();
 
