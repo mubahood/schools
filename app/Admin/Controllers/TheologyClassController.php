@@ -65,7 +65,7 @@ class TheologyClassController extends AdminController
             return count($this->students);
         });
         $grid->column('streams', __('Streams'))->display(function () {
-            return count($this->streams); 
+            return count($this->streams);
         });
         $grid->column('details', __('Details'))->hide();
 
@@ -192,10 +192,24 @@ class TheologyClassController extends AdminController
         $form->tab('Class Streams', function (Form $form) {
             $form->morphMany('streams', null, function (Form\NestedForm $form) {
                 $u = Admin::user();
- 
+
                 $form->hidden('enterprise_id')->default($u->enterprise_id);
-                $u = Admin::user(); 
+                $u = Admin::user();
                 $form->text('name', __('Class name'))->rules('required');
+
+                $teachers = [];
+                foreach (Administrator::where([
+                    'enterprise_id' => $u->enterprise_id,
+                    'user_type' => 'employee',
+                ])->get() as $key => $a) {
+                    $teachers[$a['id']] = $a['name']; 
+                }
+
+
+                $form->select('teacher_id', 'Class teahcer')
+                    ->options(
+                        $teachers
+                    );
             });
         });
 

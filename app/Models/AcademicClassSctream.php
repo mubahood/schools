@@ -40,4 +40,10 @@ class AcademicClassSctream extends Model
     {
         return $this->hasMany(StudentHasClass::class, 'stream_id');
     }
+
+    //teacher
+    public function teacher()
+    {
+        return $this->belongsTo(User::class, 'teacher_id');
+    } 
 }

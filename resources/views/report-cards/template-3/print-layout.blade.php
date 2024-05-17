@@ -2,6 +2,7 @@
 use App\Models\Utils;
 use App\Models\StudentHasClass;
 use App\Models\StudentHasTheologyClass;
+ 
 
 $max_bot = 30;
 $max_mot = 40;
@@ -44,6 +45,9 @@ $hasClass = StudentHasClass::where(['administrator_id' => $r->owner->id, 'academ
 if ($hasClass != null) {
     if ($hasClass->stream != null) {
         $stream_class = ' - ' . $hasClass->stream->name;
+        if($hasClass->stream->teacher != null){
+            $class_teacher_name = $hasClass->stream->teacher->name;
+        }
     }
 }
 
@@ -52,6 +56,9 @@ if ($tr != null) {
     if ($hasTheologyClass != null) {
         if ($hasTheologyClass->stream != null) {
             $theo_stream_class = ' - ' . $hasTheologyClass->stream->name;
+            if($hasTheologyClass->stream->teacher != null){
+                $class_teacher_name_1 = $hasTheologyClass->stream->teacher->name;
+            }
         }
     }
 }

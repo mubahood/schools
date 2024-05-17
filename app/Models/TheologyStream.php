@@ -11,6 +11,7 @@ class TheologyStream extends Model
 
     protected $fillable = [
         'enterprise_id',
+        'teacher_id',
         'name',
     ];
 
@@ -22,4 +23,16 @@ class TheologyStream extends Model
     public function studentHasTheologyClasses(){
         return $this->hasMany(StudentHasTheologyClass::class,'theology_stream_id');
     }
+
+    //teacher
+    public function teacher()
+    {
+        return $this->belongsTo(User::class, 'teacher_id');
+    } 
+
+   /*  //setter for teacher_id
+    public function setTeacherIdAttribute($value)
+    {
+        $this->attributes['teacher_id'] = $value;
+    }  */
 }

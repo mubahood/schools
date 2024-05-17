@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Models\AcademicClass;
 use App\Models\AcademicClassSctream;
+use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -26,7 +27,9 @@ class AcademicClassSctreamController extends AdminController
      */
     protected function grid()
     {
+        //dd((new AcademicClassSctream())->getTable());
         $grid = new Grid(new AcademicClassSctream());
+        $grid->disableBatchActions();
         //$grid->disableBatchActions();
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
@@ -43,12 +46,22 @@ class AcademicClassSctreamController extends AdminController
             })
             ->sortable();
 
-        $grid->disableActions();
+        // $grid->disableActions();
         $grid->actions(function ($x) {
             $x->disableDelete();
             $x->disableView();
         });
         $grid->column('name', __('Stream'))->sortable();
+
+        //teacher_id
+        $grid->column('teacher_id', __('Teacher'))
+            ->display(function ($x) {
+                if ($this->teacher == null) {
+                    return 'N/A';
+                }
+                return $this->teacher->name;
+            })
+            ->sortable(); 
 
         return $grid;
     }
@@ -93,7 +106,25 @@ class AcademicClassSctreamController extends AdminController
             )->rules('required');
 
 
-        $form->text('name', __('Strem Name'))->rules('required');
+        $form->text('name', __('Stream Name'))->rules('required');
+
+        $teachers = [];
+        foreach (Administrator::where([
+            'enterprise_id' => $u->enterprise_id,
+            'user_type' => 'employee',
+        ])->get() as $key => $a) {
+            $teachers[$a['id']] = $a['name'];
+            /* if ($a->isRole('teacher')) {
+
+            } */
+        }
+
+
+        $form->select('teacher_id', 'Class teahcer')
+            ->options(
+                $teachers
+            );
+ 
 
         return $form;
     }

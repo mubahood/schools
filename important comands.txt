@@ -1,4 +1,4 @@
-php artisan make:migration add_ent_id_grading_scales --table=grading_scales
+php artisan make:migration add_teacher_id_academic_class_sctreams --table=acadteacherc_class_sctreams
 
 php artisan make:migration slot
 
