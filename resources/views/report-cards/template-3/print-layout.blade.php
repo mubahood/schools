@@ -433,12 +433,12 @@ foreach ($r->termly_report_card->term->exams as $exam) {
             padding: 0px; margin-bottom: 6px;   "
         class="my-3">
 
-    {{-- <p class="mt-2 fw-16"><span class="text-uppercase">Mentor's comment:</span> <b class="comment"
+    <p class="mt-2 fw-16"><span class="text-uppercase">Mentor's comment:</span> <b class="comment"
             style="font-size: 14px">{{ $r->mentor_comment }}</b></p>
     <p class="mt-2 fw-16"><span class="text-uppercase">Co-Curricular Activities comment:</span> <b class="comment"
             style="font-size: 14px">{{ $r->sports_comment }}</b></p>
     <p class="mt-2 fw-16"><span class="text-uppercase">Nurse's comment:</span> <b class="comment"
-            style="font-size: 14px">{{ $r->nurse_comment }}</b></p> --}}
+            style="font-size: 14px">{{ $r->nurse_comment }}</b></p>
 
 
 
