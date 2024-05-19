@@ -525,7 +525,7 @@ class ReportCardsPrintingController extends Controller
             $u->user_id = $user_id;
             $u->school_pay_account_id = $user_id;
             $u->school_pay_payment_code = $user_id;
-            $u->current_class_id = $cla->id;
+            $u->current_class_id = $cla->id;//CLASS ID
             $u->username = $enterprise_id . $user_id;
             $u->password = password_hash('4321', PASSWORD_DEFAULT);
             $u->enterprise_id = $enterprise_id;
