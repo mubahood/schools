@@ -28,7 +28,7 @@ class UserBatchImporterController extends AdminController
     {
         //$x = UserBatchImporter::find(2);
         //UserBatchImporter::students_batch_import($x);
- 
+
 
         /*  $x = new UserBatchImporter();
         $x->enterprise_id = Admin::user()->enterprise_id;
@@ -49,9 +49,8 @@ class UserBatchImporterController extends AdminController
             <b>NOTE</b> Only feed in data of students in a particular class. Don't temper with the structure of the file.
             ";
         });
-        
 
-        $grid->disableActions();
+
         $grid->disableBatchActions();
         $grid->disableFilter();
         $grid->disableExport();
@@ -68,8 +67,9 @@ class UserBatchImporterController extends AdminController
         /*         $grid->column('created_at', __('Created at'));
         $grid->column('updated_at', __('Updated at')); 
         $grid->column('enterprise_id', __('Enterprise id'));*/
+        $grid->column('status', __('status'))->sortable();
         $grid->column('description', __('Description'));
-        /*         $grid->column('academic_class_id', __('Description'))
+        $grid->column('academic_class_id', __('Details'))
             ->display(function ($academic_class_id) {
                 $class = AcademicClass::find($academic_class_id);
                 $count  = count($this->users);
@@ -78,8 +78,13 @@ class UserBatchImporterController extends AdminController
                     $class_name = $class->name;
                 }
                 return "Imported $count students to $class_name ";
-            }); */
-        /*  $grid->column('type', __('Type')); */
+            });
+        $grid->column('type', __('Type'));
+        $grid->column('import', __('Type'))
+            ->display(function ($academic_class_id) {
+                $url = url('data-import?id=' . $this->id);
+                return "<a href='$url' target='_blank' class='btn btn-primary btn-sm'>IMPORT DATA</a>";
+            });
 
         return $grid;
     }
@@ -125,6 +130,17 @@ class UserBatchImporterController extends AdminController
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
         $form->hidden('type', __('type'))->default('students')->rules('required');
         $form->hidden('imported', __('imported'))->default(0)->rules('required');
+        if ($form->isCreating()) {
+            $form->hidden('status', __('imported'))->default(0)->default('Not Imported');
+        } else {
+            $form->radio('status', __('imported'))->default(0)
+                ->options([
+                    'Imported' => 'Imported',
+                    'Not Imported' => 'Not Imported',
+                ])
+                ->default('Not Imported');
+        }
+
 
         $form->select('academic_class_id', 'Import stydent to class')
             ->options(

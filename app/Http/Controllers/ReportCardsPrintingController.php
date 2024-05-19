@@ -2,20 +2,28 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AcademicClass;
 use App\Models\FixedAsset;
 use App\Models\FixedAssetPrint;
 use App\Models\ReportCard;
 use App\Models\ReportCardPrint;
 use App\Models\SecondaryReportCard;
+use App\Models\StudentHasClass;
 use App\Models\StudentReportCard;
 use App\Models\TermlyReportCard;
 use App\Models\TheologryStudentReportCard;
 use App\Models\TheologyStudentReportCardItem;
+use App\Models\User;
+use App\Models\UserBatchImporter;
+use App\Models\Utils;
+use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReportCardsPrintingController extends Controller
 {
+
 
     public function index(Request $req)
     {
@@ -46,7 +54,7 @@ class ReportCardsPrintingController extends Controller
 
         $items = [];
 
-        $pdf = App::make('dompdf.wrapper'); 
+        $pdf = App::make('dompdf.wrapper');
         if ($printing->type == 'Theology') {
             $theologgy_reps = TheologryStudentReportCard::where([
                 'theology_termly_report_card_id' => $printing->theology_termly_report_card_id,
@@ -463,5 +471,152 @@ class ReportCardsPrintingController extends Controller
         return $pdf->stream();
     }
 
-    // 
+    public function data_import(Request $req)
+    {
+        $m = UserBatchImporter::find($req->id);
+        $file_path = Utils::docs_root() . 'storage/' . $m->file_path;
+        if (!file_exists($file_path)) {
+            die("$file_path File does not exist.");
+        }
+
+        $cla = AcademicClass::find($m->academic_class_id);
+        if ($cla == null) {
+            die("Class not found.");
+        }
+
+
+        $array = Excel::toArray([], $file_path);
+
+        $i = 0;
+        $enterprise_id = $m->enterprise_id;
+        $_duplicates = '';
+        $update_count = 0;
+        $import_count = 0;
+        $is_first = true;
+        foreach ($array[0] as $key => $v) {
+            if ($is_first) {
+                $is_first = false;
+                continue;
+            }
+
+
+            $i++;
+            if (
+                (!isset($v[0])) ||
+                (!isset($v[1])) ||
+                ($v[0] == null)
+            ) {
+                $update_count++;
+                continue;
+            }
+            $user_id = trim($v[0]);
+            $u = Administrator::where([
+                'enterprise_id' => $enterprise_id,
+                'user_id' => $user_id
+            ])->first();
+            if ($u != null) {
+                $msg = "Skipped $user_id because already eixst<br>";
+                echo $msg;
+                $update_count++;
+                continue;
+            }
+
+            $u = new Administrator();
+            $u->user_id = $user_id;
+            $u->school_pay_account_id = $user_id;
+            $u->school_pay_payment_code = $user_id;
+            $u->current_class_id = $cla->id;
+            $u->username = $enterprise_id . $user_id;
+            $u->password = password_hash('4321', PASSWORD_DEFAULT);
+            $u->enterprise_id = $enterprise_id;
+            $u->avatar = url('user.png');
+            $u->first_name = trim($v[1]);
+            $u->given_name = "";
+            $u->last_name = "";
+            if (
+                isset($v[2]) &&
+                strlen($v[2]) > 2
+            ) {
+                $u->given_name = trim($v[2]);
+            }
+
+            if (
+                isset($v[3]) &&
+                strlen($v[3]) > 2
+            ) {
+                $u->last_name = trim($v[3]);
+            }
+
+            if (strlen($u->last_name) < 2) {
+                if (strlen($u->given_name) < 2) {
+                    $names = explode(' ', $u->first_name);
+                    if (isset($names[0])) {
+                        $u->first_name = $names[0];
+                    }
+                    if (isset($names[1])) {
+                        $u->last_name = $names[1];
+                    }
+                    if (isset($names[3])) {
+                        $u->given_name = $names[3];
+                    }
+                }
+            }
+
+            $u->name = $u->first_name;
+            if (strlen($u->given_name) > 2) {
+                $u->name .= ' ' . $u->given_name;
+            }
+            if (strlen($u->last_name) > 2) {
+                $u->name .= ' ' . $u->last_name;
+            }
+
+            if (strlen(trim($u->name)) < 4) {
+                $update_count++;
+                continue;
+            }
+
+
+            if (isset($v[4])) {
+                $u->sex = trim($v[4]);
+                if ($u->sex != null) {
+                    if (strlen($u->sex) > 0) {
+                        if (strtoupper(substr($u->sex, 0, 1)) == 'M') {
+                            $u->sex = 'Male';
+                        } else {
+                            $u->sex = 'Female';
+                        }
+                    }
+                }
+            }
+
+            $u->user_type = 'student';
+
+            try {
+                $u->save();
+                $import_count++;
+                echo "Imported {$u->name} SUCCESSFULLY! <br>";
+            } catch (\Throwable $th) {
+                //throw $th;
+            }
+
+
+            if ($u != null) {
+                $class = new StudentHasClass();
+                $class->enterprise_id = $enterprise_id;
+                $class->academic_class_id = $m->academic_class_id;
+                $class->administrator_id = $u->id;
+                $class->academic_year_id = $cla->academic_year_id;
+                $class->stream_id = 0;
+                $class->done_selecting_option_courses = 0;
+                $class->optional_subjects_picked = 0;
+                try {
+                    $class->save();
+                } catch (\Throwable $th) {
+                    //throw $th;
+                }
+            }
+        }
+        $m->description = "Imported $import_count new students and skipped $update_count students.";
+        $m->save();
+    }
 }

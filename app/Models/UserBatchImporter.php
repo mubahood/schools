@@ -22,6 +22,7 @@ class UserBatchImporter extends Model
 
         parent::boot();
         static::created(function ($m) {
+            return true;
             if ($m->type == 'photos') {
                 UserBatchImporter::user_photos_batch_import($m);
                 return $m;
@@ -36,6 +37,7 @@ class UserBatchImporter extends Model
             return $m;
         });
         static::updated(function ($m) {
+            return true; 
             if ($m->type == 'photos') {
                 //UserBatchImporter::user_photos_batch_import($m);
                 return $m;
@@ -194,12 +196,17 @@ class UserBatchImporter extends Model
             $is_updating = false;
 
             if ($u != null) {
+                continue; 
                 dd("upading...");
                 //time to update
                 $_duplicates .= " $user_id, ";
                 $is_updating = true;
                 $update_count++;
             } else {
+                $u = User::where('user_id',$user_id)->first();
+                if($u != null){
+                    continue;
+                }
    
                 $is_updating = false;
                 $u = new Administrator();

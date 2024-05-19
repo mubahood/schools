@@ -30,12 +30,15 @@ use App\Models\Term;
 use App\Models\TheologyMarkRecord;
 use App\Models\Transaction;
 use App\Models\Utils;
+use Dflydev\DotAccessData\Util;
 use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Console\Scheduling\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 Utils::system_boot(Admin::user());
+
+//dd(Utils::docs_root()); 
 
 /* $rep = StudentReportCard::find(5120);
 $rep->download_self(); */

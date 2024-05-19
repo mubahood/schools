@@ -458,6 +458,15 @@ class Utils  extends Model
     {
         $r = $_SERVER['DOCUMENT_ROOT'] . "";
 
+
+        //check if $_SERVER['HTTP_HOST'] is contains locahost
+        if (strpos($_SERVER['HTTP_HOST'], 'localhost') !== false) {
+            $script = $_SERVER['SCRIPT_FILENAME'];
+            $s = rtrim($script, 'server.php');
+
+            return $s . 'public/';
+        }
+
         if (!str_contains($r, 'home/')) {
             $r = str_replace('/public', "", $r);
             $r = str_replace('\public', "", $r);
