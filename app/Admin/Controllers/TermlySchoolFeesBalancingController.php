@@ -38,13 +38,28 @@ class TermlySchoolFeesBalancingController extends AdminController
         ])->orderBy('id', 'DESC');
 
         $grid->disableBatchActions();
-        $grid->column('term_id', __('Term'))->display(
+        $grid->column('from_term_id', __('From Term'))->display(
             function ($x) {
                 $t = Term::find($x);
                 if ($t != null) {
                     return "TERM " . $t->name_text;
                 }
+                $y = Term::find($this->term_id);
+                if ($y != null) {
+                    return "TERM " . $y->name_text;
+                }
                 return $x;
+            }
+        )->sortable();
+
+        //to term
+        $grid->column('to_term_id', __('To Term'))->display(
+            function ($x) {
+                $t = Term::find($x);
+                if ($t != null) {
+                    return "TERM " . $t->name_text;
+                }
+                return '-';
             }
         )->sortable();
 
@@ -69,7 +84,27 @@ class TermlySchoolFeesBalancingController extends AdminController
             }
         );
 
-        $grid->column('processed', __('Processed'))->hide();
+        $grid->column('processed', __('Process Status'))
+            ->display(function ($x) {
+                if ($x == 'Yes') {
+                    return "<span class='label label-success'>Processed</span>";
+                } else {
+                    return "<span class='label label-warning'>Not Processed</span>";
+                }
+            })->sortable();
+
+        //action 
+        $grid->column('action', __('Action'))->display(function ($x) {
+            if($this->processed == 'Yes'){
+                return 'N/A';
+            } 
+            $t = Term::find($this->to_term_id);
+            if ($t == null) {
+                return 'N/A';
+            }
+            $url = url('process-termly-school-fees-balancings?id=' . $this->id);
+            return '<a href="' . $url . '" class="btn btn-primary" target="_blank">PROCESS NOW</a>';
+        });
 
         return $grid;
     }
@@ -117,20 +152,51 @@ class TermlySchoolFeesBalancingController extends AdminController
         }
 
         if ($form->isCreating()) {
-            $form->select('term_id', __('Term'))->options($terms)
+            $form->select('from_term_id', __('From Term'))->options($terms)
+                ->rules('required');
+
+            $form->select('to_term_id', __('Term'))->options($terms)
                 ->rules('required');
         } else {
-            $form->select('term_id', __('Term'))->options($terms)
-                ->readOnly()
-                ->rules('required');
+            $form->display('from_term_id', __('From Term'))->with(function ($x) {
+                $t = Term::find($x);
+                if ($t != null) {
+                    return "TERM " . $t->name_text;
+                }
+                return $x;
+            });
+
+            $form->display('to_term_id', __('To Term'))->with(function ($x) {
+                $t = Term::find($x);
+                if ($t != null) {
+                    return "TERM " . $t->name_text;
+                }
+                return $x;
+            });
         }
+
+        //target_students_status ACTIVE OR ALL
+        $form->radioCard('target_students_status', __('Target Students Status'))
+            ->options([
+                'Active' => 'Only Active Students',
+                'All' => 'All Students',
+            ])
+            ->rules('required');
 
         $form->radioCard('processed', __('Process School Fees Balances'))
             ->options([
-                'Yes' => 'Yes',
-                'No' => 'No',
+                'Yes' => 'No',
+                'No' => 'Yes',
             ])
-            ->rules('required');
+            ->rules('required')
+            ->when('No', function (Form $form) {
+                $form->radioCard('updated_existed_balances', __('Updated Existed Balances'))->default('No')
+                    ->options([
+                        'Yes' => 'Yes',
+                        'No' => 'No',
+                    ])
+                    ->rules('required');
+            });
 
         $form->disableCreatingCheck();
         $form->disableReset();

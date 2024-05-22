@@ -209,10 +209,15 @@ class BursaryBeneficiaryController extends AdminController
             })
             ->ajax($ajax_url)->rules('required');
 
-        $form->select('bursary_id', 'Select bursary scheme')->options(Bursary::where(
+        $options = [];
+        foreach (Bursary::where(
             'enterprise_id',
             Admin::user()->enterprise_id
-        )->get()->pluck('name', 'id'))->rules('required');
+        )->get() as $key => $bursary) {
+            $options[$bursary->id] = $bursary->name . " - UGX " . number_format($bursary->fund);
+        }
+
+        $form->select('bursary_id', 'Select bursary scheme')->options($options)->rules('required');
 
         $form->textarea('description', __('Description'))->rules('required');
 

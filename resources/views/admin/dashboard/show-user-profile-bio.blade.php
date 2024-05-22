@@ -1,3 +1,7 @@
+<?php
+//use Utils;
+use App\Models\Utils;
+?>
 <style>
     .item {
         font-size: 1.5rem;
@@ -6,22 +10,40 @@
 
 @include('admin.dashboard.show-user-profile-header', ['u' => $u])
 <div class="row">
-    <div class="col-xs-12 col-md-12">  
-        <p class="mb-2 mb-md-3 item"><b>NAME:</b> {{ $u->first_name }} {{ $u->last_name }}</p>
-        <p class="mb-2 mb-md-3 item"><b>Date of birth:</b> {{ $u->date_of_birth }}</p>
-        <p class="mb-2 mb-md-3 item"><b>Place of birth:</b> {{ $u->place_of_birth }}</p>
-        <p class="mb-2 mb-md-3 item"><b>Sex:</b> {{ $u->sex }}</p>
-        <p class="mb-2 mb-md-3 item"><b>Home address:</b> {{ $u->home_address }}</p>
-        <p class="mb-2 mb-md-3 item"><b>Current address:</b> {{ $u->current_address }}</p>
-        <p class="mb-2 mb-md-3 item"><b>Phone number 1:</b> {{ $u->phone_number_1 }}</p>
-        <p class="mb-2 mb-md-3 item"><b>Phone number 2:</b> {{ $u->phone_number_2 }}</p>
-        <p class="mb-2 mb-md-3 item"><b>Nationality:</b> {{ $u->nationality }}</p>
-        <p class="mb-2 mb-md-3 item"><b>Religion:</b> {{ $u->religion }}</p>
-        <p class="mb-2 mb-md-3 item"><b>Father's name:</b> {{ $u->father_name }}</p>
-        <p class="mb-2 mb-md-3 item"><b>Father's phone number:</b> {{ $u->father_phone }}</p>
-        <p class="mb-2 mb-md-3 item"><b>Mother's name:</b> {{ $u->mother_name }}</p>
-        <p class="mb-2 mb-md-3 item"><b>Mother's phone number:</b> {{ $u->mother_phone }}</p>
-        <p class="mb-2 mb-md-3 item"><b>Languages/Dilect:</b> {{ $u->languages }}</p>
+    <div class="col-xs-12 col-md-12">
+        @if ($u->user_type == 'student')
+            <p class="bg-primary p-2 m-0" style="font-weight: 800">School Fees Billing & Payement (For This term)</p>
+            <div class="row">
+                <div class="col-md-12">
+                    @if (empty($active_term_transactions))
+                        <div class="alert alert-info">This student no Transactions.</div>
+                    @else
+                        @foreach ($active_term_transactions as $tra)
+                            @php
+                                $color = 'green';
+                                if ($tra->amount < 0) {
+                                    $color = 'red';
+                                }
+                            @endphp
+                            <p>
+                            <div
+                                style="
+                                background-color: {{ $color }}; 
+                                border-radius: 5px; 
+                                margin-right: 3px;
+                                margin-top: -5px;
+                                width: 
+                                10px; 
+                                height: 10px; 
+                                display: inline-block;">
+                            </div>
+                            {{ Utils::my_date($tra->payment_date) }} - <b>UGX. {{ number_format($tra->amount) }}</b> -
+                            {{ $tra->description }}</p>
+                        @endforeach
+                    @endif
+                </div>
+            </div>
+        @endif
 
 
         @if ($u->user_type == 'employee')

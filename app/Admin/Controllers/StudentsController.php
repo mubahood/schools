@@ -11,6 +11,7 @@ use App\Models\StudentHasClass;
 use App\Models\Subject;
 use App\Models\TheologyClass;
 use App\Models\TheologySubject;
+use App\Models\Transaction;
 use App\Models\User;
 use App\Models\UserBatchImporter;
 use App\Models\Utils;
@@ -366,17 +367,38 @@ class StudentsController extends AdminController
 
         $u = Administrator::findOrFail($id);
         $tab = new Tab();
+        $term = $u->ent->active_term();
+        $active_term_transactions = $u->account->transactions()->where([
+            'term_id' => $term->id
+        ])->get();
+        $services_for_this_term  = $u->services()->where([
+            'due_term_id' => $term->id
+        ])->get();
+
+        //revers $services_for_this_term
+        $services_for_this_term = $services_for_this_term->reverse();
+
+        //reverse $active_term_transactions
+        $active_term_transactions = $active_term_transactions->reverse();
+
         $tab->add('Bio', view('admin.dashboard.show-user-profile-bio', [
-            'u' => $u
+            'u' => $u,
+            'active_term_transactions' => $active_term_transactions
         ]));
         $tab->add('Classes', view('admin.dashboard.show-user-profile-classes', [
             'u' => $u
         ]));
         $tab->add('Services', view('admin.dashboard.show-user-profile-bills', [
-            'u' => $u
+            'u' => $u,
+            'services_for_this_term' => $services_for_this_term
         ]));
+
+        $all_transactions = $u->account->transactions;
+        //reverse $all_transactions
+        $all_transactions = $all_transactions->reverse();
         $tab->add('Transactions', view('admin.dashboard.show-user-profile-transactions', [
-            'u' => $u
+            'u' => $u,
+            'all_transactions' => $all_transactions
         ]));
         return $tab;
     }

@@ -45,6 +45,7 @@ use Illuminate\Support\Facades\DB;
 
 Route::get('report-card-printings', [ReportCardsPrintingController::class, 'index']);
 Route::get('data-import', [ReportCardsPrintingController::class, 'data_import']);
+Route::get('process-termly-school-fees-balancings', [MainController::class, 'process_termly_school_fees_balancings']);
 
 Route::get('gen-code', function () {
   $data = '1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcefghijklmnopqrstuvwxyz';

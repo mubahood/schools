@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\Post\TransactionChangeDueTerm;
 use App\Models\Account;
 use App\Models\Term;
 use App\Models\TermlySchoolFeesBalancing;
@@ -91,7 +92,7 @@ class TransactionController extends AdminController
                 if ($term->is_active) {
                     $active_term = $term->id;
                 }
-            } 
+            }
             $filter->equal('term_id', 'Fliter by term')->select($terms);
 
 
@@ -109,6 +110,21 @@ class TransactionController extends AdminController
             );
 
             $filter->between('payment_date', 'Created between')->date();
+            /* $filter->select([
+                "SCHOOL_PAY" => 'SCHOOL_PAY',
+                "GENERATED" => 'GENERATED',
+                "MANUAL_ENTRY" => 'MANUAL_ENTRY',
+                "MOBILE_APP" => 'MOBILE_APP',
+            ]); */
+
+            //filter by source
+            $filter->equal('source', 'Filter by source')
+                ->select([
+                    "SCHOOL_PAY" => 'SCHOOL_PAY',
+                    "GENERATED" => 'GENERATED',
+                    "MANUAL_ENTRY" => 'MANUAL_ENTRY',
+                    "MOBILE_APP" => 'MOBILE_APP',
+                ]);
 
             $filter->group('amount', function ($group) {
                 $group->gt('greater than');
@@ -119,6 +135,10 @@ class TransactionController extends AdminController
 
         $grid->quickSearch('description');
 
+        $grid->batchActions(function ($batch) {
+            $batch->disableDelete();
+            $batch->add(new TransactionChangeDueTerm());
+        });
 
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
@@ -132,7 +152,8 @@ class TransactionController extends AdminController
         $grid->column('payment_date', __('Date'))->display(function () {
             return Utils::my_date_time($this->payment_date);
         })
-            ->sortable();
+            ->sortable()
+            ->width(120);
 
 
         $grid->column('academic_year_id', __('Academic year id'))->hide();
@@ -145,10 +166,8 @@ class TransactionController extends AdminController
                     return $x;
                 }
                 return
-                    '<a class="text-dark" href="' . admin_url('students/' . $this->account->administrator_id) . '">' . $this->account->name . "</a>";;
+                    '<b><a class="text-primary" href="' . admin_url('students/' . $this->account->administrator_id) . '">' . $this->account->name . "</a></b>";;
             });
-
-
 
 
         $grid->column('amount', __('Amount (UGX)'))->display(function () {
@@ -160,9 +179,7 @@ class TransactionController extends AdminController
 
 
 
-        $grid->column('description', __('Description'))->display(function ($x) {
-            return '<spap title="' . $x . '" >' . Str::limit($x, 40, '...') . '</span>';
-        });
+        $grid->column('description', __('Description'))->limit(80)->sortable();
 
         $grid->column('type', __('Type'))
             ->label([
@@ -186,11 +203,7 @@ class TransactionController extends AdminController
                 "SCHOOL_PAY" => 'success',
                 "GENERATED" => 'info',
                 "MANUAL_ENTRY" => 'warning',
-            ])
-            ->filter([
-                "SCHOOL_PAY" => 'SCHOOL_PAY',
-                "GENERATED" => 'GENERATED',
-                "MANUAL_ENTRY" => 'MANUAL_ENTRY',
+                "MOBILE_APP" => 'warning',
             ])
             ->sortable();
 
@@ -221,10 +234,10 @@ class TransactionController extends AdminController
 
         $grid->column('created_by_id', __('Created By'))->display(function () {
             if ($this->by == null) {
+                return 'Deleted';
             }
             return  $this->by->name;
         })
-            ->hide()
             ->sortable();
         return $grid;
     }
@@ -295,7 +308,7 @@ class TransactionController extends AdminController
 
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
         $form->hidden('created_by_id', __('By id'))->default($u->id)->rules('required');
-        $form->hidden('source', "Money deposited to")->default('MANUAL_ENTRY') 
+        $form->hidden('source', "Money deposited to")->default('MANUAL_ENTRY')
             ->readonly();
 
 

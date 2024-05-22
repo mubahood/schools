@@ -21,27 +21,26 @@ class TermlySchoolFeesBalancing extends Model
     {
         parent::boot();
         self::deleting(function ($m) {
+            throw new Exception("Cannot delete this record.", 1);
         });
         self::creating(function ($m) {
-            $_m = TermlySchoolFeesBalancing::where([
-                'term_id' => $m->term_id,
-            ])->first();
-            if ($_m != null) {
-                return false;
-            }
-            $t = Term::find($m->term_id);
-            if ($t == null) {
-                throw new Exception("Term not found.", 1);
-            }
-            $m->academic_year_id = $t->academic_year_id;
-            return $m;
+            $m = self::validate($m);
+            return true;
+        });
+
+        //updating
+        self::updating(function ($m) {
+            $m = self::validate($m);
+            return true;
         });
 
         self::updated(function ($m) {
+            return true;
             $m->process_fees_balances();
         });
 
         self::created(function ($m) {
+            return true;
             $m->process_fees_balances();
         });
     }
@@ -49,6 +48,7 @@ class TermlySchoolFeesBalancing extends Model
     public function process_fees_balances()
     {
 
+        return;
         if ($this->processed != 'Yes') {
             return false;
         }
@@ -133,5 +133,69 @@ class TermlySchoolFeesBalancing extends Model
         }
         $this->processed = 'No';
         $this->save();
+    }
+    //validate
+    public static function validate($m)
+    {
+        //check if from and to term are the same
+        if ($m->from_term_id == $m->to_term_id) {
+            throw new Exception("From and to term cannot be the same.", 1);
+        }
+
+
+        //check if id from term is greater than to term
+        if ($m->from_term_id > $m->to_term_id) {
+            throw new Exception("From term cannot be greater than to term.", 1);
+        }
+
+        //get from term and see if it exists
+        $from_term = Term::find($m->from_term_id);
+        if ($from_term == null) {
+            throw new Exception("From term not found.", 1);
+        }
+
+        //get to term and see if it exists
+        $to_term = Term::find($m->to_term_id);
+        if ($to_term == null) {
+            throw new Exception("To term not found.", 1);
+        }
+
+        //check if same setup exists for this enterprise
+        $same_setup = TermlySchoolFeesBalancing::where([
+            'enterprise_id' => $m->enterprise_id,
+            'from_term_id' => $m->from_term_id,
+            'to_term_id' => $m->to_term_id,
+        ])->first();
+        if ($same_setup != null) {
+            if ($same_setup->id != $m->id) {
+                throw new Exception("Same setup already exists.", 1);
+            }
+        }
+
+        //one of the terms must be is_active
+        if ($m->processed == 'No') {
+            if ($from_term->is_active != 1 && $to_term->is_active != 1) {
+                throw new Exception("One of the terms must be active.", 1);
+            }
+        }
+
+        $m->academic_year_id = $to_term->academic_year_id;
+        return $m;
+
+
+        /* 
+
+id	
+created_at	
+updated_at	
+enterprise_id	
+academic_year_id	
+term_id	
+processed Descending 1	
+from_term_id	
+to_term_id	
+updated_existed_balances		
+
+        */
     }
 }

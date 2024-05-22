@@ -167,7 +167,7 @@ class ServiceSubscriptionController extends AdminController
         $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
             ->orderBy('id', 'Desc');
 
-        $grid->column('id', __('id'))->sortable();
+        $grid->column('id', __('id'))->sortable()->hide();
 
         $grid->column('administrator_id', __('Subscriber'))
             ->display(function () {
@@ -283,7 +283,7 @@ class ServiceSubscriptionController extends AdminController
         $form->select('service_id', 'Select Service')->options(Service::where(
             'enterprise_id',
             Admin::user()->enterprise_id
-        )->get()->pluck('name', 'id'))->rules('required');
+        )->get()->pluck('name_text', 'id'))->rules('required');
 
 
         $form->text('quantity', __('Quantity'))

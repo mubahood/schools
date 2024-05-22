@@ -100,4 +100,10 @@ class Service extends Model
     {
         return $this->hasMany(ServiceSubscription::class);
     }
+
+    //appends name_text
+    public function getNameTextAttribute()
+    {
+        return $this->name.' - UGX '.number_format($this->fee);
+    } 
 }

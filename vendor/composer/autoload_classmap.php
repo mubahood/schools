@@ -15,6 +15,7 @@ return array(
     'App\\Admin\\Actions\\Post\\ChangeStudentsClass' => $baseDir . '/app/Admin/Actions/Post/ChangeStudentsClass.php',
     'App\\Admin\\Actions\\Post\\ChangeStudentsStatus' => $baseDir . '/app/Admin/Actions/Post/ChangeStudentsStatus.php',
     'App\\Admin\\Actions\\Post\\MessageStatus' => $baseDir . '/app/Admin/Actions/Post/MessageStatus.php',
+    'App\\Admin\\Actions\\Post\\TransactionChangeDueTerm' => $baseDir . '/app/Admin/Actions/Post/TransactionChangeDueTerm.php',
     'App\\Admin\\Controllers\\AcademicClassController' => $baseDir . '/app/Admin/Controllers/AcademicClassController.php',
     'App\\Admin\\Controllers\\AcademicClassFeeController' => $baseDir . '/app/Admin/Controllers/AcademicClassFeeController.php',
     'App\\Admin\\Controllers\\AcademicClassLevelController' => $baseDir . '/app/Admin/Controllers/AcademicClassLevelController.php',

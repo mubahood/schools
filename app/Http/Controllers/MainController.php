@@ -2,11 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Account;
 use App\Models\Enterprise;
 use App\Models\StudentHasClass;
+use App\Models\Term;
+use App\Models\TermlySchoolFeesBalancing;
+use App\Models\Transaction;
 use App\Models\Utils;
+use Carbon\Carbon;
 use Encore\Admin\Auth\Database\Administrator;
 use Excel;
+use Exception;
+use Illuminate\Http\Request;
 
 use function PHPUnit\Framework\fileExists;
 
@@ -436,5 +443,148 @@ status';
         echo "<pre>";
         print_r($_data);
         die("");
+    }
+
+    public function process_termly_school_fees_balancings(Request $r)
+    {
+        $id = $r->id;
+        $termlyFessBalancing = TermlySchoolFeesBalancing::find($id);
+        if ($termlyFessBalancing == null) {
+            return "Termly School Fees Balancing not found";
+        }
+
+
+        if ($termlyFessBalancing->processed != 'No') {
+            die("Already processed");
+            return false;
+        }
+        $from_term = Term::find($termlyFessBalancing->from_term_id);
+        $to_term = Term::find($termlyFessBalancing->to_term_id);
+        if ($from_term->is_active != 1 && $to_term->is_active != 1) {
+            die("One of the terms must be active.");
+        }
+
+
+        $conds = [
+            'enterprise_id' => $termlyFessBalancing->enterprise_id,
+            'user_type' => 'student',
+        ];
+
+        if ($termlyFessBalancing->target_students_status == 'Active') {
+            $conds['status'] = 1;
+        }
+
+        set_time_limit(-1);
+        ini_set('memory_limit', '-1');
+        $ent = Enterprise::find($termlyFessBalancing->enterprise_id);
+        if ($ent == null) {
+            throw new Exception("Enterprise not found", 1);
+        }
+        $created_by_id = $ent->administrator_id;
+
+        $user_accounts = Administrator::where($conds)->get();
+        $success = 1;
+        $fail = 1;
+        foreach ($user_accounts as $stud) {
+            $acc = Account::where([
+                'administrator_id' => $stud->id
+            ])->first();
+            $isNew  = 'CREATED NEW TRANSACTION: ';
+            echo "<hr> <b>$success. $stud->name</b> <br>";
+
+            if ($acc != null) {
+                $trans_carried_down = Transaction::where([
+                    'account_id' => $acc->id,
+                    'termly_school_fees_balancing_id' => $termlyFessBalancing->id,
+                    'type' => 'BALANCE_CARRIED_DOWN',
+                ])->first();
+                if ($trans_carried_down == null) {
+                    $trans_carried_down = new Transaction();
+                } else {
+                    if ($termlyFessBalancing->updated_existed_balances != 'Yes') {
+                        continue;
+                    }
+                    $isNew = 'UPDATED EXISTING TRANSACTION: ';
+                }
+                $amount = Transaction::where([
+                    'account_id' => $acc->id,
+                ])->sum('amount');
+
+                $trans_carried_down->account_id = $acc->id;
+                $trans_carried_down->termly_school_fees_balancing_id = $termlyFessBalancing->id;
+                $trans_carried_down->term_id = $from_term->id;
+                $trans_carried_down->type = 'BALANCE_CARRIED_DOWN';
+                $trans_carried_down->payment_date = Carbon::now();
+                $trans_carried_down->enterprise_id = $acc->enterprise_id;
+                $trans_carried_down->academic_year_id = $from_term->academic_year_id;
+                $trans_carried_down->created_by_id = $created_by_id;
+                $trans_carried_down->amount = ((-1) * ($amount));
+                $trans_carried_down->is_contra_entry = true;
+                $trans_carried_down->source = 'GENERATED';
+                $sign = "";
+                if ($trans_carried_down->amount > 0) {
+                    $sign = "+";
+                } else {
+                    $sign = "";
+                }
+                $trans_carried_down->description =
+                    "UGX " . $sign . number_format($trans_carried_down->amount) . " on account being balance CARRIED DOWN for the end of term $from_term->name_text.";
+
+                try {
+                    $trans_carried_down->save();
+
+                    echo ("TERM: " . $trans_carried_down->term->name_text . " - " . $isNew . " " . $trans_carried_down->description);
+                } catch (\Throwable $th) {
+                    echo "Failed to save transaction because: " . $th->getMessage();;
+                }
+
+
+                $TRANS_BALANCE_BROUGHT_FORWARD = Transaction::where([
+                    'account_id' => $acc->id,
+                    'termly_school_fees_balancing_id' => $termlyFessBalancing->id,
+                    'type' => 'BALANCE_BROUGHT_FORWARD',
+                ])->first();
+                $isNew = 'CREATED NEW TRANSACTION: ';
+                if ($TRANS_BALANCE_BROUGHT_FORWARD == null) {
+                    $TRANS_BALANCE_BROUGHT_FORWARD = new Transaction();
+                } else {
+                    if ($termlyFessBalancing->updated_existed_balances != 'Yes') {
+                        continue;
+                    }
+                    $isNew = 'UPDATED EXISTING TRANSACTION: ';
+                }
+
+                $TRANS_BALANCE_BROUGHT_FORWARD->account_id = $acc->id;
+                $TRANS_BALANCE_BROUGHT_FORWARD->term_id = $to_term->id;
+                $TRANS_BALANCE_BROUGHT_FORWARD->type = 'BALANCE_BROUGHT_FORWARD';
+                $TRANS_BALANCE_BROUGHT_FORWARD->payment_date = Carbon::now();
+                $TRANS_BALANCE_BROUGHT_FORWARD->enterprise_id = $acc->enterprise_id;
+                $TRANS_BALANCE_BROUGHT_FORWARD->created_by_id = $created_by_id;
+                $TRANS_BALANCE_BROUGHT_FORWARD->academic_year_id = $to_term->academic_year_id;
+                $TRANS_BALANCE_BROUGHT_FORWARD->is_contra_entry = true;
+                $trans_carried_down->source = 'GENERATED';
+                $TRANS_BALANCE_BROUGHT_FORWARD->amount = ((-1) * ($trans_carried_down->amount));
+                $TRANS_BALANCE_BROUGHT_FORWARD->termly_school_fees_balancing_id = $termlyFessBalancing->id;
+                $sign = "";
+                if ($TRANS_BALANCE_BROUGHT_FORWARD->amount > 0) {
+                    $sign = "+";
+                }
+                $TRANS_BALANCE_BROUGHT_FORWARD->description =
+                    "UGX " . $sign . number_format($TRANS_BALANCE_BROUGHT_FORWARD->amount) . " on account being balance BROUGHT FORWARD from the term $from_term->name_text.";
+                $TRANS_BALANCE_BROUGHT_FORWARD->save();
+                echo ("<br>TERM: " . $TRANS_BALANCE_BROUGHT_FORWARD->term->name_text . " - " . $isNew . " " . $TRANS_BALANCE_BROUGHT_FORWARD->description);
+                $success++;
+                /* if ($success > 5) {
+                    break;
+                } */
+            } else {
+                $fail++;
+                $msg = "<br>$fail. Skipped <b>$stud->name</b> because: account was not found.";
+                echo $msg;
+            }
+        }
+
+        $termlyFessBalancing->processed = 'Yes';
+        $termlyFessBalancing->save();
     }
 }
