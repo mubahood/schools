@@ -377,20 +377,43 @@ class StudentsController extends AdminController
 
         //revers $services_for_this_term
         $services_for_this_term = $services_for_this_term->reverse();
+        $student_data = null;
+        
+        if ($u->user_type == 'student') {
+            $student_data = $u->get_finances();
+        }
+
+        /* 
+        "id" => 123
+        "created_at" => "2024-02-02 01:17:58"
+        "updated_at" => "2024-02-02 01:17:58"
+        "enterprise_id" => 7
+        "academic_class_id" => 127
+        "name" => "Tuition - Primary Two 2024"
+        "amount" => 885000
+        "type" => "Secular"
+        "theology_class_id" => null
+        "cycle" => "Termly"
+        "due_term_id" => 40
+*/
+
 
         //reverse $active_term_transactions
         $active_term_transactions = $active_term_transactions->reverse();
 
         $tab->add('Bio', view('admin.dashboard.show-user-profile-bio', [
             'u' => $u,
-            'active_term_transactions' => $active_term_transactions
+            'active_term_transactions' => $active_term_transactions,
+            'student_data' => $student_data
         ]));
         $tab->add('Classes', view('admin.dashboard.show-user-profile-classes', [
-            'u' => $u
+            'u' => $u,
+            'student_data' => $student_data
         ]));
         $tab->add('Services', view('admin.dashboard.show-user-profile-bills', [
             'u' => $u,
-            'services_for_this_term' => $services_for_this_term
+            'services_for_this_term' => $services_for_this_term,
+            'student_data' => $student_data
         ]));
 
         $all_transactions = $u->account->transactions;
@@ -398,7 +421,8 @@ class StudentsController extends AdminController
         $all_transactions = $all_transactions->reverse();
         $tab->add('Transactions', view('admin.dashboard.show-user-profile-transactions', [
             'u' => $u,
-            'all_transactions' => $all_transactions
+            'all_transactions' => $all_transactions,
+            'student_data' => $student_data
         ]));
         return $tab;
     }

@@ -1194,4 +1194,37 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
 
         return $this->belongsToMany($relatedModel, $pivotTable, 'user_id', 'permission_id');
     }
+
+    public function get_finances()
+    {
+        $student_data = null;
+        $u = $this;
+        $term = $u->ent->active_term();
+        if ($term == null) {
+            return null;
+        }
+        if ($u->user_type == 'student') {
+            $active_class = $u->current_class;
+            if ($active_class != null) {
+                $student_data['class'] = $active_class;
+                $student_data['fees'] = $active_class->academic_class_fees->sum('amount');
+                $student_data['services'] = $u->services
+                    ->where('due_term_id', $term->id)
+                    ->sum('total');
+                //balance b/f for this term 
+                $student_data['balance_bf'] =
+                    $u->account->transactions
+                    ->where('type', 'BALANCE_BROUGHT_FORWARD')
+                    ->where('term_id', $term->id)
+                    ->sum('amount');
+                $student_data['total_payable'] = $student_data['fees'] + $student_data['services'] + $student_data['balance_bf'];
+                $student_data['total_paid'] = $u->account->transactions
+                    ->where('term_id', $term->id)
+                    ->sum('amount');
+                $student_data['balance'] = $u->account->transactions
+                    ->sum('amount');
+            }
+        }
+        return $student_data;
+    }
 }

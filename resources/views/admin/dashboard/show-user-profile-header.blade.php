@@ -17,6 +17,11 @@ if ($u->account != null) {
         }
     }
 }
+$student_data = null;
+if ($u->user_type == 'student') {
+    $student_data = $u->get_finances();
+}
+
 $balance = $payable + $paid;
 ?>
 <div class="row">
@@ -89,10 +94,27 @@ $balance = $payable + $paid;
     </div>
     <div class="col-xs-12 col-md-4  mt-4 mt-md-0">
         <div class="border border-1 border-primary p-2 ">
-            <h4 class="text-center"><b><u>FEES SUMMARY</u></b></h4>
-            <p><b>TOTAL PAYABLE FEES:</b> UGX {{ number_format($payable) }}</p>
+            @if ($student_data != null)
+                <h4 class="text-center"><b><u>CLASS SUMMARY (FOR THIS TERM)</u></b></h4>
+                {{--                 <p class="m-0 p-0" style="line-height: 1.2;"><b>CLASS :</b> {{ $student_data['class']->name_text }}</p> --}}
+                <p class="m-0 p-0" style="line-height: 1.2;"><b>SCHOOL FEES:</b> UGX
+                    {{ number_format($student_data['fees']) }}</p>
+                <p class="m-0 p-0" style="line-height: 1.2;"><b>SERVICES:</b> UGX
+                    {{ number_format($student_data['services']) }}</p>
+                <p class="m-0 p-0" style="line-height: 1.2;"><b>PREVIOUS TERM BALANCE:</b> UGX
+                    {{ number_format($student_data['balance_bf']) }}</p>
+                <p class="m-0 p-0" style="line-height: 1.2;"><b>TOTAL AMOUNT PAYABLE:</b> UGX
+                    {{ number_format($student_data['total_payable']) }}</p>
+                <p class="m-0 p-0" style="line-height: 1.2;"><b>TOTAL AMOUNT PAID:</b> UGX
+                    {{ number_format($student_data['total_paid']) }}</p>
+                <hr class="border-primary" style="margin-top: 8px; margin-bottom: 8px; ">
+                <p class="m-0 p-0" style="line-height: 1.2;"><b>FEES BALANCE</b> UGX
+                    {{ number_format($student_data['balance']) }}</p>
+            @endif
+            {{--             <h4 class="text-center"><b><u>FEES SUMMARY</u></b></h4>
+
             <p><b>TOTAL PAID FEES:</b> UGX {{ number_format($paid) }}</p>
-            <p><b>FEES BALANCE:</b> UGX {{ number_format($balance) }}</p>
+            <p><b>FEES BALANCE:</b> UGX {{ number_format($balance) }}</p> --}}
         </div>
     </div>
 </div>
