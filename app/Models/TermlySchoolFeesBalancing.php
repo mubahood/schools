@@ -24,6 +24,7 @@ class TermlySchoolFeesBalancing extends Model
             throw new Exception("Cannot delete this record.", 1);
         });
         self::creating(function ($m) {
+            return true;
             $m = self::validate($m);
             return true;
         });
