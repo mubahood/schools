@@ -24,7 +24,6 @@ class TermlySchoolFeesBalancing extends Model
             throw new Exception("Cannot delete this record.", 1);
         });
         self::creating(function ($m) {
-            return true;
             $m = self::validate($m);
             return true;
         });
@@ -140,25 +139,25 @@ class TermlySchoolFeesBalancing extends Model
     {
         //check if from and to term are the same
         if ($m->from_term_id == $m->to_term_id) {
-            throw new Exception("From and to term cannot be the same.", 1);
+            //throw new Exception("From and to term cannot be the same.", 1);
         }
 
 
         //check if id from term is greater than to term
         if ($m->from_term_id > $m->to_term_id) {
-            throw new Exception("From term cannot be greater than to term.", 1);
+            //throw new Exception("From term cannot be greater than to term.", 1);
         }
 
         //get from term and see if it exists
         $from_term = Term::find($m->from_term_id);
         if ($from_term == null) {
-            throw new Exception("From term not found.", 1);
+           // throw new Exception("From term not found.", 1);
         }
 
         //get to term and see if it exists
         $to_term = Term::find($m->to_term_id);
         if ($to_term == null) {
-            throw new Exception("To term not found.", 1);
+            //throw new Exception("To term not found.", 1);
         }
 
         //check if same setup exists for this enterprise
@@ -176,7 +175,7 @@ class TermlySchoolFeesBalancing extends Model
         //one of the terms must be is_active
         if ($m->processed == 'No') {
             if ($from_term->is_active != 1 && $to_term->is_active != 1) {
-                throw new Exception("One of the terms must be active.", 1);
+               // throw new Exception("One of the terms must be active.", 1);
             }
         }
 
