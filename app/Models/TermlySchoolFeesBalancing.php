@@ -25,12 +25,14 @@ class TermlySchoolFeesBalancing extends Model
         });
         self::creating(function ($m) {
             $m = self::validate($m);
+            $m->term_id = $m->to_term_id;
             return true;
         });
 
         //updating
         self::updating(function ($m) {
             $m = self::validate($m);
+            $m->term_id = $m->to_term_id;
             return true;
         });
 
