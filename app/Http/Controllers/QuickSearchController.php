@@ -57,7 +57,7 @@ class QuickSearchController extends Controller
                 $user->current_class_text = $user->current_class_id;
                 $class = $user->getActiveClass();
                 if ($class != null) {
-                    $current_class_text = " - " . $class->short_name;
+                    $current_class_text = " - " . $class->short_name . " - (Bal: " . number_format($val->balance) . ")";
                 }
             }
             $data[] = [

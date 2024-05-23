@@ -11,7 +11,7 @@ use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
-use Illuminate\Support\Str; 
+use Illuminate\Support\Str;
 
 class SchoolFeesPaymentController extends AdminController
 {
@@ -48,7 +48,7 @@ class SchoolFeesPaymentController extends AdminController
                         . 'user_id=' . $u->id
                 ));
 
-         
+
 
 
             $filter->group('amount', function ($group) {
@@ -62,6 +62,8 @@ class SchoolFeesPaymentController extends AdminController
 
         $grid->disableBatchActions();
         $grid->disableActions();
+        $grid->quickSearch('school_pay_transporter_id', 'description')
+            ->placeholder('Search by school pay ID or description');
         $grid->model()
             ->where([
                 'enterprise_id' => Admin::user()->enterprise_id,
@@ -113,6 +115,15 @@ class SchoolFeesPaymentController extends AdminController
             ->sortable();
 
         $grid->column('academic_year_id', __('Academic year id'))->hide();
+        $grid->column('term_id', __('Term id'))->hide();
+        //school_pay_transporter_id
+        $grid->column('school_pay_transporter_id', __('School Pay ID'))
+            ->display(function ($x) {
+                if ($this->source != 'SCHOOL_PAY') {
+                    return "N/A";
+                }
+                return $x;
+            })->sortable();
 
 
         $terms = [];
@@ -185,11 +196,27 @@ class SchoolFeesPaymentController extends AdminController
     {
         $form = new Form(new Transaction());
         $u = Admin::user();
+
+        //on submit
+        $form->submitted(function (Form $form) {
+            //check if is from school pay
+            if ($form->source == 'SCHOOL_PAY') {
+                //check if the transaction id is valid
+                $trans = Transaction::where([
+                    'school_pay_transporter_id' => $form->school_pay_transporter_id,
+                ])->first();
+                if ($trans != null) {
+                    //if the transaction id is already used
+                    admin_error("Transaction ID already used");
+                    return back();
+                }
+            }
+        });
+
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
         $form->hidden('type', __('Transaction type'))->default('FEES_PAYMENT')->rules('required');
         $form->hidden('created_by_id', __('created_by_id'))->default(Admin::user()->id)->rules('required');
         $form->hidden('is_contra_entry', __('is_contra_entry'))->default(0)->rules('required');
-        $form->hidden('school_pay_transporter_id', __('is_contra_entry'))->default('-')->rules('required');
 
         $form->select('account_id', "Student Account")
             ->options(function ($id) {
@@ -203,17 +230,27 @@ class SchoolFeesPaymentController extends AdminController
                     . 'user_id=' . $u->id
             ))->rules('required');
 
-        $form->text('amount', __('Amount'))
+        $form->decimal('amount', __('Amount'))
             ->attribute('type', 'number')
             ->rules('required|int');
 
+        //->format('YYYY-MM-DD HH:mm:ss')
         $form->date('payment_date', __('Date'))
+            ->default(date('Y-m-d H:i:s'))
             ->rules('required');
 
 
-        $form->hidden('source', "Money deposited to")->default('MANUAL_ENTRY')
-            ->required()
-            ->readonly();
+        $form->radio('source', "Money deposited to")
+            ->options([
+                "SCHOOL_PAY" => 'School Pay',
+                "MANUAL_ENTRY" => 'Manual Entry (Cash)',
+            ])
+            ->when('SCHOOL_PAY', function (Form $form) {
+                $form->text('school_pay_transporter_id', 'School Pay transaction ID')
+                    ->rules('required|numeric');
+            })->rules('required')
+            ->required();
+
 
         $form->disableCreatingCheck();
         $form->disableEditingCheck();

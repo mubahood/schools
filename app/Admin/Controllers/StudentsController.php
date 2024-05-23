@@ -216,7 +216,19 @@ class StudentsController extends AdminController
 
 
         $grid->quickSearch('name')->placeholder("Search by name...");
-
+        //on export, emergency_person_name as it is
+        $grid->export(function ($export) {
+            $export->originalValue([
+                'emergency_person_name',
+                'emergency_person_phone',
+                'lin'
+            ]);
+            $export->except([
+                'parent_id',
+                'avatar',
+                'documents',
+            ]);
+        });
 
 
         if (!Admin::user()->isRole('dos')) {
@@ -308,8 +320,10 @@ class StudentsController extends AdminController
             ->filter(['Male' => 'Male', 'Female' => 'Female']);
         $grid->column('emergency_person_name', __('Guardian'))
             ->hide()
-            ->sortable();
-        $grid->column('emergency_person_phone', __('Guardian Phone'))->hide()->sortable();
+            ->sortable()
+            ->editable();
+        $grid->column('emergency_person_phone', __('Guardian Phone'))->hide()->sortable()
+            ->editable();
 
 
         $grid->column('phone_number_1', __('Phone number'))->hide();
@@ -378,7 +392,7 @@ class StudentsController extends AdminController
         //revers $services_for_this_term
         $services_for_this_term = $services_for_this_term->reverse();
         $student_data = null;
-        
+
         if ($u->user_type == 'student') {
             $student_data = $u->get_finances();
         }
