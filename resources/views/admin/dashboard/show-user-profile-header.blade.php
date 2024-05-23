@@ -103,6 +103,7 @@ $balance = $payable + $paid;
                     {{ number_format($student_data['services']) }}</p>
                 <p class="m-0 p-0" style="line-height: 1.2;"><b>PREVIOUS TERM BALANCE:</b> UGX
                     {{ number_format($student_data['balance_bf']) }}</p>
+                <hr class="border-primary" style="margin-top: 8px; margin-bottom: 8px; ">
                 <p class="m-0 p-0" style="line-height: 1.2;"><b>TOTAL AMOUNT PAYABLE:</b> UGX
                     {{ number_format($student_data['total_payable']) }}</p>
                 <p class="m-0 p-0" style="line-height: 1.2;"><b>TOTAL AMOUNT PAID:</b> UGX
