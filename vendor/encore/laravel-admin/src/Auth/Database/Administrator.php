@@ -1222,8 +1222,8 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                     ->where('term_id', $term->id)
                     ->where('amount', '>', 0)
                     ->sum('amount');
-                $student_data['balance'] = $u->account->transactions
-                    ->sum('amount');
+                $student_data['balance'] = abs($student_data['total_payable']) - abs($student_data['total_paid']);
+
             }
         }
         return $student_data;
