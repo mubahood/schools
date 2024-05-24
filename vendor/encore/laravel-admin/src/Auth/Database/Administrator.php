@@ -1217,7 +1217,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                     ->where('type', 'BALANCE_BROUGHT_FORWARD')
                     ->where('term_id', $term->id)
                     ->sum('amount');
-                $student_data['total_payable'] = $student_data['fees'] + $student_data['services'] + $student_data['balance_bf'];
+                $student_data['total_payable'] = $student_data['fees'] + $student_data['services'] + ((-1)*$student_data['balance_bf']);
                 $student_data['total_paid'] = $u->account->transactions
                     ->where('term_id', $term->id)
                     ->where('amount', '>', 0)
