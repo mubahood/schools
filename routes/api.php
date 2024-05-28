@@ -91,7 +91,7 @@ Route::get('streams', function (Request $r) {
     foreach ($c as $key => $v) {
         $data[] = [
             'id' => $v->id . "",
-            'text' => $v->name
+            'text' => $v->name_text
         ];
     }
     return [

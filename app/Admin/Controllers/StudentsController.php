@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Admin\Actions\Post\ChangeStudentsStatus;
 use App\Models\AcademicClass;
+use App\Models\AcademicClassSctream;
 use App\Models\AcademicYear;
 use App\Models\AdminRole;
 use App\Models\AdminRoleUser;
@@ -205,6 +206,23 @@ class StudentsController extends AdminController
                 $filter->equal('current_theology_class_id', 'Filter by theology class')->select($classes);
             }
 
+            $streams = [];
+            $term = $u->ent->active_term();
+            if ($term != null) {
+                foreach (AcademicClassSctream::where(
+                    [
+                        'enterprise_id' => $u->enterprise_id,
+                    ]
+                )
+                    ->orderBy('id', 'desc')
+                    ->get() as $ex) {
+                    if ($ex->academic_class->academic_year_id != $term->academic_year_id) {
+                        continue;
+                    }
+                    $streams[$ex->id] = $ex->name_text;
+                }
+            }
+            $filter->equal('stream_id', 'Filter by Stream')->select($streams);
 
 
 
@@ -516,9 +534,77 @@ class StudentsController extends AdminController
                 $classes[$class->id] = $class->name_text;
             }
 
-            $form->select('current_class_id', 'Class')->options($classes)->rules('required');
 
+
+            if ($form->isCreating()) {
+                $form->select('current_class_id', 'Class')->options($classes)->rules('required')
+                    ->load(
+                        'stream_id',
+                        url('/api/streams?enterprise_id=' . $u->enterprise_id)
+                    );
+                $form->select('stream_id', __('Stream'))->options(function ($id) {
+                    $streams = [];
+                    $u = Admin::user();
+                    foreach (AcademicClassSctream::where(
+                        [
+                            'enterprise_id' => $u->enterprise_id,
+                        ]
+                    )
+                        ->orderBy('id', 'desc')
+                        ->get() as $ex) {
+                        $streams[$ex->id] = $ex->name_text;
+                    }
+                    return $streams;
+                });
+            } else {
+
+
+
+                //change students class
+                $form->radio('change_class', 'Do you want to change this student\'s class?')->options([
+                    "Yes" => 'Yes',
+                    "No" => 'No',
+                ])->when('Yes', function (Form $form) {
+                    $u = Admin::user();
+                    $active_academic_year = $u->ent->active_academic_year();
+                    if ($active_academic_year == null) {
+                        die("No active academic year");
+                    }
+                    $classes = [];
+                    foreach (AcademicClass::where([
+                        'enterprise_id' => $u->enterprise_id,
+                        'academic_year_id' => $active_academic_year->id,
+                    ])->get() as $class) {
+                        if (((int)($class->academic_year->is_active)) != 1) {
+                            continue;
+                        }
+                        $classes[$class->id] = $class->name_text;
+                    }
+
+
+                    $form->select('current_class_id', 'Class')->options($classes)->rules('required')
+                        ->load(
+                            'stream_id',
+                            url('/api/streams?enterprise_id=' . $u->enterprise_id)
+                        );
+                    $form->select('stream_id', __('Stream'))->options(function ($id) {
+                        $streams = [];
+                        $u = Admin::user();
+                        foreach (AcademicClassSctream::where(
+                            [
+                                'enterprise_id' => $u->enterprise_id,
+                            ]
+                        )
+                            ->orderBy('id', 'desc')
+                            ->get() as $ex) {
+                            $streams[$ex->id] = $ex->name_text;
+                        }
+                        return $streams;
+                    });
+                });
+            }
             $form->image('avatar', 'Student\'s photo')->uniqueName();
+            $form->ignore('change_class');
 
             $form->divider();
             $form->radio('status')->options([
