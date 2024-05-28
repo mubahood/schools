@@ -320,23 +320,53 @@ class StudentHasClassController extends AdminController
 
         if ($form->isCreating()) {
 
-            $form->select('administrator_id', 'Student')->options(function () {
-                return Administrator::where([
-                    'enterprise_id' => Admin::user()->enterprise_id,
-                    'user_type' => 'student',
-                ])->get()->pluck('name', 'id');
-            });
 
-            $form->select('academic_class_id', 'Class')->options(function () {
-                return AcademicClass::where([
-                    'enterprise_id' => Admin::user()->enterprise_id,
-                ])->get()->pluck('name', 'id');
-            })->load(
+
+            $ajax_url = url(
+                '/api/ajax-users?'
+                    . 'enterprise_id=' . $u->enterprise_id
+                    . "&search_by_1=name"
+                    . "&search_by_2=id"
+                    . "&user_type=student"
+                    . "&model=User"
+            );
+
+            $form->select('administrator_id', "Student")
+                ->options(function ($id) {
+                    $a = Administrator::find($id);
+                    if ($a) {
+                        return [$a->id => "#" . $a->id . " - " . $a->name];
+                    }
+                })
+                ->ajax($ajax_url)->rules('required');
+
+            $classes = [];
+            foreach (AcademicClass::where([
+                'enterprise_id' => Admin::user()->enterprise_id,
+            ])
+                ->orderBy('id', 'desc')
+                ->get() as $key => $value) {
+                $classes[$value->id] = $value->name_text;
+            }
+
+
+            $form->select('academic_class_id', 'Class')->options($classes)->load(
                 'stream_id',
                 url('/api/streams?enterprise_id=' . $u->enterprise_id)
             );
             $form->select('stream_id', __('Stream'))->options(function ($id) {
-                return AcademicClassSctream::all()->pluck('name', 'id');
+                $streams = [];
+                $u = Admin::user();
+                foreach (AcademicClassSctream::where(
+                    [
+                        'enterprise_id' => $u->enterprise_id,
+                    ]
+                )
+                    ->orderBy('id', 'desc')
+                    ->get() as $ex) {
+                    $streams[$ex->id] = $ex->name_text;
+                }
+                return $streams;
             });
         } else {
 
@@ -356,10 +386,16 @@ class StudentHasClassController extends AdminController
             }
 
             $streams = [];
-            foreach ($hasClass->class->streams as $s) {
-                $streams[$s->id] = $s->name;
+            $u = Admin::user();
+            foreach (AcademicClassSctream::where(
+                [
+                    'enterprise_id' => $u->enterprise_id,
+                ]
+            )
+                ->orderBy('id', 'desc')
+                ->get() as $ex) {
+                $streams[$ex->id] = $ex->name_text;
             }
-
             $form->display('administrator_id', 'Class')->with(function ($value) {
                 return Administrator::find($value)->name;
             });
