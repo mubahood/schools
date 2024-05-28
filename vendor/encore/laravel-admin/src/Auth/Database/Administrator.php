@@ -578,6 +578,19 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                     $class->administrator_id = $m->id;
                     $class->stream_id = $m->stream_id;
                     $class->save();
+                } else {
+                    //check if $class->stream_id is not the same
+                    if ($existing->stream_id != $m->stream_id) {
+                        $stream = AcademicClassSctream::find($m->stream_id);
+                        if ($stream != null) {
+                            $existing->stream_id = $m->stream_id;
+                            try {
+                                $existing->save();
+                            } catch (\Throwable $th) {
+                                //throw $th;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -1217,13 +1230,12 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                     ->where('type', 'BALANCE_BROUGHT_FORWARD')
                     ->where('term_id', $term->id)
                     ->sum('amount');
-                $student_data['total_payable'] = $student_data['fees'] + $student_data['services'] + ((-1)*$student_data['balance_bf']);
+                $student_data['total_payable'] = $student_data['fees'] + $student_data['services'] + ((-1) * $student_data['balance_bf']);
                 $student_data['total_paid'] = $u->account->transactions
                     ->where('term_id', $term->id)
                     ->where('amount', '>', 0)
                     ->sum('amount');
                 $student_data['balance'] = abs($student_data['total_payable']) - abs($student_data['total_paid']);
-
             }
         }
         return $student_data;
