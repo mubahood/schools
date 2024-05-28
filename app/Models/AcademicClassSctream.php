@@ -27,7 +27,7 @@ class AcademicClassSctream extends Model
     public function getNameTextAttribute()
     {
         if ($this->academic_class != null) {
-            return  $this->academic_class->short_name . ' - ' . $this->name;
+            return  $this->academic_class->name_text . ' - ' . $this->name;
         }
         return $this->name;
     }
