@@ -173,6 +173,8 @@ class AcademicClassController extends AdminController
                     ->options($class_levels)
                     ->rules('required');
             } else {
+
+                $form->text('name', __('Class Name'))->rules('required');
                 $form->select('academic_year_id', 'Academic year')
                     ->readOnly()
                     ->options(
