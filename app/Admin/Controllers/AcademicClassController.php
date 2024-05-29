@@ -175,6 +175,7 @@ class AcademicClassController extends AdminController
             } else {
 
                 $form->text('name', __('Class Name'))->rules('required');
+                $form->text('short_name', __('Short Name'))->rules('required');
                 $form->select('academic_year_id', 'Academic year')
                     ->readOnly()
                     ->options(
