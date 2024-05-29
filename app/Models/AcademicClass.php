@@ -276,7 +276,7 @@ class AcademicClass extends Model
         }
  
         if($class->name == null || strlen($class->name)<3){
-            $class->name = $class->name;
+            $class->name = $level->name;
             $class->short_name = $level->short_name;
         }
 
