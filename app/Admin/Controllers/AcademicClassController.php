@@ -38,7 +38,7 @@ class AcademicClassController extends AdminController
         //Utils::display_system_checklist();
 
         $grid = new Grid(new AcademicClass());
-        $grid->disableCreateButton();
+        //$grid->disableCreateButton();
         $grid->disableBatchActions();
         $grid->model()
             ->orderBy('id', 'Desc')
@@ -68,7 +68,7 @@ class AcademicClassController extends AdminController
                 return "No teacher assigned";
             }
             return $this->class_teacher->name;
-        });
+        })->hide(); 
 
 
 
