@@ -274,9 +274,12 @@ class AcademicClass extends Model
         if ($level == null) {
             throw new Exception("Academic class level not found.", 1);
         }
+ 
+        if($class->name == null || strlen($class->name)<3){
+            $class->name = $class->short_name;
+            $class->short_name = $level->short_name;
+        }
 
-        $class->name = $level->name;
-        $class->short_name = $level->short_name;
         $class->class_type = $level->category;
         return $class;
     }
