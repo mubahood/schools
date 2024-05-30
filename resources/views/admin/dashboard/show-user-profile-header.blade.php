@@ -30,9 +30,12 @@ $balance = $payable + $paid;
     </div>
     <div class="col-xs-8 col-md-6 no-padding pt-0 mt-0">
         <h4 class="no-padding " style="line-height: .8">{{ $u->name }}</h4>
+        <p class="mb-2 mb-md-3 item" style="line-height: .6"><b>Current Class:</b> {{ $u->current_class->name_text }}
         <h5 class="no-padding " style="line-height: .6"><b>PAYMENT CODE:</b> {{ $u->school_pay_payment_code }}</h5>
         <hr class="border-primary" style="margin-top: 0px; margin-bottom: 8px; ">
         <p class="mb-2 mb-md-3 item" style="line-height: .6"><b>Sex:</b> {{ $u->sex }}</p>
+
+        </p>
         @if ($u->date_of_birth != null && strlen($u->date_of_birth) > 2)
             <p class="mb-2 mb-md-3 item" style="line-height: .6"><b>Date of birth:</b> {{ $u->date_of_birth }}</p>
         @endif
@@ -95,7 +98,7 @@ $balance = $payable + $paid;
     <div class="col-xs-12 col-md-4  mt-4 mt-md-0">
         <div class="border border-1 border-primary p-2 ">
             @if ($student_data != null)
-                <h4 class="text-center"><b><u>CLASS SUMMARY (FOR THIS TERM)</u></b></h4>
+                <h4 class="text-center"><b><u>SCHOOL FEES SUMMARY (FOR THIS TERM)</u></b></h4>
                 {{--                 <p class="m-0 p-0" style="line-height: 1.2;"><b>CLASS :</b> {{ $student_data['class']->name_text }}</p> --}}
                 <p class="m-0 p-0" style="line-height: 1.2;"><b>SCHOOL FEES:</b> UGX
                     {{ number_format($student_data['fees']) }}</p>
