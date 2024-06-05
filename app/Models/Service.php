@@ -95,6 +95,7 @@ class Service extends Model
             $fee_dep->save();
             $trans->save();
         }
+
     }
     public function subs()
     {

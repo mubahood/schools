@@ -1,4 +1,4 @@
-php artisan make:migration add_from_and_to_termly_school_fees_balancings --table=termly_school_fees_balancings
+php artisan make:migration add_service_sub_id_totransport_subscriptions --table=transport_subscriptions
 
 php artisan make:migration slot
 

@@ -97,7 +97,6 @@ class ServiceSubscriptionController extends AdminController
 
         $grid->actions(function ($actions) {
             $actions->disableView();
-            $actions->disableEdit();
         });
 
 
@@ -200,6 +199,10 @@ class ServiceSubscriptionController extends AdminController
             return  number_format(((int)($this->sub->account->balance)));
         });
 
+        //link_with
+        $grid->column('link_with', __('Link with'))->display(function () {
+            return $this->link_with;
+        })->sortable();
 
         return $grid;
     }
@@ -252,9 +255,6 @@ class ServiceSubscriptionController extends AdminController
             }
         }
 
-        $form->select('due_term_id', 'Due term')->options($terms)
-            ->default($active_term)
-            ->rules('required');
 
         //UPDATE service_subscriptions SET due_term_id = 6, due_academic_year_id= 2
         //6
@@ -269,35 +269,74 @@ class ServiceSubscriptionController extends AdminController
                 . "&model=User"
         );
 
+        if ($form->isCreating()) {
 
-        $form->select('administrator_id', "Subscriber")
-            ->options(function ($id) {
-                $a = Administrator::find($id);
-                if ($a) {
-                    return [$a->id => "#" . $a->id . " - " . $a->name];
+            $form->select('due_term_id', 'Due term')->options($terms)
+                ->default($active_term)
+                ->rules('required');
+            $form->select('administrator_id', "Subscriber")
+                ->options(function ($id) {
+                    $a = Administrator::find($id);
+                    if ($a) {
+                        return [$a->id => "#" . $a->id . " - " . $a->name];
+                    }
+                })
+                ->ajax($ajax_url)->rules('required');
+
+
+            $form->select('service_id', 'Select Service')->options(Service::where(
+                'enterprise_id',
+                Admin::user()->enterprise_id
+            )->get()->pluck('name_text', 'id'))->rules('required');
+
+
+            $form->text('quantity', __('Quantity'))
+                ->rules('required|int')
+                ->attribute('type', 'number')
+                ->help("How much/many units of this service was subscribed for?");
+        } else {
+            $form->display('due_term_id', 'Due term')->with(function ($v) {
+                return "Term " . Term::find($v)->name_text;
+            });
+            $form->display('administrator_id', "Subscriber")
+                ->with(function ($v) {
+                    $a = User::find($v);
+                    if ($a) {
+                        return "#" . $a->id . " - " . $a->name_text;
+                    }
+                });
+            $form->display('service_id', 'Service')->with(function ($v) {
+                return Service::find($v)->name_text;
+            });
+            $form->display('quantity', __('Quantity'));
+        }
+
+        $form->divider('Link with other services');
+        $form->radioCard('link_with', 'Link this subscription with?')->options([
+            'Transport' => 'Transport',
+            'Hostel' => 'Hostel',
+            'None' => 'None',
+        ])->default('None')
+            ->when('Transport', function (Form $form) {
+                $u = Admin::user();
+                $routes = [];
+                foreach (\App\Models\TransportRoute::where('enterprise_id', $u->enterprise_id)->get() as $key => $route) {
+                    $routes[$route->id] = $route->name;
                 }
-            })
-            ->ajax($ajax_url)->rules('required');
-
-
-        $form->select('service_id', 'Select Service')->options(Service::where(
-            'enterprise_id',
-            Admin::user()->enterprise_id
-        )->get()->pluck('name_text', 'id'))->rules('required');
-
-
-        $form->text('quantity', __('Quantity'))
-            ->rules('required|int')
-            ->attribute('type', 'number')
-            ->help("How much/many units of this service was subscribed for?");
+                $form->select('transport_route_id', __('Transport Rqoute'))
+                    ->options($routes)
+                    ->rules('required');
+                $form->radio('trip_type', __('Trip Type'))
+                    ->options([
+                        'To School' => 'To School',
+                        'From School' => 'From School',
+                        'Round Trip' => 'Round Trip (To & Fro)',
+                    ])->rules('required')
+                    ->required();
+            });
 
 
 
-        //admin_warning('Warning', 'Make sure you enter correct information because this action cannot be reversed.');
-
-
-        $form->disableCreatingCheck();
-        $form->disableEditingCheck();
         $form->disableReset();
         $form->disableViewCheck();
         return $form;
