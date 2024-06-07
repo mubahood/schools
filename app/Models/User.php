@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Form\Field\BelongsToMany;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -19,16 +20,16 @@ class User extends Administrator implements JWTSubject
     protected $table = 'admin_users';
 
     //creating
-    
+
     //boot
     public static function boot()
     {
         parent::boot();
         //deleting
         self::deleting(function ($m) {
-            return false; 
-        }); 
-    } 
+            return false;
+        });
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -267,6 +268,21 @@ class User extends Administrator implements JWTSubject
         return $this->belongsToMany($relatedModel, $pivotTable, 'user_id', 'role_id');
     }
     //getter for name_text
+    public function getUserNumberAttribute($x)
+    {
+        if ($x == null || (strlen($x) < 3)) {
+            if ($this->status != 1) return 'N/A';
+            $created = Carbon::parse($this->created_at);
+            $year = $created->format('Y');
+            $x = $this->ent->short_name . "-" . $year . "-" . $this->id;
+            $x = strtoupper($x);
+            $this->user_number = $x;
+            //$u->qr_code =  Utils::generate_qrcode($this->user_number);
+            $this->save();
+            return $x;
+        }
+        return $x;
+    }
     public function getNameTextAttribute()
     {
         //if is student, add current class

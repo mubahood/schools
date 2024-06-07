@@ -18,6 +18,7 @@ use App\Models\TheologyClass;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Utils;
+use Carbon\Carbon;
 use Encore\Admin\Traits\DefaultDatetimeFormat;
 use Exception;
 use Illuminate\Auth\Authenticatable;
@@ -1206,6 +1207,22 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
         $relatedModel = config('admin.database.permissions_model');
 
         return $this->belongsToMany($relatedModel, $pivotTable, 'user_id', 'permission_id');
+    }
+
+    public function getUserNumberAttribute($x)
+    {
+        if ($x == null || (strlen($x) < 3)) {
+            if ($this->status != 1) return 'N/A';
+            $created = Carbon::parse($this->created_at);
+            $year = $created->format('Y');
+            $x = $this->ent->short_name . "-" . $year . "-" . $this->id;
+            $x = strtoupper($x);
+            $this->user_number = $x;
+            //$u->qr_code =  Utils::generate_qrcode($this->user_number);
+            $this->save();
+            return $x;
+        }
+        return $x;
     }
 
     public function get_finances()

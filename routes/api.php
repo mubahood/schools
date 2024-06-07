@@ -22,9 +22,14 @@ Route::POST("users/register", [ApiAuthController::class, "register"]);
 Route::POST("users/login", [ApiAuthController::class, "login"]);
 
 Route::middleware([JwtMiddleware::class])->group(function () {
+    Route::get("transport-vehicles", [ApiMainController::class, 'transport_vehicles']);
+    Route::get("transport-routes", [ApiMainController::class, 'transport_routes']);
+    Route::get("transport-subscriptions", [ApiMainController::class, 'transport_subscriptions']);
+    Route::get("trips", [ApiMainController::class, 'trips']);
     Route::get("student-verification", [ApiMainController::class, 'student_verification']);
     Route::get("service-subscriptions", [ApiMainController::class, 'service_subscriptions']);
     Route::post("service-subscriptions", [ApiMainController::class, 'service_subscriptions_store']);
+    Route::post("trips-create", [ApiMainController::class, 'trips_create']);
     Route::get("services", [ApiMainController::class, 'services']);
     Route::get("posts", [ApiMainController::class, 'posts']);
     Route::get("post-views", [ApiMainController::class, 'post_views']);
