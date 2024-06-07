@@ -2,3 +2,19 @@
 in /home4/schooics/public_html/vendor/laravel/framework/src/Illuminate/Database/Connection.php on line 373
 [08-Aug-2023 23:22:40 Africa/Nairobi] PHP Fatal error:  Allowed memory size of 536870912 bytes exhausted (tried to allocate 20480 bytes) 
 in /home4/schooics/public_html/vendor/barryvdh/laravel-debugbar/src/DataCollector/QueryCollector.php on line 275
+[25-May-2024 04:23:16 Africa/Nairobi] PHP Notice:  fwrite(): Write of 7670 bytes failed with errno=122 Disk quota exceeded in /home4/schooics/public_html/vendor/monolog/monolog/src/Monolog/Handler/StreamHandler.php on line 178
+[25-May-2024 04:23:16 Africa/Nairobi] PHP Notice:  fwrite(): Write of 172 bytes failed with errno=122 Disk quota exceeded in /home4/schooics/public_html/vendor/monolog/monolog/src/Monolog/Handler/StreamHandler.php on line 178
+[25-May-2024 04:46:15 Africa/Nairobi] PHP Notice:  fwrite(): Write of 8988 bytes failed with errno=122 Disk quota exceeded in /home4/schooics/public_html/vendor/monolog/monolog/src/Monolog/Handler/StreamHandler.php on line 178
+[25-May-2024 04:46:15 Africa/Nairobi] PHP Notice:  fwrite(): Write of 172 bytes failed with errno=122 Disk quota exceeded in /home4/schooics/public_html/vendor/monolog/monolog/src/Monolog/Handler/StreamHandler.php on line 178
+[25-May-2024 05:00:17 Africa/Nairobi] PHP Notice:  fwrite(): Write of 8988 bytes failed with errno=122 Disk quota exceeded in /home4/schooics/public_html/vendor/monolog/monolog/src/Monolog/Handler/StreamHandler.php on line 178
+[25-May-2024 05:00:17 Africa/Nairobi] PHP Notice:  fwrite(): Write of 172 bytes failed with errno=122 Disk quota exceeded in /home4/schooics/public_html/vendor/monolog/monolog/src/Monolog/Handler/StreamHandler.php on line 178
+[25-May-2024 05:23:17 Africa/Nairobi] PHP Notice:  fwrite(): Write of 8988 bytes failed with errno=122 Disk quota exceeded in /home4/schooics/public_html/vendor/monolog/monolog/src/Monolog/Handler/StreamHandler.php on line 178
+[25-May-2024 05:23:17 Africa/Nairobi] PHP Notice:  fwrite(): Write of 172 bytes failed with errno=122 Disk quota exceeded in /home4/schooics/public_html/vendor/monolog/monolog/src/Monolog/Handler/StreamHandler.php on line 178
+[25-May-2024 05:46:16 Africa/Nairobi] PHP Notice:  fwrite(): Write of 8988 bytes failed with errno=122 Disk quota exceeded in /home4/schooics/public_html/vendor/monolog/monolog/src/Monolog/Handler/StreamHandler.php on line 178
+[25-May-2024 05:46:16 Africa/Nairobi] PHP Notice:  fwrite(): Write of 172 bytes failed with errno=122 Disk quota exceeded in /home4/schooics/public_html/vendor/monolog/monolog/src/Monolog/Handler/StreamHandler.php on line 178
+[25-May-2024 06:00:19 Africa/Nairobi] PHP Notice:  fwrite(): Write of 8988 bytes failed with errno=122 Disk quota exceeded in /home4/schooics/public_html/vendor/monolog/monolog/src/Monolog/Handler/StreamHandler.php on line 178
+[25-May-2024 06:00:19 Africa/Nairobi] PHP Notice:  fwrite(): Write of 172 bytes failed with errno=122 Disk quota exceeded in /home4/schooics/public_html/vendor/monolog/monolog/src/Monolog/Handler/StreamHandler.php on line 178
+[25-May-2024 06:23:16 Africa/Nairobi] PHP Notice:  fwrite(): Write of 8988 bytes failed with errno=122 Disk quota exceeded in /home4/schooics/public_html/vendor/monolog/monolog/src/Monolog/Handler/StreamHandler.php on line 178
+[25-May-2024 06:23:16 Africa/Nairobi] PHP Notice:  fwrite(): Write of 172 bytes failed with errno=122 Disk quota exceeded in /home4/schooics/public_html/vendor/monolog/monolog/src/Monolog/Handler/StreamHandler.php on line 178
+[25-May-2024 06:46:15 Africa/Nairobi] PHP Notice:  fwrite(): Write of 8988 bytes failed with errno=122 Disk quota exceeded in /home4/schooics/public_html/vendor/monolog/monolog/src/Monolog/Handler/StreamHandler.php on line 178
+[25-May-2024 06:46:15 Africa/Nairobi] PHP Notice:  fwrite(): Write of 172 bytes failed with errno=122 Disk quota exceeded in /home4/schooics/public_html/vendor/monolog/monolog/src/Monolog/Handler/Stream
