@@ -1,4 +1,4 @@
-php artisan make:migration add_user_token_to_admin_users --table=admin_users
+php artisan make:migration add_roles_text_to_admin_users --table=roles_text
 
 
 php artisan make:migration slot
