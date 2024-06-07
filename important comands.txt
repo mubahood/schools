@@ -1,11 +1,12 @@
-php artisan make:migration add_from_and_to_termly_school_fees_balancings --table=termly_school_fees_balancings
+php artisan make:migration add_user_number_to_admin_users --table=admin_users
+
 
 php artisan make:migration slot
 
 
 php artisan admin:make ReportCardPrintController --model=App\\Models\\ReportCardPrint
 
-php artisan make:model ReportCardPrint -m
+php artisan make:model PassengerRecord -m
 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
 
 git config --global user.name "mubahood"

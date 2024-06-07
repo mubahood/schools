@@ -26,7 +26,15 @@ class ApiAuthController extends Controller
     public function me()
     {
         $query = auth('api')->user();
-        return $this->success($query, $message = "Profile details", 200);
+        if($query == null){
+            return $this->error('User not found.'); 
+        }
+        $u = User::find($query->id);
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        $u->roles_text = json_encode($u->roles);
+        return $this->success($u, $message = "Profile details", 200);
     }
 
 

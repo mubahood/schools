@@ -10,6 +10,7 @@ use App\Models\DisciplinaryRecord;
 use App\Models\Enterprise;
 use App\Models\Mark;
 use App\Models\Participant;
+use App\Models\PassengerRecord;
 use App\Models\Post;
 use App\Models\PostView;
 use App\Models\Service;
@@ -19,6 +20,10 @@ use App\Models\StudentHasClass;
 use App\Models\StudentReportCard;
 use App\Models\TheologyStream;
 use App\Models\Transaction;
+use App\Models\TransportRoute;
+use App\Models\TransportSubscription;
+use App\Models\TransportVehicle;
+use App\Models\Trip;
 use App\Models\User;
 use App\Models\Utils;
 use App\Traits\ApiResponser;
@@ -428,6 +433,122 @@ class ApiMainController extends Controller
     }
 
 
+    public function trips_create(Request $r)
+    {
+        $u = auth('api')->user();
+        $term = $u->ent->active_term();
+
+        if (
+            $r->trip == null ||
+            $r->passengers == null
+        ) {
+            return $this->error('Params are missing.');
+        }
+
+        $trip_data = null;
+        try {
+            $trip_data = json_decode(json_encode($r->trip));
+        } catch (\Throwable $t) {
+            var_dump($r->trip);
+            return $this->error('Invalid trip data. 1, ' . $t);
+        }
+        if ($trip_data == null) {
+            return $this->error('Invalid trip data. 2');
+        }
+        $passengers = $r->passengers;
+        try {
+            $passengers = json_decode($r->passengers);
+        } catch (\Throwable $t) {
+            return $this->error('Invalid passengers data.');
+        }
+        if ($passengers == null) {
+            return $this->error('Invalid passengers data. 1');
+        }
+        //ifnot array $passengers
+        if (!is_array($passengers)) {
+            return $this->error('Invalid passengers data. 2');
+        }
+
+        //if empty $passengers
+        if (count($passengers) < 1) {
+            return $this->error('No passengers data.');
+        }
+
+        //check if trip data has local_id
+        if ($trip_data->local_id == null) {
+            return $this->error('Trip local_id is required.');
+        }
+        $trip = Trip::where([
+            'enterprise_id' => $u->enterprise_id,
+            'local_id' => $trip_data->local_id,
+        ])->first();
+        if ($trip == null) {
+            $trip = new Trip();
+        }
+        $transport_route = TransportRoute::find($trip_data->transport_route_id);
+        if ($transport_route == null) {
+            return $this->error('Transport route not found.');
+        }
+        $trip->enterprise_id = $u->enterprise_id;
+        $trip->local_id = $trip_data->local_id;
+        $trip->driver_id = $u->id;
+        $trip->term_id = $term->id;
+        $trip->transport_route_id = $trip_data->transport_route_id;
+        $trip->date = $trip_data->date;
+        $trip->status = $trip_data->status;
+        $trip->start_time = $trip_data->start_time;
+        $trip->end_time = $trip_data->end_time;
+        $trip->start_gps = $trip_data->start_gps;
+        $trip->end_gps = $trip_data->end_gps;
+        $trip->trip_direction = $trip_data->trip_direction;
+        $trip->start_mileage = $trip_data->start_mileage;
+        $trip->end_mileage = $trip_data->end_mileage;
+        $trip->expected_passengers = $trip_data->expected_passengers;
+        $trip->actual_passengers = $trip_data->actual_passengers;
+        $trip->absent_passengers = $trip_data->absent_passengers;
+
+        try {
+            $trip->save();
+        } catch (\Throwable $t) {
+            return $this->error('Failed to save trip because ' . $t);
+        }
+        $trip = TransportSubscription::find($trip->id);
+
+
+        foreach ($passengers as $key => $val) {
+
+            $student = User::where([
+                'user_number'  => $val->student_id
+            ])->first();
+            if ($student == null) {
+                return $this->error('Student not found. #' . $val->student_id);
+            }
+
+            $pass = PassengerRecord::find([
+                'trip_id' => $trip->id,
+                'user_id' => $student->id,
+            ])->first();
+            if ($pass == null) {
+                $pass = new PassengerRecord();
+            }
+            $pass->enterprise_id = $u->enterprise_id;
+            $pass->trip_id = $trip->id;
+
+            $pass->user_id = $student->id;
+            $pass->status = $val->status;
+            $pass->start_time = $val->start_time;
+            $pass->end_time = $val->end_time;
+            try {
+                $pass->save();
+            } catch (\Throwable $t) {
+                return $this->error('Failed to save passenger record because ' . $t);
+            }
+        }
+
+        return $this->success($trip, $message = "Success", 200);
+    }
+
+
     public function service_subscriptions_store(Request $r)
     {
         $u = auth('api')->user();
@@ -469,6 +590,81 @@ class ApiMainController extends Controller
             return $this->error('Failed to save record because ' . $th);
         }
     }
+
+    public function transport_vehicles()
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        //$term = $u->ent->active_term();
+        return $this->success(TransportVehicle::where([
+            'enterprise_id' => $u->enterprise_id,
+        ])->limit(100000)->orderBy('id', 'desc')->get(), $message = "Success", 200);
+    }
+
+    public function transport_routes()
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        //$term = $u->ent->active_term();
+        return $this->success(TransportRoute::where([
+            'enterprise_id' => $u->enterprise_id,
+        ])->limit(100000)->orderBy('id', 'desc')->get(), $message = "Success", 200);
+    }
+
+
+    public function transport_subscriptions()
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        $term = $u->ent->active_term();
+        $records = [];
+        foreach (TransportSubscription::where([
+            'enterprise_id' => $u->enterprise_id,
+            'term_id' => $term->id
+        ])->limit(100000)->orderBy('id', 'desc')->get() as $key => $val) {
+            $user = $val->subscriber;
+            if ($user == null) {
+                continue;
+            }
+            $sub['id'] = $val->id;
+            $sub['user_id'] = $val->user_id;
+            $sub['transport_route_id'] = $val->transport_route_id;
+            $sub['status'] = $val->status;
+            $sub['trip_type'] = $val->trip_type;
+            $sub['description'] = $user->name;
+            $sub['service_subscription_text'] = $user->avatar;
+            $sub['user_text'] = $user->user_number;
+            $records[] = $sub;
+        }
+        return $this->success($records, $message = "Success", 1);
+    }
+
+
+
+    public function trips()
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        $term = $u->ent->active_term();
+        $records = [];
+        foreach (Trip::where([
+            'enterprise_id' => $u->enterprise_id,
+        ])->limit(100000)->orderBy('id', 'desc')->get() as $key => $val) {
+            $records[] = $val;
+        }
+        return $this->success($records, $message = "Success", 1);
+    }
+
+
+
     public function service_subscriptions()
     {
         $u = auth('api')->user();

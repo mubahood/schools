@@ -28,6 +28,8 @@ class TransportSubscriptionController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new TransportSubscription());
+
+
         $grid->filter(
             function ($filter) {
                 $filter->disableIdFilter();
@@ -83,7 +85,15 @@ class TransportSubscriptionController extends AdminController
             }
         );
         $u = Admin::user();
+        $active_term = Admin::user()->ent->active_term();
         $grid->model()->where('enterprise_id', $u->enterprise_id);
+
+
+        if (!isset($_GET['term_id'])) {
+            $grid->model()->where('term_id', $active_term->id);
+        }
+
+        $grid->disableCreateButton(); 
         $grid->disableBatchActions();
         $grid->column('user_id', __('User'))
             ->display(function ($user_id) {

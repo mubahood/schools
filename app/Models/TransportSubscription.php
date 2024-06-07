@@ -68,4 +68,16 @@ class TransportSubscription extends Model
     {
         return $this->belongsTo(Term::class, 'term_id');
     }
+
+    //apends
+    protected $appends = ['service_subscription_text'];
+    //getter for service_subscription_text
+    public function getServiceSubscriptionTextAttribute()
+    {
+        $u = User::find($this->service_subscription_id);
+        if ($u == null) {
+            return 'user.png';
+        }
+        return $u->avatar;
+    }
 }

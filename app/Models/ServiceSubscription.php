@@ -18,8 +18,14 @@ class ServiceSubscription extends Model
     {
         parent::boot();
         self::created(function ($m) {
+            self::my_update($m);
             Service::update_fees($m->service);
         });
+        self::updated(function ($m) {
+            self::my_update($m);
+            Service::update_fees($m->service);
+        });
+
         self::creating(function ($m) {
 
             $term = Term::find($m->due_term_id);
@@ -118,4 +124,48 @@ class ServiceSubscription extends Model
         return $s->name;
     }
     protected $appends = ['service_text', 'due_term_text', 'administrator_text'];
+
+    //my update
+    public static function my_update($m)
+    {
+
+        if ($m->link_with == 'Transport') {
+            $t = TransportSubscription::where([
+                'service_subscription_id' => $m->id,
+            ])->first();
+            if ($t == null) {
+                $t = TransportSubscription::where([
+                    'user_id' => $m->administrator_id,
+                    'term_id' => $m->due_term_id,
+                ])->first();
+                if ($t == null) {
+                    $t = new TransportSubscription();
+                }
+            }
+            $t->service_subscription_id = $m->id;
+            $t->enterprise_id = $m->enterprise_id;
+            $t->user_id = $m->administrator_id;
+            $t->transport_route_id = $m->transport_route_id;
+            $t->term_id = $m->due_term_id;
+            $t->status = 'Active';
+            $t->trip_type = $m->trip_type;
+            $t->amount = $m->total;
+            $t->description = 'Generated from ' . $m->service->name . ' service subscription. REF: #' . $m->id . "";
+            $t->save();
+        } else {
+            $t = TransportSubscription::where([
+                'service_subscription_id' => $m->id,
+            ])->first();
+
+            if ($t != null) {
+                $t = TransportSubscription::where([
+                    'user_id' => $m->administrator_id,
+                    'term_id' => $m->due_term_id,
+                ])->first();
+                if ($t == null) {
+                    $t->delete();
+                }
+            }
+        }
+    }
 }
