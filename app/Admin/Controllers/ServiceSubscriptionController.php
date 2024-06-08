@@ -331,8 +331,7 @@ class ServiceSubscriptionController extends AdminController
                         'To School' => 'To School',
                         'From School' => 'From School',
                         'Round Trip' => 'Round Trip (To & Fro)',
-                    ])->rules('required')
-                    ->required();
+                    ])->rules('required');
             });
 
 
