@@ -215,7 +215,8 @@ class FixedAssetController extends AdminController
         $form->text('name', __('Name'))->rules('required');
         $form->select('category', __('Category'))
             ->options($cats)
-            ->rules('required');
+            ->rules('required')
+            ->required();
         $form->image('photo', __('Photo'));
 
 

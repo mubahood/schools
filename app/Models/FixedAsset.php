@@ -78,6 +78,11 @@ Query results operations
         parent::boot();
         self::creating(function ($model) {
 
+            $category = FixedAssetCategory::find($model->category);
+            if ($category == null) {
+                throw new \Exception('Category does not exist');
+            }
+            
             $model->code = self::generate_code_number($model->category);
             //category with same name should not exist
             $existing = FixedAsset::where('code', $model->code)
@@ -90,9 +95,17 @@ Query results operations
             if ($current_value == 0) {
                 $model->current_value = $model->purchase_price;
             }
+            $model->category = $category->id;
+            return $model;
         });
         //updating
         self::updating(function ($model) {
+            $category = FixedAssetCategory::find($model->category);
+            if ($category == null) {
+                throw new \Exception('Category does not exist');
+            } 
+            $model->category = $category->id;
+            return $model;
         });
 
         static::deleting(function ($category) {
