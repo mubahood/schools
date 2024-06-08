@@ -26,6 +26,7 @@ class FixedAssetCategory extends Model
             }
             $existing = FixedAssetCategory::where('code', $model->code)
                 ->where('id', '!=', $model->id)
+                ->where('enterprise_id', $model->enterprise_id) 
                 ->first();
             if ($existing) {
                 throw new \Exception('Fixed Asset Category with same code already exists');
@@ -41,6 +42,7 @@ class FixedAssetCategory extends Model
             //category with same name should not exist
             $existing = FixedAssetCategory::where('name', $model->name)
                 ->where('id', '!=', $model->id)
+                ->where('enterprise_id', $model->enterprise_id)
                 ->first();
             if ($existing) {
                 throw new \Exception('Fixed Asset Category with same name already exists');
@@ -48,13 +50,13 @@ class FixedAssetCategory extends Model
             //unique code
             $existing = FixedAssetCategory::where('code', $model->code)
                 ->where('id', '!=', $model->id)
+                ->where('enterprise_id', $model->enterprise_id)
                 ->first();
             if ($existing) {
                 throw new \Exception('Fixed Asset Category with same code already exists');
             }
             $code = strtoupper($model->code);
             $model->code = $code;
-            $model->id = $model->generateUuid();
         });
 
         static::deleting(function ($category) {
