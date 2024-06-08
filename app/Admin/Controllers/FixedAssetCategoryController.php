@@ -97,8 +97,7 @@ class FixedAssetCategoryController extends AdminController
             ->help('3 characters');
         $form->image('photo', __('Photo'));
         $form->textarea('description', __('Description'));
-        $form->disableEditingCheck();
-        $form->text('id', __('iD')); 
+        $form->disableEditingCheck(); 
         return $form;
     }
 }
