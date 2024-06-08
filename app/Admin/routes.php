@@ -119,10 +119,10 @@ Route::group([
     $router->resource('transport-routes', TransportRouteController::class);
     $router->resource('transport-vehicles', TransportVehicleController::class);
     $router->resource('transport-subscriptions', TransportSubscriptionController::class);
-    $router->resource('schem-work-items', SchemWorkItemController::class);
+    $router->resource('schems-work-items', SchemWorkItemController::class);
     $router->resource('identification-cards', IdentificationCardController::class);
     $router->resource('report-card-prints', ReportCardPrintController::class);
-    
+
     //$router->get('/fixed-asset-records-stats', 'FixedAssetRecordController@stats');
 
 

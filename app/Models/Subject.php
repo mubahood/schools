@@ -129,7 +129,7 @@ class Subject extends Model
     {
         $text = "";
         if ($this->academic_class != null) {
-            $text = $this->academic_class->name_text . " - ";
+            $text = $this->academic_class->name_text;
         }
 
         return  $this->subject_name . " - " . $text;
