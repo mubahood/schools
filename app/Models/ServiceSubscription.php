@@ -36,6 +36,17 @@ class ServiceSubscription extends Model
             if ($service == null) {
                 throw new Exception("Service Not Found.", 1);
             }
+
+            //check if the user is already subscribed to the service in this term
+            $s = ServiceSubscription::where([
+                'service_id' => $m->service_id,
+                'administrator_id' => $m->administrator_id,
+                'due_term_id' => $m->due_term_id,
+            ])->first(); 
+            if ($s != null) {
+                throw new Exception("This user is already subscribed to this service in this term.", 1);
+            }
+
             $m->due_academic_year_id = $term->academic_year_id;
             $m->enterprise_id = $term->enterprise_id;
             $quantity = ((int)($m->quantity));
