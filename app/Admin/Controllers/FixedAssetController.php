@@ -219,7 +219,7 @@ class FixedAssetController extends AdminController
 
 
         $form->decimal('purchase_price', __('Purchase Price'))->rules('required');
-        $form->decimal('current_value', __('Current value'))->rules('required');
+        $form->decimal('current_value', __('Current value'));
 
         $form->text('serial_number', __('Serial number'));
 

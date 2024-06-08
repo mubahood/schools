@@ -16,7 +16,7 @@ class FixedAsset extends Model
     public function assigned_to()
     {
         return $this->belongsTo(User::class, 'assigned_to_id');
-    } 
+    }
     //due_term
     public function category_data()
     {
@@ -27,7 +27,7 @@ class FixedAsset extends Model
     public function due_term()
     {
         return $this->belongsTo(Term::class, 'due_term_id');
-    } 
+    }
 
 
     /*  
@@ -83,13 +83,16 @@ Query results operations
             $existing = FixedAsset::where('code', $model->code)
                 ->first();
             if ($existing) {
-                throw new \Exception('Fixed Asset with same code already exists: '.$model->code);
+                throw new \Exception('Fixed Asset with same code already exists: ' . $model->code);
             }
-             $model->id = $model->generateUuid();
+            $model->id = $model->generateUuid();
+            $current_value = (int)$model->current_value;
+            if ($current_value == 0) {
+                $model->current_value = $model->purchase_price;
+            }
         });
         //updating
         self::updating(function ($model) {
-             
         });
 
         static::deleting(function ($category) {
@@ -111,7 +114,7 @@ Query results operations
         if ($bar_code == null || $bar_code == '' || !file_exists(public_path($bar_code))) {
             $bar_code = Utils::generate_barcode($this->code);
             $this->barcode = $bar_code;
-            $this->save(); 
+            $this->save();
         }
 
         return str_replace('storage/', '', $bar_code);
