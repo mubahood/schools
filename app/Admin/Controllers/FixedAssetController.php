@@ -263,7 +263,7 @@ class FixedAssetController extends AdminController
             ])->default('Active')
             ->rules('required');
 
-        $form->text('id', __('iD'));
+
 
 
         return $form;
