@@ -4,6 +4,8 @@ php artisan make:migration add_roles_text_to_admin_users --table=roles_text
 php artisan make:migration slot
 
 
+
+
 php artisan admin:make ReportCardPrintController --model=App\\Models\\ReportCardPrint
 
 php artisan make:model PassengerRecord -m

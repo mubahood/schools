@@ -104,6 +104,12 @@ Query results operations
             $bar_code = Utils::generate_barcode($model->code);
             $model->barcode = $bar_code;
             $model->save();
+            FixedAssetCategory::update_purchase_price($model->category);
+        });
+
+        //updated 
+        self::updated(function ($model) {
+            FixedAssetCategory::update_purchase_price($model->category);
         });
     }
 

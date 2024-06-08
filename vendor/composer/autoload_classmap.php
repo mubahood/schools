@@ -12,6 +12,7 @@ return array(
     'App\\Admin\\Actions\\Post\\BatchStudentFinancialAccountChangeBalance' => $baseDir . '/app/Admin/Actions/Post/BatchStudentFinancialAccountChangeBalance.php',
     'App\\Admin\\Actions\\Post\\BatchStudentFinancialAccountSetNotVerified' => $baseDir . '/app/Admin/Actions/Post/BatchStudentFinancialAccountSetNotVerified.php',
     'App\\Admin\\Actions\\Post\\BatchStudentFinancialAccountSetVerified' => $baseDir . '/app/Admin/Actions/Post/BatchStudentFinancialAccountSetVerified.php',
+    'App\\Admin\\Actions\\Post\\ChangeSchemeWorkTopic' => $baseDir . '/app/Admin/Actions/Post/ChangeSchemeWorkTopic.php',
     'App\\Admin\\Actions\\Post\\ChangeStudentsClass' => $baseDir . '/app/Admin/Actions/Post/ChangeStudentsClass.php',
     'App\\Admin\\Actions\\Post\\ChangeStudentsStatus' => $baseDir . '/app/Admin/Actions/Post/ChangeStudentsStatus.php',
     'App\\Admin\\Actions\\Post\\MessageStatus' => $baseDir . '/app/Admin/Actions/Post/MessageStatus.php',

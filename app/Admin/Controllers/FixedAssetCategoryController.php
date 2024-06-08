@@ -25,6 +25,8 @@ class FixedAssetCategoryController extends AdminController
      */
     protected function grid()
     {
+
+
         $grid = new Grid(new FixedAssetCategory());
         $grid->disableBatchActions();
         $u = Admin::user();
@@ -40,6 +42,15 @@ class FixedAssetCategoryController extends AdminController
             ->width(100);
         $grid->column('name', __('Name'))->sortable();
         $grid->column('code', __('Code'))->sortable();
+
+        $grid->column('purchase_price', __('Total Investment'))
+            ->display(function ($val) {
+                return "UGX " . number_format($val);
+            })->sortable();
+        $grid->column('current_value', __('Current Value'))
+            ->display(function ($val) {
+                return "UGX " . number_format($val);
+            })->sortable();
         $grid->column('description', __('Description'))->hide();
 
         return $grid;
