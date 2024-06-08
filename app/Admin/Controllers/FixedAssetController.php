@@ -36,6 +36,7 @@ class FixedAssetController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new FixedAsset());
+        $grid->quickSearch('name', 'code')->placeholder('Search by name or code');
 
         $grid->filter(function ($filter) {
             $filter->disableIdFilter();
@@ -79,23 +80,22 @@ class FixedAssetController extends AdminController
         $grid->column('photo', __('Photo'))->lightbox(['width' => 50, 'height' => 50])->width(100)->sortable();
 
         $grid->column('name', __('Name'))->sortable()
-            ->hide();
+            ->sortable();
         $grid->column('code', __('Code'))->sortable()->filter('like');
-        $grid->column('assigned_to_id', __('Assigned'))
-            ->display(function ($assigned_to_id) {
-                return $this->assigned_to->name_text;
-            })->sortable();
+
         $grid->column('due_term_id', __('Due term'))
             ->display(function ($due_term_id) {
                 return $this->due_term->name_text;
-            })->sortable();
+            })->sortable()
+            ->hide();
         $grid->column('category', __('Category'))
             ->display(function ($id) {
                 if ($this->category_data == null) {
                     return 'N/A - ' . $id;
                 }
                 return $this->category_data->name;
-            })->sortable();
+            })->sortable()
+            ->width(120);
         $grid->column('description', __('Description'))->hide();
 
 
@@ -150,6 +150,11 @@ class FixedAssetController extends AdminController
                     $last_seen = $this->updated_at;
                 }
                 return Carbon::parse($last_seen)->diffForHumans();
+            })->sortable();
+
+        $grid->column('assigned_to_id', __('Assigned To'))
+            ->display(function ($assigned_to_id) {
+                return $this->assigned_to->name_text;
             })->sortable();
 
         return $grid;
@@ -231,7 +236,7 @@ class FixedAssetController extends AdminController
 
         $form->text('serial_number', __('Serial number'));
 
- 
+
 
         $active_term = Admin::user()->ent->active_term();
         $form->select('due_term_id', __('Due term'))
