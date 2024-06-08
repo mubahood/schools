@@ -80,7 +80,7 @@ class FixedAssetController extends AdminController
 
         $grid->column('name', __('Name'))->sortable()
             ->hide();
-        $grid->column('code', __('Code'))->sortable();
+        $grid->column('code', __('Code'))->sortable()->filter('like');
         $grid->column('assigned_to_id', __('Assigned'))
             ->display(function ($assigned_to_id) {
                 return $this->assigned_to->name_text;
@@ -90,9 +90,9 @@ class FixedAssetController extends AdminController
                 return $this->due_term->name_text;
             })->sortable();
         $grid->column('category', __('Category'))
-            ->display(function () {
+            ->display(function ($id) {
                 if ($this->category_data == null) {
-                    return 'N/A';
+                    return 'N/A - ' . $id;
                 }
                 return $this->category_data->name;
             })->sortable();
@@ -146,6 +146,9 @@ class FixedAssetController extends AdminController
         $grid->column('updated_at', __('Updated'))->sortable()->hide();
         $grid->column('last_seen', __('Last Seen'))->sortable()
             ->display(function ($last_seen) {
+                if ($last_seen == null || $last_seen == '') {
+                    $last_seen = $this->updated_at;
+                }
                 return Carbon::parse($last_seen)->diffForHumans();
             })->sortable();
 
@@ -228,10 +231,7 @@ class FixedAssetController extends AdminController
 
         $form->text('serial_number', __('Serial number'));
 
-
-
-
-
+ 
 
         $active_term = Admin::user()->ent->active_term();
         $form->select('due_term_id', __('Due term'))

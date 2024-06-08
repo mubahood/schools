@@ -41,7 +41,8 @@ class FixedAssetCategoryController extends AdminController
         )->sortable()
             ->width(100);
         $grid->column('name', __('Name'))->sortable();
-        $grid->column('code', __('Code'))->sortable();
+        $grid->column('code', __('Code'))->sortable()
+            ->filter('like');
 
         $grid->column('purchase_price', __('Total Investment'))
             ->display(function ($val) {

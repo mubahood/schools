@@ -82,7 +82,8 @@ Query results operations
             if ($category == null) {
                 throw new \Exception('Category does not exist');
             }
-            
+
+
             $model->code = self::generate_code_number($model->category);
             //category with same name should not exist
             $existing = FixedAsset::where('code', $model->code)
@@ -103,7 +104,7 @@ Query results operations
             $category = FixedAssetCategory::find($model->category);
             if ($category == null) {
                 throw new \Exception('Category does not exist');
-            } 
+            }
             $model->category = $category->id;
             return $model;
         });
@@ -112,11 +113,20 @@ Query results operations
             throw new \Exception('Deleting not allowed');
         });
 
+        //deleted
+        self::deleted(function ($model) {
+            FixedAssetCategory::update_purchase_price($model->category);
+        });
+
         //created
         self::created(function ($model) {
-            $bar_code = Utils::generate_barcode($model->code);
-            $model->barcode = $bar_code;
-            $model->save();
+            try {
+                $bar_code = Utils::generate_barcode($model->code);
+                $model->barcode = $bar_code;
+                $model->save();
+            } catch (\Throwable $th) {
+                //throw $th;
+            }
             FixedAssetCategory::update_purchase_price($model->category);
         });
 

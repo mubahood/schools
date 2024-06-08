@@ -65,19 +65,23 @@ class FixedAssetCategory extends Model
 
     public static function update_purchase_price($category_id)
     {
-        $category = FixedAssetCategory::find($category_id);
-        if ($category == null) {
-            return;
+        try {
+            $category = FixedAssetCategory::find($category_id);
+            if ($category == null) {
+                return;
+            }
+            //purchase_price sum of all active assets 
+            $purchase_price = FixedAsset::where('category', $category_id)
+                ->where('status', 'Active')
+                ->sum('purchase_price');
+            $current_value = FixedAsset::where('category', $category_id)
+                ->where('status', 'Active')
+                ->sum('current_value');
+            $category->purchase_price = $purchase_price;
+            $category->current_value = $current_value;
+            $category->save();
+        } catch (\Throwable $th) {
+            //throw $th;
         }
-        //purchase_price sum of all active assets 
-        $purchase_price = FixedAsset::where('category', $category_id)
-            ->where('status', 'Active')
-            ->sum('purchase_price');
-        $current_value = FixedAsset::where('category', $category_id)
-            ->where('status', 'Active')
-            ->sum('current_value');
-        $category->purchase_price = $purchase_price;
-        $category->current_value = $current_value;
-        $category->save(); 
     }
 }
