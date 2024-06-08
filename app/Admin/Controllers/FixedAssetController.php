@@ -23,7 +23,8 @@ class FixedAssetController extends AdminController
     protected $title = 'Fixed Assets';
 
 
-    public function stats(Content $content){
+    public function stats(Content $content)
+    {
         die('stats');
     }
 
@@ -89,7 +90,10 @@ class FixedAssetController extends AdminController
                 return $this->due_term->name_text;
             })->sortable();
         $grid->column('category', __('Category'))
-            ->display(function ($category) {
+            ->display(function () {
+                if ($this->category_data == null) {
+                    return 'N/A';
+                }
                 return $this->category_data->name;
             })->sortable();
         $grid->column('description', __('Description'))->hide();
@@ -223,16 +227,8 @@ class FixedAssetController extends AdminController
 
         $form->text('serial_number', __('Serial number'));
 
-        if ($form->isCreating()) {
-            $form->radio('status', __('Status'))
-                ->options([
-                    'Active' => 'Active',
-                    'Disposed' => 'Disposed',
-                    'Damaged' => 'Damaged',
-                    'Lost' => 'Lost',
-                ])->default('Active')
-                ->rules('required');
-        }
+
+
 
 
 
@@ -255,7 +251,17 @@ class FixedAssetController extends AdminController
         $form->textarea('description', __('Asset Details'));
         $form->text('remarks', __('Remarks'));
         $form->disableReset();
-        $form->disableEditingCheck();
+        $form->disableViewCheck();
+        $form->divider();
+        $form->radio('status', __('Status'))
+            ->options([
+                'Active' => 'Active',
+                'Disposed' => 'Disposed',
+                'Damaged' => 'Damaged',
+                'Lost' => 'Lost',
+            ])->default('Active')
+            ->rules('required');
+
 
         return $form;
     }

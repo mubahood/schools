@@ -712,6 +712,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Admin\\Actions\\Post\\BatchStudentFinancialAccountChangeBalance' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/BatchStudentFinancialAccountChangeBalance.php',
         'App\\Admin\\Actions\\Post\\BatchStudentFinancialAccountSetNotVerified' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/BatchStudentFinancialAccountSetNotVerified.php',
         'App\\Admin\\Actions\\Post\\BatchStudentFinancialAccountSetVerified' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/BatchStudentFinancialAccountSetVerified.php',
+        'App\\Admin\\Actions\\Post\\ChangeSchemeWorkTopic' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/ChangeSchemeWorkTopic.php',
         'App\\Admin\\Actions\\Post\\ChangeStudentsClass' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/ChangeStudentsClass.php',
         'App\\Admin\\Actions\\Post\\ChangeStudentsStatus' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/ChangeStudentsStatus.php',
         'App\\Admin\\Actions\\Post\\MessageStatus' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/MessageStatus.php',
