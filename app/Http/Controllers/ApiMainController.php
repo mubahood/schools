@@ -13,11 +13,13 @@ use App\Models\Participant;
 use App\Models\PassengerRecord;
 use App\Models\Post;
 use App\Models\PostView;
+use App\Models\SchemWorkItem;
 use App\Models\Service;
 use App\Models\ServiceSubscription;
 use App\Models\Session;
 use App\Models\StudentHasClass;
 use App\Models\StudentReportCard;
+use App\Models\Subject;
 use App\Models\TheologyStream;
 use App\Models\Transaction;
 use App\Models\TransportRoute;
@@ -546,6 +548,72 @@ class ApiMainController extends Controller
         }
 
         return $this->success($trip, $message = "Success", 200);
+    }
+
+
+    public function schemework_items_create(Request $r)
+    {
+        $u = auth('api')->user();
+        $term = $u->ent->active_term();
+
+        if (
+            $r->subject_id == null
+        ) {
+            return $this->error('Subject is missing.');
+        }
+
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+
+        $subject = Subject::find($r->subject_id);
+        if ($subject == null) {
+            return $this->error('Subject not found.');
+        }
+        $task = 'Create';
+        $item = new SchemWorkItem();
+        if ($r->id != null) {
+            $item = SchemWorkItem::find($r->id);
+            if ($item != null) {
+                $task = 'Update';
+            } else {
+                $item = new SchemWorkItem();
+            }
+        }
+
+
+        $item->enterprise_id = $u->enterprise_id;
+        $item->subject_id = $r->subject_id;
+        $item->term_id = $term->id;
+        $item->teacher_id = $u->id;
+        $item->supervisor_id = $u->supervisor_id;
+        $item->teacher_status = $r->teacher_status;
+        $item->teacher_comment = $r->teacher_comment;
+        $item->supervisor_status = $r->supervisor_status;
+        $item->supervisor_comment = $r->supervisor_comment;
+        $item->status = $r->status;
+        $item->week = $r->week;
+        $item->period = $r->period;
+        $item->topic = $r->topic;
+        $item->competence = $r->competence;
+        $item->methods = $r->methods;
+        $item->skills = $r->skills;
+        $item->suggested_activity = $r->suggested_activity;
+        $item->instructional_material = $r->instructional_material;
+        $item->references = $r->references;
+
+        try {
+            $item->save();
+        } catch (\Throwable $t) {
+            return $this->error('Failed to save schemework item because ' . $t);
+        }
+        $item = SchemWorkItem::find($item->id);
+        if ($item == null) {
+            return $this->error('Failed to save schemework item.');
+        }
+
+
+        return $this->success($item, $message = $task . "d successfully!", 1);
     }
 
 

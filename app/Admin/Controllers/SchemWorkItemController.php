@@ -122,7 +122,6 @@ class SchemWorkItemController extends AdminController
             ->editable()
             ->sortable();
 
-
         $grid->column('teacher_id', __('Teacher'))
             ->display(function ($teacher_id) {
                 if ($this->teacher == null) {
@@ -134,7 +133,7 @@ class SchemWorkItemController extends AdminController
         $grid->column('teacher_comment', __('Teacher Comment'))
             ->editable()
             ->sortable();
-        $grid->column('supervisor_status', __('Supervisor status'))->hide(); 
+        $grid->column('supervisor_status', __('Supervisor status'))->hide();
 
         $grid->column('supervisor_id', __('Supervisor'))
             ->display(function ($supervisor_id) {
@@ -156,7 +155,7 @@ class SchemWorkItemController extends AdminController
             ->filter([
                 'Pending' => 'Pending',
                 'Done' => 'Done',
-            ])->hide(); 
+            ])->hide();
         $grid->column('status', __('Status'))->hide();
 
         return $grid;

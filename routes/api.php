@@ -30,6 +30,7 @@ Route::middleware([JwtMiddleware::class])->group(function () {
     Route::get("service-subscriptions", [ApiMainController::class, 'service_subscriptions']);
     Route::post("service-subscriptions", [ApiMainController::class, 'service_subscriptions_store']);
     Route::post("trips-create", [ApiMainController::class, 'trips_create']);
+    Route::post("schemework-items-create", [ApiMainController::class, 'schemework_items_create']);
     Route::get("services", [ApiMainController::class, 'services']);
     Route::get("posts", [ApiMainController::class, 'posts']);
     Route::get("post-views", [ApiMainController::class, 'post_views']);

@@ -18,6 +18,14 @@ class SchemWorkItem extends Model
             if ($m->supervisor_id == null) {
                 $m->supervisor_id = $m->teacher_id;
             }
+            if ($m->supervisor_status == null) {
+                $m->supervisor_status = 'Pending';
+            }
+            if($m->supervisor_status != 'Done'){
+                $m->status = 'Pending';
+            }
+
+            
             return $m;
         });
     }
