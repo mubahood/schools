@@ -1496,7 +1496,11 @@ lin
     public function get_my_students()
     {
         $u = auth('api')->user();
-        return $this->success($u->get_my_students($u), $message = "Success", 200);
+        $admin = Administrator::find($u->id);
+        if ($admin == null) {
+            return $this->error('User not found.');
+        }
+        return $this->success($admin->get_my_students($admin), $message = "Success", 200);
     }
     /**
      * Get a JWT via given credentials.
