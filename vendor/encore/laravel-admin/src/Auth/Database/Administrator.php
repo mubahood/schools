@@ -896,7 +896,8 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                 'user_type' => 'student',
                 'enterprise_id' => $u->enterprise_id,
             ])->get() as $user) {
-
+                $students[] = $user;
+                continue; 
                 $user->balance = 0;
                 $user->account_id = 0;
                 $user->current_class_text = $user->current_class_id;
@@ -972,7 +973,8 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                 'parent_id' => $u->id,
                 'user_type' => 'student',
             ])->get() as $user) {
-
+                $students[] = $user;
+                continue;
                 $user->balance = 0;
                 $user->account_id = 0;
 
