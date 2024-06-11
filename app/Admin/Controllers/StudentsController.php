@@ -340,7 +340,7 @@ class StudentsController extends AdminController
             ->hide()
             ->sortable()
             ->editable();
-        $grid->column('emergency_person_phone', __('Guardian Phone'))->hide()->sortable()
+        $grid->column('emergency_person_phone', __('Guardian Phone'))->sortable()
             ->editable();
 
 
