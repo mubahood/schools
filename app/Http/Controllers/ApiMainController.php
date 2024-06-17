@@ -1360,6 +1360,20 @@ lin
         }
     }
 
+    public function schemework_items()
+    {
+        $u = auth('api')->user();
+
+        $secula_subjects = $u->get_my_subjetcs();
+        //$theology_subjects = $u->get_my_theology_subjetcs();
+        $subjects_ids = [];
+        foreach ($secula_subjects as $key => $value) {
+            $subjects_ids[] = $value->id;
+        }
+        $scheme_work_items = SchemWorkItem::wherein('subject_id', $subjects_ids)->get();
+        return $this->success($scheme_work_items, $message = "Success", 200); 
+    }
+
     public function my_subjects()
     {
         $u = auth('api')->user();

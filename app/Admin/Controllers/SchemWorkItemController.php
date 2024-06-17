@@ -32,10 +32,9 @@ class SchemWorkItemController extends AdminController
         //add ChangeSchemeWorkTopic batch action
         $grid->batchActions(function ($batch) {
             $batch->add(new ChangeSchemeWorkTopic());
-            //disable delete
             $batch->disableDelete();
         });
-
+        $grid->disableBatchActions();
         //$grid filter
         $grid->filter(function ($filter) {
             $filter->disableIdFilter();
@@ -64,7 +63,8 @@ class SchemWorkItemController extends AdminController
             $filter->equal('teacher_status', __('Teacher Status'))
                 ->select([
                     'Pending' => 'Not yet taught',
-                    'Done' => 'Taught',
+                    'Conducted' => 'Taught',
+                    'Skipped' => 'Skipped'
                 ]);
 
             //date between created
@@ -150,11 +150,11 @@ class SchemWorkItemController extends AdminController
         $grid->column('teacher_status', __('Teacher Status'))
             ->label([
                 'Pending' => 'warning',
-                'Done' => 'success',
+                'Conducted' => 'success',
             ])->sortable()
             ->filter([
                 'Pending' => 'Pending',
-                'Done' => 'Done',
+                'Conducted' => 'Conducted',
             ])->hide();
         $grid->column('status', __('Status'))->hide();
 
@@ -250,9 +250,9 @@ class SchemWorkItemController extends AdminController
         $form->radio('teacher_status', __('Teacher\'s Status'))->default('Pending')
             ->options([
                 'Pending' => 'Lessons not yet taught',
-                'Done' => 'Lessons taught',
+                'Conducted' => 'Lessons taught',
             ])
-            ->when('Done', function (Form $form) {
+            ->when('Conducted', function (Form $form) {
                 $form->text('teacher_comment', __('Teacher Remarks'))->rules('required');
             });
         $form->hidden('supervisor_status', __('Supervisor status'))->default('Pending');

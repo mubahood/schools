@@ -20,6 +20,7 @@ use App\Models\Mark;
 use App\Models\MarkRecord;
 use App\Models\ReportFinanceModel;
 use App\Models\ReportsFinance;
+use App\Models\SchemWorkItem;
 use App\Models\TheologyMarkRecord;
 use App\Models\StudentHasClass;
 use App\Models\StudentHasFee;
@@ -167,6 +168,35 @@ Route::get('reports-finance-create', function () {
     }
   }
 });
+
+
+Route::get('scheme-of-work-print', function (Request $request) {
+  $sub = Subject::find($request->id);
+  if ($sub == null) return "Subject not found";
+  //active term
+  $active = Term::where([
+    'enterprise_id' => $sub->enterprise_id,
+    'is_active' => 1
+  ])->first();
+  if ($active == null) return "Active term not found";
+  $items = SchemWorkItem::where([
+    'subject_id' => $sub->id,
+    'term_id' => $active->id
+  ])->get(); 
+  $pdf = App::make('dompdf.wrapper');
+  $class = AcademicClass::find($sub->academic_class_id);
+  $pdf->loadHTML(view('print.scheme-of-work-print', [
+    'term' => $active,
+    'ent' => $active->enterprise,
+    'sub' => $sub,
+    'class' => $class,
+    'isPrint' => true,
+    'items' => $items
+  ]));
+  return $pdf->stream();
+});
+
+
 Route::get('reports-finance-print', function (Request $request) {
   //return view('print/print-admission-letter');
   $pdf = App::make('dompdf.wrapper');

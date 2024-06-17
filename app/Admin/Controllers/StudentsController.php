@@ -233,7 +233,7 @@ class StudentsController extends AdminController
 
 
         //user_number column
-        $grid->column('user_number', __('Student ID '))->sortable(); 
+
 
         $grid->quickSearch('name')->placeholder("Search by name...");
         //on export, emergency_person_name as it is
@@ -383,7 +383,7 @@ class StudentsController extends AdminController
                 return Carbon::parse($date)->format('d-M-Y');
             })->hide()->sortable();
 
-
+        $grid->column('user_number', __('ID Number'))->sortable();
 
 
 

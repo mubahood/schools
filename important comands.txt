@@ -6,7 +6,7 @@ php artisan make:migration slot
 
 
 
-php artisan admin:make ReportCardPrintController --model=App\\Models\\ReportCardPrint
+php artisan admin:make SchemeWorkController --model=App\\Models\\Subject
 
 php artisan make:model PassengerRecord -m
 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

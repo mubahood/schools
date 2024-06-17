@@ -48,6 +48,7 @@ Route::middleware([JwtMiddleware::class])->group(function () {
     Route::post("update-guardian/{id}", [ApiMainController::class, 'update_guardian']);
     Route::post("session-create", [ApiMainController::class, 'session_create']);
     Route::get("my-subjects", [ApiMainController::class, 'my_subjects']);
+    Route::get("schemework-items", [ApiMainController::class, 'schemework_items']);
     Route::get("student-has-class", [ApiMainController::class, 'student_has_class']);
     Route::get("transactions", [ApiMainController::class, 'transactions']);
     Route::post("transactions", [ApiMainController::class, 'transactions_post']);

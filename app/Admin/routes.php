@@ -122,6 +122,7 @@ Route::group([
     $router->resource('schems-work-items', SchemWorkItemController::class);
     $router->resource('identification-cards', IdentificationCardController::class);
     $router->resource('report-card-prints', ReportCardPrintController::class);
+    $router->resource('scheme-works', SchemeWorkController::class);
 
     //$router->get('/fixed-asset-records-stats', 'FixedAssetRecordController@stats');
 
