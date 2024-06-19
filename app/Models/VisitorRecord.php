@@ -130,6 +130,12 @@ class VisitorRecord extends Model
         $visitor->number_of_visits = VisitorRecord::where(['visitor_id' => $visitor->id])->count();
         $visitor->save();
     }
+
+    //driver
+    public function driver()
+    {
+        return $this->belongsTo(User::class, 'driver_id');
+    }
 }
 /* 		 	 
 	

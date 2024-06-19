@@ -125,6 +125,7 @@ Route::group([
     $router->resource('scheme-works', SchemeWorkController::class);
     $router->resource('visitors', VisitorController::class);
     $router->resource('visitor-records', VisitorRecordController::class);
+    $router->resource('trips', TripController::class); 
 
     //$router->get('/fixed-asset-records-stats', 'FixedAssetRecordController@stats');
 

@@ -10,7 +10,7 @@ php artisan make:migration slot
 
 
 
-php artisan admin:make VisitorRecordController --model=App\\Models\\VisitorRecord
+php artisan admin:make TripController --model=App\\Models\\Trip
 
 php artisan make:model VisitorRecord -m
 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

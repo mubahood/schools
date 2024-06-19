@@ -27,6 +27,7 @@ class VisitorRecordController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new VisitorRecord());
+        $grid->disableCreateButton(); 
         $grid->disableBatchActions();
         $u = Admin::user();
         $grid->quickSearch('name', 'phone_number')->placeholder('Search by name or phone number');
@@ -150,8 +151,8 @@ class VisitorRecordController extends AdminController
     protected function form()
     {
         $form = new Form(new VisitorRecord());
-
-        $form->number('visitor_id', __('Visitor id'));
+        $u = Admin::user();
+        $form->hidden('enterprise_id', __('enterprise_id'))->default($u->enterprise_id);
         $form->number('purpose_staff_id', __('Purpose staff id'));
         $form->number('purpose_student_id', __('Purpose student id'));
         $form->text('name', __('Name'));
