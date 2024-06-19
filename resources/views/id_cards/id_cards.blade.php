@@ -12,6 +12,7 @@
         body {
             margin: 0 !important;
             padding: 0 !important;
+            margin-top: 15 !important;
         }
     </style>
     <style>
@@ -39,7 +40,17 @@
 </head>
 
 <body>
+    <?php
+    $per_page = 0;
+    ?>
     @foreach ($users as $user)
+        @php
+            $per_page++;
+            if ($per_page == 5) {
+                $per_page = 0;
+                echo '<div class="page-break"></div>';
+            }
+        @endphp
         @include('id_cards.template-1', [
             'user' => $user,
         ])
