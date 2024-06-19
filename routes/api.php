@@ -32,6 +32,8 @@ Route::middleware([JwtMiddleware::class])->group(function () {
     Route::post("trips-create", [ApiMainController::class, 'trips_create']);
     Route::post("schemework-items-create", [ApiMainController::class, 'schemework_items_create']);
     Route::get("services", [ApiMainController::class, 'services']);
+    Route::get("visitors", [ApiMainController::class, 'visitors']);
+    Route::get("users-mini", [ApiMainController::class, 'users_mini']);
     Route::get("posts", [ApiMainController::class, 'posts']);
     Route::get("post-views", [ApiMainController::class, 'post_views']);
     Route::post("post-views", [ApiMainController::class, 'post_view_create']);
@@ -57,6 +59,7 @@ Route::middleware([JwtMiddleware::class])->group(function () {
     Route::get("my-sessions", [ApiMainController::class, 'my_sessions']);
     Route::get("my-students", [ApiMainController::class, 'get_my_students']);
     Route::post("post-media-upload", [ApiMainController::class, 'upload_media']);
+    Route::post("visitors-record-create", [ApiMainController::class, 'visitors_record_create']);
 
     //=====ATTENDANCE========//
     Route::get("participants", [ApiMainController::class, 'participants']);

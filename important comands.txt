@@ -1,4 +1,6 @@
-php artisan make:migration add_roles_text_to_admin_users --table=roles_text
+php artisan make:migration add_local_id_to_visitor_records --table=visitor_records
+
+
 
 
 php artisan make:migration slot
@@ -6,9 +8,9 @@ php artisan make:migration slot
 
 
 
-php artisan admin:make SchemeWorkController --model=App\\Models\\Subject
+php artisan admin:make VisitorRecordController --model=App\\Models\\VisitorRecord
 
-php artisan make:model PassengerRecord -m
+php artisan make:model VisitorRecord -m
 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
 
 git config --global user.name "mubahood"

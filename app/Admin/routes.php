@@ -123,6 +123,8 @@ Route::group([
     $router->resource('identification-cards', IdentificationCardController::class);
     $router->resource('report-card-prints', ReportCardPrintController::class);
     $router->resource('scheme-works', SchemeWorkController::class);
+    $router->resource('visitors', VisitorController::class);
+    $router->resource('visitor-records', VisitorRecordController::class);
 
     //$router->get('/fixed-asset-records-stats', 'FixedAssetRecordController@stats');
 

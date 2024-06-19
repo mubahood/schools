@@ -28,6 +28,8 @@ use App\Models\TransportVehicle;
 use App\Models\Trip;
 use App\Models\User;
 use App\Models\Utils;
+use App\Models\Visitor;
+use App\Models\VisitorRecord;
 use App\Traits\ApiResponser;
 use Carbon\Carbon;
 use Encore\Admin\Auth\Database\Administrator;
@@ -766,6 +768,39 @@ class ApiMainController extends Controller
         }
     }
 
+    public function users_mini()
+    {
+        $u = auth('api')->user();
+        $users = [];
+        foreach (User::where([
+            'enterprise_id' => $u->enterprise_id,
+            'status' => 1
+        ])
+            ->limit(10000)->orderBy('id', 'desc')->get() as $key => $val) {
+            $user['id'] = $val->id;
+            $user['name'] = $val->name_text;
+            $user['user_type'] = $val->user_type;
+            $user['phone_number'] = $val->phone_number_1;
+            $user['avatar'] = $val->avatar;
+            $users[] = $user;
+        }
+        return $this->success($users, $message = "Success", 1);
+    }
+
+    public function visitors()
+    {
+        $u = auth('api')->user();
+        return $this->success(
+            Visitor::where([
+                'enterprise_id' => $u->enterprise_id,
+            ])->limit(10000)->orderBy('id', 'desc')
+                ->get(),
+            $message = "Success",
+            200
+        );
+    }
+
+
     public function services()
     {
         $u = auth('api')->user();
@@ -1371,7 +1406,7 @@ lin
             $subjects_ids[] = $value->id;
         }
         $scheme_work_items = SchemWorkItem::wherein('subject_id', $subjects_ids)->get();
-        return $this->success($scheme_work_items, $message = "Success", 200); 
+        return $this->success($scheme_work_items, $message = "Success", 200);
     }
 
     public function my_subjects()
@@ -1432,6 +1467,104 @@ lin
             'due_date',
             'type',
         ]), $message = "Success", 200);
+    }
+
+    public function visitors_record_create(Request $r)
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+
+        if ($r->parent_type == 'user-photo') {
+            $acc = Administrator::find($r->parent_id_online);
+            if ($acc == null) {
+                return $this->success(null, $message = "File not found.", 200);
+            }
+
+            $visitorRecord = VisitorRecord::where(['local_id' => $r->local_id])->first();
+            if ($visitorRecord == null) {
+                $visitorRecord = new VisitorRecord();
+            }
+            $visitorRecord->enterprise_id = $u->enterprise_id;
+            $visitorRecord->created_by_id = $u->id;
+            $visitorRecord->local_id = $r->local_id;
+            $visitorRecord->visitor_id = $r->visitor_id;
+            $visitorRecord->purpose_staff_id = $r->purpose_staff_id;
+            $visitorRecord->purpose_student_id = $r->purpose_student_id;
+            $visitorRecord->name = $r->name;
+            $phone_number = Utils::prepare_phone_number($r->phone_number);
+            if (Utils::phone_number_is_valid($phone_number)) {
+                $visitorRecord->phone_number = $phone_number;
+            } else {
+                $visitorRecord->phone_number = $r->phone_number;
+            }
+            $visitorRecord->organization = $r->organization;
+            $visitorRecord->email = $r->email;
+            $visitorRecord->address = $r->address;
+            $visitorRecord->nin = $r->nin;
+            $visitorRecord->check_in_time = $r->check_in_time;
+            $visitorRecord->check_out_time = $r->check_out_time;
+            $visitorRecord->purpose = $r->purpose;
+            $visitorRecord->purpose_description = $r->purpose_description;
+            $visitorRecord->pupurpose_office = $r->purpose_office;
+            $visitorRecord->purpose_other = $r->purpose_other;
+            $visitorRecord->has_car = $r->has_car;
+            $visitorRecord->car_reg = $r->car_reg;
+            $visitorRecord->status = $r->status;
+            $active_term = $u->ent->active_term();
+            if ($active_term != null) {
+                $visitorRecord->due_term_id = $active_term->id;
+            }
+
+
+            $image = null;
+            if (!empty($_FILES)) {
+                try {
+                    //$image = Utils::upload_images_2($_FILES, true);
+                    if ($r->file('file') != null) {
+                        $image = Utils::file_upload($r->file('file'));
+                    }
+                } catch (Throwable $t) {
+                    $image = null;
+                }
+            }
+            if ($image != null) {
+                if (strlen($image) > 3) {
+                    $active_term->signature_src = $image;
+                }
+            }
+
+            return $this->success($active_term, 'Updated successfully.'); 
+        }
+
+
+
+
+
+
+
+        /* 
+      
+        
+        $_images = [];
+        foreach ($images as $src) {
+            $img = new Image();
+            $img->administrator_id =  $administrator_id;
+            $img->src =  $src;
+            $img->thumbnail =  null;
+            $img->parent_id =  null;
+            $img->size = filesize(Utils::docs_root() . '/storage/images/' . $img->src);
+            $img->save();
+
+            $_images[] = $img;
+        }
+        Utils::process_images_in_backround();
+*/
+        return $this->success(null, 'File uploaded successfully.');
+
+
+        die('upload_media');
     }
 
     public function upload_media(Request $r)
@@ -1500,9 +1633,6 @@ lin
         Utils::process_images_in_backround();
 */
         return $this->success(null, 'File uploaded successfully.');
-
-
-
 
 
         die('upload_media');
