@@ -36,7 +36,7 @@ class SchemeWorkController extends AdminController
             'academic_year_id' => $active_year->id
         ];
         $grid = new Grid(new Subject());
-        $grid->disableBatchActions(); 
+        $grid->disableBatchActions();
         $grid->quickSearch('subject_name', 'code')->placeholder('Quick search subject or code');
         $grid
             ->model()
@@ -110,6 +110,13 @@ class SchemeWorkController extends AdminController
                     'term_id' => $active->id
                 ])->count();
                 return $items;
+            });
+
+        //print
+        $grid->column('print', __('Print'))
+            ->display(function () {
+                $link = url('scheme-of-work-print?id=' . $this->id);
+                return "<a href='$link' target='_blank'>Print</a>";
             });
 
         return $grid;
