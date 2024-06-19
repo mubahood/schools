@@ -2,8 +2,10 @@
 
 namespace App\Admin\Controllers;
 
+use App\Models\User;
 use App\Models\VisitorRecord;
 use Encore\Admin\Controllers\AdminController;
+use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
@@ -15,7 +17,7 @@ class VisitorRecordController extends AdminController
      *
      * @var string
      */
-    protected $title = 'VisitorRecord';
+    protected $title = 'Visitors\'s Records';
 
     /**
      * Make a grid builder.
@@ -25,30 +27,80 @@ class VisitorRecordController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new VisitorRecord());
+        $grid->disableBatchActions();
+        $u = Admin::user();
+        $grid->quickSearch('name', 'phone_number')->placeholder('Search by name or phone number');
+        $grid->model()->where('enterprise_id', $u->enterprise_id)
+            ->orderBy('created_at', 'desc');
+        $grid->column('created_at', __('Date'))
+            ->display(function ($created_at) {
+                return date('d-m-Y', strtotime($created_at));
+            })->sortable();
+        $grid->column('name', __('Name'))->sortable();
+        $grid->column('phone_number', __('Phone number'))->sortable();
+        $grid->column('address', __('Address'))->sortable();
+        $grid->column('purpose', __('Purpose'))->sortable()
+            ->label([
+                'Official' => 'success',
+                'Staff' => 'info',
+                'Student' => 'warning',
+                'Other' => 'danger',
+            ])
+            ->filter([
+                'Official' => 'Official',
+                'Staff' => 'Staff',
+                'Student' => 'Student',
+                'Other' => 'Other',
+            ])
+            ->sortable();
+        $grid->column('purpose_staff_id', __('Host'))
+            ->display(function ($purpose_staff_id) {
+                $staff = User::find($purpose_staff_id);
+                if ($staff != null) {
+                    return $staff->name;
+                }
+                $student = User::find($this->purpose_student_id);
+                if ($student != null) {
+                    return $student->name_text;
+                }
 
-        $grid->column('id', __('Id'));
-        $grid->column('created_at', __('Created at'));
-        $grid->column('updated_at', __('Updated at'));
-        $grid->column('visitor_id', __('Visitor id'));
-        $grid->column('purpose_staff_id', __('Purpose staff id'));
-        $grid->column('purpose_student_id', __('Purpose student id'));
-        $grid->column('name', __('Name'));
-        $grid->column('phone_number', __('Phone number'));
-        $grid->column('organization', __('Organization'));
-        $grid->column('email', __('Email'));
-        $grid->column('address', __('Address'));
-        $grid->column('nin', __('Nin'));
-        $grid->column('check_in_time', __('Check in time'));
-        $grid->column('check_out_time', __('Check out time'));
-        $grid->column('purpose', __('Purpose'));
+                if ($this->purpose == 'Official') {
+                    return $this->purpose_office;
+                }
+                return $this->purpose_other;
+            });
+        $grid->column('purpose_student_id', __('Visted Student'))
+            ->display(function ($purpose_student_id) {
+                $student = User::find($purpose_student_id);
+                if ($student != null) {
+                    return $student->name_text;
+                }
+                return '';
+            })->sortable()->hide();
+        $grid->column('organization', __('Organization'))->sortable()->hide();
+        $grid->column('email', __('Email'))->hide();
+        $grid->column('nin', __('Nin'))->hide();
+        $grid->column('status', __('Check-out Status'))
+            ->dot([
+                'In' => 'danger',
+                'Out' => 'success',
+            ])->sortable();
+        $grid->column('check_in_time', __('Check-in Time'))->sortable();
+        $grid->column('check_out_time', __('Check-out Time'))->sortable();
         $grid->column('purpose_description', __('Purpose description'));
-        $grid->column('purpose_office', __('Purpose office'));
-        $grid->column('purpose_other', __('Purpose other'));
-        $grid->column('signature_src', __('Signature src'));
-        $grid->column('signature_path', __('Signature path'));
-        $grid->column('lacal_id', __('Lacal id'));
-        $grid->column('has_car', __('Has car'));
-        $grid->column('car_reg', __('Car reg'));
+        $grid->column('purpose_office', __('Purpose office'))->sortable()->hide();
+
+        $grid->column('signature_src', __('Sign'))
+            ->lightbox(['width' => 50, 'height' => 50])->width(50)->sortable();
+        $grid->column('car_reg', __('Vevicle Reg'))->sortable()
+            ->filter('like')
+            ->display(function ($car_reg) {
+                if ($car_reg != null && strlen($car_reg) > 3) {
+                    return $car_reg;
+                }
+                return '-';
+            })->hide();
+
 
         return $grid;
     }

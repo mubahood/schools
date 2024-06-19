@@ -1,5 +1,7 @@
-php artisan make:migration add_local_id_to_visitor_records --table=visitor_records
+php artisan make:migration add_check_in_time_to_time_records --table=visitor_records
 
+         $table->date('check_in_time')->nullable();
+            $table->date('check_out_time')->nullable();
 
 
 

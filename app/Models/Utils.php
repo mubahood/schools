@@ -51,6 +51,15 @@ class Utils  extends Model
 {
     //0782664225
 
+    //static email_is_valid
+    public static function email_is_valid($email)
+    {
+        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return true;
+        }
+        return false;
+    } 
+
     public static function copy_default_grading($u)
     {
         if ($u == null) {

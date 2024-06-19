@@ -16,7 +16,7 @@ class VisitorController extends AdminController
      *
      * @var string
      */
-    protected $title = 'Visitor';
+    protected $title = 'Visitors';
 
     /**
      * Make a grid builder.
@@ -27,15 +27,42 @@ class VisitorController extends AdminController
     {
         $grid = new Grid(new Visitor());
 
-        $grid->column('id', __('Id'));
-        $grid->column('created_at', __('Created at'));
-        $grid->column('updated_at', __('Updated at'));
-        $grid->column('name', __('Name'));
-        $grid->column('nin', __('Nin'));
-        $grid->column('phone_number', __('Phone number'));
-        $grid->column('email', __('Email'));
-        $grid->column('organization', __('Organization'));
+        $grid->disableBatchActions();
+        $u = Admin::user();
+        $grid->quickSearch('name', 'phone_number')->placeholder('Search by name or phone number');
+        $grid->model()->where('enterprise_id', $u->enterprise_id)
+            ->orderBy('created_at', 'desc');
+
+
+
+        $grid->column('name', __('Name'))->sortable();
+        $grid->column('phone_number', __('Phone Number'))->sortable();
+
+
         $grid->column('address', __('Address'));
+
+        $grid->column('email', __('Email'))->sortable()->hide();
+        $grid->column('organization', __('Organization'))->sortable()->hide();
+        $grid->column('number_of_visits', __('Organization'))->sortable()->label(); 
+
+        $grid->column('created_at', __('Date'))
+            ->display(function ($created_at) {
+                return date('d-m-Y', strtotime($created_at));
+            })->sortable();
+        $grid->column('updated_at', __('Last Visit'))
+            ->display(function ($created_at) {
+                return date('d-m-Y', strtotime($created_at));
+            })->sortable();
+        $grid->column('nin', __('NIN'))
+            ->sortable()
+            ->display(function ($nin) {
+                if ($nin == null) {
+                    return 'N/A';
+                }
+                return $nin;
+            })->display(function ($created_at) {
+                return date('d-m-Y', strtotime($created_at));
+            })->sortable();
 
         return $grid;
     }

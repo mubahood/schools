@@ -32,6 +32,7 @@ Route::middleware([JwtMiddleware::class])->group(function () {
     Route::post("trips-create", [ApiMainController::class, 'trips_create']);
     Route::post("schemework-items-create", [ApiMainController::class, 'schemework_items_create']);
     Route::get("services", [ApiMainController::class, 'services']);
+    Route::get("visitors-records", [ApiMainController::class, 'visitors_records']);
     Route::get("visitors", [ApiMainController::class, 'visitors']);
     Route::get("users-mini", [ApiMainController::class, 'users_mini']);
     Route::get("posts", [ApiMainController::class, 'posts']);

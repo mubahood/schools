@@ -297,10 +297,7 @@ class ApiMainController extends Controller
         if ($stream == null) {
             return $this->error('Stream not found.');
         }
-
         $u = auth('api')->user();
-
-
         $session = new Session();
         $session->enterprise_id = $u->enterprise_id;
         $session->academic_class_id = $r->academic_class_id;
@@ -806,6 +803,22 @@ class ApiMainController extends Controller
         $u = auth('api')->user();
         return $this->success(Service::where([
             'enterprise_id' => $u->enterprise_id,
+        ])->limit(10000)->orderBy('id', 'desc')->get(), $message = "Success", 200);
+    }
+
+    public function visitors_records()
+    {
+        $u = auth('api')->user();
+        $term = $u->ent->active_term();
+        if (
+            $term == null
+        ) {
+            return $this->error('Please set active term.');
+        }
+
+        return $this->success(VisitorRecord::where([
+            'enterprise_id' => $u->enterprise_id,
+            'due_term_id' => $term->id
         ])->limit(10000)->orderBy('id', 'desc')->get(), $message = "Success", 200);
     }
 
@@ -1475,97 +1488,71 @@ lin
         if ($u == null) {
             return $this->error('User not found.');
         }
-
-        if ($r->parent_type == 'user-photo') {
-            $acc = Administrator::find($r->parent_id_online);
-            if ($acc == null) {
-                return $this->success(null, $message = "File not found.", 200);
-            }
-
-            $visitorRecord = VisitorRecord::where(['local_id' => $r->local_id])->first();
-            if ($visitorRecord == null) {
-                $visitorRecord = new VisitorRecord();
-            }
-            $visitorRecord->enterprise_id = $u->enterprise_id;
-            $visitorRecord->created_by_id = $u->id;
-            $visitorRecord->local_id = $r->local_id;
-            $visitorRecord->visitor_id = $r->visitor_id;
-            $visitorRecord->purpose_staff_id = $r->purpose_staff_id;
-            $visitorRecord->purpose_student_id = $r->purpose_student_id;
-            $visitorRecord->name = $r->name;
-            $phone_number = Utils::prepare_phone_number($r->phone_number);
-            if (Utils::phone_number_is_valid($phone_number)) {
-                $visitorRecord->phone_number = $phone_number;
-            } else {
-                $visitorRecord->phone_number = $r->phone_number;
-            }
-            $visitorRecord->organization = $r->organization;
-            $visitorRecord->email = $r->email;
-            $visitorRecord->address = $r->address;
-            $visitorRecord->nin = $r->nin;
-            $visitorRecord->check_in_time = $r->check_in_time;
-            $visitorRecord->check_out_time = $r->check_out_time;
-            $visitorRecord->purpose = $r->purpose;
-            $visitorRecord->purpose_description = $r->purpose_description;
-            $visitorRecord->pupurpose_office = $r->purpose_office;
-            $visitorRecord->purpose_other = $r->purpose_other;
-            $visitorRecord->has_car = $r->has_car;
-            $visitorRecord->car_reg = $r->car_reg;
-            $visitorRecord->status = $r->status;
-            $active_term = $u->ent->active_term();
-            if ($active_term != null) {
-                $visitorRecord->due_term_id = $active_term->id;
-            }
+        $task = 'Updated';
 
 
-            $image = null;
-            if (!empty($_FILES)) {
-                try {
-                    //$image = Utils::upload_images_2($_FILES, true);
-                    if ($r->file('file') != null) {
-                        $image = Utils::file_upload($r->file('file'));
-                    }
-                } catch (Throwable $t) {
-                    $image = null;
-                }
-            }
-            if ($image != null) {
-                if (strlen($image) > 3) {
-                    $active_term->signature_src = $image;
-                }
-            }
-            $active_term->save(); 
 
-            return $this->success($active_term, 'Updated successfully.');
+        $visitorRecord = VisitorRecord::where(['local_id' => $r->local_id])->first();
+        if ($visitorRecord == null) {
+            $visitorRecord = new VisitorRecord();
+            $task = 'Created';
+        }
+        $visitorRecord->enterprise_id = $u->enterprise_id;
+        $visitorRecord->created_by_id = $u->id;
+        $visitorRecord->local_id = $r->local_id;
+        $visitorRecord->visitor_id = $r->visitor_id;
+        $visitorRecord->purpose_staff_id = $r->purpose_staff_id;
+        $visitorRecord->purpose_student_id = $r->purpose_student_id;
+        $visitorRecord->name = $r->name;
+        $phone_number = Utils::prepare_phone_number($r->phone_number);
+        if (Utils::phone_number_is_valid($phone_number)) {
+            $visitorRecord->phone_number = $phone_number;
+        } else {
+            $visitorRecord->phone_number = $r->phone_number;
+        }
+        $visitorRecord->organization = $r->organization;
+        $visitorRecord->email = $r->email;
+        $visitorRecord->address = $r->address;
+        $visitorRecord->nin = $r->nin;
+        $visitorRecord->check_in_time = $r->check_in_time;
+        $visitorRecord->check_out_time = $r->check_out_time;
+        $visitorRecord->purpose = $r->purpose;
+        $visitorRecord->purpose_description = $r->purpose_description;
+        $visitorRecord->purpose_office = $r->purpose_office;
+        $visitorRecord->purpose_other = $r->purpose_other;
+        $visitorRecord->has_car = $r->has_car;
+        $visitorRecord->car_reg = $r->car_reg;
+        $visitorRecord->status = $r->status;
+        $active_term = $u->ent->active_term();
+        if ($active_term != null) {
+            $visitorRecord->due_term_id = $active_term->id;
         }
 
 
-
-
-
-
-
-        /* 
-      
-        
-        $_images = [];
-        foreach ($images as $src) {
-            $img = new Image();
-            $img->administrator_id =  $administrator_id;
-            $img->src =  $src;
-            $img->thumbnail =  null;
-            $img->parent_id =  null;
-            $img->size = filesize(Utils::docs_root() . '/storage/images/' . $img->src);
-            $img->save();
-
-            $_images[] = $img;
+        $image = null;
+        if (!empty($_FILES)) {
+            try {
+                //$image = Utils::upload_images_2($_FILES, true);
+                if ($r->file('file') != null) {
+                    $image = Utils::file_upload($r->file('file'));
+                }
+            } catch (Throwable $t) {
+                $image = null;
+            }
         }
-        Utils::process_images_in_backround();
-*/
-        return $this->success(null, 'File uploaded successfully.');
+        if ($image != null) {
+            if (strlen($image) > 3) {
+                $visitorRecord->signature_src = $image;
+            }
+        }
+        try {
+            $visitorRecord->save();
+            $visitorRecord = VisitorRecord::find($visitorRecord->id);
+        } catch (\Throwable $th) {
+            return $this->error('Failed to save record because ' . $th);
+        }
 
-
-        die('upload_media');
+        return $this->success($visitorRecord, $task . ' successfully.');
     }
 
     public function upload_media(Request $r)

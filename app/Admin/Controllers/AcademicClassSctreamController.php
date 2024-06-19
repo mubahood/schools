@@ -36,6 +36,11 @@ class AcademicClassSctreamController extends AdminController
         ])
             ->orderBY('id', 'desc');
 
+        $u = Admin::user();
+        $classes =  AcademicClass::getAcademicClasses([
+            'enterprise_id' => $u->enterprise_id,
+            'academic_year_id' => $u->ent->dp_year,
+        ]);
 
         $grid->column('academic_class_id', __('Class'))
             ->display(function ($x) {
@@ -44,7 +49,8 @@ class AcademicClassSctreamController extends AdminController
                 }
                 return $this->academic_class->short_name . " - " . $this->academic_class->name_text;
             })
-            ->sortable();
+            ->sortable()
+            ->filter($classes);
 
         // $grid->disableActions();
         $grid->actions(function ($x) {
@@ -52,6 +58,10 @@ class AcademicClassSctreamController extends AdminController
             $x->disableView();
         });
         $grid->column('name', __('Stream'))->sortable();
+        $grid->column('students_count', __('Students'))
+            ->display(function ($x) {
+                return $this->studentHasClasses->count();
+            });
 
         //teacher_id
         $grid->column('teacher_id', __('Teacher'))
@@ -61,7 +71,7 @@ class AcademicClassSctreamController extends AdminController
                 }
                 return $this->teacher->name;
             })
-            ->sortable(); 
+            ->sortable();
 
         return $grid;
     }
@@ -124,7 +134,7 @@ class AcademicClassSctreamController extends AdminController
             ->options(
                 $teachers
             );
- 
+
 
         return $form;
     }
