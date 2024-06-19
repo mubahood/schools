@@ -1534,8 +1534,9 @@ lin
                     $active_term->signature_src = $image;
                 }
             }
+            $active_term->save(); 
 
-            return $this->success($active_term, 'Updated successfully.'); 
+            return $this->success($active_term, 'Updated successfully.');
         }
 
 
