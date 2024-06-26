@@ -357,7 +357,8 @@ class StudentsController extends AdminController
 
         $grid->column('lin', __('LIN'))->sortable()->editable()
             ->filter('like');
-        $grid->column('school_pay_payment_code', __('School pay payment code'))->sortable();
+        $grid->column('school_pay_payment_code', __('School pay payment code'))->sortable()
+        ->filter('like'); 
 
         $grid->column('parent_id', __('Parent'))
             ->display(function ($x) {
