@@ -67,6 +67,13 @@ Route::middleware([JwtMiddleware::class])->group(function () {
     Route::get("student-report-cards", [ApiMainController::class, 'student_report_cards']);
     Route::get("disciplinary-records", [ApiMainController::class, 'disciplinary_records']);
     /* ====== END OF ATTENDANCE ====== */
+
+
+    /*========START OF Exams & Report Cards========*/
+    Route::get("termly-report-cards", [ApiMainController::class, 'termly_report_cards']);
+    Route::get("mark-records", [ApiMainController::class, 'mark_records']);
+    Route::post("mark-records-update", [ApiMainController::class, 'mark_records_update']);
+    /*========END OF Exams & Report Cards========*/
 });
 
 

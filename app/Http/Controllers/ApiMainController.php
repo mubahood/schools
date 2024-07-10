@@ -9,6 +9,7 @@ use App\Models\Account;
 use App\Models\DisciplinaryRecord;
 use App\Models\Enterprise;
 use App\Models\Mark;
+use App\Models\MarkRecord;
 use App\Models\Participant;
 use App\Models\PassengerRecord;
 use App\Models\Post;
@@ -20,6 +21,7 @@ use App\Models\Session;
 use App\Models\StudentHasClass;
 use App\Models\StudentReportCard;
 use App\Models\Subject;
+use App\Models\TermlyReportCard;
 use App\Models\TheologyStream;
 use App\Models\Transaction;
 use App\Models\TransportRoute;
@@ -44,6 +46,95 @@ class ApiMainController extends Controller
 {
 
     use ApiResponser;
+
+
+    public function mark_records_update(Request $r)
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        $u = Administrator::find($u->id);
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        $ent = $u->ent;
+        $active_term = $ent->active_term();
+        if ($active_term == null) {
+            return $this->error('Active term not found.');
+        }
+        $record = MarkRecord::find($r->record_id);
+
+        if ($record == null) {
+            return $this->error('Record not found.');
+        }
+        $record->eot_score = $r->eot_score;
+        $record->mot_score = $r->mot_score;
+        $record->bot_score = $r->bot_score;
+        $record->remarks = $r->remarks;
+        $record->save();
+        $record = MarkRecord::find($record->id);
+        return $this->success($record, $message = "Updated Success.", 1);
+    }
+    public function mark_records()
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        $u = Administrator::find($u->id);
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        $ent = $u->ent;
+        $active_term = $ent->active_term();
+        if ($active_term == null) {
+            return $this->error('Active term not found.');
+        }
+
+        $secula_subjects = $u->get_my_subjetcs();
+        $subject_ids = [];
+        foreach ($secula_subjects as $key => $value) {
+            $subject_ids[] = $value->id;
+        }
+
+
+        $records = MarkRecord::where([
+            'enterprise_id' => $u->enterprise_id,
+            'term_id' => $active_term->id,
+        ])->whereIn('subject_id', $subject_ids)
+            ->limit(10000)->orderBy('id', 'desc')->get();
+
+        return $this->success($records, $message = "Success", 1);
+    }
+
+
+    public function termly_report_cards()
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        $u = Administrator::find($u->id);
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        $ent = $u->ent;
+        $active_term = $ent->active_term();
+        if ($active_term == null) {
+            return $this->error('Active term not found.');
+        }
+        $termly_report_card = TermlyReportCard::where([
+            'enterprise_id' => $u->enterprise_id,
+            'term_id' => $active_term->id,
+        ])->first();
+
+        $data = [];
+        if ($termly_report_card != null) {
+            $data[] = $termly_report_card;
+        }
+        return $this->success($data, $message = "Success", 1);
+    }
 
 
     public function update_guardian($id, Request $r)

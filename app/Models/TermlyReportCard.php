@@ -1068,4 +1068,12 @@ class TermlyReportCard extends Model
     {
         return $this->belongsTo(Enterprise::class);
     }
+
+    //appends for term_text
+    protected $appends = ['term_text'];
+    //getter for term_text
+    public function getTermTextAttribute()
+    {
+        return $this->term->name_text;
+    }
 }
