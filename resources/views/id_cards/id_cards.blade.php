@@ -51,10 +51,20 @@
                 echo '<div class="page-break"></div>';
             }
         @endphp
-        @include('id_cards.template-1', [
-            'user' => $user,
-        ])
-    @endforeach
+        @if ($idCard->template == 'template_1')
+            @include('id_cards.template-1', [
+                'user' => $user,
+            ])
+        @elseif ($idCard->template == 'template_2')
+            @include('id_cards.template-2', [
+                'user' => $user,
+            ])
+        @else
+            @include('id_cards.template-1', [
+                'user' => $user,
+            ])
+        @endif
+    @endforeach 
 </body>
 
 </html>

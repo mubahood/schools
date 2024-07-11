@@ -1260,4 +1260,14 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
         }
         return $student_data;
     }
+
+    //GETTER FOR current_class_text
+    public function getCurrentClassTextAttribute($x)
+    {
+        $class = AcademicClass::find($this->current_class_id);
+        if ($class == null) {
+            return 'N/A';
+        }
+        return $class->name;
+    }
 }
