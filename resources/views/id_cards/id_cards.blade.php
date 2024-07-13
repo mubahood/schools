@@ -63,6 +63,10 @@
             @include('id_cards.template-3', [
                 'user' => $user,
             ])
+        @elseif ($idCard->template == 'template_4')
+            @include('id_cards.template-4', [
+                'user' => $user,
+            ])
         @else
             @include('id_cards.template-1', [
                 'user' => $user,

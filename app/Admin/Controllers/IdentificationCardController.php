@@ -166,8 +166,8 @@ class IdentificationCardController extends AdminController
                 'template_1' => 'Template 1',
                 'template_2' => 'Template 2',
                 'template_3' => 'Template 3',
-                /* 'template_4' => 'Template 4',
-                'template_5' => 'Template 5', */
+                'template_4' => 'Template 4',
+                /* 'template_5' => 'Template 5', */
             ])->default('template_1');
 
 
