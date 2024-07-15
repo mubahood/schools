@@ -38,6 +38,7 @@ class ServiceSubscriptionController extends AdminController
         $grid = new Grid(new ServiceSubscription());
 
 
+
         $grid->export(function ($export) {
 
             $export->filename('Accounts');
@@ -77,6 +78,10 @@ class ServiceSubscriptionController extends AdminController
         if (!isset($_GET['due_term_id'])) {
             $grid->model()->where('due_term_id', $active_term);
         }
+        //where sub.status = active
+        $grid->model()->whereHas('sub', function ($q) {
+            $q->where('status', 1);
+        });
 
 
 
