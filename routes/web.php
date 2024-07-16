@@ -57,6 +57,11 @@ Route::get('identification-cards-generation', function () {
   $idCard = IdentificationCard::find($_GET['id']);
   $pdf = App::make('dompdf.wrapper');
   $ent = Enterprise::find($idCard->enterprise_id);
+  /* return view('id_cards.id_cards', [
+    'idCard' => $idCard,
+    'ent' => $ent,
+    'users' => $idCard->get_users(),
+  ]); */
   $pdf->loadHTML(view('id_cards.id_cards', [
     'idCard' => $idCard,
     'ent' => $ent,
@@ -182,7 +187,7 @@ Route::get('scheme-of-work-print', function (Request $request) {
   $items = SchemWorkItem::where([
     'subject_id' => $sub->id,
     'term_id' => $active->id
-  ])->get(); 
+  ])->get();
   $pdf = App::make('dompdf.wrapper');
   $class = AcademicClass::find($sub->academic_class_id);
   $pdf->loadHTML(view('print.scheme-of-work-print', [

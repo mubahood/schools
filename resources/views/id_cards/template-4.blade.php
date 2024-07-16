@@ -1,6 +1,11 @@
 <?php
 $width = 323;
 $height = 210;
+
+//add 8 to width and height
+// $width = $width + 8;
+// $height = $height + 8;
+
 $logo = public_path('storage/' . $user->ent->logo);
 
 //get file name
@@ -23,10 +28,10 @@ $next_year = date('Y', strtotime('+1 year'));
 
 ?>
 
-<div class="mt-2" style="">
+<div class="mt-4" style="">
     <div style="width: {{ $width }}px; 
                 height: {{ $height }}px;
-                background-color: #e8ecef;
+                background-color: #e8ecef; 
                 "
         class=" d-inline-block">
         <div style="background-color: {{ $user->ent->color }};" class="p-1">
@@ -40,9 +45,12 @@ $next_year = date('Y', strtotime('+1 year'));
                     width: {{ $width - 40 }}px;
                     text-align: center; align-content: center;
                     ">
-                        <h2 style="color: white; font-size: 18px; line-height: 17px; " class="p-1 text-center pr-3">
+                        <h2 style="color: white; font-size: 17px; line-height: 15px; " class="p-1 text-center pr-3 m-0">
                             {{ strtoupper($user->ent->name) }}
                         </h2>
+                        <p style="color: white; font-size: 14px; line-height: 12px; " class="p-0 text-center">
+                            "<i>{{ $user->ent->motto }}</i>"
+                        </p>
                     </td>
                 </tr>
             </table>
@@ -88,7 +96,7 @@ $next_year = date('Y', strtotime('+1 year'));
                             </td>
                             <td>
                                 {{-- qr code --}}
-                                <center><img src="{{ $qr_code }}" style="width: 75px;"
+                                <center><img src="{{ $qr_code }}" style="width: 65px;"
                                         class="text-center mt-1 ml-2"></center>
                             </td>
                         </tr>
@@ -98,6 +106,8 @@ $next_year = date('Y', strtotime('+1 year'));
             </tr>
         </table>
     </div>
+    &nbsp;
+    &nbsp;
     &nbsp;
     &nbsp;
     <div style="
