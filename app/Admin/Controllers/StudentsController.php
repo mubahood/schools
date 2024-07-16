@@ -692,9 +692,7 @@ class StudentsController extends AdminController
             $form->tab('SYSTEM ACCOUNT', function (Form $form) {
 
                 $form->text('email', 'Email address');
-                $form->text('username', 'Username')
-                    ->creationRules(["unique:admin_users"])
-                    ->updateRules(["unique:admin_users,username,{{id}}"]);
+                $form->text('username', 'Username');
 
                 $form->password('password', trans('admin.password'));
 

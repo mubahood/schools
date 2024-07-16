@@ -123,7 +123,7 @@ $next_year = date('Y', strtotime('+1 year'));
          height: {{ $height / 1.4 }}px;
         ">
             <p class="value text-center pt-2" style="line-height: 15px; font-size: 12px; color: black;">
-                {{ strtoupper('This card is the property of ' . $user->ent->name) }}.
+                {{ strtoupper('This card is a property of ' . $user->ent->name) }}.
             </p>
             <center><img src="{{ $qr_code }}" style="width: 80px;" class="text-center mt-0"></center>
 

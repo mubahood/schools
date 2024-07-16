@@ -170,7 +170,7 @@ $next_year = date('Y', strtotime('+1 year'));
                     font-weight: 400;
                     ">
                         <ul>
-                            <li>This card is the property of {{ $user->ent->name }}</li>
+                            <li>This card is a property of {{ $user->ent->name }}</li>
                             <li class="mt-1">If found, please contact the GUARDIAN or return to the address below.
                             </li>
                         </ul>
