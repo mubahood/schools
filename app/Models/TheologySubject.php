@@ -112,5 +112,12 @@ class TheologySubject extends Model
         }
         return $parent->name;
     }
-    protected $appends = ['name'];
+    protected $appends = ['name', 'theology_class_text'];
+
+    public function getTheologyClassTextAttribute()
+    {
+        $u = TheologyClass::find($this->theology_class_id);
+        if ($u == null) return 'N/A';
+        return strtoupper($u->short_name);
+    }
 }

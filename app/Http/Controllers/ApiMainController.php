@@ -22,7 +22,11 @@ use App\Models\StudentHasClass;
 use App\Models\StudentReportCard;
 use App\Models\Subject;
 use App\Models\TermlyReportCard;
+use App\Models\TheologyMark;
+use App\Models\TheologyMarkRecord;
 use App\Models\TheologyStream;
+use App\Models\TheologySubject;
+use App\Models\TheologyTermlyReportCard;
 use App\Models\Transaction;
 use App\Models\TransportRoute;
 use App\Models\TransportSubscription;
@@ -46,6 +50,36 @@ class ApiMainController extends Controller
 {
 
     use ApiResponser;
+
+
+    public function theology_mark_records_update(Request $r)
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        $u = Administrator::find($u->id);
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        $ent = $u->ent;
+        $active_term = $ent->active_term();
+        if ($active_term == null) {
+            return $this->error('Active term not found.');
+        }
+        $record = TheologyMarkRecord::find($r->record_id);
+
+        if ($record == null) {
+            return $this->error('Record not found.');
+        }
+        $record->eot_score = $r->eot_score;
+        $record->mot_score = $r->mot_score;
+        $record->bot_score = $r->bot_score;
+        $record->remarks = $r->remarks;
+        $record->save();
+        $record = TheologyMarkRecord::find($record->id);
+        return $this->success($record, $message = "Theology mark updated Success.", 1);
+    }
 
 
     public function mark_records_update(Request $r)
@@ -76,6 +110,40 @@ class ApiMainController extends Controller
         $record = MarkRecord::find($record->id);
         return $this->success($record, $message = "Updated Success.", 1);
     }
+
+
+    public function theology_mark_records()
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        $u = Administrator::find($u->id);
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        $ent = $u->ent;
+        $active_term = $ent->active_term();
+        if ($active_term == null) {
+            return $this->error('Active term not found.');
+        }
+
+        $secula_subjects = $u->get_my_theology_subjetcs();
+        $subject_ids = [];
+        foreach ($secula_subjects as $key => $value) {
+            $subject_ids[] = $value->id;
+        }
+
+
+        $records = TheologyMarkRecord::where([
+            'enterprise_id' => $u->enterprise_id,
+            'term_id' => $active_term->id,
+        ])->whereIn('theology_subject_id', $subject_ids)
+            ->limit(10000)->orderBy('id', 'desc')->get();
+
+        return $this->success($records, $message = "Success", 1);
+    }
+
     public function mark_records()
     {
         $u = auth('api')->user();
@@ -108,6 +176,33 @@ class ApiMainController extends Controller
         return $this->success($records, $message = "Success", 1);
     }
 
+
+    public function theology_termly_report_cards()
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        $u = Administrator::find($u->id);
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        $ent = $u->ent;
+        $active_term = $ent->active_term();
+        if ($active_term == null) {
+            return $this->error('Active term not found.');
+        }
+        $termly_report_card = TheologyTermlyReportCard::where([
+            'enterprise_id' => $u->enterprise_id,
+            'term_id' => $active_term->id,
+        ])->first();
+
+        $data = [];
+        if ($termly_report_card != null) {
+            $data[] = $termly_report_card;
+        }
+        return $this->success($data, $message = "Success", 1);
+    }
 
     public function termly_report_cards()
     {
@@ -269,6 +364,15 @@ class ApiMainController extends Controller
             return $this->error('User not found.');
         }
         return $this->success($u->get_my_all_classes(), $message = "Success", 200);
+    }
+
+    public function theology_classes()
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        return $this->success($u->get_my_theology_classes(), $message = "Success", 200);
     }
 
     public function student_report_cards()
@@ -1512,6 +1616,25 @@ lin
         $scheme_work_items = SchemWorkItem::wherein('subject_id', $subjects_ids)->get();
         return $this->success($scheme_work_items, $message = "Success", 200);
     }
+
+    public function theology_subjects()
+    {
+        $u = auth('api')->user();
+
+        // $secula_subjects = $u->get_my_subjetcs();
+        $theology_subjects = $u->get_my_theology_subjetcs();
+        $subjects = [];
+
+        foreach ($theology_subjects as $key => $value) {
+            $theology_subject = TheologySubject::find($value->id);
+            if ($theology_subject == null) {
+                continue;
+            }
+            $subjects[] = $theology_subject;
+        }
+        return $this->success($subjects, $message = "Success", 200);
+    }
+
 
     public function my_subjects()
     {

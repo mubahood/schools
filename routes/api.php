@@ -45,12 +45,14 @@ Route::middleware([JwtMiddleware::class])->group(function () {
     Route::get("users/me", [ApiAuthController::class, 'me']);
     Route::get("manifest", [ApiMainController::class, 'manifest']);
     Route::get("my-classes", [ApiMainController::class, 'classes']);
+    Route::get("theology-classes", [ApiMainController::class, 'theology_classes']);
     Route::get("class-streams", [ApiMainController::class, 'streams']);
     Route::post("update-bio/{id}", [ApiMainController::class, 'update_bio']);
     Route::post("verify-student/{id}", [ApiMainController::class, 'verify_student']);
     Route::post("update-guardian/{id}", [ApiMainController::class, 'update_guardian']);
     Route::post("session-create", [ApiMainController::class, 'session_create']);
     Route::get("my-subjects", [ApiMainController::class, 'my_subjects']);
+    Route::get("theology-subjects", [ApiMainController::class, 'theology_subjects']);
     Route::get("schemework-items", [ApiMainController::class, 'schemework_items']);
     Route::get("student-has-class", [ApiMainController::class, 'student_has_class']);
     Route::get("transactions", [ApiMainController::class, 'transactions']);
@@ -71,8 +73,11 @@ Route::middleware([JwtMiddleware::class])->group(function () {
 
     /*========START OF Exams & Report Cards========*/
     Route::get("termly-report-cards", [ApiMainController::class, 'termly_report_cards']);
+    Route::get("theology-termly-report-cards", [ApiMainController::class, 'theology_termly_report_cards']);
     Route::get("mark-records", [ApiMainController::class, 'mark_records']);
+    Route::get("theology-mark-records", [ApiMainController::class, 'theology_mark_records']);
     Route::post("mark-records-update", [ApiMainController::class, 'mark_records_update']);
+    Route::post("theology-mark-records-update", [ApiMainController::class, 'theology_mark_records_update']);
     /*========END OF Exams & Report Cards========*/
 });
 

@@ -510,13 +510,13 @@ class StudentFinancialAccountController extends AdminController
                 })->rules('required');
         }
 
-        $form->textarea('description', __('Account description'));
+        // $form->textarea('description', __('Account description'));
 
 
 
 
         $form->disableCreatingCheck();
-        $form->disableEditingCheck();
+        // $form->disableEditingCheck();
         $form->disableReset();
         $form->disableViewCheck();
 

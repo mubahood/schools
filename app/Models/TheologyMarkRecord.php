@@ -84,4 +84,31 @@ class TheologyMarkRecord extends Model
         }
         return $_grade;
     }
+
+    public function getAdministratorTextAttribute()
+    {
+        $u = Administrator::find($this->administrator_id);
+        if ($u == null) return 'N/A';
+        return $this->administrator->name;
+    }
+    /*
+'academic_class_text', 'subject_text' 
+ */
+    protected $appends = ['administrator_text', 'theology_class_text', 'theology_subject_text'];
+
+    //GETTER FOR theology_class_text
+    public function getTheologyClassTextAttribute()
+    {
+        $u = TheologyClass::find($this->theology_class_id);
+        if ($u == null) return 'N/A';
+        return $u->short_name;
+    }
+
+    //getter for theology_subject_text
+    public function getTheologySubjectTextAttribute()
+    {
+        $u = TheologySubject::find($this->theology_subject_id);
+        if ($u == null) return 'N/A';
+        return $u->name;
+    }
 }

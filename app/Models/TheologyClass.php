@@ -65,7 +65,7 @@ class TheologyClass extends Model
         return $this->belongsTo(Administrator::class, 'class_teahcer_id');
     }
     function get_class_teacher()
-    { 
+    {
         $t = Administrator::find($this->class_teahcer_id);
         if ($t == null) {
             $t = Administrator::find($this->class_teahcer_id);
@@ -104,5 +104,19 @@ class TheologyClass extends Model
     }
 
 
-    protected  $appends = ['name_text'];
+    protected  $appends = ['name_text', 'students_count'];
+
+    //getter for students_count
+    public function getStudentsCountAttribute()
+    {
+        $students = $this->get_active_students();
+
+        $count  = [];
+        try {
+            $count = count($students);
+        } catch (\Throwable $th) {
+            return 'N/A';
+        }
+        return $count;
+    }
 }
