@@ -1154,7 +1154,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
 
     public function account()
     {
-        return $this->hasOne(Account::class);
+        return $this->hasOne(Account::class, 'administrator_id');
     }
 
     public function getAccount()
