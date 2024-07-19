@@ -164,11 +164,11 @@ foreach ($r->termly_report_card->term->exams as $exam) {
         DIVISION: <b class="text-danger">{{ $r->grade }}</b> &nbsp;
 
         @if ($r->termly_report_card->display_positions == 'Yes')
-            POS IN {{ $termly_report_card->positioning_type }}: <b
+            position IN {{ $termly_report_card->positioning_type }}: <b
                 class="text-danger">{{ (int) $r->position }}</b> &nbsp;
             OUT OF: <b class="text-danger">{{ (int) $r->total_students }}</b> &nbsp;
         @elseif ($r->termly_report_card->display_positions == 'Manual')
-            position IN Class/Stream: <b class="text-danger">......</b> &nbsp;
+            position IN {{ $termly_report_card->positioning_type }}: <b class="text-danger">......</b> &nbsp;
             OUT OF: <b class="text-danger">......</b> &nbsp;
         @endif
 
@@ -253,11 +253,13 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 @endif
                 @if ($termly_report_card->reports_include_mot == 'Yes')
                     <td>{{ (int) $v->mot_score }}</td>
-                    <td>{{ $v->subject->grade_subject == 'Yes' ? $v->get_grade($grading_scale, $v->mot_score) : '-' }}</td>
+                    <td>{{ $v->subject->grade_subject == 'Yes' ? $v->get_grade($grading_scale, $v->mot_score) : '-' }}
+                    </td>
                 @endif
                 @if ($termly_report_card->reports_include_eot == 'Yes')
                     <td>{{ (int) $v->eot_score }}</td>
-                    <td>{{ $v->subject->grade_subject == 'Yes' ? $v->get_grade($grading_scale, $v->eot_score) : '-'}}</td>
+                    <td>{{ $v->subject->grade_subject == 'Yes' ? $v->get_grade($grading_scale, $v->eot_score) : '-' }}
+                    </td>
                 @endif
                 @if ($termly_report_card->positioning_method != 'Specific')
                     <td>{{ (int) $v->total_score_display }}</td>
@@ -289,8 +291,10 @@ foreach ($r->termly_report_card->term->exams as $exam) {
         </tr>
     </table>
     <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's comment:</span> <b class="comment"
-        style="font-size: 14px">{!! $termly_report_card->display_class_teacher_comments == 'Yes' ? Utils::capitalizeSentences($r->class_teacher_comment) : Utils::get_empty_spaces(135)."<br>".Utils::get_empty_spaces(183) !!}</b>
-</p>
+            style="font-size: 14px">{!! $termly_report_card->display_class_teacher_comments == 'Yes'
+                ? Utils::capitalizeSentences($r->class_teacher_comment)
+                : Utils::get_empty_spaces(135) . '<br>' . Utils::get_empty_spaces(183) !!}</b>
+    </p>
     <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's Name:</span>
         <b style="font-size: 14px" class="text-uppercase comment">{{ $class_teacher_name }}</b>,&nbsp;
         {{-- <b style="font-size: 14px"
@@ -317,7 +321,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     class="text-danger">{{ (int) $r->position }}</b> &nbsp;
                 OUT OF: <b class="text-danger">{{ (int) $r->total_students }}</b> &nbsp;
             @elseif ($r->termly_report_card->display_positions == 'Manual')
-                position IN Class/Stream: <b class="text-danger">......</b> &nbsp;
+                position IN {{ $termly_report_card->positioning_type }}: <b class="text-danger">......</b> &nbsp;
                 OUT OF: <b class="text-danger">......</b> &nbsp;
             @endif
         </div>
@@ -445,7 +449,9 @@ foreach ($r->termly_report_card->term->exams as $exam) {
 
         </table>
         <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's comment:</span> <b class="comment"
-                style="font-size: 14px">{!! $termly_report_card->display_class_teacher_comments == 'Yes' ? Utils::capitalizeSentences($tr->class_teacher_comment) : Utils::get_empty_spaces(135)."<br>".Utils::get_empty_spaces(180) !!}</b>
+                style="font-size: 14px">{!! $termly_report_card->display_class_teacher_comments == 'Yes'
+                    ? Utils::capitalizeSentences($tr->class_teacher_comment)
+                    : Utils::get_empty_spaces(135) . '<br>' . Utils::get_empty_spaces(180) !!}</b>
         </p>
         <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's Name:</span>
             <b style="font-size: 14px" class="text-uppercase comment">{{ $class_teacher_name_1 }}</b>,&nbsp;

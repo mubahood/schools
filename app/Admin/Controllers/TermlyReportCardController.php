@@ -337,11 +337,9 @@ class TermlyReportCardController extends AdminController
                 ->default('No');
             $form->radioCard('generate_positions', 'Generate positions?')
                 ->options(['Yes' => 'Yes', 'No' => 'No'])
-                ->when('Yes', function (Form $form) {
-                    $form->radio('positioning_type', 'Positioning Type')
-                        ->options(['Stream' => 'By Stream', 'Class' => 'By Class']);
-                })
                 ->default('No');
+            $form->radio('positioning_type', 'Positioning Type')
+                ->options(['Stream' => 'By Stream', 'Class' => 'By Class']);
 
 
             $form->radio('display_positions', 'Display positions on report cards?')
