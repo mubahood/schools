@@ -10,6 +10,16 @@ if (isset($items[0])) {
 if ($ent == null) {
     die('No Report card to print.');
 }
+
+$min = 0;
+$max = 5;
+$hasLimits = false;
+if (isset($min_count) && isset($max_count)) {
+    $min = $min_count;
+    $max = $max_count;
+    $hasLimits = true;
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -204,7 +214,21 @@ if ($ent == null) {
 
 
 <body>
+    <?php $count = 0; ?> 
     @foreach ($items as $item)
+        <?php
+        
+        if ($hasLimits) {
+            if ($min > $count) {
+                continue;
+            }
+            if ($max < $count) {
+                break;
+            }
+        }
+        $count++;
+        
+        ?>
         @include('report-cards.template-3.print-layout', ['r' => $item])
     @endforeach
 

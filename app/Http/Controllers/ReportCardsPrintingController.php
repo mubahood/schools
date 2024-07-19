@@ -43,6 +43,7 @@ class ReportCardsPrintingController extends Controller
             $max = (int)($_GET['max']);
         }
         $printing = ReportCardPrint::find($req->id);
+   
         if ($printing == null) {
             die("Printing not found.");
         }
@@ -102,11 +103,15 @@ class ReportCardsPrintingController extends Controller
                 'items' => $reps,
                 'ent' => $printing->enterprise,
                 'report_type' => $printing->type,
+                'min_count' => $printing->min_count,
+                'max_count' => $printing->max_count,
             ]));
         } elseif ($printing->secular_tempate == 'Template_6') {
             $pdf->loadHTML(view('report-cards.template-6.print', [
                 'items' => $items,
                 'report_type' => $printing->type,
+                'min_count' => $printing->min_count,
+                'max_count' => $printing->max_count,
             ]));
         } else {
             $pdf->loadHTML(view('report-cards.template-6.print', [

@@ -457,9 +457,8 @@ foreach ($r->termly_report_card->term->exams as $exam) {
             <b style="font-size: 14px" class="text-uppercase comment">{{ Utils::get_empty_spaces(60) }}</b>&nbsp;
             {{-- <b style="font-size: 14px"
                 class="text-uppercase">......................................................</b> --}}&nbsp;
-            <span class="text-uppercase fs-16 ">Signature:<b
-                    class="comment">{{ Utils::get_empty_spaces(40) }}</b></span>
-        </p>
+            <span class="text-uppercase fs-16 ">Signature:<b class="comment">{{ Utils::get_empty_spaces(40) }}</b></span>
+        </p>    
     @endif
 
     <hr style="background-color:  {{ $r->ent->color }}; height: 2px; 
