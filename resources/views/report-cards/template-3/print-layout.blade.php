@@ -123,7 +123,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     $avatar = $r->owner->getAvatarPath();
                 @endphp
                 @if (!str_contains($avatar, 'user.jpeg'))
-                    <img style="width: 100%;" src="{{ public_path($avatar) }}">
+                    <img style="width: 100%; height: 110;" src="{{ public_path($avatar) }}">
                 @endif
             </td>
         </tr>
