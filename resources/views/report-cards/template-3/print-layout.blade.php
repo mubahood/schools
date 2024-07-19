@@ -296,10 +296,10 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 : Utils::get_empty_spaces(135) . '<br>' . Utils::get_empty_spaces(183) !!}</b>
     </p>
     <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's Name:</span>
-        <b style="font-size: 14px" class="text-uppercase comment">{{ $class_teacher_name }}</b>,&nbsp;
+        <b style="font-size: 14px" class="text-uppercase comment">{{ Utils::get_empty_spaces(60) }}</b>&nbsp;
         {{-- <b style="font-size: 14px"
             class="text-uppercase">......................................................</b> --}}&nbsp;
-        <span class="text-uppercase fs-16 ">Signature:<b>.......................</b></span>
+        <span class="text-uppercase fs-16 ">Signature:<b class="comment">{{ Utils::get_empty_spaces(40) }}</b></span>
     </p>
 
     @if ($tr != null)
@@ -454,10 +454,11 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     : Utils::get_empty_spaces(135) . '<br>' . Utils::get_empty_spaces(180) !!}</b>
         </p>
         <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's Name:</span>
-            <b style="font-size: 14px" class="text-uppercase comment">{{ $class_teacher_name_1 }}</b>,&nbsp;
+            <b style="font-size: 14px" class="text-uppercase comment">{{ Utils::get_empty_spaces(60) }}</b>&nbsp;
             {{-- <b style="font-size: 14px"
-                class="text-uppercase">......................................................</b> --}},&nbsp;
-            <span class="text-uppercase fs-16 ">Signature:<b>...............................</b></span>
+                class="text-uppercase">......................................................</b> --}}&nbsp;
+            <span class="text-uppercase fs-16 ">Signature:<b
+                    class="comment">{{ Utils::get_empty_spaces(40) }}</b></span>
         </p>
     @endif
 
@@ -475,8 +476,8 @@ foreach ($r->termly_report_card->term->exams as $exam) {
     @endif
 
 
-    <p class="mt-2 fw-16"><span class="text-uppercase">HEAD TEACHER'S COMMENT:</span> <b class="comment"
-            style="font-size: 14px">{{ Utils::capitalizeSentences($r->head_teacher_comment) }}</b></p>
+    <p class="mt-2 fw-16"><span class="text-uppercase">HEAD TEACHER'S COMMUNICATION:</span> <b class="comment"
+            style="font-size: 14px">{{ Utils::capitalizeSentences($termly_report_card->hm_communication) }}</b></p>
     <p class="mt-2 fw-16"><span class="text-uppercase">HEAD Teacher's Name:</span> <b style="font-size: 14px"
             class="text-uppercase">{{ $hm_name }}</b>,&nbsp;
         <span class="text-uppercase fs-16 ">Signature:
