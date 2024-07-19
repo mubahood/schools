@@ -350,8 +350,6 @@ class StudentReportCardController extends AdminController
             })
             ->sortable();
         $grid->column('academic_year_id', __('Academic year'))->sortable()->hide();
-        $grid->column('term_id', __('Term id'))->hide();
-
 
         $grid->column('owner.avatar', __('Photo'))
             ->width(80)
@@ -375,7 +373,7 @@ class StudentReportCardController extends AdminController
         });
         $grid->column('academic_class_id', __('Class'))
             ->display(function () {
-                return $this->academic_class->name;
+                return $this->academic_class->name_text;
             })->sortable();
 
         $grid->column('stream_id', __('Stream'))
@@ -428,6 +426,7 @@ class StudentReportCardController extends AdminController
                 if ($t == null) {
                     return $term_id;
                 }
+
                 return $t->name_text;
             })->sortable();
         return $grid;
