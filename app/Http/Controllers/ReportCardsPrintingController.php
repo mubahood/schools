@@ -144,7 +144,10 @@ class ReportCardsPrintingController extends Controller
         $url = url('storage/files/' . $name);
         $printing->download_link = $url;
         $printing->save();
-        
+
+        $ready_for_download_text = "ready for download! LINK: " . $url;
+        return '<a href="' . $url . '">' . $ready_for_download_text . '</a>';
+
         return redirect($url);
 
         return $pdf->stream();
