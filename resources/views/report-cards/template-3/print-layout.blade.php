@@ -168,7 +168,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 class="text-danger">{{ (int) $r->position }}</b> &nbsp;
             OUT OF: <b class="text-danger">{{ (int) $r->total_students }}</b> &nbsp;
         @elseif ($r->termly_report_card->display_positions == 'Manual')
-            POS IN Class/Stream: <b class="text-danger">......</b> &nbsp;
+            position IN Class/Stream: <b class="text-danger">......</b> &nbsp;
             OUT OF: <b class="text-danger">......</b> &nbsp;
         @endif
 
@@ -317,7 +317,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     class="text-danger">{{ (int) $r->position }}</b> &nbsp;
                 OUT OF: <b class="text-danger">{{ (int) $r->total_students }}</b> &nbsp;
             @elseif ($r->termly_report_card->display_positions == 'Manual')
-                POS IN Class/Stream: <b class="text-danger">......</b> &nbsp;
+                position IN Class/Stream: <b class="text-danger">......</b> &nbsp;
                 OUT OF: <b class="text-danger">......</b> &nbsp;
             @endif
         </div>
