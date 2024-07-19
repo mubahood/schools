@@ -76,7 +76,9 @@ class ReportCardsPrintingController extends Controller
             $reps = StudentReportCard::where([
                 'termly_report_card_id' => $printing->termly_report_card_id,
                 'academic_class_id' => $printing->academic_class_id
-            ])->get();
+            ])
+                ->orderBy('id', 'asc')
+                ->get();
             foreach ($reps as $key => $r) {
                 $tr = TheologryStudentReportCard::where([
                     'student_id' => $r->student_id,
@@ -86,7 +88,7 @@ class ReportCardsPrintingController extends Controller
                     'r' => $r,
                     'tr' => $tr,
                 ];
-                break;
+                //break;
             }
         }
 
@@ -94,7 +96,6 @@ class ReportCardsPrintingController extends Controller
         if (count($items) == 0) {
             die("Nothing to print.");
         }
-
 
         if ($printing->secular_tempate == 'Template_3') {
             $pdf->loadHTML(view('report-cards.template-3.print', [
@@ -111,6 +112,8 @@ class ReportCardsPrintingController extends Controller
             $pdf->loadHTML(view('report-cards.template-6.print', [
                 'items' => $items,
                 'report_type' => $printing->type,
+                'min_count' => $printing->min_count,
+                'max_count' => $printing->max_count,
             ]));
         }
 
@@ -525,7 +528,7 @@ class ReportCardsPrintingController extends Controller
             $u->user_id = $user_id;
             $u->school_pay_account_id = $user_id;
             $u->school_pay_payment_code = $user_id;
-            $u->current_class_id = $cla->id;//CLASS ID
+            $u->current_class_id = $cla->id; //CLASS ID
             $u->username = $enterprise_id . $user_id;
             $u->password = password_hash('4321', PASSWORD_DEFAULT);
             $u->enterprise_id = $enterprise_id;

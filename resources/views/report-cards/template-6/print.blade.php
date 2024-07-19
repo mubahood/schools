@@ -2,6 +2,14 @@
 if (!isset($isBlank)) {
     $isBlank = false;
 }
+$min = 0;
+$max = 5;
+$hasLimits = false;
+if (isset($min_count) && isset($max_count)) {
+    $min = $min_count;
+    $max = $max_count;
+    $hasLimits = true;
+}
 
 $ent = null;
 if (isset($items[0])) {
@@ -12,7 +20,7 @@ if (isset($items[0])) {
     }
 }
 if ($ent == null) {
-    echo('Ent not found.');
+    echo 'Ent not found.';
     dd($items);
 }
 ?>
@@ -209,7 +217,21 @@ if ($ent == null) {
 
 
 <body>
+    <?php $count = 0; ?>
     @foreach ($items as $item)
+        <?php
+        
+        if ($hasLimits) {
+            if ($min > $count) {
+                continue;
+            }
+            if ($max < $count) {
+                break;
+            }
+        }
+        $count++;
+        
+        ?>
         @include('report-cards.template-6.print-layout', [
             'report_type' => $report_type,
             'r' => $item['r'],
