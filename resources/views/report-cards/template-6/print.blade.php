@@ -221,6 +221,7 @@ if ($ent == null) {
     @foreach ($items as $item)
         <?php
         
+        $count++;
         if ($hasLimits) {
             if ($min > $count) {
                 continue;
@@ -229,7 +230,6 @@ if ($ent == null) {
                 break;
             }
         }
-        $count++;
         
         ?>
         @include('report-cards.template-6.print-layout', [

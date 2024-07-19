@@ -214,10 +214,11 @@ if (isset($min_count) && isset($max_count)) {
 
 
 <body>
-    <?php $count = 0; ?> 
+    <?php $count = 0; ?>
     @foreach ($items as $item)
         <?php
         
+        $count++;
         if ($hasLimits) {
             if ($min > $count) {
                 continue;
@@ -226,7 +227,6 @@ if (isset($min_count) && isset($max_count)) {
                 break;
             }
         }
-        $count++;
         
         ?>
         @include('report-cards.template-3.print-layout', ['r' => $item])
