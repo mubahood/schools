@@ -289,7 +289,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
         </tr>
     </table>
     <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's comment:</span> <b class="comment"
-        style="font-size: 14px">{!! $termly_report_card->display_class_teacher_comments == 'Yes' ? Utils::capitalizeSentences($r->class_teacher_comment) : Utils::get_empty_spaces(180)."<br>".Utils::get_empty_spaces(230) !!}</b>
+        style="font-size: 14px">{!! $termly_report_card->display_class_teacher_comments == 'Yes' ? Utils::capitalizeSentences($r->class_teacher_comment) : Utils::get_empty_spaces(135)."<br>".Utils::get_empty_spaces(183) !!}</b>
 </p>
     <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's Name:</span>
         <b style="font-size: 14px" class="text-uppercase comment">{{ $class_teacher_name }}</b>,&nbsp;
@@ -445,7 +445,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
 
         </table>
         <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's comment:</span> <b class="comment"
-                style="font-size: 14px">{!! $termly_report_card->display_class_teacher_comments == 'Yes' ? Utils::capitalizeSentences($tr->class_teacher_comment) : Utils::get_empty_spaces(180)."<br>".Utils::get_empty_spaces(230) !!}</b>
+                style="font-size: 14px">{!! $termly_report_card->display_class_teacher_comments == 'Yes' ? Utils::capitalizeSentences($tr->class_teacher_comment) : Utils::get_empty_spaces(135)."<br>".Utils::get_empty_spaces(180) !!}</b>
         </p>
         <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's Name:</span>
             <b style="font-size: 14px" class="text-uppercase comment">{{ $class_teacher_name_1 }}</b>,&nbsp;
