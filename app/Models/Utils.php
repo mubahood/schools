@@ -49,6 +49,17 @@ define('COLORS',  [
 
 class Utils  extends Model
 {
+
+    //static get_empty_spaces
+    public static function get_empty_spaces($num)
+    {
+        $x = '';
+        for ($i = 0; $i < $num; $i++) {
+            $x .= '&nbsp;';
+        }
+        return $x;
+    }
+
     //0782664225
 
     //static email_is_valid
@@ -58,7 +69,7 @@ class Utils  extends Model
             return true;
         }
         return false;
-    } 
+    }
 
     public static function copy_default_grading($u)
     {

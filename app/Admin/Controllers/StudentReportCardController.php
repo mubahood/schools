@@ -421,6 +421,7 @@ class StudentReportCardController extends AdminController
         });
 
         $grid->column('is_ready', __('Ready for parent view'))->editable('select', ['No' => 'No', 'Yes' => 'Yes'])->sortable();
+        $grid->column('created_at', __('DATE'))->sortable();
         return $grid;
     }
 

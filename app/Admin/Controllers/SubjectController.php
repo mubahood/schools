@@ -35,7 +35,7 @@ class SubjectController extends AdminController
     {
 
 
-      /*   foreach (Subject::where([])->get() as $key => $s) {
+        /*   foreach (Subject::where([])->get() as $key => $s) {
             $s->demo_id = 111;
             try {
                 $s->save();
@@ -92,7 +92,7 @@ class SubjectController extends AdminController
         $grid->column('subject_name', __('SUBJECT'))
             ->display(function ($t) {
                 return $this->course->name;
-            });
+            })->sortable();
         $grid->column('academic_class_id', __('Class'))
             ->display(function ($t) {
                 if ($this->academic_class == null) {
@@ -126,6 +126,32 @@ class SubjectController extends AdminController
             1 => 'warning',
             0 => 'success',
         ]);
+
+        //grade_subject
+
+        $grid->column('grade_subject', __('Grade Subject'))->using([
+            'Yes' => 'Yes',
+            'No' => 'No',
+        ])->filter([
+            'Yes' => 'Yes',
+            'No' => 'No',
+        ])->label([
+            'Yes' => 'success',
+            'No' => 'warning',
+        ]);
+
+        /* show_in_report COL */
+        $grid->column('show_in_report', __('Show in report'))->using([
+            'Yes' => 'Yes',
+            'No' => 'No',
+        ])->filter([
+            'Yes' => 'Yes',
+            'No' => 'No',
+        ])->label([
+            'Yes' => 'success',
+            'No' => 'warning',
+        ]);
+
 
         return $grid;
     }
@@ -241,6 +267,19 @@ class SubjectController extends AdminController
             ->options([
                 0 => 'Compulsory subject',
                 1 => 'Optional subject',
+            ])->rules('required');
+        /* show_in_report */
+        $form->radio('show_in_report', 'Show in report')
+            ->options([
+                'Yes' => 'Yes',
+                'No' => 'No',
+            ])->rules('required');
+
+        /* grade_subject */
+        $form->radio('grade_subject', 'Grade subject')
+            ->options([
+                'Yes' => 'Yes',
+                'No' => 'No',
             ])->rules('required');
 
         $form->textarea('details', __('Details'));

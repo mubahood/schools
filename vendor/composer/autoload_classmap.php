@@ -126,6 +126,7 @@ return array(
     'App\\Admin\\Controllers\\TransportRouteController' => $baseDir . '/app/Admin/Controllers/TransportRouteController.php',
     'App\\Admin\\Controllers\\TransportSubscriptionController' => $baseDir . '/app/Admin/Controllers/TransportSubscriptionController.php',
     'App\\Admin\\Controllers\\TransportVehicleController' => $baseDir . '/app/Admin/Controllers/TransportVehicleController.php',
+    'App\\Admin\\Controllers\\TripController' => $baseDir . '/app/Admin/Controllers/TripController.php',
     'App\\Admin\\Controllers\\UserBatchImporterController' => $baseDir . '/app/Admin/Controllers/UserBatchImporterController.php',
     'App\\Admin\\Controllers\\UserPhotosBatchImporterController' => $baseDir . '/app/Admin/Controllers/UserPhotosBatchImporterController.php',
     'App\\Admin\\Controllers\\VisitorController' => $baseDir . '/app/Admin/Controllers/VisitorController.php',

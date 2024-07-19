@@ -124,7 +124,7 @@ class TheologyTermlyReportCardController extends AdminController
      */
     protected function form()
     {
-       /*  $tr = TheologyTermlyReportCard::find(13);
+        /*  $tr = TheologyTermlyReportCard::find(13);
         $tr->generate_class_teacher_comment = 'Yes';
         TheologyTermlyReportCard::do_generate_class_teacher_comment($tr);
         die("asone"); */
@@ -300,7 +300,11 @@ class TheologyTermlyReportCardController extends AdminController
                 })
                 ->default('No');
             $form->radioCard('display_positions', 'Display positions on report cards?')
-                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->options([
+                    'Yes' => 'System Automated Positions',
+                    'Manual' => 'Manual Positions entry space',
+                    'No' => 'Do not display positions',
+                ])
                 ->default('No');
 
 

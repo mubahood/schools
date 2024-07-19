@@ -139,6 +139,12 @@ Route::get('generate-report-card', function () {
 });
 Route::get('generate-report-cards', function () {
 
+  $temlyReport = TermlyReportCard::find($_GET['id']);
+  // TermlyReportCard::do_reports_generate($temlyReport);
+  // die('done');
+  $temlyReport->reports_generate = 'Yes';
+  $temlyReport->save();
+  dd('done');
   $i = 0;
   $reps = StudentReportCard::where(
     [
@@ -152,7 +158,25 @@ Route::get('generate-report-cards', function () {
     $url = url('storage/files/' . $rep->pdf_url);
     echo $i . ". " . $rep->owner->name . ", <a href='$url' target='_blank'>Download</a><br>";
   }
-  die();
+  die('DONE!');
+});
+
+Route::get('generate-report-cards-pdf', function () {
+
+  $i = 0;
+  $reps = StudentReportCard::where(
+    [
+      'termly_report_card_id' => $_GET['id']
+    ]
+  )->get();
+  foreach ($reps as $key => $rep) {
+    if ($rep->owner == null) continue;
+    $i++;
+    $rep->download_self();
+    $url = url('storage/files/' . $rep->pdf_url);
+    echo $i . ". " . $rep->owner->name . ", <a href='$url' target='_blank'>Download</a><br>";
+  }
+  die('DONE!');
 });
 
 Route::get('reports-finance-process', function (Request $request) {

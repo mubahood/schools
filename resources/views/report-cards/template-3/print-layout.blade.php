@@ -3,9 +3,9 @@ use App\Models\Utils;
 use App\Models\StudentHasClass;
 use App\Models\StudentHasTheologyClass;
 
-$max_bot = 30;
-$max_mot = 40;
-$max_eot = 60;
+$max_bot = 100;
+$max_mot = 100;
+$max_eot = 100;
 $tr = isset($tr) ? $tr : null;
 $ent = $r->ent;
 $owner = $r->owner;
@@ -89,13 +89,13 @@ if (!$r->owner->account->status) {
 $numFormat = new NumberFormatter('en_US', NumberFormatter::ORDINAL);
 foreach ($r->termly_report_card->term->exams as $exam) {
     if ($exam->type == 'B.O.T') {
-        $max_bot = $exam->max_mark;
+        $max_bot = $termly_report_card->bot_max;
     }
     if ($exam->type == 'M.O.T') {
-        $max_mot = $exam->max_mark;
+        $max_mot = $termly_report_card->mot_max;
     }
     if ($exam->type == 'E.O.T') {
-        $max_eot = $exam->max_mark;
+        $max_eot = $termly_report_card->eot_max;
     }
 }
 ?>
@@ -163,9 +163,13 @@ foreach ($r->termly_report_card->term->exams as $exam) {
         Aggregate: <b class="text-danger">{{ (int) $r->average_aggregates }}</b> &nbsp;
         DIVISION: <b class="text-danger">{{ $r->grade }}</b> &nbsp;
 
-        @if ($r->display_positions == 'Yes')
-            position: <b class="text-danger">{{ (int) $r->position }}</b> &nbsp;
+        @if ($r->termly_report_card->display_positions == 'Yes')
+            POS IN {{ $termly_report_card->positioning_type }}: <b
+                class="text-danger">{{ (int) $r->position }}</b> &nbsp;
             OUT OF: <b class="text-danger">{{ (int) $r->total_students }}</b> &nbsp;
+        @elseif ($r->termly_report_card->display_positions == 'Manual')
+            POS IN Class/Stream: <b class="text-danger">......</b> &nbsp;
+            OUT OF: <b class="text-danger">......</b> &nbsp;
         @endif
 
 
@@ -231,6 +235,10 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                         continue;
                     }
 
+                    if ($v->subject->show_in_report != 'Yes') {
+                        continue;
+                    }
+
                 @endphp
 
                 @php
@@ -245,15 +253,15 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 @endif
                 @if ($termly_report_card->reports_include_mot == 'Yes')
                     <td>{{ (int) $v->mot_score }}</td>
-                    <td>{{ $v->get_grade($grading_scale, $v->mot_score) }}</td>
+                    <td>{{ $v->subject->grade_subject == 'Yes' ? $v->get_grade($grading_scale, $v->mot_score) : '-' }}</td>
                 @endif
                 @if ($termly_report_card->reports_include_eot == 'Yes')
                     <td>{{ (int) $v->eot_score }}</td>
-                    <td>{{ $v->get_grade($grading_scale, $v->eot_score) }}</td>
+                    <td>{{ $v->subject->grade_subject == 'Yes' ? $v->get_grade($grading_scale, $v->eot_score) : '-'}}</td>
                 @endif
                 @if ($termly_report_card->positioning_method != 'Specific')
                     <td>{{ (int) $v->total_score_display }}</td>
-                    <td>{{ $v->aggr_name }}</td>
+                    <td>{{ $v->subject->grade_subject == 'Yes' ? $v->aggr_name : '-' }}</td>
                 @endif
                 <td class="remarks text-center">{{ $v->remarks }}</td>
                 <td class="remarks text-center">{{ $v->initials }}</td>
@@ -280,8 +288,9 @@ foreach ($r->termly_report_card->term->exams as $exam) {
             <td colspan="2"></td>
         </tr>
     </table>
-    <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's Comment:</span> <b class="comment"
-            style="font-size: 14px">{{ Utils::capitalizeSentences($r->class_teacher_comment) }}</b></p>
+    <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's comment:</span> <b class="comment"
+        style="font-size: 14px">{!! $termly_report_card->display_class_teacher_comments == 'Yes' ? Utils::capitalizeSentences($r->class_teacher_comment) : Utils::get_empty_spaces(180)."<br>".Utils::get_empty_spaces(230) !!}</b>
+</p>
     <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's Name:</span>
         <b style="font-size: 14px" class="text-uppercase comment">{{ $class_teacher_name }}</b>,&nbsp;
         {{-- <b style="font-size: 14px"
@@ -303,9 +312,13 @@ foreach ($r->termly_report_card->term->exams as $exam) {
             {{-- STREAM: <b> {{ $theo_stream_class }}&nbsp;</b> --}}
             Aggregate: <b class="text-danger">{{ (int) $tr->average_aggregates }}</b> &nbsp;
             DIVISION: <b class="text-danger">{{ $tr->grade }}</b> &nbsp;
-            @if ($tr->display_positions == 'Yes')
-                position: <b class="text-danger">{{ (int) $tr->position }}</b> &nbsp;
-                OUT OF: <b class="text-danger">{{ (int) $tr->total_students }}</b> &nbsp;
+            @if ($r->termly_report_card->display_positions == 'Yes')
+                POS IN {{ $termly_report_card->positioning_type }}: <b
+                    class="text-danger">{{ (int) $r->position }}</b> &nbsp;
+                OUT OF: <b class="text-danger">{{ (int) $r->total_students }}</b> &nbsp;
+            @elseif ($r->termly_report_card->display_positions == 'Manual')
+                POS IN Class/Stream: <b class="text-danger">......</b> &nbsp;
+                OUT OF: <b class="text-danger">......</b> &nbsp;
             @endif
         </div>
         <table class="table table-bordered marks-table p-0 m-0 w-100 mt-2">
@@ -432,7 +445,8 @@ foreach ($r->termly_report_card->term->exams as $exam) {
 
         </table>
         <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's comment:</span> <b class="comment"
-                style="font-size: 14px">{{ Utils::capitalizeSentences($tr->class_teacher_comment) }}</b></p>
+                style="font-size: 14px">{!! $termly_report_card->display_class_teacher_comments == 'Yes' ? Utils::capitalizeSentences($tr->class_teacher_comment) : Utils::get_empty_spaces(180)."<br>".Utils::get_empty_spaces(230) !!}</b>
+        </p>
         <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's Name:</span>
             <b style="font-size: 14px" class="text-uppercase comment">{{ $class_teacher_name_1 }}</b>,&nbsp;
             {{-- <b style="font-size: 14px"
@@ -445,13 +459,14 @@ foreach ($r->termly_report_card->term->exams as $exam) {
             padding: 0px; margin-bottom: 6px;   "
         class="my-3">
 
-    <p class="mt-2 fw-16"><span class="text-uppercase">Mentor's comment:</span> <b class="comment"
-            style="font-size: 14px">{{ $r->mentor_comment }}</b></p>
-    <p class="mt-2 fw-16"><span class="text-uppercase">Co-Curricular Activities comment:</span> <b class="comment"
-            style="font-size: 14px">{{ $r->sports_comment }}</b></p>
-    <p class="mt-2 fw-16"><span class="text-uppercase">Nurse's comment:</span> <b class="comment"
-            style="font-size: 14px">{{ $r->nurse_comment }}</b></p>
-
+    @if ($termly_report_card->display_class_other_comments == 'Yes')
+        <p class="mt-2 fw-16"><span class="text-uppercase">Mentor's comment:</span> <b class="comment"
+                style="font-size: 14px">{{ $r->mentor_comment }}</b></p>
+        <p class="mt-2 fw-16"><span class="text-uppercase">Co-Curricular Activities comment:</span> <b
+                class="comment" style="font-size: 14px">{{ $r->sports_comment }}</b></p>
+        <p class="mt-2 fw-16"><span class="text-uppercase">Nurse's comment:</span> <b class="comment"
+                style="font-size: 14px">{{ $r->nurse_comment }}</b></p>
+    @endif
 
 
     <p class="mt-2 fw-16"><span class="text-uppercase">HEAD TEACHER'S COMMENT:</span> <b class="comment"

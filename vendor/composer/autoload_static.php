@@ -826,6 +826,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Admin\\Controllers\\TransportRouteController' => __DIR__ . '/../..' . '/app/Admin/Controllers/TransportRouteController.php',
         'App\\Admin\\Controllers\\TransportSubscriptionController' => __DIR__ . '/../..' . '/app/Admin/Controllers/TransportSubscriptionController.php',
         'App\\Admin\\Controllers\\TransportVehicleController' => __DIR__ . '/../..' . '/app/Admin/Controllers/TransportVehicleController.php',
+        'App\\Admin\\Controllers\\TripController' => __DIR__ . '/../..' . '/app/Admin/Controllers/TripController.php',
         'App\\Admin\\Controllers\\UserBatchImporterController' => __DIR__ . '/../..' . '/app/Admin/Controllers/UserBatchImporterController.php',
         'App\\Admin\\Controllers\\UserPhotosBatchImporterController' => __DIR__ . '/../..' . '/app/Admin/Controllers/UserPhotosBatchImporterController.php',
         'App\\Admin\\Controllers\\VisitorController' => __DIR__ . '/../..' . '/app/Admin/Controllers/VisitorController.php',

@@ -54,7 +54,9 @@ class TermlyReportCardController extends AdminController
         ])->orderBy('id', 'DESC');
         $grid->column('id', __('ID'))->sortable();
         $grid->column('academic_year.name', __('Academic Year'));
-        $grid->column('term.name', __('Term'));
+        $grid->column('term.name', __('Term'))->display(function () {
+            return 'Term ' . $this->academic_year->name . " - " . $this->term->name;
+        });
 
         $grid->column('report_title', __('Report title'))->hide();
         $grid->column('marks', __('Marks'))->display(function () {
@@ -102,6 +104,35 @@ class TermlyReportCardController extends AdminController
         $grid->column('has_mid_term', __('Has mid term'))->bool()->hide();
         $grid->column('has_end_term', __('Has end term'))->bool()->hide();
 
+        /* Generate reports for which classes column will be added*/
+
+        $grid->column('classes', __('Generate Reports for Classes'))->display(function ($classes) {
+            if ($classes ==  null || !is_array($classes)) {
+                return '';
+            }
+            //display classes names seperated by comma
+            $db_classes = AcademicClass::whereIn('id', $classes)->get();
+            $text = '';
+            $isFirst = true;
+            foreach ($db_classes as $class) {
+                if (!$isFirst) {
+                    $text .= ', ';
+                }
+                $text .= $class->short_name;
+                $isFirst = false;
+            }
+            return $text;
+        });
+        //regenerate reports for selected classes button
+
+        $grid->column('regenerate', __('Regenerate REPORT'))->display(function () {
+            return '<a class="btn btn-sm btn-primary" target="_blank" href="' . url('generate-report-cards?id=' . $this->id) . '" >RE-GENERATE REPORT</a>';
+        });
+        $grid->column('regenerate-pdf', __('Regenerate PDFs'))->display(function () {
+            return '<a class="btn btn-sm btn-primary" target="_blank" href="' . url('generate-report-cards-pdf?id=' . $this->id) . '" >RE-GENERATE PDFs</a>';
+        });
+
+
         /* $grid->column('print', __('Print'))->display(function ($m) {
             $d = '<a class="btn btn-sm btn-info" target="_blank" href="' . url('generate-report-cards?id=' . $this->id) . '" >BULK PDFs GENERATE</a><br>';
             return $d;
@@ -141,9 +172,9 @@ class TermlyReportCardController extends AdminController
      * @return Form
      */
     protected function form()
-    { 
+    {
         //$x = TermlyReportCard::find(16);
-       /*  TermlyReportCard::do_generate_class_teacher_comment($x);
+        /*  TermlyReportCard::do_generate_class_teacher_comment($x);
         dd($x); */
         // $x->generate_marks = 'Yes';
         // TermlyReportCard::do_generate_marks($x);
@@ -313,9 +344,29 @@ class TermlyReportCardController extends AdminController
                 ->default('No');
 
 
-            $form->radioCard('display_positions', 'Display positions on report cards?')
-                ->options(['Yes' => 'Yes', 'No' => 'No'])
+            $form->radio('display_positions', 'Display positions on report cards?')
+                ->options([
+                    'Yes' => 'System Automated Positions',
+                    'Manual' => 'Manual Positions entry space',
+                    'No' => 'Do not display positions',
+                ])
                 ->default('No');
+            $form->radio('display_class_teacher_comments', 'Display class teacher\'s comments?')
+                ->options([
+                    'Yes' => 'System based Class Teacher\'s comments',
+                    'Manual' => 'Manual Class Teacher\'s comments entry space',
+                ])
+                ->default('No');
+            /* display_class_other_comments field*/
+            $form->radio('display_class_other_comments', 'Display class other\'s comments?')
+                ->options([
+                    'Yes' => 'Yes',
+                    'No' => 'No',
+                ])
+                ->default('No');
+
+            //class_teacher_comment
+
             $form->divider('Reports Display Settings');
             $form->radioCard('reports_who_fees_balance', 'Display fees balance?')
                 ->options(['Yes' => 'Yes', 'No' => 'No'])

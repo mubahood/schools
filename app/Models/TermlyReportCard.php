@@ -308,21 +308,10 @@ class TermlyReportCard extends Model
         }
         $grading_scale = $m->grading_scale;
         $ranges = $grading_scale->grade_ranges;
-        $graddeble = [
-            38,
-            72,
-            73,
-            38,
-            41,
-            40,
-            39,
-            52,
-        ];
+
         if ($grading_scale == null) {
             throw new Exception("Grading scale not found.", 1);
         }
-        // $m->classes = ["90", "89", "88", "87", "86", "85", "84"];
-        // $m->classes = ["84"];
 
         foreach ($m->classes as $class_id) {
             $class = AcademicClass::find(((int)($class_id)));
@@ -330,6 +319,7 @@ class TermlyReportCard extends Model
                 throw new Exception("Class not found.", 1);
                 continue;
             }
+
             foreach ($class->students as $key => $student_has_class) {
                 $student = $student_has_class->student;
                 if ($student == null) {
@@ -368,6 +358,13 @@ class TermlyReportCard extends Model
                 $_total_aggregates = 0;
 
                 foreach ($marks as $mark) {
+                    if ($mark->subject == null) {
+                        continue;
+                    }
+                    if ($mark->subject->show_in_report != 'Yes') {
+                        continue;
+                    }
+
                     $total_max_marks = 0;
                     $total_scored_marks = 0;
 
@@ -408,13 +405,8 @@ class TermlyReportCard extends Model
                     $mark->total_score_display = $average_mark;
                     $mark->remarks = Utils::get_automaic_mark_remarks($mark->total_score_display);
 
-                    $sub = Subject::find($mark->subject_id);
 
-                    if ($sub == null) {
-                        continue;
-                    }
-
-                    if (((int)$sub->is_optional) == 1) {
+                    if ($mark->subject->grade_subject != 'Yes') {
                         $mark->aggr_value = 0;
                         $mark->aggr_name = '-';
                         $mark->save();
