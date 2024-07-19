@@ -422,6 +422,14 @@ class StudentReportCardController extends AdminController
 
         $grid->column('is_ready', __('Ready for parent view'))->editable('select', ['No' => 'No', 'Yes' => 'Yes'])->sortable();
         $grid->column('created_at', __('DATE'))->sortable();
+        $grid->column('term_id', __('Term'))
+            ->display(function ($term_id) {
+                $t = Term::find($term_id);
+                if ($t == null) {
+                    return $term_id;
+                }
+                return $t->name_text;
+            })->sortable();
         return $grid;
     }
 
