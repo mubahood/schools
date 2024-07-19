@@ -80,13 +80,20 @@ class ReportCardPrintController extends AdminController
         $grid->column('min_count', __('Range'))->display(function ($f) {
             return $this->min_count . " - " . $this->max_count;
         })->sortable();
-        
+
         $grid->column('print', __('PRINT'))
             ->display(function ($f) {
                 $url = url("/report-card-printings?id=$this->id");
                 return "<a href='$url' target='_blank' class='btn btn-primary'>Print</a>";
             });
+        //download_link download link column
 
+        $grid->column('download_link', __('Download Link'))->display(function ($f) {
+            if ($f == null || strlen($f) < 5) {
+                return "N/A";
+            }
+            return "<a href='$f' target='_blank' class='btn btn-primary'>Download File</a>";
+        })->sortable();
 
         return $grid;
     }
@@ -197,6 +204,7 @@ class ReportCardPrintController extends AdminController
 
         $form->decimal('min_count', __('PRINT RANGE FROM :'))->default(0)->rules('required');
         $form->decimal('max_count', __('PRINT RANGE TO: '))->default(10)->rules('required');
+
 
         return $form;
     }

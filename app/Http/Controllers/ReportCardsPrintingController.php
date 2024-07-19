@@ -43,7 +43,7 @@ class ReportCardsPrintingController extends Controller
             $max = (int)($_GET['max']);
         }
         $printing = ReportCardPrint::find($req->id);
-   
+
         if ($printing == null) {
             die("Printing not found.");
         }
@@ -93,6 +93,7 @@ class ReportCardsPrintingController extends Controller
             }
         }
 
+
         //check if $items is empty
         if (count($items) == 0) {
             die("Nothing to print.");
@@ -122,6 +123,29 @@ class ReportCardsPrintingController extends Controller
             ]));
         }
 
+
+        $name = $printing->title . '-' . $printing->min_count . $printing->max_count . $termly_report_card->name_text;
+        $name = str_replace(' ', '_', $name);
+        $name = $name . '.pdf';
+        $store_file_path = public_path('storage/files/' . $name);
+
+        //check if file exists
+        if (file_exists($store_file_path)) {
+            unlink($store_file_path);
+        }
+
+        $output = $pdf->output();
+        try {
+            file_put_contents($store_file_path, $output);
+        } catch (\Exception $e) {
+            die($e->getMessage());
+        }
+
+        $url = url('storage/files/' . $name);
+        $printing->download_link = $url;
+        $printing->save();
+        
+        return redirect($url);
 
         return $pdf->stream();
 
