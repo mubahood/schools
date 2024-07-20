@@ -81,10 +81,10 @@ class ReportCardPrintController extends AdminController
             return $this->min_count . " - " . $this->max_count;
         })->sortable();
 
-        $grid->column('print', __('PRINT'))
+        $grid->column('print', __('GENERATE'))
             ->display(function ($f) {
                 $url = url("/report-card-printings?id=$this->id");
-                return "<a href='$url' target='_blank' class='btn btn-primary'>Print</a>";
+                return "<a href='$url' target='_blank' class='btn btn-primary'>GENERATE REPORTs</a>";
             });
         //download_link download link column
 

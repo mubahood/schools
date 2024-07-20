@@ -403,7 +403,7 @@ class StudentReportCardController extends AdminController
 
 
 
-        $grid->column('print', __('Print'))->display(function ($m) {
+        $grid->column('print', __('GENERATE'))->display(function ($m) {
             $d = '<a class="btn btn-sm btn-primary" target="_blank" href="' . url('print?id=' . $this->id) . '" >PRINT</a><br>';
             $d .= '<a class="btn btn-sm btn-info" target="_blank" href="' . url('generate-report-card?id=' . $this->id) . '" >GENERATE PDF NOW</a><br>';
             if (
