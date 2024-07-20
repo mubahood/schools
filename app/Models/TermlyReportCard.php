@@ -322,6 +322,9 @@ class TermlyReportCard extends Model
 
             foreach ($class->students as $key => $student_has_class) {
                 $student = $student_has_class->student;
+                /* if($student->student_id != 7669){
+                    continue;
+                } */
                 if ($student == null) {
                     continue;
                 }
@@ -398,12 +401,14 @@ class TermlyReportCard extends Model
                             throw new Exception("Total max marks is zero.", 1);
                         }
                     }
-
-                    $average_mark = ($total_scored_marks / $total_max_marks) * 100;
+ 
+                    $average_mark = $total_scored_marks;//($total_scored_marks / $total_max_marks) * 100;
                     $average_mark = (int)($average_mark);
                     $mark->total_score = $total_scored_marks;
                     $mark->total_score_display = $average_mark;
                     $mark->remarks = Utils::get_automaic_mark_remarks($mark->total_score_display);
+                    //dd($average_mark."-".$total_scored_marks);
+                    //student_id=2570
 
 
                     if ($mark->subject->grade_subject != 'Yes') {

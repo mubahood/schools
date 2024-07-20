@@ -140,8 +140,8 @@ Route::get('generate-report-card', function () {
 Route::get('generate-report-cards', function () {
 
   $temlyReport = TermlyReportCard::find($_GET['id']);
-  // TermlyReportCard::do_reports_generate($temlyReport);
-  // die('done');
+  TermlyReportCard::do_reports_generate($temlyReport);
+  die('done');
   $temlyReport->reports_generate = 'Yes';
   $temlyReport->save();
   dd('done');
