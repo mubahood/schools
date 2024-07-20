@@ -284,7 +284,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 <th></th>
             @endif
             @if ($termly_report_card->positioning_method != 'Specific')
-                <td class="text-center"><b>{{ $r->total_marks }}</b></td>
+                <td class="text-center"><b>{{ /* $r->total_marks */ }}</b></td>
                 <td><b>{{ $r->total_aggregates }}</b></td>
             @endif
             <td colspan="2"></td>
@@ -441,7 +441,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     <th></th>
                 @endif
                 @if ($termly_report_card->positioning_method != 'Specific')
-                    <td class="text-center"><b>{{ $tr->total_marks }}</b></td>
+                    <td class="text-center"><b>{{ /* $tr->total_marks */ }}</b></td>
                     <td><b>{{ $tr->total_aggregates }}</b></td>
                 @endif
                 <td colspan="2"></td>
