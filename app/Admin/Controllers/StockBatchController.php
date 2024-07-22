@@ -42,6 +42,17 @@ class StockBatchController extends AdminController
                 StockItemCategory::all()
                     ->pluck('name', 'id')
             );
+
+            $terms = [];
+            foreach (Term::where(
+                'enterprise_id',
+                Admin::user()->enterprise_id
+            )->orderBy('id', 'desc')->get() as $key => $term) {
+                $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
+            }
+
+            $filter->equal('due_term_id', 'Filter by term')
+                ->select($terms);
         });
 
 
@@ -67,6 +78,22 @@ class StockBatchController extends AdminController
                 'enterprise_id' => Admin::user()->enterprise_id,
             ])
                 ->orderBy('id', 'Desc');
+        }
+
+
+        $terms = [];
+        $active_term = 0;
+        foreach (Term::where(
+            'enterprise_id',
+            Admin::user()->enterprise_id
+        )->orderBy('id', 'desc')->get() as $key => $term) {
+            $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
+            if ($term->is_active) {
+                $active_term = $term->id;
+            }
+        }
+        if (!isset($_GET['term_id'])) {
+            $grid->model()->where('term_id', $active_term);
         }
         $grid->disableBatchActions();
         $grid->column('id', __('Batch Number'))->sortable();
@@ -121,7 +148,13 @@ class StockBatchController extends AdminController
 
         $grid->column('photo', __('Photo'))->hide();
         $grid->column('fund_requisition_id', __('Requisition form ID'))->hide();
-
+        $grid->column('term_id', __('Due term'))->display(function ($x) {
+            $t = Term::find($x);
+            if ($t == null) {
+                return "N/A";
+            }
+            return 'Term ' . $t->name;
+        })->sortable();
         return $grid;
     }
 

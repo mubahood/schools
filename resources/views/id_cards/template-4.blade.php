@@ -92,7 +92,7 @@ $next_year = date('Y', strtotime('+1 year'));
                                 <p class="label mt-1">{{ strtoupper($user->user_type) }} NUMBER</p>
                                 <p class="value">{{ strtoupper($user->user_number) }}</p>
                                 <p class="label">DATE OF EXPIRY</p>
-                                <p class="value">{{ '31-DEC-' . $current_year }}</p>
+                                <p class="value">{{ '31-DEC-' . ($current_year+1) }}</p>
                             </td>
                             <td>
                                 {{-- qr code --}}

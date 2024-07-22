@@ -105,6 +105,18 @@ class StockRecordController extends AdminController
 
             $filter->equal('stock_item_category_id', 'Stock category')->select($cats);
 
+            $terms = [];
+            foreach (Term::where(
+                'enterprise_id',
+                Admin::user()->enterprise_id
+            )->orderBy('id', 'desc')->get() as $key => $term) {
+                $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
+            }
+
+            $filter->equal('due_term_id', 'Filter by term')
+                ->select($terms);
+ 
+
 
             $filter->between('record_date', 'Date')->date();
         });
@@ -154,6 +166,13 @@ class StockRecordController extends AdminController
 
 
         $grid->column('description', __('Description'))->hide();
+        $grid->column('due_term_id', __('Due term'))->display(function ($x) {
+            $t = Term::find($x);
+            if ($t == null) {
+                return "N/A";
+            }
+            return 'Term ' . $t->name;
+        })->sortable();
 
         return $grid;
     }
