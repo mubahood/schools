@@ -35,11 +35,11 @@ class StockRecordController extends AdminController
         //set max time
         set_time_limit(0);
         //set max memory
-        ini_set('memory_limit', '1024M'); 
-        foreach (StockRecord::all() as $key => $value) {
+        ini_set('memory_limit', '1024M');
+        foreach (StockRecord::where('quanity', '>', 0) as $key => $value) {
             //$value->
             $value->description .= ".";
-            $value->save(); 
+            $value->save();
         }
         //Utils::reset_account_names();
         //die("as");
@@ -124,7 +124,7 @@ class StockRecordController extends AdminController
 
             $filter->equal('due_term_id', 'Filter by term')
                 ->select($terms);
-            
+
             //stock_batch_id
             $ajax_url = url(
                 '/api/ajax?'
@@ -139,7 +139,7 @@ class StockRecordController extends AdminController
                     if ($a) {
                         return [$a->id => $a->cat->name . " Stock ID #" . $a->id];
                     }
-                })->ajax($ajax_url);  
+                })->ajax($ajax_url);
 
 
             $filter->between('record_date', 'Date')->date();
@@ -289,7 +289,7 @@ class StockRecordController extends AdminController
         }
 
 
-        $form->datetime('record_date', __('Date'))->rules('required'); 
+        $form->datetime('record_date', __('Date'))->rules('required');
 
 
         $u = Admin::user();
