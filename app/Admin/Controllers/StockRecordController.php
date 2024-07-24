@@ -36,7 +36,7 @@ class StockRecordController extends AdminController
         set_time_limit(0);
         //set max memory
         ini_set('memory_limit', '1024M');
-        foreach (StockRecord::where('quanity', '>', 0) as $key => $value) {
+        foreach (StockRecord::where('quanity', '>', 0)->get() as $key => $value) {
             //$value->
             if ($value->description == null) {
                 $value->description = "";
