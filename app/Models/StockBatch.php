@@ -70,4 +70,14 @@ class StockBatch extends Model
     {
         return $this->belongsTo(Term::class);
     }
+
+    //update balance
+    public  function update_balance()
+    {
+        $sum_records = StockRecord::where([
+            'stock_batch_id' => $this->id
+        ])->sum('quanity');
+        $this->current_quantity = $this->original_quantity + $sum_records;
+        $this->save();
+    }
 }

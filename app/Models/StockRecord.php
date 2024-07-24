@@ -16,6 +16,11 @@ class StockRecord extends Model
         parent::boot();
 
         self::created(function ($m) {
+            $batch = StockBatch::find($m->stock_batch_id);
+            if ($batch == null) {
+                die("Sock batch not found");
+            }
+            $batch->update_balance();
             StockItemCategory::update_quantity($m->enterprise_id);
         });
 
@@ -23,6 +28,15 @@ class StockRecord extends Model
             StockItemCategory::update_quantity($m->enterprise_id);
         });
 
+        self::updating(function ($m) {
+            if (strtoupper($m->type) == 'IN') {
+                $m->quanity = abs($m->quanity);
+            } else {
+                $m->quanity = abs($m->quanity);
+                $m->quanity = $m->quanity * -1;
+            }
+            return $m;
+        });
         self::creating(function ($m) {
 
             $batch = StockBatch::find($m->stock_batch_id);
@@ -34,10 +48,18 @@ class StockRecord extends Model
                 die("Issufitient amount of stock available.");
             }
 
-            $batch->current_quantity -= $m->quanity;
-            $batch->save();
+            /*   $batch->current_quantity -= $m->quanity;
+            $batch->save(); */
 
             $m->stock_item_category_id = $batch->cat->id;
+
+            if (strtoupper($m->type) == 'IN') {
+                $m->quanity = abs($m->quanity);
+            } else {
+                $m->quanity = abs($m->quanity);
+                $m->quanity = $m->quanity * -1;
+            }
+
             return $m;
         });
     }

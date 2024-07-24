@@ -23,7 +23,7 @@ class StockRecordController extends AdminController
      *
      * @var string
      */
-    protected $title = 'Stock out records';
+    protected $title = 'Stock records';
 
     /**
      * Make a grid builder.
@@ -32,6 +32,15 @@ class StockRecordController extends AdminController
      */
     protected function grid()
     {
+        //set max time
+        set_time_limit(0);
+        //set max memory
+        ini_set('memory_limit', '1024M'); 
+        foreach (StockRecord::all() as $key => $value) {
+            //$value->
+            $value->description .= ".";
+            $value->save(); 
+        }
         //Utils::reset_account_names();
         //die("as");
         $grid = new Grid(new StockRecord());
@@ -115,7 +124,22 @@ class StockRecordController extends AdminController
 
             $filter->equal('due_term_id', 'Filter by term')
                 ->select($terms);
- 
+            
+            //stock_batch_id
+            $ajax_url = url(
+                '/api/ajax?'
+                    . 'enterprise_id=' . $u->enterprise_id
+                    . "&search_by_1=name"
+                    . "&search_by_2=id"
+                    . "&model=StockBatch"
+            );
+            $filter->equal('stock_batch_id', 'Filter by stock batch')
+                ->select(function ($id) {
+                    $a = StockBatch::find($id);
+                    if ($a) {
+                        return [$a->id => $a->cat->name . " Stock ID #" . $a->id];
+                    }
+                })->ajax($ajax_url);  
 
 
             $filter->between('record_date', 'Date')->date();
@@ -149,6 +173,16 @@ class StockRecordController extends AdminController
             ->display(function () {
                 return $this->batch->cat->name;
             })->sortable();
+        //type
+        $grid->column('type', __('Type'))
+            ->label([
+                'IN' => 'success',
+                'OUT' => 'danger',
+            ])->sortable()
+            ->filter([
+                'IN' => 'IN',
+                'OUT' => 'OUT',
+            ]);
 
 
         if (Admin::user()->isRole('admin')) {
@@ -215,7 +249,7 @@ class StockRecordController extends AdminController
         $form->hidden('due_term_id')->default($due_term->id)->value($due_term->id);
         // due_term_id
 
-        $form->datetime('record_date', __('Date'))->rules('required');
+
 
         $form->hidden('enterprise_id')->rules('required')->default(Admin::user()->enterprise_id)
             ->value(Admin::user()->enterprise_id);
@@ -233,9 +267,29 @@ class StockRecordController extends AdminController
             $cats[$val->id] = $val->cat->name . " " . number_format($val->current_quantity) . " $p - STOCK ID #{$val->id}";
         }
 
-        $form->select('stock_batch_id', 'Stock batch')
-            ->options($cats)->rules('required');
+        if ($form->isCreating()) {
+            $stock_batch_id = null;
+            if (isset($_GET['stock_batch_id'])) {
+                $stock_batch_id = $_GET['stock_batch_id'];
+            }
+            $form->select('stock_batch_id', 'Stock batch')
+                ->options($cats)->rules('required')
+                ->default($stock_batch_id);
+            $form->radio('type', 'Type')->options([
+                'IN' => 'IN',
+                'OUT' => 'OUT',
+            ])->rules('required')->required();
+        } else {
+            $form->select('stock_batch_id', 'Stock batch')
+                ->options($cats)->readonly()->rules('required');
+            $form->select('type', 'Type')->options([
+                'IN' => 'IN',
+                'OUT' => 'OUT',
+            ])->readonly()->required();
+        }
 
+
+        $form->datetime('record_date', __('Date'))->rules('required'); 
 
 
         $u = Admin::user();

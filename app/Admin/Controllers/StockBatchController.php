@@ -33,6 +33,8 @@ class StockBatchController extends AdminController
     {
         $grid = new Grid(new StockBatch());
 
+       
+
 
         $grid->filter(function ($filter) {
             // Remove the default id filter
@@ -155,6 +157,12 @@ class StockBatchController extends AdminController
             }
             return 'Term ' . $t->name;
         })->sortable();
+        $grid->column('record', __('Records'))->display(function () {
+            $add_recordUrl = admin_url('stock-records/create?stock_batch_id=' . $this->id);
+            $view_recordUrl = admin_url('stock-records?stock_batch_id=' . $this->id);
+            return "<a target='_blank' href='$add_recordUrl' class='btn btn-xs btn-success'>Add record</a> <a target='_blank' href='$view_recordUrl' class='btn btn-xs btn-primary'>View records</a>";
+        });
+        
         return $grid;
     }
 
