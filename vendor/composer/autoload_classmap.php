@@ -187,6 +187,7 @@ return array(
     'App\\Models\\Activity' => $baseDir . '/app/Models/Activity.php',
     'App\\Models\\AdminRole' => $baseDir . '/app/Models/AdminRole.php',
     'App\\Models\\AdminRoleUser' => $baseDir . '/app/Models/AdminRoleUser.php',
+    'App\\Models\\BatchServiceSubscription' => $baseDir . '/app/Models/BatchServiceSubscription.php',
     'App\\Models\\Book' => $baseDir . '/app/Models/Book.php',
     'App\\Models\\BookAuthor' => $baseDir . '/app/Models/BookAuthor.php',
     'App\\Models\\BookBorrow' => $baseDir . '/app/Models/BookBorrow.php',

@@ -33,7 +33,7 @@ class StockRecordController extends AdminController
     protected function grid()
     {
         //set max time
-        set_time_limit(0);
+        /* set_time_limit(0);
         //set max memory
         ini_set('memory_limit', '1024M');
         foreach (StockRecord::where('quanity', '>', 0)->get() as $key => $value) {
@@ -44,7 +44,7 @@ class StockRecordController extends AdminController
                 $value->description .= ".";
             }
             $value->save();
-        }
+        } */
         //Utils::reset_account_names();
         //die("as");
         $grid = new Grid(new StockRecord());

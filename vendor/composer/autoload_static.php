@@ -887,6 +887,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Models\\Activity' => __DIR__ . '/../..' . '/app/Models/Activity.php',
         'App\\Models\\AdminRole' => __DIR__ . '/../..' . '/app/Models/AdminRole.php',
         'App\\Models\\AdminRoleUser' => __DIR__ . '/../..' . '/app/Models/AdminRoleUser.php',
+        'App\\Models\\BatchServiceSubscription' => __DIR__ . '/../..' . '/app/Models/BatchServiceSubscription.php',
         'App\\Models\\Book' => __DIR__ . '/../..' . '/app/Models/Book.php',
         'App\\Models\\BookAuthor' => __DIR__ . '/../..' . '/app/Models/BookAuthor.php',
         'App\\Models\\BookBorrow' => __DIR__ . '/../..' . '/app/Models/BookBorrow.php',

@@ -42,7 +42,7 @@ class ServiceSubscription extends Model
                 'service_id' => $m->service_id,
                 'administrator_id' => $m->administrator_id,
                 'due_term_id' => $m->due_term_id,
-            ])->first(); 
+            ])->first();
             if ($s != null) {
                 throw new Exception("This user is already subscribed to this service in this term.", 1);
             }
@@ -58,6 +58,12 @@ class ServiceSubscription extends Model
         });
 
 
+        self::deleting(function ($m) {
+            //service_subscription_id delete transport_subscription
+            TransportSubscription::where([
+                'service_subscription_id' => $m->id,
+            ])->delete(); 
+        });
         self::deleting(function ($m) {
 
             $term = Term::find($m->due_term_id);

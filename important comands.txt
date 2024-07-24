@@ -10,9 +10,10 @@ php artisan make:migration slot
 
 
 
-php artisan admin:make TripController --model=App\\Models\\Trip
 
-php artisan make:model VisitorRecord -m
+php artisan admin:make BatchServiceSubscriptionController --model=App\\Models\\BatchServiceSubscription
+
+php artisan make:model BatchServiceSubscription -m
 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
 
 git config --global user.name "mubahood"
@@ -31,44 +32,3 @@ mrif02004_mobi_save
 ssh -p 20002 mrif02004@137.63.168.25 
 
 /home/mrif02004/web/mobi-save.muni.ac.ug/public_html 
-
-
-
-///access
-
-
-<IfModule mod_rewrite.c>
-<IfModule mod_negotiation.c>
-    Options -MultiViews
-</IfModule>
-
-RewriteEngine On
-# Exclude directory from rewriting
-RewriteRule ^(public/) - [L]
-
-RewriteCond %{REQUEST_FILENAME} -d [OR]
-RewriteCond %{REQUEST_FILENAME} -f
-RewriteRule ^ ^$1 [N] 
-
-RewriteCond %{REQUEST_URI} (\.\w+$) [NC]
-RewriteRule ^(.*)$ public/$1
-
-RewriteEngine On
-RewriteCond %{HTTPS} !=on
-RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301,NE] 
-
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^ server.php
-</IfModule>
-RewriteCond %{HTTP_HOST} ^nakalokess\.schooldynamics\.ug$
-RewriteRule ^/?$ "https\:\/\/nakalokess\.schooldynamics\.ug\/" [R=301,L]
-RewriteCond %{HTTP_HOST} ^emiratescs\.schooldynamics\.ug$
-RewriteRule ^/?$ "https\:\/\/emiratescs\.schooldynamics\.ug\/" [R=301,L]
-
-# php -- BEGIN cPanel-generated handler, do not edit
-# Set the “ea-php82” package as the default “PHP” programming language.
-<IfModule mime_module>
-  AddHandler application/x-httpd-ea-php82___lsphp .php .php8 .phtml
-</IfModule>
-# php -- END cPanel-generated handler, do not edit
