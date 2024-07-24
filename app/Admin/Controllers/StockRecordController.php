@@ -38,7 +38,11 @@ class StockRecordController extends AdminController
         ini_set('memory_limit', '1024M');
         foreach (StockRecord::where('quanity', '>', 0) as $key => $value) {
             //$value->
-            $value->description .= ".";
+            if ($value->description == null) {
+                $value->description = "";
+            } else {
+                $value->description .= ".";
+            }
             $value->save();
         }
         //Utils::reset_account_names();
