@@ -27,15 +27,16 @@ class TermController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Term());
+        $grid->disableCreateButton();
         $u = Admin::user();
         $active_year = AcademicYear::where([
             'enterprise_id' => $u->enterprise_id,
             'is_active' => 1,
         ])->first();
-        if($active_year == null){
+        if ($active_year == null) {
             admin_toastr("No active academic year found. Please set an active academic year first.", 'error');
             return redirect()->route('admin.academic-years.index');
-        } 
+        }
         $grid->model()
             ->orderBy('id', 'Desc')
             ->where(
@@ -116,7 +117,7 @@ class TermController extends AdminController
             ->options(
                 AcademicYear::where([
                     'enterprise_id' => $u->enterprise_id,
-/*                     'is_active' => 1, */
+                    /*                     'is_active' => 1, */
                 ])->get()
                     ->pluck('name', 'id')
             )->rules('required');

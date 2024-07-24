@@ -24,6 +24,7 @@ class Term extends Model
     {
         parent::boot();
         self::deleting(function ($m) {
+            throw new \Exception("Cannot delete term.");
         });
         self::creating(function ($m) {
             $_m_1 = Term::where([
