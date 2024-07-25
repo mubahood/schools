@@ -201,7 +201,17 @@ class StockBatchController extends AdminController
         $form = new Form(new StockBatch());
 
         $u = Auth::user();
-        $form->date('purchase_date', __('Date'))->rules('required');
+
+        $date_of_last_rec = null;
+        $last_rec = StockBatch::where([
+            'enterprise_id' => $u->enterprise_id
+        ])->orderBy('id', 'desc')->first();
+        if ($last_rec != null) {
+            $date_of_last_rec = $last_rec->purchase_date;
+        }
+
+        $form->date('purchase_date', __('Date'))->rules('required')
+            ->default($date_of_last_rec);
         $term = $u->ent->active_term();
         $form->select('term_id', "Due term")
             ->options(Term::where([
@@ -212,6 +222,7 @@ class StockBatchController extends AdminController
                 ->pluck('name_text', 'id'))
             ->default($term->id)
             ->rules('required');
+
 
 
         $form->divider();

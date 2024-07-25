@@ -162,10 +162,10 @@ class StockRecordController extends AdminController
         $grid->column('stock_batch_id', __('Stock batch'))
             ->hide()
             ->display(function () {
-                if($this->batch == null){
+                if ($this->batch == null) {
                     return "N/A";
-                } 
-                if($this->batch->cat == null){
+                }
+                if ($this->batch->cat == null) {
                     return "N/A";
                 }
                 return $this->batch->cat->name . " Stock ID #" . $this->batch->id;
@@ -173,7 +173,7 @@ class StockRecordController extends AdminController
 
         $grid->column('quanity', __('Quanity'))
             ->display(function ($x) {
-                if($this->cat == null){
+                if ($this->cat == null) {
                     $this->delete();
                     return "N/A";
                 }
@@ -303,7 +303,17 @@ class StockRecordController extends AdminController
         }
 
 
-        $form->datetime('record_date', __('Date'))->rules('required');
+        $purchase_date = null;
+        $last_rec = StockRecord::where([
+            'enterprise_id' => $u->enterprise_id
+        ])->orderBy('id', 'desc')->first();
+        if ($last_rec != null) {
+            $purchase_date = $last_rec->purchase_date;
+        }
+
+
+        $form->datetime('record_date', __('Date'))->rules('required')
+            ->default($purchase_date);
 
 
         $u = Admin::user();
