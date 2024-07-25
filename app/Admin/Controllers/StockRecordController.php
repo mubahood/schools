@@ -48,7 +48,7 @@ class StockRecordController extends AdminController
         //Utils::reset_account_names();
         //die("as");
         $grid = new Grid(new StockRecord());
-        $grid->disableBatchActions();
+        // $grid->disableBatchActions();
 
 
 
@@ -78,7 +78,7 @@ class StockRecordController extends AdminController
             }
         }
         if (!isset($_GET['due_term_id'])) {
-            $grid->model()->where('due_term_id', $active_term);
+            //$grid->model()->where('due_term_id', $active_term);
         }
 
 

@@ -33,7 +33,7 @@ class StockBatchController extends AdminController
     {
         $grid = new Grid(new StockBatch());
 
-       
+
 
 
         $grid->filter(function ($filter) {
@@ -54,7 +54,7 @@ class StockBatchController extends AdminController
             }
 
             $filter->equal('term_id', 'Filter by term')
-                ->select($terms); 
+                ->select($terms);
         });
 
 
@@ -95,7 +95,7 @@ class StockBatchController extends AdminController
             }
         }
         if (!isset($_GET['term_id'])) {
-            $grid->model()->where('term_id', $active_term);
+            //$grid->model()->where('term_id', $active_term);
         }
         $grid->disableBatchActions();
         $grid->column('id', __('Batch Number'))->sortable();
@@ -162,7 +162,7 @@ class StockBatchController extends AdminController
             $view_recordUrl = admin_url('stock-records?stock_batch_id=' . $this->id);
             return "<a target='_blank' href='$add_recordUrl' class='btn btn-xs btn-success'>Add record</a> <a target='_blank' href='$view_recordUrl' class='btn btn-xs btn-primary'>View records</a>";
         });
-        
+
         return $grid;
     }
 
