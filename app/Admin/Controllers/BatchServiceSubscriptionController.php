@@ -20,7 +20,7 @@ class BatchServiceSubscriptionController extends AdminController
      *
      * @var string
      */
-    protected $title = 'BatchServiceSubscription';
+    protected $title = 'Batch Service Subscriptions';
 
     /**
      * Make a grid builder.
@@ -49,6 +49,12 @@ class BatchServiceSubscriptionController extends AdminController
         $grid->column('administrators', __('Administrators'));
         $grid->column('is_processed', __('Is processed'));
         $grid->column('processed_notes', __('Processed notes'));
+        $grid->column('processed_button', 'Processed')->display(function () {
+            if($this->is_processed == 'Yes'){
+                return "<span class='badge badge-success'>Processed</span>";
+            }
+            return "<a target='_blank' href='process-batch-service-subscriptions?id=" . $this->id . "' class='btn btn-primary'>Process</a>";
+        });
 
         return $grid;
     }

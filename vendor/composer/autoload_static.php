@@ -726,6 +726,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Admin\\Controllers\\AccountParentController' => __DIR__ . '/../..' . '/app/Admin/Controllers/AccountParentController.php',
         'App\\Admin\\Controllers\\ActivityController' => __DIR__ . '/../..' . '/app/Admin/Controllers/ActivityController.php',
         'App\\Admin\\Controllers\\AuthController' => __DIR__ . '/../..' . '/app/Admin/Controllers/AuthController.php',
+        'App\\Admin\\Controllers\\BatchServiceSubscriptionController' => __DIR__ . '/../..' . '/app/Admin/Controllers/BatchServiceSubscriptionController.php',
         'App\\Admin\\Controllers\\BookAuthorController' => __DIR__ . '/../..' . '/app/Admin/Controllers/BookAuthorController.php',
         'App\\Admin\\Controllers\\BookBorrowController' => __DIR__ . '/../..' . '/app/Admin/Controllers/BookBorrowController.php',
         'App\\Admin\\Controllers\\BookController' => __DIR__ . '/../..' . '/app/Admin/Controllers/BookController.php',

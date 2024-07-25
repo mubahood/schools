@@ -22,7 +22,8 @@ if ($u->user_type == 'student') {
     $student_data = $u->get_finances();
 }
 
-$balance = $payable + $paid;
+//$balance = $payable + $paid;
+$balance = $u->account->balance;
 ?>
 <div class="row">
     <div class="col-xs-4 col-md-2 ">
@@ -113,7 +114,7 @@ $balance = $payable + $paid;
                     {{ number_format($student_data['total_paid']) }}</p>
                 <hr class="border-primary" style="margin-top: 8px; margin-bottom: 8px; ">
                 <p class="m-0 p-0" style="line-height: 1.2;"><b>FEES BALANCE</b> UGX
-                    {{ number_format($student_data['balance']) }}</p>
+                    {{ number_format($u->account->balance) }}</p>
             @endif
             {{--             <h4 class="text-center"><b><u>FEES SUMMARY</u></b></h4>
 

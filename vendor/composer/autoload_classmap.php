@@ -26,6 +26,7 @@ return array(
     'App\\Admin\\Controllers\\AccountParentController' => $baseDir . '/app/Admin/Controllers/AccountParentController.php',
     'App\\Admin\\Controllers\\ActivityController' => $baseDir . '/app/Admin/Controllers/ActivityController.php',
     'App\\Admin\\Controllers\\AuthController' => $baseDir . '/app/Admin/Controllers/AuthController.php',
+    'App\\Admin\\Controllers\\BatchServiceSubscriptionController' => $baseDir . '/app/Admin/Controllers/BatchServiceSubscriptionController.php',
     'App\\Admin\\Controllers\\BookAuthorController' => $baseDir . '/app/Admin/Controllers/BookAuthorController.php',
     'App\\Admin\\Controllers\\BookBorrowController' => $baseDir . '/app/Admin/Controllers/BookBorrowController.php',
     'App\\Admin\\Controllers\\BookController' => $baseDir . '/app/Admin/Controllers/BookController.php',

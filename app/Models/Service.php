@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Encore\Admin\Auth\Database\Administrator;
+use Encore\Admin\Facades\Admin;
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
@@ -66,7 +68,16 @@ class Service extends Model
             $trans = new Transaction();
             $trans->enterprise_id = $ent->id;
             $trans->account_id = $account_id;
-            $trans->created_by_id = Auth::user()->id;
+
+            $by = Auth::user();
+            if ($by == null) {
+                $by = Admin::user();
+            }
+            if ($by == null) {
+                throw new Exception("User not found", 1);
+            }
+            $trans->created_by_id = $by->id; 
+
             $trans->school_pay_transporter_id = '-';
             $trans->amount = ((-1) * $m->fee);
             $trans->amount = $trans->amount * $s->quantity;

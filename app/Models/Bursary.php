@@ -11,6 +11,12 @@ class Bursary extends Model
 
     public function beneficiaries()
     {
-        return  $this->hasMany(BursaryBeneficiary::class,'bursary_id');
+        return  $this->hasMany(BursaryBeneficiary::class, 'bursary_id');
+    }
+
+    //name_text
+    public function getNameTextAttribute()
+    {
+        return $this->name . " (UGX " . number_format($this->fund) . ")";
     }
 }

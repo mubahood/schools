@@ -72,6 +72,15 @@ class BursaryBeneficiaryController extends AdminController
                         return [$a->id => $a->name];
                     }
                 })->ajax($ajax_url);
+            $shemes = [];
+            foreach (Bursary::where(
+                'enterprise_id',
+                Admin::user()->enterprise_id
+            )->get() as $key => $bursary) {
+                $shemes[$bursary->id] = "UGX " . ($bursary->name_text);
+            }
+            $filter->equal('bursary_id', 'Filter by bursary scheme')
+                ->select($shemes);
         });
 
 
@@ -135,7 +144,13 @@ class BursaryBeneficiaryController extends AdminController
             });
 
         $grid->column('description', __('Description'));
-        $grid->column('id', __('id'))->sortable();
+        $grid->column('name_text', __('Fund'))
+            ->display(function () {
+                if ($this->bursary == null) {
+                    return '-';
+                }
+                return "UGX " . number_format($this->bursary->fund);
+            });
 
         return $grid;
     }

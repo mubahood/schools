@@ -8,6 +8,7 @@ use App\Http\Controllers\ReportCardsPrintingController;
 use App\Models\AcademicClass;
 use App\Models\AcademicClassFee;
 use App\Models\Account;
+use App\Models\BatchServiceSubscription;
 use App\Models\Book;
 use App\Models\BooksCategory;
 use App\Models\Course;
@@ -21,6 +22,7 @@ use App\Models\MarkRecord;
 use App\Models\ReportFinanceModel;
 use App\Models\ReportsFinance;
 use App\Models\SchemWorkItem;
+use App\Models\ServiceSubscription;
 use App\Models\TheologyMarkRecord;
 use App\Models\StudentHasClass;
 use App\Models\StudentHasFee;
@@ -48,6 +50,71 @@ Route::get('report-card-printings', [ReportCardsPrintingController::class, 'inde
 Route::get('data-import', [ReportCardsPrintingController::class, 'data_import']);
 Route::get('process-termly-school-fees-balancings', [MainController::class, 'process_termly_school_fees_balancings']);
 
+Route::get('process-batch-service-subscriptions', function (Request $request) {
+  $rep = BatchServiceSubscription::find($request->id);
+  if ($rep == null) return "Report not found";
+  if ($rep->is_processed == 'Yes') return "Already processed";
+
+  $total = count($rep->administrators);
+  $success = 0;
+  $fail = 0;
+  $total_count = 0;
+  $fail_text = "";
+  foreach ($rep->administrators as $key => $admin) {
+    $total_count++;
+    $user = User::find($admin);
+    if ($user == null) {
+      $fail++;
+      $fail_text .= "User not found: " . $admin . "<br>";
+      continue;
+    }
+
+    //existing subscription
+    $sub = ServiceSubscription::where([
+      'service_id' => $rep->service_id,
+      'administrator_id' => $user->id,
+      'due_term_id' => $rep->due_term_id,
+    ])->first();
+
+    if ($sub != null) {
+      $fail++;
+      $fail_text .= "User already subscribed: " . $user->name . ", ref: " . $sub->id . "<br>";
+      echo 'Skipped: ' . $user->name . " because already subscribed<br>";
+      continue;
+    }
+    $sub = new ServiceSubscription();
+    $sub->service_id = $rep->service_id;
+    $sub->enterprise_id = $rep->enterprise_id;
+
+    $sub->quantity = $rep->quantity;
+    $sub->due_term_id = $rep->due_term_id;
+    $sub->administrator_id = $user->id;
+    $sub->due_academic_year_id = $rep->due_academic_year_id;
+    $sub->link_with = $rep->link_with;
+    $sub->transport_route_id = $rep->transport_route_id;
+    $sub->trip_type = $rep->trip_type;
+    $error_text = null;
+    try {
+      $sub->save();
+      echo 'SUCCESS: ' . $user->name . "<br>";
+    } catch (\Exception $e) {
+      $error_text = $e->getMessage();
+      throw $e;
+    }
+    if ($error_text == null) {
+      $success++;
+    } else {
+      $fail++;
+      $fail_text .= "Error: " . $error_text . "<br>";
+    }
+  }
+  $rep->success_count = $success;
+  $rep->fail_count = $fail;
+  $rep->total_count = $total_count;
+  $rep->is_processed = 'Yes';
+  $rep->processed_notes = $fail_text;
+  $rep->save();
+});
 Route::get('gen-code', function () {
   $data = '1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcefghijklmnopqrstuvwxyz';
   $code_type = 'qr';

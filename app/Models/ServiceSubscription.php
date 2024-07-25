@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Encore\Admin\Auth\Database\Administrator;
+use Encore\Admin\Facades\Admin;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -62,7 +63,7 @@ class ServiceSubscription extends Model
             //service_subscription_id delete transport_subscription
             TransportSubscription::where([
                 'service_subscription_id' => $m->id,
-            ])->delete(); 
+            ])->delete();
         });
         self::deleting(function ($m) {
 
@@ -91,7 +92,14 @@ class ServiceSubscription extends Model
             $t->amount = $m->total;
             $t->is_contra_entry     = 0;
             $t->payment_date = Carbon::now();
-            $t->created_by_id = Auth::user()->id;
+            $by = Auth::user();
+            if ($by == null) {
+                $by = Admin::user();
+            }
+            if ($by == null) {
+                throw new Exception("User not found", 1);
+            }
+            $t->created_by_id = $by->id;
             $t->school_pay_transporter_id = "-";
             $t->description = "UGX " . number_format($t->amount) . " was added to this account because this account was removed from " . $m->service->name . " service.";
 
