@@ -165,7 +165,7 @@ class StockRecordController extends AdminController
                 if($this->batch == null){
                     return "N/A";
                 } 
-                if($this->batch->cat = null){
+                if($this->batch->cat == null){
                     return "N/A";
                 }
                 return $this->batch->cat->name . " Stock ID #" . $this->batch->id;
