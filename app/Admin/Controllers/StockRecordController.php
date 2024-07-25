@@ -303,17 +303,17 @@ class StockRecordController extends AdminController
         }
 
 
-        $purchase_date = null;
+        $record_date = null;
         $last_rec = StockRecord::where([
             'enterprise_id' => $u->enterprise_id
         ])->orderBy('id', 'desc')->first();
         if ($last_rec != null) {
-            $purchase_date = $last_rec->purchase_date;
+            $record_date = $last_rec->record_date;
         }
 
 
         $form->datetime('record_date', __('Date'))->rules('required')
-            ->default($purchase_date);
+            ->default($record_date);
 
 
         $u = Admin::user();
