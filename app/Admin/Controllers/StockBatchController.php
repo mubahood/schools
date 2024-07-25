@@ -97,7 +97,7 @@ class StockBatchController extends AdminController
         if (!isset($_GET['term_id'])) {
             //$grid->model()->where('term_id', $active_term);
         }
-        $grid->disableBatchActions();
+        // $grid->disableBatchActions();
         $grid->column('id', __('Batch Number'))->sortable();
         $grid->column('stock_item_category_id', __('Item'))->display(function () {
             return $this->cat->name;
