@@ -53,8 +53,8 @@ class StockBatchController extends AdminController
                 $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
             }
 
-            $filter->equal('due_term_id', 'Filter by term')
-                ->select($terms);
+            $filter->equal('term_id', 'Filter by term')
+                ->select($terms); 
         });
 
 
