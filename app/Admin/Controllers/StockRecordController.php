@@ -173,6 +173,10 @@ class StockRecordController extends AdminController
 
         $grid->column('quanity', __('Quanity'))
             ->display(function ($x) {
+                if($this->cat == null){
+                    $this->delete();
+                    return "N/A";
+                }
                 return number_format($x) . " " . Str::plural($this->cat->measuring_unit);
             })->sortable()->totalRow(function ($x) {
                 return number_format($x);
