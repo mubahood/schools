@@ -31,29 +31,61 @@ class BatchServiceSubscriptionController extends AdminController
     {
         $grid = new Grid(new BatchServiceSubscription());
 
-        $grid->column('id', __('Id'));
-        $grid->column('created_at', __('Created at'));
-        $grid->column('updated_at', __('Updated at'));
-        $grid->column('enterprise_id', __('Enterprise id'));
-        $grid->column('service_id', __('Service id'));
-        $grid->column('quantity', __('Quantity'));
-        $grid->column('total', __('Total'));
-        $grid->column('due_academic_year_id', __('Due academic year id'));
-        $grid->column('due_term_id', __('Due term id'));
-        $grid->column('link_with', __('Link with'));
-        $grid->column('transport_route_id', __('Transport route id'));
-        $grid->column('success_count', __('Success count'));
-        $grid->column('fail_count', __('Fail count'));
-        $grid->column('total_count', __('Total count'));
-        $grid->column('trip_type', __('Trip type'));
-        $grid->column('administrators', __('Administrators'));
-        $grid->column('is_processed', __('Is processed'));
-        $grid->column('processed_notes', __('Processed notes'));
+        $u = Admin::user();
+        $grid->model()->where('enterprise_id', $u->enterprise_id)
+            ->orderBy('id', 'desc');
+        $grid->column('created_at', __('Created'))->hide()->sortable();
+
+        $grid->column('service_id', __('Service'))
+            ->display(function ($service_id) {
+                $s = Service::find($service_id);
+                if ($s == null) {
+                    return "<span class='badge badge-danger'>Service not found</span>";
+                }
+                return $s->name_text;
+            })->sortable();
+        $grid->column('quantity', __('Quantity'))->sortable();
+        // $grid->column('total', __('Total'));
+        $grid->column('due_term_id', __('Due term'))
+            ->display(function ($due_term_id) {
+                $term = Term::find($due_term_id);
+                if ($term == null) {
+                    return "<span class='badge badge-danger'>Term not found</span>";
+                }
+                return "Term " . $term->name_text;
+            })->sortable()->hide();
+        $grid->column('link_with', __('Link With'))->hide();
+        $grid->column('transport_route_id', __('Transport route id'))->hide();
+        $grid->column('success_count', __('Successful'))->sortable();
+        $grid->column('fail_count', __('Failed'))->sortable();
+        $grid->column('total_count', __('Totaled'))->sortable();
+        $grid->column('trip_type', __('Trip type'))->sortable()->hide();
+        $grid->column('administrators', __('Subscribers'))->display(function ($administrators) {
+            $users = [];
+            foreach ($administrators as $key => $v) {
+                $s = User::find($v);
+                if ($s == null) {
+                    continue;
+                }
+                $users[] = $s->name_text;
+            }
+            return implode(", ", $users);
+        })->sortable();
+        $grid->disableBatchActions();
+        $grid->column('processed_notes', __('Processed notes'))
+            ->limit(30);
         $grid->column('processed_button', 'Processed')->display(function () {
-            if($this->is_processed == 'Yes'){
+            if ($this->is_processed == 'Yes') {
                 return "<span class='badge badge-success'>Processed</span>";
             }
             return "<a target='_blank' href='process-batch-service-subscriptions?id=" . $this->id . "' class='btn btn-primary'>Process</a>";
+        });
+
+        $grid->actions(function ($actions) {
+            $actions->disableView();
+            if ($actions->row->is_processed != 'Yes') {
+                $actions->disableEdit();
+            }
         });
 
         return $grid;
