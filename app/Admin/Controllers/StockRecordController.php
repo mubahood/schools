@@ -162,6 +162,12 @@ class StockRecordController extends AdminController
         $grid->column('stock_batch_id', __('Stock batch'))
             ->hide()
             ->display(function () {
+                if($this->batch == null){
+                    return "N/A";
+                } 
+                if($this->batch->cat = null){
+                    return "N/A";
+                }
                 return $this->batch->cat->name . " Stock ID #" . $this->batch->id;
             })->sortable();
 
