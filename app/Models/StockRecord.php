@@ -44,8 +44,10 @@ class StockRecord extends Model
                 die("Sock batch not found");
             }
 
-            if ($m->quanity > $batch->current_quantity) {
-                die("Issufitient amount of stock available.");
+            if (strtoupper($m->type) != 'IN') {
+                if ($m->quanity > $batch->current_quantity) {
+                    die("Insufficient amount of stock available.");
+                }
             }
 
             /*   $batch->current_quantity -= $m->quanity;
