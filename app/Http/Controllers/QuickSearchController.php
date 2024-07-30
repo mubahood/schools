@@ -53,6 +53,14 @@ class QuickSearchController extends Controller
             ->get() as $key => $val) {
             $current_class_text = "";
             if ($val->owner != null) {
+
+                if ($val->owner == null) {
+                    continue;
+                }
+                if ($val->owner->status != 1) {
+                    continue;
+                }
+
                 $user = $val->owner;
                 $user->current_class_text = $user->current_class_id;
                 $class = $user->getActiveClass();

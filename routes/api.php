@@ -163,6 +163,12 @@ Route::get('ajax-users', function (Request $r) {
     $data = [];
     $surfix = "";
     foreach ($c as $key => $v) {
+
+
+        if ($v->status != 1) {
+            continue;
+        }
+
         if ($user_type == 'student') {
             if ($v->current_class != null) {
                 $surfix = " - " . $v->current_class->name_text;
