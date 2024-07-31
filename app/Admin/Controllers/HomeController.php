@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AcademicClass;
 use App\Models\Account;
 use App\Models\Enterprise;
+use App\Models\Manifest;
 use App\Models\MenuItem;
 use App\Models\ReportCard;
 use App\Models\ReportFinanceModel;
@@ -97,7 +98,7 @@ class HomeController extends Controller
                         'enterprise_id' => $term->enterprise_id,
                         'term_id' => $term->id
                     ])->first();
-                    if($r == null){
+                    if ($r == null) {
                         $r = new ReportFinanceModel();
                         $r->enterprise_id = $term->enterprise_id;
                         $r->term_id = $term->id;
@@ -106,55 +107,21 @@ class HomeController extends Controller
                         $r = ReportFinanceModel::where([
                             'enterprise_id' => $term->enterprise_id,
                             'term_id' => $term->id
-                        ])->first(); 
+                        ])->first();
                     }
-                    $val = 0;
-                    if ($r) {
-                        $val = $r->total_expected_service_fees;
-                    }
+
+
                     $column->append(view('widgets.box-5', [
                         'is_dark' => false,
                         'title' => 'Expected Services Fees',
                         'sub_title' => 'Total sum of service subscription fees of this term.',
-                        'number' => "<small>UGX</small>" . number_format($val, 0, '.', ','),
+                        'number' => "<small>UGX</small>" . number_format(
+                            Manifest::get_total_expected_service_fees(Admin::user()),
+                            0,
+                            '.',
+                            ','
+                        ),
                         'link' => admin_url('service-subscriptions')
-                    ]));
-                });
-                $row->column(3, function (Column $column) {
-                    $term = Auth::user()->ent->dpTerm();
-                    $r = ReportFinanceModel::where([
-                        'enterprise_id' => $term->enterprise_id,
-                        'term_id' => $term->id
-                    ])->first();
-                    $val = 0;
-                    if ($r) {
-                        $val = ($r->total_expected_service_fees + $r->total_expected_tuition);
-                    }
-                    $column->append(view('widgets.box-5', [
-                        'is_dark' => true,
-                        'title' => 'Total Expected Income',
-                        'sub_title' => 'Sum of tution fees and services subscriptions fees..',
-                        'number' => "<small>UGX</small>" . number_format($val),
-                        'link' => admin_url('transactions')
-                    ]));
-                });
-
-                $row->column(3, function (Column $column) {
-                    $term = Auth::user()->ent->dpTerm();
-                    $r = ReportFinanceModel::where([
-                        'enterprise_id' => $term->enterprise_id,
-                        'term_id' => $term->id
-                    ])->first();
-                    $val = 0;
-                    if ($r) {
-                        $val = ($r->total_payment_total);
-                    }
-                    $column->append(view('widgets.box-5', [
-                        'is_dark' => true,
-                        'title' => 'Total Income',
-                        'sub_title' => 'Total sum of all payments made this term.',
-                        'number' => "<small>UGX</small>" . number_format($val),
-                        'link' => admin_url('transactions')
                     ]));
                 });
 
@@ -171,12 +138,11 @@ class HomeController extends Controller
                     $column->append(view('widgets.box-5', [
                         'is_dark' => false,
                         'title' => 'Total Bursaries Offered',
-                        'sub_title' => 'Total sum of all payments made this term.',
+                        'sub_title' => 'Total sum of bursaries offered this term.',
                         'number' => "<small>UGX</small>" . number_format($val),
                         'link' => admin_url('transactions')
                     ]));
                 });
-
                 $row->column(3, function (Column $column) {
                     $term = Auth::user()->ent->dpTerm();
                     $r = ReportFinanceModel::where([
@@ -185,13 +151,40 @@ class HomeController extends Controller
                     ])->first();
                     $val = 0;
                     if ($r) {
-                        $val = ($r->total_school_fees_balance);
+                        $val = (Manifest::get_total_expected_tuition(Auth::user()) + Manifest::get_total_expected_tuition(Auth::user()));
                     }
+                    $column->append(view('widgets.box-5', [
+                        'is_dark' => true,
+                        'title' => 'Total Expected Income',
+                        'sub_title' => 'Sum of tution fees and services subscriptions fees..',
+                        'number' => "<small>UGX</small>" . number_format($val),
+                        'link' => admin_url('transactions')
+                    ]));
+                });
+
+                $row->column(3, function (Column $column) {
+                    $total_expected = (Manifest::get_total_expected_tuition(Auth::user()) + Manifest::get_total_expected_tuition(Auth::user()));
+                    $total_balance = Manifest::get_total_fees_balance(Auth::user());
+                    $paid = $total_expected + $total_balance;
+
+                    $column->append(view('widgets.box-5', [
+                        'is_dark' => true,
+                        'title' => 'Total Income',
+                        'sub_title' => 'Total sum of all payments made this term.',
+                        'number' => "<small>UGX</small>" . number_format($paid),
+                        'link' => admin_url('transactions')
+                    ]));
+                });
+
+
+
+                $row->column(3, function (Column $column) {
+
                     $column->append(view('widgets.box-5', [
                         'is_dark' => true,
                         'title' => 'School Fees Balance',
                         'sub_title' => 'Total school fees balance of all active students.',
-                        'number' => "<small>UGX</small>" . number_format($val),
+                        'number' => "<small>UGX</small>" . number_format(Manifest::get_total_fees_balance(Auth::user())),
                         'link' => admin_url('students-financial-accounts')
                     ]));
                 });
@@ -238,7 +231,7 @@ class HomeController extends Controller
                     $val = StockBatch::where([
                         'enterprise_id' => $term->enterprise_id,
                         'term_id' => $term->id
-                    ])->sum('worth'); 
+                    ])->sum('worth');
                     $column->append(view('widgets.box-5', [
                         'is_dark' => false,
                         'title' => 'Stock Value',

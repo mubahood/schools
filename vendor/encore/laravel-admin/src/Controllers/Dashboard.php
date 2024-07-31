@@ -8,6 +8,7 @@ use App\Models\Account;
 use App\Models\AccountParent;
 use App\Models\Enterprise;
 use App\Models\FinancialRecord;
+use App\Models\Manifest;
 use App\Models\Mark;
 use App\Models\ReportFinanceModel;
 use App\Models\Service;
@@ -548,7 +549,7 @@ class Dashboard
             'is_dark' => false,
             'title' => 'Expected Tution Fees',
             'sub_title' => 'Total sum of tution fees of the term from all active students.',
-            'number' => "<small>UGX</small>" . number_format($r->total_expected_tuition),
+            'number' => "<small>UGX</small>" . number_format(Manifest::get_total_expected_tuition(Auth::user())),
             'link' => admin_url('transactions')
         ]);
     }

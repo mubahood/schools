@@ -10,6 +10,7 @@ use App\Models\AcademicClass;
 use App\Models\Account;
 use App\Models\AccountParent;
 use App\Models\Enterprise;
+use App\Models\Manifest;
 use App\Models\Utils;
 use Dflydev\DotAccessData\Util;
 use Encore\Admin\Controllers\AdminController;
@@ -28,7 +29,7 @@ class StudentFinancialAccountController extends AdminController
      *
      * @var string
      */
-    protected $title = 'Students Accounts';
+    protected $title = 'Active Students Accounts';
     /**
      * Make a grid builder.
      *
@@ -58,13 +59,15 @@ class StudentFinancialAccountController extends AdminController
         $grid = new Grid(new Account());
 
 
-        //'academic_class_id'
+        //'academic_class_id for active students only'
+        $active_admins = Manifest::get_active_students_user_ids(Admin::user());
         $grid->model()
             ->orderBy('id', 'Desc')
             ->where([
                 'enterprise_id' => Admin::user()->enterprise_id,
-                'type' => 'STUDENT_ACCOUNT'
-            ]);
+                'type' => 'STUDENT_ACCOUNT',
+            ])
+            ->whereIn('administrator_id', $active_admins);
 
         $grid->batchActions(function ($batch) {
             $batch->disableDelete();
