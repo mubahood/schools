@@ -261,7 +261,11 @@ class TheologyMarkRecordController extends AdminController
         $grid->column('created_at', __('Created'))->sortable()->hide();
         $grid->column('updated_at', __('Updated'))->sortable()->hide();
         $grid->column('termly_report_card_id', __('Termly Report'))->display(function ($termly_report_card_id) {
-            return $this->termlyReportCard->report_title;
+            if($this->termlyReportCard ==  null){
+                $this->delete();
+                return 'Deleted';
+            }
+            return $this->termlyReportCard->report_title; 
         })
             ->hide()
             ->sortable();
