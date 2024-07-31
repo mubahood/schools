@@ -316,7 +316,7 @@ class StudentsController extends AdminController
         $grid->column('stream_id', __('Stream'))
             ->display(function () {
                 if ($this->stream == null) {
-                    return '<span class="badge bg-danger">No Stream</span>';
+                    return 'No Stream';
                 }
                 return $this->stream->name;
             })->sortable();
