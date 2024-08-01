@@ -143,7 +143,8 @@ Route::get('identification-cards-generation', function () {
   $idCard->file_link = $store_file_path;
   $idCard->save();
   //redirect to the print
-  return redirect('identification-cards-print?id=' . $idCard->id);
+  $rand = rand(1, 100000) . time();
+  return redirect('identification-cards-print?id=' . $idCard->id . '&rand=' . $rand);
 });
 Route::get('identification-cards-print', function () {
   $idCard = IdentificationCard::find($_GET['id']);
