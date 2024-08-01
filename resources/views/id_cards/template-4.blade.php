@@ -57,8 +57,8 @@ $next_year = date('Y', strtotime('+1 year'));
         </div>
         <table class="mt-2 ml-1 " style=" width: 95%">
             <tr>
-                <td class=" p-0 m-0" style="width: 85px;">
-                    <img src="{{ $avatar }}" style="width: 85px; height: 140px!important;" class="d-inline-block">
+                <td class=" p-0 m-0" style="width: 100px;">
+                    <img src="{{ $avatar }}" style="width: 100px; height: 140px!important;" class="d-inline-block">
                 </td>
                 <td class="pl-2" style="vertical-align: top;">
 
