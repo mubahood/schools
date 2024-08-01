@@ -47,8 +47,13 @@ class IdentificationCard extends Model
                 ->pluck('id');
         } elseif ($this->target_type == 'classes') {
             $classes = $this->classes;
+            $user_ids = [];
             foreach ($classes as $key => $v) {
-                $user_ids = array_merge($user_ids, AcademicClass::find($v)->students->pluck('administrator_id')->toArray());
+                $student_ids = User::where([
+                    'current_class_id' => $v,
+                    'status' => 1
+                ])->pluck('id')->toArray();
+                $user_ids = array_merge($user_ids, $student_ids); 
             }
         } elseif ($this->target_type == 'users') {
             $user_ids = $this->users;

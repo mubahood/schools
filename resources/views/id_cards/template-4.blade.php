@@ -92,7 +92,7 @@ $next_year = date('Y', strtotime('+1 year'));
                                 <p class="label mt-1">{{ strtoupper($user->user_type) }} NUMBER</p>
                                 <p class="value">{{ strtoupper($user->user_number) }}</p>
                                 <p class="label">DATE OF EXPIRY</p>
-                                <p class="value">{{ '31-DEC-' . ($current_year+1) }}</p>
+                                <p class="value">{{ '31-DEC-' . ($current_year + 3) }}</p>
                             </td>
                             <td>
                                 {{-- qr code --}}
@@ -127,6 +127,7 @@ $next_year = date('Y', strtotime('+1 year'));
             </p>
             <center><img src="{{ $qr_code }}" style="width: 80px;" class="text-center mt-0"></center>
 
+
             <center>
                 <div class="m-0 p-0 mt-1 text-center"
                     style="
@@ -140,6 +141,22 @@ $next_year = date('Y', strtotime('+1 year'));
                     <p class="value d-inline-block" style="font-size: 10px!important">
                         {{ strtoupper($user->emergency_person_name) }},
                         {{ strtoupper($user->emergency_person_phone) }}.
+                    </p>
+                </div>
+            </center>
+
+            <center>
+                <div class="m-0 p-0 mt-0 text-center"
+                    style="
+        height: 12px!important; line-height: 12px!important;
+        align-content: center;        
+        align-self: center;
+      ">
+                    <p class="value d-inline-block text-muted pl-2 text-center "
+                        style="font-size: 10px!important; align-content: center; ">SCHOOL PAY CODE: </p>
+                    &nbsp;
+                    <p class="value d-inline-block" style="font-size: 10px!important">
+                        {{ strtoupper($user->school_pay_payment_code) }}
                     </p>
                 </div>
             </center>
