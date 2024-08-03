@@ -250,6 +250,7 @@ return array(
     'App\\Models\\RoomSlot' => $baseDir . '/app/Models/RoomSlot.php',
     'App\\Models\\RoomSlotAllocation' => $baseDir . '/app/Models/RoomSlotAllocation.php',
     'App\\Models\\SchemWorkItem' => $baseDir . '/app/Models/SchemWorkItem.php',
+    'App\\Models\\SchoolPayTransaction' => $baseDir . '/app/Models/SchoolPayTransaction.php',
     'App\\Models\\SecondaryCompetence' => $baseDir . '/app/Models/SecondaryCompetence.php',
     'App\\Models\\SecondaryReportCard' => $baseDir . '/app/Models/SecondaryReportCard.php',
     'App\\Models\\SecondaryReportCardItem' => $baseDir . '/app/Models/SecondaryReportCardItem.php',

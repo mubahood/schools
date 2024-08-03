@@ -13,7 +13,7 @@ php artisan make:migration slot
 
 php artisan admin:make BatchServiceSubscriptionController --model=App\\Models\\BatchServiceSubscription
 
-php artisan make:model BatchServiceSubscription -m
+php artisan make:model SchoolPayTransaction -m
 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
 
 git config --global user.name "mubahood"

@@ -1495,7 +1495,7 @@ class Utils  extends Model
                 }
 
                 $school_pay_transporter_id = trim($v->sourceChannelTransactionId);
-                $trans = Transaction::where([
+                $trans = SchoolPayTransaction::where([
                     'school_pay_transporter_id' => $school_pay_transporter_id
                 ])->first();
                 if ($trans != null) {
@@ -1508,7 +1508,7 @@ class Utils  extends Model
 
                 $bank = Enterprise::main_bank_account($ent);
 
-                $trans = new Transaction();
+                $trans = new SchoolPayTransaction();
                 $account_id = $student->account->id;
                 $trans->amount = (int)($v->amount);
                 $trans->payment_date = $v->paymentDateAndTime;

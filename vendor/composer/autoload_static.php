@@ -950,6 +950,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Models\\RoomSlot' => __DIR__ . '/../..' . '/app/Models/RoomSlot.php',
         'App\\Models\\RoomSlotAllocation' => __DIR__ . '/../..' . '/app/Models/RoomSlotAllocation.php',
         'App\\Models\\SchemWorkItem' => __DIR__ . '/../..' . '/app/Models/SchemWorkItem.php',
+        'App\\Models\\SchoolPayTransaction' => __DIR__ . '/../..' . '/app/Models/SchoolPayTransaction.php',
         'App\\Models\\SecondaryCompetence' => __DIR__ . '/../..' . '/app/Models/SecondaryCompetence.php',
         'App\\Models\\SecondaryReportCard' => __DIR__ . '/../..' . '/app/Models/SecondaryReportCard.php',
         'App\\Models\\SecondaryReportCardItem' => __DIR__ . '/../..' . '/app/Models/SecondaryReportCardItem.php',
