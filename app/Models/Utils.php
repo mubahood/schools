@@ -1457,9 +1457,9 @@ class Utils  extends Model
 
         $data = json_decode($resp);
         $my_records_date = $rec_date;
-        echo '<h1>Syncing School Pay Transactions ==>' . $my_records_date . '<==</h1>';
+        echo '<pre><h1>Syncing School Pay Transactions ==>' . $my_records_date . '<==</h1>';
         echo "<hr>Response: $resp <br>";
-        print_r($resp);
+        print_r($data);
         echo "<hr>";
         $success = false;
         if ($data != null) {
