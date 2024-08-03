@@ -115,7 +115,7 @@ class SchoolPayTransactionController extends AdminController
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
         ])
-            ->orderBy('id', 'Desc');
+            ->orderBy('school_pay_transporter_id', 'Desc');
 
         //add school_pay_transporter_id
         $grid->column('school_pay_transporter_id', __('ID'))->sortable()->width(120);
