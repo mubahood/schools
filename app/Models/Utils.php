@@ -1415,7 +1415,7 @@ class Utils  extends Model
 
 
         $back_day = 0;
-        $max_back_days = 30;
+        $max_back_days = 5;
 
         $rec = new Reconciler();
         $rec->enterprise_id = $ent->id;
@@ -1526,7 +1526,13 @@ class Utils  extends Model
                     $trans->term_id = $t->id;
                     $trans->academic_year_id = $t->academic_year_id;
                 }
-                $trans->save();
+                try {
+                    $trans->save();
+                } catch (Exception $x) {
+                    $rec->details .= 'Failed to import transaction. ' . json_encode($v) . " because account dose not exist.";
+                    continue;
+                }
+                echo "Transaction $school_pay_transporter_id imported successfully. <br>";
             }
             $rec->details .= "$rec_date - $data->returnMessage";
             $rec->save();
