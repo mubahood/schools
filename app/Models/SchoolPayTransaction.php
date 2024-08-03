@@ -32,9 +32,9 @@ class SchoolPayTransaction extends Model
                 'school_pay_transporter_id' => $m->school_pay_transporter_id,
             ])->first();
             if ($dup != null) {
-                $m->school_pay_transporter_id = 'Imported';
+                $m->status = 'Imported';
             } else {
-                $m->school_pay_transporter_id = 'Not Imported';
+                $m->status = 'Not Imported';
             }
             return $m;
         });
@@ -54,9 +54,9 @@ class SchoolPayTransaction extends Model
                 'school_pay_transporter_id' => $m->school_pay_transporter_id,
             ])->first();
             if ($dup != null) {
-                $m->school_pay_transporter_id = 'Imported';
+                $m->status = 'Imported';
             } else {
-                $m->school_pay_transporter_id = 'Not Imported';
+                $m->status = 'Not Imported';
             }
             return $m;
         });
