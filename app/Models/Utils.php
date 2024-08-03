@@ -1459,7 +1459,7 @@ class Utils  extends Model
         $my_records_date = $rec_date;
         echo '<h1>Syncing School Pay Transactions ==>' . $my_records_date . '<==</h1>';
         echo "<hr>Response: $resp <br>";
-        print_r($data);
+        print_r($resp);
         echo "<hr>";
         $success = false;
         if ($data != null) {
