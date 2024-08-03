@@ -142,7 +142,7 @@ class SchoolPayTransactionController extends AdminController
 
                 return
                     '<b><a class="text-primary"  target="_blank"  href="' . admin_url('students/' . $this->account->administrator_id) . '">' . $name . "</a></b>";;
-            })->width(300);
+            })->width(320);
 
 
         $grid->column('amount', __('Amount (UGX)'))->display(function () {
@@ -150,7 +150,7 @@ class SchoolPayTransactionController extends AdminController
         })
             ->sortable()->totalRow(function ($x) {
                 return  number_format($x);
-            })->width(200);
+            })->width(120);
 
 
 
