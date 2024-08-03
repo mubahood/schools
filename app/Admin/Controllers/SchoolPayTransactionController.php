@@ -38,7 +38,7 @@ class SchoolPayTransactionController extends AdminController
         $grid->model()->orderBy('payment_date', 'desc');
         $grid->disableBatchActions();
         $grid->disableActions();
-        $grid->disableCreateButton(); 
+        $grid->disableCreateButton();
 
         //$grid->disableActions();
         $grid->export(function ($export) {
@@ -138,8 +138,10 @@ class SchoolPayTransactionController extends AdminController
                 if ($this->account->owner != null) {
                     $name = $this->account->owner->name_text;
                 }
+
+
                 return
-                    '<b><a class="text-primary" href="' . admin_url('students/' . $this->account->administrator_id) . '">' . $name . "</a></b>";;
+                    '<b><a class="text-primary"  target="_blank"  href="' . admin_url('students/' . $this->account->administrator_id) . '">' . $name . "</a></b>";;
             })->width(300);
 
 
