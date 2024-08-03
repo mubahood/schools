@@ -127,7 +127,7 @@ Route::group([
     $router->resource('visitor-records', VisitorRecordController::class);
     $router->resource('trips', TripController::class); 
     $router->resource('batch-service-subscriptions', BatchServiceSubscriptionController::class);
-    $router->resource('school-pay-transactions', TransactionController::class);
+    $router->resource('school-pay-transactions', SchoolPayTransactionController::class);
 
     //$router->get('/fixed-asset-records-stats', 'FixedAssetRecordController@stats');
 

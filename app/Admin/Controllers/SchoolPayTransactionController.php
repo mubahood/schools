@@ -18,7 +18,7 @@ use Encore\Admin\Show;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-class TransactionController extends AdminController
+class SchoolPayTransactionController extends AdminController
 {
     /**
      * Title for current resource.
