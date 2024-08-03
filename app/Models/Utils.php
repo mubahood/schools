@@ -1398,6 +1398,7 @@ class Utils  extends Model
             }
         }
 
+
         if ($ent == null) {
             $ent = Enterprise::where([
                 'school_pay_status' => 'Yes'
@@ -1415,7 +1416,8 @@ class Utils  extends Model
 
 
         $back_day = 0;
-        $max_back_days = 5;
+        $max_back_days = 30;
+
 
         $rec = new Reconciler();
         $rec->enterprise_id = $ent->id;
@@ -1454,6 +1456,11 @@ class Utils  extends Model
 
 
         $data = json_decode($resp);
+        $my_records_date = $rec_date;
+        echo '<h1>Syncing School Pay Transactions ==>' . $my_records_date . '<==</h1>';
+        echo "<hr>Response: $resp <br>";
+        print_r($data);
+        echo "<hr>";
         $success = false;
         if ($data != null) {
             if (isset($data->returnCode)) {
@@ -1528,11 +1535,12 @@ class Utils  extends Model
                 }
                 try {
                     $trans->save();
+                    echo "<h2>Transaction $school_pay_transporter_id imported successfully.</h2>";
                 } catch (Exception $x) {
-                    $rec->details .= 'Failed to import transaction. ' . json_encode($v) . " because account dose not exist.";
+                    $rec->details .= 'Failed to import transaction. ' . json_encode($x->getMessage()) . " because account dose not exist.";
+                    echo "<h2>Failed to import transaction $school_pay_transporter_id becasue of error. {$x->getMessage()}</h2>";
                     continue;
                 }
-                echo "Transaction $school_pay_transporter_id imported successfully. <br>";
             }
             $rec->details .= "$rec_date - $data->returnMessage";
             $rec->save();

@@ -86,6 +86,7 @@ return array(
     'App\\Admin\\Controllers\\SchemWorkItemController' => $baseDir . '/app/Admin/Controllers/SchemWorkItemController.php',
     'App\\Admin\\Controllers\\SchemeWorkController' => $baseDir . '/app/Admin/Controllers/SchemeWorkController.php',
     'App\\Admin\\Controllers\\SchoolFeesPaymentController' => $baseDir . '/app/Admin/Controllers/SchoolFeesPaymentController.php',
+    'App\\Admin\\Controllers\\SchoolPayTransactionController' => $baseDir . '/app/Admin/Controllers/SchoolPayTransactionController.php',
     'App\\Admin\\Controllers\\SecondaryCompetenceController' => $baseDir . '/app/Admin/Controllers/SecondaryCompetenceController.php',
     'App\\Admin\\Controllers\\SecondaryReportCardController' => $baseDir . '/app/Admin/Controllers/SecondaryReportCardController.php',
     'App\\Admin\\Controllers\\SecondaryReportCardItemController' => $baseDir . '/app/Admin/Controllers/SecondaryReportCardItemController.php',
