@@ -61,4 +61,10 @@ class SchoolPayTransaction extends Model
             return $m;
         });
     }
+
+    //account 
+    public function account()
+    {
+        return $this->belongsTo(Account::class);
+    } 
 }

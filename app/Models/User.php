@@ -287,7 +287,7 @@ class User extends Administrator implements JWTSubject
     {
         //if is student, add current class
         if (strtolower($this->user_type) == 'student') {
-            $class = $this->academic_class;
+            $class = AcademicClass::find($this->current_class_id);
             if ($class == null) {
                 return $this->name;
             }

@@ -35,6 +35,10 @@ class SchoolPayTransactionController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new SchoolPayTransaction());
+        $grid->model()->orderBy('payment_date', 'desc');
+        $grid->disableBatchActions();
+        $grid->disableActions();
+        $grid->disableCreateButton(); 
 
         //$grid->disableActions();
         $grid->export(function ($export) {
@@ -83,32 +87,6 @@ class SchoolPayTransactionController extends AdminController
                 })->ajax($ajax_url);
 
 
-            $terms = [];
-            $active_term = 0;
-            foreach (Term::where(
-                'enterprise_id',
-                Admin::user()->enterprise_id
-            )->orderBy('id', 'desc')->get() as $key => $term) {
-                $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
-                if ($term->is_active) {
-                    $active_term = $term->id;
-                }
-            }
-            $filter->equal('term_id', 'Fliter by term')->select($terms);
-
-
-            $balancings = [];
-            foreach (TermlySchoolFeesBalancing::where([
-                'enterprise_id' => $u->enterprise_id
-            ])
-                ->orderBy('id', 'desc')
-                ->get() as $v) {
-                $balancings[$v->id] = 'Term ' . $v->term->name_text;
-            }
-
-            $filter->equal('termly_school_fees_balancing_id', 'Fliter by balance')->select(
-                $balancings
-            );
 
             $filter->between('payment_date', 'Created between')->date();
             /* $filter->select([
@@ -118,14 +96,7 @@ class SchoolPayTransactionController extends AdminController
                 "MOBILE_APP" => 'MOBILE_APP',
             ]); */
 
-            //filter by source
-            $filter->equal('source', 'Filter by source')
-                ->select([
-                    "SCHOOL_PAY" => 'SCHOOL_PAY',
-                    "GENERATED" => 'GENERATED',
-                    "MANUAL_ENTRY" => 'MANUAL_ENTRY',
-                    "MOBILE_APP" => 'MOBILE_APP',
-                ]);
+
 
             $filter->group('amount', function ($group) {
                 $group->gt('greater than');
@@ -154,10 +125,7 @@ class SchoolPayTransactionController extends AdminController
             return Utils::my_date_time($this->payment_date);
         })
             ->sortable()
-            ->width(120);
-
-
-        $grid->column('academic_year_id', __('Academic year id'))->hide();
+            ->width(200);
 
 
         $grid->column('account_id', __('Account'))
@@ -166,9 +134,13 @@ class SchoolPayTransactionController extends AdminController
                 if ($this->account == null) {
                     return $x;
                 }
+                $name = $this->account->name;
+                if ($this->account->owner != null) {
+                    $name = $this->account->owner->name_text;
+                }
                 return
-                    '<b><a class="text-primary" href="' . admin_url('students/' . $this->account->administrator_id) . '">' . $this->account->name . "</a></b>";;
-            });
+                    '<b><a class="text-primary" href="' . admin_url('students/' . $this->account->administrator_id) . '">' . $name . "</a></b>";;
+            })->width(300);
 
 
         $grid->column('amount', __('Amount (UGX)'))->display(function () {
@@ -176,70 +148,35 @@ class SchoolPayTransactionController extends AdminController
         })
             ->sortable()->totalRow(function ($x) {
                 return  number_format($x);
-            });
+            })->width(200);
 
 
 
-        $grid->column('description', __('Description'))->limit(80)->sortable();
 
-        $grid->column('type', __('Type'))
+        $grid->column('status', __('Status'))
             ->label([
-                "FEES_PAYMENT" => 'success',
-                "FEES_BILL" => 'info',
-                "other" => 'warning',
+                "Imported" => 'success',
+                "Not Imported" => 'danger',
             ])
             ->filter([
-                "FEES_PAYMENT" => 'Fees Payment',
-                "FEES_BILL" => 'FEES BILL',
-                "BALANCE_BROUGHT_FORWARD" => 'BALANCE BROUGHT FORWARD',
-                "BALANCE_CARRIED_DOWN" => 'BALANCE CARRIED DOWN',
-                "other" => 'Other',
+                "Imported" => 'Imported',
+                "Not Imported" => 'Not Imported',
             ])
-            ->hide()
-            ->sortable();
+            ->sortable()->width(100);
 
-
-        $grid->column('source', __('Source'))
-            ->label([
-                "SCHOOL_PAY" => 'success',
-                "GENERATED" => 'info',
-                "MANUAL_ENTRY" => 'warning',
-                "MOBILE_APP" => 'warning',
-            ])
-            ->sortable();
-
-        $terms = [];
-        $active_term = 0;
-        foreach (Term::where(
-            'enterprise_id',
-            Admin::user()->enterprise_id
-        )->orderBy('id', 'desc')->get() as $key => $term) {
-            $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
-            if ($term->is_active) {
-                $active_term = $term->id;
+        //actions
+        $grid->column('actions', __('Actions'))->display(function () {
+            //if status is imported, do not show any action
+            if ($this->status == 'Imported') {
+                return 'Already Imported';
             }
-        }
-        if (!isset($_GET['term_id'])) {
-            $grid->model()->where('term_id', $active_term);
-        }
-
-        $grid->column('term_id', __('Due term'))->display(function ($x) {
-            $t = Term::find($x);
-            if ($t == null) {
-                return $x;
-            }
-            return '<span style="float: right;">Term ' . $t->name_text . '</span>';
-        })
-            ->sortable();
+            $text = 'Import Now';
+            $link = url('import-transaction?trans_id=' . $this->id);
+            //open in new tab
+            return "<a href='$link' target='_blank' class='btn btn-xs btn-success'>$text</a>";
+        });
 
 
-        $grid->column('created_by_id', __('Created By'))->display(function () {
-            if ($this->by == null) {
-                return 'Deleted';
-            }
-            return  $this->by->name;
-        })
-            ->sortable();
         return $grid;
     }
 
@@ -270,6 +207,7 @@ class SchoolPayTransactionController extends AdminController
      */
     protected function form()
     {
+        return 'No form for this model';
         $form = new Form(new SchoolPayTransaction());
         $u = Admin::user();
         $accs = Account::where([

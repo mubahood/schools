@@ -22,6 +22,7 @@ use App\Models\MarkRecord;
 use App\Models\ReportFinanceModel;
 use App\Models\ReportsFinance;
 use App\Models\SchemWorkItem;
+use App\Models\SchoolPayTransaction;
 use App\Models\ServiceSubscription;
 use App\Models\TheologyMarkRecord;
 use App\Models\StudentHasClass;
@@ -321,4 +322,70 @@ Route::get('print-receipt', function () {
   $pdf = App::make('dompdf.wrapper');
   $pdf->loadHTML(view('print/print-receipt'));
   return $pdf->stream();
+});
+Route::get('import-transaction', function (Request $request) {
+  $schoo_pay = SchoolPayTransaction::find($request->trans_id);
+  if ($schoo_pay == null) return "Transaction not found";
+  //if already imported
+  $trans = Transaction::where([
+    'school_pay_transporter_id' => $schoo_pay->school_pay_transporter_id
+  ])->first();
+  if ($trans != null) {
+    $schoo_pay->status = 'Imported';
+    $schoo_pay->save();
+    $style = 'background-color: red; color: white; padding: 10px;';
+    return "<h1 style='$style'>Transaction already imported.</h1>";
+  }
+  $trans = new Transaction();
+  /* copy these fields 
+  
+id	
+created_at	
+updated_at	
+enterprise_id	
+account_id	
+academic_year_id	
+term_id	
+school_pay_transporter_id	
+created_by_id	
+contra_entry_account_id	
+contra_entry_transaction_id	
+termly_school_fees_balancing_id	
+amount	
+description	
+is_contra_entry	
+type	
+payment_date	
+source	
+status	
+	
+  */
+  $trans->enterprise_id = $schoo_pay->enterprise_id;
+  $trans->account_id = $schoo_pay->account_id;
+  $trans->academic_year_id = $schoo_pay->academic_year_id;
+  $trans->term_id = $schoo_pay->term_id;
+  $trans->school_pay_transporter_id = $schoo_pay->school_pay_transporter_id;
+  $trans->created_by_id = $schoo_pay->created_by_id;
+  $trans->contra_entry_account_id = $schoo_pay->contra_entry_account_id;
+  $trans->contra_entry_transaction_id = $schoo_pay->contra_entry_transaction_id;
+  $trans->termly_school_fees_balancing_id = $schoo_pay->termly_school_fees_balancing_id;
+  $trans->amount = $schoo_pay->amount;
+  $trans->description = $schoo_pay->description;
+  $trans->is_contra_entry = $schoo_pay->is_contra_entry;
+  $trans->type = $schoo_pay->type;
+  $trans->payment_date = $schoo_pay->payment_date;
+  $trans->source = $schoo_pay->source;
+  try {
+    $trans->save();
+  } catch (\Exception $e) {
+
+    $msg = $e->getMessage();
+    $style = 'background-color: red; color: white; padding: 10px;';
+    return "<h1 style='$style'>$msg</h1>";
+  }
+  $trans->save();
+  $style = 'background-color: green; color: white; padding: 10px;';
+  $schoo_pay->status = 'Imported';
+  $schoo_pay->save();
+  return "<h1 style='$style'>Transaction imported successfully</h1>";
 });

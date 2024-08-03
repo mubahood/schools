@@ -238,11 +238,11 @@ class Account extends Model
     {
 
 
-        $u = Administrator::find($this->administrator_id);
+        $u = User::find($this->administrator_id);
         if ($u == null) {
             $this->delete();
         }
-        return $this->belongsTo(Administrator::class, 'administrator_id');
+        return $this->belongsTo(User::class, 'administrator_id');
     }
 
     public function transactions()
