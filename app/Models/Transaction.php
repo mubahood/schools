@@ -111,8 +111,8 @@ class Transaction extends Model
     {
         parent::boot();
         self::deleting(function ($m) {
-            throw new Exception("Transaction cannot be deleted.", 1); 
-            return false; 
+            throw new Exception("Transaction cannot be deleted.", 1);
+            return false;
         });
         self::deleted(function ($m) {
             DB::table('transactions')->where('contra_entry_account_id', $m->id)->delete();
@@ -163,6 +163,13 @@ class Transaction extends Model
 
             if (!isset($m->type)) {
                 $m->type = 'other';
+            }
+            //check if there is a duplicate of school_pay_transporter_id
+            $dup = Transaction::where([
+                'school_pay_transporter_id' => $m->school_pay_transporter_id,
+            ])->first();
+            if ($dup != null) {
+                return false;
             }
 
             $ent = Enterprise::find($m->enterprise_id);
