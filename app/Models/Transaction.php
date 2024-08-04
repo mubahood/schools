@@ -281,6 +281,17 @@ class Transaction extends Model
     public static function my_update($m)
     {
         try {
+            $school_trans = SchoolPayTransaction::where([
+                'school_pay_transporter_id' => $m->school_pay_transporter_id,
+            ])->first();
+            if ($school_trans != null) {
+                $school_trans->status = 'Imported';
+                $school_trans->save();
+            }
+        } catch (\Throwable $th) {
+        }
+
+        try {
             if ($m->account != null) {
                 if ($m->account->owner != null) {
                     if ($m->account->owner->status != 1) {

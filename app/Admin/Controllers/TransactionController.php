@@ -143,7 +143,7 @@ class TransactionController extends AdminController
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
         ])
-            ->orderBy('id', 'Desc');
+            ->orderBy('payment_date', 'Desc');
 
         /*         $grid->column('id', __('Id'))->sortable(); */
 
