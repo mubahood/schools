@@ -180,6 +180,13 @@ class SchoolPayTransactionController extends AdminController
         });
 
 
+        $grid->column('account.balance', __('Fee Balance'))
+            ->display(function ($x) {
+                return number_format($x);
+            })->width(120);
+
+
+
         return $grid;
     }
 
