@@ -139,6 +139,8 @@ Route::group([
 
     $router->get('/', 'HomeController@stats')->name('home');
     $router->get('/reports-finance', 'HomeController@reports_finance')->name('home');
+    $router->resource('assessment-sheets', AssessmentSheetController::class);
+
 
     $router->resources([
         'enterprises' => EnterpriseController::class

@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\AcademicClass;
+use App\Models\AssessmentSheet;
+use App\Models\Enterprise;
 use App\Models\FixedAsset;
 use App\Models\FixedAssetPrint;
+use App\Models\MarkRecord;
 use App\Models\ReportCard;
 use App\Models\ReportCardPrint;
 use App\Models\SecondaryReportCard;
@@ -25,6 +28,39 @@ class ReportCardsPrintingController extends Controller
 {
 
 
+    public function assessment_sheets_generate(Request $req)
+    {
+        $id = $req->id;
+        $assessment = AssessmentSheet::find($id);
+        $assessment = AssessmentSheet::prepare($assessment);
+        $assessment->save();
+
+        $pdf = App::make('dompdf.wrapper');
+        //make $pdf layout to horizontal
+        $pdf->setPaper('A4', 'landscape');
+        $class = $assessment->has_class;
+        $ent = Enterprise::find($assessment->enterprise_id);
+
+        $reportCards = StudentReportCard::where([
+            'termly_report_card_id' => $assessment->termly_report_card_id,
+            'academic_class_id' => $assessment->academic_class_id,
+
+        ])
+            ->orderBy('total_marks', 'desc')
+            ->get();
+        /* 
+            "generated" => "No"
+            "pdf_link" => null
+        */
+
+        $pdf->loadHTML(view('print.assessment-sheets', [
+            'assessment' => $assessment,
+            'subjects' => $class->subjects,
+            'reportCards' => $reportCards,
+            'ent' => $ent
+        ]));
+        return $pdf->stream();
+    }
     public function index(Request $req)
     {
 
@@ -178,11 +214,13 @@ class ReportCardsPrintingController extends Controller
 
             $icalss_id = ((int)($_GET['calss_id']));
             $reps  = [];
-            foreach (StudentReportCard::where([
-                'academic_class_id' => $icalss_id,
-                'term_id' => $term_id,
-                /*                 'termly_report_card_id' => $termly_report_card_id, */
-            ])->get() as $r) {
+            foreach (
+                StudentReportCard::where([
+                    'academic_class_id' => $icalss_id,
+                    'term_id' => $term_id,
+                    /*                 'termly_report_card_id' => $termly_report_card_id, */
+                ])->get() as $r
+            ) {
 
 
                 $tr = TheologryStudentReportCard::where([

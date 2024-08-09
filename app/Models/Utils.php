@@ -50,6 +50,32 @@ define('COLORS',  [
 class Utils  extends Model
 {
 
+    //function that sorts laravel collection
+    public static function sort_collection($collection, $field, $order = 'asc')
+    {
+        //use bubble sort, treat the field as a number  not a string
+        $n = $collection->count();
+        $max = 0;
+        for ($i = 0; $i < $n; $i++) {
+            $max = $i;
+            for ($j = $i + 1; $j < $n; $j++) {
+                if ($order == 'asc') {
+                    if ($collection[$j]->$field < $collection[$max]->$field) {
+                        $max = $j;
+                    }
+                } else {
+                    if ($collection[$j]->$field > $collection[$max]->$field) {
+                        $max = $j;
+                    }
+                }
+            }
+            $temp = $collection[$i];
+            $collection[$i] = $collection[$max];
+            $collection[$max] = $temp;
+        } 
+        return $collection; 
+    } 
+
     //static get_empty_spaces
     public static function get_empty_spaces($num)
     {

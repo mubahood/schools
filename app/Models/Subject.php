@@ -134,6 +134,15 @@ class Subject extends Model
 
         return  $this->subject_name . " - " . $text;
     }
+    
+    //short name
+    public function short_name(){
+        $course = $this->course;
+        if($course != null){
+            return $course->short_name;
+        }
+        return $this->subject_name;
+    }
 
 
     protected $appends = ['name'];

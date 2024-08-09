@@ -187,14 +187,14 @@ class StudentReportCard extends Model
   String termly_report_card_text = "";
   String total_marks = "";
   String total_aggregates = "";
-  String position = "";
+  String  = "";
   String class_teacher_comment = "";
   String head_teacher_comment = "";
   String class_teacher_commented = "";
   String head_teacher_commented = "";
   String total_students = "";
-  String average_aggregates = "";
-  String grade = "";
+  String  = "";
+  String  = "";
   String stream_id = "";
   String stream_text = "";
   String sports_comment = "";

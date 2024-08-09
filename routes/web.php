@@ -47,6 +47,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 
 
+Route::get('assessment-sheets-generate', [ReportCardsPrintingController::class, 'assessment_sheets_generate']);
 Route::get('report-card-printings', [ReportCardsPrintingController::class, 'index']);
 Route::get('data-import', [ReportCardsPrintingController::class, 'data_import']);
 Route::get('process-termly-school-fees-balancings', [MainController::class, 'process_termly_school_fees_balancings']);

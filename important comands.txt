@@ -1,4 +1,4 @@
-php artisan make:migration change_type_of_status_school_pay_transactions --table=school_pay_transactions
+php artisan make:migration add_pdf_to_assessment_sheets --table=assessment_sheets
 
          $table->date('check_in_time')->nullable();
             $table->date('check_out_time')->nullable();
@@ -11,9 +11,9 @@ php artisan make:migration slot
 
 
 
-php artisan admin:make BatchServiceSubscriptionController --model=App\\Models\\BatchServiceSubscription
+php artisan admin:make AssessmentSheetController --model=App\\Models\\AssessmentSheet
 
-php artisan make:model SchoolPayTransaction -m
+php artisan make:model AssessmentSheet -m
 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
 
 git config --global user.name "mubahood"
