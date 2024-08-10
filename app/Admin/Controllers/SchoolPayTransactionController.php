@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\Post\SchoolPayTransactionImport;
 use App\Admin\Actions\Post\TransactionChangeDueTerm;
 use App\Models\Account;
 use App\Models\SchoolPayTransaction;
@@ -36,7 +37,6 @@ class SchoolPayTransactionController extends AdminController
     {
         $grid = new Grid(new SchoolPayTransaction());
         $grid->model()->orderBy('payment_date', 'desc');
-        $grid->disableBatchActions();
         $grid->disableActions();
         $grid->disableCreateButton();
 
@@ -109,7 +109,7 @@ class SchoolPayTransactionController extends AdminController
 
         $grid->batchActions(function ($batch) {
             $batch->disableDelete();
-            $batch->add(new TransactionChangeDueTerm());
+            $batch->add(new SchoolPayTransactionImport()); 
         });
 
         $grid->model()->where([
