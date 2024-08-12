@@ -24,6 +24,10 @@ class TheologyTermlyReportCard extends Model
             if ($t == null) {
                 die("Term not found.");
             }
+            $m->bot_max = 100;
+            $m->mot_max = 100;
+            $m->eot_max = 100;
+
             $m->academic_year_id = $t->academic_year_id;
             return $m;
         });
@@ -32,6 +36,10 @@ class TheologyTermlyReportCard extends Model
             if ($t == null) {
                 die("Term not found.");
             }
+            $m->bot_max = 100;
+            $m->mot_max = 100;
+            $m->eot_max = 100;
+
             $m->academic_year_id = $t->academic_year_id;
         });
         self::updated(function ($m) {
@@ -149,18 +157,38 @@ class TheologyTermlyReportCard extends Model
         }
         $grading_scale = $m->grading_scale;
         $ranges = $grading_scale->grade_ranges;
+
         if ($grading_scale == null) {
             throw new Exception("Grading scale not found.", 1);
         }
+
+        $number_of_exams = 0;
+        if ($m->reports_include_bot == 'Yes') {
+            $number_of_exams++;
+        }
+        if ($m->reports_include_mot == 'Yes') {
+            $number_of_exams++;
+        }
+        if ($m->reports_include_eot == 'Yes') {
+            $number_of_exams++;
+        }
+        if ($number_of_exams < 1) {
+            throw new Exception("You must include at least one exam.", 1);
+        }
+
+
         foreach ($m->classes as $class_id) {
             $class = TheologyClass::find(((int)($class_id)));
             if ($class == null) {
                 throw new Exception("Class not found.", 1);
                 continue;
             }
+
             foreach ($class->students as $key => $student_has_class) {
                 $student = $student_has_class->student;
-
+                /* if($student->student_id != 7669){
+                    continue;
+                } */
                 if ($student == null) {
                     continue;
                 }
@@ -186,80 +214,58 @@ class TheologyTermlyReportCard extends Model
                 $report->stream_id = $student_has_class->theology_stream_id;
                 $report->theology_class_id = $student_has_class->theology_class_id;
 
+
+
                 $marks = TheologyMarkRecord::where([
                     'administrator_id' => $student->id,
                     'theology_termly_report_card_id' => $m->id,
                 ])->get();
 
-
-                $_total_scored_marks = 0;
-                $_total_max_marks = 0;
-                $_total_aggregates = 0;
-
+                $report->total_marks = 0;
+                $report->average_aggregates = 0;
                 foreach ($marks as $mark) {
-                    $total_max_marks = 0;
+
+                    $mark->bot_grade = Utils::generateAggregates($grading_scale, $mark->bot_score)['aggr_name'];
+                    $mark->mot_grade = Utils::generateAggregates($grading_scale, $mark->mot_score)['aggr_name'];
+                    $mark->eot_grade = Utils::generateAggregates($grading_scale, $mark->eot_score)['aggr_name'];
+
+
                     $total_scored_marks = 0;
-
-                    if ($m->positioning_method == 'Specific') {
-                        if ($m->positioning_exam == 'bot') {
-                            $total_scored_marks = (int)$mark->bot_score;
-                            $total_max_marks = (int)$m->bot_max;
-                        } else if ($m->positioning_exam == 'mot') {
-                            $total_scored_marks = (int)$mark->mot_score;
-                            $total_max_marks = (int)$m->mot_max;
-                        } else if ($m->positioning_exam == 'eot') {
-                            $total_scored_marks = (int)$mark->eot_score;
-                            $total_max_marks = (int)$m->eot_max;
-                        } else {
-                            throw new Exception("Positioning exam not found.", 1);
-                        }
-                    } else {
-                        if ($m->reports_include_bot == 'Yes') {
-                            $total_scored_marks += (int)$mark->bot_score;
-                            $total_max_marks += (int)$m->bot_max;
-                        }
-                        if ($m->reports_include_mot == 'Yes') {
-                            $total_scored_marks += (int)$mark->mot_score;
-                            $total_max_marks += (int)$m->mot_max;
-                        }
-                        if ($m->reports_include_eot == 'Yes') {
-                            $total_scored_marks += (int)$mark->eot_score;
-                            $total_max_marks += (int)$m->eot_max;
-                        }
+                    if ($m->reports_include_bot == 'Yes') {
+                        $total_scored_marks += (int)$mark->bot_score;
+                    }
+                    if ($m->reports_include_mot == 'Yes') {
+                        $total_scored_marks += (int)$mark->mot_score;
+                    }
+                    if ($m->reports_include_eot == 'Yes') {
+                        $total_scored_marks += (int)$mark->eot_score;
                     }
 
-                    $average_mark = 0;
-                    if ($total_max_marks != 0) {
-                        $average_mark = ($total_scored_marks / $total_max_marks) * 100;
-                    }
+                    $average_mark = ((int)(($total_scored_marks) / $number_of_exams));
 
-                    $average_mark = (int)($average_mark);
                     $mark->total_score = $total_scored_marks;
                     $mark->total_score_display = $average_mark;
-
-
                     $mark->remarks = Utils::get_automaic_mark_remarks($mark->total_score_display);
+
 
                     $mark->aggr_value = null;
                     $mark->aggr_name = null;
-
                     foreach ($ranges as $range) {
                         if ($mark->total_score_display > $range->min_mark && $mark->total_score_display < $range->max_mark) {
                             $mark->aggr_value = $range->aggregates;
                             $mark->aggr_name = $range->name;
+                            $report->average_aggregates += $mark->aggr_value;
                             break;
                         }
                     }
 
-                    $_total_aggregates += $mark->aggr_value;
-                    $_total_scored_marks += $mark->total_score_display;
-                    $_total_max_marks += 100;
+                    $report->total_marks += $mark->total_score_display;
                     $mark->save();
                 }
-                $report->total_marks = $_total_scored_marks;
-                //$report->total_max_marks = $_total_max_marks;
-                $report->total_aggregates = $_total_aggregates;
-                $report->average_aggregates = $_total_aggregates;
+
+                $report->total_marks = $number_of_exams * 100;
+                $report->total_aggregates = $report->average_aggregates;
+
                 $report->position = 0;
                 if ($report->average_aggregates <= 12) {
                     $report->grade = '1';
@@ -273,17 +279,10 @@ class TheologyTermlyReportCard extends Model
                     $report->grade = 'U';
                 }
                 $report->save();
-                /* 
-class_teacher_comment	
-head_teacher_comment	
-class_teacher_commented	
-head_teacher_commented	
-total_students	 
-
-*/
             }
         }
     }
+
 
 
 

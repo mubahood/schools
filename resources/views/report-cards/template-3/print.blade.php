@@ -28,7 +28,11 @@ if (isset($min_count) && isset($max_count)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="{{ public_path('css/bootstrap-print.css') }}">
+    @if (isset($_GET['html']))
+        <link rel="stylesheet" href="{{ url('css/bootstrap.css') }}">
+    @else
+        <link rel="stylesheet" href="{{ public_path('css/bootstrap.css') }}">
+    @endif 
     <style>
         body {
             background: #FFF;

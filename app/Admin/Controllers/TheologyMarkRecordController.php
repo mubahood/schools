@@ -60,22 +60,26 @@ class TheologyMarkRecordController extends AdminController
             die("Display year not found.");
         }
         if (Admin::user()->isRole('dos')) {
-            foreach (TheologySubject::where([
-                'enterprise_id' => $u->enterprise_id
-            ])
-                ->orderBy('theology_course_id', 'asc')
-                ->get() as $ex) {
+            foreach (
+                TheologySubject::where([
+                    'enterprise_id' => $u->enterprise_id
+                ])
+                    ->orderBy('theology_course_id', 'asc')
+                    ->get() as $ex
+            ) {
                 if ($ex->theology_class->academic_year_id != $dpYear->id) {
                     continue;
                 }
                 $subs[$ex->id] = $ex->course->name . " - " . $ex->theology_class->name . " - " . $dpYear->name;
             }
         } else {
-            foreach (TheologySubject::where([
-                'enterprise_id' => $u->enterprise_id
-            ])
-                ->orderBy('theology_course_id', 'asc')
-                ->get() as $ex) {
+            foreach (
+                TheologySubject::where([
+                    'enterprise_id' => $u->enterprise_id
+                ])
+                    ->orderBy('theology_course_id', 'asc')
+                    ->get() as $ex
+            ) {
                 if (
                     $ex->subject_teacher == Admin::user()->id ||
                     $ex->teacher_1 == Admin::user()->id ||
@@ -174,22 +178,26 @@ class TheologyMarkRecordController extends AdminController
                 die("Display year not found.");
             }
             if (Admin::user()->isRole('dos')) {
-                foreach (TheologySubject::where([
-                    'enterprise_id' => $u->enterprise_id
-                ])
-                    ->orderBy('theology_course_id', 'asc')
-                    ->get() as $ex) {
+                foreach (
+                    TheologySubject::where([
+                        'enterprise_id' => $u->enterprise_id
+                    ])
+                        ->orderBy('theology_course_id', 'asc')
+                        ->get() as $ex
+                ) {
                     if ($ex->theology_class->academic_year_id != $dpYear->id) {
                         continue;
                     }
                     $subs[$ex->id] = $ex->course->name . " - " . $ex->theology_class->name . " - " . $dpYear->name;
                 }
             } else {
-                foreach (TheologySubject::where([
-                    'enterprise_id' => $u->enterprise_id
-                ])
-                    ->orderBy('theology_course_id', 'asc')
-                    ->get() as $ex) {
+                foreach (
+                    TheologySubject::where([
+                        'enterprise_id' => $u->enterprise_id
+                    ])
+                        ->orderBy('theology_course_id', 'asc')
+                        ->get() as $ex
+                ) {
                     if (
                         $ex->subject_teacher == Admin::user()->id ||
                         $ex->teacher_1 == Admin::user()->id ||
@@ -213,13 +221,15 @@ class TheologyMarkRecordController extends AdminController
             $ajax_url = url('/api/ajax-users?enterprise_id=' . $u->enterprise_id . "&user_type=student");
 
             $streams = [];
-            foreach (TheologyStream::where(
-                [
-                    'enterprise_id' => $u->enterprise_id,
-                ]
-            )
-                ->orderBy('id', 'desc')
-                ->get() as $ex) {
+            foreach (
+                TheologyStream::where(
+                    [
+                        'enterprise_id' => $u->enterprise_id,
+                    ]
+                )
+                    ->orderBy('id', 'desc')
+                    ->get() as $ex
+            ) {
                 $streams[$ex->id] = $ex->theology_class->short_name . " - " . $ex->name;
             }
             $filter->equal('theology_stream_id', 'Filter by Stream')->select($streams);
@@ -233,11 +243,13 @@ class TheologyMarkRecordController extends AdminController
 
 
             $exams = [];
-            foreach (Term::where([
-                'enterprise_id' => $u->enterprise_id,
-            ])
-                ->orderBy('id', 'desc')
-                ->get() as $ex) {
+            foreach (
+                Term::where([
+                    'enterprise_id' => $u->enterprise_id,
+                ])
+                    ->orderBy('id', 'desc')
+                    ->get() as $ex
+            ) {
                 $exams[$ex->id] = "Term " . $ex->name_text;
             }
             $filter->equal('term_id', 'Filter by Term')->select($exams);
@@ -261,11 +273,11 @@ class TheologyMarkRecordController extends AdminController
         $grid->column('created_at', __('Created'))->sortable()->hide();
         $grid->column('updated_at', __('Updated'))->sortable()->hide();
         $grid->column('termly_report_card_id', __('Termly Report'))->display(function ($termly_report_card_id) {
-            if($this->termlyReportCard ==  null){
+            if ($this->termlyReportCard ==  null) {
                 $this->delete();
                 return 'Deleted';
             }
-            return $this->termlyReportCard->report_title; 
+            return $this->termlyReportCard->report_title;
         })
             ->hide()
             ->sortable();
@@ -313,18 +325,18 @@ class TheologyMarkRecordController extends AdminController
             ->sortable();
 
         if ($reportCard->display_bot_to_teachers == 'Yes') {
-            $grid->column('bot_score', __('B.o.T'))
+            $grid->column('bot_score', __($reportCard->bot_name))
                 ->editable()
                 ->sortable();
         }
         if ($reportCard->display_mot_to_teachers == 'Yes') {
-            $grid->column('mot_score', __('M.o.T'))
+            $grid->column('mot_score', __($reportCard->mot_name))
                 ->editable()
                 ->sortable();
         }
 
         if ($reportCard->display_eot_to_teachers == 'Yes') {
-            $grid->column('eot_score', __('E.o.T'))
+            $grid->column('eot_score', __($reportCard->eot_name))
                 ->editable()
                 ->sortable();
         }
@@ -335,7 +347,7 @@ class TheologyMarkRecordController extends AdminController
 
 
         if ($reportCard->display_bot_to_teachers == 'Yes') {
-            $grid->column('bot_is_submitted', __('B.o.T'))
+            $grid->column('bot_is_submitted', __($reportCard->bot_name))
                 ->label([
                     'No' => 'danger',
                     'Yes' => 'success',
@@ -348,7 +360,7 @@ class TheologyMarkRecordController extends AdminController
         }
         if ($reportCard->display_mot_to_teachers == 'Yes') {
 
-            $grid->column('mot_is_submitted', __('M.o.T'))
+            $grid->column('mot_is_submitted', __($reportCard->mot_name))
                 ->label([
                     'No' => 'danger',
                     'Yes' => 'success',
@@ -361,7 +373,7 @@ class TheologyMarkRecordController extends AdminController
         }
 
         if ($reportCard->display_eot_to_teachers == 'Yes') {
-            $grid->column('eot_is_submitted', __('E.o.T'))
+            $grid->column('eot_is_submitted', __($reportCard->eot_name))
                 ->filter([
                     'Yes' => 'Submitted',
                     'No' => 'Not Submitted',
@@ -407,6 +419,8 @@ class TheologyMarkRecordController extends AdminController
         $grid->column('initials', __('Initials'))->hide();
 
 
+
+        $grid->column('total_score_display', __('Average Mark'))->sortable(); 
         return $grid;
     }
 

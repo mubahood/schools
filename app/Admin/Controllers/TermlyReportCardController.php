@@ -201,9 +201,11 @@ class TermlyReportCardController extends AdminController
 
         $scales = [];
         $form->divider('Basic Information');
-        foreach (GradingScale::where([])
-            ->orderBy('id', 'DESC')
-            ->get() as $v) {
+        foreach (
+            GradingScale::where([])
+                ->orderBy('id', 'DESC')
+                ->get() as $v
+        ) {
             $scales[$v->id] =  $v->name;
         }
 
@@ -247,9 +249,9 @@ class TermlyReportCardController extends AdminController
             $form->radioCard('delete_marks_for_non_active', 'Delete marks for non active students?')
                 ->options(['Yes' => 'Yes', 'No' => 'No'])
                 ->default('No');
-            $form->decimal('bot_max', __('Max marks for Beginning Of Term exams'))->default(0);
-            $form->decimal('mot_max', __('Max marks for Middle Of Term exams'))->default(0);
-            $form->decimal('eot_max', __('Max marks for End Of Term exams'))->default(0);
+            $form->decimal('bot_max', __('Max marks for Beginning Of Term exams'))->default(100);
+            $form->decimal('mot_max', __('Max marks for Middle Of Term exams'))->default(100);
+            $form->decimal('eot_max', __('Max marks for End Of Term exams'))->default(100);
             $form->divider('Marks Display Settings');
             $form->radioCard('display_bot_to_teachers', 'Display Beginning Of Term marks to teachers?')
                 ->options(['Yes' => 'Yes', 'No' => 'No'])
@@ -369,6 +371,16 @@ class TermlyReportCardController extends AdminController
             $form->radioCard('reports_who_fees_balance', 'Display fees balance?')
                 ->options(['Yes' => 'Yes', 'No' => 'No'])
                 ->default('No');
+
+            /* 
+            $table->string('bot_name')->nullable()->default('B.O.T');
+            $table->string('mot_name')->nullable()->default('M.O.T');
+            $table->string('eot_name')->nullable()->default('E.O.T');
+                */
+            $form->text('bot_name', 'Beginning Of Term name')->default('B.O.T')->rules('required');
+            $form->text('mot_name', 'Middle Of Term name')->default('M.O.T')->rules('required');
+            $form->text('eot_name', 'End Of Term name')->default('E.O.T')->rules('required');
+
             $form->radioCard('reports_display_report_to_parents', 'Display reports to parents?')
                 ->options(['Yes' => 'Yes', 'No' => 'No'])
                 ->default('No');

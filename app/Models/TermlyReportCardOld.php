@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class TermlyReportCard extends Model
+class TermlyReportCardOld extends Model
 {
     use HasFactory;
 
@@ -28,7 +28,7 @@ class TermlyReportCard extends Model
             if ($term == null) {
                 throw new Exception("Term not found.", 1);
             }
-            $old = TermlyReportCard::where([
+            $old = TermlyReportCardOld::where([
                 'term_id' => $term->id,
             ])->first();
             if ($old != null) {
@@ -36,21 +36,14 @@ class TermlyReportCard extends Model
             }
             $m->academic_year_id = $term->academic_year_id;
             $m->term_id = $term->id;
-            $m->bot_max = 100;
-            $m->mot_max = 100;
-            $m->eot_max = 100;
-
             return $m;
         });
 
         self::updating(function ($m) {
             $term = Term::find($m->term_id);
             if ($term == null) {
-                throw new Exception("Term not found.", 1);
+                die("Term not found.");
             }
-            $m->bot_max = 100;
-            $m->mot_max = 100;
-            $m->eot_max = 100;
             $m->term_id = $term->id;
 
             return $m;
@@ -58,7 +51,7 @@ class TermlyReportCard extends Model
 
         self::created(function ($m) {
             if ($m->generate_marks == 'Yes') {
-                TermlyReportCard::do_generate_marks($m);
+                TermlyReportCardOld::do_generate_marks($m);
             }
         });
 
@@ -67,22 +60,22 @@ class TermlyReportCard extends Model
             ini_set('memory_limit', '-1');
 
             if ($m->generate_marks == 'Yes') {
-                TermlyReportCard::do_generate_marks($m);
+                TermlyReportCardOld::do_generate_marks($m);
             }
             if ($m->delete_marks_for_non_active == 'Yes') {
-                TermlyReportCard::do_delete_marks_for_non_active($m);
+                TermlyReportCardOld::do_delete_marks_for_non_active($m);
             }
             if ($m->reports_generate == 'Yes') {
-                TermlyReportCard::do_reports_generate($m);
+                TermlyReportCardOld::do_reports_generate($m);
             }
             if ($m->generate_class_teacher_comment == 'Yes') {
-                TermlyReportCard::do_generate_class_teacher_comment($m);
+                TermlyReportCardOld::do_generate_class_teacher_comment($m);
             }
             if ($m->generate_positions == 'Yes') {
-                TermlyReportCard::do_generate_positions($m);
+                TermlyReportCardOld::do_generate_positions($m);
             }
             if ($m->generate_head_teacher_comment == 'Yes') {
-                //TermlyReportCard::do_generate_head_teacher_comment($m);
+                //TermlyReportCardOld::do_generate_head_teacher_comment($m);
             }
             DB::update("UPDATE termly_report_cards SET 
             generate_marks = 'No',
@@ -171,10 +164,10 @@ class TermlyReportCard extends Model
 
         $ent = Enterprise::find($m->enterprise_id);
         if ($ent->type == 'Primary') {
-            TermlyReportCard::make_reports_for_primary($m);
+            TermlyReportCardOld::make_reports_for_primary($m);
         } else if ($ent->type == 'Secondary') {
             die("Time to generate secondary marks.");
-            TermlyReportCard::make_reports_for_secondary($m);
+            TermlyReportCardOld::make_reports_for_secondary($m);
         } else {
             die("School type not found.");
         }
@@ -320,21 +313,6 @@ class TermlyReportCard extends Model
             throw new Exception("Grading scale not found.", 1);
         }
 
-        $number_of_exams = 0;
-        if ($m->reports_include_bot == 'Yes') {
-            $number_of_exams++;
-        }
-        if ($m->reports_include_mot == 'Yes') {
-            $number_of_exams++;
-        }
-        if ($m->reports_include_eot == 'Yes') {
-            $number_of_exams++;
-        }
-        if ($number_of_exams < 1) {
-            throw new Exception("You must include at least one exam.", 1);
-        }
-
-
         foreach ($m->classes as $class_id) {
             $class = AcademicClass::find(((int)($class_id)));
             if ($class == null) {
@@ -377,10 +355,12 @@ class TermlyReportCard extends Model
                     'administrator_id' => $student->id,
                     'termly_report_card_id' => $m->id,
                 ])->get();
+                dd($marks);
 
+                $_total_scored_marks = 0;
+                $_total_max_marks = 0;
+                $_total_aggregates = 0;
 
-                $report->total_marks = 0;
-                $report->average_aggregates = 0;
                 foreach ($marks as $mark) {
                     if ($mark->subject == null) {
                         continue;
@@ -389,34 +369,47 @@ class TermlyReportCard extends Model
                         continue;
                     }
 
-                    
-                    $mark->bot_grade = Utils::generateAggregates($grading_scale, $mark->bot_score)['aggr_name'];
-                    $mark->mot_grade = Utils::generateAggregates($grading_scale, $mark->mot_score)['aggr_name'];
-                    $mark->eot_grade = Utils::generateAggregates($grading_scale, $mark->eot_score)['aggr_name'];
-                    
-                    /* 
-                    dd($mark->eot_grade);
-                            $table->string('bot_grade')->nullable();
-            $table->string('mot_grade')->nullable();
-            $table->string('eot_grade')->nullable();
-                    */
-
+                    $total_max_marks = 0;
                     $total_scored_marks = 0;
-                    if ($m->reports_include_bot == 'Yes') {
-                        $total_scored_marks += (int)$mark->bot_score;
-                    }
-                    if ($m->reports_include_mot == 'Yes') {
-                        $total_scored_marks += (int)$mark->mot_score;
-                    }
-                    if ($m->reports_include_eot == 'Yes') {
-                        $total_scored_marks += (int)$mark->eot_score;
+
+                    if ($m->positioning_method == 'Specific') {
+                        if ($m->positioning_exam == 'bot') {
+                            $total_scored_marks = (int)$mark->bot_score;
+                            $total_max_marks = (int)$m->bot_max;
+                        } else if ($m->positioning_exam == 'mot') {
+                            $total_scored_marks = (int)$mark->mot_score;
+                            $total_max_marks = (int)$m->mot_max;
+                        } else if ($m->positioning_exam == 'eot') {
+                            $total_scored_marks = (int)$mark->eot_score;
+                            $total_max_marks = (int)$m->eot_max;
+                        } else {
+                            throw new Exception("Positioning exam not found.", 1);
+                        }
+                    } else {
+                        if ($m->reports_include_bot == 'Yes') {
+                            $total_scored_marks += (int)$mark->bot_score;
+                            $total_max_marks += (int)$m->bot_max;
+                        }
+                        if ($m->reports_include_mot == 'Yes') {
+                            $total_scored_marks += (int)$mark->mot_score;
+                            $total_max_marks += (int)$m->mot_max;
+                        }
+                        if ($m->reports_include_eot == 'Yes') {
+                            $total_scored_marks += (int)$mark->eot_score;
+                            $total_max_marks += (int)$m->eot_max;
+                        }
+                        if ($total_max_marks == 0) {
+                            throw new Exception("Total max marks is zero.", 1);
+                        }
                     }
 
-                    $average_mark = ((int)(($total_scored_marks) / $number_of_exams));
-
+                    $average_mark = $total_scored_marks; //($total_scored_marks / $total_max_marks) * 100;
+                    $average_mark = (int)($average_mark);
                     $mark->total_score = $total_scored_marks;
                     $mark->total_score_display = $average_mark;
                     $mark->remarks = Utils::get_automaic_mark_remarks($mark->total_score_display);
+                    //dd($average_mark."-".$total_scored_marks);
+                    //student_id=2570
 
 
                     if ($mark->subject->grade_subject != 'Yes') {
@@ -431,19 +424,19 @@ class TermlyReportCard extends Model
                             if ($mark->total_score_display > $range->min_mark && $mark->total_score_display < $range->max_mark) {
                                 $mark->aggr_value = $range->aggregates;
                                 $mark->aggr_name = $range->name;
-                                $report->average_aggregates += $mark->aggr_value;
                                 break;
                             }
                         }
+                        $_total_aggregates += $mark->aggr_value;
                     }
-
-                    $report->total_marks += $mark->total_score_display;
+                    $_total_scored_marks += $mark->total_score_display;
+                    $_total_max_marks += 100;
                     $mark->save();
                 }
-
-                $report->total_marks = $number_of_exams * 100;
-                $report->total_aggregates = $report->average_aggregates;
-
+                $report->total_marks = $_total_scored_marks;
+                //$report->total_max_marks = $_total_max_marks;
+                $report->total_aggregates = $_total_aggregates;
+                $report->average_aggregates = $_total_aggregates;
                 $report->position = 0;
                 if ($report->average_aggregates <= 12) {
                     $report->grade = '1';
@@ -701,7 +694,7 @@ class TermlyReportCard extends Model
                 $report_card->total_aggregates = $total_aggregates;
                 $report_card->average_aggregates = $total_aggregates;
                 $report_card->save();
-                TermlyReportCard::grade_report_card($report_card);
+                TermlyReportCardOld::grade_report_card($report_card);
             }
         }
     }
@@ -728,8 +721,8 @@ class TermlyReportCard extends Model
 
 
         foreach ($m->report_cards as  $report_card) {
-            TermlyReportCard::grade_report_card($report_card);
-            //TermlyReportCard::get_teachers_remarks($report_card);
+            TermlyReportCardOld::grade_report_card($report_card);
+            //TermlyReportCardOld::get_teachers_remarks($report_card);
         }
     }
 

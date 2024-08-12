@@ -97,13 +97,15 @@ class MarkRecordController extends AdminController
                 ->get()->pluck('name_text', 'id'));
 
             $streams = [];
-            foreach (AcademicClassSctream::where(
-                [
-                    'enterprise_id' => $u->enterprise_id,
-                ]
-            )
-                ->orderBy('id', 'desc')
-                ->get() as $ex) {
+            foreach (
+                AcademicClassSctream::where(
+                    [
+                        'enterprise_id' => $u->enterprise_id,
+                    ]
+                )
+                    ->orderBy('id', 'desc')
+                    ->get() as $ex
+            ) {
                 if ($ex->academic_class == null) {
                     continue;
                 }
@@ -129,11 +131,13 @@ class MarkRecordController extends AdminController
             $filter->equal('termly_report_card_id', 'Filter by Report Card')->select($exams); */
 
             $subs = [];
-            foreach (Subject::where([
-                'enterprise_id' => $u->enterprise_id,
-            ])
-                ->orderBy('id', 'desc')
-                ->get() as $ex) {
+            foreach (
+                Subject::where([
+                    'enterprise_id' => $u->enterprise_id,
+                ])
+                    ->orderBy('id', 'desc')
+                    ->get() as $ex
+            ) {
                 if ($ex->academic_class == null) {
                     continue;
                 }
@@ -170,11 +174,13 @@ class MarkRecordController extends AdminController
 
 
             $exams = [];
-            foreach (Term::where([
-                'enterprise_id' => $u->enterprise_id,
-            ])
-                ->orderBy('id', 'desc')
-                ->get() as $ex) {
+            foreach (
+                Term::where([
+                    'enterprise_id' => $u->enterprise_id,
+                ])
+                    ->orderBy('id', 'desc')
+                    ->get() as $ex
+            ) {
                 $exams[$ex->id] = $ex->name_text;
             }
             $filter->equal('term_id', 'Filter by Term')->select($exams);
@@ -191,6 +197,7 @@ class MarkRecordController extends AdminController
             admin_error('Alert', 'No report card has been created for this term.');
             return redirect()->back();
         }
+
 
         $grid->column('id', __('Id'))
             ->display(function ($id) {
@@ -248,18 +255,25 @@ class MarkRecordController extends AdminController
             ->sortable();
 
         if ($reportCard->display_bot_to_teachers == 'Yes') {
-            $grid->column('bot_score', __('B.o.T'))
+            $grid->column('bot_score', __($reportCard->bot_name))
                 ->editable()
                 ->sortable();
         }
+
+        /* 
+        dd($reportCard);
+          "bot_name" => "SET 1"
+    "mot_name" => "SET 2"
+    "eot_name" => "SET 3"
+        */
         if ($reportCard->display_mot_to_teachers == 'Yes') {
-            $grid->column('mot_score', __('M.o.T'))
+            $grid->column('mot_score', __($reportCard->mot_name))
                 ->editable()
                 ->sortable();
         }
 
         if ($reportCard->display_eot_to_teachers == 'Yes') {
-            $grid->column('eot_score', __('E.o.T'))
+            $grid->column('eot_score', __($reportCard->eot_name))
                 ->editable()
                 ->sortable();
         }
@@ -270,7 +284,7 @@ class MarkRecordController extends AdminController
 
 
         if ($reportCard->display_bot_to_teachers == 'Yes') {
-            $grid->column('bot_is_submitted', __('B.o.T'))
+            $grid->column('bot_is_submitted', __($reportCard->bot_name))
                 ->label([
                     'No' => 'danger',
                     'Yes' => 'success',
@@ -283,7 +297,7 @@ class MarkRecordController extends AdminController
         }
         if ($reportCard->display_mot_to_teachers == 'Yes') {
 
-            $grid->column('mot_is_submitted', __('M.o.T'))
+            $grid->column('mot_is_submitted', __($reportCard->mot_name))
                 ->label([
                     'No' => 'danger',
                     'Yes' => 'success',
@@ -296,7 +310,7 @@ class MarkRecordController extends AdminController
         }
 
         if ($reportCard->display_eot_to_teachers == 'Yes') {
-            $grid->column('eot_is_submitted', __('E.o.T'))
+            $grid->column('eot_is_submitted', __($reportCard->eot_name))
                 ->filter([
                     'Yes' => 'Submitted',
                     'No' => 'Not Submitted',
@@ -340,6 +354,7 @@ class MarkRecordController extends AdminController
                 'Yes' => 'danger',
             ])->sortable();
         $grid->column('initials', __('Initials'))->hide();
+        $grid->column('total_score_display', __('Average Mark'))->sortable();
 
 
         return $grid;

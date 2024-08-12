@@ -1,4 +1,4 @@
-php artisan make:migration add_pdf_to_assessment_sheets --table=assessment_sheets
+php artisan make:migration add_name_to_theology_termly_report_cards --table=theology_termly_report_cards
 
          $table->date('check_in_time')->nullable();
             $table->date('check_out_time')->nullable();

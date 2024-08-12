@@ -90,15 +90,24 @@ class ReportCardsPrintingController extends Controller
         }
 
         $items = [];
-
+   
+        $min_count = $printing->min_count;
+        $max_count = $printing->max_count;
         $pdf = App::make('dompdf.wrapper');
+        $i = 0;
         if ($printing->type == 'Theology') {
             $theologgy_reps = TheologryStudentReportCard::where([
                 'theology_termly_report_card_id' => $printing->theology_termly_report_card_id,
                 'theology_class_id' => $printing->theology_class_id
             ])->get();
             foreach ($theologgy_reps as $key => $tr) {
-
+                if ($i < $min_count) {
+                    continue;
+                }
+                if ($i > $max_count) {
+                    break;
+                }
+                $i++;
                 $r = StudentReportCard::where([
                     'student_id' => $tr->student_id,
                     'term_id' => $tr->term_id,
@@ -107,7 +116,6 @@ class ReportCardsPrintingController extends Controller
                     'r' => $r,
                     'tr' => $tr,
                 ];
-                break;
             }
         } else if ($printing->type == 'Secular') {
             $reps = StudentReportCard::where([
@@ -117,6 +125,13 @@ class ReportCardsPrintingController extends Controller
                 ->orderBy('id', 'asc')
                 ->get();
             foreach ($reps as $key => $r) {
+                if ($i < $min_count) {
+                    continue;
+                }
+                if ($i > $max_count) {
+                    break;
+                }
+                $i++;
                 $tr = TheologryStudentReportCard::where([
                     'student_id' => $r->student_id,
                     'term_id' => $r->term_id,
@@ -128,7 +143,7 @@ class ReportCardsPrintingController extends Controller
                 //break;
             }
         }
-
+ 
 
         //check if $items is empty
         if (count($items) == 0) {
@@ -136,6 +151,16 @@ class ReportCardsPrintingController extends Controller
         }
 
         if ($printing->secular_tempate == 'Template_3') {
+
+            if (isset($_GET['html'])) {
+                return view('report-cards.template-3.print', [
+                    'items' => $reps,
+                    'ent' => $printing->enterprise,
+                    'report_type' => $printing->type,
+                    'min_count' => $printing->min_count,
+                    'max_count' => $printing->max_count,
+                ]);
+            }
             $pdf->loadHTML(view('report-cards.template-3.print', [
                 'items' => $reps,
                 'ent' => $printing->enterprise,
@@ -151,6 +176,14 @@ class ReportCardsPrintingController extends Controller
                 'max_count' => $printing->max_count,
             ]));
         } else {
+            if (isset($_GET['html'])) {
+                return view('report-cards.template-6.print', [
+                    'items' => $items,
+                    'report_type' => $printing->type,
+                    'min_count' => $printing->min_count,
+                    'max_count' => $printing->max_count,
+                ]);
+            }
             $pdf->loadHTML(view('report-cards.template-6.print', [
                 'items' => $items,
                 'report_type' => $printing->type,

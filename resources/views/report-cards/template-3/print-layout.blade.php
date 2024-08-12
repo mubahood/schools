@@ -9,7 +9,6 @@ $max_eot = 100;
 $tr = isset($tr) ? $tr : null;
 $ent = $r->ent;
 $owner = $r->owner;
-
 $tr = $r->get_theology_report();
 $termly_report_card = $r->termly_report_card;
 $theology_termly_report_card = null;
@@ -140,10 +139,13 @@ foreach ($r->termly_report_card->term->exams as $exam) {
             GENDER: <b>{{ $r->owner->sex }}</b> &nbsp;
         @endif
 
+        @if ($owner->lin != null && strlen($owner->lin) > 4)
+            LIN: <b>{{ $owner->lin }}</b> &nbsp;
+        @endif
         @if ($r->termly_report_card->reports_who_fees_balance == 'Yes')
             SCHOOL FEES BALANCE: <b>{{ $bal_text }}</b> &nbsp;
         @endif
-        SCHOOL PAY CODE: <b>{{ $r->owner->school_pay_payment_code }}</b> &nbsp;
+        SCHOOLPAY CODE: <b>{{ $r->owner->school_pay_payment_code }}</b> &nbsp;
     </div>
 
     <p class="text-center my-3 mt-4">
@@ -180,19 +182,19 @@ foreach ($r->termly_report_card->term->exams as $exam) {
             <th class="text-left p-1"><b>SUBJECTS</b></th>
             @if ($termly_report_card->reports_include_bot == 'Yes')
                 <th class="p-1 m-0" colspan="2">
-                    <b>B.O.T</b>
+                    <b>{{ $termly_report_card->bot_name }}</b>
                     <small class="d-block">({{ $termly_report_card->bot_max }})</small>
                 </th>
             @endif
             @if ($termly_report_card->reports_include_mot == 'Yes')
                 <th class="p-1 m-0" colspan="2">
-                    <b>M.O.T</b>
+                    <b>{{ $termly_report_card->mot_name }}</b>
                     <small class="d-block">({{ $termly_report_card->mot_max }})</small>
                 </th>
             @endif
             @if ($termly_report_card->reports_include_eot == 'Yes')
                 <th class="p-1 m-0" colspan="2">
-                    <b>E.O.T</b>
+                    <b>{{ $termly_report_card->eot_name }}</b>
                     <small class="d-block">({{ $termly_report_card->eot_max }})</small>
                 </th>
             @endif
@@ -249,16 +251,16 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 <th>{{ $v->subject->subject_name }}</th>
                 @if ($termly_report_card->reports_include_bot == 'Yes')
                     <td>{{ (int) $v->bot_score }}</td>
-                    <td>{{ Utils::generateAggregates($grading_scale, $v->bot_score)->name }}</td>
+                    <td>{{ $v->subject->grade_subject == 'Yes' ? $v->bot_grade : '-' }}
                 @endif
                 @if ($termly_report_card->reports_include_mot == 'Yes')
                     <td>{{ (int) $v->mot_score }}</td>
-                    <td>{{ $v->subject->grade_subject == 'Yes' ? $v->get_grade($grading_scale, $v->mot_score) : '-' }}
+                    <td>{{ $v->subject->grade_subject == 'Yes' ? $v->mot_grade : '-' }}
                     </td>
                 @endif
                 @if ($termly_report_card->reports_include_eot == 'Yes')
                     <td>{{ (int) $v->eot_score }}</td>
-                    <td>{{ $v->subject->grade_subject == 'Yes' ? $v->get_grade($grading_scale, $v->eot_score) : '-' }}
+                    <td>{{ $v->subject->grade_subject == 'Yes' ? $v->eot_grade : '-' }}
                     </td>
                 @endif
                 @if ($termly_report_card->positioning_method != 'Specific')
@@ -330,31 +332,30 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 <th class="text-left p-1"><b>SUBJECTS</b></th>
                 @if ($theology_termly_report_card->reports_include_bot == 'Yes')
                     <th colspan="2" class="p-1 m-0">
-                        <b>B.O.T</b>
+                        <b>{{ $theology_termly_report_card->bot_name }}</b>
                         <small class="d-block">({{ $termly_report_card->bot_max }})</small>
                     </th>
                 @endif
                 @if ($theology_termly_report_card->reports_include_mot == 'Yes')
                     <th colspan="2" class="p-1 m-0">
-                        <b>M.O.T</b>
+                        <b>{{ $theology_termly_report_card->mot_name }}</b>
                         <small class="d-block">({{ $termly_report_card->mot_max }})</small>
                     </th>
                 @endif
                 @if ($theology_termly_report_card->reports_include_eot == 'Yes')
                     <th colspan="2" class="p-1 m-0">
-                        <b>E.O.T</b>
+                        <b>{{ $theology_termly_report_card->eot_name }}</b>
                         <small class="d-block">({{ $termly_report_card->eot_max }})</small>
                     </th>
                 @endif
                 @if ($termly_report_card->positioning_method != 'Specific')
                     <th class="p-1"><b>MARKS</b>
-                        <small class="d-block">average - ({{ '100' }}%)</small>
+                        <small class="d-block">({{ '100' }}%)</small>
                     </th>
                     <th class="p-1">AGGR</th>
                 @endif
                 <th class="remarks p-1 text-center"><b class="text-uppercase">Remarks</b></th>
-                <th class="remarks text-center p-1"><b class="text-uppercase">Initials</b>
-                </th>
+                <th class="remarks text-center p-1"><b class="text-uppercase">Initials</b></th>
             </thead>
             @php
                 $span = 0;
@@ -408,19 +409,15 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     <th>{{ $v->subject->name }}</th>
                     @if ($termly_report_card->reports_include_bot == 'Yes')
                         <td>{{ (int) $v->bot_score }}</td>
-                        <td>{{ $v->get_grade($grading_scale, $v->eot_score) }}</td>
+                        <td>{{ $v->bot_grade }}</td>
                     @endif
                     @if ($termly_report_card->reports_include_mot == 'Yes')
                         <td>{{ (int) $v->mot_score }}</td>
-                        <td>{{ $v->get_grade($grading_scale, $v->mot_score) }}</td>
+                        <td>{{ $v->mot_grade }}</td>
                     @endif
                     @if ($termly_report_card->reports_include_eot == 'Yes')
                         <td>{{ (int) $v->eot_score }}</td>
-                        <td>{{ $v->get_grade($grading_scale, $v->eot_score) }}</td>
-                    @endif
-                    @if ($termly_report_card->positioning_method != 'Specific')
-                        <td>{{ (int) $v->total_score_display }}</td>
-                        <td>{{ $v->aggr_name }}</td>
+                        <td>{{ $v->eot_grade }}</td>
                     @endif
                     <td class="remarks text-center">{{ $v->remarks }}</td>
                     <td class="remarks text-center">{{ $v->initials }}</td>
@@ -438,15 +435,11 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 @endif
                 @if ($termly_report_card->reports_include_eot == 'Yes')
                     <th class="text-center">{{ $eot_tot }}</th>
-                    <th></th>
                 @endif
-                @if ($termly_report_card->positioning_method != 'Specific')
-                    <td class="text-center"><b>{{-- {{ $tr->total_marks }} --}}</b></td>
-                    <td><b>{{ $tr->total_aggregates }}</b></td>
-                @endif
+                <td><b>{{ $tr->total_aggregates }}</b></td>
                 <td colspan="2"></td>
             </tr>
-
+ 
         </table>
         <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's comment:</span> <b class="comment"
                 style="font-size: 14px">{!! $termly_report_card->display_class_teacher_comments == 'Yes'
@@ -457,8 +450,9 @@ foreach ($r->termly_report_card->term->exams as $exam) {
             <b style="font-size: 14px" class="text-uppercase comment">{{ Utils::get_empty_spaces(60) }}</b>&nbsp;
             {{-- <b style="font-size: 14px"
                 class="text-uppercase">......................................................</b> --}}&nbsp;
-            <span class="text-uppercase fs-16 ">Signature:<b class="comment">{{ Utils::get_empty_spaces(40) }}</b></span>
-        </p>    
+            <span class="text-uppercase fs-16 ">Signature:<b
+                    class="comment">{{ Utils::get_empty_spaces(40) }}</b></span>
+        </p>
     @endif
 
     <hr style="background-color:  {{ $r->ent->color }}; height: 2px; 
@@ -480,7 +474,10 @@ foreach ($r->termly_report_card->term->exams as $exam) {
     <p class="mt-2 fw-16"><span class="text-uppercase">HEAD Teacher's Name:</span> <b style="font-size: 14px"
             class="text-uppercase">{{ $hm_name }}</b>,&nbsp;
         <span class="text-uppercase fs-16 ">Signature:
-            @if ($ent->hm_signature != null && strlen($ent->hm_signature) > 5)
+            @if (
+                $ent->hm_signature != null &&
+                    strlen($ent->hm_signature) > 5 &&
+                    file_exists(public_path('storage/' . $ent->hm_signature)))
                 <img style="width: 70px; " src="{{ public_path('storage/' . $ent->hm_signature) }}">
             @endif
         </span>

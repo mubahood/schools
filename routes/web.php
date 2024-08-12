@@ -52,6 +52,60 @@ Route::get('report-card-printings', [ReportCardsPrintingController::class, 'inde
 Route::get('data-import', [ReportCardsPrintingController::class, 'data_import']);
 Route::get('process-termly-school-fees-balancings', [MainController::class, 'process_termly_school_fees_balancings']);
 
+Route::get('test', function (Request $request) {
+
+  $marks = TheologyMarkRecord::where([
+    'enterprise_id' => 7,
+  ])->get();
+
+/*   foreach ($marks as $v) {
+    $v->bot_score = rand(20, 100);
+    $v->mot_score = rand(20, 100);
+    $v->eot_score = rand(20, 100);
+    echo $v->bot_score . ", " . $v->mot_score . ", " . $v->eot_score . "<br>";
+    $v->save();
+  }
+
+  die("done"); */ 
+
+  $rep = TheologyTermlyReportCard::find(14);
+  $rep->reports_generate = 'Yes';
+  $rep->report_title .= '1';
+  $rep->save();
+  dd($rep->report_title);
+  die("done");
+
+  //$rep->
+});
+/* 
+  #attributes: array:26 [▶
+    "id" => 55326
+    "created_at" => "2024-03-25 00:02:02"
+    "updated_at" => "2024-05-02 21:28:41"
+    "enterprise_id" => 7
+    "termly_report_card_id" => 16
+    "term_id" => 40
+    "administrator_id" => 12926
+    "academic_class_id" => 129
+    "academic_class_sctream_id" => 90
+    "main_course_id" => 1
+    "subject_id" => 1069
+    "bot_score" => 0
+    "mot_score" => 96
+    "eot_score" => 97
+    "bot_is_submitted" => "No"
+    "mot_is_submitted" => "Yes"
+    "eot_is_submitted" => "Yes"
+    "bot_missed" => "Yes"
+    "mot_missed" => "Yes"
+    "eot_missed" => "Yes"
+    "initials" => "KD"
+    "remarks" => "Excellent"
+    "total_score" => 97
+    "total_score_display" => 97
+    "aggr_name" => "D1"
+    "aggr_value" => 1
+*/
 Route::get('process-batch-service-subscriptions', function (Request $request) {
   $rep = BatchServiceSubscription::find($request->id);
   if ($rep == null) return "Report not found";

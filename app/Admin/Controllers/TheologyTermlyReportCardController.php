@@ -157,9 +157,11 @@ class TheologyTermlyReportCardController extends AdminController
 
         $scales = [];
         $form->divider('Basic Information');
-        foreach (GradingScale::where([])
-            ->orderBy('id', 'DESC')
-            ->get() as $v) {
+        foreach (
+            GradingScale::where([])
+                ->orderBy('id', 'DESC')
+                ->get() as $v
+        ) {
             $scales[$v->id] =  $v->name;
         }
 
@@ -307,6 +309,10 @@ class TheologyTermlyReportCardController extends AdminController
                 ])
                 ->default('No');
 
+
+            $form->text('bot_name', 'Beginning Of Term name')->default('B.O.T')->rules('required');
+            $form->text('mot_name', 'Middle Of Term name')->default('M.O.T')->rules('required');
+            $form->text('eot_name', 'End Of Term name')->default('E.O.T')->rules('required');
 
             $form->radioCard('reports_display_report_to_parents', 'Display reports to parents?')
                 ->options(['Yes' => 'Yes', 'No' => 'No'])
