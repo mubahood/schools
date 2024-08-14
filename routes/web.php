@@ -49,6 +49,7 @@ use Illuminate\Support\Facades\DB;
 
 Route::get('assessment-sheets-generate', [ReportCardsPrintingController::class, 'assessment_sheets_generate']);
 Route::get('report-card-printings', [ReportCardsPrintingController::class, 'index']);
+Route::get('report-card-individual-printings', [ReportCardsPrintingController::class, 'report_card_individual_printings']);
 Route::get('data-import', [ReportCardsPrintingController::class, 'data_import']);
 Route::get('process-termly-school-fees-balancings', [MainController::class, 'process_termly_school_fees_balancings']);
 
@@ -58,7 +59,7 @@ Route::get('test', function (Request $request) {
     'enterprise_id' => 7,
   ])->get();
 
-/*   foreach ($marks as $v) {
+  /*   foreach ($marks as $v) {
     $v->bot_score = rand(20, 100);
     $v->mot_score = rand(20, 100);
     $v->eot_score = rand(20, 100);
@@ -66,7 +67,7 @@ Route::get('test', function (Request $request) {
     $v->save();
   }
 
-  die("done"); */ 
+  die("done"); */
 
   $rep = TheologyTermlyReportCard::find(14);
   $rep->reports_generate = 'Yes';
@@ -256,10 +257,16 @@ Route::get('student-data-import', [MainController::class, 'student_data_import']
 Route::get('prepare-things', [Utils::class, 'prepare_things']);
 Route::get('generate-report-card', function () {
   $rep = StudentReportCard::find($_GET['id']);
+  if ($rep == null) {
+    throw new \Exception("Report not found");
+  }
   $rep->download_self();
-  $url = url('storage/files/' . $rep->pdf_url);
-  header('Location: ' . $url);
-  die();
+  $url = url('storage/files/' . $rep->pdf_url . '?rand=' . rand(1, 100000));
+  return redirect($url);
+
+
+  echo '<h1>Generated Successfully</h1>';
+  echo "<a href='$url' target='_blank'>Download</a>";
 });
 Route::get('generate-report-cards', function () {
 

@@ -76,6 +76,9 @@ class MarkRecord extends Model
 
     public function get_grade($grading_scale, $score)
     {
+        if($grading_scale == null){
+            return 'N/A';
+        }
         $_grade = '';
         $grade = Utils::generateAggregates($grading_scale, $score);
         if (isset($grade['aggr_name'])) {
@@ -108,5 +111,21 @@ class MarkRecord extends Model
         $u = Administrator::find($this->administrator_id);
         if ($u == null) return 'N/A';
         return $this->administrator->name;
+    }
+
+    /* 
+                        $mark->bot_grade = Utils::generateAggregates($grading_scale, $mark->bot_score)['aggr_name'];
+                    $mark->mot_grade = Utils::generateAggregates($grading_scale, $mark->mot_score)['aggr_name'];
+                    $mark->eot_grade = Utils::generateAggregates($grading_scale, $mark->eot_score)['aggr_name'];
+    */
+
+    //getter for bot_grade
+    public function getBotGradeAttribute($x)
+    {
+        if($x == null || strlen($x) <2){
+            
+            $x = 'N/A';
+        }
+        return $this->get_grade($this->grading_scale, $this->bot_score);
     }
 }

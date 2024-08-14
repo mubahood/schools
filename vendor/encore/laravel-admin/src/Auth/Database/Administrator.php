@@ -376,7 +376,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                         throw new Exception("Active academic year not found.", 1);
                     }
                     if ($current_class->academic_year_id != $year->id) {
-                        throw new Exception("Current class is not in active academic year.", 1);
+                        // throw new Exception("Current class is not in active academic year.", 1);
                     }
                 }
             }

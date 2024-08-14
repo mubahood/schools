@@ -72,9 +72,9 @@ class Utils  extends Model
             $temp = $collection[$i];
             $collection[$i] = $collection[$max];
             $collection[$max] = $temp;
-        } 
-        return $collection; 
-    } 
+        }
+        return $collection;
+    }
 
     //static get_empty_spaces
     public static function get_empty_spaces($num)
@@ -613,20 +613,24 @@ class Utils  extends Model
         Utils::financial_accounts_creation();
 
         set_time_limit(-1);
-        foreach (Account::where(
-            'name',
-            'like',
-            '%  %',
-        )->get() as $x) {
+        foreach (
+            Account::where(
+                'name',
+                'like',
+                '%  %',
+            )->get() as $x
+        ) {
             $x->name = str_replace('   ', ' ', $x->name);
             $x->name = str_replace('  ', ' ', $x->name);
             $x->save();
         }
-        foreach (Administrator::where(
-            'name',
-            'like',
-            '%  %',
-        )->get() as $x) {
+        foreach (
+            Administrator::where(
+                'name',
+                'like',
+                '%  %',
+            )->get() as $x
+        ) {
             $x->name = str_replace('   ', ' ', $x->name);
             $x->name = str_replace('  ', ' ', $x->name);
             $x->save();
@@ -793,11 +797,13 @@ class Utils  extends Model
             foreach ($users as $key => $v) {
                 $v->stream_id = 0;
                 $term = $v->ent->active_term();
-                foreach (StudentHasClass::where([
-                    'administrator_id' => $v->id,
-                ])
-                    ->orderBy('id', 'desc')
-                    ->get() as $key => $hasClass) {
+                foreach (
+                    StudentHasClass::where([
+                        'administrator_id' => $v->id,
+                    ])
+                        ->orderBy('id', 'desc')
+                        ->get() as $key => $hasClass
+                ) {
                     if ($hasClass->class != null) {
                         if ($term->academic_year_id == $hasClass->class->academic_year_id) {
                             $v->current_class_id = $hasClass->class->id;
@@ -945,9 +951,11 @@ class Utils  extends Model
     public static function prepare_things()
     {
         //loop through all active enterprises
-        foreach (Enterprise::where([
-            'has_valid_lisence' => 'Yes',
-        ])->get() as $key => $ent) {
+        foreach (
+            Enterprise::where([
+                'has_valid_lisence' => 'Yes',
+            ])->get() as $key => $ent
+        ) {
             if ($ent->id != 7) {
                 continue;
             }
@@ -959,9 +967,11 @@ class Utils  extends Model
 
         $ent_id  = $ent->id;
         /* =============== start SUBJECTS WITH NO academic_year_id============= */
-        foreach (Subject::where([
-            'academic_year_id' => null,
-        ])->get() as $sub) {
+        foreach (
+            Subject::where([
+                'academic_year_id' => null,
+            ])->get() as $sub
+        ) {
             if ($sub->academic_class != null) {
                 $sub->academic_year_id = $sub->academic_class->academic_year_id;
                 $sub->save();
@@ -1088,10 +1098,12 @@ class Utils  extends Model
         }
 
 
-        foreach (Service::where([
-            'enterprise_id' => $u->enterprise_id,
-            'service_category_id' => null
-        ])->get() as $key => $service) {
+        foreach (
+            Service::where([
+                'enterprise_id' => $u->enterprise_id,
+                'service_category_id' => null
+            ])->get() as $key => $service
+        ) {
             $service->service_category_id = $serviceCat->id;
             $service->save();
         }
@@ -1635,9 +1647,11 @@ class Utils  extends Model
 
     public static function send_messages()
     {
-        foreach (DirectMessage::where([
-            'status' => 'Pending'
-        ])->get() as $key => $msg) {
+        foreach (
+            DirectMessage::where([
+                'status' => 'Pending'
+            ])->get() as $key => $msg
+        ) {
             DirectMessage::send_message($msg);
         }
     }
@@ -2462,8 +2476,12 @@ class Utils  extends Model
         $Sex2 = ' his/her ';
         return [
             $Sex . ' has a lot of potential and is working hard to realize it.',
-            $Sex . ' is a focused and enthusiastic learner with much determination.', $Sex . ' is self-confident and has excellent manners. Thumbs up.', $Sex . ' has done some good work, but it hasn’t been consistent because of ' . $Sex2 . ' frequent relaxation.', $Sex . ' can produce considerably better results. Though ' . $Sex . ' frequently seeks the attention and help from peers.',
-            $Sex . ' has troubles focusing in class which hinders ' . $Sex2 . ' ability to participate fully in class activities and tasks.', $Sex . ' is genuinely interested in everything we do, though experiencing some difficulties.'
+            $Sex . ' is a focused and enthusiastic learner with much determination.',
+            $Sex . ' is self-confident and has excellent manners. Thumbs up.',
+            $Sex . ' has done some good work, but it hasn’t been consistent because of ' . $Sex2 . ' frequent relaxation.',
+            $Sex . ' can produce considerably better results. Though ' . $Sex . ' frequently seeks the attention and help from peers.',
+            $Sex . ' has troubles focusing in class which hinders ' . $Sex2 . ' ability to participate fully in class activities and tasks.',
+            $Sex . ' is genuinely interested in everything we do, though experiencing some difficulties.'
         ];
     }
 
@@ -2617,6 +2635,10 @@ class Utils  extends Model
 
     public static function generateAggregates($grading_scale, $mark)
     {
+        if ($grading_scale == null) {
+            $resp['aggr_value'] = 0;
+            $resp['aggr_name'] = 'X'; 
+        }
         $ranges = $grading_scale->grade_ranges;
         if ($grading_scale == null) {
             throw new Exception("Grading scale not found.", 1);

@@ -90,7 +90,7 @@ class ReportCardsPrintingController extends Controller
         }
 
         $items = [];
-   
+
         $min_count = $printing->min_count;
         $max_count = $printing->max_count;
         $pdf = App::make('dompdf.wrapper');
@@ -143,7 +143,7 @@ class ReportCardsPrintingController extends Controller
                 //break;
             }
         }
- 
+
 
         //check if $items is empty
         if (count($items) == 0) {
@@ -533,6 +533,72 @@ class ReportCardsPrintingController extends Controller
         $pdf = App::make('dompdf.wrapper');
         $pdf->loadHTML('romina');
         return $pdf->stream();
+    }
+
+
+
+    public function report_card_individual_printings(Request $req)
+    {
+
+        ini_set('max_execution_time', '-1');
+        ini_set('memory_limit', '-1');
+
+        ini_set('display_errors', 1);
+        ini_set('display_startup_errors', 1);
+        error_reporting(E_ALL);
+        $min = -1;
+        $max = -1;
+        if (isset($_GET['min'])) {
+            $min = (int)($_GET['min']);
+        }
+        if (isset($_GET['max'])) {
+            $max = (int)($_GET['max']);
+        }
+        $printing = ReportCardPrint::find($req->id);
+
+        if ($printing == null) {
+            die("Printing not found.");
+        }
+
+        $termly_report_card = TermlyReportCard::find($printing->termly_report_card_id);
+        if ($termly_report_card == null) {
+            die("Termly report card not found.");
+        }
+
+        $items = [];
+
+        $min_count = $printing->min_count;
+        $max_count = $printing->max_count;
+        $pdf = App::make('dompdf.wrapper');
+        $i = 0;
+
+        $reps = StudentReportCard::where([
+            'termly_report_card_id' => $printing->termly_report_card_id,
+            'academic_class_id' => $printing->academic_class_id
+        ])
+            ->orderBy('id', 'asc')
+            ->get();
+        foreach ($reps as $key => $r) {
+            if ($i < $min_count) {
+                continue;
+            }
+            if ($i > $max_count) {
+                break;
+            }
+            $i++;
+            $r->report_card_print_id = $printing->id;
+            $r->save();
+
+            $msg = "";
+            try {
+                $r->download_self();
+                $msg = $i . ". Generated for " . $r->owner->name . " " . $r->owner->id . " Successfully";
+            } catch (\Exception $e) {
+                $msg = $i . ". Failed for " . $r->owner->name . " " . $r->owner->id . " - because: " . $e->getMessage() . "";
+            }
+            $download_link = url('storage/files/' . $r->pdf_url);
+            echo '<p>' . $msg . ' <a target="_blank" href="' . $download_link . '"> Download</a></p>';
+        }
     }
 
 

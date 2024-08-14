@@ -77,6 +77,9 @@ class TheologyMarkRecord extends Model
 
     public function get_grade($grading_scale, $score)
     {
+        if($grading_scale == null){
+            return 'N/A'; 
+        }
         $_grade = '';
         $grade = Utils::generateAggregates($grading_scale, $score);
         if (isset($grade['aggr_name'])) {

@@ -63,6 +63,10 @@ if ($tr != null) {
 if ($tr == null) {
     $tr = $r->get_theology_report();
 }
+if ($tr->termly_report_card == null) {
+    $tr = null;
+}
+
 if ($tr != null) {
     $theology_termly_report_card = $tr->termly_report_card;
 }
@@ -198,12 +202,12 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     <small class="d-block">({{ $termly_report_card->eot_max }})</small>
                 </th>
             @endif
-            @if ($termly_report_card->positioning_method != 'Specific')
-                <th class="p-1"><b>MARKS</b>
-                    <small class="d-block"> ({{ $max_mot }}%)</small>
-                </th>
-                <th class="p-1">AGGR</th>
-            @endif
+
+            <th class="p-1"><b>MARKS</b>
+                <small class="d-block"> ({{ $max_mot }}%)</small>
+            </th>
+            <th class="p-1">AGGR</th>
+
             <th class="remarks p-1 text-center"><b class="text-uppercase">Remarks</b></th>
             <th class="remarks text-center p-1"><b class="text-uppercase">Initials</b></th>
         </thead>
@@ -263,10 +267,10 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     <td>{{ $v->subject->grade_subject == 'Yes' ? $v->eot_grade : '-' }}
                     </td>
                 @endif
-                @if ($termly_report_card->positioning_method != 'Specific')
-                    <td>{{ (int) $v->total_score_display }}</td>
-                    <td>{{ $v->subject->grade_subject == 'Yes' ? $v->aggr_name : '-' }}</td>
-                @endif
+
+                <td>{{ (int) $v->total_score_display }}</td>
+                <td>{{ $v->aggr_name }}</td>
+
                 <td class="remarks text-center">{{ $v->remarks }}</td>
                 <td class="remarks text-center">{{ $v->initials }}</td>
             </tr>
@@ -285,10 +289,9 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 <th class="text-center">{{ $eot_tot }}</th>
                 <th></th>
             @endif
-            @if ($termly_report_card->positioning_method != 'Specific')
-                <td class="text-center"><b>{{-- {{ $r->total_marks }} --}}</b></td>
-                <td><b>{{ $r->total_aggregates }}</b></td>
-            @endif
+
+            <td class="text-center"><b>{{ $r->total_marks }}</b></td>
+            <td><b>{{ $r->total_aggregates }}</b></td>
             <td colspan="2"></td>
         </tr>
     </table>
@@ -348,12 +351,11 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                         <small class="d-block">({{ $termly_report_card->eot_max }})</small>
                     </th>
                 @endif
-                @if ($termly_report_card->positioning_method != 'Specific')
-                    <th class="p-1"><b>MARKS</b>
-                        <small class="d-block">({{ '100' }}%)</small>
-                    </th>
-                    <th class="p-1">AGGR</th>
-                @endif
+
+                <th class="p-1"><b>MARKS</b>
+                    <small class="d-block">({{ '100' }}%)</small>
+                </th>
+                <th class="p-1">AGGR</th>
                 <th class="remarks p-1 text-center"><b class="text-uppercase">Remarks</b></th>
                 <th class="remarks text-center p-1"><b class="text-uppercase">Initials</b></th>
             </thead>
@@ -419,6 +421,8 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                         <td>{{ (int) $v->eot_score }}</td>
                         <td>{{ $v->eot_grade }}</td>
                     @endif
+                    <td>{{ (int) $v->total_score_display }}</td>
+                    <td>{{ $v->aggr_name }}</td>
                     <td class="remarks text-center">{{ $v->remarks }}</td>
                     <td class="remarks text-center">{{ $v->initials }}</td>
                 </tr>
@@ -437,9 +441,13 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     <th class="text-center">{{ $eot_tot }}</th>
                 @endif
                 <td><b>{{ $tr->total_aggregates }}</b></td>
+
+                <td class="text-center"><b>{{ $tr->total_marks }}</b></td>
+                <td><b>{{ $tr->total_aggregates }}</b></td>
+
                 <td colspan="2"></td>
             </tr>
- 
+
         </table>
         <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's comment:</span> <b class="comment"
                 style="font-size: 14px">{!! $termly_report_card->display_class_teacher_comments == 'Yes'

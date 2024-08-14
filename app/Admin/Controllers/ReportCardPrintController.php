@@ -81,19 +81,26 @@ class ReportCardPrintController extends AdminController
             return $this->min_count . " - " . $this->max_count;
         })->sortable();
 
-        $grid->column('print', __('GENERATE'))
+        $grid->column('print', __('BULK GENERATE'))
             ->display(function ($f) {
                 $url = url("/report-card-printings?id=$this->id");
-                return "<a href='$url' target='_blank' class='btn btn-primary'>GENERATE REPORTs</a>";
+                return "<a href='$url' target='_blank' class='btn btn-sm p-1 btn-primary'>GENERATE BULK</a>";
             });
+
         //download_link download link column
 
-        $grid->column('download_link', __('Download Link'))->display(function ($f) {
+        $grid->column('download_link', __('Download  Link'))->display(function ($f) {
             if ($f == null || strlen($f) < 5) {
                 return "N/A";
             }
-            return "<a href='$f' target='_blank' class='btn btn-primary'>Download File</a>";
+            return "<a href='$f' target='_blank' class='btn btn-sm  btn-primary'>Download File</a>";
         })->sortable();
+
+        $grid->column('print-individual', __('Individual Reports'))
+            ->display(function ($f) {
+                $url = url("/report-card-individual-printings?id=$this->id");
+                return "<a href='$url' target='_blank' class='btn btn-sm p-1 btn-info'>GENERATE INDIVIDUAL REPORTS</a>";
+            });
 
         return $grid;
     }

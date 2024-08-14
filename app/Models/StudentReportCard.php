@@ -7,6 +7,7 @@ use Encore\Admin\Auth\Database\Administrator;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\App;
 
 class StudentReportCard extends Model
 {
@@ -18,38 +19,104 @@ class StudentReportCard extends Model
             return;
         }
 
-        if ($this->termly_report_card == null) {
-            return;
+
+
+        $printing = ReportCardPrint::find($this->report_card_print_id);
+        if ($printing == null) {
+            $printing = ReportCardPrint::where([
+                'termly_report_card_id' => $this->termly_report_card_id,
+                'academic_class_id' => $this->academic_class_id,
+            ])
+                ->orderBy('id', 'desc')
+                ->first();
         }
 
-        $download_url = url('print') . '?id=' . $this->id;
-        $public_path = public_path() . '/storage/files';
+        $termly_report_card = TermlyReportCard::find($this->termly_report_card_id);
+        if ($termly_report_card == null) {
+            throw new Exception("Termly Report Card not found");
+        }
+        if ($printing == null) {
+            $printing = new ReportCardPrint();
+            $printing->enterprise_id = $this->enterprise_id;
+            $printing->title = $termly_report_card->report_title;
+            $printing->type = 'Secular';
+            $printing->secular_tempate = 'Template_5';
+            $printing->termly_report_card_id = $this->termly_report_card_id;
+            $printing->academic_class_id = $this->academic_class_id;
+            $printing->min_count = 0;
+            $printing->max_count = 10;
+            $printing->save();
+        }
+        if ($printing == null) {
+            throw new Exception("Printing not found");
+        }
 
-        $name = strtolower($this->owner->first_name . "-" . $this->owner->last_name);
-        $name = strtolower($name);
-        $name = $name . "-" . $this->id . ".pdf";
-        $local_file_path = $public_path . '/' . $name;
+        $items = [];
 
-        //set unlimited time limit
-        set_time_limit(0);
-        ini_set('memory_limit', '-1');
 
+        $pdf = App::make('dompdf.wrapper');
+        $i = 0;
+
+        $reps = StudentReportCard::where([
+            'termly_report_card_id' => $printing->termly_report_card_id,
+            'academic_class_id' => $printing->academic_class_id,
+            'student_id' => $this->student_id,
+        ])
+            ->orderBy('id', 'asc')
+            ->get();
+
+        if ($reps == null || count($reps) == 0) {
+            throw new Exception("No report card found");
+        }
+
+        foreach ($reps as $key => $r) {
+            $i++;
+            $tr = TheologryStudentReportCard::where([
+                'student_id' => $r->student_id,
+                'term_id' => $r->term_id,
+            ])->first();
+            $items[] = [
+                'r' => $r,
+                'tr' => $tr,
+            ];
+        }
+
+
+
+        //check if $items is empty
+        if (count($items) == 0) {
+            throw new Exception("No report card found");
+        }
+
+        $name = $this->id . "-" . $this->owner->name . "-" . $printing->title;
+        $name = str_replace(' ', '-', $name);
+        $name = $name . '.pdf';
+        $store_file_path = public_path('storage/files/' . $name);
+        //check if file exists
+        if (file_exists($store_file_path)) {
+            unlink($store_file_path);
+        }
+
+        $pdf->loadHTML(view('report-cards.template-3.print', [
+            'items' => $reps,
+            'ent' => $printing->enterprise,
+            'report_type' => $printing->type,
+            'min_count' => $printing->min_count,
+            'max_count' => $printing->max_count,
+        ]));
+
+        $output = $pdf->output();
         try {
-            //download file
-            $ch = curl_init($download_url);
-            $fp = fopen($local_file_path, 'wb');
-            curl_setopt($ch, CURLOPT_FILE, $fp);
-            curl_setopt($ch, CURLOPT_HEADER, 0);
-            curl_exec($ch);
-            $this->pdf_url = $name;
-            $this->date_gnerated = Carbon::now();
-            $this->vatar = $this->owner->avatar;
-            $this->is_ready = $this->termly_report_card->reports_display_report_to_parents;
-            $this->save();
-        } catch (\Throwable $th) {
-            throw new Exception("error ".$th->getMessage());
-            return false;
+            file_put_contents($store_file_path, $output);
+        } catch (\Exception $e) {
+            throw new Exception("Error saving file " . $e->getMessage());
         }
+
+        $this->pdf_url = $name;
+        $this->date_gnerated = Carbon::now();
+        $this->is_ready = $termly_report_card->reports_display_report_to_parents;
+        $this->vatar = $this->owner->avatar;
+        $this->save();
     }
 
     function termly_report_card()
@@ -150,9 +217,9 @@ class StudentReportCard extends Model
         }
         return $this->owner->avatar;
     }
-    
+
     //append for student_text
-    protected $appends = ['student_text','academic_class_text'];
+    protected $appends = ['student_text', 'academic_class_text'];
 
     //getter for student_text
     public function getStudentTextAttribute()
@@ -161,7 +228,7 @@ class StudentReportCard extends Model
             return "N/A";
         }
         return $this->owner->name;
-    } 
+    }
     //Getter for academic_class_text
     public function getAcademicClassTextAttribute()
     {
@@ -169,8 +236,7 @@ class StudentReportCard extends Model
             return "";
         }
         return $this->academic_class->name;
-    } 
-    
+    }
 }
 /* 
   String enterprise_id = "";

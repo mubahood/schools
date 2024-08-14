@@ -58,7 +58,7 @@ class TermlyReportCardController extends AdminController
             return 'Term ' . $this->academic_year->name . " - " . $this->term->name;
         });
 
-        $grid->column('report_title', __('Report title'))->hide();
+        $grid->column('report_title', __('Report title'))->sortable();
         $grid->column('marks', __('Marks'))->display(function () {
             return number_format(count($this->mark_records));
         });
@@ -125,13 +125,13 @@ class TermlyReportCardController extends AdminController
         });
         //regenerate reports for selected classes button
 
-        $grid->column('regenerate', __('Regenerate REPORT'))->display(function () {
+/*         $grid->column('regenerate', __('Regenerate REPORT'))->display(function () {
             return '<a class="btn btn-sm btn-primary" target="_blank" href="' . url('generate-report-cards?id=' . $this->id) . '" >RE-GENERATE REPORT</a>';
         });
         $grid->column('regenerate-pdf', __('Regenerate PDFs'))->display(function () {
             return '<a class="btn btn-sm btn-primary" target="_blank" href="' . url('generate-report-cards-pdf?id=' . $this->id) . '" >RE-GENERATE PDFs</a>';
         });
-
+ */
 
         /* $grid->column('print', __('Print'))->display(function ($m) {
             $d = '<a class="btn btn-sm btn-info" target="_blank" href="' . url('generate-report-cards?id=' . $this->id) . '" >BULK PDFs GENERATE</a><br>';
@@ -282,7 +282,7 @@ class TermlyReportCardController extends AdminController
                 ->options(['Yes' => 'Yes', 'No' => 'No'])
                 ->default('No');
             $form->divider('Reports Settings');
-            $form->text('report_title', __('Report title'));
+            $form->text('report_title', __('Report title'))->rules('required');
             $form->select('grading_scale_id', __('Grading scale'))->options($scales)->required();
 
             $form->radioCard('reports_generate', 'Generate reports?')

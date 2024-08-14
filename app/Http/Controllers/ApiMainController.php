@@ -250,11 +250,13 @@ class ApiMainController extends Controller
 
 
         $acc->phone_number_1 = $r->phone_number_1;
-        $acc->mother_name = $r->father_name;
-        $acc->father_name = $r->mother_name;
-        $acc->father_name = $r->phone_number_1;
+        $acc->mother_name = $r->mother_name;
+        $acc->father_name = $r->father_name;
+        $acc->phone_number_1 = $r->phone_number_1;
         $acc->phone_number_2 = $r->phone_number_2;
-        $acc->email = $r->email;
+        if ($r->email != null && strlen($r->email) > 3) {
+            $acc->email = $r->email;
+        }
 
         try {
             $acc->save();
@@ -262,6 +264,7 @@ class ApiMainController extends Controller
             return $this->error($t);
         }
 
+        $acc = Administrator::find($id);
         return $this->success($acc, $message = "Success", 200);
     }
 
@@ -407,6 +410,19 @@ class ApiMainController extends Controller
             )
                 ->limit(10000)->orderBy('id', 'desc')->get();
         }
+
+        $_data = $data;
+        $data = [];
+        foreach ($_data as $key => $d) {
+            if ($d->pdf_url == null) {
+                continue;
+            }
+            if (strlen($d->pdf_url) < 3) {
+                continue;
+            }
+            $data[] = $d;
+        }
+
 
         return $this->success($data, $message = "Success", 200);
     }
@@ -588,10 +604,12 @@ class ApiMainController extends Controller
     {
         $u = auth('api')->user();
         $students = [];
-        foreach (Administrator::where([
-            'enterprise_id' => $u->enterprise_id,
-            'user_type' => 'student',
-        ])->limit(10000)->orderBy('id', 'desc')->get() as $key => $s) {
+        foreach (
+            Administrator::where([
+                'enterprise_id' => $u->enterprise_id,
+                'user_type' => 'student',
+            ])->limit(10000)->orderBy('id', 'desc')->get() as $key => $s
+        ) {
 
             $d['id'] = $s->id;
             $d['name'] = $s->name;
@@ -886,10 +904,12 @@ class ApiMainController extends Controller
         }
         $term = $u->ent->active_term();
         $records = [];
-        foreach (TransportSubscription::where([
-            'enterprise_id' => $u->enterprise_id,
-            'term_id' => $term->id
-        ])->limit(100000)->orderBy('id', 'desc')->get() as $key => $val) {
+        foreach (
+            TransportSubscription::where([
+                'enterprise_id' => $u->enterprise_id,
+                'term_id' => $term->id
+            ])->limit(100000)->orderBy('id', 'desc')->get() as $key => $val
+        ) {
             $user = $val->subscriber;
             if ($user == null) {
                 continue;
@@ -917,9 +937,11 @@ class ApiMainController extends Controller
         }
         $term = $u->ent->active_term();
         $records = [];
-        foreach (Trip::where([
-            'enterprise_id' => $u->enterprise_id,
-        ])->limit(100000)->orderBy('id', 'desc')->get() as $key => $val) {
+        foreach (
+            Trip::where([
+                'enterprise_id' => $u->enterprise_id,
+            ])->limit(100000)->orderBy('id', 'desc')->get() as $key => $val
+        ) {
             $records[] = $val;
         }
         return $this->success($records, $message = "Success", 1);
@@ -964,11 +986,13 @@ class ApiMainController extends Controller
     {
         $u = auth('api')->user();
         $users = [];
-        foreach (User::where([
-            'enterprise_id' => $u->enterprise_id,
-            'status' => 1
-        ])
-            ->limit(10000)->orderBy('id', 'desc')->get() as $key => $val) {
+        foreach (
+            User::where([
+                'enterprise_id' => $u->enterprise_id,
+                'status' => 1
+            ])
+                ->limit(10000)->orderBy('id', 'desc')->get() as $key => $val
+        ) {
             $user['id'] = $val->id;
             $user['name'] = $val->name_text;
             $user['user_type'] = $val->user_type;
