@@ -61,7 +61,7 @@
 <body>
     <div class="container">
         <div class="logo">
-            <img src="https://schooldynamics.ug/storage/images/logo.png" width="100" height="100" alt="SchoolDynamics Logo">
+            <img src="https://is1-ssl.mzstatic.com/image/thumb/Purple112/v4/b4/37/17/b4371716-e328-a1bb-2cbc-faf6493a9287/AppIcon-0-0-1x_U007epad-0-0-85-220.png/460x0w.webp" width="100" height="100" alt="SchoolDynamics Logo">
         </div>
         <h1>Welcome to SchoolDynamics</h1>
         <div class="links">
