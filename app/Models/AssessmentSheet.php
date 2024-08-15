@@ -86,7 +86,19 @@ class AssessmentSheet extends Model
             $m->name_of_teacher = $teacher->name;
         }
 
-        $m->title = strtoupper($termly_report_card->name) . " - " . strtoupper('ASSESSMENT SHEET');
+        $m->title = strtoupper($termly_report_card->report_title) . " - " . strtoupper('ASSESSMENT SHEET');
         return $m;
     }
+
+    //belongs to term termly_report_card_id
+    public function term()
+    {
+        return $this->belongsTo(Term::class, 'termly_report_card_id');
+    }
+
+    //stream
+    public function stream()
+    {
+        return $this->belongsTo(AcademicClassSctream::class, 'academic_class_sctream_id');
+    } 
 }

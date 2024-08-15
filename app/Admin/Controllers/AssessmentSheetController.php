@@ -5,6 +5,7 @@ namespace App\Admin\Controllers;
 use App\Models\AcademicClass;
 use App\Models\AcademicClassSctream;
 use App\Models\AssessmentSheet;
+use App\Models\Term;
 use App\Models\TermlyReportCard;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -30,31 +31,60 @@ class AssessmentSheetController extends AdminController
     {
         $grid = new Grid(new AssessmentSheet());
         $u = Admin::user();
-        $grid->model()->where('enterprise_id', $u->enterprise_id);
+        $grid->model()->where('enterprise_id', $u->enterprise_id)->orderBy('id', 'desc');
+        $grid->disableBatchActions();
 
-        $grid->column('id', __('Id'));
-        $grid->column('created_at', __('Created at'));
-        $grid->column('generate', __('Generate'))
+        $grid->column('id', __('Id'))->hide();
+        $grid->column('created_at', __('Created'))->hide();
+
+
+        $grid->column('term_id', __('Term'))
+            ->display(function ($term_id) {
+                return Term::find($term_id)->name_text;
+            });
+        $grid->column('title', __('Title'));
+        $grid->column('type', __('Type'));
+        $grid->column('academic_class_sctream_id', __('Stream'))
+            ->display(function ($academic_class_sctream_id) {
+                if ($academic_class_sctream_id == null) {
+                    return "N/A";
+                }
+                return AcademicClassSctream::find($academic_class_sctream_id)->name_text;
+            });
+        $grid->column('academic_class_id', __('Academic class'))
+            ->display(function ($academic_class_id) {
+                if ($academic_class_id == null) {
+                    return "N/A";
+                }
+                return AcademicClass::find($academic_class_id)->name_text;
+            });
+
+        $grid->column('total_students', __('Total students'))->sortable();
+        $grid->column('first_grades', __('First grades'))->sortable();
+        $grid->column('second_grades', __('Second grades'))->sortable();
+        $grid->column('third_grades', __('Third grades'))->sortable();
+        $grid->column('fourth_grades', __('Fourth grades'))->sortable();
+        $grid->column('x_grades', __('X grades'))->sortable();
+        $grid->column('name_of_teacher', __('Name of teacher'))->sortable();
+
+        $grid->column('generate', __('RE-Generate'))
             ->display(function ($generate) {
                 $url = url('assessment-sheets-generate?id=' . $this->id);
                 //open to new tab
-                return '<a href="' . $url . '" target="_blank">Generate</a>';
+                return '<a href="' . $url . '" target="_blank">Generate pdf</a>';
             });
 
-        $grid->column('enterprise_id', __('Enterprise id'));
-        $grid->column('term_id', __('Term id'));
-        $grid->column('title', __('Title'));
-        $grid->column('type', __('Type'));
-        $grid->column('academic_class_sctream_id', __('Academic class sctream id'));
-        $grid->column('academic_class_id', __('Academic class id'));
-        $grid->column('termly_report_card_id', __('Termly report card id'));
-        $grid->column('total_students', __('Total students'));
-        $grid->column('first_grades', __('First grades'));
-        $grid->column('second_grades', __('Second grades'));
-        $grid->column('third_grades', __('Third grades'));
-        $grid->column('fourth_grades', __('Fourth grades'));
-        $grid->column('x_grades', __('X grades'));
-        $grid->column('name_of_teacher', __('Name of teacher'));
+        //pdf_link
+        $grid->column('pdf_link', __('PDF Link'))
+            ->display(function ($pdf_link) {
+                if ($pdf_link == null) {
+                    return "N/A";
+                }
+                $url = url('storage/'.$pdf_link);
+                //open to new tab
+                return '<a href="' . $url . '" target="_blank">Download pdf</a>'; 
+            });
+
 
         return $grid;
     }

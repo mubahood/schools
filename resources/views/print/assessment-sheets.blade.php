@@ -1,5 +1,6 @@
 <?php
 use App\Models\MarkRecord;
+use App\Models\Utils;
 $subject_ids = [];
 
 ?>
@@ -71,6 +72,65 @@ $subject_ids = [];
         <u><b>{{ $assessment->title }}</b></u>
     </p>
 
+    <table class="table table-bordered">
+        <tbody>
+            <tr>
+                <td class="p-1"> @include('print.title-detail', [
+                    't' => 'Term',
+                    'd' => 'Term ' . $assessment->term->name_text,
+                ])</td>
+
+                @if ($assessment->type == 'Class' && $assessment->has_class != null)
+                    <td class="p-1"> @include('print.title-detail', [
+                        't' => 'Class',
+                        'd' => $assessment->has_class->name_text ?? '-',
+                    ])</td>
+                @endif
+
+                @if ($assessment->type == 'Stream' && $assessment->stream != null)
+                    <td class="p-1"> @include('print.title-detail', [
+                        't' => 'Stream',
+                        'd' => $assessment->stream->name_text ?? '-',
+                    ])</td>
+                @endif
+                <td class="p-1" colspan='3'> @include('print.title-detail', [
+                    't' => 'Class Teacher',
+                    'd' => $assessment->name_of_teacher ?? '-',
+                ])</td>
+                <td class="p-1"> @include('print.title-detail', [
+                    't' => 'Generated on',
+                    'd' => Utils::my_date_3($assessment->updated_at),
+                ])</td>
+            </tr>
+            <tr>
+                <td class="p-1"> @include('print.title-detail', [
+                    't' => 'Total Students',
+                    'd' => $assessment->total_students,
+                ])</td>
+                <td class="p-1"> @include('print.title-detail', [
+                    't' => 'first grades',
+                    'd' => $assessment->first_grades,
+                ])</td>
+                <td class="p-1"> @include('print.title-detail', [
+                    't' => 'second grades',
+                    'd' => $assessment->second_grades,
+                ])</td>
+                <td class="p-1"> @include('print.title-detail', [
+                    'd' => $assessment->third_grades,
+                    't' => 'third grades',
+                ])</td>
+                <td class="p-1"> @include('print.title-detail', [
+                    'd' => $assessment->fourth_grades,
+                    't' => 'fourth grades',
+                ])</td>
+                <td class="p-1"> @include('print.title-detail', [
+                    'd' => $assessment->x_grades,
+                    't' => 'x grades',
+                ])</td>
+            </tr>
+        </tbody>
+    </table>
+
 
     <table class="table table-bordered">
         <thead>
@@ -79,11 +139,11 @@ $subject_ids = [];
                 <th class="p-1"><b>Name</b></th>
                 @foreach ($subjects as $sub)
                     <?php ?>
-                    <th class="  p-1">{{ $sub->short_name() }}</th>
+                    <th class="  p-1  text-center" colspan='2'>{{ $sub->short_name() }}</th>
                 @endforeach
-                <th class="p-1">Total Marks</th>
-                <th class="p-1">AGGR</th>
-                <th class="p-1">GRADE</th>
+                <th class="p-1  text-center">Total Marks</th>
+                <th class="p-1  text-center">AGGR</th>
+                <th class="p-1  text-center">GRADE</th>
                 <th class="p-1 text-center">POSITION</th>
             </tr>
         </thead>
@@ -116,39 +176,14 @@ $subject_ids = [];
                         }
                         
                         ?>
-                        {{-- 
-        "id" => 61642
-        "created_at" => "2024-07-10 16:34:51"
-        "updated_at" => "2024-07-20 01:13:25"
-        "enterprise_id" => 7
-        "termly_report_card_id" => 17
-        "term_id" => 41
-        "administrator_id" => 2581
-        "academic_class_id" => 130
-        "academic_class_sctream_id" => 93
-        "main_course_id" => 1
-        "subject_id" => 1075
-        "bot_score" => 0
-        "mot_score" => 91
-        "eot_score" => 0
-        "bot_is_submitted" => "No"
-        "mot_is_submitted" => "Yes"
-        "eot_is_submitted" => "No"
-        "bot_missed" => "Yes"
-        "mot_missed" => "Yes"
-        "eot_missed" => "Yes"
-        "initials" => "DA"
-        "remarks" => "Excellent"
-        "total_score" => 91
-        "total_score_display" => 91
-        "aggr_name" => "D1"
-        "aggr_value" => 1
-                        --}}
 
                         @if ($rec == null)
                             <td class="p-0 text-center">-</td>
                         @else
-                            <td class="p-0 text-center">{{ $rec->total_score_display }}</td>
+                            <td class="p-0 text-center">{{ $rec->total_score_display }}
+                            </td>
+                            <td class="p-0 text-center">{{ $rec->aggr_name }}
+                            </td>
                         @endif
                     @endforeach
                     <th class="text-center p-0">{{ $reportCard->total_marks }}</th>

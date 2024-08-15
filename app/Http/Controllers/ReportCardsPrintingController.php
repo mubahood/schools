@@ -35,9 +35,7 @@ class ReportCardsPrintingController extends Controller
         $assessment = AssessmentSheet::prepare($assessment);
         $assessment->save();
 
-        $pdf = App::make('dompdf.wrapper');
-        //make $pdf layout to horizontal
-        $pdf->setPaper('A4', 'landscape');
+
         $class = $assessment->has_class;
         $ent = Enterprise::find($assessment->enterprise_id);
 
@@ -52,6 +50,26 @@ class ReportCardsPrintingController extends Controller
             "generated" => "No"
             "pdf_link" => null
         */
+        $assessment->generated = "Yes";
+        $name = $assessment->title;
+        $name = str_replace(' ', '-', $name);
+        $name = str_replace('---', '-', $name);
+        $name = str_replace('--', '-', $name);
+        $name = $assessment->id . "-" . $name . '.pdf';
+        $name = strtolower($name);
+        $store_file_path = public_path('storage/files/' . $name);
+
+
+        $assessment->pdf_link = 'files/' . $name;
+        $assessment->save();
+
+        $pdf = App::make('dompdf.wrapper');
+        $pdf->setPaper('A4', 'landscape');
+
+        //check if file exists
+        if (file_exists($store_file_path)) {
+            unlink($store_file_path);
+        }
 
         $pdf->loadHTML(view('print.assessment-sheets', [
             'assessment' => $assessment,
@@ -59,7 +77,21 @@ class ReportCardsPrintingController extends Controller
             'reportCards' => $reportCards,
             'ent' => $ent
         ]));
-        return $pdf->stream();
+        $output = $pdf->output();
+        try {
+            file_put_contents($store_file_path, $output);
+        } catch (\Exception $e) {
+            die($e->getMessage());
+        }
+
+        $url = url('storage/files/' . $name);
+
+        $html = '<h1>Assessment Sheet ready!</h1>';
+        $html .= '<h2>' . $assessment->title . '</h2>';
+        $html .= '<h3>' . $class->name . '</h3>';
+        //download link open 
+        $html .= '<a href="' . $url . '">Download</a>';
+        return $html;
     }
     public function index(Request $req)
     {
