@@ -189,7 +189,7 @@ $subject_ids = [];
                     <th class="text-center p-0">{{ $reportCard->total_marks }}</th>
                     <th class="text-center p-0">{{ $reportCard->average_aggregates }}</th>
                     <th class="text-center p-0">{{ $reportCard->grade }}</th>
-                    <th class="text-center p-0">{{ $reportCard->position }}</th>
+                    <th class="text-center p-0">{{ $i }}</th>
                 </tr>
             @endforeach
         </tbody>
