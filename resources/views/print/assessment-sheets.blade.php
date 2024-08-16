@@ -95,7 +95,7 @@ $subject_ids = [];
                 @endif
                 <td class="p-1" colspan='3'> @include('print.title-detail', [
                     't' => 'Class Teacher',
-                    'd' => $assessment->name_of_teacher ?? '-',
+                    'd' => /* $assessment->name_of_teacher ?? */ '-',
                 ])</td>
                 <td class="p-1"> @include('print.title-detail', [
                     't' => 'Generated on',

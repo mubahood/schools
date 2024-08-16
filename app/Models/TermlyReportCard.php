@@ -441,7 +441,7 @@ class TermlyReportCard extends Model
                     $mark->save();
                 }
 
-                $report->total_marks = $number_of_exams * 100;
+                //$report->total_marks = $number_of_exams * 100;
                 $report->total_aggregates = $report->average_aggregates;
 
                 $report->position = 0;
