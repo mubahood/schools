@@ -163,46 +163,14 @@ class ReportCardPrintController extends AdminController
         $form->radio('type', __('Type'))->options([
             'Secular' => 'Secular',
             'Theology' => 'Theology',
-        ])->rules('required')
-            ->when('Secular', function ($form) {
-                $u = Admin::user();
+        ])->rules('required');
 
-
-                $classes = AcademicClass::where([
-                    'enterprise_id' => $u->enterprise_id
-                ])->orderBy('id', 'desc')
-                    ->get()->pluck('name_text', 'id');
-                $form->select('academic_class_id', __('Class'))
-                    ->options($classes)->rules('required');
-
-                $form->radioCard('secular_tempate', __('Theology tempate'))
-                    ->options([
-                        'Template_3' => 'Template 3',
-                        'Template_5' => 'Template 5',
-                    ])->default('No');
-            })->when('Theology', function ($form) {
-                $u = Admin::user();
-                $reports = TheologyTermlyReportCard::where([
-                    'enterprise_id' => $u->enterprise_id
-                ])
-                    ->orderBy('id', 'desc')
-                    ->get()->pluck('report_title', 'id');
-                $form->select('theology_termly_report_card_id', __('Theology Termly report card'))
-                    ->options($reports)->rules('required');
-
-
-                $classes = TheologyClass::where([
-                    'enterprise_id' => $u->enterprise_id
-                ])->orderBy('id', 'desc')
-                    ->get()->pluck('name_text', 'id');
-                $form->select('theology_class_id', __('Theology Class'))
-                    ->options($classes)->rules('required');
-                $form->radioCard('theology_tempate', __('Theology tempate'))
-                    ->options([
-                        'Template_6' => 'Template 6',
-                        'Template_5' => 'Template 5', 
-                    ])->default('No');
-            });
+        $form->radioCard('secular_tempate', __('Theology tempate'))
+            ->options([
+                'Template_6' => 'Template 6',
+                'Template_5' => 'Template 5',
+                'Template_6' => 'Template 5 (Theology only OR Secular only)',
+            ]); 
 
         $form->radio('re_generate', __('Re Generate Reports'))->options([
             'No' => 'No',
