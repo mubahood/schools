@@ -127,7 +127,7 @@ class ReportCardsPrintingController extends Controller
         $max_count = $printing->max_count;
         $pdf = App::make('dompdf.wrapper');
         $i = 0;
-        if ($printing->type == 'Theology') {
+       /*  if ($printing->type == 'Theology') {
             $theologgy_reps = TheologryStudentReportCard::where([
                 'theology_termly_report_card_id' => $printing->theology_termly_report_card_id,
                 'theology_class_id' => $printing->theology_class_id
@@ -150,39 +150,40 @@ class ReportCardsPrintingController extends Controller
                 ];
             }
         } else if ($printing->type == 'Secular') {
-            $reps = StudentReportCard::where([
-                'termly_report_card_id' => $printing->termly_report_card_id,
-                'academic_class_id' => $printing->academic_class_id
-            ])
-                ->orderBy('id', 'asc')
-                ->get();
-            foreach ($reps as $key => $r) {
-                if ($i < $min_count) {
-                    continue;
-                }
-                if ($i > $max_count) {
-                    break;
-                }
-                $i++;
-                $tr = TheologryStudentReportCard::where([
-                    'student_id' => $r->student_id,
-                    'term_id' => $r->term_id,
-                ])->first();
-                $items[] = [
-                    'r' => $r,
-                    'tr' => $tr,
-                ];
-                //break;
-            }
         }
+ */
 
+        $reps = StudentReportCard::where([
+            'termly_report_card_id' => $printing->termly_report_card_id,
+            'academic_class_id' => $printing->academic_class_id
+        ])
+            ->orderBy('id', 'asc')
+            ->get();
+        foreach ($reps as $key => $r) {
+            if ($i < $min_count) {
+                continue;
+            }
+            if ($i > $max_count) {
+                break;
+            }
+            $i++;
+            $tr = TheologryStudentReportCard::where([
+                'student_id' => $r->student_id,
+                'term_id' => $r->term_id,
+            ])->first();
+            $items[] = [
+                'r' => $r,
+                'tr' => $tr,
+            ];
+            //break;
+        }
 
         //check if $items is empty
         if (count($items) == 0) {
             die("Nothing to print.");
         }
 
-        if ($printing->secular_tempate == 'Template_3') { 
+        if ($printing->secular_tempate == 'Template_3') {
 
             if (isset($_GET['html'])) {
                 return view('report-cards.template-3.print', [
