@@ -115,6 +115,7 @@ class TheologryStudentReportCardController extends AdminController
         $grid->column('theology_termly_report_card_id', __('Theology termly report card id'))
             ->display(function () {
                 if ($this->termly_report_card == null) {
+                    $this->delete();
                     return 'N/A';
                 }
                 return $this->termly_report_card->report_title;
