@@ -127,7 +127,6 @@ class ReportCardsPrintingController extends Controller
         $max_count = $printing->max_count;
         $pdf = App::make('dompdf.wrapper');
         $i = 0;
-        dd($printing->type);
         if ($printing->type == 'Theology') {
             $theologgy_reps = TheologryStudentReportCard::where([
                 'theology_termly_report_card_id' => $printing->theology_termly_report_card_id,
