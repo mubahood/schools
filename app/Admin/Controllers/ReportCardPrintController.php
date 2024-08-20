@@ -167,9 +167,8 @@ class ReportCardPrintController extends AdminController
 
         $form->radioCard('secular_tempate', __('Theology tempate'))
             ->options([
-                'Template_6' => 'Template 6',
                 'Template_5' => 'Template 5',
-                'Template_6' => 'Template 5 (Theology only OR Secular only)',
+                'Template_6' => 'Template 6 (Theology only OR Secular only)',
             ]); 
 
         $form->radio('re_generate', __('Re Generate Reports'))->options([
