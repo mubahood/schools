@@ -305,6 +305,26 @@ foreach ($r->termly_report_card->term->exams as $exam) {
     @endif
 
     @if ($tr != null)
+        @php
+            $isOneExam = false;
+            $no_of_exams = 0;
+            if ($theology_termly_report_card->reports_include_bot == 'Yes') {
+                $no_of_exams += 1;
+            }
+            if ($theology_termly_report_card->reports_include_mot == 'Yes') {
+                $no_of_exams += 1;
+            }
+            if ($theology_termly_report_card->reports_include_eot == 'Yes') {
+                $no_of_exams += 1;
+            }
+
+            if ($no_of_exams == 1) {
+                $isOneExam = true;
+            } else {
+                $isOneExam = false;
+            }
+
+        @endphp
 
         @if ($report_type == 'Theology')
             <p class="text-center my-4 mt-4">
@@ -347,10 +367,12 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                         </th>
                     @endif
 
-                    <th class="p-1"><b>MARKS</b>
-                        <small class="d-block">({{ '100' }}%)</small>
-                    </th>
-                    <th class="p-1">AGGR</th>
+                    @if (!$isOneExam)
+                        <th class="p-1"><b>MARKS</b>
+                            <small class="d-block">({{ '100' }}%)</small>
+                        </th>
+                        <th class="p-1">AGGR</th>
+                    @endif
 
                     <th class="remarks p-1 text-center"><b class="text-uppercase">Remarks</b></th>
                     <th class="remarks text-center p-1"><b class="text-uppercase">Initials</b></th>
@@ -358,14 +380,18 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 @php
                     $span = 0;
                     $done_ids = [];
+                    $no_of_exams = 0;
                     if ($theology_termly_report_card->reports_include_bot == 'Yes') {
                         $span++;
+                        $no_of_exams += 1;
                     }
                     if ($theology_termly_report_card->reports_include_mot == 'Yes') {
                         $span++;
+                        $no_of_exams += 1;
                     }
                     if ($theology_termly_report_card->reports_include_eot == 'Yes') {
                         $span++;
+                        $no_of_exams += 1;
                     }
                 @endphp
 
@@ -405,15 +431,15 @@ foreach ($r->termly_report_card->term->exams as $exam) {
 
                         @endphp
                         <th>{{ $v->subject->name }}</th>
-                        @if ($termly_report_card->reports_include_bot == 'Yes')
-                            <td>{{ (int) $v->bot_score }}</td>
+                        @if ($theology_termly_report_card->reports_include_bot == 'Yes')
+                            <td>{{ $v->bot_score }}</td>
                             <td>{{ $v->bot_grade }}</td>
                         @endif
-                        @if ($termly_report_card->reports_include_mot == 'Yes')
+                        @if ($theology_termly_report_card->reports_include_mot == 'Yes')
                             <td>{{ (int) $v->mot_score }}</td>
                             <td>{{ $v->mot_grade }}</td>
                         @endif
-                        @if ($termly_report_card->reports_include_eot == 'Yes')
+                        @if ($theology_termly_report_card->reports_include_eot == 'Yes')
                             <td>{{ (int) $v->eot_score }}</td>
                             <td>{{ $v->eot_grade }}</td>
                         @endif
@@ -423,18 +449,18 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 @endforeach
                 <tr class="marks">
                     <th><b>TOTAL</b></th>
-                    @if ($termly_report_card->reports_include_bot == 'Yes')
+                    @if ($theology_termly_report_card->reports_include_bot == 'Yes')
                         <th class="text-center">{{ $bot_tot }}</th>
                         <th></th>
                     @endif
-                    @if ($termly_report_card->reports_include_mot == 'Yes')
+                    @if ($theology_termly_report_card->reports_include_mot == 'Yes')
                         <th class="text-center">{{ $mot_tot }}</th>
                         <th></th>
                     @endif
-                    @if ($termly_report_card->reports_include_eot == 'Yes')
+                    @if ($theology_termly_report_card->reports_include_eot == 'Yes')
                         <th class="text-center">{{ $eot_tot }}</th>
                     @endif
-                    <td><b>{{ $tr->total_aggregates }}</b></td>
+{{--                     <td><b>{{ $tr->total_aggregates }}</b></td> --}}
                     <td colspan="2"></td>
                 </tr>
 
