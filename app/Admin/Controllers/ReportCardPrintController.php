@@ -200,6 +200,7 @@ class ReportCardPrintController extends AdminController
                 $form->radioCard('theology_tempate', __('Theology tempate'))
                     ->options([
                         'Template_6' => 'Template 6',
+                        'Template_5' => 'Template 5', 
                     ])->default('No');
             });
 
