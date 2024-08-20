@@ -186,7 +186,7 @@ class ReportCardsPrintingController extends Controller
 
             if (isset($_GET['html'])) {
                 return view('report-cards.template-3.print', [
-                    'items' => $reps,
+                    'items' => $items,
                     'ent' => $printing->enterprise,
                     'report_type' => $printing->type,
                     'min_count' => $printing->min_count,
@@ -194,7 +194,7 @@ class ReportCardsPrintingController extends Controller
                 ]);
             }
             $pdf->loadHTML(view('report-cards.template-3.print', [
-                'items' => $reps,
+                'items' => $items,
                 'ent' => $printing->enterprise,
                 'report_type' => $printing->type,
                 'min_count' => $printing->min_count,
