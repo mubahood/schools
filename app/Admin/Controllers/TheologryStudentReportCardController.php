@@ -112,7 +112,13 @@ class TheologryStudentReportCardController extends AdminController
             })
             ->sortable(); */
 
-        $grid->column('theology_termly_report_card_id', __('Theology termly report card id'))->hide();
+        $grid->column('theology_termly_report_card_id', __('Theology termly report card id'))
+            ->display(function () {
+                if ($this->termly_report_card == null) {
+                    return 'N/A';
+                }
+                return $this->termly_report_card->report_title;
+            })->sortable();
         $grid->column('position', __('Position in class'))->display(function ($position) {
             $numFormat = new NumberFormatter('en_US', NumberFormatter::ORDINAL);
             return $numFormat->format($position);
