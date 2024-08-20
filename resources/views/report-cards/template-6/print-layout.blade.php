@@ -28,8 +28,12 @@ if ($r->academic_class != null) {
     }
 }
 
+if ($tr->termly_report_card == null) {
+    $tr = null;
+}
+
 if ($tr != null) {
-    $theology_termly_report_card = $tr;
+    $theology_termly_report_card = $tr->termly_report_card;
 
     if ($tr->theology_class != null) {
         $_teacher = $tr->theology_class->get_class_teacher();
