@@ -191,7 +191,7 @@ if ($subjects == null) {
             @endforeach
     </table>
 
-    <h2>Detailed Summary</h2>
+    <h2 class="page-break-before: always;">Detailed Summary</h2>
     <table class="table table-bordered">
         <thead>
             <tr>
