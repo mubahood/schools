@@ -278,6 +278,7 @@ class ReportCardsPrintingController extends Controller
 
         $name = $printing->title . '-' . $printing->min_count . $printing->max_count . $termly_report_card->name_text;
         $name = str_replace(' ', '_', $name);
+        $name = $termly_report_card->id . "-" . $printing->id . "-" . $name;
         $name = $name . '.pdf';
         $store_file_path = public_path('storage/files/' . $name);
 
