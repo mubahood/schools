@@ -35,6 +35,11 @@ if ($subjects == null) {
             text-align: center;
         }
 
+        .page_break {
+            page-break-before: always;
+        }
+
+
         td {
             /*             padding: 0%!important;
             background-color: red!important; */
@@ -191,7 +196,7 @@ if ($subjects == null) {
             @endforeach
     </table>
 
-    <h2 class="page-break-before: always;">Detailed Summary</h2>
+    <h2 class="page_break" style="page-break-before: always;">Detailed Summary</h2>
     <table class="table table-bordered">
         <thead>
             <tr>
