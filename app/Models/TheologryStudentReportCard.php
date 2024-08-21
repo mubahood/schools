@@ -53,4 +53,14 @@ class TheologryStudentReportCard extends Model
             $this->attributes['generate_marks_for_classes'] = null;
         }
     }
+
+
+    //boot with updating
+    public static function boot()
+    {
+        parent::boot();
+        static::updating(function ($m) {
+           // dd($m); 
+        });
+    }   
 }

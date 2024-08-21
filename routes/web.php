@@ -67,10 +67,11 @@ Route::get('test-1', function (Request $request) {
   }
   $rep = TheologryStudentReportCard::find($id);
   $rep->average_aggregates = $pos;
+  // $rep->class_teacher_comment .= '.';
   $rep->save();
   
   $rep = TheologryStudentReportCard::find($id);
-  echo $rep->owner->name . ", AGRR: " . $rep->position . "<br>";
+  echo $rep->owner->name . ",  =>$pos<= AGRR: " . $rep->average_aggregates . "<br>";
 });
 Route::get('app', function (Request $request) {
   return view('app');
