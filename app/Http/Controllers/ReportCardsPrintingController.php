@@ -16,6 +16,7 @@ use App\Models\StudentHasClass;
 use App\Models\StudentReportCard;
 use App\Models\TermlyReportCard;
 use App\Models\TheologryStudentReportCard;
+use App\Models\TheologyClass;
 use App\Models\TheologyStudentReportCardItem;
 use App\Models\User;
 use App\Models\UserBatchImporter;
@@ -58,13 +59,13 @@ class ReportCardsPrintingController extends Controller
             throw new Exception("Class not found", 1);
         }
         $conds['termly_report_card_id'] = $assessment->termly_report_card_id;
-        $conds['academic_class_id'] = $assessment->academic_class_id; 
+        $conds['academic_class_id'] = $assessment->academic_class_id;
 
 
         $reportCards = StudentReportCard::where($conds)
             ->orderBy('total_marks', 'desc')
             ->get();
-      
+
         $assessment->generated = "Yes";
         $name = $assessment->title;
         $name = str_replace(' ', '-', $name);
@@ -168,12 +169,36 @@ class ReportCardsPrintingController extends Controller
         }
  */
 
-        $reps = StudentReportCard::where([
-            'termly_report_card_id' => $printing->termly_report_card_id,
-            'academic_class_id' => $printing->academic_class_id
-        ])
-            ->orderBy('id', 'asc')
-            ->get();
+        if ($printing->type == 'Theology') {
+            $theo_class = TheologyClass::find($printing->theology_class_id);
+            if ($theo_class == null) {
+                die("Theology class not found.");
+            }
+            $reports = TheologryStudentReportCard::where([
+                'theology_termly_report_card_id' => $printing->theology_termly_report_card_id,
+                'theology_class_id' => $printing->theology_class_id
+            ])->get();
+            $student_ids = [];
+            foreach ($reports as $key => $r) {
+                $student_ids[] = $r->student_id;
+            }
+
+            $reps = StudentReportCard::where([
+                'termly_report_card_id' => $printing->termly_report_card_id,
+            ])
+                ->whereIn('student_id', $student_ids)
+                ->orderBy('id', 'asc')
+                ->get();
+        } else {
+            $reps = StudentReportCard::where([
+                'termly_report_card_id' => $printing->termly_report_card_id,
+                'academic_class_id' => $printing->academic_class_id
+            ])
+                ->orderBy('id', 'asc')
+                ->get();
+        }
+
+
         foreach ($reps as $key => $r) {
             if ($i < $min_count) {
                 continue;
