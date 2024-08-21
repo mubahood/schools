@@ -85,7 +85,7 @@ Route::get('process-theology-report-cards', function (Request $request) {
         $number_of_exams = 0;
         $student_report->total_aggregates = 0;
         $student_report->total_marks = 0;
-        $student_report->total_students = $student_reports->count(); 
+        $student_report->total_students = $student_reports->count();
         foreach ($marks as $mark) {
           $number_of_exams = 0;
           $total_score = 0;
@@ -124,8 +124,8 @@ Route::get('process-theology-report-cards', function (Request $request) {
               $student_report->average_aggregates += $mark->aggr_value;
               $student_report->total_aggregates += $mark->aggr_value;
               $rangeFound = true;
-              $student_report->total_marks += $mark->total_score_display; 
-              echo "$mark->id. " . $mark->total_score_display . " => " . $mark->aggr_name . "<br>"; 
+              $student_report->total_marks += $mark->total_score_display;
+              echo "$mark->id. " . $mark->total_score_display . " => " . $mark->aggr_name . "<br>";
               break;
             }
           }
@@ -134,12 +134,12 @@ Route::get('process-theology-report-cards', function (Request $request) {
             throw new Exception("No range found for mark: " . $mark->total_score_display, 1);
           }
           $mark->save();
-        } 
-        
-        echo "$student_report->id. {$student_report->owner->name}.   TOTAL MARKS: " . $student_report->total_marks . " => AGGR: " . $student_report->average_aggregates . "<br><hr>";
+        }
+
+        echo "$class->name. $student_report->id. {$student_report->owner->name}.   TOTAL MARKS: " . $student_report->total_marks . " => AGGR: " . $student_report->average_aggregates . "<br><hr>";
       }
-      die("done");
       /* 
+      die("done");
 
           "id" => 9639
     "created_at" => "2024-07-20 01:20:39"
