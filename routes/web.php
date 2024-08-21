@@ -31,6 +31,7 @@ use App\Models\StudentReportCard;
 use App\Models\Subject;
 use App\Models\Term;
 use App\Models\TermlyReportCard;
+use App\Models\TheologryStudentReportCard;
 use App\Models\TheologyMark;
 use App\Models\TheologyTermlyReportCard;
 use App\Models\Transaction;
@@ -53,6 +54,24 @@ Route::get('report-card-individual-printings', [ReportCardsPrintingController::c
 Route::get('data-import', [ReportCardsPrintingController::class, 'data_import']);
 Route::get('process-termly-school-fees-balancings', [MainController::class, 'process_termly_school_fees_balancings']);
 
+Route::get('test-1', function (Request $request) {
+
+  $pos = 110;
+  $id = 9710;
+
+  if (isset($request->pos)) {
+    $pos = $request->pos;
+  }
+  if (isset($request->id)) {
+    $id = $request->id;
+  }
+  $rep = TheologryStudentReportCard::find($id);
+  $rep->position = $pos;
+  $rep->save();
+  
+  $rep = TheologryStudentReportCard::find($id);
+  echo $rep->owner->name . ", POS: " . $rep->position . "<br>";
+});
 Route::get('app', function (Request $request) {
   return view('app');
 });
