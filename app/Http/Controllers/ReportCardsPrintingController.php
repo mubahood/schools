@@ -46,10 +46,7 @@ class ReportCardsPrintingController extends Controller
         ])
             ->orderBy('total_marks', 'desc')
             ->get();
-        /* 
-            "generated" => "No"
-            "pdf_link" => null
-        */
+
         $assessment->generated = "Yes";
         $name = $assessment->title;
         $name = str_replace(' ', '-', $name);

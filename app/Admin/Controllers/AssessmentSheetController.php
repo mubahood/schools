@@ -29,6 +29,11 @@ class AssessmentSheetController extends AdminController
      */
     protected function grid()
     {
+/*         $a = AssessmentSheet::find(25);
+        $a->title .= '.';
+        $a->save();
+        dd("done"); */
+        
         $grid = new Grid(new AssessmentSheet());
         $u = Admin::user();
         $grid->model()->where('enterprise_id', $u->enterprise_id)->orderBy('id', 'desc');

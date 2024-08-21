@@ -2,6 +2,19 @@
 use App\Models\MarkRecord;
 use App\Models\Utils;
 $subject_ids = [];
+$subjects_grades = [];
+if ($assessment->subjects != null) {
+    if (strlen($assessment->subjects) > 4) {
+        try {
+            $subjects_grades = json_decode($assessment->subjects);
+        } catch (\Throwable $th) {
+            $subjects_grades = [];
+        }
+    }
+}
+if ($subjects == null) {
+    $subjects = [];
+}
 
 ?>
 <!DOCTYPE html>
@@ -72,6 +85,7 @@ $subject_ids = [];
         <u><b>{{ $assessment->title }}</b></u>
     </p>
 
+    <h2>Performance Analysis Summary</h2>
     <table class="table table-bordered">
         <tbody>
             <tr>
@@ -131,7 +145,53 @@ $subject_ids = [];
         </tbody>
     </table>
 
+    {{-- 
+/* dd($subject_ids);
+    +"id": 1069
+    +"name": "English"
+    +"d1": 31
+    +"d2": 65
+    +"c3": 39
+    +"c4": 21
+    +"c5": 11
+    +"c6": 1
+    +"p7": 4
+    +"f9": 5
+    +"x": 0
+*/
+--}}
 
+    <table class="table table-bordered">
+        <thead>
+            <th>SUBJECT/GRADES</th>
+            <th class="p-0 text-center">D1</th>
+            <th class="p-0 text-center">D2</th>
+            <th class="p-0 text-center">C3</th>
+            <th class="p-0 text-center">C4</th>
+            <th class="p-0 text-center">C5</th>
+            <th class="p-0 text-center">C6</th>
+            <th class="p-0 text-center">P7</th>
+            <th class="p-0 text-center">F9</th>
+            <th class="p-0 text-center">X</th>
+        </thead>
+        <tbody>
+            @foreach ($subjects_grades as $sub)
+                <tr>
+                    <td class="p-0 text-center">{{ $sub->name }}</td>
+                    <td class="p-0 text-center">{{ $sub->d1 }}</td>
+                    <td class="p-0 text-center">{{ $sub->d2 }}</td>
+                    <td class="p-0 text-center">{{ $sub->c3 }}</td>
+                    <td class="p-0 text-center">{{ $sub->c4 }}</td>
+                    <td class="p-0 text-center">{{ $sub->c5 }}</td>
+                    <td class="p-0 text-center">{{ $sub->c6 }}</td>
+                    <td class="p-0 text-center">{{ $sub->p7 }}</td>
+                    <td class="p-0 text-center">{{ $sub->f9 }}</td>
+                    <td class="p-0 text-center">{{ $sub->x }}</td>
+                </tr>
+            @endforeach
+    </table>
+
+    <h2>Detailed Summary</h2>
     <table class="table table-bordered">
         <thead>
             <tr>
