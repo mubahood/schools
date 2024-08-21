@@ -97,6 +97,11 @@ foreach ($r->termly_report_card->term->exams as $exam) {
         $max_eot = $exam->max_mark;
     }
 }
+/* $theology_termly_report_card->generate_positions = 'Yes';
+$theology_termly_report_card->report_title .= '.';
+$theology_termly_report_card->save();
+die("done");
+dd($theology_termly_report_card); */
 ?>
 <article>
 
@@ -340,7 +345,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 {{-- STREAM: <b> {{ $theo_stream_class }}&nbsp;</b> --}}
                 Aggregate: <b class="text-danger">{{ (int) $tr->average_aggregates }}</b> &nbsp;
                 DIVISION: <b class="text-danger">{{ $tr->grade }}</b> &nbsp;
-                @if ($tr->display_positions == 'Yes')
+                @if ($theology_termly_report_card->display_positions == 'Yes')
                     position: <b class="text-danger">{{ (int) $tr->position }}</b> &nbsp;
                     OUT OF: <b class="text-danger">{{ (int) $tr->total_students }}</b> &nbsp;
                 @endif
@@ -460,7 +465,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     @if ($theology_termly_report_card->reports_include_eot == 'Yes')
                         <th class="text-center">{{ $eot_tot }}</th>
                     @endif
-{{--                     <td><b>{{ $tr->total_aggregates }}</b></td> --}}
+                    {{--                     <td><b>{{ $tr->total_aggregates }}</b></td> --}}
                     <td colspan="2"></td>
                 </tr>
 

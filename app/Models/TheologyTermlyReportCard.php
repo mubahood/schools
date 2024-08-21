@@ -97,17 +97,15 @@ class TheologyTermlyReportCard extends Model
                 ])->update([
                     'position' => 0
                 ]);
+                if (count($class->streams) < 1) {
+                    continue;
+                }
                 foreach ($class->streams as $stream) {
-                    $studentHasTheologyClasses = $stream->studentHasTheologyClasses;
-                    $students_ids_array = [];
-                    foreach ($studentHasTheologyClasses as $studentHasClass) {
-                        $students_ids_array[] = $studentHasClass->administrator_id;
-                    }
+
                     $reports = TheologryStudentReportCard::where([
-                        'theology_class_id' => $class_id,
                         'theology_termly_report_card_id' => $m->id,
-                    ])->whereIn('student_id', $students_ids_array)
-                        ->orderBy('total_marks', 'DESC')
+                        'stream_id' => $stream->id,
+                    ])->orderBy('total_marks', 'DESC')
                         ->get();
                     $prev_mark = 0;
                     $pos = 1;
@@ -121,6 +119,8 @@ class TheologyTermlyReportCard extends Model
                         $prev_mark = $report->total_marks;
                         $report->total_students = count($reports);
                         $report->save();
+                        // dd($report);
+
                     }
                 }
             }
