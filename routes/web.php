@@ -117,15 +117,9 @@ Route::get('process-theology-report-cards', function (Request $request) {
             }
           }
           $student_report->average_aggregates += $mark->aggr_value;
-
           $student_report->total_marks = $average_mark;
           $mark->save();
-          dd($mark);
-
-          dd($total_score);
-
-          dd($termlyReport);
-          dd($mark);
+          echo $mark->total_score . ", " . $mark->total_score_display . ", " . $mark->aggr_name . "<br>";
         }
       }
       /* 
@@ -177,10 +171,7 @@ Route::get('process-theology-report-cards', function (Request $request) {
     "bot_name" => "SET 1"
     "mot_name" => "SET 2"
     "eot_name" => "SET 3"
-*/
-
-      dd($marks);
-      dd($class);
+*/ 
     }
   }
   dd($termlyReport);
