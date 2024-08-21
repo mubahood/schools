@@ -163,13 +163,36 @@ class ReportCardPrintController extends AdminController
         $form->radio('type', __('Type'))->options([
             'Secular' => 'Secular',
             'Theology' => 'Theology',
-        ])->rules('required');
+        ])->rules('required')
+            ->when('Secular', function ($form) {
+                $u = Admin::user();
+
+
+                $classes = AcademicClass::where([
+                    'enterprise_id' => $u->enterprise_id
+                ])->orderBy('id', 'desc')
+                    ->get()->pluck('name_text', 'id');
+                $form->select('academic_class_id', __('Class'))
+                    ->options($classes)->rules('required');
+            })->when('Theology', function ($form) {
+                $u = Admin::user();
+          
+          
+
+                $classes = TheologyClass::where([
+                    'enterprise_id' => $u->enterprise_id
+                ])->orderBy('id', 'desc')
+                    ->get()->pluck('name_text', 'id');
+                $form->select('theology_class_id', __('Theology Class'))
+                    ->options($classes)->rules('required');
+            });
+
 
         $form->radioCard('secular_tempate', __('Theology tempate'))
             ->options([
                 'Template_5' => 'Template 5',
                 'Template_6' => 'Template 6 (Theology only OR Secular only)',
-            ]); 
+            ]);
 
         $form->radio('re_generate', __('Re Generate Reports'))->options([
             'No' => 'No',
