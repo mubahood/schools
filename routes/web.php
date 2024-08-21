@@ -133,7 +133,6 @@ Route::get('process-theology-report-cards', function (Request $request) {
             }
           }
           if (!$rangeFound) {
-            dd($mark);
             throw new Exception("No range found for mark: " . $mark->total_score_display, 1);
           }
           $mark->save();
