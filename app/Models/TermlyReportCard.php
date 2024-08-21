@@ -428,7 +428,7 @@ class TermlyReportCard extends Model
                         $mark->aggr_value = null;
                         $mark->aggr_name = null;
                         foreach ($ranges as $range) {
-                            if ($mark->total_score_display >= $range->min_mark && $mark->total_score_display < $range->max_mark) {
+                            if ($mark->total_score_display >= $range->min_mark && $mark->total_score_display <= $range->max_mark) {
                                 $mark->aggr_value = $range->aggregates;
                                 $mark->aggr_name = $range->name;
                                 $report->average_aggregates += $mark->aggr_value;

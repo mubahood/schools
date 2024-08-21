@@ -2646,7 +2646,7 @@ class Utils  extends Model
         $resp['aggr_value'] = 0;
         $resp['aggr_name'] = 'X';
         foreach ($ranges as $range) {
-            if ($mark > $range->min_mark && $mark < $range->max_mark) {
+            if ($mark >= $range->min_mark && $mark <= $range->max_mark) {
                 $resp['aggr_value'] = $range->aggregates;
                 $resp['aggr_name'] = $range->name;
                 break;
