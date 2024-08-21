@@ -102,7 +102,7 @@ Route::get('process-theology-report-cards', function (Request $request) {
           if ($termlyReport->reports_include_eot == 'Yes') {
             $number_of_exams++;
             $total_score += $mark->eot_score;
-            $mark->eot_grade = Utils::generateAggregates($grading_scale, $mark->eot_score)['aggr_name']; 
+            $mark->eot_grade = Utils::generateAggregates($grading_scale, $mark->eot_score)['aggr_name'];
           }
           if ($number_of_exams < 1) {
             throw new Exception("You must include at least one exam.", 1);
@@ -217,12 +217,9 @@ Route::get('process-theology-report-cards', function (Request $request) {
     "mot_name" => "SET 2"
     "eot_name" => "SET 3"
 */
-
-      dd($marks);
-      dd($class);
     }
   }
-  dd($termlyReport);
+  die("done");
 });
 Route::get('test-1', function (Request $request) {
 
