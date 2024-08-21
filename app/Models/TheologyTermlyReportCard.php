@@ -258,12 +258,11 @@ class TheologyTermlyReportCard extends Model
                         if ($mark->total_score_display >= $range->min_mark && $mark->total_score_display <= $range->max_mark) {
                             $mark->aggr_value = $range->aggregates;
                             $mark->aggr_name = $range->name;
-                            echo $mark->aggr_value . "<br>";
-                            $report->average_aggregates += $mark->aggr_value;
                             break;
                         }
                     }
                     
+                    $report->average_aggregates += $mark->aggr_value;
                     $report->total_marks += $mark->total_score_display;
                     $mark->save();
                 }

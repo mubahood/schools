@@ -32,6 +32,7 @@ use App\Models\Subject;
 use App\Models\Term;
 use App\Models\TermlyReportCard;
 use App\Models\TheologryStudentReportCard;
+use App\Models\TheologyClass;
 use App\Models\TheologyMark;
 use App\Models\TheologyTermlyReportCard;
 use App\Models\Transaction;
@@ -54,6 +55,136 @@ Route::get('report-card-individual-printings', [ReportCardsPrintingController::c
 Route::get('data-import', [ReportCardsPrintingController::class, 'data_import']);
 Route::get('process-termly-school-fees-balancings', [MainController::class, 'process_termly_school_fees_balancings']);
 
+Route::get('process-theology-report-cards', function (Request $request) {
+  $termlyReport = TheologyTermlyReportCard::find($request->id);
+
+  $grading_scale = $termlyReport->grading_scale;
+  $ranges = $grading_scale->grade_ranges;
+  if (is_array($termlyReport->classes)) {
+    $classes = $termlyReport->classes;
+    foreach ($classes as $key => $class_id) {
+      $class = TheologyClass::find($class_id);
+
+      $student_reports = TheologryStudentReportCard::where([
+        'enterprise_id' => $termlyReport->enterprise_id,
+        'term_id' => $termlyReport->term_id,
+        'theology_class_id' => $class_id,
+        'theology_termly_report_card_id' => $termlyReport->id,
+      ])->get();
+      foreach ($student_reports as $student_report) {
+        // dd($student_report);
+        //process marks
+        $marks = TheologyMarkRecord::where([
+          'enterprise_id' => $termlyReport->enterprise_id,
+          'term_id' => $termlyReport->term_id,
+          'theology_class_id' => $class_id,
+          'theology_termly_report_card_id' => $termlyReport->id,
+          'administrator_id' => $student_report->student_id,
+        ])->get();
+        $number_of_exams = 0;
+        $total_score = 0;
+        $student_report->average_aggregates = 0;
+        foreach ($marks as $mark) {
+          $number_of_exams = 0;
+          if ($termlyReport->reports_include_bot == 'Yes') {
+            $number_of_exams++;
+            $total_score += $mark->bot_score;
+          }
+          if ($termlyReport->reports_include_mot == 'Yes') {
+            $number_of_exams++;
+            $total_score += $mark->mot_score;
+          }
+          if ($termlyReport->reports_include_eot == 'Yes') {
+            $number_of_exams++;
+            $total_score += $mark->eot_score;
+          }
+          if ($number_of_exams < 1) {
+            throw new Exception("You must include at least one exam.", 1);
+          }
+
+          $average_mark = ((int)(($total_score) / $number_of_exams));
+          $mark->total_score = $total_score;
+          $mark->total_score_display = $average_mark;
+          $mark->remarks = Utils::get_automaic_mark_remarks($mark->total_score_display);
+
+          $mark->aggr_value = null;
+          $mark->aggr_name = null;
+          foreach ($ranges as $range) {
+            if ($mark->total_score_display >= $range->min_mark && $mark->total_score_display <= $range->max_mark) {
+              $mark->aggr_value = $range->aggregates;
+              $mark->aggr_name = $range->name;
+              break;
+            }
+          }
+          $student_report->average_aggregates += $mark->aggr_value;
+
+          $student_report->total_marks = $average_mark;
+          $mark->save();
+          dd($mark);
+
+          dd($total_score);
+
+          dd($termlyReport);
+          dd($mark);
+        }
+      }
+      /* 
+    "id" => 14
+    "created_at" => "2024-07-16 23:36:01"
+    "updated_at" => "2024-08-21 15:51:43"
+    "grading_scale_id" => 14
+    "enterprise_id" => 7
+    "academic_year_id" => 14
+    "term_id" => 41
+    "has_beginning_term" => null
+    "has_mid_term" => null
+    "has_end_term" => null
+    "report_title" => "END OF TERM 2 REPORT CARD 20241........................1"
+    "do_update" => 1
+    "generate_marks" => "No"
+    "delete_marks_for_non_active" => "No"
+    "bot_max" => 100
+    "mot_max" => 100
+    "eot_max" => 100
+    "display_bot_to_teachers" => "Yes"
+    "display_mot_to_teachers" => "No"
+    "display_eot_to_teachers" => "No"
+    "display_bot_to_others" => "Yes"
+    "display_mot_to_others" => "No"
+    "display_eot_to_others" => "Yes"
+    "can_submit_bot" => "Yes"
+    "can_submit_mot" => "No"
+    "can_submit_eot" => "No"
+    "reports_generate" => "No"
+    "reports_delete_for_non_active" => "No"
+    "reports_include_bot" => "Yes"
+    "reports_include_mot" => "No"
+    "reports_include_eot" => "No"
+    "reports_template" => "Template_4"
+    "reports_who_fees_balance" => "No"
+    "reports_display_report_to_parents" => "No"
+    "hm_communication" => "Whichever results you get, there's always room for improvement. Continue working harder."
+    "classes" => "["63","62","61","60","59","58","57"]"
+    "generate_class_teacher_comment" => "No"
+    "generate_head_teacher_comment" => "No"
+    "generate_positions" => "No"
+    "display_positions" => "Yes"
+    "bottom_message" => null
+    "positioning_type" => "Stream"
+    "positioning_method" => "Specific"
+    "positioning_exam" => "bot"
+    "generate_marks_for_classes" => "["63","62","61","60","59","58","57"]"
+    "bot_name" => "SET 1"
+    "mot_name" => "SET 2"
+    "eot_name" => "SET 3"
+*/
+
+      dd($marks);
+      dd($class);
+    }
+  }
+  dd($termlyReport);
+});
 Route::get('test-1', function (Request $request) {
 
   $pos = 110;
@@ -69,7 +200,7 @@ Route::get('test-1', function (Request $request) {
   $rep->average_aggregates = $pos;
   // $rep->class_teacher_comment .= '.';
   $rep->save();
-  
+
   $rep = TheologryStudentReportCard::find($id);
   echo $rep->owner->name . ",  =>$pos<= AGRR: " . $rep->average_aggregates . "<br>";
 });
