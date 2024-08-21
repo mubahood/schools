@@ -66,11 +66,11 @@ Route::get('test-1', function (Request $request) {
     $id = $request->id;
   }
   $rep = TheologryStudentReportCard::find($id);
-  $rep->position = $pos;
+  $rep->average_aggregates = $pos;
   $rep->save();
   
   $rep = TheologryStudentReportCard::find($id);
-  echo $rep->owner->name . ", POS: " . $rep->position . "<br>";
+  echo $rep->owner->name . ", AGRR: " . $rep->position . "<br>";
 });
 Route::get('app', function (Request $request) {
   return view('app');
