@@ -210,7 +210,8 @@ class ReportCardsPrintingController extends Controller
             $tr = TheologryStudentReportCard::where([
                 'student_id' => $r->student_id,
                 'term_id' => $r->term_id,
-            ])->first();
+                'theology_termly_report_card_id' => $printing->theology_termly_report_card_id,
+            ])->first(); 
             $items[] = [
                 'r' => $r,
                 'tr' => $tr,
