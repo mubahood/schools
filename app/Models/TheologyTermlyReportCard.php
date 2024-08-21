@@ -223,6 +223,9 @@ class TheologyTermlyReportCard extends Model
 
                 $report->total_marks = 0;
                 $report->average_aggregates = 0;
+
+                // echo("ID: ".$student->id . "<br>");
+
                 foreach ($marks as $mark) {
 
                     $mark->bot_grade = Utils::generateAggregates($grading_scale, $mark->bot_score)['aggr_name'];
@@ -248,20 +251,23 @@ class TheologyTermlyReportCard extends Model
                     $mark->remarks = Utils::get_automaic_mark_remarks($mark->total_score_display);
 
 
+
                     $mark->aggr_value = null;
                     $mark->aggr_name = null;
                     foreach ($ranges as $range) {
                         if ($mark->total_score_display >= $range->min_mark && $mark->total_score_display <= $range->max_mark) {
                             $mark->aggr_value = $range->aggregates;
                             $mark->aggr_name = $range->name;
+                            echo $mark->aggr_value . "<br>";
                             $report->average_aggregates += $mark->aggr_value;
                             break;
                         }
                     }
-
+                    
                     $report->total_marks += $mark->total_score_display;
                     $mark->save();
                 }
+                // echo($report->average_aggregates . "<hr>");
 
                 // $report->total_marks = $number_of_exams * 100;
                 $report->total_aggregates = $report->average_aggregates;
