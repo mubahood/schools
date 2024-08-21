@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AcademicClass;
+use App\Models\AcademicClassSctream;
 use App\Models\AssessmentSheet;
 use App\Models\Enterprise;
 use App\Models\FixedAsset;
@@ -20,6 +21,7 @@ use App\Models\User;
 use App\Models\UserBatchImporter;
 use App\Models\Utils;
 use Encore\Admin\Auth\Database\Administrator;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Maatwebsite\Excel\Facades\Excel;
@@ -39,14 +41,30 @@ class ReportCardsPrintingController extends Controller
         $class = $assessment->has_class;
         $ent = Enterprise::find($assessment->enterprise_id);
 
-        $reportCards = StudentReportCard::where([
-            'termly_report_card_id' => $assessment->termly_report_card_id,
-            'academic_class_id' => $assessment->academic_class_id,
 
-        ])
+        $conds = [];
+        if ($assessment->type == "Class") {
+            $assessment->academic_class_sctream_id = null;
+        } else {
+            $stream = AcademicClassSctream::find($assessment->academic_class_sctream_id);
+            if ($stream == null) {
+                throw new Exception("Stream not found", 1);
+            }
+            $assessment->academic_class_id = $stream->academic_class_id;
+            $conds['stream_id'] = $assessment->academic_class_sctream_id;
+        }
+        $class = AcademicClass::find($assessment->academic_class_id);
+        if ($class == null) {
+            throw new Exception("Class not found", 1);
+        }
+        $conds['termly_report_card_id'] = $assessment->termly_report_card_id;
+        $conds['academic_class_id'] = $assessment->academic_class_id; 
+
+
+        $reportCards = StudentReportCard::where($conds)
             ->orderBy('total_marks', 'desc')
             ->get();
-
+      
         $assessment->generated = "Yes";
         $name = $assessment->title;
         $name = str_replace(' ', '-', $name);
