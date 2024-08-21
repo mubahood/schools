@@ -81,11 +81,14 @@ Route::get('process-theology-report-cards', function (Request $request) {
           'theology_termly_report_card_id' => $termlyReport->id,
           'administrator_id' => $student_report->student_id,
         ])->get();
-        $number_of_exams = 0;
-        $total_score = 0;
         $student_report->average_aggregates = 0;
+        $number_of_exams = 0;
+        $student_report->total_aggregates = 0;
+        $student_report->total_marks = 0;
+        $student_report->total_students = $student_reports->count(); 
         foreach ($marks as $mark) {
           $number_of_exams = 0;
+          $total_score = 0;
           if ($termlyReport->reports_include_bot == 'Yes') {
             $number_of_exams++;
             $total_score += $mark->bot_score;
@@ -102,28 +105,68 @@ Route::get('process-theology-report-cards', function (Request $request) {
             throw new Exception("You must include at least one exam.", 1);
           }
 
-          $average_mark = ((int)(($total_score) / $number_of_exams));
+          if ($number_of_exams == 1) {
+            $average_mark = $total_score;
+          } else {
+            $average_mark = ((int)(($total_score) / $number_of_exams));
+          }
           $mark->total_score = $total_score;
           $mark->total_score_display = $average_mark;
           $mark->remarks = Utils::get_automaic_mark_remarks($mark->total_score_display);
 
           $mark->aggr_value = null;
           $mark->aggr_name = null;
+          $rangeFound = false;
           foreach ($ranges as $range) {
             if ($mark->total_score_display >= $range->min_mark && $mark->total_score_display <= $range->max_mark) {
               $mark->aggr_value = $range->aggregates;
               $mark->aggr_name = $range->name;
+              $student_report->average_aggregates += $mark->aggr_value;
+              $student_report->total_aggregates += $mark->aggr_value;
+              $rangeFound = true;
+              $student_report->total_marks += $mark->total_score_display; 
+              echo "$mark->id. " . $mark->total_score_display . " => " . $mark->aggr_name . "<br>"; 
               break;
             }
           }
-          $student_report->average_aggregates += $mark->aggr_value;
-          $student_report->total_marks = $average_mark;
+          if (!$rangeFound) {
+            dd($mark);
+            throw new Exception("No range found for mark: " . $mark->total_score_display, 1);
+          }
           $mark->save();
-          echo $mark->total_score . ", " . $mark->total_score_display . ", " . $mark->aggr_name . "<br>";
-        }
+        } 
+        
+        echo "$student_report->id. {$student_report->owner->name}.   TOTAL MARKS: " . $student_report->total_marks . " => AGGR: " . $student_report->average_aggregates . "<br><hr>";
       }
+      die("done");
       /* 
-    "id" => 14
+
+          "id" => 9639
+    "created_at" => "2024-07-20 01:20:39"
+    "updated_at" => "2024-08-21 13:39:24"
+    "enterprise_id" => 7
+    "academic_year_id" => 14
+    "term_id" => 41
+    "student_id" => 12839
+    "theology_class_id" => 63
+    "theology_termly_report_card_id" => 14
+    "total_students" => 0
+    "total_aggregates" => 6
+    "total_marks" => 372.0
+    "position" => 0
+    "class_teacher_comment" => "MAWANDA RIZIK's academic performance needs significant improvement. she should work closely with teachers to address her weaknesses."
+    "head_teacher_comment" => null
+    "class_teacher_commented" => 0
+    "head_teacher_commented" => 0
+    "average_aggregates" => 6.0
+    "grade" => "1"
+    "stream_id" => null
+
+
+      ===
+    
+    
+      "id" => 14
     "created_at" => "2024-07-16 23:36:01"
     "updated_at" => "2024-08-21 15:51:43"
     "grading_scale_id" => 14
@@ -171,7 +214,10 @@ Route::get('process-theology-report-cards', function (Request $request) {
     "bot_name" => "SET 1"
     "mot_name" => "SET 2"
     "eot_name" => "SET 3"
-*/ 
+*/
+
+      dd($marks);
+      dd($class);
     }
   }
   dd($termlyReport);
