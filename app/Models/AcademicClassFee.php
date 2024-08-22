@@ -16,11 +16,17 @@ class AcademicClassFee extends Model
     public static function process_bill($m)
     {
 
+        if ($m->academic_class == null) {
+            throw new \Exception("Academic class is required", 1);
+        }
         if ($m->academic_class != null) {
-            if ($m->academic_class->students != null) {
-                foreach ($m->academic_class->students as $key => $val) {
-                    AcademicClass::update_fees(Administrator::find($val->administrator_id));
-                }
+            $students = User::where([
+                'current_class_id' => $m->academic_class_id,
+                'enterprise_id' => $m->enterprise_id,
+                'status' => 1
+            ])->get();
+            foreach ($students as $key => $student) {
+                $student->update_fees();
             }
         }
     }

@@ -29,6 +29,13 @@ class User extends Administrator implements JWTSubject
         self::deleting(function ($m) {
             return false;
         });
+
+        //updated
+        self::updated(function ($m) {
+            if ($m->status == 1) {
+                $m->update_fees();
+            }
+        });
     }
 
     /**
@@ -322,5 +329,45 @@ class User extends Administrator implements JWTSubject
             }
         }
         return $my_subjects;
+    }
+
+    public function update_fees()
+    {
+
+        $class = AcademicClass::find($this->current_class_id);
+        if ($class == null) {
+            return;
+        }
+        $ent = Enterprise::find($this->enterprise_id);
+        $active_term = $ent->active_term();
+        if ($active_term == null) {
+            return;
+        }
+        foreach ($class->academic_class_fees as $fee) {
+            if ($active_term->id != $fee->due_term_id) {
+                continue;
+            }
+
+            $has_fee = StudentHasFee::where([
+                'administrator_id' => $this->id,
+                'academic_class_fee_id' => $fee->id,
+            ])->first();
+            if ($has_fee == null) {
+
+                Transaction::my_create([
+                    'academic_year_id' => $class->academic_year_id,
+                    'administrator_id' => $this->id,
+                    'type' => 'FEES_BILLING',
+                    'description' => "Debited {$fee->amount} for $fee->name",
+                    'amount' => ((-1) * ($fee->amount))
+                ]);
+                $has_fee =  new StudentHasFee();
+                $has_fee->enterprise_id    = $this->enterprise_id;
+                $has_fee->administrator_id    = $this->id;
+                $has_fee->academic_class_fee_id    = $fee->id;
+                $has_fee->academic_class_id    = $class->id;
+                $has_fee->save();
+            }
+        }
     }
 }

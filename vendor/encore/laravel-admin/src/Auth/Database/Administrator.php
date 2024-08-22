@@ -350,8 +350,6 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                 //User::createParent($m); 
                 Administrator::my_update($m);
             }
-
-
             //created Administrator
         });
 
@@ -359,8 +357,6 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
             if ($model->enterprise_id == null) {
                 die("enterprise is required");
             }
-
-
             if ($model->user_type == 'student') {
                 if ($model->status == 1) {
                     $current_class = AcademicClass::find($model->current_class_id);
@@ -524,6 +520,15 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
 
         self::updated(function ($m) {
             Administrator::my_update($m);
+
+            self::updated(function ($m) {
+                $x = User::find($m->id);
+                if ($x != null) {
+                    if ($x->status == 1) {
+                        $x->update_fees();
+                    }
+                }
+            });
         });
 
 
@@ -773,9 +778,11 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                     $v->class_teacher_name  = "";
                 }
                 $v->students_count = 0;
-                foreach (StudentHasTheologyClass::where([
-                    'theology_class_id' => $v->id
-                ])->get() as $_value) {
+                foreach (
+                    StudentHasTheologyClass::where([
+                        'theology_class_id' => $v->id
+                    ])->get() as $_value
+                ) {
                     if ($_value->student == null) {
                         continue;
                     }
@@ -850,9 +857,11 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                     $v->class_teacher_name  = "";
                 }
                 $v->students_count = 0;
-                foreach (StudentHasClass::where([
-                    'academic_class_id' => $v->id
-                ])->get() as $_value) {
+                foreach (
+                    StudentHasClass::where([
+                        'academic_class_id' => $v->id
+                    ])->get() as $_value
+                ) {
                     if ($_value->student == null) {
                         continue;
                     }
@@ -891,11 +900,13 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
         }
 
         if ($isAdmin) {
-            foreach (Administrator::where([
-                'status' => 1,
-                'user_type' => 'student',
-                'enterprise_id' => $u->enterprise_id,
-            ])->get() as $user) {
+            foreach (
+                Administrator::where([
+                    'status' => 1,
+                    'user_type' => 'student',
+                    'enterprise_id' => $u->enterprise_id,
+                ])->get() as $user
+            ) {
                 $students[] = $user;
                 continue;
                 $user->balance = 0;
@@ -969,11 +980,13 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
         }
 
         if ($u->isRole('parent')) {
-            foreach (Administrator::where([
-                'parent_id' => $u->id,
-                'status' => 1,
-                'user_type' => 'student',
-            ])->get() as $user) {
+            foreach (
+                Administrator::where([
+                    'parent_id' => $u->id,
+                    'status' => 1,
+                    'user_type' => 'student',
+                ])->get() as $user
+            ) {
                 $students[] = $user;
                 continue;
                 $user->balance = 0;
