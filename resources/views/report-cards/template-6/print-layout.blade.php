@@ -173,7 +173,9 @@ dd($theology_termly_report_card); */
             Aggregate: <b class="text-danger">{{ (int) $r->average_aggregates }}</b> &nbsp;
             DIVISION: <b class="text-danger">{{ $r->grade }}</b> &nbsp;
 
-            @if ($r->display_positions == 'Yes')
+
+
+            @if ($r->termly_report_card->display_positions == 'Yes')
                 position: <b class="text-danger">{{ (int) $r->position }}</b> &nbsp;
                 OUT OF: <b class="text-danger">{{ (int) $r->total_students }}</b> &nbsp;
             @endif
@@ -268,7 +270,7 @@ dd($theology_termly_report_card); */
                         </td>
                     @endif
 
-                    <td>{{ (int) $v->total_score_display }}</td>
+                    <td>{{ $v->subject->grade_subject == 'Yes' ? $v->total_score_display : '' }}</td>
                     <td>{{ $v->aggr_name }}</td>
 
                     <td class="remarks text-center">{{ $v->remarks }}</td>
@@ -290,18 +292,30 @@ dd($theology_termly_report_card); */
                     <th></th>
                 @endif
 
-                <td class="text-center"><b>{{-- {{ $r->total_marks }} --}}</b></td>
+                <td class="text-center"><b>{{ $r->total_marks }}</b></td>
                 <td><b>{{ $r->total_aggregates }}</b></td>
 
                 <td colspan="2"></td>
             </tr>
         </table>
-        <p class="mt-3 fw-16" style="font-size: 14!important;"><span class="text-uppercase">Class Teacher's
-                Comment:</span> <b class="" style="font-size: 14px">
-                ........................................................................................................<br><br>........................................................................................
-                ........................................................................................
-                {{-- {{ Utils::capitalizeSentences($r->class_teacher_comment) }} --}}</b></p>
-        <p class="mt-2 " style="font-size: 14!important;"><span class="text-uppercase">Class Teacher's Name:</span>
+
+
+
+        @if ($r->termly_report_card->display_class_teacher_comments == 'Yes')
+            <p class="mt-3 fw-16" style="font-size: 14!important;"><span class="text-uppercase">Class Teacher's
+                    Comment:</span> <b class="comment" style="font-size: 16px">
+                    {{ Utils::capitalizeSentences($r->class_teacher_comment) }}</b></p>
+        @else
+            <p class="mt-3 fw-16" style="font-size: 14!important;"><span class="text-uppercase">Class Teacher's
+                    Comment:</span> <b class="" style="font-size: 14px">
+                    ........................................................................................................<br><br>........................................................................................
+                    ........................................................................................
+                    {{-- {{ Utils::capitalizeSentences($r->class_teacher_comment) }} --}}</b></p>
+        @endif
+
+
+
+        <p class="mt-2 " style="font-size: 16!important;"><span class="text-uppercase">Class Teacher's Name:</span>
             {{-- <b style="font-size: 14px" class="text-uppercase">{{ $class_teacher_name }}</b>,&nbsp; --}}
             <b style="font-size: 14px" class="text-uppercase">.......................................</b>&nbsp;
             <span class="text-uppercase fs-14 ">Signature:<b>.....................</b></span>

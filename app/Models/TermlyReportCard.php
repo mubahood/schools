@@ -188,33 +188,51 @@ class TermlyReportCard extends Model
     {
 
         foreach ($m->report_cards as $key => $report) {
-            $count = MarkRecord::where([
-                'administrator_id' => $report->student_id,
-                'termly_report_card_id' => $m->id,
-            ])->count();
+            $count = 0;
+            foreach (
+                MarkRecord::where([
+                    'administrator_id' => $report->student_id,
+                    'termly_report_card_id' => $m->id,
+                ])->get() as $item
+            ) {
+                if ($item->subject->grade_subject != 'Yes') {
+                    continue;
+                }
+                $count++;
+            }
             $max_score = $count * 100;
             if ($max_score == 0) {
                 continue;
             }
+
             $total_marks = $report->total_marks;
             $percentage = ($total_marks / $max_score) * 100;
+            if ($total_marks < 4) {
+                continue;
+            }
 
             $student = User::find($report->student_id);
             if ($student == null) {
                 continue;
             }
-            $comment = Utils::get_autometed_comment(
-                $percentage,
-                $student->name,
-                $student->sex
-            );
-            $report->class_teacher_comment = $comment;
-            $comment = Utils::get_autometed_comment(
-                $percentage,
-                $student->name,
-                $student->sex
-            );
-            $report->head_teacher_comment = $comment;
+
+            if ($m->generate_class_teacher_comment == 'Yes') {
+                $comment = Utils::get_autometed_comment(
+                    $percentage,
+                    $student->name,
+                    $student->sex
+                ); 
+                $report->class_teacher_comment = $comment;
+            }
+
+            if ($m->generate_head_teacher_comment == 'Yes') {
+                $comment = Utils::get_autometed_comment(
+                    $percentage,
+                    $student->name,
+                    $student->sex
+                );
+                $report->head_teacher_comment = $comment;
+            } 
             $report->save();
             continue;
 
@@ -255,17 +273,13 @@ class TermlyReportCard extends Model
                 ])->update([
                     'position' => 0
                 ]);
-                foreach ($class->streams as $stream) {
-                    $studentHasClasses = $stream->studentHasClasses;
-                    $totalStudents = count($studentHasClasses);
-                    $students_ids_array = [];
-                    foreach ($studentHasClasses as $studentHasClass) {
-                        $students_ids_array[] = $studentHasClass->administrator_id;
-                    }
+
+                if (count($class->streams) < 1) {
+
                     $reports = StudentReportCard::where([
                         'academic_class_id' => $class_id,
                         'termly_report_card_id' => $m->id,
-                    ])->whereIn('student_id', $students_ids_array)
+                    ])
                         ->orderBy('total_marks', 'DESC')
                         ->get();
                     $prev_mark = 0;
@@ -280,6 +294,33 @@ class TermlyReportCard extends Model
                         $prev_mark = $report->total_marks;
                         $report->total_students = count($reports);
                         $report->save();
+                    }
+                } else {
+                    foreach ($class->streams as $stream) {
+                        $studentHasClasses = $stream->studentHasClasses;
+                        $students_ids_array = [];
+                        foreach ($studentHasClasses as $studentHasClass) {
+                            $students_ids_array[] = $studentHasClass->administrator_id;
+                        }
+                        $reports = StudentReportCard::where([
+                            'academic_class_id' => $class_id,
+                            'termly_report_card_id' => $m->id,
+                        ])->whereIn('student_id', $students_ids_array)
+                            ->orderBy('total_marks', 'DESC')
+                            ->get();
+                        $prev_mark = 0;
+                        $pos = 1;
+                        foreach ($reports as $key => $report) {
+                            if ($report->total_marks == $prev_mark) {
+                                $report->position = $pos;
+                            } else {
+                                $pos = ($key + 1);
+                                $report->position = $pos;
+                            }
+                            $prev_mark = $report->total_marks;
+                            $report->total_students = count($reports);
+                            $report->save();
+                        }
                     }
                 }
             }
@@ -389,11 +430,11 @@ class TermlyReportCard extends Model
                         continue;
                     }
 
-                    
+
                     $mark->bot_grade = Utils::generateAggregates($grading_scale, $mark->bot_score)['aggr_name'];
                     $mark->mot_grade = Utils::generateAggregates($grading_scale, $mark->mot_score)['aggr_name'];
                     $mark->eot_grade = Utils::generateAggregates($grading_scale, $mark->eot_score)['aggr_name'];
-                    
+
                     /* 
                     dd($mark->eot_grade);
                             $table->string('bot_grade')->nullable();

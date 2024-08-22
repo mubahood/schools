@@ -119,13 +119,5 @@ class MarkRecord extends Model
                     $mark->eot_grade = Utils::generateAggregates($grading_scale, $mark->eot_score)['aggr_name'];
     */
 
-    //getter for bot_grade
-    public function getBotGradeAttribute($x)
-    {
-        if($x == null || strlen($x) <2){
-            
-            $x = 'N/A';
-        }
-        return $this->get_grade($this->grading_scale, $this->bot_score);
-    }
+    
 }

@@ -125,7 +125,7 @@ class TermlyReportCardController extends AdminController
         });
         //regenerate reports for selected classes button
 
-/*         $grid->column('regenerate', __('Regenerate REPORT'))->display(function () {
+        /*         $grid->column('regenerate', __('Regenerate REPORT'))->display(function () {
             return '<a class="btn btn-sm btn-primary" target="_blank" href="' . url('generate-report-cards?id=' . $this->id) . '" >RE-GENERATE REPORT</a>';
         });
         $grid->column('regenerate-pdf', __('Regenerate PDFs'))->display(function () {
@@ -173,8 +173,15 @@ class TermlyReportCardController extends AdminController
      */
     protected function form()
     {
-        //$x = TermlyReportCard::find(16);
-        /*  TermlyReportCard::do_generate_class_teacher_comment($x);
+        /* $x = TermlyReportCard::find(17);
+        $x->generate_head_teacher_comment = 'Yes';
+        $x->generate_class_teacher_comment = 'Yes'; 
+        TermlyReportCard::do_generate_class_teacher_comment($x);
+        die('done');
+        $x->positioning_type = 'Stream';
+        TermlyReportCard::do_generate_positions($x);
+        TermlyReportCard::do_reports_generate($x);
+        TermlyReportCard::do_generate_class_teacher_comment($x);
         dd($x); */
         // $x->generate_marks = 'Yes';
         // TermlyReportCard::do_generate_marks($x);
