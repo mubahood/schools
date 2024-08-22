@@ -34,6 +34,10 @@ class TransactionController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Transaction());
+        $u = Admin::user();
+        Transaction::where('enterprise_id', $u->enterprise_id)
+            ->where('term_id', 0)
+            ->delete();
 
         //$grid->disableActions();
         $grid->export(function ($export) {
@@ -84,10 +88,12 @@ class TransactionController extends AdminController
 
             $terms = [];
             $active_term = 0;
-            foreach (Term::where(
-                'enterprise_id',
-                Admin::user()->enterprise_id
-            )->orderBy('id', 'desc')->get() as $key => $term) {
+            foreach (
+                Term::where(
+                    'enterprise_id',
+                    Admin::user()->enterprise_id
+                )->orderBy('id', 'desc')->get() as $key => $term
+            ) {
                 $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
                 if ($term->is_active) {
                     $active_term = $term->id;
@@ -97,11 +103,13 @@ class TransactionController extends AdminController
 
 
             $balancings = [];
-            foreach (TermlySchoolFeesBalancing::where([
-                'enterprise_id' => $u->enterprise_id
-            ])
-                ->orderBy('id', 'desc')
-                ->get() as $v) {
+            foreach (
+                TermlySchoolFeesBalancing::where([
+                    'enterprise_id' => $u->enterprise_id
+                ])
+                    ->orderBy('id', 'desc')
+                    ->get() as $v
+            ) {
                 $balancings[$v->id] = 'Term ' . $v->term->name_text;
             }
 
@@ -209,10 +217,12 @@ class TransactionController extends AdminController
 
         $terms = [];
         $active_term = 0;
-        foreach (Term::where(
-            'enterprise_id',
-            Admin::user()->enterprise_id
-        )->orderBy('id', 'desc')->get() as $key => $term) {
+        foreach (
+            Term::where(
+                'enterprise_id',
+                Admin::user()->enterprise_id
+            )->orderBy('id', 'desc')->get() as $key => $term
+        ) {
             $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
             if ($term->is_active) {
                 $active_term = $term->id;
@@ -278,10 +288,12 @@ class TransactionController extends AdminController
 
         $terms = [];
         $active_term = 0;
-        foreach (Term::where(
-            'enterprise_id',
-            Admin::user()->enterprise_id
-        )->orderBy('id', 'desc')->get() as $key => $term) {
+        foreach (
+            Term::where(
+                'enterprise_id',
+                Admin::user()->enterprise_id
+            )->orderBy('id', 'desc')->get() as $key => $term
+        ) {
             $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
             if ($term->is_active) {
                 $active_term = $term->id;
