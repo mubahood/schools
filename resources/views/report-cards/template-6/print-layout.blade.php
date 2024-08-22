@@ -28,8 +28,10 @@ if ($r->academic_class != null) {
     }
 }
 
-if ($tr->termly_report_card == null) {
-    $tr = null;
+if ($tr != null) {
+    if ($tr->termly_report_card == null) {
+        $tr = null;
+    }
 }
 
 if ($tr != null) {
@@ -576,7 +578,7 @@ dd($theology_termly_report_card); */
                             <tr class="text-center">
                                 <th class="text-left  fs-12 lh-1 pt-2">Aggregates</th>
                                 <th class=" fs-12 lh-1 pt-2">4 - 12</th>
-                                <th class=" fs-12 lh-1 pt-2">13 - 24</th> 
+                                <th class=" fs-12 lh-1 pt-2">13 - 24</th>
                                 <th class=" fs-12 lh-1 pt-2">24 - 29</th>
                                 <th class=" fs-12 lh-1 pt-2">30 - 35</th>
                                 <th class=" fs-12 lh-1 pt-2">36 > </th>
