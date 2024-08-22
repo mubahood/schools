@@ -36,7 +36,6 @@ class TransactionController extends AdminController
         $grid = new Grid(new Transaction());
         $u = Admin::user();
         Transaction::where('enterprise_id', $u->enterprise_id)
-            ->where('term_id', 0)
             ->delete();
 
         //$grid->disableActions();
