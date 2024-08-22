@@ -59,7 +59,7 @@ Route::get('process-fees', function (Request $request) {
   $ent_id = 19;
 
 
-  $recs = StudentHasFee::where([
+  /* $recs = StudentHasFee::where([
     'enterprise_id' => $ent_id,
   ])->delete();
   echo "Fees Deleted: " . ($recs) . "<br>";
@@ -68,7 +68,7 @@ Route::get('process-fees', function (Request $request) {
   ])->delete();
   echo "Transactions Deleted: " . ($recs) . "<br>";
 
-  die();
+  die(); */
   $fees = AcademicClassFee::where([
     'enterprise_id' => $ent_id,
   ])->get();
