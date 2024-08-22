@@ -34,10 +34,10 @@ class TransactionController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Transaction());
-        $u = Admin::user();
+       /*  $u = Admin::user();
         Transaction::where('enterprise_id', $u->enterprise_id)
             ->delete();
-
+ */
         //$grid->disableActions();
         $grid->export(function ($export) {
 
