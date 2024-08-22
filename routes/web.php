@@ -69,6 +69,8 @@ Route::get('process-fees', function (Request $request) {
   echo "Transactions Deleted: " . ($recs) . "<br>";
 
   die(); */
+  set_time_limit(-1);
+  ini_set('memory_limit', '-1'); 
   $fees = AcademicClassFee::where([
     'enterprise_id' => $ent_id,
   ])->get();
