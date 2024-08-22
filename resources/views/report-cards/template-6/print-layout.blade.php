@@ -176,7 +176,9 @@ dd($theology_termly_report_card); */
 
 
             @if ($r->termly_report_card->display_positions == 'Yes')
-                position: <b class="text-danger">{{ (int) $r->position }}</b> &nbsp;
+                position: <b
+                    class="text-danger">{{ (int) $r->position }}<sup>{{ Utils::getSuperscriptSuffix($r->position) }}</sup>
+                </b> &nbsp;
                 OUT OF: <b class="text-danger">{{ (int) $r->total_students }}</b> &nbsp;
             @endif
 
@@ -205,7 +207,7 @@ dd($theology_termly_report_card); */
                     </th>
                 @endif
 
-                <th class="p-1"><b>MARKS</b>
+                <th class="p-1"><b>AVERAGE MARKS</b>
                     <small class="d-block"> ({{ '100' }}%)</small>
                 </th>
                 <th class="p-1">AGGR</th>
@@ -315,7 +317,7 @@ dd($theology_termly_report_card); */
 
 
 
-        <p class="mt-2 " style="font-size: 16!important;"><span class="text-uppercase">Class Teacher's Name:</span>
+        <p class="mt-2 " style="font-size: 16!important;"><span class="text-uppercase">Class Teacher:</span>
             {{-- <b style="font-size: 14px" class="text-uppercase">{{ $class_teacher_name }}</b>,&nbsp; --}}
             <b style="font-size: 14px" class="text-uppercase">.......................................</b>&nbsp;
             <span class="text-uppercase fs-14 ">Signature:<b>.....................</b></span>
@@ -360,7 +362,9 @@ dd($theology_termly_report_card); */
                 Aggregate: <b class="text-danger">{{ (int) $tr->average_aggregates }}</b> &nbsp;
                 DIVISION: <b class="text-danger">{{ $tr->grade }}</b> &nbsp;
                 @if ($theology_termly_report_card->display_positions == 'Yes')
-                    position: <b class="text-danger">{{ (int) $tr->position }}</b> &nbsp;
+                    position: <b
+                        class="text-danger">{{ (int) $tr->position }}{{ Utils::getSuperscriptSuffix($tr->position) }}</b>
+                    &nbsp;
                     OUT OF: <b class="text-danger">{{ (int) $tr->total_students }}</b> &nbsp;
                 @endif
             </div>
@@ -387,7 +391,7 @@ dd($theology_termly_report_card); */
                     @endif
 
                     @if (!$isOneExam)
-                        <th class="p-1"><b>MARKS</b>
+                        <th class="p-1"><b>AVERAGE MARKS</b>
                             <small class="d-block">({{ '100' }}%)</small>
                         </th>
                         <th class="p-1">AGGR</th>
@@ -515,7 +519,7 @@ dd($theology_termly_report_card); */
         <b class="comment"
             style="font-size: 14px">{{ Utils::capitalizeSentences($r->termly_report_card->hm_communication) }}</b>
     </p>
-    <p class="mt-2 fw-14"><span class="text-uppercase">HEAD Teacher's Name:</span> <b style="font-size: 14px"
+    <p class="mt-2 fw-14"><span class="text-uppercase">HEAD Teacher:</span> <b style="font-size: 14px"
             class="text-uppercase">{{ $hm_name }}</b>,&nbsp;
         <span class="text-uppercase fs-14 ">Signature:
             <img style="width: 70px; " src="{{ public_path('storage/' . $ent->hm_signature) }}">

@@ -50,6 +50,31 @@ define('COLORS',  [
 class Utils  extends Model
 {
 
+
+    public static function getSuperscriptSuffix($number)
+    {
+
+        $number = (int)$number;
+        $lastDigit = $number % 10;
+        $lastTwoDigits = $number % 100;
+
+        if ($lastTwoDigits >= 11 && $lastTwoDigits <= 13) {
+            return 'th';
+        }
+
+        switch ($lastDigit) {
+            case 1:
+                return 'st';
+            case 2:
+                return 'nd';
+            case 3:
+                return 'rd';
+            default:
+                return 'th';
+        }
+    }
+
+
     //function that sorts laravel collection
     public static function sort_collection($collection, $field, $order = 'asc')
     {
@@ -2637,7 +2662,7 @@ class Utils  extends Model
     {
         if ($grading_scale == null) {
             $resp['aggr_value'] = 0;
-            $resp['aggr_name'] = 'X'; 
+            $resp['aggr_name'] = 'X';
         }
         $ranges = $grading_scale->grade_ranges;
         if ($grading_scale == null) {
