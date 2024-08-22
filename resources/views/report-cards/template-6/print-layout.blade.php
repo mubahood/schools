@@ -189,24 +189,24 @@ dd($theology_termly_report_card); */
                 @if ($termly_report_card->reports_include_bot == 'Yes')
                     <th class="p-1 m-0" colspan="2">
                         <b>{{ $termly_report_card->bot_name }}</b>
-                        <small class="d-block">({{ $termly_report_card->bot_max }})</small>
+                        {{-- <small class="d-block">({{ $termly_report_card->bot_max }})</small> --}}
                     </th>
                 @endif
                 @if ($termly_report_card->reports_include_mot == 'Yes')
                     <th class="p-1 m-0" colspan="2">
                         <b>{{ $termly_report_card->mot_name }}</b>
-                        <small class="d-block">({{ $termly_report_card->mot_max }})</small>
+                        {{-- <small class="d-block">({{ $termly_report_card->mot_max }})</small> --}}
                     </th>
                 @endif
                 @if ($termly_report_card->reports_include_eot == 'Yes')
                     <th class="p-1 m-0" colspan="2">
                         <b>{{ $termly_report_card->eot_name }}</b>
-                        <small class="d-block">({{ $termly_report_card->eot_max }})</small>
+                        {{-- <small class="d-block">({{ $termly_report_card->eot_max }})</small> --}}
                     </th>
                 @endif
 
                 <th class="p-1"><b>MARKS</b>
-                    <small class="d-block"> ({{ $max_mot }}%)</small>
+                    <small class="d-block"> ({{ '100' }}%)</small>
                 </th>
                 <th class="p-1">AGGR</th>
 
