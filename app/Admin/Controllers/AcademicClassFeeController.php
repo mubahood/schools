@@ -61,22 +61,24 @@ class AcademicClassFeeController extends AdminController
 
 
         $grid->disableBatchActions();
-        $grid->column('id', __('#Fee ID'))->sortable();
+        $grid->column('id', __('#Fee ID'))->sortable()->width(50);
         $grid->column('academic_class_id', __('Class'))->display(function () {
             return $this->academic_class->name_text;
-        })->sortable();
+        })->sortable()->width(100);
 
-        $grid->column('name', __('Fee Name'));
+        $grid->column('name', __('Fee Name'))->sortable();
         $grid->column('amount', __('Amount'))->display(function () {
             return '<span style="float: right;">' . $this->amount_text . '</span>';
-        })->sortable();
+        })->sortable()->width(150);
 
         $terms = [];
         $active_term = 0;
-        foreach (Term::where(
-            'enterprise_id',
-            Admin::user()->enterprise_id
-        )->orderBy('id', 'desc')->get() as $key => $term) {
+        foreach (
+            Term::where(
+                'enterprise_id',
+                Admin::user()->enterprise_id
+            )->orderBy('id', 'desc')->get() as $key => $term
+        ) {
             $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
             if ($term->is_active) {
                 $active_term = $term->id;
@@ -147,8 +149,8 @@ class AcademicClassFeeController extends AdminController
                             'enterprise_id' => $u->enterprise_id,
                             /* 'academic_year_id' => $year->id */
                         ])
-                        ->orderBy('id','desc')
-                        ->get()
+                            ->orderBy('id', 'desc')
+                            ->get()
                             ->pluck('name_text', 'id')
                     )->rules('required');
             })
@@ -159,10 +161,10 @@ class AcademicClassFeeController extends AdminController
                     ->options(
                         TheologyClass::where([
                             'enterprise_id' => $u->enterprise_id,
-                      /*       'academic_year_id' => $year->id */
+                            /*       'academic_year_id' => $year->id */
                         ])
-                        ->orderBy('id','desc')
-                        ->get()
+                            ->orderBy('id', 'desc')
+                            ->get()
                             ->pluck('name_text', 'id')
                     )->rules('required');
             })
@@ -174,10 +176,12 @@ class AcademicClassFeeController extends AdminController
 
         $terms = [];
         $active_term = 0;
-        foreach (Term::where(
-            'enterprise_id',
-            Admin::user()->enterprise_id
-        )->orderBy('id', 'desc')->get() as $key => $term) {
+        foreach (
+            Term::where(
+                'enterprise_id',
+                Admin::user()->enterprise_id
+            )->orderBy('id', 'desc')->get() as $key => $term
+        ) {
             $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
             if ($term->is_active) {
                 $active_term = $term->id;

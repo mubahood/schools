@@ -19,6 +19,17 @@ class AcademicClassFee extends Model
         if ($m->academic_class == null) {
             throw new \Exception("Academic class is required", 1);
         }
+        $ent = Enterprise::find($m->enterprise_id);
+        if ($ent == null) {
+            throw new \Exception("Enterprise not found", 1);
+        } 
+        $active_term = $ent->active_term();
+        if($active_term == null){
+            return; 
+        } 
+        if($active_term->id != $m->due_term_id){
+            return; 
+        }
         if ($m->academic_class != null) {
             $students = User::where([
                 'current_class_id' => $m->academic_class_id,

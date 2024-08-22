@@ -55,6 +55,27 @@ Route::get('report-card-individual-printings', [ReportCardsPrintingController::c
 Route::get('data-import', [ReportCardsPrintingController::class, 'data_import']);
 Route::get('process-termly-school-fees-balancings', [MainController::class, 'process_termly_school_fees_balancings']);
 
+Route::get('process-fees', function (Request $request) {
+  $ent_id = 19;
+
+
+  $recs = StudentHasFee::where([
+    'enterprise_id' => $ent_id,
+  ])->delete();
+  echo "Fees Deleted: " . ($recs) . "<br>";
+  Transaction::where([
+    'enterprise_id' => $ent_id,
+  ])->delete();
+  echo "Transactions Deleted: " . ($recs) . "<br>";
+
+  die();
+  $fees = AcademicClassFee::where([
+    'enterprise_id' => $ent_id,
+  ])->get();
+  foreach ($fees as $x) {
+    AcademicClassFee::process_bill($x);
+  }
+});
 Route::get('process-theology-report-cards', function (Request $request) {
   $termlyReport = TheologyTermlyReportCard::find($request->id);
 

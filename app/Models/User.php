@@ -334,6 +334,10 @@ class User extends Administrator implements JWTSubject
     public function update_fees()
     {
 
+        if ($this->status != 1) {
+            return;
+        }
+
         $class = AcademicClass::find($this->current_class_id);
         if ($class == null) {
             return;
@@ -343,6 +347,34 @@ class User extends Administrator implements JWTSubject
         if ($active_term == null) {
             return;
         }
+        $fees = AcademicClassFee::where([
+            'academic_class_id' => $class->id,
+            'enterprise_id' => $this->enterprise_id,
+            'due_term_id' => $active_term->id,
+        ])->get();
+
+        $account = $this->account;
+        if ($this->account == null) {
+            $account = new Account();
+            $account->enterprise_id = $this->enterprise_id;
+            $account->administrator_id = $this->id;
+            $account->name = $this->name;
+            $account->type = 'STUDENT_ACCOUNT';
+            $account->balance = 0;
+            $account->status = 1;
+            $account->description = "Account for {$this->name}";
+            $account->account_parent_id = null;
+            $account->prossessed = 'No';
+            $account->save();
+            $account = Account::find($account->id);
+            $this->account = $account;
+        }
+        $account = Account::find($account->id);
+        if ($account == null) {
+            throw new \Exception("Account not found", 1);
+        }
+
+
         foreach ($class->academic_class_fees as $fee) {
             if ($active_term->id != $fee->due_term_id) {
                 continue;
@@ -353,21 +385,37 @@ class User extends Administrator implements JWTSubject
                 'academic_class_fee_id' => $fee->id,
             ])->first();
             if ($has_fee == null) {
-
-                Transaction::my_create([
-                    'academic_year_id' => $class->academic_year_id,
-                    'administrator_id' => $this->id,
-                    'type' => 'FEES_BILLING',
-                    'description' => "Debited {$fee->amount} for $fee->name",
-                    'amount' => ((-1) * ($fee->amount))
-                ]);
+                $transcation = new Transaction();
+                $transcation->enterprise_id = $this->enterprise_id;
+                $transcation->account_id = $account->id;
+                $transcation->amount = ((-1) * (abs($fee->amount)));
+                $transcation->description = "Debited {$fee->amount} for $fee->name";
+                $transcation->academic_year_id = $active_term->academic_year_id;
+                $transcation->term_id = $active_term->id;
+                $transcation->school_pay_transporter_id = null;
+                $transcation->contra_entry_account_id = null;
+                $transcation->contra_entry_transaction_id = null;
+                $transcation->termly_school_fees_balancing_id = null;
+                $transcation->created_by_id = $ent->administrator_id;
+                $transcation->is_contra_entry = 0;
+                $transcation->payment_date = Carbon::now();
+                $transcation->type = 'FEES_BILLING';
+                $transcation->source = 'STUDENT';
+                $transcation->save(); 
+                
                 $has_fee =  new StudentHasFee();
                 $has_fee->enterprise_id    = $this->enterprise_id;
                 $has_fee->administrator_id    = $this->id;
                 $has_fee->academic_class_fee_id    = $fee->id;
                 $has_fee->academic_class_id    = $class->id;
                 $has_fee->save();
+
             }
         }
+    }
+
+    public function account()
+    {
+        return $this->hasOne(Account::class, 'administrator_id');
     }
 }

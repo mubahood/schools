@@ -98,10 +98,12 @@ class StudentFinancialAccountController extends AdminController
             $year = $ent->dpYear();
             //academic_class_id
             $classes = [];
-            foreach (AcademicClass::where([
-                'enterprise_id' => $u->enterprise_id,
-                /*                 'academic_year_id' => $year->id */
-            ])->orderBy('id', 'desc')->get() as $key => $v) {
+            foreach (
+                AcademicClass::where([
+                    'enterprise_id' => $u->enterprise_id,
+                    /*                 'academic_year_id' => $year->id */
+                ])->orderBy('id', 'desc')->get() as $key => $v
+            ) {
                 $classes[$v->id] =  $v->name_text;
             }
 
@@ -170,7 +172,7 @@ class StudentFinancialAccountController extends AdminController
                 1 => 'success',
             ])
             ->sortable();
-        $grid->column('parent_name', __('Parent\'s Contact'))
+        $grid->column('parent_name', __('Parent\'s Name'))
             ->display(function () {
                 $u = $this->owner;
                 if ($u == null) {
@@ -194,9 +196,8 @@ class StudentFinancialAccountController extends AdminController
                 ) {
                     return $u->emergency_person_name;
                 }
-
                 return "-";
-            });
+            })->hide();
         $grid->column('mother_phone', __('Parent\'s Contact'))
             ->display(function () {
                 $u = $this->owner;
@@ -243,7 +244,7 @@ class StudentFinancialAccountController extends AdminController
                     return $u->username;
                 }
                 return "-";
-            });
+            })->hide();
 
         $grid->column('account_parent_id', __('Account category'))
             ->hide()
@@ -294,14 +295,22 @@ class StudentFinancialAccountController extends AdminController
                 return  "UGX " . number_format($amount);
             })
             ->sortable();
+        $grid->column('account_status', __('Account status'))
+            ->display(function () {
+                if ($this->status == 1) {
+                    return "<span class='badge bg-success'>Verified</span>";
+                }
+                return "<span class='badge bg-danger'>Not verified</span>";
+            });
         $grid->column('status', __('Verification'))
-            ->filter([0 => 'Pending', 1 => 'Verified'])
-            ->using([0 => 'Pending', 1 => 'Verified'])
-            ->label([
-                0 => 'danger',
-                1 => 'success',
-            ])
-            ->sortable();
+            ->editable('select', [
+                0 => 'Not verified',
+                1 => 'Verified',
+            ])->sortable()
+            ->filter([
+                0 => 'Not verified',
+                1 => 'Verified',
+            ]);
 
         //anjane
 
@@ -421,7 +430,8 @@ class StudentFinancialAccountController extends AdminController
                     ->when(1, function ($f) {
                         $f->decimal('new_balance_amount', __('New Account Balance'))
                             ->rules('int')->attribute('type', 'number')
-                            ->rules('required');
+                            ->rules('required')
+                            ->help("Start with a minus(-) sign if the balance is negative.");
                     })
                     ->default(0)
                     ->rules('required');

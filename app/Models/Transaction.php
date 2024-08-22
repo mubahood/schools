@@ -149,13 +149,14 @@ class Transaction extends Model
                 $m->created_by_id = $ent->administrator_id;
             }
 
+
             if ($m != false) {
                 if ($m->payment_date != null) {
                     $d = Carbon::parse($m->payment_date);
                     $min_data = Carbon::parse('15-08-2022');
                     if ($d != null) {
                         if ($d->isBefore($min_data)) {
-                            return false;
+                            // return false;
                         }
                     }
                 }
@@ -165,11 +166,15 @@ class Transaction extends Model
                 $m->type = 'other';
             }
             //check if there is a duplicate of school_pay_transporter_id
-            $dup = Transaction::where([
-                'school_pay_transporter_id' => $m->school_pay_transporter_id,
-            ])->first();
-            if ($dup != null) {
-                return false;
+            if ($m->school_pay_transporter_id != null) {
+                if (strlen($m->school_pay_transporter_id) > 4) {
+                    $dup = Transaction::where([
+                        'school_pay_transporter_id' => $m->school_pay_transporter_id,
+                    ])->first();
+                    if ($dup != null) {
+                        throw new Exception("Duplicate school_pay_transporter_id #" . $m->school_pay_transporter_i . " ref: " . $m->id, 1);
+                    }
+                }
             }
 
             $ent = Enterprise::find($m->enterprise_id);
@@ -186,19 +191,7 @@ class Transaction extends Model
                     }
                 }
             }
-            if (!$m->is_contra_entry) {
-                if ($m->school_pay_transporter_id != null) {
-                    if (strlen($m->school_pay_transporter_id) > 2) {
-                        $trans = Transaction::where([
-                            'school_pay_transporter_id' => $m->school_pay_transporter_id,
-                            'is_contra_entry' => 0,
-                        ])->first();
-                        if ($trans != null) {
-                            return false;
-                        }
-                    }
-                }
-            }
+
 
             if (Admin::user() != null) {
                 $m->created_by_id = Admin::user()->id;
@@ -226,7 +219,6 @@ class Transaction extends Model
                     }
                     $m->amount = (-1) * ($m->amount);
                 }
-
                 unset($m->is_debit);
             }
 
@@ -246,9 +238,6 @@ class Transaction extends Model
                     }
                 }
             }
-
-
-
             try {
                 if (
                     $m->school_pay_transporter_id != null &&
@@ -261,6 +250,19 @@ class Transaction extends Model
 
             if (strlen($m->source) < 3) {
                 $m->source = 'GENERATED';
+            }
+
+            if ($m->academic_class_fee_id != null) {
+                $fee = AcademicClassFee::find($m->academic_class_fee_id);
+                if ($fee != null) {
+                    $dupFee = Transaction::where([
+                        'academic_class_fee_id' => $m->academic_class_fee_id,
+                        'account_id' => $m->account_id,
+                    ])->first();
+                    if ($dupFee != null) {
+                        throw new Exception("Duplicate fee payment #" . $m->academic_class_fee_id . " ref: " . $m->id, 1);
+                    }
+                }
             }
 
             return $m;
