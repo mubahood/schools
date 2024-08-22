@@ -221,7 +221,7 @@ class TermlyReportCard extends Model
                     $percentage,
                     $student->name,
                     $student->sex
-                ); 
+                );
                 $report->class_teacher_comment = $comment;
             }
 
@@ -232,7 +232,7 @@ class TermlyReportCard extends Model
                     $student->sex
                 );
                 $report->head_teacher_comment = $comment;
-            } 
+            }
             $report->save();
             continue;
 
@@ -484,15 +484,18 @@ class TermlyReportCard extends Model
 
                 //$report->total_marks = $number_of_exams * 100;
                 $report->total_aggregates = $report->average_aggregates;
-
+              
                 $report->position = 0;
+                if ($report->average_aggregates < 4) {
+                    $report->grade = 'X';
+                } else
                 if ($report->average_aggregates <= 12) {
                     $report->grade = '1';
-                } else if ($report->average_aggregates <= 23) {
+                } else if ($report->average_aggregates <= 24) {
                     $report->grade = '2';
                 } else if ($report->average_aggregates <= 29) {
                     $report->grade = '3';
-                } else if ($report->average_aggregates <= 34) {
+                } else if ($report->average_aggregates <= 35) {
                     $report->grade = '4';
                 } else {
                     $report->grade = 'U';
