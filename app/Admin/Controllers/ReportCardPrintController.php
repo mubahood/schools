@@ -37,7 +37,16 @@ class ReportCardPrintController extends AdminController
             'enterprise_id' => $u->enterprise_id
         ])->orderBy('id', 'desc');
         $grid->column('title', __('Title'))->sortable();
-        $grid->column('type', __('Type'))->sortable();
+        $grid->column('type', __('Type'))
+            ->label([
+                'Secular' => 'info',
+                'Theology' => 'success',
+            ])
+            ->filter([
+                'Secular' => 'Secular',
+                'Theology' => 'Theology',
+            ])
+            ->sortable();
 
         $grid->column('termly_report_card_id', __('Secular Report Card'))
             ->display(function ($f) {
@@ -176,7 +185,7 @@ class ReportCardPrintController extends AdminController
                     ->options($classes)->rules('required');
             })->when('Theology', function ($form) {
                 $u = Admin::user();
- 
+
                 $reports = TheologyTermlyReportCard::where([
                     'enterprise_id' => $u->enterprise_id
                 ])
