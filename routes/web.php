@@ -23,6 +23,7 @@ use App\Models\ReportFinanceModel;
 use App\Models\ReportsFinance;
 use App\Models\SchemWorkItem;
 use App\Models\SchoolPayTransaction;
+use App\Models\Service;
 use App\Models\ServiceSubscription;
 use App\Models\TheologyMarkRecord;
 use App\Models\StudentHasClass;
@@ -56,11 +57,9 @@ Route::get('data-import', [ReportCardsPrintingController::class, 'data_import'])
 Route::get('process-termly-school-fees-balancings', [MainController::class, 'process_termly_school_fees_balancings']);
 
 Route::get('process-fees', function (Request $request) {
-  return; 
+  return;
   $ent_id = 19;
-
-
-  /* $recs = StudentHasFee::where([
+  $recs = StudentHasFee::where([
     'enterprise_id' => $ent_id,
   ])->delete();
   echo "Fees Deleted: " . ($recs) . "<br>";
@@ -68,10 +67,13 @@ Route::get('process-fees', function (Request $request) {
     'enterprise_id' => $ent_id,
   ])->delete();
   echo "Transactions Deleted: " . ($recs) . "<br>";
+  $subs = ServiceSubscription::where([
+    'enterprise_id' => $ent_id,
+  ])->delete();
+  echo "Subscriptions Deleted: " . ($subs) . "<br>";
 
-  die(); */
   set_time_limit(-1);
-  ini_set('memory_limit', '-1'); 
+  ini_set('memory_limit', '-1');
   $fees = AcademicClassFee::where([
     'enterprise_id' => $ent_id,
   ])->get();

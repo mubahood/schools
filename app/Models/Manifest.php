@@ -16,7 +16,14 @@ class Manifest extends Model
 
     public static function get_total_fees_balance($u)
     {
+        $students = User::where([
+            'user_type' => 'STUDENT',
+            'status' => 1,
+            'enterprise_id' => $u->enterprise_id
+        ])->get()->pluck('id')->toArray();
         $accounts = self::get_active_students_acounts_ids($u);
+        $total_balance_of_students = Account::whereIn('administrator_id', $students)->sum('balance');
+        return $total_balance_of_students; 
         return Account::whereIn('id', $accounts)->sum('balance');
     }
 

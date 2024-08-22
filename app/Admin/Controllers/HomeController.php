@@ -144,15 +144,11 @@ class HomeController extends Controller
                     ]));
                 });
                 $row->column(3, function (Column $column) {
-                    $term = Auth::user()->ent->dpTerm();
-                    $r = ReportFinanceModel::where([
-                        'enterprise_id' => $term->enterprise_id,
-                        'term_id' => $term->id
-                    ])->first();
-                    $val = 0;
-                    if ($r) {
-                        $val = (Manifest::get_total_expected_tuition(Auth::user()) + Manifest::get_total_expected_tuition(Auth::user()));
-                    }
+
+                    $xpected_fees = Manifest::get_total_expected_tuition(Auth::user());
+                    $xpected_services = Manifest::get_total_expected_service_fees(Admin::user());
+                    $val = $xpected_fees + $xpected_services;
+
                     $column->append(view('widgets.box-5', [
                         'is_dark' => true,
                         'title' => 'Total Expected Income',
@@ -163,15 +159,35 @@ class HomeController extends Controller
                 });
 
                 $row->column(3, function (Column $column) {
-                    $total_expected = (Manifest::get_total_expected_tuition(Auth::user()) + Manifest::get_total_expected_tuition(Auth::user()));
+                    /* $total_expected = (Manifest::get_total_expected_tuition(Auth::user()) + Manifest::get_total_expected_tuition(Auth::user()));
                     $total_balance = Manifest::get_total_fees_balance(Auth::user());
-                    $paid = $total_expected + $total_balance;
+                    $paid = $total_expected + $total_balance; */
+                    $u = Admin::user();
+                    $ent = $u->ent;
+                    $term = $ent->active_term();
+                    if ($term == null) {
+                        $column->append(view('widgets.box-5', [
+                            'is_dark' => true,
+                            'title' => 'Total Income',
+                            'sub_title' => 'Total sum of all payments made this term.',
+                            'number' => "<small>UGX</small>" . number_format(0),
+                            'link' => admin_url('transactions')
+                        ]));
+                        return;
+                    }
+                    //postive transactions made this term
+                    $transsactions_tot = Transaction::where([
+                        'enterprise_id' => $ent->id,
+                        'term_id' => $term->id,
+                    ])
+                        ->where('amount', '>', 0)
+                        ->sum('amount');
 
                     $column->append(view('widgets.box-5', [
                         'is_dark' => true,
                         'title' => 'Total Income',
                         'sub_title' => 'Total sum of all payments made this term.',
-                        'number' => "<small>UGX</small>" . number_format($paid),
+                        'number' => "<small>UGX</small>" . number_format($transsactions_tot),
                         'link' => admin_url('transactions')
                     ]));
                 });
@@ -179,12 +195,23 @@ class HomeController extends Controller
 
 
                 $row->column(3, function (Column $column) {
+                    $u = Admin::user();
+                    //ids of active students
+                    $students = User::where([
+                        'user_type' => 'STUDENT',
+                        'status' => 1,
+                        'enterprise_id' => $u->enterprise_id
+                    ])->get()->pluck('id')->toArray();
+
+                    $total_balance_of_students = Account::whereIn('administrator_id', $students)->sum('balance');
 
                     $column->append(view('widgets.box-5', [
                         'is_dark' => true,
                         'title' => 'School Fees Balance',
                         'sub_title' => 'Total school fees balance of all active students.',
-                        'number' => "<small>UGX</small>" . number_format(Manifest::get_total_fees_balance(Auth::user())),
+                        'number' => "<small>UGX</small>" . number_format(
+                            $total_balance_of_students
+                        ),
                         'link' => admin_url('students-financial-accounts')
                     ]));
                 });
