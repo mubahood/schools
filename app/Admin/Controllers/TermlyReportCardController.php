@@ -40,6 +40,7 @@ class TermlyReportCardController extends AdminController
         // dd($x);
 
 
+
         $grid = new Grid(new TermlyReportCard());
 
 

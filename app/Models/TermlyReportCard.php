@@ -21,7 +21,9 @@ class TermlyReportCard extends Model
 
         parent::boot();
         self::deleting(function ($m) {
-            die("You cannot delete this item.");
+            //delete related records
+            $m->mark_records()->delete();
+            $m->report_cards()->delete();
         });
         self::creating(function ($m) {
             $term = Term::find($m->term_id);
@@ -484,7 +486,7 @@ class TermlyReportCard extends Model
 
                 //$report->total_marks = $number_of_exams * 100;
                 $report->total_aggregates = $report->average_aggregates;
-              
+
                 $report->position = 0;
                 if ($report->average_aggregates < 4) {
                     $report->grade = 'X';
