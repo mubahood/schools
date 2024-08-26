@@ -63,8 +63,10 @@ if ($tr != null) {
 if ($tr == null) {
     $tr = $r->get_theology_report();
 }
-if ($tr->termly_report_card == null) {
-    $tr = null;
+if ($tr != null) {
+    if ($tr->termly_report_card == null) {
+        $tr = null;
+    }
 }
 
 if ($tr != null) {
@@ -203,10 +205,15 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 </th>
             @endif
 
-            <th class="p-1"><b>MARKS</b>
-                <small class="d-block"> ({{ $max_mot }}%)</small>
-            </th>
-            <th class="p-1">AGGR</th>
+
+            {{-- if $termly_report_card->display_avg --}}
+            @if ($termly_report_card->display_avg == 'Yes')
+                <th class="p-1"><b>MARKS</b>
+                    <small class="d-block"> ({{ $max_mot }}%)</small>
+                </th>
+                <th class="p-1">AGGR</th>
+            @endif
+
 
             <th class="remarks p-1 text-center"><b class="text-uppercase">Remarks</b></th>
             <th class="remarks text-center p-1"><b class="text-uppercase">Initials</b></th>
@@ -268,8 +275,10 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     </td>
                 @endif
 
-                <td>{{ (int) $v->total_score_display }}</td>
-                <td>{{ $v->aggr_name }}</td>
+                @if ($termly_report_card->display_avg == 'Yes')
+                    <td>{{ (int) $v->total_score_display }}</td>
+                    <td>{{ $v->aggr_name }}</td>
+                @endif
 
                 <td class="remarks text-center">{{ $v->remarks }}</td>
                 <td class="remarks text-center">{{ $v->initials }}</td>
@@ -290,8 +299,10 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 <th></th>
             @endif
 
-            <td class="text-center"><b>{{ $r->total_marks }}</b></td>
-            <td><b>{{ $r->total_aggregates }}</b></td>
+            @if ($termly_report_card->display_avg == 'Yes')
+                <td class="text-center"><b>{{ $r->total_marks }}</b></td>
+                <td><b>{{ $r->total_aggregates }}</b></td>
+            @endif
             <td colspan="2"></td>
         </tr>
     </table>
@@ -352,10 +363,14 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     </th>
                 @endif
 
-                <th class="p-1"><b>MARKS</b>
-                    <small class="d-block">({{ '100' }}%)</small>
-                </th>
-                <th class="p-1">AGGR</th>
+                @if ($theology_termly_report_card->display_avg == 'Yes')
+                    <th class="p-1"><b>MARKS</b>
+                        <small class="d-block">({{ '100' }}%)</small>
+                    </th>
+                    <th class="p-1">AGGR</th>
+                @endif
+
+
                 <th class="remarks p-1 text-center"><b class="text-uppercase">Remarks</b></th>
                 <th class="remarks text-center p-1"><b class="text-uppercase">Initials</b></th>
             </thead>
@@ -420,11 +435,13 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                     @if ($termly_report_card->reports_include_eot == 'Yes')
                         <td>{{ (int) $v->eot_score }}</td>
                         <td>{{ $v->eot_grade }}</td>
+                        @if ($theology_termly_report_card->display_avg == 'Yes')
+                            <td>{{ (int) $v->total_score_display }}</td>
+                            <td>{{ $v->aggr_name }}</td>
+                        @endif
+                        <td class="remarks text-center">{{ $v->remarks }}</td>
+                        <td class="remarks text-center">{{ $v->initials }}</td>
                     @endif
-                    <td>{{ (int) $v->total_score_display }}</td>
-                    <td>{{ $v->aggr_name }}</td>
-                    <td class="remarks text-center">{{ $v->remarks }}</td>
-                    <td class="remarks text-center">{{ $v->initials }}</td>
                 </tr>
             @endforeach
             <tr class="marks">
@@ -439,11 +456,14 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 @endif
                 @if ($termly_report_card->reports_include_eot == 'Yes')
                     <th class="text-center">{{ $eot_tot }}</th>
+                    <th></th>
                 @endif
-                <td><b>{{ $tr->total_aggregates }}</b></td>
 
-                <td class="text-center"><b>{{ $tr->total_marks }}</b></td>
-                <td><b>{{ $tr->total_aggregates }}</b></td>
+                @if ($theology_termly_report_card->display_avg == 'Yes')
+                    <td class="text-center"><b>{{ $tr->total_marks }}</b></td>
+                    <td><b>{{ $tr->total_aggregates }}</b></td>
+                @endif
+
 
                 <td colspan="2"></td>
             </tr>

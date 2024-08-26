@@ -1,4 +1,4 @@
-php artisan make:migration add_fee_id_adding --table=transactions
+php artisan make:migration add_display_average_theology_termly_report_cards --table=theology_termly_report_cards
 
          $table->date('check_in_time')->nullable();
             $table->date('check_out_time')->nullable();

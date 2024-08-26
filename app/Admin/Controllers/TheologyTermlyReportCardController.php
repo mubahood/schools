@@ -31,7 +31,7 @@ class TheologyTermlyReportCardController extends AdminController
     protected function grid()
     {
 
-/*         $r = TheologyTermlyReportCard::find(14);
+        /*         $r = TheologyTermlyReportCard::find(14);
         $r->report_title .= '.';
         $r->reports_generate = 'Yes';
         $r->save();
@@ -299,6 +299,11 @@ class TheologyTermlyReportCardController extends AdminController
             $form->radioCard('generate_head_teacher_comment', 'Generate Head Teacher\'s comment?')
                 ->options(['Yes' => 'Yes', 'No' => 'No'])
                 ->default('No');
+
+            $form->radioCard('display_avg', 'Display Average?')
+                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->default('Yes');
+
             $form->radioCard('generate_positions', 'Generate positions?')
                 ->options(['Yes' => 'Yes', 'No' => 'No'])
                 ->when('Yes', function (Form $form) {

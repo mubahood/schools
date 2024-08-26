@@ -345,6 +345,9 @@ class TermlyReportCardController extends AdminController
             $form->radioCard('generate_head_teacher_comment', 'Generate Head Teacher\'s comment?')
                 ->options(['Yes' => 'Yes', 'No' => 'No'])
                 ->default('No');
+            $form->radioCard('display_avg', 'Display Average?')
+                ->options(['Yes' => 'Yes', 'No' => 'No'])
+                ->default('Yes');
             $form->radioCard('generate_positions', 'Generate positions?')
                 ->options(['Yes' => 'Yes', 'No' => 'No'])
                 ->default('No');
