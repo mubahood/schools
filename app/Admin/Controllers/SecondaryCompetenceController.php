@@ -51,10 +51,12 @@ class SecondaryCompetenceController extends AdminController
 
 
             $subs = [];
-            foreach (SecondarySubject::where([
-                'enterprise_id' => $u->ent->id,
-                'academic_year_id' => $u->ent->dpYear()->id
-            ])->get() as $key => $value) {
+            foreach (
+                SecondarySubject::where([
+                    'enterprise_id' => $u->ent->id,
+                    'academic_year_id' => $u->ent->dpYear()->id
+                ])->get() as $key => $value
+            ) {
                 $subs[$value->id] = $value->subject_name . " - " . $value->academic_class->short_name;
             }
             $filter->equal('secondary_subject_id', 'Fliter by subject')->select($subs);
@@ -102,6 +104,15 @@ class SecondaryCompetenceController extends AdminController
 
 
 
+        /* activity_id */
+        $grid->column('activity_id', __('Activity'))
+            ->display(function ($x) {
+                if ($this->activity == null) {
+                    return $x;
+                }
+                return $this->activity->theme . " - " . $this->activity->topic;
+            })
+            ->sortable();
 
         $grid->column('secondary_subject_id', __('Subject'))
             ->display(function ($x) {

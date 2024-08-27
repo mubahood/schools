@@ -1,59 +1,5 @@
 <?php
-/* 
-
-
-    "id" => 1
-    "created_at" => "2023-10-07 20:46:38"
-    "updated_at" => "2023-10-11 19:23:27"
-    "enterprise_id" => 12
-    "academic_year_id" => 8
-    "term_id" => 22
-    "" => "End of Term 1 2023"
-    "general_commnunication" => "Some test message."
-    "do_update" => "No"
-    "reports_template" => null
-    "reports_display_report_to_parents" => null
-    "use_background_image" => null
-    "generate_class_teacher_comment" => "No"
-    "generate_head_teacher_comment" => "No"
-    "hm_communication" => null
-    "classes" => "["75"]"
-    "background_image" => null
-    "bottom_message" => null
-    "max_score" => 3.0
-    ================================
-    "id" => 12
-    "created_at" => "2023-03-01 00:26:03"
-    "updated_at" => "2023-03-01 00:33:47"
-    "name" => "St. Charles Vocational Secondary School"
-    "short_name" => "scvss"
-    "details" => "St. Charles Vocational Secondary School"
-    "logo" => "images/7775c5a1b4d3d42386ca947b2844a089.jpeg"
-    "" => "256774802614"
-    "email" => "stcharlesvocationalkasanga@gmail.com"
-    "address" => "Kasese district, Bwera sub-county, Kasanga, Kasanga Roman Catholic Parish"
-    "expiry" => "2024-01-02"
-    "administrator_id" => 3757
-    "subdomain" => "scvss"
-    "color" => "#26386E"
-    "welcome_message" => "<p>St. Charles Vocational Secondary School</p>"
-    "type" => "Advanced"
-    "phone_number_2" => null
-    "hm_signature" => null
-    "dos_signature" => null
-    "bursar_signature" => null
-    "dp_year" => 8
-    "school_pay_code" => null
-    "school_pay_password" => null
-    "has_theology" => "No"
-    "dp_term_id" => 22
-    "motto" => null
-    "website" => null
-    "hm_name" => null
-    "wallet_balance" => 0
-    "can_send_messages" => "No"
-    "has_valid_lisence" => "Yes"
-*/
+use App\Models\SecondaryCompetence;
 ?>
 <table>
     <tr>
@@ -120,6 +66,28 @@
             <tr>
                 <?php
                 $competences = $item->items();
+                if (count($competences) == 0) {
+                    $c1 = new SecondaryCompetence();
+                    $c1->topic = 'Topic';
+                    $c1->description = 'Description';
+                    $c1->competance = new \stdClass();
+                    $c1->competance->score = 0;
+                    $competences[] = $c1;
+                    //c2
+                    $c2 = new SecondaryCompetence();
+                    $c2->topic = 'Topic';
+                    $c2->description = 'Description';
+                    $c2->competance = new \stdClass();
+                    $c2->competance->score = 0;
+                    $competences[] = $c2;
+                    #c3
+                    $c3 = new SecondaryCompetence();
+                    $c3->topic = 'Topic';
+                    $c3->description = 'Description';
+                    $c3->competance = new \stdClass();
+                    $c3->competance->score = 0;
+                    $competences[] = $c3;
+                }
                 $first_competence = $competences[0];
                 $last_competences = array_slice($competences, 1, count($competences));
                 

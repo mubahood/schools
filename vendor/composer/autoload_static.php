@@ -979,6 +979,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Models\\StudentReportCard' => __DIR__ . '/../..' . '/app/Models/StudentReportCard.php',
         'App\\Models\\StudentReportCardItem' => __DIR__ . '/../..' . '/app/Models/StudentReportCardItem.php',
         'App\\Models\\Subject' => __DIR__ . '/../..' . '/app/Models/Subject.php',
+        'App\\Models\\SubjectSetting' => __DIR__ . '/../..' . '/app/Models/SubjectSetting.php',
         'App\\Models\\SubjectTeacherRemark' => __DIR__ . '/../..' . '/app/Models/SubjectTeacherRemark.php',
         'App\\Models\\SupplierOrder' => __DIR__ . '/../..' . '/app/Models/SupplierOrder.php',
         'App\\Models\\SupplierOrderItem' => __DIR__ . '/../..' . '/app/Models/SupplierOrderItem.php',

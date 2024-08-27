@@ -279,6 +279,7 @@ return array(
     'App\\Models\\StudentReportCard' => $baseDir . '/app/Models/StudentReportCard.php',
     'App\\Models\\StudentReportCardItem' => $baseDir . '/app/Models/StudentReportCardItem.php',
     'App\\Models\\Subject' => $baseDir . '/app/Models/Subject.php',
+    'App\\Models\\SubjectSetting' => $baseDir . '/app/Models/SubjectSetting.php',
     'App\\Models\\SubjectTeacherRemark' => $baseDir . '/app/Models/SubjectTeacherRemark.php',
     'App\\Models\\SupplierOrder' => $baseDir . '/app/Models/SupplierOrder.php',
     'App\\Models\\SupplierOrderItem' => $baseDir . '/app/Models/SupplierOrderItem.php',
