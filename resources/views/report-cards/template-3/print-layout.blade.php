@@ -312,7 +312,7 @@ $mainReport = $r;
                 ? Utils::capitalizeSentences($r->class_teacher_comment)
                 : Utils::get_empty_spaces(135) . '<br>' . Utils::get_empty_spaces(183) !!}</b>
     </p>
-    <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's Name:</span>
+    <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher:</span>
         <b style="font-size: 14px" class="text-uppercase comment">{{ Utils::get_empty_spaces(60) }}</b>&nbsp;
         {{-- <b style="font-size: 14px"
             class="text-uppercase">......................................................</b> --}}&nbsp;
@@ -475,7 +475,7 @@ $mainReport = $r;
                     ? Utils::capitalizeSentences($tr->class_teacher_comment)
                     : Utils::get_empty_spaces(135) . '<br>' . Utils::get_empty_spaces(180) !!}</b>
         </p>
-        <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher's Name:</span>
+        <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher:</span>
             <b style="font-size: 14px" class="text-uppercase comment">{{ Utils::get_empty_spaces(60) }}</b>&nbsp;
             {{-- <b style="font-size: 14px"
                 class="text-uppercase">......................................................</b> --}}&nbsp;
@@ -485,8 +485,8 @@ $mainReport = $r;
     @endif
 
     <hr style="background-color:  {{ $r->ent->color }}; height: 2px; 
-            padding: 0px; margin-bottom: 6px;   "
-        class="my-3">
+            padding: 0px; margin-bottom: 0px;   "
+        class="my-1">
 
     @if ($termly_report_card->display_class_other_comments == 'Yes')
         <p class="mt-2 fw-16"><span class="text-uppercase">Mentor's comment:</span> <b class="comment"
