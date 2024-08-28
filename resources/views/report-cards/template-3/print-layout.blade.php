@@ -313,7 +313,8 @@ $mainReport = $r;
                 : Utils::get_empty_spaces(135) . '<br>' . Utils::get_empty_spaces(183) !!}</b>
     </p>
     <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher:</span>
-        <b style="font-size: 14px" class="text-uppercase comment">{{ Utils::get_empty_spaces(60) }}</b>&nbsp;
+        <b style="font-size: 14px"
+            class="text-uppercase comment">{{ $class_teacher_name != null && strlen($class_teacher_name) > 2 ? $class_teacher_name : Utils::get_empty_spaces(60) }}</b>&nbsp;
         {{-- <b style="font-size: 14px"
             class="text-uppercase">......................................................</b> --}}&nbsp;
         <span class="text-uppercase fs-16 ">Signature:<b class="comment">{{ Utils::get_empty_spaces(40) }}</b></span>
@@ -475,13 +476,15 @@ $mainReport = $r;
                     ? Utils::capitalizeSentences($tr->class_teacher_comment)
                     : Utils::get_empty_spaces(135) . '<br>' . Utils::get_empty_spaces(180) !!}</b>
         </p>
+        
         <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher:</span>
-            <b style="font-size: 14px" class="text-uppercase comment">{{ Utils::get_empty_spaces(60) }}</b>&nbsp;
+            <b style="font-size: 14px"
+                class="text-uppercase comment">{{ $class_teacher_name_1 != null && strlen($class_teacher_name_1) > 2 ? $class_teacher_name_1 : Utils::get_empty_spaces(60) }}</b>&nbsp;
             {{-- <b style="font-size: 14px"
                 class="text-uppercase">......................................................</b> --}}&nbsp;
-            <span class="text-uppercase fs-16 ">Signature:<b
-                    class="comment">{{ Utils::get_empty_spaces(40) }}</b></span>
+            <span class="text-uppercase fs-16 ">Signature:<b class="comment">{{ Utils::get_empty_spaces(40) }}</b></span>
         </p>
+
     @endif
 
     <hr style="background-color:  {{ $r->ent->color }}; height: 2px; 
@@ -510,11 +513,11 @@ $mainReport = $r;
                 <img style="width: 70px; " src="{{ public_path('storage/' . $ent->hm_signature) }}">
             @endif
         </span>
-    </p> 
+    </p>
 
-    <hr
-        style="background-color:  {{ $r->ent->color }}; height: 2px; 
-            padding: 0px; margin-bottom: 2px; margin-top: 0px; " class="mp-0 pt-0">
+    <hr style="background-color:  {{ $r->ent->color }}; height: 2px; 
+            padding: 0px; margin-bottom: 2px; margin-top: 0px; "
+        class="mp-0 pt-0">
 
     {{--  <table class="w-100 mt-0">
         <tbody>
@@ -585,7 +588,7 @@ $mainReport = $r;
 
 
 
-   {{--  <div class=" mt-0 d-flex justify-content-between p-0 pt-0 bg-danger " style="font-size: 14px;">
+    {{--  <div class=" mt-0 d-flex justify-content-between p-0 pt-0 bg-danger " style="font-size: 14px;">
         {!! $r->termly_report_card->bottom_message !!}
     </div> --}}
     <p class="text-right pt-0 pb-0 my-0"><small>Printed on: <b>{{ Utils::my_date_3(now()) }}</b></small></p>
