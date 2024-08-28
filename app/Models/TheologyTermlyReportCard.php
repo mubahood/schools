@@ -234,14 +234,31 @@ class TheologyTermlyReportCard extends Model
 
 
                     $total_scored_marks = 0;
-                    if ($m->reports_include_bot == 'Yes') {
-                        $total_scored_marks += (int)$mark->bot_score;
-                    }
-                    if ($m->reports_include_mot == 'Yes') {
-                        $total_scored_marks += (int)$mark->mot_score;
-                    }
-                    if ($m->reports_include_eot == 'Yes') {
-                        $total_scored_marks += (int)$mark->eot_score;
+
+                    if (strtolower($m->positioning_method) == 'specific') {
+                        $number_of_exams = 1;
+                        if ($m->positioning_exam == 'eot') {
+                            $total_scored_marks += (int)$mark->eot_score;
+                        } else if (strtolower($m->positioning_exam) == 'mot') {
+                            $total_scored_marks += (int)$mark->mot_score;
+                        } else if (strtolower($m->positioning_exam) == 'bot') {
+                            $total_scored_marks += (int)$mark->bot_score;
+                        } else {
+                            $total_scored_marks += (int)$mark->bot_score;
+                            $total_scored_marks += (int)$mark->mot_score;
+                            $total_scored_marks += (int)$mark->eot_score;
+                            $total_scored_marks = $total_scored_marks / 3;
+                        }
+                    } else {
+                        if ($m->reports_include_bot == 'Yes') {
+                            $total_scored_marks += (int)$mark->bot_score;
+                        }
+                        if ($m->reports_include_mot == 'Yes') {
+                            $total_scored_marks += (int)$mark->mot_score;
+                        }
+                        if ($m->reports_include_eot == 'Yes') {
+                            $total_scored_marks += (int)$mark->eot_score;
+                        }
                     }
 
                     $average_mark = ((int)(($total_scored_marks) / $number_of_exams));
@@ -257,12 +274,12 @@ class TheologyTermlyReportCard extends Model
                     foreach ($ranges as $range) {
                         if ($mark->total_score_display >= $range->min_mark && $mark->total_score_display <= $range->max_mark) {
                             $mark->aggr_value = $range->aggregates;
-                            $mark->aggr_name = $range->name; 
+                            $mark->aggr_name = $range->name;
                             $report->average_aggregates += $mark->aggr_value;
                             break;
                         }
                     }
-                    
+
                     $report->total_marks += $mark->total_score_display;
                     $mark->save();
                 }

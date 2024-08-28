@@ -422,6 +422,7 @@ class TermlyReportCard extends Model
                 ])->get();
 
 
+
                 $report->total_marks = 0;
                 $report->average_aggregates = 0;
                 foreach ($marks as $mark) {
@@ -437,22 +438,33 @@ class TermlyReportCard extends Model
                     $mark->mot_grade = Utils::generateAggregates($grading_scale, $mark->mot_score)['aggr_name'];
                     $mark->eot_grade = Utils::generateAggregates($grading_scale, $mark->eot_score)['aggr_name'];
 
-                    /* 
-                    dd($mark->eot_grade);
-                            $table->string('bot_grade')->nullable();
-            $table->string('mot_grade')->nullable();
-            $table->string('eot_grade')->nullable();
-                    */
-
                     $total_scored_marks = 0;
-                    if ($m->reports_include_bot == 'Yes') {
-                        $total_scored_marks += (int)$mark->bot_score;
-                    }
-                    if ($m->reports_include_mot == 'Yes') {
-                        $total_scored_marks += (int)$mark->mot_score;
-                    }
-                    if ($m->reports_include_eot == 'Yes') {
-                        $total_scored_marks += (int)$mark->eot_score;
+
+
+                    if (strtolower($m->positioning_method) == 'specific') {
+                        $number_of_exams = 1;
+                        if ($m->positioning_exam == 'eot') {
+                            $total_scored_marks += (int)$mark->eot_score;
+                        } else if (strtolower($m->positioning_exam) == 'mot') {
+                            $total_scored_marks += (int)$mark->mot_score;
+                        } else if (strtolower($m->positioning_exam) == 'bot') {
+                            $total_scored_marks += (int)$mark->bot_score;
+                        } else {
+                            $total_scored_marks += (int)$mark->bot_score;
+                            $total_scored_marks += (int)$mark->mot_score;
+                            $total_scored_marks += (int)$mark->eot_score;
+                            $total_scored_marks = $total_scored_marks / 3;
+                        }
+                    } else {
+                        if ($m->reports_include_bot == 'Yes') {
+                            $total_scored_marks += (int)$mark->bot_score;
+                        }
+                        if ($m->reports_include_mot == 'Yes') {
+                            $total_scored_marks += (int)$mark->mot_score;
+                        }
+                        if ($m->reports_include_eot == 'Yes') {
+                            $total_scored_marks += (int)$mark->eot_score;
+                        }
                     }
 
                     $average_mark = ((int)(($total_scored_marks) / $number_of_exams));

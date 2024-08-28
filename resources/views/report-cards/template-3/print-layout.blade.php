@@ -103,6 +103,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
         $max_eot = $termly_report_card->eot_max;
     }
 }
+$mainReport = $r;
 ?>
 <article>
 
@@ -497,9 +498,9 @@ foreach ($r->termly_report_card->term->exams as $exam) {
     @endif
 
 
-    <p class="mt-2 fw-16"><span class="text-uppercase">HEAD TEACHER'S COMMUNICATION:</span> <b class="comment"
-            style="font-size: 14px">{{ Utils::capitalizeSentences($termly_report_card->hm_communication) }}</b></p>
-    <p class="mt-2 fw-16"><span class="text-uppercase">HEAD Teacher's Name:</span> <b style="font-size: 14px"
+    <p class="mt-2 fw-16"><span class="text-uppercase">HEAD TEACHER'S COMMENT:</span> <b class="comment"
+            style="font-size: 14px">{{ Utils::capitalizeSentences($mainReport->head_teacher_comment) }}</b></p>
+    <p class="mt-2 fw-16"><span class="text-uppercase">HEAD Teacher:</span> <b style="font-size: 14px"
             class="text-uppercase">{{ $hm_name }}</b>,&nbsp;
         <span class="text-uppercase fs-16 ">Signature:
             @if (
@@ -509,12 +510,11 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                 <img style="width: 70px; " src="{{ public_path('storage/' . $ent->hm_signature) }}">
             @endif
         </span>
-    </p>
-    <br>
+    </p> 
 
     <hr
         style="background-color:  {{ $r->ent->color }}; height: 2px; 
-            padding: 0px; margin-bottom: 6px; margin-top: 10px; ">
+            padding: 0px; margin-bottom: 2px; margin-top: 0px; " class="mp-0 pt-0">
 
     {{--  <table class="w-100 mt-0">
         <tbody>
@@ -585,10 +585,10 @@ foreach ($r->termly_report_card->term->exams as $exam) {
 
 
 
-    <div class=" mt-0 d-flex justify-content-between p-0 pt-1 " style="font-size: 14px;">
+   {{--  <div class=" mt-0 d-flex justify-content-between p-0 pt-0 bg-danger " style="font-size: 14px;">
         {!! $r->termly_report_card->bottom_message !!}
-    </div>
-    <p class="text-right"><small>Printed on: <b>{{ Utils::my_date_3(now()) }}</b></small></p>
+    </div> --}}
+    <p class="text-right pt-0 pb-0 my-0"><small>Printed on: <b>{{ Utils::my_date_3(now()) }}</b></small></p>
 
 
 </article>

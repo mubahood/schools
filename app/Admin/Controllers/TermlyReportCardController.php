@@ -174,11 +174,12 @@ class TermlyReportCardController extends AdminController
      */
     protected function form()
     {
-        /* $x = TermlyReportCard::find(17);
-        $x->generate_head_teacher_comment = 'Yes';
-        $x->generate_class_teacher_comment = 'Yes'; 
-        TermlyReportCard::do_generate_class_teacher_comment($x);
+        /* $x = TermlyReportCard::find(18);
+        TermlyReportCard::do_reports_generate($x);
         die('done');
+        $x->generate_class_teacher_comment = 'Yes';
+        TermlyReportCard::do_generate_class_teacher_comment($x);
+        $x->generate_head_teacher_comment = 'Yes';
         $x->positioning_type = 'Stream';
         TermlyReportCard::do_generate_positions($x);
         TermlyReportCard::do_reports_generate($x);

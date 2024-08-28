@@ -97,6 +97,17 @@ class StudentReportCard extends Model
             unlink($store_file_path);
         }
 
+        if (isset($_GET['html'])) {
+            echo view('report-cards.template-3.print', [
+                'items' => $reps,
+                'ent' => $printing->enterprise,
+                'report_type' => $printing->type,
+                'min_count' => $printing->min_count,
+                'max_count' => $printing->max_count,
+            ]);
+            die();
+        }
+
         $pdf->loadHTML(view('report-cards.template-3.print', [
             'items' => $reps,
             'ent' => $printing->enterprise,
