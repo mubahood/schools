@@ -220,7 +220,7 @@ class TheologyTermlyReportCard extends Model
 
                 $marks = TheologyMarkRecord::where([
                     'administrator_id' => $student->id,
-                    'theology_class_id' => $class_id,
+                    'theology_class_id' => $class->id,
                     'theology_termly_report_card_id' => $m->id,
                 ])->get();
 
