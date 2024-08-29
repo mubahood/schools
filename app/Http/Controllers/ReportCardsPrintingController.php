@@ -223,7 +223,7 @@ class ReportCardsPrintingController extends Controller
         if (count($items) == 0) {
             die("Nothing to print.");
         }
-
+        $printing->secular_tempate = 'Template_3';
         if ($printing->secular_tempate == 'Template_3') {
 
             if (isset($_GET['html'])) {

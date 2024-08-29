@@ -129,10 +129,14 @@ class TheologyTermlyReportCardController extends AdminController
      */
     protected function form()
     {
-        /*  $tr = TheologyTermlyReportCard::find(13);
-        $tr->generate_class_teacher_comment = 'Yes';
-        TheologyTermlyReportCard::do_generate_class_teacher_comment($tr);
+        /* $tr = TheologyTermlyReportCard::find(16);
+        $tr->reports_generate = 'Yes';
+        TheologyTermlyReportCard::do_reports_generate($tr);
         die("asone"); */
+        /*  
+        TheologyTermlyReportCard::do_generate_class_teacher_comment($tr);
+        $tr->generate_class_teacher_comment = 'Yes';
+        */
 
         //dd($tr->generate_class_teacher_comment);
         //dd($tr);

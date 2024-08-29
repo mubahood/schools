@@ -127,9 +127,10 @@ $mainReport = $r;
             <td style="width: 16%">
                 @php
                     $avatar = $r->owner->getAvatarPath();
+                    $avatar_path = public_path($avatar);
                 @endphp
-                @if (!str_contains($avatar, 'user.jpeg'))
-                    <img style="width: 100%; height: 110;" src="{{ public_path($avatar) }}">
+                @if (file_exists($avatar_path) && !str_contains($avatar, 'user.jpeg'))
+                    <img style="width: 100%; height: 110;" src="{{ $avatar_path }}">
                 @endif
             </td>
         </tr>
@@ -476,13 +477,14 @@ $mainReport = $r;
                     ? Utils::capitalizeSentences($tr->class_teacher_comment)
                     : Utils::get_empty_spaces(135) . '<br>' . Utils::get_empty_spaces(180) !!}</b>
         </p>
-        
+
         <p class="mt-2 fw-16"><span class="text-uppercase">Class Teacher:</span>
             <b style="font-size: 14px"
                 class="text-uppercase comment">{{ $class_teacher_name_1 != null && strlen($class_teacher_name_1) > 2 ? $class_teacher_name_1 : Utils::get_empty_spaces(60) }}</b>&nbsp;
             {{-- <b style="font-size: 14px"
                 class="text-uppercase">......................................................</b> --}}&nbsp;
-            <span class="text-uppercase fs-16 ">Signature:<b class="comment">{{ Utils::get_empty_spaces(40) }}</b></span>
+            <span class="text-uppercase fs-16 ">Signature:<b
+                    class="comment">{{ Utils::get_empty_spaces(40) }}</b></span>
         </p>
 
     @endif
@@ -588,9 +590,9 @@ $mainReport = $r;
 
 
 
-    {{--  <div class=" mt-0 d-flex justify-content-between p-0 pt-0 bg-danger " style="font-size: 14px;">
+    <div class=" mt-0 d-flex justify-content-between p-0 pt-0 " style="font-size: 14px;">
         {!! $r->termly_report_card->bottom_message !!}
-    </div> --}}
+    </div>
     <p class="text-right pt-0 pb-0 my-0"><small>Printed on: <b>{{ Utils::my_date_3(now()) }}</b></small></p>
 
 

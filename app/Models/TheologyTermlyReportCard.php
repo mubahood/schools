@@ -155,6 +155,7 @@ class TheologyTermlyReportCard extends Model
         if (!is_array($m->classes)) {
             return;
         }
+
         $grading_scale = $m->grading_scale;
         $ranges = $grading_scale->grade_ranges;
 
@@ -208,6 +209,7 @@ class TheologyTermlyReportCard extends Model
                     $report->student_id = $student->id;
                     $report->theology_termly_report_card_id = $m->id;
                 }
+
                 $report->term_id = $m->term_id;
                 $report->academic_year_id = $m->academic_year_id;
                 $report->enterprise_id = $m->enterprise_id;
@@ -218,6 +220,7 @@ class TheologyTermlyReportCard extends Model
 
                 $marks = TheologyMarkRecord::where([
                     'administrator_id' => $student->id,
+                    'theology_class_id' => $class_id,
                     'theology_termly_report_card_id' => $m->id,
                 ])->get();
 
@@ -227,7 +230,6 @@ class TheologyTermlyReportCard extends Model
                 // echo("ID: ".$student->id . "<br>");
 
                 foreach ($marks as $mark) {
-
                     $mark->bot_grade = Utils::generateAggregates($grading_scale, $mark->bot_score)['aggr_name'];
                     $mark->mot_grade = Utils::generateAggregates($grading_scale, $mark->mot_score)['aggr_name'];
                     $mark->eot_grade = Utils::generateAggregates($grading_scale, $mark->eot_score)['aggr_name'];
@@ -266,8 +268,6 @@ class TheologyTermlyReportCard extends Model
                     $mark->total_score = $total_scored_marks;
                     $mark->total_score_display = $average_mark;
                     $mark->remarks = Utils::get_automaic_mark_remarks($mark->total_score_display);
-
-
 
                     $mark->aggr_value = null;
                     $mark->aggr_name = null;

@@ -419,6 +419,7 @@ class TermlyReportCard extends Model
                 $marks = MarkRecord::where([
                     'administrator_id' => $student->id,
                     'termly_report_card_id' => $m->id,
+                    'academic_class_id' => $class_id,
                 ])->get();
 
 
