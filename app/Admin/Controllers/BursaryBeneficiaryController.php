@@ -234,7 +234,7 @@ class BursaryBeneficiaryController extends AdminController
 
         $form->select('bursary_id', 'Select bursary scheme')->options($options)->rules('required');
 
-        $form->textarea('description', __('Description'))->rules('required');
+        $form->textarea('description', __('Description'));
 
         return $form;
     }
