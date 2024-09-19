@@ -193,4 +193,57 @@ class ServiceSubscription extends Model
             }
         }
     }
+
+    //has many service subscription items
+    public function items()
+    {
+        return $this->hasMany(ServiceSubscriptionItem::class, 'service_subscription_id');
+    }
+
+    function do_process()
+    {
+        //$this->items is empty 
+        if ($this->items->isEmpty()) {
+            $this->is_processed = 'Yes';
+            try {
+                $this->save();
+            } catch (\Throwable $th) {
+                //throw $th;
+            }
+            return;
+        }
+
+        foreach ($this->items as $key => $item) {
+            if ($item->is_processed == 'Yes') {
+                continue;
+            }
+            $newSub = new ServiceSubscriptionItem();
+            $newSub->service_subscription_id = $this->id;
+            $newSub->enterprise_id = $this->enterprise_id;
+            $newSub->service_id = $item->service_id;
+            $service = Service::find($item->service_id);
+            if ($service == null) {
+                continue;
+            }
+            $newSub->administrator_id = $item->administrator_id;
+            $newSub->quantity = $item->quantity;
+            $newSub->total = $service->fee * $item->quantity;
+            $newSub->due_academic_year_id = $this->due_academic_year_id;
+            $newSub->due_term_id = $this->due_term_id;
+            $newSub->is_processed = 'Yes';
+            try {
+                $newSub->save();
+            } catch (\Throwable $th) {
+                //throw $th;
+            }
+            $item->is_processed = 'Yes';
+            $item->save();
+        }
+        $this->is_processed = 'Yes';
+        try {
+            $this->save();
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
+    }
 }

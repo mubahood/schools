@@ -66,10 +66,12 @@ class ServiceSubscriptionController extends AdminController
 
         $terms = [];
         $active_term = 0;
-        foreach (Term::where(
-            'enterprise_id',
-            Admin::user()->enterprise_id
-        )->orderBy('id', 'desc')->get() as $key => $term) {
+        foreach (
+            Term::where(
+                'enterprise_id',
+                Admin::user()->enterprise_id
+            )->orderBy('id', 'desc')->get() as $key => $term
+        ) {
             $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
             if ($term->is_active) {
                 $active_term = $term->id;
@@ -113,10 +115,12 @@ class ServiceSubscriptionController extends AdminController
 
 
             $terms = [];
-            foreach (Term::where(
-                'enterprise_id',
-                Admin::user()->enterprise_id
-            )->orderBy('id', 'desc')->get() as $key => $term) {
+            foreach (
+                Term::where(
+                    'enterprise_id',
+                    Admin::user()->enterprise_id
+                )->orderBy('id', 'desc')->get() as $key => $term
+            ) {
                 $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
             }
 
@@ -141,10 +145,12 @@ class ServiceSubscriptionController extends AdminController
 
 
             $services = [];
-            foreach (Service::where(
-                'enterprise_id',
-                Admin::user()->enterprise_id
-            )->get() as $v) {
+            foreach (
+                Service::where(
+                    'enterprise_id',
+                    Admin::user()->enterprise_id
+                )->get() as $v
+            ) {
                 $services[$v->id] = $v->name;
             }
 
@@ -250,10 +256,12 @@ class ServiceSubscriptionController extends AdminController
 
         $terms = [];
         $active_term = 0;
-        foreach (Term::where(
-            'enterprise_id',
-            Admin::user()->enterprise_id
-        )->orderBy('id', 'desc')->get() as $key => $term) {
+        foreach (
+            Term::where(
+                'enterprise_id',
+                Admin::user()->enterprise_id
+            )->orderBy('id', 'desc')->get() as $key => $term
+        ) {
             $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
             if ($term->is_active) {
                 $active_term = $term->id;
@@ -298,6 +306,7 @@ class ServiceSubscriptionController extends AdminController
             $form->text('quantity', __('Quantity'))
                 ->rules('required|int')
                 ->attribute('type', 'number')
+                ->default(1)
                 ->help("How much/many units of this service was subscribed for?");
         } else {
             $form->display('due_term_id', 'Due term')->with(function ($v) {
@@ -316,7 +325,6 @@ class ServiceSubscriptionController extends AdminController
             $form->display('quantity', __('Quantity'));
         }
 
-        $form->divider('Link with other services');
         $form->radioCard('link_with', 'Link this subscription with?')->options([
             'Transport' => 'Transport',
             'Hostel' => 'Hostel',
@@ -339,7 +347,44 @@ class ServiceSubscriptionController extends AdminController
                     ])->rules('required');
             });
 
+        $form->divider('Add more subscriptions to selected subscriber');
+        $form->html('Click on "New Button" to add more subscriptions to the selected subscriber');
 
+        //has many items
+
+        if ($form->isCreating()) {
+
+            $form->hasMany('items', 'Items', function (Form\NestedForm $form) {
+                $u = Admin::user();
+                $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
+                $form->hidden('is_processed', __('Processed'))->default('No')->rules('required');
+                $form->hidden('total', __('Total'))->default(0)->rules('required');
+
+                $form->select('service_id', 'Select Service')->options(Service::where(
+                    'enterprise_id',
+                    Admin::user()->enterprise_id
+                )->get()->pluck('name_text', 'id'))->rules('required');
+                $form->decimal('quantity', __('Quantity'))->default(1)->rules('required');
+            });
+        } else {
+            $form->hasMany('items', 'Items', function (Form\NestedForm $form) {
+                $u = Admin::user();
+                $form->display('enterprise_id', __('Enterprise id'))->with(function ($v) {
+                    return $v;
+                });
+                $form->display('is_processed', __('Processed'))->with(function ($v) {
+                    return $v;
+                });
+                $form->display('total', __('Total'))->with(function ($v) {
+                    return $v;
+                });
+                $form->display('service_id', 'Service')->with(function ($v) {
+                    return Service::find($v)->name_text;
+                });
+                $form->display('quantity', __('Quantity'));
+            })->disableCreate()
+                ->disableRemove();
+        }
 
         $form->disableReset();
         $form->disableViewCheck();

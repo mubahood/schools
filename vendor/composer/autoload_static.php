@@ -964,6 +964,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Models\\Service' => __DIR__ . '/../..' . '/app/Models/Service.php',
         'App\\Models\\ServiceCategory' => __DIR__ . '/../..' . '/app/Models/ServiceCategory.php',
         'App\\Models\\ServiceSubscription' => __DIR__ . '/../..' . '/app/Models/ServiceSubscription.php',
+        'App\\Models\\ServiceSubscriptionItem' => __DIR__ . '/../..' . '/app/Models/ServiceSubscriptionItem.php',
         'App\\Models\\Session' => __DIR__ . '/../..' . '/app/Models/Session.php',
         'App\\Models\\Slot' => __DIR__ . '/../..' . '/app/Models/Slot.php',
         'App\\Models\\StockBatch' => __DIR__ . '/../..' . '/app/Models/StockBatch.php',

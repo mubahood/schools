@@ -264,6 +264,7 @@ return array(
     'App\\Models\\Service' => $baseDir . '/app/Models/Service.php',
     'App\\Models\\ServiceCategory' => $baseDir . '/app/Models/ServiceCategory.php',
     'App\\Models\\ServiceSubscription' => $baseDir . '/app/Models/ServiceSubscription.php',
+    'App\\Models\\ServiceSubscriptionItem' => $baseDir . '/app/Models/ServiceSubscriptionItem.php',
     'App\\Models\\Session' => $baseDir . '/app/Models/Session.php',
     'App\\Models\\Slot' => $baseDir . '/app/Models/Slot.php',
     'App\\Models\\StockBatch' => $baseDir . '/app/Models/StockBatch.php',

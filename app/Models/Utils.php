@@ -122,6 +122,21 @@ class Utils  extends Model
         return false;
     }
 
+    public static function process_pending_subscriptions($u)
+    {
+        if ($u == null) {
+            return;
+        }
+        $subs = ServiceSubscription::where([
+            'is_processed' => 'No',
+            'enterprise_id' => $u->enterprise_id
+        ])
+            ->orderBy('id', 'desc')
+            ->get();
+        foreach ($subs as $key => $sub) {
+            $sub->do_process();
+        }
+    }
     public static function copy_default_grading($u)
     {
         if ($u == null) {
@@ -595,6 +610,7 @@ class Utils  extends Model
             return;
         }
         self::copy_default_grading($u);
+        self::process_pending_subscriptions($u);
 
         if ($u->enterprise_id == 1) {
             return;
