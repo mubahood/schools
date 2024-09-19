@@ -111,7 +111,7 @@ class AccountController extends AdminController
             ->lightbox(['width' => 60, 'height' => 60]);
 
         $grid->column('name', __('Account'))->sortable();
-        $grid->column('account_parent_id', __('Department'))
+        $grid->column('account_parent_id', __('Vote'))
             ->display(function () {
                 $acc =  Utils::getObject(AccountParent::class, $this->account_parent_id);
                 if ($acc == null) {

@@ -77,7 +77,7 @@ class FinancialRecordController extends AdminController
             }
 
 
-            $filter->equal('parent_account_id', 'Filter by department')
+            $filter->equal('parent_account_id', 'Filter by Vote')
                 ->select($parents);
 
             $filter->equal('account_id', 'Filter by account')
@@ -151,7 +151,7 @@ class FinancialRecordController extends AdminController
             })->sortable();
 
 
-        $grid->column('parent_account_id', __('Department'))
+        $grid->column('parent_account_id', __('Vote'))
             ->display(function ($x) {
                 if ($this->par == null) {
                     return $x;

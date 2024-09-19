@@ -43,19 +43,21 @@ class FinancialBudgetRecordController extends AdminController
 
         $terms = [];
         $active_term = 0;
-        foreach (Term::where(
-            'enterprise_id',
-            Admin::user()->enterprise_id
-        )->orderBy('id', 'desc')->get() as $key => $term) {
+        foreach (
+            Term::where(
+                'enterprise_id',
+                Admin::user()->enterprise_id
+            )->orderBy('id', 'desc')->get() as $key => $term
+        ) {
             $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
             if ($term->is_active) {
                 $active_term = $term->id;
             }
-        } 
+        }
         $grid->disableBatchActions();
         if (!isset($_GET['term_id'])) {
             $grid->model()->where('term_id', $active_term);
-        } 
+        }
 
 
 
@@ -64,11 +66,13 @@ class FinancialBudgetRecordController extends AdminController
             $filter->disableIdFilter();
             $u = Admin::user();
             $accs = [];
-            foreach (Account::where([
-                'enterprise_id' => $u->enterprise_id,
-                'type' => 'OTHER_ACCOUNT'
-            ])
-                ->get() as $val) {
+            foreach (
+                Account::where([
+                    'enterprise_id' => $u->enterprise_id,
+                    'type' => 'OTHER_ACCOUNT'
+                ])
+                    ->get() as $val
+            ) {
                 if ($val->account_parent_id == null) {
                     continue;
                 }
@@ -79,26 +83,30 @@ class FinancialBudgetRecordController extends AdminController
 
 
 
-            foreach (AccountParent::where([
-                'enterprise_id' => $u->enterprise_id,
-            ])
-                ->orderBy('id', 'desc')
-                ->get() as $v) {
+            foreach (
+                AccountParent::where([
+                    'enterprise_id' => $u->enterprise_id,
+                ])
+                    ->orderBy('id', 'desc')
+                    ->get() as $v
+            ) {
                 $parents[$v->id] = $v->name;
             }
 
 
-            $filter->equal('parent_account_id', 'Filter by department')
+            $filter->equal('parent_account_id', 'Filter by vote')
                 ->select($parents);
 
             $filter->equal('account_id', 'Filter by account')
                 ->select($accs);
 
 
-            foreach (Term::where(
-                'enterprise_id',
-                Admin::user()->enterprise_id
-            )->orderBy('id', 'desc')->get() as $key => $term) {
+            foreach (
+                Term::where(
+                    'enterprise_id',
+                    Admin::user()->enterprise_id
+                )->orderBy('id', 'desc')->get() as $key => $term
+            ) {
                 $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
             }
             $filter->equal('term_id', 'Fliter by term')->select($terms);
@@ -172,7 +180,7 @@ class FinancialBudgetRecordController extends AdminController
             })->sortable();
 
 
-        $grid->column('parent_account_id', __('Department'))
+        $grid->column('parent_account_id', __('Vote'))
             ->display(function ($x) {
                 if ($this->par == null) {
                     return $x;
@@ -270,11 +278,13 @@ class FinancialBudgetRecordController extends AdminController
         $ajax_url = trim($ajax_url);
 
         $accs = [];
-        foreach (Account::where([
-            'enterprise_id' => $u->enterprise_id,
-            'type' => 'OTHER_ACCOUNT'
-        ])
-            ->get() as $val) {
+        foreach (
+            Account::where([
+                'enterprise_id' => $u->enterprise_id,
+                'type' => 'OTHER_ACCOUNT'
+            ])
+                ->get() as $val
+        ) {
             if ($val->account_parent_id == null) {
                 continue;
             }
@@ -293,7 +303,7 @@ class FinancialBudgetRecordController extends AdminController
         //$form->number('created_by_id', __('Created by id'));
         //$form->number('termly_school_fees_balancing_id', __('Termly school fees balancing id'));
 
-        $form->text('description', __('Particulars'))->rules('required');
+        $form->text('description', __('Particulars'));
         $form->decimal('quantity', __('Quantity'))
             ->rules('required');
         $form->decimal('unit_price', __('Unit price'))->rules('required');

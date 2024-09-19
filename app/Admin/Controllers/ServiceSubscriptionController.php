@@ -369,23 +369,20 @@ class ServiceSubscriptionController extends AdminController
         } else {
             $form->hasMany('items', 'Items', function (Form\NestedForm $form) {
                 $u = Admin::user();
-                $form->display('enterprise_id', __('Enterprise id'))->with(function ($v) {
-                    return $v;
-                });
-                $form->display('is_processed', __('Processed'))->with(function ($v) {
-                    return $v;
-                });
-                $form->display('total', __('Total'))->with(function ($v) {
-                    return $v;
-                });
-                $form->display('service_id', 'Service')->with(function ($v) {
-                    return Service::find($v)->name_text;
-                });
-                $form->display('quantity', __('Quantity'));
-            })->disableCreate()
-                ->disableRemove();
-        }
+                $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
+                $form->text('is_processed', __('Processed'))->default('No')->rules('required');
+                $form->hidden('total', __('Total'))->default(0)->rules('required');
 
+                $form->select('service_id', 'Select Service')->options(Service::where(
+                    'enterprise_id',
+                    Admin::user()->enterprise_id
+                )->get()->pluck('name_text', 'id'))->rules('required');
+                $form->decimal('quantity', __('Quantity'))->default(1)->rules('required');  
+            })->disableCreate()
+            ->disableDelete()
+            ->disable();
+        }
+        $form->text('is_processed', __('Processed'))->default('No')->rules('required');
         $form->disableReset();
         $form->disableViewCheck();
         return $form;

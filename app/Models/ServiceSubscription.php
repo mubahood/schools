@@ -202,6 +202,8 @@ class ServiceSubscription extends Model
 
     function do_process()
     {
+
+
         //$this->items is empty 
         if ($this->items->isEmpty()) {
             $this->is_processed = 'Yes';
@@ -217,24 +219,24 @@ class ServiceSubscription extends Model
             if ($item->is_processed == 'Yes') {
                 continue;
             }
-            $newSub = new ServiceSubscriptionItem();
-            $newSub->service_subscription_id = $this->id;
+            $newSub = new ServiceSubscription();
             $newSub->enterprise_id = $this->enterprise_id;
             $newSub->service_id = $item->service_id;
             $service = Service::find($item->service_id);
             if ($service == null) {
                 continue;
             }
-            $newSub->administrator_id = $item->administrator_id;
+            $newSub->administrator_id = $this->administrator_id;
             $newSub->quantity = $item->quantity;
             $newSub->total = $service->fee * $item->quantity;
             $newSub->due_academic_year_id = $this->due_academic_year_id;
             $newSub->due_term_id = $this->due_term_id;
             $newSub->is_processed = 'Yes';
+
             try {
                 $newSub->save();
             } catch (\Throwable $th) {
-                //throw $th;
+                // throw $th;
             }
             $item->is_processed = 'Yes';
             $item->save();

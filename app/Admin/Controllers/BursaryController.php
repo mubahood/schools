@@ -3,7 +3,10 @@
 namespace App\Admin\Controllers;
 
 use App\Models\Bursary;
+use App\Models\BursaryBeneficiary;
+use App\Models\ServiceSubscription;
 use Encore\Admin\Controllers\AdminController;
+use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
@@ -42,12 +45,25 @@ class BursaryController extends AdminController
             ->sortable();
         $grid->column('beneficiaries', __('Beneficiaries'))
             ->display(function ($f) {
-                return count($this->beneficiaries);
-            }); 
+                $u = Admin::user();
+                if ($u == null || $u->ent == null) {
+                    return '-';
+                }
+                $term = $u->ent->active_term();
+                if ($term == null) {
+                    return "-";
+                }
+                $this_term_bens_count = BursaryBeneficiary::where([
+                    'enterprise_id' => $u->ent->id,
+                    'due_term_id' => $term->id,
+                    'bursary_id' => $this->id,
+                ])->count();
+                return $this_term_bens_count;
+            });
         $grid->column('is_termly', __('Offer Typs'))->using([
             1 => 'Termly',
             2 => 'One time offer',
-        ])->sortable(); 
+        ])->sortable();
 
         $grid->column('description', __('Description'))->hide();
 
