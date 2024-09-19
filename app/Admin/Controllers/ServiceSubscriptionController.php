@@ -370,7 +370,7 @@ class ServiceSubscriptionController extends AdminController
             $form->hasMany('items', 'Items', function (Form\NestedForm $form) {
                 $u = Admin::user();
                 $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
-                $form->text('is_processed', __('Processed'))->default('No')->rules('required');
+                $form->hidden('is_processed', __('Processed'))->default('No')->rules('required');
                 $form->hidden('total', __('Total'))->default(0)->rules('required');
 
                 $form->select('service_id', 'Select Service')->options(Service::where(
@@ -382,7 +382,7 @@ class ServiceSubscriptionController extends AdminController
             ->disableDelete()
             ->disable();
         }
-        $form->text('is_processed', __('Processed'))->default('No')->rules('required');
+
         $form->disableReset();
         $form->disableViewCheck();
         return $form;
