@@ -81,7 +81,7 @@ class SecondaryReportCardItem extends Model
                 'administrator_id' => $this->report_card->administrator_id,
             ])->first();
             if ($comp == null) {
-                dd("not found");
+                //dd("not found");
                 $comp = new SecondaryCompetence();
             }
             $act->competance = $comp;

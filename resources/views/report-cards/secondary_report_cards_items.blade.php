@@ -56,8 +56,8 @@ use App\Models\SecondaryCompetence;
             
             if ($item->subject == null) {
                 //dd($item);
-                dd($item->secondary_subject_id);
-                echo 'Subject not found ' . $item->secondary_subject_id;
+                //dd($item->secondary_subject_id);
+                //echo 'Subject not found ' . $item->secondary_subject_id;
                 continue;
             }
             
