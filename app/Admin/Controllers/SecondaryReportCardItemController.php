@@ -4,10 +4,8 @@ namespace App\Admin\Controllers;
 
 use App\Models\AcademicClass;
 use App\Models\AcademicClassSctream;
-use App\Models\SecondaryReportCard;
 use App\Models\SecondaryReportCardItem;
 use App\Models\SecondarySubject;
-use App\Models\SecondaryTermlyReportCard;
 use App\Models\Term;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
@@ -23,7 +21,7 @@ class SecondaryReportCardItemController extends AdminController
      *
      * @var string
      */
-    protected $title = 'Report Card Items';
+    protected $title = 'SecondaryReportCardItem';
 
     /**
      * Make a grid builder.
@@ -32,12 +30,6 @@ class SecondaryReportCardItemController extends AdminController
      */
     protected function grid()
     {
-        /* 
-
-academic_year_id		
-            
-
-*/
         $grid = new Grid(new SecondaryReportCardItem());
         $grid->disableCreateButton();
         $grid->filter(function ($filter) {
@@ -137,6 +129,60 @@ academic_year_id
         $grid->column('generic_skills', __('Generic Skills'))->editable();
         $grid->column('remarks', __('Genral Remarks'))->editable();
         $grid->column('teacher', __('Teacher'))->editable();
+
+        $grid->column('score_1', 'U1')->editable()->sortable();
+        $grid->column('score_2', 'U2')->editable()->sortable();
+        $grid->column('score_3', 'U3')->editable()->sortable();
+        $grid->column('score_4', 'U4')->editable()->sortable();
+        $grid->column('score_5', 'U5')->editable()->sortable();
+        $grid->column('tot_units_score', 'U Score')->sortable();
+        $grid->column('out_of_10', 'Out of 10')->sortable();
+        $grid->column('descriptor', 'Descriptor')->sortable();
+        $grid->column('project_score', 'Project Score')->editable()->sortable();
+        $grid->column('out_of_20', 'Out of 20')->sortable();
+        $grid->column('exam_score', 'Exam Score')->editable()->sortable();
+        $grid->column('overall_score', 'Overall Score')->editable()->sortable();
+        $grid->column('grade_value', 'Grade Value')->editable()->sortable();
+        $grid->column('grade_name', 'Grade Value')->sortable();
+        $grid->column('score_1_submitted', 'U1 Submitted')
+            ->filter([
+                'Yes' => 'Yes',
+                'No' => 'No',
+            ])
+            ->sortable();
+        $grid->column('score_2_submitted', 'U2 Submitted')
+            ->filter([
+                'Yes' => 'Yes',
+                'No' => 'No',
+            ])
+            ->sortable();
+        $grid->column('score_3_submitted', 'U3 Submitted')
+            ->filter([
+                'Yes' => 'Yes',
+                'No' => 'No',
+            ])
+            ->sortable();
+        $grid->column('score_4_submitted', 'U4 Submitted')
+            ->filter([
+                'Yes' => 'Yes',
+                'No' => 'No',
+            ])
+            ->sortable();
+        $grid->column('score_5_submitted', 'U5 Submitted')
+            ->filter([
+                'Yes' => 'Yes',
+                'No' => 'No',
+            ])
+            ->sortable();
+        $grid->column('exam_score_submitted', 'Exam Submitted')
+            ->filter([
+                'Yes' => 'Yes',
+                'No' => 'No',
+            ])
+            ->sortable();
+        //termly_examination_id
+        $grid->column('termly_examination_id', 'Termly Exam')->sortable();
+
         return $grid;
     }
 
@@ -161,6 +207,32 @@ academic_year_id
         $show->field('generic_skills', __('Generic skills'));
         $show->field('remarks', __('Remarks'));
         $show->field('teacher', __('Teacher'));
+        $show->field('administrator_id', __('Administrator id'));
+        $show->field('academic_class_id', __('Academic class id'));
+        $show->field('term_id', __('Term id'));
+        $show->field('academic_class_sctream_id', __('Academic class sctream id'));
+        $show->field('score_1', __('Score 1'));
+        $show->field('score_2', __('Score 2'));
+        $show->field('score_3', __('Score 3'));
+        $show->field('score_4', __('Score 4'));
+        $show->field('score_5', __('Score 5'));
+        $show->field('tot_units_score', __('Tot units score'));
+        $show->field('out_of_10', __('Out of 10'));
+        $show->field('descriptor', __('Descriptor'));
+        $show->field('project_score', __('Project score'));
+        $show->field('out_of_20', __('Out of 20'));
+        $show->field('exam_score', __('Exam score'));
+        $show->field('overall_score', __('Overall score'));
+        $show->field('grade_value', __('Grade value'));
+        $show->field('grade_name', __('Grade name'));
+        $show->field('score_1_submitted', __('Score 1 submitted'));
+        $show->field('score_2_submitted', __('Score 2 submitted'));
+        $show->field('score_3_submitted', __('Score 3 submitted'));
+        $show->field('score_4_submitted', __('Score 4 submitted'));
+        $show->field('score_5_submitted', __('Score 5 submitted'));
+        $show->field('project_score_submitted', __('Project score submitted'));
+        $show->field('exam_score_submitted', __('Exam score submitted'));
+        $show->field('termly_examination_id', __('Termly examination id'));
 
         return $show;
     }
@@ -174,10 +246,41 @@ academic_year_id
     {
         $form = new Form(new SecondaryReportCardItem());
 
+        $form->number('enterprise_id', __('Enterprise id'));
+        $form->number('academic_year_id', __('Academic year id'));
+        $form->number('secondary_subject_id', __('Secondary subject id'));
+        $form->number('secondary_report_card_id', __('Secondary report card id'));
         $form->decimal('average_score', __('Average score'))->default(0.00);
         $form->textarea('generic_skills', __('Generic skills'));
         $form->textarea('remarks', __('Remarks'));
         $form->text('teacher', __('Teacher'));
+        $form->number('administrator_id', __('Administrator id'));
+        $form->number('academic_class_id', __('Academic class id'));
+        $form->number('term_id', __('Term id'));
+        $form->number('academic_class_sctream_id', __('Academic class sctream id'));
+        $form->decimal('score_1', __('Score 1'));
+        $form->decimal('score_2', __('Score 2'));
+        $form->decimal('score_3', __('Score 3'));
+        $form->decimal('score_4', __('Score 4'));
+        $form->decimal('score_5', __('Score 5'));
+        $form->decimal('tot_units_score', __('Tot units score'));
+        $form->decimal('out_of_10', __('Out of 10'));
+        $form->text('descriptor', __('Descriptor'));
+        $form->decimal('project_score', __('Project score'));
+        $form->decimal('out_of_20', __('Out of 20'));
+        $form->decimal('exam_score', __('Exam score'));
+        $form->decimal('overall_score', __('Overall score'));
+        $form->decimal('grade_value', __('Grade value'));
+        $form->text('grade_name', __('Grade name'));
+        $form->text('score_1_submitted', __('Score 1 submitted'))->default('No');
+        $form->text('score_2_submitted', __('Score 2 submitted'))->default('No');
+        $form->text('score_3_submitted', __('Score 3 submitted'))->default('No');
+        $form->text('score_4_submitted', __('Score 4 submitted'))->default('No');
+        $form->text('score_5_submitted', __('Score 5 submitted'))->default('No');
+        $form->text('project_score_submitted', __('Project score submitted'))->default('No');
+        $form->text('exam_score_submitted', __('Exam score submitted'))->default('No');
+        $form->number('termly_examination_id', __('Termly examination id'));
+
         return $form;
     }
 }

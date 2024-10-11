@@ -26,8 +26,7 @@ class StudentHasClass extends Model
     {
 
         parent::boot();
-        self::deleting(function ($m) {
-        });
+        self::deleting(function ($m) {});
         self::creating(function ($m) {
             $_m = AcademicClass::find($m->academic_class_id);
             if ($_m == null) {
@@ -56,6 +55,13 @@ class StudentHasClass extends Model
             }
             $m->academic_year_id = $_m->academic_year_id;
             $m->enterprise_id = $_m->enterprise_id;
+            $m->optional_subjects_picked = 0;
+            if ($m->new_curriculum_optional_subjects != null && is_array($m->new_curriculum_optional_subjects)) {
+                if (!empty($m->new_curriculum_optional_subjects)) {
+                    $m->optional_subjects_picked = 1;
+                }
+            }
+
             return $m;
         });
 
@@ -120,7 +126,6 @@ class StudentHasClass extends Model
                 break;
             }
 
-            $class = AcademicClass::find($m);
             if (isset($m->academic_class_id)) {
                 $class = AcademicClass::find($m->academic_class_id);
                 if ($class != null) {
@@ -211,5 +216,32 @@ class StudentHasClass extends Model
         }
         return '-';
     }
+
+    public function setNewCurriculumOptionalSubjectsAttribute($value)
+    {
+        if ($value != null && is_array($value)) {
+            try {
+                $this->attributes['new_curriculum_optional_subjects'] = json_encode($value);
+            } catch (\Throwable $th) {
+                $this->attributes['new_curriculum_optional_subjects'] = null;
+            }
+        } else {
+            $this->attributes['new_curriculum_optional_subjects'] = null;
+        }
+    }
+
+    //getter for new_curriculum_optional_subjects
+    public function getNewCurriculumOptionalSubjectsAttribute($value)
+    {
+        if ($value != null) {
+            if (is_string($value)) {
+                return json_decode($value);
+            }
+        }
+        return [];
+    }
+
+
+
     protected $appends = ['academic_class_text', 'administrator_photo', 'stream_text', 'administrator_text'];
 }

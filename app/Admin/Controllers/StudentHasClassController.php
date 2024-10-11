@@ -7,6 +7,7 @@ use App\Models\AcademicClass;
 use App\Models\AcademicClassSctream;
 use App\Models\AcademicYear;
 use App\Models\Course;
+use App\Models\SecondarySubject;
 use App\Models\StudentHasClass;
 use App\Models\StudentHasOptionalSubject;
 use App\Models\User;
@@ -110,13 +111,15 @@ class StudentHasClassController extends AdminController
             }
 
             $streams = [];
-            foreach (AcademicClassSctream::where(
-                [
-                    'enterprise_id' => $u->enterprise_id,
-                ]
-            )
-                ->orderBy('id', 'desc')
-                ->get() as $ex) {
+            foreach (
+                AcademicClassSctream::where(
+                    [
+                        'enterprise_id' => $u->enterprise_id,
+                    ]
+                )
+                    ->orderBy('id', 'desc')
+                    ->get() as $ex
+            ) {
                 if ($ex->academic_class == null) {
                     continue;
                 }
@@ -253,14 +256,18 @@ class StudentHasClassController extends AdminController
 
             $grid->column('pick_subject', __('Pick Optional Subjects'))
                 ->display(function ($title) {
-                    $x = $this->optional_subjects_picker;
-                    if ($x != null) {
-                        $url = admin_url('student-optional-subject-pickers/' . $x->id . '/edit');
-                    } else {
-                        $url = admin_url('student-optional-subject-pickers/create?student_has_class_id=' . $this->id);
+                    $preFrix = "";
+                    if ($this->optional_subjects_picked == 1) {
+                        $subjetcs =  $subs = SecondarySubject::wherein(
+                            'id',
+                            $this->new_curriculum_optional_subjects,
+                        )->get()->pluck('subject_name')->toarray();
+                        if (count($subjetcs) > 0) {
+                            $preFrix = implode(',', $subjetcs) . "<br>";
+                        }
                     }
-
-                    return "<a href='$url' target='_blank'><b>Select</b></a>";
+                    $url = admin_url('students-classes/' . $this->id . '/edit');
+                    return "$preFrix<a href='$url' ><b>Select Subjects</b></a>";
                 });
         }
 
@@ -341,11 +348,13 @@ class StudentHasClassController extends AdminController
                 ->ajax($ajax_url)->rules('required');
 
             $classes = [];
-            foreach (AcademicClass::where([
-                'enterprise_id' => Admin::user()->enterprise_id,
-            ])
-                ->orderBy('id', 'desc')
-                ->get() as $key => $value) {
+            foreach (
+                AcademicClass::where([
+                    'enterprise_id' => Admin::user()->enterprise_id,
+                ])
+                    ->orderBy('id', 'desc')
+                    ->get() as $key => $value
+            ) {
                 $classes[$value->id] = $value->name_text;
             }
 
@@ -357,13 +366,15 @@ class StudentHasClassController extends AdminController
             $form->select('stream_id', __('Stream'))->options(function ($id) {
                 $streams = [];
                 $u = Admin::user();
-                foreach (AcademicClassSctream::where(
-                    [
-                        'enterprise_id' => $u->enterprise_id,
-                    ]
-                )
-                    ->orderBy('id', 'desc')
-                    ->get() as $ex) {
+                foreach (
+                    AcademicClassSctream::where(
+                        [
+                            'enterprise_id' => $u->enterprise_id,
+                        ]
+                    )
+                        ->orderBy('id', 'desc')
+                        ->get() as $ex
+                ) {
                     $streams[$ex->id] = $ex->name_text;
                 }
                 return $streams;
@@ -387,13 +398,15 @@ class StudentHasClassController extends AdminController
 
             $streams = [];
             $u = Admin::user();
-            foreach (AcademicClassSctream::where(
-                [
-                    'enterprise_id' => $u->enterprise_id,
-                ]
-            )
-                ->orderBy('id', 'desc')
-                ->get() as $ex) {
+            foreach (
+                AcademicClassSctream::where(
+                    [
+                        'enterprise_id' => $u->enterprise_id,
+                    ]
+                )
+                    ->orderBy('id', 'desc')
+                    ->get() as $ex
+            ) {
                 $streams[$ex->id] = $ex->name_text;
             }
             $form->display('administrator_id', 'Class')->with(function ($value) {
@@ -408,10 +421,10 @@ class StudentHasClassController extends AdminController
         }
 
 
-        /* if ($form->isEditing()) {
+        if ($form->isEditing()) {
             if (Admin::user()->enterprise->type != 'Primary') {
-                $form->divider('Old Curriculum - Optional subjects');
-                $form->morphMany('optional_subjects', 'Click to add optional subject', function (Form\NestedForm $form) {
+                // $form->divider('Old Curriculum - Optional subjects');
+                /* $form->morphMany('optional_subjects', 'Click to add optional subject', function (Form\NestedForm $form) {
                     $id = ((int)(FacadesRequest::segment(2)));
                     if ($id < 1) {
                         $id = ((int)(FacadesRequest::segment(1)));
@@ -440,7 +453,7 @@ class StudentHasClassController extends AdminController
                     }
 
                     $subs = [];
-                    foreach ($academic_class->getOptionalSubjectsItems() as  $s) {
+                    foreach ($academic_class->getNewCurriculumOptionalSubjectsItems() as  $s) {
                         $subs[((int)($s->course_id))] = $s->subject_name . " - " . $s->code;
                     }
 
@@ -455,9 +468,9 @@ class StudentHasClassController extends AdminController
                         ->options(
                             $subs
                         );
-                });
+                }); */
                 $form->divider('New Curriculum - Optional subjects');
-                $form->morphMany('new_curriculum_optional_subjects', 'Click to add optional subject', function (Form\NestedForm $form) {
+                /* $form->morphMany('new_curriculum_optional_subjects', 'Click to add optional subject', function (Form\NestedForm $form) {
                     $id = ((int)(FacadesRequest::segment(2)));
                     if ($id < 1) {
                         $id = ((int)(FacadesRequest::segment(1)));
@@ -501,9 +514,52 @@ class StudentHasClassController extends AdminController
                         ->options(
                             $subs
                         );
-                });
+                }); */
+
+
+
+
+                $id = ((int)(FacadesRequest::segment(2)));
+                if ($id < 1) {
+                    $id = ((int)(FacadesRequest::segment(1)));
+                }
+                if ($id < 1) {
+                    $id = ((int)(FacadesRequest::segment(0)));
+                }
+                if ($id < 1) {
+                    $id = ((int)(FacadesRequest::segment(3)));
+                }
+                if ($id < 1) {
+                    $id = ((int)(FacadesRequest::segment(4)));
+                }
+                if ($id < 1) {
+                    die("Class not found.");
+                }
+                $class = StudentHasClass::find($id);
+
+                if ($class == null) {
+                    die("Class not found..");
+                }
+
+                $academic_class = AcademicClass::find($class->academic_class_id);
+                if ($academic_class == null) {
+                    die("Academic class not found.");
+                }
+
+                $subs = [];
+                foreach ($academic_class->getNewCurriculumOptionalSubjectsItems() as  $s) {
+                    $class_text = "";
+                    if ($s->academic_class != null) {
+                        $class_text = " - (" . $s->academic_class->short_name . ")";
+                    }
+                    $subs[((int)($s->id))] = $s->subject_name . " - " . $s->code . $class_text;
+                }
+
+                $form->checkbox('new_curriculum_optional_subjects', __('Select Optional Subjects (New Curriculum'))
+                    ->options($subs)
+                    ->stacked();
             }
-        } */
+        }
 
 
 

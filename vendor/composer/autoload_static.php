@@ -989,6 +989,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Models\\TermlyReportCard' => __DIR__ . '/../..' . '/app/Models/TermlyReportCard.php',
         'App\\Models\\TermlyReportCardOld' => __DIR__ . '/../..' . '/app/Models/TermlyReportCardOld.php',
         'App\\Models\\TermlySchoolFeesBalancing' => __DIR__ . '/../..' . '/app/Models/TermlySchoolFeesBalancing.php',
+        'App\\Models\\TermlySecondaryReportCard' => __DIR__ . '/../..' . '/app/Models/TermlySecondaryReportCard.php',
         'App\\Models\\TheologryStudentReportCard' => __DIR__ . '/../..' . '/app/Models/TheologryStudentReportCard.php',
         'App\\Models\\TheologyClass' => __DIR__ . '/../..' . '/app/Models/TheologyClass.php',
         'App\\Models\\TheologyCourse' => __DIR__ . '/../..' . '/app/Models/TheologyCourse.php',

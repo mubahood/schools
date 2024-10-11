@@ -625,6 +625,12 @@ class AcademicClass extends Model
     }
     function getOptionalSubjectsItems()
     {
+        $subs = SecondarySubject::where([
+            'academic_class_id' => $this->id,
+            'is_optional' => 1,
+        ])->get();
+        return $subs;
+
         $subs = [];
         foreach ($this->main_subjects() as $sub) {
             if ($sub->is_optional == 1) {

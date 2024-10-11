@@ -289,6 +289,7 @@ return array(
     'App\\Models\\TermlyReportCard' => $baseDir . '/app/Models/TermlyReportCard.php',
     'App\\Models\\TermlyReportCardOld' => $baseDir . '/app/Models/TermlyReportCardOld.php',
     'App\\Models\\TermlySchoolFeesBalancing' => $baseDir . '/app/Models/TermlySchoolFeesBalancing.php',
+    'App\\Models\\TermlySecondaryReportCard' => $baseDir . '/app/Models/TermlySecondaryReportCard.php',
     'App\\Models\\TheologryStudentReportCard' => $baseDir . '/app/Models/TheologryStudentReportCard.php',
     'App\\Models\\TheologyClass' => $baseDir . '/app/Models/TheologyClass.php',
     'App\\Models\\TheologyCourse' => $baseDir . '/app/Models/TheologyCourse.php',
