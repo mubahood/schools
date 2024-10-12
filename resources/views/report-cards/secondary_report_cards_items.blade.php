@@ -97,7 +97,8 @@ if ($termly_report->has_u5 == 'Yes') {
         </td>
         <td class="text-center">
             <br>
-            <img style="width: 100%;" src="{{ public_path('assets/mubahood.png') }}">
+            {{-- <img style="width: 100%;" src="{{ public_path('assets/mubahood.png') }}"> --}}
+            <img style="width: 100%;" src="{{ public_path($r->owner->getAvatarPath()) }}">
         </td>
     </tr>
 </table>
