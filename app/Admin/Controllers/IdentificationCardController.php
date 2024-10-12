@@ -56,11 +56,12 @@ class IdentificationCardController extends AdminController
                     }
                     return implode(", ", $classes);
                 } elseif ($this->target_type == 'users') {
-                    $users = [];
+                   /*  $users = [];
                     foreach ($this->users as $key => $v) {
                         $users[] = Administrator::find($v)->name;
                     }
-                    return implode(", ", $users);
+                    return implode(", ", $users); */
+                    return 'Specific Users'; 
                 } else {
                     return 'All Employees';
                 }
