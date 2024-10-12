@@ -17,7 +17,7 @@ class SubjectTeacherRemarkController extends AdminController
      *
      * @var string
      */
-    protected $title = 'Subject Teachers Remarks';
+    protected $title = 'Grades';
 
     /**
      * Make a grid builder.
@@ -27,15 +27,14 @@ class SubjectTeacherRemarkController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new SubjectTeacherRemark());
-
         $grid->disableBatchActions();
         $u = Auth::user();
         $grid->model()->where([
             'enterprise_id' => $u->enterprise_id,
-        ])->orderBy('min_score', 'asc');
+        ])->orderBy('max_score', 'asc');
+        $grid->column('comments', __('Comments'))->sortable()->editable(); 
         $grid->column('min_score', __('Min Score'))->sortable()->editable();
         $grid->column('max_score', __('Max score'))->sortable()->editable();
-        $grid->column('comments', __('Comments'))->limit(100)->sortable();
 
         return $grid;
     }
@@ -72,24 +71,25 @@ class SubjectTeacherRemarkController extends AdminController
 
         $form->decimal('min_score', __('Min score'))->rules('required');
         $form->decimal('max_score', __('Max score'))->rules('required');
-         
-        $form->html('
+        $form->text('comments', __('Grade'))->rules('required')->required();
+
+        /*      $form->html('
         <code>[STUDENT_NAME]</code>
         <code>[HE_SHE]</code>
         <code>[HIM_HER]</code>
         ','Key words');
         $form->textarea('comments', __('Comments'))
             ->help('Enter comments separated by commas. e.g. Excellent, Good, Average, Poor, Very Poor');
-
+ */
 
 
         $u = Admin::user();
         $form->hidden('enterprise_id')->default($u->enterprise_id);
 
-        $form->saving(function (Form $form) {
+        /*   $form->saving(function (Form $form) {
             $form->min_score = round($form->min_score, 2);
             $form->max_score = round($form->max_score, 2);
-        });
+        }); */
 
         return $form;
     }

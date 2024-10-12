@@ -10,6 +10,22 @@ class SecondaryReportCard extends Model
 {
     use HasFactory;
 
+    //boot
+    public static function boot()
+    {
+        parent::boot();
+        //creating
+        self::creating(function ($m) {
+            $reportCard = SecondaryReportCard::where([
+                'secondary_termly_report_card_id' => $m->secondary_termly_report_card_id,
+                'administrator_id' => $m->administrator_id
+            ])->first();
+            if ($reportCard != null) {
+                return false;
+            }
+        });
+    }
+
     //toDropdownArray
     public static function toDropdownArray($enterprise_id)
     {
@@ -31,7 +47,7 @@ class SecondaryReportCard extends Model
         }
         return $data;
     }
-   
+
     //academic_class 
     public function academic_class()
     {
@@ -65,5 +81,20 @@ class SecondaryReportCard extends Model
     function items()
     {
         return $this->hasMany(SecondaryReportCardItem::class);
+    }
+
+    //belongs to termly_SEcondary_report_card_id
+    public function termly_secondary_report_card()
+    {
+        return $this->belongsTo(TermlySecondaryReportCard::class, 'secondary_termly_report_card_id');
+    }   
+
+    function get_report_card_items()
+    {
+        $items =  SecondaryReportCardItem::where([
+            'termly_examination_id' => $this->secondary_termly_report_card_id,
+            'administrator_id' => $this->administrator_id
+        ])->get();
+        return $items;
     }
 }

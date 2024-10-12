@@ -9,7 +9,7 @@ class GenericSkill extends Model
 {
     use HasFactory;
 
-    //multiselect for comments setter
+ /*    //multiselect for comments setter
     public function setCommentsAttribute($value)
     {
         $this->attributes['comments'] = json_encode($value);
@@ -18,6 +18,6 @@ class GenericSkill extends Model
     public function getCommentsAttribute($value)
     {
         return json_decode($value, true);
-    }
+    } */
 
 }

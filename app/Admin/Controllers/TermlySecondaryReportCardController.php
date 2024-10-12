@@ -26,7 +26,13 @@ class TermlySecondaryReportCardController extends AdminController
      */
     protected function grid()
     {
+        /* $m = TermlySecondaryReportCard::find(1);
+        TermlySecondaryReportCard::do_generate_reports($m);
+        die("done");
+        TermlySecondaryReportCard::do_process($m); */
+        
         $grid = new Grid(new TermlySecondaryReportCard());
+        $grid->disableCreateButton();
         $u = Admin::user();
         $grid->model()
             ->orderBy('id', 'DESC')
@@ -140,7 +146,7 @@ class TermlySecondaryReportCardController extends AdminController
         $form = new Form(new TermlySecondaryReportCard());
         $u = Admin::user();
         if ($form->isCreating()) {
-            // return admin_error('This item cannot be created from this page. It is automatically created when a new term is created.');
+            return admin_error('This item cannot be created from this page. It is automatically created when a new term is created.');
         }
 
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->id);
@@ -156,8 +162,9 @@ class TermlySecondaryReportCardController extends AdminController
         foreach ($academicClasses as  $v) {
             $classes[$v->id] = $v->name_text;
         }
-        $form->multipleSelect('generate_marks_for_classes', 'Select classes to generate marks for')
-            ->options($classes);
+        $form->listbox('generate_marks_for_classes', 'Select classes to generate marks for')
+            ->options($classes)
+            ->required();
 
 
         $form->text('report_title', __('Report title'))->required();
@@ -166,7 +173,7 @@ class TermlySecondaryReportCardController extends AdminController
         $form->radio('has_u3', __('Inlude UNIT 3 on report'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('Yes')->required();
         $form->radio('has_u4', __('Inlude UNIT 4 on report'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('No')->required();
         $form->radio('has_u5', __('Inlude UNIT 5 on report'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('No')->required();
-        // $form->radio('do_update', __('Do update'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('No')->required();
+        $form->radio('generate_marks', __('Generate/Re-Generate Marks'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('No')->required();
         $form->radio('delete_marks_for_non_active', __('Delete marks for non active'))->default('No')->options(['Yes' => 'Yes', 'No' => 'No'])->required();
         $form->radio('submit_u1', __('Submit UNIT 1 marks'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('Yes')->required();
         $form->radio('submit_u2', __('Submit UNIT 2 marks'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('Yes')->required();
@@ -175,6 +182,13 @@ class TermlySecondaryReportCardController extends AdminController
         $form->radio('submit_u5', __('Submit UNIT 5 marks'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('No')->required();
         $form->radio('submit_project', __('Submit Project Marks'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('No')->required();
         $form->radio('submit_exam', __('Submit Exam Marks'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('No')->required();
+        $form->decimal('max_score_1', __('Max Score for UNIT 1'))->default(3.0)->required();
+        $form->decimal('max_score_2', __('Max Score for UNIT 2'))->default(3.0)->required();
+        $form->decimal('max_score_3', __('Max Score for UNIT 3'))->default(3.0)->required();
+        $form->decimal('max_score_4', __('Max Score for UNIT 4'))->default(3.0)->required();
+        $form->decimal('max_score_5', __('Max Score for UNIT 5'))->default(3.0)->required();
+        $form->decimal('max_project_score', __('Max Score for Project'))->default(10.0)->required();
+        $form->decimal('max_exam_score', __('Max Score for Exam'))->default(80.0)->required();
 
         $form->radio('reports_generate', __('Generate/Re-Generate Reports'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('No')->required();
         $form->radio('reports_include_u1', __('Inlude UNIT 1 in report cards'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('No')->required();

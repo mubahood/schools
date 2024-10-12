@@ -609,6 +609,7 @@ class Utils  extends Model
         if ($u == null) {
             return;
         }
+        Utils::generate_termly_report_cards($u);
         self::copy_default_grading($u);
         self::process_pending_subscriptions($u);
 
@@ -965,6 +966,74 @@ class Utils  extends Model
             } else {
                 $s->parent_id = $p->id;
                 $s->save();
+            }
+        }
+    }
+
+    public static function generate_termly_report_cards($u)
+    {
+        if ($u == null) {
+            return;
+        }
+        if ($u->ent == null) {
+            return;
+        }
+
+        if (
+            $u->ent->type == 'Advanced' ||
+            $u->ent->type == 'Secondary'
+        ) {
+            $active_term = $u->ent->active_term();
+            if ($active_term != null) {
+                $report = TermlySecondaryReportCard::where([
+                    'term_id' => $active_term->id,
+                    'enterprise_id' => $u->ent->id
+                ])->first();
+                if ($report == null) {
+                    $report = new TermlySecondaryReportCard();
+                    $report->term_id = $active_term->id;
+                    $report->academic_year_id = $active_term->academic_year_id;
+                    $report->enterprise_id = $u->ent->id;
+                    $report->report_title = "Term " . $active_term->name . " - Termly Report Card";
+                    $report->has_u1 = 'Yes';
+                    $report->submit_u1 = 'Yes';
+                    $report->submit_u2 = 'Yes';
+                    $report->submit_u3 = 'Yes';
+                    $report->has_u2 = 'Yes';
+                    $report->has_u3 = 'Yes';
+                    $report->has_u4 = 'No';
+                    $report->has_u5 = 'No';
+                    $report->do_update = 'No';
+                    $report->generate_marks = 'No';
+                    $report->delete_marks_for_non_active = 'No';
+                    $report->generate_marks_for_classes = null;
+                    $report->submit_u4 = 'No';
+                    $report->submit_u5 = 'No';
+                    $report->submit_project = 'No';
+                    $report->submit_exam = 'Yes';
+                    $report->reports_generate = 'No';
+                    $report->reports_include_u1 = 'Yes';
+                    $report->reports_include_u2 = 'Yes';
+                    $report->reports_include_u3 = 'Yes';
+                    $report->reports_include_u4 = 'No';
+                    $report->reports_include_u5 = 'No';
+                    $report->reports_include_exam = 'Yes';
+                    $report->reports_include_project = 'Yes';
+                    $report->reports_who_fees_balance = 'Yes';
+                    $report->reports_display_report_to_parents = 'No';
+                    $report->generate_class_teacher_comment = 'No';
+                    $report->generate_head_teacher_comment = 'No';
+                    $report->generate_positions = 'No';
+                    $report->display_positions = 'No';
+                    $report->hm_communication = '';
+                    $report->bottom_message = '';
+                    $report->reports_template = '1';
+                    try {
+                        $report->save();
+                    } catch (Exception $e) {
+                        throw "Failed to create termly report card because " . $e->getMessage();
+                    }
+                }
             }
         }
     }

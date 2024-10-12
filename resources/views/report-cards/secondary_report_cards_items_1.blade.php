@@ -1,6 +1,5 @@
 <?php
 use App\Models\SecondaryCompetence;
-use App\Models\GenericSkill;
 $NUMBER_OF_UNITS = 0;
 $termly_report = $r->termly_secondary_report_card;
 if ($termly_report == null) {
@@ -151,7 +150,7 @@ if ($termly_report->has_u5 == 'Yes') {
     </thead>
     <tbody>
         @foreach ($r->get_report_card_items() as $item)
-            <?php
+            <?php 
             
             if ($item->subject == null) {
                 //dd($item);
@@ -201,131 +200,69 @@ if ($termly_report->has_u5 == 'Yes') {
             ?>
 
             <tr>
-                <th style="line-height: 14px;">{{ $item->subject->subject_name }}</th>
-                @if ($termly_report->has_u1 == 'Yes')
-                    <td style="text-align: center;">{{ $item->score_1 ?? '-' }}</td>
-                @endif
-                @if ($termly_report->has_u2 == 'Yes')
-                    <td style="text-align: center;">{{ $item->score_2 ?? '-' }}</td>
-                @endif
-                @if ($termly_report->has_u3 == 'Yes')
-                    <td style="text-align: center;">{{ $item->score_3 ?? '-' }}</td>
-                @endif
-                @if ($termly_report->has_u4 == 'Yes')
-                    <td style="text-align: center;">{{ $item->score_4 ?? '-' }}</td>
-                @endif
-                @if ($termly_report->has_u5 == 'Yes')
-                    <td style="text-align: center;">{{ $item->score_5 ?? '-' }}</td>
-                @endif
-                @if ($termly_report->has_u5 == 'Yes')
-                    <td style="text-align: center;">{{ $item->score_5 ?? '-' }}</td>
-                @endif
-                <td style="text-align: center;">{{ $item->tot_units_score ?? '-' }}</td>
-                <td style="text-align: center;">{{ $item->average_score ?? '-' }}</td>
-                <td style="text-align: center;"><b>{{ $item->out_of_10 ?? '-' }}</b></td>
-                <td style="text-align: center;">{{ $item->descriptor ?? '-' }}</td>
-                <td style="text-align: center;">{{ $item->project_score ?? '-' }}</td>
-                <td style="text-align: center;"><b>{{ $item->out_of_20 ?? '-' }}</b></td>
-                <td style="text-align: center;">{{ $item->exam_score ?? '-' }}</td>
-                <td style="text-align: center;"><b>{{ $item->overall_score ?? '-' }}</b></td>
-                <td style="text-align: center;"><b>{{ $item->grade_name ?? '-' }}</b></td>
-                <td style="text-align: center;"><b>{{ $item->teacher ?? '-' }}</b></td>
-                {{-- 
+                <?php
+                $competences = $item->items();
+                if (count($competences) == 0) {
+                    $c1 = new SecondaryCompetence();
+                    $c1->topic = 'Topic';
+                    $c1->description = 'Description';
+                    $c1->competance = new \stdClass();
+                    $c1->competance->score = 0;
+                    $competences[] = $c1;
+                    //c2
+                    $c2 = new SecondaryCompetence();
+                    $c2->topic = 'Topic';
+                    $c2->description = 'Description';
+                    $c2->competance = new \stdClass();
+                    $c2->competance->score = 0;
+                    $competences[] = $c2;
+                    #c3
+                    $c3 = new SecondaryCompetence();
+                    $c3->topic = 'Topic';
+                    $c3->description = 'Description';
+                    $c3->competance = new \stdClass();
+                    $c3->competance->score = 0;
+                    $competences[] = $c3;
+                }
+                $first_competence = $competences[0];
+                $last_competences = array_slice($competences, 1, count($competences));
                 
-id
-created_at
-updated_at
-enterprise_id
-academic_year_id
-secondary_subject_id
-secondary_report_card_id
-average_score
-generic_skills
-remarks
-
-administrator_id
-academic_class_id
-term_id
-academic_class_sctream_id
-score_1
-score_2
-score_3
-score_4
-score_5
-tot_units_score
-out_of_10
-descriptor
-project_score
-out_of_20
-exam_score
-overall_score
-grade_value
-grade_name
-score_1_submitted
-score_2_submitted
-score_3_submitted
-score_4_submitted
-score_5_submitted
-project_score_submitted
-exam_score_submitted
-termly_examination_id
-
-Edit Edit
-
-                --}}
+                $seed = str_split('abcdefghijklmnopqrstuvwxyz' . 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'); // and any other characters
+                shuffle($seed); // probably optional since array_is randomized; this may be redundant
+                $rand = '';
+                $isFirst = true; //
+                foreach (array_rand($seed, 2) as $k) {
+                    if (!$isFirst) {
+                        $rand .= '.';
+                    }
+                    $isFirst = false;
+                    $rand .= $seed[$k];
+                }
+                $rand = strtoupper($rand);
+                ?>
+                <th rowspan="{{ count($competences) }}">{{ $item->subject->subject_name }}</th>
+                <td>
+                    <b>{{ $first_competence->topic }}:</b> {{ $first_competence->description }}
+                </td>
+                <td class="text-center"><b>{{ $first_competence->competance->score }}</b></td>
+                <td class="text-center" rowspan="{{ count($competences) }}">
+                    <b><br>{{ $item->average_score }}</b>
+                </td>
+                <td rowspan="{{ count($competences) }}">{{ $item->generic_skills }}</td>
+                <td rowspan="{{ count($competences) }}">{{ $item->remarks }}</td>
+                <td rowspan="{{ count($competences) }}">{{ $rand }}</td>
             </tr>
+            @foreach ($last_competences as $competence)
+                <tr>
+                    <td>
+                        <b>{{ $competence->topic }}:</b> {{ $competence->description }}
+                    </td>
+                    <td class="text-center"><b>{{ $competence->competance->score }}</b></td>
+
+                </tr>
+            @endforeach
         @endforeach
     </tbody>
-</table>
-
-<table class="table table-bordered data mt-1">
-    <tr>
-        <th rowspan="2">
-            OVERALL AVERAGE LEVEL OF ACHIEVEMENT
-        </th>
-        <td class="text-center">AVERAGE SCORE</td>
-        <td class="text-center">DESCRIPTOR</td>
-    </tr>
-    <tr>
-        <td class="text-center">{{ 13 }}</td>
-        <td class="text-center">{{ 13 }}</td>
-    </tr>
-</table>
-
-<table class="table table-bordered data mt-1">
-    <tr>
-        <th colspan="2" style="font-size: 14px;">
-            KEY TERMS USED
-        </th>
-    </tr>
-    <tr>
-        <td>SCORE RANGE</td>
-        <td>DESCRIPTOR (Meaning)</td>
-    </tr>
-
-    @foreach (GenericSkill::where([
-        'enterprise_id' => $r->enterprise_id,
-    ])->orderBy('min_score', 'asc')->get() as $x)
-        <tr>
-            <td style="width: 15%;">{{ $x->min_score . ' - ' . $x->max_score }}</td>
-            <td>{{ $x->comments }}</td>
-        </tr>
-    @endforeach
-    <tr>
-        <td colspan="2">
-            <b>Descriptor</b> - Gives details on the extend to which the learner has attained the intended learning
-            outcomes. <br>
-            <b>Competency</b> - The overall expected capability of the learner at the end of topic after being
-            exposed to
-            a body of knowledge, Skills and Values.<br>
-            <b>Indentifier</b> - A label of grade that distinguishes learners according to the achievement of the set
-            of
-            outcomes.
-            <br>
-            <b>U1: </b> Unit 1 Assesment, <b>U2: </b> Unit 2 Assesment, etc.
-        </td>
-    </tr>
-
 </table>
 
 <div class="p-0 mt-2 mb-2 class-teacher">

@@ -1,4 +1,4 @@
-php artisan make:migration add_score_values_to_secondary_report_card_items --table=termly_report_cards
+php artisan make:migration add_descriptior_to_secondary_report_card_items --table=secondary_report_card_items
 
          $table->date('check_in_time')->nullable();
             $table->date('check_out_time')->nullable();

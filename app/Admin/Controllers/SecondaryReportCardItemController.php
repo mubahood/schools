@@ -30,6 +30,10 @@ class SecondaryReportCardItemController extends AdminController
      */
     protected function grid()
     {
+        /*  $m = SecondaryReportCardItem::find(40);
+        $m->score_1 = 0.89;
+        SecondaryReportCardItem::do_prepare($m);
+        die("done"); */
         $grid = new Grid(new SecondaryReportCardItem());
         $grid->disableCreateButton();
         $grid->filter(function ($filter) {

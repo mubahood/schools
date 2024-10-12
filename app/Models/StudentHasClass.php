@@ -241,6 +241,35 @@ class StudentHasClass extends Model
         return [];
     }
 
+    //get my subjects
+    public function getMySubjects()
+    {
+        if ($this->class == null) {
+            return [];
+        }
+        $subs = [];
+        foreach ($this->class->secondarySubjects as $key => $subject) {
+            if ($subject->is_optional == 0) {
+                $subs[] = $subject;
+            }
+        }
+        $option_class_ids = $this->new_curriculum_optional_subjects;
+        if ($option_class_ids != null && is_array($option_class_ids)) {
+            if (!empty($option_class_ids)) {
+                $options = SecondarySubject::whereIn('id', $option_class_ids)
+                    ->get();
+                foreach ($options as $key => $subject) {
+                    $subs[] = $subject;
+                }
+            }
+        }
+        $options = SecondarySubject::whereIn('id', $option_class_ids)->get();
+
+        foreach ($options as $key => $subject) {
+            $subs[] = $subject;
+        }
+        return $subs;
+    }
 
 
     protected $appends = ['academic_class_text', 'administrator_photo', 'stream_text', 'administrator_text'];

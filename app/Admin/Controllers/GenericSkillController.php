@@ -33,6 +33,8 @@ class GenericSkillController extends AdminController
         ])->orderBy('min_score', 'asc');
         $grid->column('min_score', __('Min Score'))->sortable()->editable();
         $grid->column('max_score', __('Max score'))->sortable()->editable();
+        $grid->column('descriptor', __('Descriptor'))->sortable()->editable();
+        $grid->column('identifier', __('Identifier'))->sortable()->editable();
         $grid->column('comments', __('Comments'))->limit(100)->sortable();
 
         return $grid;
@@ -68,17 +70,22 @@ class GenericSkillController extends AdminController
     {
         $form = new Form(new GenericSkill());
 
-        $form->decimal('min_score', __('Min score'));
-        $form->decimal('max_score', __('Max score'));
-        $form->tags('comments', __('Comments'));
+        $form->decimal('min_score', __('Min score'))->required();
+        $form->decimal('max_score', __('Max score'))->required();
+        $form->text('descriptor', __('Descriptor'))->required();
+        $form->decimal('identifier', __('Identifier'))->required();
+
+        $form->text('comments', __('Descriptor meaning'))->required();
 
         $u = Admin::user();
         $form->hidden('enterprise_id')->default($u->enterprise_id);
 
-        $form->saving(function (Form $form) {
+        /* $form->saving(function (Form $form) {
             $form->min_score = round($form->min_score, 2);
             $form->max_score = round($form->max_score, 2);
-        });
+        }); */
+
+
         return $form;
     }
 }
