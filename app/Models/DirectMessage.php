@@ -53,7 +53,7 @@ class DirectMessage extends Model
             return;
         }
 
-        if ($ent->wallet_balance < 45) {
+        if ($ent->wallet_balance < 50) {
             $m->status = 'Failed';
             $m->error_message_message = 'Insufficient funds.';
             $m->save();
@@ -97,7 +97,7 @@ class DirectMessage extends Model
                 }
                 $wallet_rec = new WalletRecord();
                 $wallet_rec->enterprise_id = $m->enterprise_id;
-                $wallet_rec->amount = $no_of_messages * -45;
+                $wallet_rec->amount = $no_of_messages * -50;
                 $wallet_rec->details = "Sent $no_of_messages messages to $m->receiver_number. ref: $m->id";
                 $wallet_rec->save();
             } else {

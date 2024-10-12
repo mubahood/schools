@@ -167,12 +167,21 @@ class BulkMessage extends Model
 
                         foreach ($class->students as $studentHasClass) {
                             $administrator_id = $studentHasClass->administrator_id;
-                            $student = Administrator::find($administrator_id);
-                            $parent = Administrator::find($student->parent_id);
+                            $student = User::find($administrator_id);
+                            $parent = $student->getParent();
                             if ($parent == null) {
-                                $hasError = true;
-                                $errorMessage .= "Parent of {$student->name}, #" . $student->parent_id . ", was not found.";
-                                continue;
+                                try {
+                                    User::createParent($student);
+                                } catch (\Throwable $th) {
+                                }
+                                $parent = $student->getParent();
+                            }
+
+                            if ($parent == null) {
+                                $phone_number = $student->getParentPhonNumber();
+                                $parent = $student;
+                            } else {
+                                $phone_number = $parent->phone_number_1;
                             }
 
 
@@ -209,7 +218,7 @@ class BulkMessage extends Model
                             $msg->TEACHER_NAME = $student->name;
                             $msg->PARENT_NAME = $parent->name;
 
-                            $phone_number = $parent->phone_number_1;
+
                             if ($phone_number == null || strlen($phone_number) < 2) {
                                 $phone_number = $parent->phone_number_2;
                             }
