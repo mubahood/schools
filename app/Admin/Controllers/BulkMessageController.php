@@ -31,9 +31,12 @@ class BulkMessageController extends AdminController
      */
     protected function grid()
     {
-        /* $m = BulkMessage::find(6);
-        BulkMessage::do_prepare_messages($m);
-        die(); */
+        $m = BulkMessage::find(6);
+        /* BulkMessage::do_prepare_messages($m);
+        die('done');
+        $m->target_parents_condition_fees_amount = -200000;
+        $m->save(); 
+        dd($m); */
         
         $grid = new Grid(new BulkMessage());
         $grid->disableBatchActions();

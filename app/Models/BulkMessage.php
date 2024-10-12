@@ -30,6 +30,10 @@ class BulkMessage extends Model
     public static function do_prepare_messages($m)
     {
 
+        //set unlited execution time
+        ini_set('max_execution_time', 0);
+        ini_set('memory_limit', '1024M');
+
         $messages = [];
         $hasError = false;
         $errorMessage = "";
@@ -221,7 +225,7 @@ class BulkMessage extends Model
 
                             if ($phone_number == null || strlen($phone_number) < 2) {
                                 $phone_number = $parent->phone_number_2;
-                            }
+                            } 
                             $msg->receiver_number = $phone_number;
                             $msg->administrator_id = $parent->id;
                             $msg->balance = $balance;
