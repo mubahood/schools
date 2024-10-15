@@ -63,14 +63,32 @@ class ParticipantController extends AdminController
                 return $this->participant->name;
             })
             ->sortable();
-        $grid->column('academic_year_id', __('Academic year id'));
-        $grid->column('term_id', __('Term id'));
-        $grid->column('academic_class_id', __('Academic class id'));
-        $grid->column('subject_id', __('Subject id'));
-        $grid->column('service_id', __('Service id'));
-        $grid->column('is_present', __('Is present'));
-        $grid->column('session_id', __('Session id'));
-        $grid->column('is_done', __('Is done'));
+        $grid->column('academic_year_id', __('Academic year id'))->hide();
+        $grid->column('term_id', __('Term id'))->hide();
+        $grid->column('academic_class_id', __('Academic class id'))->hide();
+        $grid->column('subject_id', __('Subject id'))->hide();
+        $grid->column('service_id', __('Service id'))->hide();
+        $grid->column('is_present', __('Is Present'))
+            ->using([
+                1 => 'Present',
+                0 => 'Absent',
+            ])->filter([
+                1 => 'Present',
+                0 => 'Absent',
+            ])->label([
+                1 => 'success',
+                0 => 'danger',
+            ])
+            ->sortable();
+        $grid->column('session_id', __('Roll-call'))
+            ->display(function ($x) {
+                $ses = Session::find($x);
+                if ($ses == null) {
+                    return "N/A";
+                }
+                return $ses->type . " - " . Utils::my_date($ses->due_date);
+            });
+        $grid->column('is_done', __('Is done'))->hide();
 
         return $grid;
     }

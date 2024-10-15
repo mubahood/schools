@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Models\AcademicClass;
+use App\Models\Participant;
 use App\Models\Service;
 use App\Models\Session;
 use App\Models\Subject;
@@ -64,7 +65,7 @@ class SessionController extends AdminController
                 return Utils::my_date($this->due_date);
             })
             ->sortable();
-        $grid->column('title', __('Title'))->sortable();
+        $grid->column('type', __('Session Type'))->sortable();
 
 
 
@@ -162,13 +163,39 @@ class SessionController extends AdminController
     protected function form()
     {
 
+/*         $s = Session::find(1);
+        Session::process_attendance($s);
+        die('.'); */
         /*         $s = Session::find(1);
         $s->title .= "1";
         $s->save();  */
 
         $form = new Form(new Session());
-
         $u = Admin::user();
+
+        /* $s = Session::find(1);
+        if ($s == null) {
+            $s = new Session();
+            $s->enterprise_id = $u->enterprise_id;
+            $s->administrator_id = $u->id;
+            $s->academic_class_id = null;
+            $s->subject_id = null;
+            $s->stream_id = null;
+            $s->prepared = 0;
+            $s->notify_present = "Yes";
+            $s->type = "STUDENT_REPORT";
+            $s->notify_absent = "No";
+            $s->due_date = date('Y-m-d');
+            try {
+                $s->save();
+            } catch (\Throwable $th) {
+                throw $th;
+            }
+        }
+        $s->type = "STUDENT_REPORT";
+        $s->save();
+        Session::create_participants($s);
+        die("here 1. =>{$s->id}<="); */
         $term = $u->ent->active_term();
         if ($term == null) {
             return admin_error('Ooops!', 'No active term.');
@@ -176,7 +203,7 @@ class SessionController extends AdminController
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
         $form->hidden('administrator_id', __('Enterprise id'))->default($u->id)->rules('required');
         $form->disableCreatingCheck();
-        $form->disableEditingCheck();
+        // $form->disableEditingCheck();
         $form->disableReset();
         $form->disableViewCheck();
 
@@ -184,17 +211,23 @@ class SessionController extends AdminController
 
             $form->radio('type', __('Roll-call type'))
                 ->options([
+                    'STUDENT_REPORT' => 'Student Report at School',
+                    'STUDENT_LEAVE' => 'Student Leave School',
+                    'STUDENT_MEAL' => 'Student Meals Session',
                     'Class attendance' => 'Class attendance',
                     'Activity participation' => 'Activity participation',
                 ])
+                ->stacked()
                 ->rules('required')
                 ->when('Activity participation', function ($form) {
 
                     $u = Admin::user();
                     $services = [];
-                    foreach (Service::where([
-                        'enterprise_id' => $u->enterprise_id,
-                    ])->get() as $key => $s) {
+                    foreach (
+                        Service::where([
+                            'enterprise_id' => $u->enterprise_id,
+                        ])->get() as $key => $s
+                    ) {
                         $services[$s->id] = "#" . $s->id . " " . $s->name;
                     }
                     $form->select('service_id', 'Service')->options($services)->rules('required');
@@ -203,11 +236,13 @@ class SessionController extends AdminController
                     $classes = [];
                     $u = Admin::user();
                     $term = $u->ent->active_term();
-                    foreach (AcademicClass::where([
-                        'academic_year_id' => $term->academic_year_id,
-                        'enterprise_id' => $u->enterprise_id,
-                    ])->get() as $key => $class) {
-                        $classes[$class->id] = $class->name_text." => ".$class->id;
+                    foreach (
+                        AcademicClass::where([
+                            'academic_year_id' => $term->academic_year_id,
+                            'enterprise_id' => $u->enterprise_id,
+                        ])->get() as $key => $class
+                    ) {
+                        $classes[$class->id] = $class->name_text . " => " . $class->id;
                     }
 
 
@@ -224,15 +259,25 @@ class SessionController extends AdminController
                         })
                         ->rules('required');
                 });
-            $form->text('title', __('Session title'))->rules('required');
+            /*             $form->text('title', __('Session title'))->rules('required'); */
             $form->hidden('academic_year_id', __('Academic year id'))->default($term->academic_year_id);
             $form->hidden('term_id', __('Term id'))->default($term->id);
             $form->datetime('due_date', __('Due date'))->default(date('Y-m-d H:i:s'))->rules('required');
+            $form->radio('notify_present', 'Notify parent if present')->default('No')->required()
+                ->options([
+                    'No' => 'No',
+                    'Yes' => 'Yes',
+                ]);
+            $form->radio('notify_absent', 'Notify parent if absent')->default('No')->required()
+                ->options([
+                    'No' => 'No',
+                    'Yes' => 'Yes',
+                ]);
         } else {
 
 
             $form->display('type', __('Session type'));
-            $form->display('title', __('Session title'));
+            // $form->display('title', __('Session title'));
         }
 
 
@@ -243,50 +288,21 @@ class SessionController extends AdminController
             $id = ((int)($segments[1]));
             $m = Session::find($id);
             if ($m != null) {
-                $candidates = $m->getCandidates();
+                $cands = Participant::where([
+                    'session_id' => $m->id,
+                ])->get();
+                $candidates = [];
+                foreach ($cands as $key => $c) {
+                    if ($c->user == null) {
+                        continue;
+                    }
+                    $candidates[$c->administrator_id] = $c->user->user_number . " - " . $c->user->name_text;
+                }
             }
         }
 
 
 
-
-        /*
-
-            "id" => 21
-    "created_at" => "2023-01-05 19:09:44"
-    "updated_at" => "2023-01-05 19:09:44"
-    "enterprise_id" => 7
-    "academic_year_id" => 3
-    "class_teahcer_id" => 2206
-    "name" => "Primary one"
-    "short_name" => "P.1"
-    "details" => "Primary one"
-    "demo_id" => 0
-    "compulsory_subjects" => 0
-    "optional_subjects" => 0
-    "class_type" => "Primary"
-    "academic_class_level_id" => 4
-
-
-
-
-
-            "id" => 1
-            "created_at" => "2023-01-28 14:17:07"
-            "updated_at" => "2023-01-28 14:17:07"
-            "enterprise_id" => 7
-            "administrator_id" => 2206
-            "academic_year_id" => 3
-            "term_id" => 7
-            "academic_class_id" => 21
-            "subject_id" => 104
-            "service_id" => null
-            "due_date" => "2023-01-28 14:16:30"
-            "title" => "Some details about this"
-            "is_open" => 1
-            "type" => "Class attendance"
-
-        */
 
 
 
@@ -298,9 +314,10 @@ class SessionController extends AdminController
                 ->help("Select members who participated in this activity")
                 ->rules('required');
 
-            $form->radio('session_decision', __('Session is open'))
+            $form->radio('session_decision', __('Session is status'))
                 ->options([
                     2 => "Close session",
+                    1 => "Active session",
                 ])->when(2, function ($form) {
                     $form->radio('is_open', __('Are your you want to close this session?'))
                         ->options([
@@ -311,7 +328,7 @@ class SessionController extends AdminController
                         ->options([
                             1 => "Opened",
                         ]);
-                });
+                })->default('1');
         }
 
         $form->ignore('session_decision');

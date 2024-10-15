@@ -1,4 +1,4 @@
-php artisan make:migration add_descriptior_to_secondary_report_card_items --table=secondary_report_card_items
+php artisan make:migration make_bulk_message_id_nullable --table=direct_messages
 
          $table->date('check_in_time')->nullable();
             $table->date('check_out_time')->nullable();
@@ -10,7 +10,7 @@ php artisan make:migration slot
 
 
 
-php artisan make:model TermlySecondaryReportCard -m
+php artisan make:model SchoolFeesDemand -m
 
 php artisan admin:make TermlySecondaryReportCardController --model=App\\Models\\TermlySecondaryReportCard
 

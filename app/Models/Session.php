@@ -18,61 +18,121 @@ class Session extends Model
         parent::boot();
         self::creating(function ($m) {
             $m->is_open = 1;
+            $u = User::find($m->administrator_id);
+            if ($u == null) {
+                throw new \Exception("User not found");
+            }
+            $ent = $u->ent;
+            if ($ent == null) {
+                throw new \Exception("Enterprise not found");
+            }
+            $active_term = $ent->active_term();
+            if ($active_term == null) {
+                throw new \Exception("Active term not found");
+            }
+            $m->term_id = $active_term->id;
+            $m->academic_year_id = $active_term->academic_year_id;
+            $m->title = $m->type;
+
+            if ($m->subject_id != null) {
+                $sub = Subject::find($m->subject_id);
+                if ($sub != null) {
+                    $m->title .= " - " . $sub->name;
+                }
+            }
+
+
             return $m;
         });
-        self::updated(function ($m) {
+        self::created(function ($m) {
+            self::create_participants($m);
         });
+
+        self::updated(function ($m) {});
     }
 
 
-    function close_session()
+    public function setParticipantsAttribute($value)
     {
-        $m = $this;
-        if ((!$m->is_open) && ($m->prepared != 1)) {
-            $participants = [];
-            foreach ($m->participant_items as $p) {
-                $participants[] = $p->administrator_id;
-                if ($p->is_done) {
-                    continue;
-                }
-                $p->created_at = new Carbon();
-                $p->is_done = 1;
-                $p->enterprise_id = $m->enterprise_id;
-                $p->academic_year_id = $m->academic_year_id;
-                $p->term_id = $m->term_id;
-                $p->academic_class_id = $m->academic_class_id;
-                $p->subject_id = $m->subject_id;
-                $p->service_id = $m->service_id;
-                $p->is_present = 1;
-                $p->save();
+        if ($value != null && is_array($value)) {
+            try {
+                $this->attributes['participants'] = json_encode($value);
+            } catch (\Throwable $th) {
+                $this->attributes['participants'] = "[]";
             }
+        } else {
+            $this->attributes['participants'] = '[]';
+        }
+    }
 
-            foreach ($m->getCandidates() as $key =>  $candidate) {
-                if (in_array($key, $participants)) {
+    public function getParticipantsAttribute()
+    {
+        $data = [];
+        try {
+            $data = json_decode($this->attributes['participants']);
+        } catch (\Throwable $th) {
+            $data = [];
+        }
+        return $data;
+    }
+
+    public static function process_attendance($m)
+    {
+        $markedNotPresent = Participant::whereIn('administrator_id',$m->participants)->where([
+            'is_present' => 0
+        ])->get();
+        foreach ($markedNotPresent as $key => $value) {
+            $value->is_present = 1;
+            Participant::send_sms($value);
+            die('as');
+            $value->save();
+            dd($value->id);
+            dd($value);
+        }
+        dd($markedNotPresent);
+        dd($m->participants);
+    }
+
+    public static function create_participants($m)
+    {
+        if ($m->type == 'STUDENT_REPORT') {
+            $active_students = User::where([
+                'enterprise_id' => $m->enterprise_id,
+                'status' => 1,
+                'user_type' => 'student',
+            ])->get();
+            foreach ($active_students as $student) {
+                $exist = Participant::where([
+                    'administrator_id' => $student->id,
+                    'session_id' => $m->id,
+                ])->first();
+                if ($exist != null) {
                     continue;
                 }
                 $p = new Participant();
+                $p->session_id = $m->id;
+                $p->administrator_id = $student->id;
                 $p->enterprise_id = $m->enterprise_id;
-                $p->administrator_id = $key;
                 $p->academic_year_id = $m->academic_year_id;
                 $p->term_id = $m->term_id;
-                $p->academic_class_id = $m->academic_class_id;
                 $p->subject_id = $m->subject_id;
                 $p->service_id = $m->service_id;
                 $p->is_present = 0;
-                $p->is_done = 1;
+                $p->is_done = 0;
                 $p->session_id = $m->id;
-                $p->save();
+                try {
+                    $p->save();
+                } catch (\Throwable $th) {
+                    //throw $th;
+                }
             }
-
-            $m->prepared  = 1;
-            $m->save();
         }
     }
-    function participants()
+
+    /*  function participants()
     {
         return $this->belongsToMany(Administrator::class, 'participants');
-    }
+    } */
 
     function created_by()
     {
