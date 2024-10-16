@@ -16,7 +16,7 @@ class Participant extends Model
     {
         parent::boot();
         self::created(function ($m) {
-            self::send_sms($m);
+            // self::send_sms($m);
         });
 
         self::updated(function ($m) {
@@ -44,6 +44,9 @@ class Participant extends Model
 
         $ent = Enterprise::find($m->enterprise_id);
         if ($ent == null) {
+            return;
+        }
+        if($m->is_present != 1){
             return;
         }
         $childName = $m->participant->name;

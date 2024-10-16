@@ -15,7 +15,7 @@ php artisan make:model SchoolFeesDemand -m
 php artisan admin:make TermlySecondaryReportCardController --model=App\\Models\\TermlySecondaryReportCard
 
 17-35-P.1_Theology_-_Term_2_-_2024-0200.pdf
-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
+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
 
 git config --global user.name "mubahood"
 $ git config --global user.email muhindomubaraka@iut-dhaka.edu
