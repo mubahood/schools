@@ -88,6 +88,7 @@ return array(
     'App\\Admin\\Controllers\\RoomSlotController' => $baseDir . '/app/Admin/Controllers/RoomSlotController.php',
     'App\\Admin\\Controllers\\SchemWorkItemController' => $baseDir . '/app/Admin/Controllers/SchemWorkItemController.php',
     'App\\Admin\\Controllers\\SchemeWorkController' => $baseDir . '/app/Admin/Controllers/SchemeWorkController.php',
+    'App\\Admin\\Controllers\\SchoolFeesDemandController' => $baseDir . '/app/Admin/Controllers/SchoolFeesDemandController.php',
     'App\\Admin\\Controllers\\SchoolFeesPaymentController' => $baseDir . '/app/Admin/Controllers/SchoolFeesPaymentController.php',
     'App\\Admin\\Controllers\\SchoolPayTransactionController' => $baseDir . '/app/Admin/Controllers/SchoolPayTransactionController.php',
     'App\\Admin\\Controllers\\SecondaryCompetenceController' => $baseDir . '/app/Admin/Controllers/SecondaryCompetenceController.php',

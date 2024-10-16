@@ -22,6 +22,7 @@ use App\Models\MarkRecord;
 use App\Models\ReportFinanceModel;
 use App\Models\ReportsFinance;
 use App\Models\SchemWorkItem;
+use App\Models\SchoolFeesDemand;
 use App\Models\SchoolPayTransaction;
 use App\Models\Service;
 use App\Models\ServiceSubscription;
@@ -249,7 +250,7 @@ Route::get('process-theology-report-cards', function (Request $request) {
 });
 Route::get('test-1', function (Request $request) {
 
-  
+
 
   $pos = 110;
   $id = 9710;
@@ -394,6 +395,56 @@ Route::get('gen-code', function () {
   $data = '1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcefghijklmnopqrstuvwxyz';
   $code_type = 'qr';
 });
+
+Route::get('meal-cards', function () {
+  set_time_limit(-1);
+  $idCard = SchoolFeesDemand::find($_GET['id']);
+  $pdf = App::make('dompdf.wrapper');
+  $ent = Enterprise::find($idCard->enterprise_id);
+  $recs = $idCard->get_demand_records();
+  $pdf->loadHTML(view('fees.meal-cards', [
+    'recs' => $recs,
+    'ent' => $ent,
+    'demand' => $idCard
+  ]));
+  $pdf->render();
+  return $pdf->stream();
+
+  $store_file_path = public_path('storage/files/' . $idCard->id . '.pdf');
+  file_put_contents($store_file_path, $output);
+  $idCard->pdf_generated = 'Yes';
+  $idCard->file_link = $store_file_path;
+  $idCard->save();
+  //redirect to the print
+  $rand = rand(1, 100000) . time();
+  return redirect('identification-cards-print?id=' . $idCard->id . '&rand=' . $rand);
+});
+
+Route::get('generate-demand-notice', function () {
+  //set unlimited time
+  set_time_limit(-1);
+  $idCard = SchoolFeesDemand::find($_GET['id']);
+  $pdf = App::make('dompdf.wrapper');
+  $ent = Enterprise::find($idCard->enterprise_id);
+  $recs = $idCard->get_meal_card_records();
+  $pdf->loadHTML(view('fees.demand-notice', [
+    'recs' => $recs,
+    'ent' => $ent,
+    'demand' => $idCard
+  ]));
+  $pdf->render();
+  return $pdf->stream();
+
+  $store_file_path = public_path('storage/files/' . $idCard->id . '.pdf');
+  file_put_contents($store_file_path, $output);
+  $idCard->pdf_generated = 'Yes';
+  $idCard->file_link = $store_file_path;
+  $idCard->save();
+  //redirect to the print
+  $rand = rand(1, 100000) . time();
+  return redirect('identification-cards-print?id=' . $idCard->id . '&rand=' . $rand);
+});
+
 
 Route::get('identification-cards-generation', function () {
   $idCard = IdentificationCard::find($_GET['id']);

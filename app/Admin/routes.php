@@ -129,6 +129,8 @@ Route::group([
     $router->resource('batch-service-subscriptions', BatchServiceSubscriptionController::class);
     $router->resource('school-pay-transactions', SchoolPayTransactionController::class);
     $router->resource('termly-secondary-report-cards', TermlySecondaryReportCardController::class);
+    $router->resource('school-fees-demands', SchoolFeesDemandController::class);
+
 
 
     //$router->get('/fixed-asset-records-stats', 'FixedAssetRecordController@stats');

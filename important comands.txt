@@ -1,4 +1,4 @@
-php artisan make:migration make_bulk_message_id_nullable --table=direct_messages
+php artisan make:migration add_cols_school_fees_demands --table=school_fees_demands
 
          $table->date('check_in_time')->nullable();
             $table->date('check_out_time')->nullable();
@@ -12,7 +12,7 @@ php artisan make:migration slot
 
 php artisan make:model SchoolFeesDemand -m
 
-php artisan admin:make TermlySecondaryReportCardController --model=App\\Models\\TermlySecondaryReportCard
+php artisan admin:make SchoolFeesDemandController --model=App\\Models\\SchoolFeesDemand
 
 17-35-P.1_Theology_-_Term_2_-_2024-0200.pdf
 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
