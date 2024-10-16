@@ -60,7 +60,7 @@ class SchoolFeesDemand extends Model
                 'enterprise_id' => $this->enterprise_id,
             ])
                 ->whereIn('administrator_id', $ids)
-                ->where('balance', '<', $balance)
+                ->where('balance', '>', $balance)
                 ->get();
             $recs[$class] = $accounts;
         }
