@@ -44,7 +44,7 @@ class SchoolFeesDemandController extends AdminController
                 $url = url('generate-demand-notice?id=' . $this->id);
                 return '<a href="' . $url . '" target="_blank">Generate Demand Notices</a>';
             });
-        $grid->column('demand_notice', __('Meal Card'))
+        $grid->column('meal-cards', __('Meal Card'))
             ->display(function ($f) {
                 $url = url('meal-cards?id=' . $this->id);
                 return '<a href="' . $url . '" target="_blank">Generate Meal Cards</a>';
