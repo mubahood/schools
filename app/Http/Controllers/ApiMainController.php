@@ -515,6 +515,7 @@ class ApiMainController extends Controller
         }
         $stream = null;
         $populations = [];
+        $u = auth('api')->user();
         if ($r->type == 'CLASS_ATTENDANCE') {
             $stream = AcademicClassSctream::find($r->stream_id);
             if ($stream == null) {
@@ -525,6 +526,25 @@ class ApiMainController extends Controller
                 return $this->error('Subject not found.');
             }
             $populations = User::where('stream_id', $stream->id)->get();
+        } else if ($r->type == 'THEOLOGY_ATTENDANCE') {
+            $stream = TheologyStream::find($r->stream_id);
+            if ($stream == null) {
+                return $this->error('Stream not found.');
+            }
+            $subject = TheologySubject::find($r->subject_id);
+            if ($subject == null) {
+                return $this->error('Subject not found.');
+            }
+            $populations = User::where('theology_stream_id', $stream->id)->get();
+            if ($populations->count() < 1) {
+                return $this->error('No students found in this stream.');
+            }
+        } else {
+            $populations = User::where([
+                'enterprise_id' => $u->enterprise_id,
+                'user_type' => 'student',
+                'status' => 1,
+            ])->get();
         }
 
         $u = auth('api')->user();
@@ -564,9 +584,6 @@ class ApiMainController extends Controller
         $m = $session;
 
 
-
-
-
         foreach ($populations as $key =>  $student) {
             $p = new Participant();
             $p->enterprise_id = $m->enterprise_id;
@@ -580,9 +597,15 @@ class ApiMainController extends Controller
             $p->session_id = $m->id;
             $p->sms_is_sent = 'No';
 
+
             if (in_array($p->administrator_id, $present)) {
                 $p->is_present = 1;
             } else {
+                //if type is ACTIVITY_ATTENDANCE, continue
+                if ($m->type != 'THEOLOGY_ATTENDANCE' && $m->type != 'CLASS_ATTENDANCE') {
+                    continue;
+                }
+
                 $p->is_present = 0;
             }
             $p->save();

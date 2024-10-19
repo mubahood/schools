@@ -32,14 +32,15 @@ class Session extends Model
             }
             $m->term_id = $active_term->id;
             $m->academic_year_id = $active_term->academic_year_id;
-            $m->title = $m->type;
-
-            if ($m->subject_id != null) {
-                $sub = Subject::find($m->subject_id);
-                if ($sub != null) {
-                    $m->title .= " - " . $sub->name;
+            /* if (strlen($m->title) < 3) {
+                $m->title = $m->type;
+                if ($m->subject_id != null) {
+                    $sub = Subject::find($m->subject_id);
+                    if ($sub != null) {
+                        $m->title .= " - " . $sub->name;
+                    }
                 }
-            }
+            } */
 
 
             return $m;
@@ -90,11 +91,7 @@ class Session extends Model
             Participant::send_sms($value);
             die('as');
             $value->save();
-            dd($value->id);
-            dd($value);
         }
-        dd($markedNotPresent);
-        dd($m->participants);
     }
 
     public static function create_participants($m)

@@ -292,7 +292,7 @@ Route::get('test-1', function (Request $request) {
         $stud->current_theology_class_id = $class->id;
 
         $stud->save();
-        echo "$stud->id. ==> $stud->name <br>";
+        echo "$stud->id. ==> $stud->name!<br>";
       }
     }
   }
