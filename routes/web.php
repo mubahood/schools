@@ -270,13 +270,15 @@ Route::get('test-1', function (Request $request) {
       $studentHasClasses = StudentHasTheologyClass::where([
         'enterprise_id' => $ent->id,
         'theology_class_id' => $class->id,
-      ])->get();
+      ])
+        ->orderBy('id', 'desc')
+        ->get();
       foreach ($studentHasClasses as $key => $studentHasClass) {
         $stud = Administrator::find($studentHasClass->administrator_id);
         if ($stud == null) {
           continue;
         }
-        $stream = TheologyStream::find($studentHasClass->theology_stream_id);
+        /* $stream = TheologyStream::find($studentHasClass->theology_stream_id);
         if ($stream == null) {
           continue;
         } 
@@ -284,8 +286,11 @@ Route::get('test-1', function (Request $request) {
           if ($stud->theology_stream_id == $studentHasClass->theology_stream_id) {
             continue;
           }
-        }
+        } */
+
         $stud->theology_stream_id = $studentHasClass->theology_stream_id;
+        $stud->current_theology_class_id = $class->id;
+
         $stud->save();
         echo "$stud->id. ==> $stud->name <br>";
       }
