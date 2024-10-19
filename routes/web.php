@@ -37,6 +37,7 @@ use App\Models\TermlyReportCard;
 use App\Models\TheologryStudentReportCard;
 use App\Models\TheologyClass;
 use App\Models\TheologyMark;
+use App\Models\TheologyStream;
 use App\Models\TheologyTermlyReportCard;
 use App\Models\Transaction;
 use App\Models\User;
@@ -275,6 +276,10 @@ Route::get('test-1', function (Request $request) {
         if ($stud == null) {
           continue;
         }
+        $stream = TheologyStream::find($studentHasClass->theology_stream_id);
+        if ($stream == null) {
+          continue;
+        } 
         if ($stud->theology_stream_id != null && strlen($stud->theology_stream_id) > 0) {
           if ($stud->theology_stream_id == $studentHasClass->theology_stream_id) {
             continue;
