@@ -275,6 +275,11 @@ Route::get('test-1', function (Request $request) {
         if ($stud == null) {
           continue;
         }
+        if ($stud->theology_stream_id != null && strlen($stud->theology_stream_id) > 0) {
+          if ($stud->theology_stream_id == $studentHasClass->theology_stream_id) {
+            continue;
+          }
+        }
         $stud->theology_stream_id = $studentHasClass->theology_stream_id;
         $stud->save();
         echo "$stud->id. ==> $stud->name <br>";
