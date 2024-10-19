@@ -29,6 +29,7 @@ use App\Models\ServiceSubscription;
 use App\Models\TheologyMarkRecord;
 use App\Models\StudentHasClass;
 use App\Models\StudentHasFee;
+use App\Models\StudentHasTheologyClass;
 use App\Models\StudentReportCard;
 use App\Models\Subject;
 use App\Models\Term;
@@ -251,6 +252,38 @@ Route::get('process-theology-report-cards', function (Request $request) {
 Route::get('test-1', function (Request $request) {
 
 
+  $ents = Enterprise::where([
+    'type' => 'Primary',
+  ])->get();
+  //set unlimited time
+  set_time_limit(-1);
+
+
+  foreach ($ents as $key => $ent) {
+    $active_term = $ent->active_term();
+    $classes = TheologyClass::where([
+      'enterprise_id' => $ent->id,
+      'academic_year_id' => $active_term->academic_year_id,
+    ])->get();
+    foreach ($classes as $key => $class) {
+      $studentHasClasses = StudentHasTheologyClass::where([
+        'enterprise_id' => $ent->id,
+        'theology_class_id' => $class->id,
+      ])->get();
+      foreach ($studentHasClasses as $key => $studentHasClass) {
+        $stud = Administrator::find($studentHasClass->administrator_id);
+        if ($stud == null) {
+          continue;
+        }
+        $stud->theology_stream_id = $studentHasClass->theology_stream_id;
+        $stud->save();
+        echo "$stud->id. ==> $stud->name <br>";
+      }
+    }
+  }
+  die("done");
+
+  dd($ents);
 
   $pos = 110;
   $id = 9710;

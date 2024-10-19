@@ -44,7 +44,7 @@ class SessionController extends AdminController
             return redirect(admin_url("sessions/{$activeSession->id}/edit"));
         }
 
-        $grid->disableActions();
+        // $grid->disableActions();
         $grid->disableBatchActions();
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
@@ -163,7 +163,7 @@ class SessionController extends AdminController
     protected function form()
     {
 
-/*         $s = Session::find(1);
+        /*         $s = Session::find(1);
         Session::process_attendance($s);
         die('.'); */
         /*         $s = Session::find(1);
@@ -214,8 +214,10 @@ class SessionController extends AdminController
                     'STUDENT_REPORT' => 'Student Report at School',
                     'STUDENT_LEAVE' => 'Student Leave School',
                     'STUDENT_MEAL' => 'Student Meals Session',
-                    'Class attendance' => 'Class attendance',
-                    'Activity participation' => 'Activity participation',
+                    'CLASS_ATTENDANCE' => 'Class attendance',
+                    'THEOLOGY_ATTENDANCE' => 'Theology Class attendance',
+                    'SECONDARY_CLASS_ATTENDANCE' => 'Secondary Class attendance',
+                    'ACTIVITY_ATTENDANCE' => 'Activity participation',
                 ])
                 ->stacked()
                 ->rules('required')

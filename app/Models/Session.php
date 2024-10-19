@@ -49,6 +49,10 @@ class Session extends Model
         });
 
         self::updated(function ($m) {});
+        //on delete
+        self::deleting(function ($m) {
+            Participant::where('session_id', $m->id)->delete();
+        });
     }
 
 
@@ -78,7 +82,7 @@ class Session extends Model
 
     public static function process_attendance($m)
     {
-        $markedNotPresent = Participant::whereIn('administrator_id',$m->participants)->where([
+        $markedNotPresent = Participant::whereIn('administrator_id', $m->participants)->where([
             'is_present' => 0
         ])->get();
         foreach ($markedNotPresent as $key => $value) {

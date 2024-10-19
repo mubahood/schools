@@ -70,7 +70,7 @@ class StudentsController extends AdminController
             $status = 0;
         }
 
-        $grid = new Grid(new Administrator());
+        $grid = new Grid(new User());
 
         $grid->perPages([10, 50, 100, 300, 500]);
         $grid->batchActions(function ($batch) {
@@ -209,13 +209,15 @@ class StudentsController extends AdminController
             $streams = [];
             $term = $u->ent->active_term();
             if ($term != null) {
-                foreach (AcademicClassSctream::where(
-                    [
-                        'enterprise_id' => $u->enterprise_id,
-                    ]
-                )
-                    ->orderBy('id', 'desc')
-                    ->get() as $ex) {
+                foreach (
+                    AcademicClassSctream::where(
+                        [
+                            'enterprise_id' => $u->enterprise_id,
+                        ]
+                    )
+                        ->orderBy('id', 'desc')
+                        ->get() as $ex
+                ) {
                     if ($ex->academic_class->academic_year_id != $term->academic_year_id) {
                         continue;
                     }
@@ -333,6 +335,14 @@ class StudentsController extends AdminController
             ->hide()
             ->sortable();
 
+        $grid->column('theology_stream_id', __('Theology Stream'))
+            ->display(function () {
+                if ($this->theology_stream == null) {
+                    return 'No Stream';
+                }
+                return $this->theology_stream->name;
+            })->hide()->sortable();
+
 
 
         $grid->column('sex', __('Gender'))
@@ -358,7 +368,7 @@ class StudentsController extends AdminController
         $grid->column('lin', __('LIN'))->sortable()->editable()
             ->filter('like');
         $grid->column('school_pay_payment_code', __('School pay payment code'))->sortable()
-        ->filter('like'); 
+            ->filter('like');
 
         $grid->column('parent_id', __('Parent'))
             ->display(function ($x) {
@@ -387,8 +397,17 @@ class StudentsController extends AdminController
 
         $grid->column('user_number', __('ID Number'))->sortable();
 
+        //theology_stream_id
 
-
+        //current_theology_class_id
+        /*    $grid->column('current_theology_class_id', __('Theology Class'))
+            ->display(function () {
+                if ($this->current_theology_class == null) {
+                    return 'No class';
+                }
+                return $this->current_theology_class->name_text;
+            })->hide()->sortable();
+ */
         return $grid;
     }
 
@@ -528,10 +547,12 @@ class StudentsController extends AdminController
             }
 
             $classes = [];
-            foreach (AcademicClass::where([
-                'enterprise_id' => $u->enterprise_id,
-                'academic_year_id' => $active_academic_year->id,
-            ])->get() as $class) {
+            foreach (
+                AcademicClass::where([
+                    'enterprise_id' => $u->enterprise_id,
+                    'academic_year_id' => $active_academic_year->id,
+                ])->get() as $class
+            ) {
                 if (((int)($class->academic_year->is_active)) != 1) {
                     continue;
                 }
@@ -549,13 +570,15 @@ class StudentsController extends AdminController
                 $form->select('stream_id', __('Stream'))->options(function ($id) {
                     $streams = [];
                     $u = Admin::user();
-                    foreach (AcademicClassSctream::where(
-                        [
-                            'enterprise_id' => $u->enterprise_id,
-                        ]
-                    )
-                        ->orderBy('id', 'desc')
-                        ->get() as $ex) {
+                    foreach (
+                        AcademicClassSctream::where(
+                            [
+                                'enterprise_id' => $u->enterprise_id,
+                            ]
+                        )
+                            ->orderBy('id', 'desc')
+                            ->get() as $ex
+                    ) {
                         $streams[$ex->id] = $ex->name_text;
                     }
                     return $streams;
@@ -575,10 +598,12 @@ class StudentsController extends AdminController
                         die("No active academic year");
                     }
                     $classes = [];
-                    foreach (AcademicClass::where([
-                        'enterprise_id' => $u->enterprise_id,
-                        'academic_year_id' => $active_academic_year->id,
-                    ])->get() as $class) {
+                    foreach (
+                        AcademicClass::where([
+                            'enterprise_id' => $u->enterprise_id,
+                            'academic_year_id' => $active_academic_year->id,
+                        ])->get() as $class
+                    ) {
                         if (((int)($class->academic_year->is_active)) != 1) {
                             continue;
                         }
@@ -594,13 +619,15 @@ class StudentsController extends AdminController
                     $form->select('stream_id', __('Stream'))->options(function ($id) {
                         $streams = [];
                         $u = Admin::user();
-                        foreach (AcademicClassSctream::where(
-                            [
-                                'enterprise_id' => $u->enterprise_id,
-                            ]
-                        )
-                            ->orderBy('id', 'desc')
-                            ->get() as $ex) {
+                        foreach (
+                            AcademicClassSctream::where(
+                                [
+                                    'enterprise_id' => $u->enterprise_id,
+                                ]
+                            )
+                                ->orderBy('id', 'desc')
+                                ->get() as $ex
+                        ) {
                             $streams[$ex->id] = $ex->name_text;
                         }
                         return $streams;

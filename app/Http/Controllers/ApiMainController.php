@@ -22,6 +22,7 @@ use App\Models\StudentHasClass;
 use App\Models\StudentReportCard;
 use App\Models\Subject;
 use App\Models\TermlyReportCard;
+use App\Models\TheologyClass;
 use App\Models\TheologyMark;
 use App\Models\TheologyMarkRecord;
 use App\Models\TheologyStream;
@@ -476,16 +477,25 @@ class ApiMainController extends Controller
         $data1 = AcademicClassSctream::where([
             'enterprise_id' => $u->enterprise_id,
         ])->limit(10000)->orderBy('id', 'desc')->get();
-        $data2 = TheologyStream::where([
-            'enterprise_id' => $u->enterprise_id,
-        ])->limit(10000)->orderBy('id', 'desc')->get();
 
         $data = [];
         foreach ($data1 as $key => $value) {
             $value->section = 'Secular';
             $data[] = $value;
         }
-        foreach ($data2 as $key => $value) {
+
+        return $this->success($data, $message = "Success", 200);
+    }
+
+    public function theology_streams()
+    {
+        $u = auth('api')->user();
+        $data1 = TheologyStream::where([
+            'enterprise_id' => $u->enterprise_id,
+        ])->limit(10000)->orderBy('id', 'desc')->get();
+
+        $data = [];
+        foreach ($data1 as $key => $value) {
             $value->section = 'Theology';
             $data[] = $value;
         }
@@ -503,12 +513,28 @@ class ApiMainController extends Controller
         ) {
             return $this->error('Some params are missing.');
         }
-
-        $stream = AcademicClassSctream::find($r->stream_id);
-        if ($stream == null) {
-            return $this->error('Stream not found.');
+        $stream = null;
+        $populations = [];
+        if ($r->type == 'CLASS_ATTENDANCE') {
+            $stream = AcademicClassSctream::find($r->stream_id);
+            if ($stream == null) {
+                return $this->error('Stream not found.');
+            }
+            $subject = Subject::find($r->subject_id);
+            if ($subject == null) {
+                return $this->error('Subject not found.');
+            }
+            $populations = User::where('stream_id', $stream->id)->get();
         }
+
         $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        $active_term = $u->ent->active_term();
+        if ($active_term == null) {
+            return $this->error('Active term not found.');
+        }
         $session = new Session();
         $session->enterprise_id = $u->enterprise_id;
         $session->academic_class_id = $r->academic_class_id;
@@ -521,8 +547,8 @@ class ApiMainController extends Controller
         $session->prepared = 1;
         $session->administrator_id = $u->id;
         $session->due_date = Carbon::parse($r->due_date);
-        $session->academic_year_id = $u->ent->active_academic_year()->id;
-        $session->term_id = $u->ent->active_term()->id;
+        $session->term_id = $active_term->id;
+        $session->academic_year_id = $active_term->academic_year_id;
         $session->save();
 
         $present = [];
@@ -537,18 +563,14 @@ class ApiMainController extends Controller
 
         $m = $session;
 
-        //$cands = $m->getCandidates($r->stream_id);
-
-        $cands = StudentHasClass::where([
-            'stream_id' => $m->stream_id,
-        ])->get();
 
 
 
-        foreach ($cands as $key =>  $hasClass) {
+
+        foreach ($populations as $key =>  $student) {
             $p = new Participant();
             $p->enterprise_id = $m->enterprise_id;
-            $p->administrator_id = $hasClass->administrator_id;
+            $p->administrator_id = $student->id;
             $p->academic_year_id = $m->academic_year_id;
             $p->term_id = $m->term_id;
             $p->academic_class_id = $m->academic_class_id;
@@ -556,6 +578,7 @@ class ApiMainController extends Controller
             $p->service_id = $m->service_id;
             $p->is_done = 1;
             $p->session_id = $m->id;
+            $p->sms_is_sent = 'No';
 
             if (in_array($p->administrator_id, $present)) {
                 $p->is_present = 1;
@@ -569,6 +592,7 @@ class ApiMainController extends Controller
         $session->prepared = 1;
         $session->save();
 
+        $session = Session::find($session->id);
         return $this->success($session, $message = "Success", 1);
     }
 
@@ -985,10 +1009,21 @@ class ApiMainController extends Controller
     public function users_mini()
     {
         $u = auth('api')->user();
+        if ($u == null) {
+            return [];
+        }
+        $ent = Enterprise::find($u->enterprise_id);
+        if ($ent == null) {
+            return [];
+        }
+
+        $term = $ent->active_term();
+
         $users = [];
         foreach (
             User::where([
                 'enterprise_id' => $u->enterprise_id,
+                'user_type' => 'student',
                 'status' => 1
             ])
                 ->limit(10000)->orderBy('id', 'desc')->get() as $key => $val
@@ -998,6 +1033,33 @@ class ApiMainController extends Controller
             $user['user_type'] = $val->user_type;
             $user['phone_number'] = $val->phone_number_1;
             $user['avatar'] = $val->avatar;
+            $user['user_number'] = $val->user_number;
+            $user['class_name'] = '';
+            $user['class_id'] = '';
+            $user['services'] = '';
+            $user['class_id'] = $val->current_class_id;
+            $user['stream_id'] = $val->stream_id;
+            $user['user_number'] = $val->user_number;
+            $user['theology_stream_id'] = $val->theology_stream_id;
+
+            $class = AcademicClass::find($val->current_class_id);
+            if ($class != null) {
+                $user['class'] = $class->short_name;
+            }
+
+            if ($term != null) {
+                $services = ServiceSubscription::where([
+                    'administrator_id' => $val->id,
+                    'due_term_id' => $val->due_term_id,
+                ])->get();
+                $services_ids = [];
+                foreach ($services as $key => $value) {
+                    $services_ids[] = $value->service_id;
+                }
+                $user['services'] = json_encode($services_ids);
+            }
+
+
             $users[] = $user;
         }
         return $this->success($users, $message = "Success", 1);

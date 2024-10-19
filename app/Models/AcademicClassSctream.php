@@ -32,6 +32,16 @@ class AcademicClassSctream extends Model
         return $this->name;
     }
 
+    //getter for _text
+    public function getAcademicClassTextAttribute()
+    {
+        if ($this->academic_class != null) {
+            return  $this->academic_class->name_text;
+        }
+        return 'N/A';
+    }
+
+
     function academic_class()
     {
         return $this->belongsTo(AcademicClass::class);
@@ -45,5 +55,8 @@ class AcademicClassSctream extends Model
     public function teacher()
     {
         return $this->belongsTo(User::class, 'teacher_id');
-    } 
+    }
+
+    //appends academic_class_text
+    protected $appends = ['academic_class_text'];
 }

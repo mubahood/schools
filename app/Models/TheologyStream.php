@@ -35,4 +35,16 @@ class TheologyStream extends Model
     {
         $this->attributes['teacher_id'] = $value;
     }  */
+
+    //getter for theology_class_text
+    public function getTheologyClassTextAttribute()
+    {
+        if ($this->theology_class != null) {
+            return  $this->theology_class->name_text;
+        }
+        return 'N/A';
+    } 
+    
+    //appends theology_class_text
+    protected $appends = ['theology_class_text']; 
 }

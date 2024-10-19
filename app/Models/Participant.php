@@ -28,6 +28,7 @@ class Participant extends Model
 
     public static function send_sms($m)
     {
+        return;
         if ($m->sms_is_sent == 'Yes') {
             return;
         }
@@ -46,7 +47,7 @@ class Participant extends Model
         if ($ent == null) {
             return;
         }
-        if($m->is_present != 1){
+        if ($m->is_present != 1) {
             return;
         }
         $childName = $m->participant->name;

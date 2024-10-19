@@ -47,6 +47,7 @@ Route::middleware([JwtMiddleware::class])->group(function () {
     Route::get("my-classes", [ApiMainController::class, 'classes']);
     Route::get("theology-classes", [ApiMainController::class, 'theology_classes']);
     Route::get("class-streams", [ApiMainController::class, 'streams']);
+    Route::get("theology-streams", [ApiMainController::class, 'theology_streams']);
     Route::post("update-bio/{id}", [ApiMainController::class, 'update_bio']);
     Route::post("verify-student/{id}", [ApiMainController::class, 'verify_student']);
     Route::post("update-guardian/{id}", [ApiMainController::class, 'update_guardian']);

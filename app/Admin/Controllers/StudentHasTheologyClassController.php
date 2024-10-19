@@ -90,13 +90,15 @@ class StudentHasTheologyClassController extends AdminController
             ])->orderBy('id', 'Desc')->get()->pluck('name_text', 'id'));
 
             $streams = [];
-            foreach (TheologyStream::where(
-                [
-                    'enterprise_id' => $u->enterprise_id,
-                ]
-            )
-                ->orderBy('id', 'desc')
-                ->get() as $ex) {
+            foreach (
+                TheologyStream::where(
+                    [
+                        'enterprise_id' => $u->enterprise_id,
+                    ]
+                )
+                    ->orderBy('id', 'desc')
+                    ->get() as $ex
+            ) {
                 $streams[$ex->id] = $ex->theology_class->short_name . " - " . $ex->name;
             }
             $filter->equal('theology_stream_id', 'Filter by Stream')->select($streams);
@@ -202,10 +204,10 @@ class StudentHasTheologyClassController extends AdminController
     protected function form()
     {
 
-        /*         $fee = StudentHasTheologyClass::find(1885);
+       /*  $fee = StudentHasTheologyClass::find(5025);
+        dd('$fee');
         $fee->theology_stream_id .= 1;
-        $fee->save();   
-        dd('$fee'); */
+        $fee->save(); */
 
         $form = new Form(new StudentHasTheologyClass());
 
@@ -247,10 +249,12 @@ class StudentHasTheologyClassController extends AdminController
 
 
             $years = [];
-            foreach (TheologyClass::where([
-                'enterprise_id' => Admin::user()->enterprise_id,
-                'academic_year_id' => $dpYear->id
-            ])->get() as $key => $value) {
+            foreach (
+                TheologyClass::where([
+                    'enterprise_id' => Admin::user()->enterprise_id,
+                    'academic_year_id' => $dpYear->id
+                ])->get() as $key => $value
+            ) {
                 $years[$value->id] = $value->name_text;
             }
             $form->select('theology_class_id', 'Class')->options($years)
@@ -270,9 +274,11 @@ class StudentHasTheologyClassController extends AdminController
 
             $dpYear   =  Admin::user()->ent->dpYear();
             $years = [];
-            foreach (TheologyClass::where([
-                'enterprise_id' => Admin::user()->enterprise_id,
-            ])->get() as $key => $value) {
+            foreach (
+                TheologyClass::where([
+                    'enterprise_id' => Admin::user()->enterprise_id,
+                ])->get() as $key => $value
+            ) {
                 $years[$value->id] = $value->name_text;
             }
             $form->select('theology_class_id', 'Class')

@@ -84,7 +84,7 @@ class User extends Administrator implements JWTSubject
 
     public function stream()
     {
-        return $this->belongsTo(Stream::class, 'stream_id');
+        return $this->belongsTo(AcademicClassSctream::class, 'stream_id');
     }
 
     public function services()
@@ -418,4 +418,16 @@ class User extends Administrator implements JWTSubject
     {
         return $this->hasOne(Account::class, 'administrator_id');
     }
+
+    //belings to theology_stream_id
+    public function theology_stream()
+    {
+        return $this->belongsTo(TheologyStream::class, 'theology_stream_id');
+    }
+
+    //belongs to theology_class using current_theology_class_id
+    public function theology_class()
+    {
+        return $this->belongsTo(TheologyClass::class, 'current_theology_class_id');
+    } 
 }

@@ -1437,7 +1437,13 @@ class Utils  extends Model
             ->orderBy('id', 'desc')
             ->first();
         if ($theo != null) {
-            DB::update("UPDATE admin_users SET current_theology_class_id = {$theo->theology_class_id} WHERE id = {$stud->id}");
+            //theology_stream_id = theology_stream_id
+            DB::update(
+                "UPDATE admin_users SET 
+                current_theology_class_id = {$theo->theology_class_id},
+                theology_stream_id = {$theo->theology_stream_id}
+                WHERE id = {$stud->id}"
+            );
         }
 
         $class = StudentHasClass::where([
