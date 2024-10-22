@@ -39,10 +39,12 @@ class SecondarySubjectController extends AdminController
             $filter->disableIdFilter();
             $u = Auth::user();
             $teachers = [];
-            foreach (Administrator::where([
-                'enterprise_id' => $u->enterprise_id,
-                'user_type' => 'employee',
-            ])->get() as $key => $a) {
+            foreach (
+                Administrator::where([
+                    'enterprise_id' => $u->enterprise_id,
+                    'user_type' => 'employee',
+                ])->get() as $key => $a
+            ) {
                 if ($a->isRole('teacher')) {
                     $teachers[$a['id']] = $a['name'] . "  " . $a['id'];
                 }
@@ -52,9 +54,11 @@ class SecondarySubjectController extends AdminController
             ])->get()->pluck('name', 'id'));
 
             $classes = [];
-            foreach (AcademicClass::where([
-                'enterprise_id' => $u->enterprise_id,
-            ])->orderBy('id', 'desc')->get() as $key => $class) {
+            foreach (
+                AcademicClass::where([
+                    'enterprise_id' => $u->enterprise_id,
+                ])->orderBy('id', 'desc')->get() as $key => $class
+            ) {
                 $classes[$class->id] = $class->name_text;
             }
             $filter->equal('academic_class_id', 'Filter By class')->select($classes);
@@ -272,10 +276,12 @@ class SecondarySubjectController extends AdminController
 
         $u = Admin::user();
         $teachers = [];
-        foreach (Administrator::where([
-            'enterprise_id' => $u->enterprise_id,
-            'user_type' => 'employee',
-        ])->get() as $key => $a) {
+        foreach (
+            Administrator::where([
+                'enterprise_id' => $u->enterprise_id,
+                'user_type' => 'employee',
+            ])->get() as $key => $a
+        ) {
             if ($a->isRole('teacher')) {
                 $teachers[$a['id']] = $a['name'] . "  " . $a['id'];
             }

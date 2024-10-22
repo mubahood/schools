@@ -64,6 +64,7 @@ Route::middleware([JwtMiddleware::class])->group(function () {
     Route::get("my-students", [ApiMainController::class, 'get_my_students']);
     Route::post("post-media-upload", [ApiMainController::class, 'upload_media']);
     Route::post("visitors-record-create", [ApiMainController::class, 'visitors_record_create']);
+    Route::post("get-student-details", [ApiMainController::class, 'get_student_details']);
 
     //=====ATTENDANCE========//
     Route::get("participants", [ApiMainController::class, 'participants']);

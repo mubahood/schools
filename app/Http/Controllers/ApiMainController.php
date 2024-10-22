@@ -1805,6 +1805,11 @@ lin
         ]), $message = "Success", 200);
     }
 
+    public function get_student_details(Request $r)
+    {
+        return $this->success(Administrator::find(1), $message = "Success", 200);
+    }
+
     public function visitors_record_create(Request $r)
     {
         $u = auth('api')->user();

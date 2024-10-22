@@ -92,7 +92,7 @@ class TermlySecondaryReportCard extends Model
                 'secondary_termly_report_card_id' => $termlyReport->id,
                 'administrator_id' => $StudentHasClasse->administrator_id
             ])->first();
-            if($reportCard == null){
+            if ($reportCard == null) {
                 $reportCard = new SecondaryReportCard();
                 $reportCard->secondary_termly_report_card_id = $termlyReport->id;
                 $reportCard->administrator_id = $StudentHasClasse->administrator_id;
@@ -216,46 +216,63 @@ class TermlySecondaryReportCard extends Model
         //sql that sets generate_marks to No
         $sql = "UPDATE termly_secondary_report_cards SET generate_marks = 'No',reports_generate = 'No' WHERE id = $model->id";
         DB::update($sql);
-
-
-        // dd();
-        //die("time to process");
-        /* 
-
-has_u1
-has_u2
-has_u3
-has_u4
-has_u5
-
-generate_marks
-generate_marks_for_classes
-delete_marks_for_non_active
-submit_u1
-submit_u2
-submit_u3
-submit_u4
-submit_u5
-submit_project
-submit_exam
-reports_generate
-reports_include_u1
-reports_include_u2
-reports_include_u3
-reports_include_u4
-reports_include_u5
-reports_include_exam
-reports_include_project
-reports_template
-reports_who_fees_balance
-reports_display_report_to_parents
-hm_communication
-generate_class_teacher_comment
-generate_head_teacher_comment
-generate_positions
-display_positions
-bottom_message
-
-*/
     }
+
+    //belongs to academic_year
+    public function academic_year()
+    {
+        return $this->belongsTo(AcademicYear::class);
+    }
+    public function term()
+    {
+        return $this->belongsTo(Term::class);
+    }
+
+    public function marks_count()
+    {
+        return SecondaryReportCardItem::where('termly_examination_id', $this->id)->count();
+    }
+
+    public function submitted_marks_u1_count()
+    {
+        return SecondaryReportCardItem::where([
+            'termly_examination_id' => $this->id,
+            'score_1_submitted' => 'Yes',
+        ])->count();
+    }
+    //for u2
+    public function submitted_marks_u2_count()
+    {
+        return SecondaryReportCardItem::where([
+            'termly_examination_id' => $this->id,
+            'score_2_submitted' => 'Yes',
+        ])->count();
+    } 
+
+    //for u3
+    public function submitted_marks_u3_count()
+    {
+        return SecondaryReportCardItem::where([
+            'termly_examination_id' => $this->id,
+            'score_3_submitted' => 'Yes',
+        ])->count();
+    } 
+
+    //for project
+    public function submitted_project_count()
+    {
+        return SecondaryReportCardItem::where([
+            'termly_examination_id' => $this->id,
+            'project_score_submitted' => 'Yes',
+        ])->count();
+    } 
+
+    //for exam
+    public function submitted_exam_count()
+    {
+        return SecondaryReportCardItem::where([
+            'termly_examination_id' => $this->id,
+            'exam_score_submitted' => 'Yes',
+        ])->count();
+    } 
 }

@@ -76,13 +76,14 @@ if ($termly_report->has_u5 == 'Yes') {
     "max_exam_score" => "80.0"
 */
 
+$a4_width = 210;
 ?>
-<table>
+<table style="width: 100%!important;">
     <tr>
-        <td class="text-center ">
+        <td class="text-center " style="width: {{ $a4_width / 6 }}mm!important ">
             <img style="width: 100%;" src="{{ public_path('storage/' . $r->ent->logo) }}">
         </td>
-        <td style="width: 72%;" class="px-3">
+        <td style="width: 100%!important;" class="px-3">
             <p class="text-center text-uppercase" style="font-size: 18px"><b>{{ $r->ent->name }}</b></p>
             <p class="text-center mt-1" style="font-size: 13px">{{ $r->ent->p_o_box }}</p>
             <p class="text-center" style="font-size: 13px"><b>E-MAIL:</b> {{ $r->ent->email }}</p>
@@ -95,9 +96,7 @@ if ($termly_report->has_u5 == 'Yes') {
                     CARD --}}
             <p class="mt-2 text-center text-sm small"><i>"{{ $r->ent->motto }}"</i></p>
         </td>
-        <td class="text-center">
-            <br>
-            {{-- <img style="width: 100%;" src="{{ public_path('assets/mubahood.png') }}"> --}}
+        <td class="text-center " style="width: {{ $a4_width / 6 }}mm!important ">
             <img style="width: 100%;" src="{{ public_path($r->owner->getAvatarPath()) }}">
         </td>
     </tr>

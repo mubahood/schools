@@ -7,6 +7,7 @@ use App\Models\AcademicClassSctream;
 use App\Models\SecondaryReportCardItem;
 use App\Models\SecondarySubject;
 use App\Models\Term;
+use App\Models\TermlySecondaryReportCard;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -21,7 +22,7 @@ class SecondaryReportCardItemController extends AdminController
      *
      * @var string
      */
-    protected $title = 'SecondaryReportCardItem';
+    protected $title = 'Report Card Items';
 
     /**
      * Make a grid builder.
@@ -34,8 +35,29 @@ class SecondaryReportCardItemController extends AdminController
         $m->score_1 = 0.89;
         SecondaryReportCardItem::do_prepare($m);
         die("done"); */
+
+        $u = Admin::user();
+        $active_term = $u->ent->active_term();
+        if ($active_term == null) {
+            return admin_error("No active term found.");
+        }
+        $report = TermlySecondaryReportCard::where([
+            'term_id' => $active_term->id,
+            'enterprise_id' => $u->enterprise_id
+        ])->first();
+
+        if ($report == null) {
+            return admin_error("No report card found for this term.");
+        }
+
         $grid = new Grid(new SecondaryReportCardItem());
+
+        if (!Admin::user()->isRole('dos')) {
+            $grid->disableBatchActions();
+        }
         $grid->disableCreateButton();
+
+
         $grid->filter(function ($filter) {
             $filter->disableIdFilter();
             $u = Admin::user();
@@ -85,8 +107,7 @@ class SecondaryReportCardItemController extends AdminController
             $act->disableDelete();
         });
 
-        $grid->disableBatchActions();
-        $u = Admin::user();
+
         $grid->model()->where([
             'enterprise_id' => $u->enterprise_id,
         ]);
@@ -134,58 +155,176 @@ class SecondaryReportCardItemController extends AdminController
         $grid->column('remarks', __('Genral Remarks'))->editable();
         $grid->column('teacher', __('Teacher'))->editable();
 
-        $grid->column('score_1', 'U1')->editable()->sortable();
-        $grid->column('score_2', 'U2')->editable()->sortable();
-        $grid->column('score_3', 'U3')->editable()->sortable();
-        $grid->column('score_4', 'U4')->editable()->sortable();
-        $grid->column('score_5', 'U5')->editable()->sortable();
-        $grid->column('tot_units_score', 'U Score')->sortable();
-        $grid->column('out_of_10', 'Out of 10')->sortable();
-        $grid->column('descriptor', 'Descriptor')->sortable();
-        $grid->column('project_score', 'Project Score')->editable()->sortable();
-        $grid->column('out_of_20', 'Out of 20')->sortable();
-        $grid->column('exam_score', 'Exam Score')->editable()->sortable();
+        if ($report->submit_u1 == 'Yes') {
+            $grid->column('score_1', 'U1')->editable()->sortable();
+        } else {
+            $grid->column('score_1', 'U1')->sortable()->hide();
+        }
+
+        if ($report->submit_u2 == 'Yes') {
+            $grid->column('score_2', 'U2')->editable()->sortable();
+        } else {
+            $grid->column('score_2', 'U2')->sortable()->hide();
+        }
+        if ($report->submit_u3 == 'Yes') {
+            $grid->column('score_3', 'U3')->editable()->sortable();
+        } else {
+            $grid->column('score_3', 'U3')->sortable()->hide();
+        }
+        if ($report->submit_u4 == 'Yes') {
+            $grid->column('score_4', 'U4')->editable()->sortable();
+        } else {
+            $grid->column('score_4', 'U4')->sortable()->hide();
+        }
+        if ($report->submit_u5 == 'Yes') {
+            $grid->column('score_5', 'U5')->editable()->sortable();
+        } else {
+            $grid->column('score_5', 'U5')->sortable()->hide();
+        }
+
+        $grid->column('tot_units_score', 'Units Score')->sortable()->hide();
+        $grid->column('out_of_10', 'Out of 10')->sortable()->hide();
+        $grid->column('descriptor', 'Descriptor')->sortable()->hide();
+
+        if ($report->submit_project == 'Yes') {
+            $grid->column('project_score', 'Project Score')->editable()->sortable();
+        } else {
+            $grid->column('project_score', 'Project Score')->sortable()->hide();
+        }
+        /* 
+            $report
+            "submit_u1" => "No"
+            "submit_u2" => "Yes"
+            "submit_u3" => "Yes"
+            "submit_u4" => "No"
+            "submit_u5" => "No"
+            "submit_project" => "No"
+            "submit_exam" => "Yes"
+        */
+        $grid->column('out_of_20', 'Out of 20')->sortable()->hide();
+        if ($report->submit_exam == 'Yes') {
+            $grid->column('exam_score', 'Exam Score')->editable()->sortable();
+        } else {
+            $grid->column('exam_score', 'Exam Score')->sortable()->hide();
+        }
         $grid->column('overall_score', 'Overall Score')->editable()->sortable();
-        $grid->column('grade_value', 'Grade Value')->editable()->sortable();
-        $grid->column('grade_name', 'Grade Value')->sortable();
-        $grid->column('score_1_submitted', 'U1 Submitted')
-            ->filter([
-                'Yes' => 'Yes',
-                'No' => 'No',
-            ])
-            ->sortable();
-        $grid->column('score_2_submitted', 'U2 Submitted')
-            ->filter([
-                'Yes' => 'Yes',
-                'No' => 'No',
-            ])
-            ->sortable();
-        $grid->column('score_3_submitted', 'U3 Submitted')
-            ->filter([
-                'Yes' => 'Yes',
-                'No' => 'No',
-            ])
-            ->sortable();
-        $grid->column('score_4_submitted', 'U4 Submitted')
-            ->filter([
-                'Yes' => 'Yes',
-                'No' => 'No',
-            ])
-            ->sortable();
-        $grid->column('score_5_submitted', 'U5 Submitted')
-            ->filter([
-                'Yes' => 'Yes',
-                'No' => 'No',
-            ])
-            ->sortable();
-        $grid->column('exam_score_submitted', 'Exam Submitted')
-            ->filter([
-                'Yes' => 'Yes',
-                'No' => 'No',
-            ])
-            ->sortable();
+        $grid->column('grade_name', 'Grade')->sortable();
+        if ($report->submit_project == 'Yes') {
+            $grid->column('project_score_submitted', 'Project Submitted')
+                ->filter([
+                    'Yes' => 'Yes',
+                    'No' => 'No',
+                ])
+                ->sortable();
+        } else {
+            $grid->column('project_score_submitted', 'Project Submitted')
+                ->filter([
+                    'Yes' => 'Yes',
+                    'No' => 'No',
+                ])
+                ->sortable()->hide();
+        }
+
+        if ($report->submit_u1 == 'Yes') {
+            $grid->column('score_1_submitted', 'U1 Submitted')
+                ->filter([
+                    'Yes' => 'Yes',
+                    'No' => 'No',
+                ])
+                ->sortable();
+        } else {
+            $grid->column('score_1_submitted', 'U1 Submitted')
+                ->filter([
+                    'Yes' => 'Yes',
+                    'No' => 'No',
+                ])
+                ->sortable()->hide();
+        }
+
+        if ($report->submit_u2 == 'Yes') {
+            $grid->column('score_2_submitted', 'U2 Submitted')
+                ->filter([
+                    'Yes' => 'Yes',
+                    'No' => 'No',
+                ])
+                ->sortable();
+        } else {
+            $grid->column('score_2_submitted', 'U2 Submitted')
+                ->filter([
+                    'Yes' => 'Yes',
+                    'No' => 'No',
+                ])
+                ->sortable()->hide();
+        }
+
+        if ($report->submit_u3 == 'Yes') {
+            $grid->column('score_3_submitted', 'U3 Submitted')
+                ->filter([
+                    'Yes' => 'Yes',
+                    'No' => 'No',
+                ])
+                ->sortable();
+        } else {
+            $grid->column('score_3_submitted', 'U3 Submitted')
+                ->filter([
+                    'Yes' => 'Yes',
+                    'No' => 'No',
+                ])
+                ->sortable()->hide();
+        }
+
+        if ($report->submit_u4 == 'Yes') {
+            $grid->column('score_4_submitted', 'U4 Submitted')
+                ->filter([
+                    'Yes' => 'Yes',
+                    'No' => 'No',
+                ])
+                ->sortable();
+        } else {
+            $grid->column('score_4_submitted', 'U4 Submitted')
+                ->filter([
+                    'Yes' => 'Yes',
+                    'No' => 'No',
+                ])
+                ->sortable()->hide();
+        }
+
+        if ($report->submit_u5 == 'Yes') {
+            $grid->column('score_5_submitted', 'U5 Submitted')
+                ->filter([
+                    'Yes' => 'Yes',
+                    'No' => 'No',
+                ])
+                ->sortable();
+        } else {
+            $grid->column('score_5_submitted', 'U5 Submitted')
+                ->filter([
+                    'Yes' => 'Yes',
+                    'No' => 'No',
+                ])
+                ->sortable()->hide();
+        }
+        if ($report->submit_exam == 'Yes') {
+            $grid->column('exam_score_submitted', 'Exam Submitted')
+                ->filter([
+                    'Yes' => 'Yes',
+                    'No' => 'No',
+                ])
+                ->sortable();
+        } else {
+            $grid->column('exam_score_submitted', 'Exam Submitted')
+                ->filter([
+                    'Yes' => 'Yes',
+                    'No' => 'No',
+                ])
+                ->sortable()->hide();
+        }
+
         //termly_examination_id
-        $grid->column('termly_examination_id', 'Termly Exam')->sortable();
+        $grid->column('termly_examination_id', 'Termly Exam')->sortable()->hide();
+
+        //perPages
+        $grid->perPages([10, 20, 30, 40, 50, 100, 200, 500, 1000]);
 
         return $grid;
     }

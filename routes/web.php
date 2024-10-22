@@ -59,6 +59,10 @@ Route::get('report-card-individual-printings', [ReportCardsPrintingController::c
 Route::get('data-import', [ReportCardsPrintingController::class, 'data_import']);
 Route::get('process-termly-school-fees-balancings', [MainController::class, 'process_termly_school_fees_balancings']);
 
+Route::get('roll-calling', function (Request $request) {
+  return view('roll-calling.roll-calling');
+});
+
 Route::get('process-fees', function (Request $request) {
   return;
   $ent_id = 19;
