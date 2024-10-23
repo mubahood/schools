@@ -1852,8 +1852,12 @@ lin
             'is_present' => 1,
         ])->count();
         $data = Participant::find($part->id);
+        $class = AcademicClass::find($session->academic_class_id);
         $data->num = $num;
         $data->administrator_text = $u->name;
+        if ($class != null) {
+            $data->administrator_text .= $class->short_name;
+        }
         return $this->success($data, $message = "Success", 200);
     }
 
