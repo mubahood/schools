@@ -1,4 +1,6 @@
 @php
+//use AcademicClass
+    use App\Models\AcademicClass; 
     $ent = $session->ent;
     $participants = $session->participant_items;
 @endphp
