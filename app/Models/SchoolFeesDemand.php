@@ -60,14 +60,14 @@ class SchoolFeesDemand extends Model
                 'enterprise_id' => $this->enterprise_id,
             ])
                 ->whereIn('administrator_id', $ids)
-                ->where('balance', '>', $balance)
+                ->where('balance', '<=', $balance)
                 ->get();
             $recs[$class] = $accounts;
         }
         return $recs;
     }
-    
-    function get_meal_card_records()
+
+    function get_meal_card_records($residence)
     {
 
         $balance = abs($this->amount);
@@ -79,6 +79,7 @@ class SchoolFeesDemand extends Model
                 'enterprise_id' => $this->enterprise_id,
                 'user_type' => 'student',
                 'status' => 1,
+                'residence' => $residence,
                 'current_class_id' => $class
             ])
                 ->get()

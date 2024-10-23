@@ -28,20 +28,45 @@ use App\Models\Utils;
             <tr>
                 <td style="width: {{ 100 / 2 }}%!important" class="pr-1 pb-2">
                     @if (isset($rec[$super_count]))
-                        @include('fees.meal-card-item', [
-                            'ent' => $ent,
-                            'demand' => $demand,
-                            'item' => $rec[$super_count],
-                        ])
+                        @php
+                            $acc = $rec[$super_count];
+                        @endphp
+
+                        @if ($acc->owner->residence != 'BOARDER')
+                            @include('fees.meal-card-item', [
+                                'ent' => $ent,
+                                'demand' => $demand,
+                                'item' => $rec[$super_count],
+                            ])
+                        @else
+                            @include('fees.meal-card-item-1', [
+                                'ent' => $ent,
+                                'demand' => $demand,
+                                'item' => $rec[$super_count],
+                            ])
+                        @endif
                     @endif
                 </td>
                 <td style="width: {{ 100 / 2 }}%!important" class="pl-2 pb-2">
                     @if (isset($rec[$super_count + 1]))
-                        @include('fees.meal-card-item', [
-                            'ent' => $ent,
-                            'demand' => $demand,
-                            'item' => $rec[$super_count + 1],
-                        ])
+                        {{-- BOARDER --}}
+                        @php
+                            $acc = $rec[$super_count + 1];
+                        @endphp
+
+                        @if ($acc->owner->residence != 'BOARDER')
+                            @include('fees.meal-card-item', [
+                                'ent' => $ent,
+                                'demand' => $demand,
+                                'item' => $rec[$super_count],
+                            ])
+                        @else
+                            @include('fees.meal-card-item-1', [
+                                'ent' => $ent,
+                                'demand' => $demand,
+                                'item' => $rec[$super_count],
+                            ])
+                        @endif
                     @endif
                 </td>
             </tr>

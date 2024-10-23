@@ -448,12 +448,15 @@ Route::get('gen-code', function () {
   $code_type = 'qr';
 });
 
-Route::get('meal-cards', function () {
+Route::get('meal-cards', function (Request $r) {
+  if (!isset($r->type)) {
+    return "ID not set";
+  }
   set_time_limit(-1);
   $idCard = SchoolFeesDemand::find($_GET['id']);
   $pdf = App::make('dompdf.wrapper');
   $ent = Enterprise::find($idCard->enterprise_id);
-  $recs = $idCard->get_demand_records();
+  $recs = $idCard->get_meal_card_records($r->type);
   $pdf->loadHTML(view('fees.meal-cards', [
     'recs' => $recs,
     'ent' => $ent,
@@ -478,7 +481,8 @@ Route::get('generate-demand-notice', function () {
   $idCard = SchoolFeesDemand::find($_GET['id']);
   $pdf = App::make('dompdf.wrapper');
   $ent = Enterprise::find($idCard->enterprise_id);
-  $recs = $idCard->get_meal_card_records();
+  $recs = $idCard->get_demand_records();
+
   $pdf->loadHTML(view('fees.demand-notice', [
     'recs' => $recs,
     'ent' => $ent,

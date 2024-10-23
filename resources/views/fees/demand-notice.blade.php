@@ -9,8 +9,8 @@ use App\Models\Utils;
     @php
         $class = AcademicClass::find($index);
     @endphp
-    <h4 class="text-center"> {{ $class->name }}</h4>
-    <hr>
+    {{--   <h4 class="text-center"> {{ $class->name }}</h4>
+    <hr> --}}
 
     @php
         $count = 0;
@@ -56,6 +56,8 @@ use App\Models\Utils;
             <br>
             <p class="text-right"><b>Signature:................................</b></p>
         </div>
+        @php 
+        @endphp
     @endforeach
     <div style="page-break-after: always;"></div>
 @endforeach

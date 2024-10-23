@@ -48,6 +48,7 @@ class StudentsController extends AdminController
     protected function grid()
     {
 
+
         /*
         $u = Administrator::find(2334);
         $u->status =  1;
@@ -237,7 +238,8 @@ class StudentsController extends AdminController
         //user_number column
 
 
-        $grid->quickSearch('name')->placeholder("Search by name...");
+        $grid->quickSearch('name', 'lin', 'school_pay_payment_code', 'user_number')
+            ->placeholder("Search by name or LIN or school pay code or ID number");
         //on export, emergency_person_name as it is
         $grid->export(function ($export) {
             $export->originalValue([
@@ -251,6 +253,9 @@ class StudentsController extends AdminController
                 'documents',
             ]);
         });
+
+
+
 
 
         if (!Admin::user()->isRole('dos')) {
@@ -397,6 +402,16 @@ class StudentsController extends AdminController
 
         $grid->column('user_number', __('ID Number'))->sortable();
 
+        //residence
+        $grid->column('residence', __('Residence'))->sortable()
+            ->label([
+                'DAY_SCHOLAR' => 'success',
+                'BOARDER' => 'info',
+            ])->filter([
+                'DAY_SCHOLAR' => 'Day Scholar',
+                'BOARDER' => 'Boarder',
+            ])->sortable();
+
         //theology_stream_id
 
         //current_theology_class_id
@@ -537,6 +552,13 @@ class StudentsController extends AdminController
             $form->text('school_pay_payment_code');
             $form->text('school_pay_account_id');
             $form->radio('sex', 'Gender')->options(['Male' => 'Male', 'Female' => 'Female'])->rules('required');
+            $form->radio('residence', 'Residence')
+                ->options([
+                    'DAY_SCHOLAR' => 'Day Scholar',
+                    'BOARDER' => 'Boarder',
+                ])
+                ->default('DAY_SCHOLAR')
+                ->rules('required');
             $form->date('date_of_birth', 'Date of birth');
 
 

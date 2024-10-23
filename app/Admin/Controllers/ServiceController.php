@@ -50,10 +50,12 @@ class ServiceController extends AdminController
 
 
             $cats = [];
-            foreach (ServiceCategory::where(
-                'enterprise_id',
-                Admin::user()->enterprise_id
-            )->get() as $v) {
+            foreach (
+                ServiceCategory::where(
+                    'enterprise_id',
+                    Admin::user()->enterprise_id
+                )->get() as $v
+            ) {
                 $cats[$v->id] = $v->name;
             }
 
@@ -72,6 +74,9 @@ class ServiceController extends AdminController
         $grid->column('service_category_id', __('Category'))
             ->sortable()
             ->display(function () {
+                if ($this->service_category == null) {
+                    return "N/A";
+                }
                 return $this->service_category->name;
             });
         $grid->column('fee', __('Fee'))->display(function () {
@@ -79,7 +84,7 @@ class ServiceController extends AdminController
         });
 
 
-       /*  $grid->column('subs', __('Subscribers'))->display(function () {
+        /*  $grid->column('subs', __('Subscribers'))->display(function () {
             return count($this->subs);
         })->hide(); */
         $grid->column('description', __('Description'))->hide();
@@ -123,7 +128,7 @@ class ServiceController extends AdminController
         $form->select('service_category_id', 'Service category')
             ->options(ServiceCategory::where([
                 'enterprise_id' => $u->enterprise_id
-            ])->get()->pluck('name', 'id'));
+            ])->get()->pluck('name', 'id'))->rules('required');
         $form->text('fee', __('Fee'))->attribute('type', 'number')->rules('required');
 
         $form->textarea('description', __('Description'));

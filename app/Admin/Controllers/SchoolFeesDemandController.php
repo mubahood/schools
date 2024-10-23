@@ -44,10 +44,15 @@ class SchoolFeesDemandController extends AdminController
                 $url = url('generate-demand-notice?id=' . $this->id);
                 return '<a href="' . $url . '" target="_blank">Generate Demand Notices</a>';
             });
-        $grid->column('meal-cards', __('Meal Card'))
+        $grid->column('meal-cards', __('Meal Card (DAY SCHOLARS)'))
             ->display(function ($f) {
-                $url = url('meal-cards?id=' . $this->id);
-                return '<a href="' . $url . '" target="_blank">Generate Meal Cards</a>';
+                $url = url('meal-cards?id=' . $this->id . '&type=DAY_SCHOLAR');
+                return '<a href="' . $url . '" target="_blank">Generate Meal Cards for (DAY SCHOLAR)</a>';
+            });
+        $grid->column('meal-cards-2', __('Meal Card (BOARDERS)'))
+            ->display(function ($f) {
+                $url = url('meal-cards?id=' . $this->id . '&type=BOARDER');
+                return '<a href="' . $url . '" target="_blank">Generate Meal Cards for (BOARDER)</a>';
             });
 
         /*         $grid->column('message_1', __('Message 1'));
@@ -91,19 +96,19 @@ class SchoolFeesDemandController extends AdminController
      */
     protected function form()
     {
+   
         $form = new Form(new SchoolFeesDemand());
         $u = Admin::user();
         $form->hidden('enterprise_id')->value($u->enterprise_id);
         $form->text('description', __('Title'))->rules('required');
         $form->decimal('amount', __('Balance'))->default(0)->rules('required');
         $form->quill('message_1', __('Demand Notice Template'))
-            ->default('Dear Parent,<br>we write to inform you that your child <b>[STUDENT_NAME]</b> has an outstanding balance of UGX <b>[BALANCE_AMOUNT] - [STUDENT_CLASS]</b>.<br><b>[STUDENT_NAME]</b> will not be permitted in school unless this balance is cleared.')
+            ->default('Dear Parent,<br>We write to inform you that your child <b>[STUDENT_NAME] - [STUDENT_CLASS]</b> has an outstanding balance of UGX <b>[BALANCE_AMOUNT]</b>.We request you to clear the balance to avoid inconvenience.<br><b>[STUDENT_NAME]</b> will not be permitted in school unless this balance is cleared.')
             ->required();
         $form->textarea('message_2', __('SMS Template'))
             ->default('Dear Parent, you are reminded to clear the outstanding balance of UGX [BALANCE_AMOUNT] for your child [STUDENT_NAME]. Thank you.')
             ->required();
         $form->html('<code>[BALANCE_AMOUNT]</code> <code>[STUDENT_NAME]</code> <code>[STUDENT_CLASS]</code>', 'Keywords');
-
 
         $u = Admin::user();
         $year = $u->ent->active_academic_year();
