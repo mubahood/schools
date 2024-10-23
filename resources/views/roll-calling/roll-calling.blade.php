@@ -122,7 +122,7 @@
                         $class = AcademicClass::find($participant->participant->current_class_id);
                         $name = $participant->participant->name;
                         if ($class != null) {
-                            $name .= $class->short_name;
+                            $name .= " - ".$class->short_name;
                         }
                     @endphp
                     <b>{{ $int }}</b>. {{ $name }}

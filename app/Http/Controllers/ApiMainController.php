@@ -1856,7 +1856,7 @@ lin
         $data->administrator_text = $u->name;
         $class = AcademicClass::find($u->current_class_id);
         if ($class != null) {
-            $data->administrator_text .= $class->short_name;
+            $data->administrator_text .= " - " . $class->short_name;
         }
         return $this->success($data, $message = "Success", 200);
     }
