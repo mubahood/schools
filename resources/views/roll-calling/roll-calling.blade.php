@@ -100,7 +100,8 @@
         <h4 class="text-uppercase">{{ 'Students Present:' }} <span
                 id="present-count">({{ $participants->count() }})</span></h4>
 
-        <a href="{{ url('roll-calling-close-session?roll_call_session_id=' . $session->id) }}" class="text-danger"><b>Close
+        <a href="{{ url('roll-calling-close-session?roll_call_session_id=' . $session->id) }}"
+            class="text-danger"><b>Close
                 Session</b></a>
         <div id="studentList">
             @php
@@ -115,7 +116,14 @@
                     $int--;
                 @endphp
                 <div class="my-item">
-                    <b>{{ $int }}</b>. {{ $participant->participant->name }}
+                    @php
+                        $class = AcademicClass::find($participant->participant->current_class_id);
+                        $name = $participant->participant->name;
+                        if ($class != null) {
+                            $name .= $class->short_name;
+                        }
+                    @endphp
+                    <b>{{ $int }}</b>. {{ $name }}
                 </div>
             @endforeach
         </div>

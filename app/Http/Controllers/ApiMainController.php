@@ -1852,9 +1852,9 @@ lin
             'is_present' => 1,
         ])->count();
         $data = Participant::find($part->id);
-        $class = AcademicClass::find($session->academic_class_id);
         $data->num = $num;
         $data->administrator_text = $u->name;
+        $class = AcademicClass::find($u->current_class_id);
         if ($class != null) {
             $data->administrator_text .= $class->short_name;
         }
