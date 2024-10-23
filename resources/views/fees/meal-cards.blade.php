@@ -73,10 +73,10 @@ use App\Models\Utils;
         </table>
 
         @php
+            $super_count++;
             if ($super_count > count($rec)) {
                 break;
             }
-            $super_count++;
         @endphp
     @endforeach
     <div style="page-break-after: always;"></div>
