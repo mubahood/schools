@@ -26,6 +26,7 @@ use App\Models\SchoolFeesDemand;
 use App\Models\SchoolPayTransaction;
 use App\Models\Service;
 use App\Models\ServiceSubscription;
+use App\Models\Session;
 use App\Models\TheologyMarkRecord;
 use App\Models\StudentHasClass;
 use App\Models\StudentHasFee;
@@ -59,8 +60,32 @@ Route::get('report-card-individual-printings', [ReportCardsPrintingController::c
 Route::get('data-import', [ReportCardsPrintingController::class, 'data_import']);
 Route::get('process-termly-school-fees-balancings', [MainController::class, 'process_termly_school_fees_balancings']);
 
+Route::get('roll-calling-close-session', function (Request $request) {
+  $session = Session::find($request->roll_call_session_id);
+  if ($session == null) {
+    return "Session not found";
+  }
+  $session->is_open = 0;
+  // $session->process_attendance();
+  $session->save();
+  return redirect(admin_url('sessions')); 
+});
 Route::get('roll-calling', function (Request $request) {
-  return view('roll-calling.roll-calling');
+  if (isset($request->roll_call_session_id)) {
+    $session = Session::find($request->roll_call_session_id);
+    if ($session == null) {
+      return "Session not found";
+    }
+    session(['roll_call_session_id' => $session->id]);
+    return redirect('roll-calling');
+  }
+  $session = Session::find(session('roll_call_session_id'));
+  if ($session == null) {
+    return "No active session";
+  }
+  return view('roll-calling.roll-calling', [
+    'session' => $session,
+  ]);
 });
 
 Route::get('process-fees', function (Request $request) {

@@ -2,8 +2,10 @@
 
 namespace App\Admin\Controllers;
 
+use App\Models\AcademicClass;
 use App\Models\Participant;
 use App\Models\Session;
+use App\Models\Subject;
 use App\Models\Utils;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -18,7 +20,7 @@ class ParticipantController extends AdminController
      *
      * @var string
      */
-    protected $title = 'Participant';
+    protected $title = 'Roll-call records';
 
     /**
      * Make a grid builder.
@@ -28,8 +30,37 @@ class ParticipantController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Participant());
+        $grid->filter(function ($filter) {
+            $filter->disableIdFilter();
+            $u = Admin::user();
+            $filter->equal('academic_class_id', 'Fliter by class')->select(AcademicClass::where([
+                'enterprise_id' => $u->enterprise_id
+            ])->get()
+                ->pluck('name_text', 'id'));
+            $filter->equal('subject_id', __('Subject'))
+                ->select(
+                    \App\Models\Subject::where([
+                        'enterprise_id' => Admin::user()->enterprise_id,
+                    ])->get()->pluck('name', 'id')
+                );
+            $filter->equal('is_present', __('Is Present'))->select([
+                1 => 'Present',
+                0 => 'Absent',
+            ]);
+
+            $sessions = Session::where([
+                'enterprise_id' => $u->enterprise_id,
+                'administrator_id' => $u->id,
+            ])->get();
+
+            $filter->equal('session_id', __('Roll-call'))
+                ->select($sessions->pluck('title', 'id'));
+            //created_at range
+            $filter->between('created_at', __('Created at'))->datetime();
+        });
 
         $grid->disableExport();
+
 
         $activeSession = Session::where([
             'enterprise_id' => Admin::user()->enterprise_id,
@@ -50,24 +81,46 @@ class ParticipantController extends AdminController
 
 
 
-
-        $grid->column('created_at', __('Created'))
+        $grid->column('administrator_id', __('Student'))
             ->display(function () {
-                return Utils::my_date($this->created_at);
+                if ($this->participant == null) {
+                    return "N/A";
+                }
+                return $this->participant->name . " - " . $this->participant->user_number;
             })
-            ->hide()
             ->sortable();
 
-        $grid->column('administrator_id', __('Participant'))
+        $grid->column('created_at', __('DATE'))
             ->display(function () {
-                return $this->participant->name;
+                return Utils::my_date($this->created_at);
             })
             ->sortable();
         $grid->column('academic_year_id', __('Academic year id'))->hide();
         $grid->column('term_id', __('Term id'))->hide();
-        $grid->column('academic_class_id', __('Academic class id'))->hide();
-        $grid->column('subject_id', __('Subject id'))->hide();
-        $grid->column('service_id', __('Service id'))->hide();
+        $grid->column('academic_class_id', __('Class'))
+            ->display(function ($x) {
+                $class = AcademicClass::find($x);
+                if ($class == null) {
+                    return "N/A";
+                }
+                return $class->name;
+            })->sortable();
+        $grid->column('subject_id', __('Subject'))
+            ->display(function ($x) {
+                $sub = Subject::find($x);
+                if ($sub == null) {
+                    return "N/A";
+                }
+                return $sub->name_text;
+            })->sortable();
+        $grid->column('service_id', __('Service'))
+            ->display(function ($x) {
+                $sub = Subject::find($x);
+                if ($sub == null) {
+                    return "N/A";
+                }
+                return $sub->name;
+            })->sortable();
         $grid->column('is_present', __('Is Present'))
             ->using([
                 1 => 'Present',

@@ -102,6 +102,8 @@ class Participant extends Model
         return $this->academic_class->name;
     }
 
+    //belongs to academic_class
+
     //getter for service_text
     public function getServiceTextAttribute()
     {

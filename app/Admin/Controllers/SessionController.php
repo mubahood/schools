@@ -33,6 +33,36 @@ class SessionController extends AdminController
     {
         $grid = new Grid(new Session());
         $grid->disableExport();
+        $grid->filter(function ($filter) {
+            $filter->disableIdFilter();
+            $u = Admin::user();
+            $filter->equal('academic_class_id', 'Fliter by class')->select(AcademicClass::where([
+                'enterprise_id' => $u->enterprise_id
+            ])->get()
+                ->pluck('name_text', 'id'));
+            $filter->equal('subject_id', __('Subject'))
+                ->select(
+                    \App\Models\Subject::where([
+                        'enterprise_id' => Admin::user()->enterprise_id,
+                    ])->get()->pluck('name', 'id')
+                );
+            $filter->equal('is_open', __('Is open'))->select([
+                1 => 'Open',
+                0 => 'Closed',
+            ]);
+            $filter->equal('type', __('Type'))->select([
+                'STUDENT_REPORT' => 'Student Report at School',
+                'STUDENT_LEAVE' => 'Student Leave School',
+                'STUDENT_MEAL' => 'Student Meals Session',
+                'CLASS_ATTENDANCE' => 'Class attendance',
+                'THEOLOGY_ATTENDANCE' => 'Theology Class attendance',
+                'SECONDARY_CLASS_ATTENDANCE' => 'Secondary Class attendance',
+                'ACTIVITY_ATTENDANCE' => 'Activity participation',
+            ]);
+            $filter->between('due_date', __('Due date'))->datetime();
+            //created_at range
+            $filter->between('created_at', __('Created at'))->datetime();
+        });
 
         $activeSession = Session::where([
             'enterprise_id' => Admin::user()->enterprise_id,
@@ -41,6 +71,8 @@ class SessionController extends AdminController
         ])->first();
 
         if ($activeSession  != null) {
+
+            return redirect(url("roll-calling?roll_call_session_id={$activeSession->id}"));
             return redirect(admin_url("sessions/{$activeSession->id}/edit"));
         }
 
@@ -124,6 +156,13 @@ class SessionController extends AdminController
                 return $this->created_by->name;
             })
             ->sortable();
+        //condut session column
+        $grid->column('is_open', __('Conduct Session'))
+            ->display(function () {
+                //conduct session
+                $url = url("roll-calling?roll_call_session_id={$this->id}");
+                return "<a href='{$url}'  class='btn btn-primary btn-sm'>Conduct Roll-call</a>";
+            });
 
         return $grid;
     }

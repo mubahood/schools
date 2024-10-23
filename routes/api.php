@@ -65,6 +65,7 @@ Route::middleware([JwtMiddleware::class])->group(function () {
     Route::post("post-media-upload", [ApiMainController::class, 'upload_media']);
     Route::post("visitors-record-create", [ApiMainController::class, 'visitors_record_create']);
     Route::post("get-student-details", [ApiMainController::class, 'get_student_details']);
+    Route::post("roll-call-participant-submit", [ApiMainController::class, 'roll_call_participant_submit']);
 
     //=====ATTENDANCE========//
     Route::get("participants", [ApiMainController::class, 'participants']);
@@ -367,10 +368,12 @@ Route::get('school-pay-reconcile', function (Request $r) {
 
 Route::get('process-balance', function (Request $r) {
     $start = microtime(true);
-    foreach (Administrator::where([
-        'status' => 1,
-        'user_type' => 'student'
-    ])->get() as $key => $value) {
+    foreach (
+        Administrator::where([
+            'status' => 1,
+            'user_type' => 'student'
+        ])->get() as $key => $value
+    ) {
         if ($value->account == null) {
             continue;
         }

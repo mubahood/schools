@@ -17,7 +17,6 @@ class Session extends Model
     {
         parent::boot();
         self::creating(function ($m) {
-            $m->is_open = 1;
             $u = User::find($m->administrator_id);
             if ($u == null) {
                 throw new \Exception("User not found");
@@ -149,6 +148,11 @@ class Session extends Model
         return $this->belongsTo(AcademicClass::class);
     }
 
+    //belongs to enterprise
+    function ent()
+    {
+        return $this->belongsTo(Enterprise::class, 'enterprise_id');
+    }
 
 
     function subject()
@@ -166,7 +170,7 @@ class Session extends Model
 
     function participant_items()
     {
-        return $this->hasMany(Participant::class);
+        return $this->hasMany(Participant::class)->where('is_present', 1);
     }
 
 
@@ -295,4 +299,23 @@ class Session extends Model
         'present_count',
         'absent_count'
     ];
+    //getter for title
+    public function getTitleAttribute($value)
+    {
+        if (strlen($value) < 2) {
+            return $this->type . " - " . Utils::my_date($this->due_date);
+        }
+        if ($this->type == 'Class attendance') {
+            $class = AcademicClass::find($this->academic_class_id);
+            if ($class != null) {
+                return $class->name;
+            }
+        } else if ($this->type == 'Activity participation') {
+            $class = Service::find($this->service_id);
+            if ($class != null) {
+                return $class->name;
+            }
+        }
+        return $value;
+    }
 }

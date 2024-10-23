@@ -1805,6 +1805,58 @@ lin
         ]), $message = "Success", 200);
     }
 
+    public function roll_call_participant_submit(Request $r)
+    {
+        $session = Session::find($r->session_id);
+        if ($session == null) {
+            return $this->error('Session not found.');
+        }
+        $u = User::where([
+            'user_number' => $r->user_number,
+        ])->first();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        $ent = Enterprise::find($u->enterprise_id);
+        if ($ent == null) {
+            return $this->error('Enterprise not found.');
+        }
+        $active_term = $ent->active_term();
+        if ($active_term == null) {
+            return $this->error('Active term not found.');
+        }
+        $part = Participant::where([
+            'session_id' => $session->id,
+            'administrator_id' => $u->id,
+        ])->latest()->first();
+        if ($part == null) {
+            $part = new Participant();
+            $part->enterprise_id = $session->enterprise_id;
+            $part->administrator_id = $u->administrator_id;
+            $part->academic_year_id = $active_term->academic_year_id;
+            $part->term_id = $active_term->id;
+            $part->academic_class_id = $session->academic_class_id;
+            $part->subject_id = $session->subject_id;
+            $part->service_id = $session->service_id;
+            $part->session_id = $session->id;
+        }
+        if ($part->is_present == 1) {
+            return $this->error('Already submitted.');
+        }
+        $part->is_present = 1;
+        $part->is_done = 1;
+        $part->sms_is_sent = 'No';
+        $part->save();
+        $num = Participant::where([
+            'session_id' => $session->id,
+            'is_present' => 1,
+        ])->count();
+        $data = Participant::find($part->id);
+        $data->num = $num;
+        $data->administrator_text = $u->name;
+        return $this->success($data, $message = "Success", 200);
+    }
+
     public function get_student_details(Request $r)
     {
         return $this->success(Administrator::find(1), $message = "Success", 200);
