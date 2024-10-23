@@ -58,13 +58,13 @@ use App\Models\Utils;
                             @include('fees.meal-card-item', [
                                 'ent' => $ent,
                                 'demand' => $demand,
-                                'item' => $rec[$super_count],
+                                'item' => $rec[$super_count + 1],
                             ])
                         @else
                             @include('fees.meal-card-item-1', [
                                 'ent' => $ent,
                                 'demand' => $demand,
-                                'item' => $rec[$super_count],
+                                'item' => $rec[$super_count + 1],
                             ])
                         @endif
                     @endif
