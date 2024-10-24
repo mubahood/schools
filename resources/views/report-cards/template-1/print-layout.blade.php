@@ -206,7 +206,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
             &nbsp;&nbsp;
             <span><b class="text-uppercase">DIV:</b> <span
                     class="value">&nbsp;{{ $tr->grade }}&nbsp;</span></span>&nbsp;&nbsp;
-            <span><b class="text-uppercase">Position in class:</b> <span class="value text-lowercase">
+            <span><b class="text-uppercase">Position:</b> <span class="value text-lowercase">
                     {{ $numFormat->format($tr->position) }} </span>&nbsp;&nbsp;
                 <span><b class="text-uppercase">OUT OF :</b> <span class="value"> {{ $tr->total_students }}</span>
                 </span>
