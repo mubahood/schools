@@ -211,7 +211,7 @@ class ReportCardsPrintingController extends Controller
                 'student_id' => $r->student_id,
                 'term_id' => $r->term_id,
                 'theology_termly_report_card_id' => $printing->theology_termly_report_card_id,
-            ])->first(); 
+            ])->first();
             $items[] = [
                 'r' => $r,
                 'tr' => $tr,
@@ -224,11 +224,11 @@ class ReportCardsPrintingController extends Controller
             die("Nothing to print.");
         }
         $printing->secular_tempate = 'Template_3';
-        if ($printing->secular_tempate == 'Template_3') {
+        if ($printing->secular_tempate == 'Template_3' && $printing->type == 'Secular') {
 
             if (isset($_GET['html'])) {
                 return view('report-cards.template-3.print', [
-                    'items' => $reps,
+                    'items' => $reps, 
                     'ent' => $printing->enterprise,
                     'report_type' => $printing->type,
                     'min_count' => $printing->min_count,
