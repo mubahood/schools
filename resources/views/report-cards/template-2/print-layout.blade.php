@@ -158,9 +158,8 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                                         {{ $numFormat->format($r->position) }} </span>&nbsp;&nbsp;
                                     <span><b class="text-uppercase">OUT OF :</b> <span class="value">
                                             {{ $r->total_students }}</span> </span>
-                            @elseif ($r->termly_report_card->display_positions == 'Manual')
-                                    position: <b
-                                        class="text-danger">......</b>
+                                @elseif ($r->termly_report_card->display_positions == 'Manual')
+                                    position: <b class="text-danger">......</b>
                                     &nbsp;
                                     OUT OF: <b class="text-danger">......</b> &nbsp;
                             @endif
@@ -346,7 +345,9 @@ foreach ($r->termly_report_card->term->exams as $exam) {
 
                                 <div class="p-0 mt-0 mb-0 class-teacher mt-1">
                                     <b class="d-block">CLASS TEACHER'S COMMENT:</b>
-                                    <span class="comment">{{ $tr->class_teacher_comment }}</span>
+                                    <span class="comment">{!! $termly_report_card->display_class_teacher_comments == 'Yes'
+                                        ? $tr->class_teacher_comment
+                                        : Utils::get_empty_spaces(135) . '<br>' . Utils::get_empty_spaces(183) !!}</span>
                                 </div>
                             </div>
                         @endif
