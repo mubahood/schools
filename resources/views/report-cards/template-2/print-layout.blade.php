@@ -159,7 +159,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                                     <span><b class="text-uppercase">OUT OF :</b> <span class="value">
                                             {{ $r->total_students }}</span> </span>
                             @elseif ($r->termly_report_card->display_positions == 'Manual')
-                                    position IN {{ $termly_report_card->positioning_type }}: <b
+                                    position: <b
                                         class="text-danger">......</b>
                                     &nbsp;
                                     OUT OF: <b class="text-danger">......</b> &nbsp;

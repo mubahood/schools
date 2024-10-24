@@ -192,11 +192,7 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                             {{-- <span><b class="text-uppercase">Aggre:</b> <span class="value">18</span></span> --}}
                             <span><b class="text-uppercase">DIV:</b> <span
                                     class="value">{{ $tr->grade }}</span></span>
-                            {{-- <span><b class="text-uppercase">Position in class:</b> <span class="value text-lowercase"> --}}
-                            {{-- {{ $numFormat->format($tr->position) }} --}}
-                            {{--     ..........
-                                </span></span>
-                            OUT OF......... --}}
+                           
 
                         </div>
                     @endif

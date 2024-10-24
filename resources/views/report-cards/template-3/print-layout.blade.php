@@ -174,11 +174,11 @@ $mainReport = $r;
         DIVISION: <b class="text-danger">{{ $r->grade }}</b> &nbsp;
 
         @if ($r->termly_report_card->display_positions == 'Yes')
-            position IN {{ $termly_report_card->positioning_type }}: <b
+            position: <b
                 class="text-danger">{{ (int) $r->position }}</b> &nbsp;
             OUT OF: <b class="text-danger">{{ (int) $r->total_students }}</b> &nbsp;
         @elseif ($r->termly_report_card->display_positions == 'Manual')
-            position IN {{ $termly_report_card->positioning_type }}: <b class="text-danger">......</b> &nbsp;
+            position: <b class="text-danger">......</b> &nbsp;
             OUT OF: <b class="text-danger">......</b> &nbsp;
         @endif
 
@@ -336,11 +336,11 @@ $mainReport = $r;
             Aggregate: <b class="text-danger">{{ (int) $tr->average_aggregates }}</b> &nbsp;
             DIVISION: <b class="text-danger">{{ $tr->grade }}</b> &nbsp;
             @if ($r->termly_report_card->display_positions == 'Yes')
-                POS IN {{ $termly_report_card->positioning_type }}: <b
+                POS: <b
                     class="text-danger">{{ (int) $r->position }}</b> &nbsp;
                 OUT OF: <b class="text-danger">{{ (int) $r->total_students }}</b> &nbsp;
             @elseif ($r->termly_report_card->display_positions == 'Manual')
-                position IN {{ $termly_report_card->positioning_type }}: <b class="text-danger">......</b> &nbsp;
+                position: <b class="text-danger">......</b> &nbsp;
                 OUT OF: <b class="text-danger">......</b> &nbsp;
             @endif
         </div>
