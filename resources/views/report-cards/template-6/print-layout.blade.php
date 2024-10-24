@@ -372,6 +372,10 @@ dd($theology_termly_report_card); */
                         class="text-danger">{{ (int) $tr->position }}{{ Utils::getSuperscriptSuffix($tr->position) }}</b>
                     &nbsp;
                     OUT OF: <b class="text-danger">{{ (int) $tr->total_students }}</b> &nbsp;
+                @elseif ($r->termly_report_card->display_positions == 'Manual')
+                    position IN {{ $termly_report_card->positioning_type }}: <b class="text-danger">......</b>
+                    &nbsp;
+                    OUT OF: <b class="text-danger">......</b> &nbsp;
                 @endif
             </div>
             <table class="table table-bordered marks-table p-0 m-0 w-100 mt-2">
