@@ -118,9 +118,8 @@ foreach ($r->termly_report_card->term->exams as $exam) {
     </div> --}}
 
     <div class="mt-2 row" style="border: solid 2px {{ $r->ent->color }}; border-radius: 15px">
-        <div
-            class=" mx-3 my-3 d-flex justify-content-between summary"style="
-        font-size: 20px!important; 
+        <div class=" mx-3 my-3 d-flex justify-content-between summary"style="
+        font-size: 20px!important;
         line-height: 14px;">
             <span><b>NAME:</b> <span class="value">{{ $r->owner->name }}</span></span> &nbsp;&nbsp;
             @if ($r->owner->sex != null && strlen($r->owner->sex) > 1)
@@ -159,6 +158,11 @@ foreach ($r->termly_report_card->term->exams as $exam) {
                                         {{ $numFormat->format($r->position) }} </span>&nbsp;&nbsp;
                                     <span><b class="text-uppercase">OUT OF :</b> <span class="value">
                                             {{ $r->total_students }}</span> </span>
+                                @elseif ($r->termly_report_card->display_positions == 'Manual')
+                                    position IN {{ $termly_report_card->positioning_type }}: <b
+                                        class="text-danger">......</b>
+                                    &nbsp;
+                                    OUT OF: <b class="text-danger">......</b> &nbsp;
                             @endif
 
                         </div>
