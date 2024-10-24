@@ -311,8 +311,9 @@ dd($theology_termly_report_card); */
 
         @if ($r->termly_report_card->display_class_teacher_comments == 'Yes')
             <p class="mt-3 fw-16" style="font-size: 14!important;"><span class="text-uppercase">Class Teacher's
-                    Comment:</span> <b class="comment" style="font-size: 16px">
-                    {{ Utils::capitalizeSentences($r->class_teacher_comment) }}</b></p>
+                    Comment:</span> <b class="comment" style="font-size: 16px">{!! $termly_report_card->display_class_teacher_comments == 'Yes'
+                        ? $r->class_teacher_comment
+                        : Utils::get_empty_spaces(135) . '<br>' . Utils::get_empty_spaces(183) !!}</b></p>
         @else
             <p class="mt-3 fw-16" style="font-size: 14!important;"><span class="text-uppercase">Class Teacher's
                     Comment:</span> <b class="" style="font-size: 14px">
@@ -499,8 +500,11 @@ dd($theology_termly_report_card); */
 
             </table>
             <p class="mt-3 fw-16" style="font-size: 18px"><span class="text-uppercase">Class Teacher's
-                    comment:</span> <b class="comment" style="font-size: 18px"
-                    style="font-size: 18px">{{ Utils::capitalizeSentences($tr->class_teacher_comment) }}</b></p>
+                    comment:</span> <b class="comment" style="font-size: 18px" style="font-size: 18px">
+                    {!! $termly_report_card->display_class_teacher_comments == 'Yes'
+                        ? $tr->class_teacher_comment
+                        : Utils::get_empty_spaces(135) . '<br>' . Utils::get_empty_spaces(183) !!}
+                </b></p>
             <p class="mt-2 fw-16"><span class="text-uppercase" style="font-size: 18px">Class Teacher's Name:</span>
                 {{-- <b style="font-size: 14px" class="text-uppercase">{{ $class_teacher_name_1 }}</b>,&nbsp; --}}
                 <b style="font-size: 18px"
