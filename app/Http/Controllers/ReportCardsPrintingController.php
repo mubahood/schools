@@ -227,6 +227,23 @@ class ReportCardsPrintingController extends Controller
         if ($printing->secular_tempate == 'Template_3' && $printing->type == 'Secular') {
 
             if (isset($_GET['html'])) {
+                return view('report-cards.template-6.print', [
+                    'items' => $items,
+                    'report_type' => $printing->type,
+                    'min_count' => $printing->min_count,
+                    'max_count' => $printing->max_count,
+                ]);
+            }
+
+            $pdf->loadHTML(view('report-cards.template-6.print', [
+                'items' => $items,
+                'report_type' => $printing->type,
+                'min_count' => $printing->min_count,
+                'max_count' => $printing->max_count,
+            ]));
+            
+/* 
+            if (isset($_GET['html'])) {
                 return view('report-cards.template-3.print', [
                     'items' => $reps, 
                     'ent' => $printing->enterprise,
@@ -241,7 +258,7 @@ class ReportCardsPrintingController extends Controller
                 'report_type' => $printing->type,
                 'min_count' => $printing->min_count,
                 'max_count' => $printing->max_count,
-            ]));
+            ])); */
         } elseif ($printing->secular_tempate == 'Template_6') {
 
             if (isset($_GET['html'])) {
