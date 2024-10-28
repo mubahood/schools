@@ -28,6 +28,7 @@ class AssessmentSheet extends Model
         static::updating(function ($m) {
             //preapre
             $m = self::prepare($m);
+            
         });
     }
 
@@ -38,6 +39,7 @@ class AssessmentSheet extends Model
         if ($termly_report_card == null) {
             throw new Exception("Termly Report Card not found", 1);
         }
+
         $conds = [];
         if ($m->type == "Class") {
             $m->academic_class_sctream_id = null;
@@ -53,6 +55,7 @@ class AssessmentSheet extends Model
         if ($class == null) {
             throw new Exception("Class not found", 1);
         }
+
         $teacher = User::find($class->class_teahcer_id);
         $m->term_id = $termly_report_card->term_id;
         $m->enterprise_id = $termly_report_card->enterprise_id;
@@ -76,19 +79,47 @@ class AssessmentSheet extends Model
         ])->get();
         $subs = [];
 
+        /* 
+        
+        
+        */
+
+
+        $student_ids = [];
+        if ($m->type  == 'Stream') {
+            $marks_conds['stream_id'] = $m->academic_class_sctream_id;
+            $student_ids = User::where([
+                'user_type' => 'student',
+                'status' => 1,
+                'stream_id' => $m->academic_class_sctream_id
+            ])->pluck('id')->toArray();
+        } else {
+            $student_ids = User::where([
+                'user_type' => 'student',
+                'status' => 1,
+                'academic_class_id' => $m->academic_class_id
+            ])->pluck('id')->toArray();
+        }
+
         foreach ($subjects as $key => $subject) {
             $s['id'] = $subject->id;
             $s['name'] = $subject->subject_name;
-            $s['d1'] = MarkRecord::where(['aggr_value' => 1, 'academic_class_id' => $m->academic_class_id, 'subject_id' => $subject->id])->count();
-            $s['d2'] = MarkRecord::where(['aggr_value' => 2, 'academic_class_id' => $m->academic_class_id, 'subject_id' => $subject->id])->count();
-            $s['c3'] = MarkRecord::where(['aggr_value' => 3, 'academic_class_id' => $m->academic_class_id, 'subject_id' => $subject->id])->count();
-            $s['c4'] = MarkRecord::where(['aggr_value' => 4, 'academic_class_id' => $m->academic_class_id, 'subject_id' => $subject->id])->count();
-            $s['c5'] = MarkRecord::where(['aggr_value' => 5, 'academic_class_id' => $m->academic_class_id, 'subject_id' => $subject->id])->count();
-            $s['c6'] = MarkRecord::where(['aggr_value' => 6, 'academic_class_id' => $m->academic_class_id, 'subject_id' => $subject->id])->count();
-            $s['p7'] = MarkRecord::where(['aggr_value' => 7, 'academic_class_id' => $m->academic_class_id, 'subject_id' => $subject->id])->count();
-            $s['p7'] = MarkRecord::where(['aggr_value' => 8, 'academic_class_id' => $m->academic_class_id, 'subject_id' => $subject->id])->count();
-            $s['f9'] = MarkRecord::where(['aggr_value' => 9, 'academic_class_id' => $m->academic_class_id, 'subject_id' => $subject->id])->count();
-            $s['x'] = MarkRecord::where(['aggr_value' => 0, 'academic_class_id' => $m->academic_class_id, 'subject_id' => $subject->id])->count();
+            $marks_conds = [
+                'academic_class_id' => $m->academic_class_id,
+                'subject_id' => $subject->id,
+                'term_id' => $m->term_id
+            ];
+            $s['d1'] = MarkRecord::where($marks_conds)->wherein('administrator_id', $student_ids)->where('aggr_value', 1)->count();
+            $s['d2'] = MarkRecord::where($marks_conds)->wherein('administrator_id', $student_ids)->where('aggr_value', 2)->count();
+            $s['c3'] = MarkRecord::where($marks_conds)->wherein('administrator_id', $student_ids)->where('aggr_value', 3)->count();
+            $s['c4'] = MarkRecord::where($marks_conds)->wherein('administrator_id', $student_ids)->where('aggr_value', 4)->count();
+            $s['c5'] = MarkRecord::where($marks_conds)->wherein('administrator_id', $student_ids)->where('aggr_value', 5)->count();
+            $s['c6'] = MarkRecord::where($marks_conds)->wherein('administrator_id', $student_ids)->where('aggr_value', 6)->count();
+            $s['p7'] = MarkRecord::where($marks_conds)->wherein('administrator_id', $student_ids)->where('aggr_value', 7)->count();
+            $s['p8'] = MarkRecord::where($marks_conds)->wherein('administrator_id', $student_ids)->where('aggr_value', 8)->count();
+            $s['f9'] = MarkRecord::where($marks_conds)->wherein('administrator_id', $student_ids)->where('aggr_value', 9)->count();
+            $s['x'] = MarkRecord::where($marks_conds)->wherein('administrator_id', $student_ids)->where('aggr_value', 0)->count();
+
             $subs[] = $s;
         }
         $m->subjects = json_encode($subs);
@@ -116,7 +147,7 @@ class AssessmentSheet extends Model
     //belongs to term termly_report_card_id
     public function term()
     {
-        return $this->belongsTo(Term::class, 'termly_report_card_id');
+        return $this->belongsTo(Term::class, 'term_id');
     }
 
     //stream

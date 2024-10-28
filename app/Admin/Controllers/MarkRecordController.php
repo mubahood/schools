@@ -260,12 +260,6 @@ class MarkRecordController extends AdminController
                 ->sortable();
         }
 
-        /* 
-        dd($reportCard);
-          "bot_name" => "SET 1"
-    "mot_name" => "SET 2"
-    "eot_name" => "SET 3"
-        */
         if ($reportCard->display_mot_to_teachers == 'Yes') {
             $grid->column('mot_score', __($reportCard->mot_name))
                 ->editable()
@@ -356,6 +350,20 @@ class MarkRecordController extends AdminController
         $grid->column('initials', __('Initials'))->hide();
         $grid->column('total_score_display', __('Average Mark'))->sortable();
 
+        //aggr_value
+        $grid->column('aggr_value', __('Aggr'))->hide()->sortable()
+            ->filter([
+                1 => 'D1',
+                2 => 'D2',
+                3 => 'C3',
+                4 => 'C4',
+                5 => 'C5',
+                6 => 'C6',
+                7 => 'P7',
+                8 => 'P8',
+                9 => 'F9',
+                0 => 'X',
+            ]);
 
         return $grid;
     }

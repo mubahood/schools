@@ -68,12 +68,19 @@ class ReportCardsPrintingController extends Controller
 
         $assessment->generated = "Yes";
         $name = $assessment->title;
+        $name = rand(1000000, 100000000) . "-" . $name;
         $name = str_replace(' ', '-', $name);
         $name = str_replace('---', '-', $name);
         $name = str_replace('--', '-', $name);
         $name = $assessment->id . "-" . $name . '.pdf';
         $name = strtolower($name);
         $store_file_path = public_path('storage/files/' . $name);
+
+        if ($assessment->pdf_link != null && strlen($assessment->pdf_link) > 0) {
+            if (file_exists(public_path('storage/' . $assessment->pdf_link))) {
+                unlink(public_path('storage/' . $assessment->pdf_link));
+            }
+        }
 
 
         $assessment->pdf_link = 'files/' . $name;
@@ -95,12 +102,17 @@ class ReportCardsPrintingController extends Controller
         ]));
         $output = $pdf->output();
         try {
+            if (file_exists($store_file_path)) {
+                unlink($store_file_path);
+            }
+
             file_put_contents($store_file_path, $output);
         } catch (\Exception $e) {
             die($e->getMessage());
         }
 
         $url = url('storage/files/' . $name);
+
 
         $html = '<h1>Assessment Sheet ready!</h1>';
         $html .= '<h2>' . $assessment->title . '</h2>';
@@ -241,8 +253,8 @@ class ReportCardsPrintingController extends Controller
                 'min_count' => $printing->min_count,
                 'max_count' => $printing->max_count,
             ]));
-            
-/* 
+
+            /* 
             if (isset($_GET['html'])) {
                 return view('report-cards.template-3.print', [
                     'items' => $reps, 
