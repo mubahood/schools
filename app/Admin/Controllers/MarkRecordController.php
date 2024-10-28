@@ -351,7 +351,7 @@ class MarkRecordController extends AdminController
         $grid->column('total_score_display', __('Average Mark'))->sortable();
 
         //aggr_value
-        $grid->column('aggr_value', __('Aggr'))->hide()->sortable()
+        $grid->column('aggr_value', __('Aggr'))->sortable()
             ->filter([
                 1 => 'D1',
                 2 => 'D2',
@@ -363,7 +363,18 @@ class MarkRecordController extends AdminController
                 8 => 'P8',
                 9 => 'F9',
                 0 => 'X',
-            ]);
+            ])->using([
+                1 => 'D1',
+                2 => 'D2',
+                3 => 'C3',
+                4 => 'C4',
+                5 => 'C5',
+                6 => 'C6',
+                7 => 'P7',
+                8 => 'P8',
+                9 => 'F9',
+                0 => 'X',
+            ]); 
 
         return $grid;
     }
