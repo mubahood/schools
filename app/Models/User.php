@@ -35,7 +35,20 @@ class User extends Administrator implements JWTSubject
             if ($m->status == 1) {
                 $m->update_fees();
             }
+            
+            //check if has parent
+            if($m->user_type == 'student'){
+                $p = $m->getParent();
+                if($p == null){
+                    try {
+                        $p = User::createParent($m);
+                    } catch (\Throwable $th) {
+                        //throw $th;
+                    }
+                }
+            }
         });
+        
     }
 
     /**

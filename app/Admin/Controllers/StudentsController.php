@@ -377,8 +377,15 @@ class StudentsController extends AdminController
 
         $grid->column('parent_id', __('Parent'))
             ->display(function ($x) {
-                if ($this->parent == null) {
-                    return $x;
+                $parent = $this->parent;
+                if ($parent == null) {
+                    $parent = $this->getParent();
+                }
+                if ($parent == null) {
+                    if ($x != null) {
+                        return $x;
+                    }
+                    return 'No parent';
                 }
 
                 $txt = '<a href="' . admin_url('parents/?id=' . $this->parent->id) . '" title="View parent" ><b>' . $this->parent->name . "</b></a>";
