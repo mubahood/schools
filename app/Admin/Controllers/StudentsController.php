@@ -385,6 +385,11 @@ class StudentsController extends AdminController
                     if ($x != null) {
                         return $x;
                     }
+                    try {
+                        $p = User::createParent($this); 
+                    } catch (\Throwable $th) {
+                        //throw $th;
+                    }
                     return 'No parent';
                 }
 
