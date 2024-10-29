@@ -35,11 +35,11 @@ class User extends Administrator implements JWTSubject
             if ($m->status == 1) {
                 $m->update_fees();
             }
-            
+
             //check if has parent
-            if($m->user_type == 'student'){
+            if ($m->user_type == 'student') {
                 $p = $m->getParent();
-                if($p == null){
+                if ($p == null) {
                     try {
                         $p = User::createParent($m);
                     } catch (\Throwable $th) {
@@ -48,7 +48,25 @@ class User extends Administrator implements JWTSubject
                 }
             }
         });
-        
+
+        //created
+        self::created(function ($m) {
+            if ($m->status == 1) {
+                $m->update_fees();
+            }
+
+            //check if has parent
+            if ($m->user_type == 'student') {
+                $p = $m->getParent();
+                if ($p == null) {
+                    try {
+                        $p = User::createParent($m);
+                    } catch (\Throwable $th) {
+                        //throw $th;
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -184,6 +202,19 @@ class User extends Administrator implements JWTSubject
             } catch (\Throwable $th) {
                 $s->parent_id = null;
                 $s->save();
+            }
+
+            $p = User::find($p->id);
+            if ($p != null) {
+                //add role with id 17
+                try {
+                    $r = new AdminRoleUser();
+                    $r->role_id = 17;
+                    $r->user_id = $p->id;
+                    $r->save();
+                } catch (\Throwable $th) {
+                    //throw $th;
+                }
             }
         }
         return  $p;
@@ -351,6 +382,11 @@ class User extends Administrator implements JWTSubject
             return;
         }
 
+        //if not student, return
+        if ($this->user_type != 'student') {
+            return;
+        }
+
         $class = AcademicClass::find($this->current_class_id);
         if ($class == null) {
             return;
@@ -414,15 +450,14 @@ class User extends Administrator implements JWTSubject
                 $transcation->payment_date = Carbon::now();
                 $transcation->type = 'FEES_BILLING';
                 $transcation->source = 'STUDENT';
-                $transcation->save(); 
-                
+                $transcation->save();
+
                 $has_fee =  new StudentHasFee();
                 $has_fee->enterprise_id    = $this->enterprise_id;
                 $has_fee->administrator_id    = $this->id;
                 $has_fee->academic_class_fee_id    = $fee->id;
                 $has_fee->academic_class_id    = $class->id;
                 $has_fee->save();
-
             }
         }
     }
@@ -442,5 +477,5 @@ class User extends Administrator implements JWTSubject
     public function theology_class()
     {
         return $this->belongsTo(TheologyClass::class, 'current_theology_class_id');
-    } 
+    }
 }
