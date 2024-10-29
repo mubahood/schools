@@ -61,8 +61,8 @@ class ParentsController extends AdminController
         });
 
 
-        $grid->disableExport();
-        $grid->disableCreateButton();
+/*         $grid->disableExport();
+        $grid->disableCreateButton(); */
         $grid->quickSearch('name')->placeholder('Search by name');
         $grid->disableBatchActions();
         $grid->column('id', __('Id'))->sortable();
