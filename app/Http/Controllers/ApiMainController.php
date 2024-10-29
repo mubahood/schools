@@ -494,13 +494,13 @@ class ApiMainController extends Controller
             'enterprise_id' => $u->enterprise_id,
         ])->limit(10000)->orderBy('id', 'desc')->get();
 
-        $data = [];
+        /* $data = [];
         foreach ($data1 as $key => $value) {
             $value->section = 'Theology';
             $data[] = $value;
-        }
+        } */
 
-        return $this->success($data, $message = "Success", 200);
+        return $this->success($data1, $message = "Success", 200);
     }
 
     public function session_create(Request $r)
