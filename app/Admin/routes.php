@@ -125,11 +125,12 @@ Route::group([
     $router->resource('scheme-works', SchemeWorkController::class);
     $router->resource('visitors', VisitorController::class);
     $router->resource('visitor-records', VisitorRecordController::class);
-    $router->resource('trips', TripController::class); 
+    $router->resource('trips', TripController::class);
     $router->resource('batch-service-subscriptions', BatchServiceSubscriptionController::class);
     $router->resource('school-pay-transactions', SchoolPayTransactionController::class);
     $router->resource('termly-secondary-report-cards', TermlySecondaryReportCardController::class);
     $router->resource('school-fees-demands', SchoolFeesDemandController::class);
+    $router->resource('transport-stages', TransportStageController::class);
 
 
 

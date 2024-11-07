@@ -121,22 +121,24 @@ class AccountController extends AdminController
             })
             ->sortable();
 
-        /*  $grid->column('name', __('Account Name'))
+        /*  
+            $grid->column('name', __('Account Name'))
             ->link()
-            ->sortable(); */
+            ->sortable(); 
+        */
 
 
 
 
-        $grid->column('budget', __('Budget'))->display(function () {
+        $grid->column('budget', __('Budget (UGX)'))->display(function () {
             $term = Auth::user()->ent->dpTerm();
-            return 'UGX ' . number_format($this->getBudget($term));
-        });
+            return  number_format($this->getBudget($term));
+        })->sortable();
 
         $grid->column('expense', __('Expense'))->display(function () {
             $term = Auth::user()->ent->dpTerm();
-            return 'UGX ' . number_format($this->getExpenditure($term));
-        });
+            return  number_format($this->getExpenditure($term));
+        })->sortable();
 
 
         $grid->column('balance', __('Balance'))->display(function () {
@@ -157,15 +159,16 @@ class AccountController extends AdminController
         $grid->export(function ($export) {
 
             $export->filename('Accounts');
+            $export->except(['balance']);
 
             $export->except(['enterprise_id', 'type', 'owner.avatar', 'id']);
-            $export->column('balance', function ($value, $original) {
+            /* $export->column('balance', function ($value, $original) {
                 $term = Auth::user()->ent->dpTerm();
                 $bud = $this->getBudget($term);
                 $exp = $this->getExpenditure($term);
                 $bal = $bud + $exp;
                 return $bal;
-            });
+            }); */
         });
 
 

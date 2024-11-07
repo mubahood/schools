@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Models\TransportRoute;
+use App\Models\TransportStage;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -16,7 +17,7 @@ class TransportRouteController extends AdminController
      *
      * @var string
      */
-    protected $title = 'Transport Routes';
+    protected $title = 'Stages';
 
     /**
      * Make a grid builder.
@@ -32,9 +33,16 @@ class TransportRouteController extends AdminController
         $grid->disableBatchActions();
         $grid->quickSearch();
         $grid->column('name', __('Name'))->sortable();
+        $grid->column('stage_id', __('Stage'))->display(function ($stage) {
+            if ($this->route == null) {
+                return 'N/A';
+            }
+            return $this->route->name;
+        })->sortable();
         $grid->column('single_trip_fare', __('Single trip fare'))->sortable();
         $grid->column('round_trip_fare', __('Round trip fare'))->sortable();
         $grid->column('description', __('Description'))->hide();
+
 
         return $grid;
     }
@@ -68,11 +76,17 @@ class TransportRouteController extends AdminController
     {
         $form = new Form(new TransportRoute());
         $u = Admin::user();
+
+        $_stages = [];
+        $stages = TransportStage::where('enterprise_id', $u->enterprise_id)->get();
+        foreach ($stages as $key => $stage) {
+            $_stages[$stage->id] = $stage->name;
+        }
         $form->hidden('enterprise_id', __('Enterprise id'))->value($u->enterprise_id);
-        $form->text('name', __('Name'))->rules('required');
+        $form->text('name', __('Name'))->rules('required')->required();
+        $form->select('stage_id', 'Select route')->options($_stages)->rules('required')->required();
         $form->decimal('single_trip_fare', __('Single trip fare'))->rules('required');
         $form->decimal('round_trip_fare', __('Round trip fare'))->rules('required');
-
         $form->textarea('description', __('Description'));
 
 

@@ -1,4 +1,4 @@
-php artisan make:migration add_residence --table=admin_users
+php artisan make:migration add_stage_id_to_transport_routes --table=transport_routes
 
          $table->date('check_in_time')->nullable();
             $table->date('check_out_time')->nullable();
@@ -10,9 +10,9 @@ php artisan make:migration slot
 
 
 
-php artisan make:model SchoolFeesDemand -m
+php artisan make:model TransportStage -m
 
-php artisan admin:make SchoolFeesDemandController --model=App\\Models\\SchoolFeesDemand
+php artisan admin:make TransportStageController --model=App\\Models\\TransportStage
 
 17-35-P.1_Theology_-_Term_2_-_2024-0200.pdf
 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

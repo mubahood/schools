@@ -36,6 +36,20 @@ class FixedAssetController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new FixedAsset());
+
+        //ignore barcode on export
+        $grid->export(function ($export) {
+            $export->filename('fixed-assets');
+            $export->originalValue(['status', 'current_value']);
+            $export->column('purchase_price', function ($value, $original) {
+                return number_format($original);
+            });
+            $export->column('current_value', function ($value, $original) {
+                return number_format($original);
+            });
+            $export->except(['barcode', 'photo']);
+        });
+
         $grid->quickSearch('name', 'code')->placeholder('Search by name or code');
 
         $grid->filter(function ($filter) {
@@ -207,10 +221,12 @@ class FixedAssetController extends AdminController
         $form->hidden('enterprise_id', __('Enterprise id'))->value($u->enterprise_id);
 
         $teachers = [];
-        foreach (Administrator::where([
-            'enterprise_id' => $u->enterprise_id,
-            'user_type' => 'employee',
-        ])->get() as $key => $a) {
+        foreach (
+            Administrator::where([
+                'enterprise_id' => $u->enterprise_id,
+                'user_type' => 'employee',
+            ])->get() as $key => $a
+        ) {
             if ($a->isRole('teacher')) {
                 $teachers[$a['id']] = $a['name'] . "  " . $a['id'];
             }
