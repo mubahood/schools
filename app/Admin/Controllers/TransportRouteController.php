@@ -41,7 +41,7 @@ class TransportRouteController extends AdminController
         })->sortable();
         $grid->column('single_trip_fare', __('Single trip fare'))->sortable();
         $grid->column('round_trip_fare', __('Round trip fare'))->sortable();
-        $grid->column('description', __('Description'))->hide();
+        $grid->column('description', __('Description'))->hide(); //
 
 
         return $grid;

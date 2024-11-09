@@ -14,10 +14,13 @@ use App\Models\ReportCardPrint;
 use App\Models\SecondaryReportCard;
 use App\Models\StudentHasClass;
 use App\Models\StudentReportCard;
+use App\Models\Subject;
 use App\Models\TermlyReportCard;
 use App\Models\TheologryStudentReportCard;
 use App\Models\TheologyClass;
+use App\Models\TheologyStream;
 use App\Models\TheologyStudentReportCardItem;
+use App\Models\TheologySubject;
 use App\Models\User;
 use App\Models\UserBatchImporter;
 use App\Models\Utils;
@@ -35,15 +38,15 @@ class ReportCardsPrintingController extends Controller
     {
         $id = $req->id;
         $assessment = AssessmentSheet::find($id);
-        $assessment = AssessmentSheet::prepare($assessment);
-        $assessment->save();
+        /*   $assessment = AssessmentSheet::prepare($assessment);
+        $assessment->save(); */
 
 
         $class = $assessment->has_class;
         $ent = Enterprise::find($assessment->enterprise_id);
 
 
-        $conds = [];
+        /* $conds = [];
         if ($assessment->type == "Class") {
             $assessment->academic_class_sctream_id = null;
         } else {
@@ -64,7 +67,7 @@ class ReportCardsPrintingController extends Controller
 
         $reportCards = StudentReportCard::where($conds)
             ->orderBy('total_marks', 'desc')
-            ->get();
+            ->get(); */
 
         $assessment->generated = "Yes";
         $name = $assessment->title;
@@ -94,10 +97,58 @@ class ReportCardsPrintingController extends Controller
             unlink($store_file_path);
         }
 
+        $subjects = [];
+        if ($assessment->target != "Theology") {
+            $subjects = Subject::where([
+                'enterprise_id' => $assessment->enterprise_id,
+                'academic_class_id' => $assessment->academic_class_id,
+                'show_in_report' => 'Yes'
+            ])->get();
+
+            $conds['termly_report_card_id'] = $assessment->termly_report_card_id;
+            $conds['academic_class_id'] = $assessment->academic_class_id;
+            $reportCards = StudentReportCard::where($conds)
+                ->orderBy('total_marks', 'desc')
+                ->get();
+        } else {
+            $subjects = TheologySubject::where([
+                'enterprise_id' => $assessment->enterprise_id,
+                'theology_class_id' => $assessment->theology_class_id,
+            ])->get();
+
+            if ($assessment->theology_target_type != "Class") {
+                $stream = TheologyStream::find($assessment->theology_stream_id);
+                if ($stream == null) {
+                    throw new Exception("Theology Stream not found", 1);
+                }
+                $conds['stream_id'] = $assessment->theology_stream_id;
+            } else {
+                $assessment->theology_stream_id = null;
+                $class = TheologyClass::find($assessment->theology_class_id);
+                if ($class == null) {
+                    throw new Exception("Theology class not found.", 1);
+                }
+                $conds['theology_class_id'] = $assessment->theology_class_id;
+            }
+
+            $conds['theology_class_id'] = $class->id;
+            $reportCards = TheologryStudentReportCard::where($conds)
+                ->orderBy('total_marks', 'desc')
+                ->get();
+        }
+
+
+        return view('print.assessment-sheets', [
+            'assessment' => $assessment,
+            'subjects' => $subjects,
+            'reportCards' => $reportCards,
+            'ent' => $ent
+        ]);
+
         $pdf->loadHTML(view('print.assessment-sheets', [
             'assessment' => $assessment,
-            'subjects' => $class->subjects,
-            'reportCards' => $reportCards,
+            /*             'subjects' => $class->subjects,
+            'reportCards' => $reportCards, */
             'ent' => $ent
         ]));
         $output = $pdf->output();

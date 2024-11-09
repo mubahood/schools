@@ -120,4 +120,12 @@ class TheologySubject extends Model
         if ($u == null) return 'N/A';
         return strtoupper($u->short_name);
     }
+
+    //short_name
+    public function short_name()
+    {
+        $u = TheologyClass::find($this->theology_class_id);
+        if ($u == null) return 'N/A';
+        return strtoupper($u->short_name);
+    }
 }

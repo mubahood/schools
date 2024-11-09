@@ -7,6 +7,8 @@ use App\Models\AcademicClassSctream;
 use App\Models\AssessmentSheet;
 use App\Models\Term;
 use App\Models\TermlyReportCard;
+use App\Models\TheologyClass;
+use App\Models\TheologyStream;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -29,11 +31,12 @@ class AssessmentSheetController extends AdminController
      */
     protected function grid()
     {
-/*         $a = AssessmentSheet::find(25);
+        // dd((new AssessmentSheet())->getTable());
+        /*    $a = AssessmentSheet::find(81);
         $a->title .= '.';
         $a->save();
-        dd("done"); */
-        
+        dd("done");
+ */
         $grid = new Grid(new AssessmentSheet());
         $u = Admin::user();
         $grid->model()->where('enterprise_id', $u->enterprise_id)->orderBy('id', 'desc');
@@ -48,7 +51,12 @@ class AssessmentSheetController extends AdminController
                 return Term::find($term_id)->name_text;
             });
         $grid->column('title', __('Title'));
-        $grid->column('type', __('Type'));
+        $grid->column('target', __('Type'))->sortable()
+            ->label([
+                'Secular' => 'primary',
+                'Theology' => 'success',
+            ])->sortable();
+        $grid->column('type', __('Target'));
         $grid->column('academic_class_sctream_id', __('Stream'))
             ->display(function ($academic_class_sctream_id) {
                 if ($academic_class_sctream_id == null) {
@@ -85,9 +93,9 @@ class AssessmentSheetController extends AdminController
                 if ($pdf_link == null) {
                     return "N/A";
                 }
-                $url = url('storage/'.$pdf_link);
+                $url = url('storage/' . $pdf_link);
                 //open to new tab
-                return '<a href="' . $url . '" target="_blank">Download pdf</a>'; 
+                return '<a href="' . $url . '" target="_blank">Download pdf</a>';
             });
 
 
@@ -137,41 +145,86 @@ class AssessmentSheetController extends AdminController
 
         $u = Admin::user();
         $form->hidden('enterprise_id', __('Enterprise id'))->value($u->enterprise_id);
-        $form->radio('type', __('Target'))
-            ->rules('required')
-            ->options([
-                'Class' => 'Class',
-                'Stream' => 'Stream',
-            ])
-            ->when('Class', function (Form $form) {
 
+
+        $form->radio('target', __('Target'))
+            ->options([
+                'Secular' => 'Secular',
+                'Theology' => 'Theology',
+            ])
+            ->required()
+            ->when('Secular', function (Form $form) {
+                $form->radio('type', __('Type'))
+                    ->rules('required')
+                    ->options([
+                        'Class' => 'Class',
+                        'Stream' => 'Stream',
+                    ])
+                    ->when('Class', function (Form $form) {
+
+                        $u = Admin::user();
+                        $classes = [];
+                        foreach (
+                            AcademicClass::where([
+                                'enterprise_id' => $u->enterprise_id,
+                            ])->orderBy('id', 'desc')->get()
+                            as $class
+                        ) {
+                            $classes[$class->id] = $class->name_text;
+                        }
+                        //academic_class_id
+                        $form->select('academic_class_id', __('Select Class'))->options($classes)->rules('required');
+                    })->when('Stream', function (Form $form) {
+                        $streams = [];
+                        $u = Admin::user();
+                        foreach (
+                            AcademicClassSctream::where([
+                                'enterprise_id' => $u->enterprise_id,
+                            ])->orderBy('id', 'desc')->get()
+                            as $stream
+                        ) {
+                            $streams[$stream->id] = $stream->name_text;
+                        }
+                        $form->select('academic_class_sctream_id', __('Select Stream'))->options($streams)->rules('required');
+                    });
+            })->when('Theology', function (Form $form) {
+
+                $_streams = [];
+                $_classes = [];
                 $u = Admin::user();
-                $classes = [];
+                //theology_target_type
                 foreach (
-                    AcademicClass::where([
+                    TheologyClass::where([
                         'enterprise_id' => $u->enterprise_id,
-                    ])->orderBy('id', 'desc')->get()
-                    as $class
+                    ])->orderBy('id', 'desc')->get() as $class
                 ) {
-                    $classes[$class->id] = $class->name_text;
+                    $_classes[$class->id] = $class->name_text;
                 }
-                //academic_class_id
-                $form->select('academic_class_id', __('Select Class'))->options($classes)->rules('required');
-            })->when('Stream', function (Form $form) {
-                $streams = [];
-                $u = Admin::user();
                 foreach (
-                    AcademicClassSctream::where([
+                    TheologyStream::where([
                         'enterprise_id' => $u->enterprise_id,
-                    ])->orderBy('id', 'desc')->get()
-                    as $stream
+                    ])->orderBy('id', 'desc')->get() as $stream
                 ) {
-                    $streams[$stream->id] = $stream->name_text;
+                    $_streams[$stream->id] = $stream->theology_class_text;
                 }
-                $form->select('academic_class_sctream_id', __('Select Stream'))->options($streams)->rules('required');
+
+
+                $form->radio('theology_target_type', __('Type'))->options([
+                    'Class' => 'Class',
+                    'Stream' => 'Stream',
+                ])->when('Class', function (Form $form) use ($_classes) {
+                    $u = Admin::user();
+
+                    $form->select('theology_class_id', __('Select Theology Class'))->options($_classes)->rules('required');
+                })->when('Stream', function (Form $form) use ($_streams) {
+
+
+                    $form->select('theology_stream_id', __('Select Theology Stream'))->options($_streams)->rules('required');
+                });
             });
 
 
+        $form->disableReset();
         $termly_report_cards = [];
         $u = Admin::user();
         foreach (

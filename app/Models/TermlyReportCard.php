@@ -474,25 +474,22 @@ class TermlyReportCard extends Model
                     $mark->total_score_display = $average_mark;
                     $mark->remarks = Utils::get_automaic_mark_remarks($mark->total_score_display);
 
-
-                    if ($mark->subject->grade_subject != 'Yes') {
-                        $mark->aggr_value = 0;
-                        $mark->aggr_name = '-';
-                        $mark->save();
-                        continue;
-                    } else {
-                        $mark->aggr_value = null;
-                        $mark->aggr_name = null;
-                        foreach ($ranges as $range) {
-                            if ($mark->total_score_display >= $range->min_mark && $mark->total_score_display <= $range->max_mark) {
-                                $mark->aggr_value = $range->aggregates;
-                                $mark->aggr_name = $range->name;
-                                $report->average_aggregates += $mark->aggr_value;
-                                break;
-                            }
+                    $mark->aggr_value = null;
+                    $mark->aggr_name = null;
+                    foreach ($ranges as $range) {
+                        if ($mark->total_score_display >= $range->min_mark && $mark->total_score_display <= $range->max_mark) {
+                            $mark->aggr_value = $range->aggregates;
+                            $mark->aggr_name = $range->name;
+                            break;
                         }
                     }
 
+                    if ($mark->subject->grade_subject != 'Yes') {
+                        $mark->save();
+                        continue;
+                    }
+
+                    $report->average_aggregates += $mark->aggr_value;
                     $report->total_marks += $mark->total_score_display;
                     $mark->save();
                 }
