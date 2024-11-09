@@ -30,6 +30,11 @@ class ParticipantController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Participant());
+        $grid->export(function ($export) {
+            $export->column('is_present', function ($value, $original) {
+                return $value == 1 ? "Present" : "Absent";
+            });
+        });
         $grid->filter(function ($filter) {
             $filter->disableIdFilter();
             $u = Admin::user();
@@ -43,10 +48,10 @@ class ParticipantController extends AdminController
                         'enterprise_id' => Admin::user()->enterprise_id,
                     ])->get()->pluck('name', 'id')
                 );
-            $filter->equal('is_present', __('Is Present'))->select([
+            /*             $filter->equal('is_present', __('Is Present'))->select([
                 1 => 'Present',
                 0 => 'Absent',
-            ]);
+            ]); */
 
             $sessions = Session::where([
                 'enterprise_id' => $u->enterprise_id,
@@ -59,8 +64,7 @@ class ParticipantController extends AdminController
             $filter->between('created_at', __('Created at'))->datetime();
         });
 
-        $grid->disableExport();
-
+        $grid->disableCreateButton();
 
         $activeSession = Session::where([
             'enterprise_id' => Admin::user()->enterprise_id,
@@ -86,9 +90,14 @@ class ParticipantController extends AdminController
                 if ($this->participant == null) {
                     return "N/A";
                 }
-                return $this->participant->name . " - " . $this->participant->user_number;
+                return $this->participant->name;
             })
             ->sortable();
+        $grid->column('student_id', __('Student ID'))
+            ->display(function () {
+                return  $this->participant->user_number;
+            })
+            ->hide();
 
         $grid->column('created_at', __('DATE'))
             ->display(function () {
@@ -120,8 +129,8 @@ class ParticipantController extends AdminController
                     return "N/A";
                 }
                 return $sub->name;
-            })->sortable();
-        $grid->column('is_present', __('Is Present'))
+            })->sortable()->hide();
+        $grid->column('is_present', __('Status'))
             ->using([
                 1 => 'Present',
                 0 => 'Absent',
