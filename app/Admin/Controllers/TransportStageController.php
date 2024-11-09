@@ -26,6 +26,7 @@ class TransportStageController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new TransportStage());
+        $grid->disableCreateButton();
         $grid->disableBatchActions();
         $u = Admin::user();
         $grid->model()

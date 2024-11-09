@@ -28,15 +28,18 @@
         @page {
             size: landscape;
         }
+
         tbody {
             page-break-inside: avoid;
         }
+
         table tbody tr td {
             page-break-inside: avoid;
             page-break-after: auto;
             font-size: 12px;
             font-weight: 400;
         }
+
         table thead tr th {
             font-size: 12px;
             font-weight: 800;
@@ -87,6 +90,7 @@
                 <th class="text-center">Skills</th>
                 <th class="text-center">Suggested Activities</th>
                 <th class="text-center">Instructional Materials</th>
+                <th class="text-center">Content</th>
                 <th class="text-center">References</th>
                 <th class="text-center">Remarks</th>
             </tr>
@@ -102,6 +106,7 @@
                     <td class="text-left p-1">{{ $item->skills }}</td>
                     <td class="text-left p-1">{{ $item->suggested_activity }}</td>
                     <td class="text-left p-1">{{ $item->instructional_material }}</td>
+                    <td class="text-left p-1">{{ $item->supervisor_comment }}</td>
                     <td class="text-left p-1">{{ $item->references }}</td>
                     <td class="text-left p-1">{{ $item->teacher_comment }}</td>
                 </tr>
