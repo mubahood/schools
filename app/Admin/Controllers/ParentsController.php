@@ -34,6 +34,44 @@ class ParentsController extends AdminController
             $actions->disableDelete();
         });
 
+        $grid->export(function ($export) {
+            $export->column('kids', function ($value, $original) {
+                if ($original->kids == null) {
+                    return '-';
+                }
+                $txt = "";
+                $isFirst = true;
+                foreach ($original->kids as $key => $kid) {
+                    if (!$isFirst) {
+                        $txt .= ', ';
+                    } else {
+                        $isFirst = false;
+                    }
+                    $txt .= $kid->name;
+                }
+                return $txt;
+            });
+
+            //children
+            $export->column('kids', function ($value, $original) {
+                if ($original->kids == null) {
+                    return '-';
+                }
+                $txt = "";
+                $isFirst = true;
+                foreach ($original->kids as $key => $kid) {
+                    if (!$isFirst) {
+                        $txt .= ', ';
+                    } else {
+                        $isFirst = false;
+                    }
+                    $txt .= $kid->name;
+                }
+                return $txt;
+            }); 
+        });
+
+
         /*         $ git add  .git/MERGE_MSG -f
 
 
@@ -76,7 +114,7 @@ class ParentsController extends AdminController
 
                 return $txt;
             });
-        $grid->column('kids', __('No. of Children'))
+        $grid->column('kids', __('Lis of Children'))
             ->display(function ($x) {
                 if ($this->kids == null) {
                     return '-';
