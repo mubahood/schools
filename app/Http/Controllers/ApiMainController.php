@@ -1832,7 +1832,7 @@ lin
         if ($part == null) {
             $part = new Participant();
             $part->enterprise_id = $session->enterprise_id;
-            $part->administrator_id = $u->administrator_id;
+            $part->administrator_id = $u->id;
             $part->academic_year_id = $active_term->academic_year_id;
             $part->term_id = $active_term->id;
             $part->academic_class_id = $session->academic_class_id;
