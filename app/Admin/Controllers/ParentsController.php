@@ -35,40 +35,7 @@ class ParentsController extends AdminController
         });
 
         $grid->export(function ($export) {
-            $export->column('kids', function ($value, $original) {
-                if ($original->kids == null) {
-                    return '-';
-                }
-                $txt = "";
-                $isFirst = true;
-                foreach ($original->kids as $key => $kid) {
-                    if (!$isFirst) {
-                        $txt .= ', ';
-                    } else {
-                        $isFirst = false;
-                    }
-                    $txt .= $kid->name;
-                }
-                return $txt;
-            });
-
-            //children
-            $export->column('kids', function ($value, $original) {
-                if ($original->kids == null) {
-                    return '-';
-                }
-                $txt = "";
-                $isFirst = true;
-                foreach ($original->kids as $key => $kid) {
-                    if (!$isFirst) {
-                        $txt .= ', ';
-                    } else {
-                        $isFirst = false;
-                    }
-                    $txt .= $kid->name;
-                }
-                return $txt;
-            }); 
+            $export->except(['kids','children']);
         });
 
 
