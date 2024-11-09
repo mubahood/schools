@@ -36,16 +36,27 @@ class BursaryBeneficiaryController extends AdminController
         $x->description .= 1;
         $x->delete(); */
 
+        $grid->export(function ($export) {
+            $export->column('administrator_id', function ($value, $original) {
+                if ($original->beneficiary == null) {
+                    return 'N/A';
+                }
+                return $original->beneficiary->name;
+            });
+        });
+
         $grid->filter(function ($filter) {
             $filter->disableIdFilter();
             $u = Admin::user();
 
 
             $terms = [];
-            foreach (Term::where(
-                'enterprise_id',
-                Admin::user()->enterprise_id
-            )->orderBy('id', 'desc')->get() as $key => $term) {
+            foreach (
+                Term::where(
+                    'enterprise_id',
+                    Admin::user()->enterprise_id
+                )->orderBy('id', 'desc')->get() as $key => $term
+            ) {
                 $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
             }
 
@@ -73,10 +84,12 @@ class BursaryBeneficiaryController extends AdminController
                     }
                 })->ajax($ajax_url);
             $shemes = [];
-            foreach (Bursary::where(
-                'enterprise_id',
-                Admin::user()->enterprise_id
-            )->get() as $key => $bursary) {
+            foreach (
+                Bursary::where(
+                    'enterprise_id',
+                    Admin::user()->enterprise_id
+                )->get() as $key => $bursary
+            ) {
                 $shemes[$bursary->id] = "UGX " . ($bursary->name_text);
             }
             $filter->equal('bursary_id', 'Filter by bursary scheme')
@@ -95,10 +108,12 @@ class BursaryBeneficiaryController extends AdminController
 
         $terms = [];
         $active_term = 0;
-        foreach (Term::where(
-            'enterprise_id',
-            Admin::user()->enterprise_id
-        )->orderBy('id', 'desc')->get() as $key => $term) {
+        foreach (
+            Term::where(
+                'enterprise_id',
+                Admin::user()->enterprise_id
+            )->orderBy('id', 'desc')->get() as $key => $term
+        ) {
             $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
             if ($term->is_active) {
                 $active_term = $term->id;
@@ -200,10 +215,12 @@ class BursaryBeneficiaryController extends AdminController
 
         $terms = [];
         $active_term = 0;
-        foreach (Term::where(
-            'enterprise_id',
-            Admin::user()->enterprise_id
-        )->orderBy('id', 'desc')->get() as $key => $term) {
+        foreach (
+            Term::where(
+                'enterprise_id',
+                Admin::user()->enterprise_id
+            )->orderBy('id', 'desc')->get() as $key => $term
+        ) {
             $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
             if ($term->is_active) {
                 $active_term = $term->id;
@@ -225,10 +242,12 @@ class BursaryBeneficiaryController extends AdminController
             ->ajax($ajax_url)->rules('required');
 
         $options = [];
-        foreach (Bursary::where(
-            'enterprise_id',
-            Admin::user()->enterprise_id
-        )->get() as $key => $bursary) {
+        foreach (
+            Bursary::where(
+                'enterprise_id',
+                Admin::user()->enterprise_id
+            )->get() as $key => $bursary
+        ) {
             $options[$bursary->id] = $bursary->name . " - UGX " . number_format($bursary->fund);
         }
 
