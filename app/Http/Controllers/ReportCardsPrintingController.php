@@ -38,8 +38,8 @@ class ReportCardsPrintingController extends Controller
     {
         $id = $req->id;
         $assessment = AssessmentSheet::find($id);
-        /*   $assessment = AssessmentSheet::prepare($assessment);
-        $assessment->save(); */
+        $assessment = AssessmentSheet::prepare($assessment);
+        $assessment->save();
 
 
         $class = $assessment->has_class;
@@ -68,6 +68,15 @@ class ReportCardsPrintingController extends Controller
         $reportCards = StudentReportCard::where($conds)
             ->orderBy('total_marks', 'desc')
             ->get(); */
+
+        $termly_report = $assessment->get_termly_report_card();
+
+        if ($termly_report == null) {
+            throw new Exception("Termly report card not found", 1);
+        }
+
+        $conds['term_id'] = $termly_report->term_id;
+
 
         $assessment->generated = "Yes";
         $name = $assessment->title;
@@ -122,6 +131,10 @@ class ReportCardsPrintingController extends Controller
                     throw new Exception("Theology Stream not found", 1);
                 }
                 $conds['stream_id'] = $assessment->theology_stream_id;
+                $class = TheologyClass::find($stream->theology_class_id);
+                if ($class == null) {
+                    throw new Exception("Theology class not found.", 1);
+                }
             } else {
                 $assessment->theology_stream_id = null;
                 $class = TheologyClass::find($assessment->theology_class_id);
@@ -138,17 +151,17 @@ class ReportCardsPrintingController extends Controller
         }
 
 
-        return view('print.assessment-sheets', [
+        /* return view('print.assessment-sheets', [
             'assessment' => $assessment,
             'subjects' => $subjects,
             'reportCards' => $reportCards,
             'ent' => $ent
-        ]);
+        ]); */
 
         $pdf->loadHTML(view('print.assessment-sheets', [
             'assessment' => $assessment,
-            /*             'subjects' => $class->subjects,
-            'reportCards' => $reportCards, */
+            'subjects' => $subjects,
+            'reportCards' => $reportCards,
             'ent' => $ent
         ]));
         $output = $pdf->output();

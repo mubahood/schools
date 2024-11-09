@@ -32,11 +32,14 @@ class AssessmentSheetController extends AdminController
     protected function grid()
     {
         // dd((new AssessmentSheet())->getTable());
-        /*    $a = AssessmentSheet::find(81);
-        $a->title .= '.';
-        $a->save();
+        /* $a = AssessmentSheet::find(81);
+        $t = $a->get_title();
+        dd($t);
+        dd($a->title);
         dd("done");
- */
+        $a->title .= '.';
+        $a->save(); */
+
         $grid = new Grid(new AssessmentSheet());
         $u = Admin::user();
         $grid->model()->where('enterprise_id', $u->enterprise_id)->orderBy('id', 'desc');
@@ -56,20 +59,29 @@ class AssessmentSheetController extends AdminController
                 'Secular' => 'primary',
                 'Theology' => 'success',
             ])->sortable();
-        $grid->column('type', __('Target'));
-        $grid->column('academic_class_sctream_id', __('Stream'))
-            ->display(function ($academic_class_sctream_id) {
-                if ($academic_class_sctream_id == null) {
-                    return "N/A";
-                }
-                return AcademicClassSctream::find($academic_class_sctream_id)->name_text;
-            });
+        $grid->column('type', __('Target'))->hide();
+
         $grid->column('academic_class_id', __('Academic class'))
             ->display(function ($academic_class_id) {
                 if ($academic_class_id == null) {
-                    return "N/A";
+                    $class = TheologyClass::find($this->theology_class_id);
+                    if ($class == null) {
+                        return "N/A";
+                    }
+                    return $class->name_text;
                 }
                 return AcademicClass::find($academic_class_id)->name_text;
+            });
+        $grid->column('academic_class_sctream_id', __('Stream'))
+            ->display(function ($academic_class_sctream_id) {
+                if ($academic_class_sctream_id == null) {
+                    $stream = TheologyStream::find($this->theology_stream_id);
+                    if ($stream == null) {
+                        return "N/A";
+                    }
+                    return $stream->name;
+                }
+                return AcademicClassSctream::find($academic_class_sctream_id)->name_text;
             });
 
         $grid->column('total_students', __('Total students'))->sortable();
@@ -146,6 +158,19 @@ class AssessmentSheetController extends AdminController
         $u = Admin::user();
         $form->hidden('enterprise_id', __('Enterprise id'))->value($u->enterprise_id);
 
+        $termly_report_cards = [];
+        $u = Admin::user();
+        foreach (
+            TermlyReportCard::where([
+                'enterprise_id' => $u->enterprise_id,
+            ])->orderBy('id', 'desc')->get()
+            as $termly_report_card
+        ) {
+            $termly_report_cards[$termly_report_card->id] = $termly_report_card->report_title;
+        }
+        //select termly_report_card_id
+        $form->select('termly_report_card_id', __('Select Termly Report Card'))->options($termly_report_cards)->rules('required');
+
 
         $form->radio('target', __('Target'))
             ->options([
@@ -205,7 +230,7 @@ class AssessmentSheetController extends AdminController
                         'enterprise_id' => $u->enterprise_id,
                     ])->orderBy('id', 'desc')->get() as $stream
                 ) {
-                    $_streams[$stream->id] = $stream->theology_class_text;
+                    $_streams[$stream->id] = $stream->theology_class_text . " - " . $stream->name;
                 }
 
 
@@ -225,18 +250,7 @@ class AssessmentSheetController extends AdminController
 
 
         $form->disableReset();
-        $termly_report_cards = [];
-        $u = Admin::user();
-        foreach (
-            TermlyReportCard::where([
-                'enterprise_id' => $u->enterprise_id,
-            ])->orderBy('id', 'desc')->get()
-            as $termly_report_card
-        ) {
-            $termly_report_cards[$termly_report_card->id] = $termly_report_card->report_title;
-        }
-        //select termly_report_card_id
-        $form->select('termly_report_card_id', __('Select Termly Report Card'))->options($termly_report_cards)->rules('required');
+
 
 
         return $form;

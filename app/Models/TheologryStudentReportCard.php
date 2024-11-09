@@ -21,6 +21,13 @@ class TheologryStudentReportCard extends Model
     {
         return $this->belongsTo(Administrator::class, 'student_id');
     }
+    public function getStudentTextAttribute()
+    {
+        if ($this->owner == null) {
+            return "N/A";
+        }
+        return $this->owner->name;
+    }
     public function term()
     {
         return $this->belongsTo(Term::class);
@@ -60,7 +67,7 @@ class TheologryStudentReportCard extends Model
     {
         parent::boot();
         static::updating(function ($m) {
-           // dd($m); 
+            // dd($m); 
         });
-    }   
+    }
 }

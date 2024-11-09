@@ -1,5 +1,6 @@
 <?php
 use App\Models\MarkRecord;
+use App\Models\TheologyMarkRecord;
 use App\Models\Utils;
 $subject_ids = [];
 $subjects_grades = [];
@@ -16,6 +17,11 @@ if ($subjects == null) {
     $subjects = [];
 }
 
+$theology_termly_report = $assessment->get_theology_termly_report_card();
+
+$class = $assessment->get_class();
+$stream = $assessment->get_stream();
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -24,7 +30,7 @@ if ($subjects == null) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>{{ $assessment->title }}</title>
+    <title>{{ $assessment->get_title() }}</title>
     {{-- inclide css blade --}}
     @include('print.css')
     <style>
@@ -99,20 +105,30 @@ if ($subjects == null) {
                     'd' => 'Term ' . $assessment->term->name_text,
                 ])</td>
 
-                @if ($assessment->type == 'Class' && $assessment->has_class != null)
+                @if ($class != null)
                     <td class="p-1"> @include('print.title-detail', [
                         't' => 'Class',
-                        'd' => $assessment->has_class->name_text ?? '-',
+                        'd' => $class->name_text ?? '-',
+                    ])</td>
+                @else
+                    <td class="p-1"> @include('print.title-detail', [
+                        't' => 'Class',
+                        'd' => '-',
                     ])</td>
                 @endif
 
-                @if ($assessment->type == 'Stream' && $assessment->stream != null)
+                @if ($stream != null)
                     <td class="p-1"> @include('print.title-detail', [
                         't' => 'Stream',
-                        'd' => $assessment->stream->name_text ?? '-',
+                        'd' => $stream->name ?? '-',
+                    ])</td>
+                @else
+                    <td class="p-1"> @include('print.title-detail', [
+                        't' => 'Stream',
+                        'd' => '-',
                     ])</td>
                 @endif
-                <td class="p-1" colspan='3'> @include('print.title-detail', [
+                <td class="p-1" colspan='2'> @include('print.title-detail', [
                     't' => 'Class Teacher',
                     'd' => /* $assessment->name_of_teacher ?? */ '-',
                 ])</td>
@@ -219,8 +235,8 @@ if ($subjects == null) {
             @foreach ($reportCards as $reportCard)
                 <?php
                 $i++;
-                if ($i == 10) {
-                    //break;
+                if ($i == 5) {
+                    // break;
                 }
                 ?>
                 <tr>
@@ -228,13 +244,23 @@ if ($subjects == null) {
                     <td class="p-1">{{ $reportCard->student_text }}</td>
                     @foreach ($subjects as $sub)
                         <?php
-                        
-                        $records = MarkRecord::where([
-                            'termly_report_card_id' => $assessment->termly_report_card_id,
-                            'academic_class_id' => $assessment->academic_class_id,
-                            'administrator_id' => $reportCard->student_id,
-                            'subject_id' => $sub->id,
-                        ])->get();
+                        if ($assessment->target == 'Theology') {
+                            $records = TheologyMarkRecord::where([
+                                'term_id' => $reportCard->term_id,
+                                'theology_class_id' => $reportCard->theology_class_id,
+                                'administrator_id' => $reportCard->student_id,
+                                'theology_subject_id' => $sub->id,
+                            ])
+                                ->orderBy('id', 'desc')
+                                ->get();
+                        } else {
+                            $records = MarkRecord::where([
+                                'termly_report_card_id' => $assessment->termly_report_card_id,
+                                'academic_class_id' => $assessment->academic_class_id,
+                                'administrator_id' => $reportCard->student_id,
+                                'subject_id' => $sub->id,
+                            ])->get();
+                        }
                         $rec = null;
                         if ($records->count() > 0) {
                             $rec = $records->first();
@@ -244,11 +270,10 @@ if ($subjects == null) {
 
                         @if ($rec == null)
                             <td class="p-0 text-center">-</td>
+                            <td class="p-0 text-center">-</td>
                         @else
-                            <td class="p-0 text-center">{{ $rec->total_score_display }}
-                            </td>
-                            <td class="p-0 text-center">{{ $rec->aggr_name }}
-                            </td>
+                            <td class="p-0 text-center">{{ $rec->total_score_display }}</td>
+                            <td class="p-0 text-center">{{ $rec->aggr_name }}</td>
                         @endif
                     @endforeach
                     <th class="text-center p-0">{{ $reportCard->total_marks }}</th>

@@ -11,6 +11,58 @@ class AssessmentSheet extends Model
     use HasFactory;
 
     //belongs to class
+    public function get_title()
+    {
+        $t = "";
+        if ($this->target == "Theology") {
+            $t = "THEOLOGY";
+
+            //if stream
+            $stream = null;
+            if ($this->theology_target_type == "Stream") {
+                $stream = TheologyStream::find($this->theology_stream_id);
+                if ($stream == null) {
+                    throw new Exception("Theology Stream not found", 1);
+                }
+                $class = TheologyClass::find($stream->theology_class_id);
+                if ($class == null) {
+                    throw new Exception("Theology class not found", 1);
+                }
+            } else {
+                $class = TheologyClass::find($this->theology_class_id);
+                if ($class == null) {
+                    throw new Exception("Theology class not found", 1);
+                }
+            }
+            $t = $class->name;
+            if ($stream != null) {
+                $t .= " - " . $stream->name;
+            }
+            $t .= ' - Theology';
+        } else {
+            $class = AcademicClass::find($this->academic_class_id);
+            if ($class == null) {
+                throw new Exception("Class not found", 1);
+            }
+            //check if stream
+            if ($this->type == "Stream") {
+                $stream = AcademicClassSctream::find($this->academic_class_sctream_id);
+                if ($stream == null) {
+                    throw new Exception("Stream not found", 1);
+                }
+                $t = $stream->name . ' - ' . $class->name;
+            } else {
+                $t = $class->name;
+            }
+        }
+        $termly_report_card = TermlyReportCard::find($this->termly_report_card_id);
+        if ($termly_report_card == null) {
+            throw new Exception("Termly Report Card not found", 1);
+        }
+
+        $t .= ' - ' . strtoupper($termly_report_card->report_title) . strtoupper(' - ASSESSMENT SHEET');
+        return $t;
+    }
     public function has_class()
     {
         return $this->belongsTo(AcademicClass::class, 'academic_class_id');
@@ -56,6 +108,7 @@ class AssessmentSheet extends Model
             $title = $class->name;
             $conds['theology_class_id'] = $m->theology_class_id;
         } else {
+
             $stream = TheologyStream::find($m->theology_stream_id);
             if ($stream == null) {
                 throw new Exception("Theology Stream not found", 1);
@@ -66,10 +119,11 @@ class AssessmentSheet extends Model
             if ($class == null) {
                 throw new Exception("Theology class not found..", 1);
             }
-            $m->theology_class_id = $m->theology_class_id;
-            $conds['theology_class_id'] = $m->theology_class_id;
+            $m->theology_class_id = $class->id;
+            $conds['theology_class_id'] = $class->id;
             $title = $stream->theology_class_text;
         }
+
         $m->title = strtoupper($termly_report_card->report_title) . ' - ' . strtoupper($title) . ' - ' . strtoupper('ASSESSMENT SHEET');
 
         if ($class == null) {
@@ -151,6 +205,15 @@ class AssessmentSheet extends Model
 
         return $m;
     }
+    public function get_termly_report_card()
+    {
+        $termly_report_card = TermlyReportCard::find($this->termly_report_card_id);
+        if ($termly_report_card == null) {
+            throw new Exception("Termly Report Card not found", 1);
+        }
+        return $termly_report_card;
+    }
+
     public static function prepare($m)
     {
         $termly_report_card = TermlyReportCard::find($m->termly_report_card_id);
@@ -200,27 +263,19 @@ class AssessmentSheet extends Model
         ])->get();
         $subs = [];
 
-        /* 
-        
-        
-        */
-
 
         $student_ids = [];
         if ($m->type  == 'Stream') {
             $marks_conds['stream_id'] = $m->academic_class_sctream_id;
-            $student_ids = User::where([
-                'user_type' => 'student',
-                'status' => 1,
-                'stream_id' => $m->academic_class_sctream_id
-            ])->pluck('id')->toArray();
+            $student_ids = StudentHasClass::where([
+                'stream_id' => $m->stream_id
+            ])->pluck('administrator_id')->toArray();
         } else {
-            $student_ids = User::where([
-                'user_type' => 'student',
-                'status' => 1,
+            $student_ids = StudentHasClass::where([
                 'academic_class_id' => $m->academic_class_id
-            ])->pluck('id')->toArray();
+            ])->pluck('administrator_id')->toArray();
         }
+        $student_ids = array_unique($student_ids);
 
         foreach ($subjects as $key => $subject) {
             $s['id'] = $subject->id;
@@ -275,5 +330,80 @@ class AssessmentSheet extends Model
     public function stream()
     {
         return $this->belongsTo(AcademicClassSctream::class, 'academic_class_sctream_id');
+    }
+
+    //theology_termly_report_card
+    public function get_theology_termly_report_card()
+    {
+        $termly_report_card = TermlyReportCard::find($this->termly_report_card_id);
+        if ($termly_report_card == null) {
+            throw new Exception("Termly Report Card not found", 1);
+        }
+
+        $conds = [];
+        $term = Term::find($termly_report_card->term_id);
+        if ($term == null) {
+            throw new Exception("Term not found", 1);
+        }
+        //for this term
+        $TheologyTermlyReport = TheologyTermlyReportCard::where([
+            'term_id' => $termly_report_card->term_id,
+            'enterprise_id' => $termly_report_card->enterprise_id
+        ])->first();
+        return $TheologyTermlyReport;
+    }
+
+    //getter for title
+    public function get_title_attribute($value)
+    {
+        return $this->get_title();
+    }
+
+    //get_class
+    public function get_class()
+    {
+        if ($this->target == "Theology") {
+            if ($this->theology_target_type == "Stream") {
+                $stream = TheologyStream::find($this->theology_stream_id);
+                if ($stream == null) {
+                    throw new Exception("Theology Stream not found", 1);
+                }
+                $class = TheologyClass::find($stream->theology_class_id);
+                if ($class == null) {
+                    throw new Exception("Theology class not found", 1);
+                }
+            } else {
+                $class = TheologyClass::find($this->theology_class_id);
+                if ($class == null) {
+                    throw new Exception("Theology class not found", 1);
+                }
+            }
+            return $class;
+        }
+        $class = AcademicClass::find($this->academic_class_id);
+        if ($class == null) {
+            throw new Exception("Class not found", 1);
+        }
+        return $class;
+    }
+
+    //get_stream
+    public function get_stream()
+    {
+        if ($this->target == "Theology") {
+            if ($this->theology_target_type == "Stream") {
+                $stream = TheologyStream::find($this->theology_stream_id);
+                if ($stream == null) {
+                    throw new Exception("Theology Stream not found", 1);
+                }
+                return $stream;
+            }
+            return null;
+        }
+        $stream = AcademicClassSctream::find($this->academic_class_sctream_id);
+        if ($stream == null) {
+            throw new Exception("Stream not found", 1);
+        }
+        return $stream;
     }
 }
