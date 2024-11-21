@@ -265,36 +265,34 @@ class AssessmentSheet extends Model
 
 
         $student_ids = [];
+        $marks_conds['term_id'] = $m->term_id;
         if ($m->type  == 'Stream') {
-            $marks_conds['stream_id'] = $m->academic_class_sctream_id;
-            $student_ids = StudentHasClass::where([
+            $marks_conds['academic_class_sctream_id'] = $m->academic_class_sctream_id;
+            /* $student_ids = StudentHasClass::where([
                 'stream_id' => $m->stream_id
-            ])->pluck('administrator_id')->toArray();
+                ])->pluck('administrator_id')->toArray(); */
         } else {
-            $student_ids = StudentHasClass::where([
+            $marks_conds['academic_class_id'] = $m->academic_class_id;
+           /*  $student_ids = StudentHasClass::where([
                 'academic_class_id' => $m->academic_class_id
-            ])->pluck('administrator_id')->toArray();
+            ])->pluck('administrator_id')->toArray(); */
         }
         $student_ids = array_unique($student_ids);
 
         foreach ($subjects as $key => $subject) {
             $s['id'] = $subject->id;
             $s['name'] = $subject->subject_name;
-            $marks_conds = [
-                'academic_class_id' => $m->academic_class_id,
-                'subject_id' => $subject->id,
-                'term_id' => $m->term_id
-            ];
-            $s['d1'] = MarkRecord::where($marks_conds)->wherein('administrator_id', $student_ids)->where('aggr_value', 1)->count();
-            $s['d2'] = MarkRecord::where($marks_conds)->wherein('administrator_id', $student_ids)->where('aggr_value', 2)->count();
-            $s['c3'] = MarkRecord::where($marks_conds)->wherein('administrator_id', $student_ids)->where('aggr_value', 3)->count();
-            $s['c4'] = MarkRecord::where($marks_conds)->wherein('administrator_id', $student_ids)->where('aggr_value', 4)->count();
-            $s['c5'] = MarkRecord::where($marks_conds)->wherein('administrator_id', $student_ids)->where('aggr_value', 5)->count();
-            $s['c6'] = MarkRecord::where($marks_conds)->wherein('administrator_id', $student_ids)->where('aggr_value', 6)->count();
-            $s['p7'] = MarkRecord::where($marks_conds)->wherein('administrator_id', $student_ids)->where('aggr_value', 7)->count();
-            $s['p8'] = MarkRecord::where($marks_conds)->wherein('administrator_id', $student_ids)->where('aggr_value', 8)->count();
-            $s['f9'] = MarkRecord::where($marks_conds)->wherein('administrator_id', $student_ids)->where('aggr_value', 9)->count();
-            $s['x'] = MarkRecord::where($marks_conds)->wherein('administrator_id', $student_ids)->where('aggr_value', 0)->count();
+            $marks_conds['subject_id'] = $subject->id;
+            $s['d1'] = MarkRecord::where($marks_conds)->where('aggr_value', 1)->count();
+            $s['d2'] = MarkRecord::where($marks_conds)->where('aggr_value', 2)->count();
+            $s['c3'] = MarkRecord::where($marks_conds)->where('aggr_value', 3)->count();
+            $s['c4'] = MarkRecord::where($marks_conds)->where('aggr_value', 4)->count();
+            $s['c5'] = MarkRecord::where($marks_conds)->where('aggr_value', 5)->count();
+            $s['c6'] = MarkRecord::where($marks_conds)->where('aggr_value', 6)->count();
+            $s['p7'] = MarkRecord::where($marks_conds)->where('aggr_value', 7)->count();
+            $s['p8'] = MarkRecord::where($marks_conds)->where('aggr_value', 8)->count();
+            $s['f9'] = MarkRecord::where($marks_conds)->where('aggr_value', 9)->count();
+            $s['x'] = MarkRecord::where($marks_conds)->where('aggr_value', 0)->count();
 
             $subs[] = $s;
         }
