@@ -160,7 +160,7 @@ $stream = $assessment->get_stream();
                 ])</td>
                 <td class="p-1"> @include('print.title-detail', [
                     'd' => $assessment->x_grades,
-                    't' => 'x grades',
+                    't' => 'U',
                 ])</td>
             </tr>
         </tbody>
