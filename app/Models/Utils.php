@@ -1438,11 +1438,18 @@ class Utils  extends Model
             ->first();
         if ($theo != null) {
             //theology_stream_id = theology_stream_id
+            $stream_path = "";
+            if ($theo->theology_stream_id != null) {
+                $stream = TheologyStream::find($theo->theology_stream_id);
+                if ($stream != null) {
+                    $stream_path = ", theology_stream_id = {$theo->theology_stream_id} ";
+                }
+            }
             DB::update(
                 "UPDATE admin_users SET 
-                current_theology_class_id = {$theo->theology_class_id},
-                theology_stream_id = {$theo->theology_stream_id}
-                WHERE id = {$stud->id}"
+                current_theology_class_id = {$theo->theology_class_id} " .
+                    $stream_path .
+                    " WHERE id = {$stud->id}" 
             );
         }
 
