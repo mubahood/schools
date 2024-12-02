@@ -116,12 +116,12 @@ class ReportCardsPrintingController extends Controller
 
             $conds['termly_report_card_id'] = $assessment->termly_report_card_id;
             $conds['academic_class_id'] = $assessment->academic_class_id;
-            if($assessment->type == 'Stream'){
+            if ($assessment->type == 'Stream') {
                 $conds['stream_id'] = $assessment->academic_class_sctream_id;
             }
             $reportCards = StudentReportCard::where($conds)
                 ->orderBy('total_marks', 'desc')
-                ->get(); 
+                ->get();
         } else {
             $subjects = TheologySubject::where([
                 'enterprise_id' => $assessment->enterprise_id,

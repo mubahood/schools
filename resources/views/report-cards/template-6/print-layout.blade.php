@@ -88,16 +88,26 @@ if (!$r->owner->account->status) {
 }
 
 $numFormat = new NumberFormatter('en_US', NumberFormatter::ORDINAL);
+$exam_num = 0;
+$show_avg = false;
 foreach ($r->termly_report_card->term->exams as $exam) {
     if ($exam->type == 'B.O.T') {
         $max_bot = $exam->max_mark;
+        $exam_num++;
     }
     if ($exam->type == 'M.O.T') {
         $max_mot = $exam->max_mark;
+        $exam_num++;
     }
     if ($exam->type == 'E.O.T') {
         $max_eot = $exam->max_mark;
+        $exam_num++;
     }
+}
+if ($exam_num < 2) {
+    $show_avg = false;
+} else {
+    $show_avg = true;
 }
 /* $theology_termly_report_card->generate_positions = 'Yes';
 $theology_termly_report_card->report_title .= '.';
@@ -213,10 +223,12 @@ dd($theology_termly_report_card); */
                     </th>
                 @endif
 
-                <th class="p-1"><b>AVERAGE MARKS</b>
-                    <small class="d-block"> ({{ '100' }}%)</small>
-                </th>
-                <th class="p-1">AGGR</th>
+                @if ($show_avg)
+                    <th class="p-1"><b>AVERAGE MARKS</b>
+                        <small class="d-block"> ({{ '100' }}%)</small>
+                    </th>
+                    <th class="p-1">AGGR</th>
+                @endif
 
                 <th class="remarks p-1 text-center"><b class="text-uppercase">Remarks</b></th>
                 <th class="remarks text-center p-1"><b class="text-uppercase">Initials</b></th>
@@ -277,8 +289,9 @@ dd($theology_termly_report_card); */
                         <td>{{ $v->subject->grade_subject == 'Yes' ? $v->eot_grade : '-' }}
                         </td>
                     @endif
-
-                    <td>{{ $v->subject->grade_subject == 'Yes' ? $v->total_score_display : '' }}</td>
+                    @if ($show_avg)
+                        <td>{{ $v->subject->grade_subject == 'Yes' ? $v->total_score_display : '' }}</td>
+                    @endif
                     <td>{{ $v->aggr_name }}</td>
 
                     <td class="remarks text-center">{{ $v->remarks }}</td>
@@ -301,7 +314,9 @@ dd($theology_termly_report_card); */
                 @endif
 
                 <td class="text-center"><b>{{ $r->total_marks }}</b></td>
-                <td><b>{{ $r->total_aggregates }}</b></td>
+                @if ($show_avg)
+                    <td><b>{{ $r->total_aggregates }}</b></td>
+                @endif
 
                 <td colspan="2"></td>
             </tr>
@@ -494,6 +509,7 @@ dd($theology_termly_report_card); */
                     @if ($theology_termly_report_card->reports_include_eot == 'Yes')
                         <th class="text-center">{{ $eot_tot }}</th>
                     @endif
+                    <td></td>
                     {{--                     <td><b>{{ $tr->total_aggregates }}</b></td> --}}
                     <td colspan="2"></td>
                 </tr>
