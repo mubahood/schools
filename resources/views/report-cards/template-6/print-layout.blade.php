@@ -231,7 +231,7 @@ dd($theology_termly_report_card); */
                 @endif
 
                 <th class="remarks p-1 text-center"><b class="text-uppercase">Remarks</b></th>
-                <th class="remarks text-center p-1"><b class="text-uppercase">Initials</b></th>
+                <th class="remarks text-center p-1" colspan="2"><b class="text-uppercase">Initials</b></th>
             </thead>
             @php
                 $span = 0;
@@ -291,11 +291,12 @@ dd($theology_termly_report_card); */
                     @endif
                     @if ($show_avg)
                         <td>{{ $v->subject->grade_subject == 'Yes' ? $v->total_score_display : '' }}</td>
+                        <td>{{ $v->aggr_name }}</td>
                     @endif
-                    <td>{{ $v->aggr_name }}</td>
 
                     <td class="remarks text-center">{{ $v->remarks }}</td>
-                    <td class="remarks text-center">{{ $v->initials }}</td>
+                    <td class="remarks text-center" colspan="2">
+                        {{ $v->initials }}</td>
                 </tr>
             @endforeach
             <tr class="marks">
@@ -318,7 +319,11 @@ dd($theology_termly_report_card); */
                     <td><b>{{ $r->total_aggregates }}</b></td>
                 @endif
 
-                <td colspan="2"></td>
+                @if ($show_avg)
+                    <td colspan="1"></td>
+                @else
+                    <td colspan="2"></td>
+                @endif
             </tr>
         </table>
 
