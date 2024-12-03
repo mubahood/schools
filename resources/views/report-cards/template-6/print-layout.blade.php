@@ -311,10 +311,10 @@ dd($theology_termly_report_card); */
                 @endif
                 @if ($termly_report_card->reports_include_eot == 'Yes')
                     <th class="text-center">{{ $eot_tot }}</th>
-                    <th></th>
+                    <th>{{ (int) $r->average_aggregates }}</th>
                 @endif
 
-                <td class="text-center"><b>{{ $r->total_marks }}</b></td>
+                <td class="text-center"><b></b></td>
                 @if ($show_avg)
                     <td><b>{{ $r->total_aggregates }}</b></td>
                 @endif
@@ -505,16 +505,16 @@ dd($theology_termly_report_card); */
                     <th><b>TOTAL</b></th>
                     @if ($theology_termly_report_card->reports_include_bot == 'Yes')
                         <th class="text-center">{{ $bot_tot }}</th>
-                        <th></th>
+                        <th>{{ (int) $tr->average_aggregates }}</th>
                     @endif
                     @if ($theology_termly_report_card->reports_include_mot == 'Yes')
                         <th class="text-center">{{ $mot_tot }}</th>
-                        <th></th>
+                        <th>{{ (int) $tr->average_aggregates }}</th>
                     @endif
                     @if ($theology_termly_report_card->reports_include_eot == 'Yes')
                         <th class="text-center">{{ $eot_tot }}</th>
                     @endif
-                    <td></td>
+                    <td>{{ (int) $tr->average_aggregates }}</td>
                     {{--                     <td><b>{{ $tr->total_aggregates }}</b></td> --}}
                     <td colspan="2"></td>
                 </tr>
