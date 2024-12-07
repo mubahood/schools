@@ -109,7 +109,7 @@ class ReportCardPrintController extends AdminController
             ->display(function ($f) {
                 $url = url("/report-card-individual-printings?id=$this->id");
                 return "<a href='$url' target='_blank' class='btn btn-sm p-1 btn-info'>GENERATE INDIVIDUAL REPORTS</a>";
-            });
+            })->hide();
 
         return $grid;
     }
