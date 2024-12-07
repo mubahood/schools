@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Term extends Model
 {
@@ -55,8 +56,16 @@ class Term extends Model
             if ($_m != null) {
                 if ($_m->id != $m->id) {
                     if ($_m->is_active == 1) {
-                        $m->is_active = 0;
-                        admin_error('Warning', "You cannot have two active terms. Deativate the other first.");
+                        //set the current one to inactive
+                        $sql = "UPDATE terms SET is_active = 0 WHERE id = " . $_m->id;
+                        $m->is_active = 1;
+                        try {
+                            DB::update($sql);
+                        } catch (\Throwable $th) {
+                            throw $th;
+                        }
+                        // $m->is_active = 0;
+                        // admin_error('Warning', "You cannot have two active terms. Deativate the other first.");
                     }
                 }
             }
