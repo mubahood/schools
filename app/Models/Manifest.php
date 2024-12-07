@@ -31,6 +31,17 @@ class Manifest extends Model
     {
         //$accs = self::get_active_students_acounts_ids($u);
         $users = self::get_active_students_user_ids($u);
+        //if empty or null return 0
+        if($users == null){
+            return 0;
+        }
+        //ifnot array
+        if (!is_array($users)) {
+            return 0;
+        }
+        if (count($users) == 0) {
+            return 0;
+        }
         $total = 0;
         $sql = "SELECT SUM(total) as total FROM service_subscriptions WHERE administrator_id IN (" . implode(",", $users) . ")";
         $res = DB::select($sql);
