@@ -93,6 +93,7 @@ class AcademicYear extends Model
 
         self::updated(function ($m) {
 
+            return $m;
             if ($m->process_data != 'Yes') {
                 return $m;
             }
