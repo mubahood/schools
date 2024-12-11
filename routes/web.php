@@ -593,7 +593,7 @@ Route::get('photos-zip-generation', function () {
 
   //check if file exists
   if (!file_exists($zip_file)) {
-    return "ZIP File not found";
+    return "ZIP File not found fro ".$zip_file;
   }
 
   //zip file size
