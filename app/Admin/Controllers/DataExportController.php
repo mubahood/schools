@@ -77,6 +77,10 @@ class DataExportController extends AdminController
         //identification-cards-print
         $grid->column('file_link', __('DOWNLOAD ZIP'))
             ->display(function ($file_link) {
+                //it zip not generated
+                if ($file_link == null) {
+                    return 'N/A';
+                }
                 $zip_url = url('storage/' . $file_link);
                 return "<a 
                 style='background-color: #000; color: #fff; padding: 10px; margin: 10px; text-decoration: none; border-radius: 5px;' 
