@@ -70,9 +70,13 @@ class DataExportController extends AdminController
             ->display(function ($do_generate_pdf) {
                 $url = url('photos-zip-generation?id=' . $this->id);
                 if ($this->pdf_generated == 'Yes') {
-                    return "<a target='_blank' href='$url'>Re-Generate ZIP</a>";
+                    return "<a 
+                    style='background-color: #000; color: #fff; padding: 10px; margin: 10px; text-decoration: none; border-radius: 5px;' 
+                    target='_blank' href='$url'>Re-Generate ZIP</a>";
                 }
-                return "<a target='_blank' href='$url'>Generate ZIP</a>";
+                return "<a 
+                style='background-color: #000; color: #fff; padding: 10px; margin: 10px; text-decoration: none; border-radius: 5px;' 
+                target='_blank' href='$url'>Generate ZIP</a>";
             });
         //identification-cards-print
         $grid->column('file_link', __('DOWNLOAD ZIP'))
@@ -139,7 +143,13 @@ class DataExportController extends AdminController
                 $ent = $u->enterprise;
                 $year = $ent->active_academic_year();
                 $classes = [];
-                foreach (AcademicClass::where('academic_year_id', $year->id)->get() as $key => $class) {
+                foreach (
+                    AcademicClass::where([
+                        'enterprise_id' => $u->enterprise_id,
+                    ])
+                        ->orderBy('id', 'desc')
+                        ->get() as $key => $class
+                ) {
                     $classes[$class->id] = $class->name_text;
                 }
                 $form->multipleSelect('classes', __('Classes'))->options($classes);
