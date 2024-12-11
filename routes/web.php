@@ -590,6 +590,12 @@ Route::get('photos-zip-generation', function () {
 
   $zip_url = url('storage/files/' . $idCard->id . '.zip');
   $idCard->pdf_generated = 'Yes';
+
+  //check if file exists
+  if (!file_exists($zip_file)) {
+    return "ZIP File not found";
+  }
+
   //zip file size
   $size = filesize($zip_file);
   //convert to mb
