@@ -39,16 +39,14 @@ class DataExport extends Model
         $user_ids = [];
         if ($this->target_type == 'employees') {
             $user_ids = User::where('user_type', 'employee')
-                ->where('enterprise_id', $this->enterprise_id)
-                ->where('status', 1)
+                ->where('enterprise_id', $this->enterprise_id) 
                 ->pluck('id');
         } elseif ($this->target_type == 'classes') {
             $classes = $this->classes;
             $user_ids = [];
             foreach ($classes as $key => $v) {
                 $student_ids = User::where([
-                    'current_class_id' => $v,
-                    'status' => 1
+                    'current_class_id' => $v, 
                 ])->pluck('id')->toArray();
                 $user_ids = array_merge($user_ids, $student_ids); 
             }
@@ -58,8 +56,7 @@ class DataExport extends Model
 
         foreach ($user_ids as $key => $v) {
             $u = User::find($v);
-            if ($u == null) continue;
-            if ($u->status != 1) continue;
+            if ($u == null) continue; 
             $created = Carbon::parse($u->created_at);
             $year = $created->format('Y');
             $u->user_number = $u->ent->short_name . "-" . $year . "-" . $u->id;

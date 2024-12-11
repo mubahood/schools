@@ -533,6 +533,11 @@ Route::get('photos-zip-generation', function () {
   $ent = Enterprise::find($idCard->enterprise_id);
   $users = $idCard->get_users();
 
+  //if $users is empty
+  if (count($users) < 1) {
+    return "No users found";
+  }
+
   $count = 0;
   $pics_links = [];
   $class_error = " background-color: #ff0000; color: #fff; padding: 0px; margin: 0px; ";
