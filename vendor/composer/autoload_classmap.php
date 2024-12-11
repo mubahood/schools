@@ -210,6 +210,7 @@ return array(
     'App\\Models\\Competence' => $baseDir . '/app/Models/Competence.php',
     'App\\Models\\Course' => $baseDir . '/app/Models/Course.php',
     'App\\Models\\CreditPurchase' => $baseDir . '/app/Models/CreditPurchase.php',
+    'App\\Models\\DataExport' => $baseDir . '/app/Models/DataExport.php',
     'App\\Models\\Demo' => $baseDir . '/app/Models/Demo.php',
     'App\\Models\\DirectMessage' => $baseDir . '/app/Models/DirectMessage.php',
     'App\\Models\\DisciplinaryRecord' => $baseDir . '/app/Models/DisciplinaryRecord.php',

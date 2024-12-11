@@ -12,6 +12,7 @@ use App\Models\BatchServiceSubscription;
 use App\Models\Book;
 use App\Models\BooksCategory;
 use App\Models\Course;
+use App\Models\DataExport;
 use App\Models\Enterprise;
 use App\Models\Exam;
 use App\Models\FinancialRecord;
@@ -68,7 +69,7 @@ Route::get('roll-calling-close-session', function (Request $request) {
   $session->is_open = 0;
   // $session->process_attendance();
   $session->save();
-  return redirect(admin_url('sessions')); 
+  return redirect(admin_url('sessions'));
 });
 Route::get('roll-calling', function (Request $request) {
   if (isset($request->roll_call_session_id)) {
@@ -527,6 +528,82 @@ Route::get('generate-demand-notice', function () {
 });
 
 
+Route::get('photos-zip-generation', function () {
+  $idCard = DataExport::find($_GET['id']);
+  $ent = Enterprise::find($idCard->enterprise_id);
+  $users = $idCard->get_users();
+
+  $count = 0;
+  $pics_links = [];
+  $class_error = " background-color: #ff0000; color: #fff; padding: 0px; margin: 0px; ";
+  $class_success = " background-color: green; color: #fff; padding: 0px; margin: 0px; ";
+  $success_count = 0;
+  $zip = new \ZipArchive();
+  $zip_file = public_path('storage/files/' . $idCard->id . '.zip');
+  $zip->open($zip_file, \ZipArchive::CREATE);
+
+  foreach ($users as $key => $user) {
+    $count++;
+    $segs = explode('/', $user->avatar);
+    if (count($segs) < 1) {
+      echo '<p style="' . $class_error . '">' . $count . '. ' . $user->name . ' SKIPPED BECAUSE: ' . $user->avatar . ' is empty</P>';
+      continue;
+    }
+    $last_seg = end($segs);
+    if (strlen($last_seg) < 4) {
+      echo '<p style="' . $class_error . '">' . $count . '. ' . $user->name . ' SKIPPED BECAUSE: ' . $user->avatar . ' is empty.</P>';
+      continue;
+    }
+
+    //if user.jpeg
+    if ($last_seg == 'user.jpeg') {
+      echo '<p style="' . $class_error . '">' . $count . '. ' . $user->name . ' SKIPPED BECAUSE: ' . $user->avatar . ' is default.</P>';
+      continue;
+    }
+
+    $path = public_path('storage/images/' . $last_seg);
+    $file_exists = file_exists($path);
+    if (!$file_exists) {
+      echo '<p style="' . $class_error . '">' . $count . '. ' . $user->name . ' SKIPPED BECAUSE: ' . $path . ' does not exist.</P>';
+      continue;
+    }
+    $url = url('storage/images/' . $last_seg);
+    echo '<p style="' . $class_success . '">' . $count . '. ' . $user->name . ', SUCCESS, ADDED TO ZIP. <a href="' . $url . '" target="_blank">View Image</a></P>';
+    $pics_links[] = $path;
+    $success_count++;
+    $zip_photo_name = $user->id . '-';
+
+    if ($user->school_pay_account_id != null && strlen($user->school_pay_account_id) > 3) {
+      $zip_photo_name .= $user->school_pay_account_id . '-';
+    } else if ($user->school_pay_payment_code != null && strlen($user->school_pay_payment_code) > 3) {
+      $zip_photo_name .= $user->school_pay_payment_code . '-';
+    }
+    $zip_photo_name .= $user->name . '-';
+    $zip_photo_name .= $last_seg;
+    $zip->addFile($path, $zip_photo_name);
+    if ($count > 5) {
+      // break;
+    }
+  }
+  $zip->close();
+  echo '<p style="background-color: #000; color: #fff; padding: 0px; margin: 0px;">TOTAL: ' . $count . ', SUCCESS: ' . $success_count . '</P>';
+
+  $zip_url = url('storage/files/' . $idCard->id . '.zip');
+  $idCard->pdf_generated = 'Yes';
+  //zip file size
+  $size = filesize($zip_file);
+  //convert to mb
+  $size = $size / 1024 / 1024;
+  //to 2 decimal places
+  $size = number_format($size, 2);
+  $idCard->template = $size;
+  $idCard->file_link = 'files/' . $idCard->id . '.zip';
+  $idCard->save();
+  return "<br><br><a 
+    style='background-color: #000; color: #fff; padding: 10px; margin: 10px; text-decoration: none; border-radius: 5px;'
+   href='$zip_url' target='_blank'>Download Photos ZIP File ($size MB)</a><br><br><br><br><br><br>";
+});
+
 Route::get('identification-cards-generation', function () {
   $idCard = IdentificationCard::find($_GET['id']);
   $pdf = App::make('dompdf.wrapper');
@@ -553,6 +630,7 @@ Route::get('identification-cards-generation', function () {
   $rand = rand(1, 100000) . time();
   return redirect('identification-cards-print?id=' . $idCard->id . '&rand=' . $rand);
 });
+
 Route::get('identification-cards-print', function () {
   $idCard = IdentificationCard::find($_GET['id']);
   if ($idCard->pdf_generated == 'No') {

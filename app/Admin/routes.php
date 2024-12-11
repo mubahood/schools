@@ -131,7 +131,7 @@ Route::group([
     $router->resource('termly-secondary-report-cards', TermlySecondaryReportCardController::class);
     $router->resource('school-fees-demands', SchoolFeesDemandController::class);
     $router->resource('transport-stages', TransportStageController::class);
-
+    $router->resource('data-exports', DataExportController::class);
 
 
     //$router->get('/fixed-asset-records-stats', 'FixedAssetRecordController@stats');
