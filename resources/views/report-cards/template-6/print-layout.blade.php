@@ -557,7 +557,27 @@ dd($theology_termly_report_card); */
     <p class="mt-2 fw-14"><span class="text-uppercase">HEAD Teacher:</span> <b style="font-size: 14px"
             class="text-uppercase">{{ $hm_name }}</b>,&nbsp;
         <span class="text-uppercase fs-14 ">Signature:
-            <img style="width: 70px; " src="{{ public_path('storage/' . $ent->hm_signature) }}">
+            @php
+                $signature_path = null;
+                $last_seg = null;
+                $segs = [];
+
+                if ($ent->hm_signature != null && strlen($ent->hm_signature) > 3) {
+                    $segs = explode('/', $ent->hm_signature);
+                }
+                //if not empty $segs
+                if (!empty($segs)) {
+                    $last_seg = end($segs);
+                }
+                if ($last_seg != null && strlen($last_seg) > 3) {
+                    $signature_path = public_path('storage/images/' . $last_seg);
+                }
+            @endphp
+            @if ($signature_path != null && file_exists($signature_path))
+                <img style="width: 70px; " src="{{ $signature_path }}">
+            @else
+                <img style="width: 70px; " src="{{ public_path('storage/images/user.jpeg') }}">
+            @endif
         </span>
     </p>
     <br>
