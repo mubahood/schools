@@ -576,7 +576,7 @@ dd($theology_termly_report_card); */
             @if ($signature_path != null && file_exists($signature_path))
                 <img style="width: 70px; " src="{{ $signature_path }}">
             @else
-                <img style="width: 70px; " src="{{ public_path('storage/images/user.jpeg') }}">
+                
             @endif
         </span>
     </p>

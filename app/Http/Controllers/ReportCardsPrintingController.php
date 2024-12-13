@@ -302,7 +302,8 @@ class ReportCardsPrintingController extends Controller
         if (count($items) == 0) {
             die("Nothing to print.");
         }
-        $printing->secular_tempate = 'Template_3';
+        // $printing->secular_tempate = 'Template_3';
+
         if ($printing->secular_tempate == 'Template_3' && $printing->type == 'Secular') {
 
             if (isset($_GET['html'])) {
@@ -355,17 +356,23 @@ class ReportCardsPrintingController extends Controller
                 'min_count' => $printing->min_count,
                 'max_count' => $printing->max_count,
             ]));
-        } else {
+        } else { 
+            $my_items = [];
+            foreach ($items as $key => $item) {
+                $my_items[] = $item['r'];
+            }
             if (isset($_GET['html'])) {
-                return view('report-cards.template-6.print', [
-                    'items' => $items,
+                return view('report-cards.template-3.print', [
+                    'items' => $my_items,
+                    'ent' => $printing->enterprise,
                     'report_type' => $printing->type,
                     'min_count' => $printing->min_count,
                     'max_count' => $printing->max_count,
                 ]);
             }
-            $pdf->loadHTML(view('report-cards.template-6.print', [
-                'items' => $items,
+            $pdf->loadHTML(view('report-cards.template-3.print', [
+                'items' => $my_items,
+                'ent' => $printing->enterprise,
                 'report_type' => $printing->type,
                 'min_count' => $printing->min_count,
                 'max_count' => $printing->max_count,
