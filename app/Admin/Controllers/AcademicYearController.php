@@ -99,7 +99,6 @@ class AcademicYearController extends AdminController
         $form = new Form(new AcademicYear());
 
         $form->disableCreatingCheck();
-        $form->disableEditingCheck();
         $form->disableReset();
         $form->disableViewCheck();
 

@@ -214,7 +214,7 @@ class ReportCardPrintController extends AdminController
             'No' => 'No',
             'Yes' => 'Yes',
         ])->rules('required');
-        /* min_count filed*/
+        /* min_count filed,  */
 
         $form->decimal('min_count', __('PRINT RANGE FROM :'))->default(0)->rules('required');
         $form->decimal('max_count', __('PRINT RANGE TO: '))->default(10)->rules('required');
