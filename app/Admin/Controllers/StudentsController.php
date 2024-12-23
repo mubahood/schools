@@ -386,14 +386,14 @@ class StudentsController extends AdminController
                         return $x;
                     }
                     try {
-                        $p = User::createParent($this); 
+                        $p = User::createParent($this);
                     } catch (\Throwable $th) {
                         //throw $th;
                     }
                     return 'No parent';
                 }
 
-                if($this->parent == null){
+                if ($this->parent == null) {
                     return 'No parent';
                 }
 
@@ -657,12 +657,31 @@ class StudentsController extends AdminController
                     $form->select('stream_id', __('Stream'))->options(function ($id) {
                         $streams = [];
                         $u = Admin::user();
+                        $active_academic_year = $u->ent->active_academic_year();
+                        if ($active_academic_year == null) {
+                            die("No active academic year");
+                        }
+                        $classes_ids = [];
+                        foreach (
+                            AcademicClass::where([
+                                'enterprise_id' => $u->enterprise_id,
+                                'academic_year_id' => $active_academic_year->id,
+                            ])->get() as $class
+                        ) {
+                            if (((int)($class->academic_year->is_active)) != 1) {
+                                continue;
+                            }
+                            $classes_ids[] = $class->id;
+                        }
+
+
                         foreach (
                             AcademicClassSctream::where(
                                 [
                                     'enterprise_id' => $u->enterprise_id,
                                 ]
                             )
+                                ->whereIn('academic_class_id', $classes_ids)
                                 ->orderBy('id', 'desc')
                                 ->get() as $ex
                         ) {
