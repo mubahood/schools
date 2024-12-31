@@ -117,7 +117,7 @@ class ApiAuthController extends Controller
 
     public function register(Request $r)
     { 
-        if ($r->phone_number == null) {
+        if ($r->phone_number_1 == null) {
             return $this->error('Phone number is required.');
         }
 
@@ -135,7 +135,7 @@ class ApiAuthController extends Controller
             $email = null;
         }
 
-        $phone_number = Utils::prepare_phone_number(trim($r->phone_number));
+        $phone_number = Utils::prepare_phone_number(trim($r->phone_number_1));
 
         if (!Utils::phone_number_is_valid($phone_number)) {
             return $this->error('Invalid phone number. ' . $phone_number);
