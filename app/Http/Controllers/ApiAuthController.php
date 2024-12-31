@@ -165,11 +165,11 @@ class ApiAuthController extends Controller
 
         $u = Administrator::where('phone_number_1', $phone_number)->first();
         if ($u != null) {
-            return $this->error('User with same phone number already exists.');
+            return $this->error('User with same phone number  as phone number already exists.');
         }
         $u = Administrator::where('username', $phone_number)->first();
         if ($u != null) {
-            return $this->error('User with same phone number already exists.');
+            return $this->error('User with same phone number as username already exists.');
         }
 
         $u = Administrator::where('email', $email)->first();
