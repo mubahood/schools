@@ -157,7 +157,7 @@ class ApiAuthController extends Controller
             return $this->error('Nationality is required.');
         }
         //gender
-        if ($r->gender == null) {
+        if ($r->sex == null) {
             return $this->error('Gender is required.');
         }
 
