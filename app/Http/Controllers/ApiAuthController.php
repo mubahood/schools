@@ -116,10 +116,7 @@ class ApiAuthController extends Controller
     }
 
     public function register(Request $r)
-    {
-        if ($r->task == null) {
-            return $this->error('Task is required.');
-        }
+    { 
         if ($r->phone_number == null) {
             return $this->error('Phone number is required.');
         }
