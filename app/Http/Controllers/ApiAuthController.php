@@ -188,7 +188,7 @@ class ApiAuthController extends Controller
         $user = new Administrator();
         $user->phone_number_1 = $phone_number;
         $user->username = $phone_number;
-        $user->username = $phone_number;
+        $user->username = $email;
         $user->name = $r->first_name . " " . $user->last_name;
         $user->first_name = $r->first_name;
         $user->last_name = $r->last_name;
