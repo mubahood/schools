@@ -42,6 +42,7 @@ return array(
     'App\\Admin\\Controllers\\ConfigurationController' => $baseDir . '/app/Admin/Controllers/ConfigurationController.php',
     'App\\Admin\\Controllers\\CourseController' => $baseDir . '/app/Admin/Controllers/CourseController.php',
     'App\\Admin\\Controllers\\CreditPurchaseController' => $baseDir . '/app/Admin/Controllers/CreditPurchaseController.php',
+    'App\\Admin\\Controllers\\DataExportController' => $baseDir . '/app/Admin/Controllers/DataExportController.php',
     'App\\Admin\\Controllers\\DemoController' => $baseDir . '/app/Admin/Controllers/DemoController.php',
     'App\\Admin\\Controllers\\DirectMessageController' => $baseDir . '/app/Admin/Controllers/DirectMessageController.php',
     'App\\Admin\\Controllers\\DisciplinaryRecordController' => $baseDir . '/app/Admin/Controllers/DisciplinaryRecordController.php',

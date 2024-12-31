@@ -478,4 +478,10 @@ class User extends Administrator implements JWTSubject
     {
         return $this->belongsTo(TheologyClass::class, 'current_theology_class_id');
     }
+
+    //make plain_password not returned in json or array or object
+    public function getPlainPasswordAttribute()
+    {
+        return null;
+    }
 }

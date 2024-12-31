@@ -742,6 +742,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Admin\\Controllers\\ConfigurationController' => __DIR__ . '/../..' . '/app/Admin/Controllers/ConfigurationController.php',
         'App\\Admin\\Controllers\\CourseController' => __DIR__ . '/../..' . '/app/Admin/Controllers/CourseController.php',
         'App\\Admin\\Controllers\\CreditPurchaseController' => __DIR__ . '/../..' . '/app/Admin/Controllers/CreditPurchaseController.php',
+        'App\\Admin\\Controllers\\DataExportController' => __DIR__ . '/../..' . '/app/Admin/Controllers/DataExportController.php',
         'App\\Admin\\Controllers\\DemoController' => __DIR__ . '/../..' . '/app/Admin/Controllers/DemoController.php',
         'App\\Admin\\Controllers\\DirectMessageController' => __DIR__ . '/../..' . '/app/Admin/Controllers/DirectMessageController.php',
         'App\\Admin\\Controllers\\DisciplinaryRecordController' => __DIR__ . '/../..' . '/app/Admin/Controllers/DisciplinaryRecordController.php',
