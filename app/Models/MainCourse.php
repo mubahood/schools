@@ -57,7 +57,8 @@ class MainCourse extends Model
         });
     }
 
-    public function parent(){
-        return $this->belongsTo(ParentCourse::class,'parent_course_id');
+    public function parent()
+    {
+        return $this->belongsTo(ParentCourse::class, 'parent_course_id');
     }
 }

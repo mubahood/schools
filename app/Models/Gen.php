@@ -187,6 +187,10 @@ class Gen extends Model
     static String tableName = "{$this->table_name}";
     $generate_vars
   
+     String get_name() {
+      return name;
+    }
+
     static fromJson(dynamic m) {
     $this->class_name obj = new $this->class_name();
       if (m == null) {

@@ -134,16 +134,63 @@ class Subject extends Model
 
         return  $this->subject_name . " - " . $text;
     }
-    
+
     //short name
-    public function short_name(){
+    public function short_name()
+    {
         $course = $this->course;
-        if($course != null){
+        if ($course != null) {
             return $course->short_name;
         }
         return $this->subject_name;
     }
 
 
-    protected $appends = ['name'];
+    protected $appends = [
+        'name',
+        'teacher_1_name',
+        'teacher_2_name',
+        'teacher_3_name',
+        'teacher_name',
+    ];
+
+    //teacher_name getter
+    public function getTeacherNameAttribute()
+    {
+        $admin = Administrator::find($this->subject_teacher);
+        if ($admin != null) {
+            return $admin->name;
+        }
+        return "";
+    }
+
+    // getter attribute
+    public function getTeacher1NameAttribute()
+    {
+        $admin = Administrator::find($this->teacher_1);
+        if ($admin != null) {
+            return $admin->name;
+        }
+        return "";
+    }
+
+    // getter attribute
+    public function getTeacher2NameAttribute()
+    {
+        $admin = Administrator::find($this->teacher_2);
+        if ($admin != null) {
+            return $admin->name;
+        }
+        return "";
+    }
+
+    // getter attribute
+    public function getTeacher3NameAttribute()
+    {
+        $admin = Administrator::find($this->teacher_3);
+        if ($admin != null) {
+            return $admin->name;
+        }
+        return "";
+    }
 }
