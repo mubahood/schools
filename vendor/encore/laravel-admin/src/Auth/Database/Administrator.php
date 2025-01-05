@@ -1285,7 +1285,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
     }
 
     //appends
-    protected $appends = ['balance', 'current_class_text', 'verification'];
+    protected $appends = ['balance', 'current_class_text'];
 
     //getter for balance
     public function getBalanceAttribute()
@@ -1294,14 +1294,5 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
             return 0;
         }
         return $this->account->balance;
-    }
-
-    //getter for verification
-    public function getVerificationAttribute()
-    {
-        if ($this->account == null) {
-            return 0;
-        }
-        return $this->account->status;
     }
 }

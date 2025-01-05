@@ -30,6 +30,16 @@ class User extends Administrator implements JWTSubject
             return false;
         });
 
+
+        //updating
+        self::updating(function ($m) {
+            $roles = AdminRoleUser::where([
+                'user_id' => $m->id
+            ]);
+            $m->roles_text = json_encode($roles->pluck('role_id')->toArray());
+            return $m;
+        });
+
         //updated
         self::updated(function ($m) {
             if ($m->status == 1) {
@@ -483,5 +493,82 @@ class User extends Administrator implements JWTSubject
     public function getPlainPasswordAttribute()
     {
         return null;
+    }
+
+
+    public function sendEmailVerificationNotification()
+    {
+        $mail_verification_token =  rand(100000, 999999);
+        $this->mail_verification_token = $mail_verification_token;
+        $this->save();
+
+        $url = url('verification-mail-verify?tok=' . $mail_verification_token . '&email=' . $this->email);
+        $from = env('APP_NAME') . " Team.";
+
+        $mail_body =
+            <<<EOD
+        <p>Dear <b>$this->name</b>,</p>
+        <p>Please use the code below to verify your email address.</p><p style="font-size: 25px; font-weight: bold; text-align: center; color:rgb(7, 76, 194); "><b>$mail_verification_token</b></p>
+        <p>Or clink on the link below to verify your email address.</p>
+        <p><a href="{$url}">Verify Email Address</a></p>
+        <p>Best regards,</p>
+        <p>{$from}</p>
+        EOD;
+
+        // $full_mail = view('mails/mail-1', ['body' => $mail_body, 'title' => 'Email Verification']);
+
+        try {
+            $day = date('Y-m-d');
+            $data['body'] = $mail_body;
+            $data['data'] = $data['body'];
+            $data['name'] = $this->name;
+            $data['email'] = $this->email;
+            $data['subject'] = 'Email Verification - ' . env('APP_NAME') . ' - ' . $day . ".";
+            Utils::mail_sender($data);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+
+    //function that sends password reset email. it is exacly the same as sendEmailVerificationNotification, only that the words are different
+    public function sendPasswordResetNotification()
+    {
+        $mail_verification_token =  rand(100000, 999999);
+        $this->mail_verification_token = $mail_verification_token;
+        $this->save();
+
+        $url = url('password-reset-screen?tok=' . $mail_verification_token . '&email=' . $this->email);
+        $from = env('APP_NAME') . " Team.";
+
+        $mail_body =
+            <<<EOD
+        <p>Dear <b>$this->name</b>,</p>
+        <p>Please use the code below to reset your password.</p><p style="font-size: 25px; font-weight: bold; text-align: center; color:rgb(7, 76, 194); "><b>$mail_verification_token</b></p>
+        <p>Or clink on the link below to reset your password.</p>
+        <p><a href="{$url}">Reset Password</a></p>
+        <p>Best regards,</p>
+        <p>{$from}</p>
+        EOD;
+
+        try {
+            $day = date('Y-m-d');
+            $data['body'] = $mail_body;
+            $data['data'] = $data['body'];
+            $data['name'] = $this->name;
+            $data['email'] = $this->email;
+            $data['subject'] = 'Password Reset - ' . env('APP_NAME') . ' - ' . $day . ".";
+            Utils::mail_sender($data);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+    }
+    //getter for roles_text attribute
+    public function getRolesTextAttribute($x)
+    {
+        $role_ids = [];
+        foreach ($this->roles as $role) {
+            $role_ids[] = $role->id;
+        }
+        return json_encode($role_ids);
     }
 }

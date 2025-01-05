@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\AcademicClass;
 use App\Models\AcademicClassSctream;
 use App\Models\Account;
+use App\Models\AdminRole;
+use App\Models\AdminRoleUser;
 use App\Models\DisciplinaryRecord;
 use App\Models\Enterprise;
 use App\Models\Mark;
@@ -918,6 +920,517 @@ class ApiMainController extends Controller
         }
     }
 
+    public function forget_password_request(Request $r)
+    {
+        $u = User::where('email', $r->email)->first();
+
+        if ($u == null) {
+            return $this->error('User account not found for email address ' . $r->email);
+        }
+        try {
+            $u->sendPasswordResetNotification();
+        } catch (\Throwable $th) {
+            return $this->error('Failed to send password reset token.');
+        }
+        return $this->success(null, 'Password reset token sent successfully!. Check your email (' . $u->email . ') inbox. If you don\'t see it, check your spam folder.');
+    }
+
+    public function forget_password_reset(Request $r)
+    {
+        $u = User::where('email', $r->email)->first();
+
+        if ($u == null) {
+            return $this->error('User account not found for email address ' . $r->email);
+        }
+        if ($r->code != $u->mail_verification_token) {
+            return $this->error('Invalid verification code.');
+        }
+        $password = trim($r->password);
+        if (strlen($password) < 4) {
+            return $this->error('Password must be at least 6 characters.');
+        }
+        if (strlen($password) > 100) {
+            return $this->error('Password must not be more than 100 characters.');
+        }
+        $u->password = password_hash($password, PASSWORD_DEFAULT);
+        $u->plain_password = $password;
+        $u->verification = 1;
+        try {
+            $u->save();
+        } catch (\Throwable $th) {
+            return $this->error('Failed to send password reset token.');
+        }
+
+        Config::set('jwt.ttl', 60 * 24 * 30 * 365);
+
+        $token = auth('api')->attempt([
+            'id' => $u->id,
+            'password' => trim($r->password),
+        ]);
+
+
+        if ($token == null) {
+            return $this->error('Wrong credentials.');
+        }
+        $u->token = $token;
+        $u->remember_token = $token;
+        return $this->success($u, 'Password reset successfully!.', 200);
+    }
+
+    public function email_verify_review_code(Request $r)
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User account not found.');
+        }
+        $u = User::find($u->id);
+        if ($u == null) {
+            return $this->error('User account not found.');
+        }
+
+        //chek if $u is already verified
+        if ($u->verification . '' == '1') {
+            return $this->success(null, 'Email address already verified!');
+        }
+
+        $email = trim($r->email);
+
+        $token = trim($r->code);
+        if ($token == null) {
+            return $this->error('Verification code is required.');
+        }
+        //check length of token
+        if (strlen($token) < 3) {
+            return $this->error('Invalid verification code.');
+        }
+
+
+        //mail_verification_token == $token
+        if ($u->mail_verification_token != $token) {
+            return $this->error('Invalid verification code.');
+        }
+        $u->verification = 1;
+
+        try {
+            $u->save();
+        } catch (\Throwable $th) {
+            return $this->error('Failed to save email address.');
+        }
+
+        return $this->success(
+            null,
+            'Email address verified successfully! '
+        );
+    }
+
+    public function employee_create(Request $r)
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User account not found.');
+        }
+        $u = User::find($u->id);
+        if ($u == null) {
+            return $this->error('User account not found.');
+        }
+
+        $isCreating = true;
+        if ($r->id != null && strlen($r->id) > 0) {
+            $employee = User::find($r->id);
+            if ($employee == null) {
+                $isCreating = true;
+                $employee = new User();
+            } else {
+                $isCreating = false;
+            }
+        }
+
+        //first_name is required
+        if ($r->first_name == null || strlen($r->first_name) < 3) {
+            return $this->error('First name is required.');
+        }
+
+        //last_name is required
+        if ($r->last_name == null || strlen($r->last_name) < 3) {
+            return $this->error('Last name is required.');
+        }
+
+        //phone_number_1 is required
+        if ($r->phone_number_1 == null || strlen($r->phone_number_1) < 3) {
+            return $this->error('Phone number is required.');
+        }
+        //sex is required
+        if ($r->sex == null || strlen($r->sex) < 3) {
+            return $this->error('Sex is required.');
+        }
+
+        $employee = Utils::fetchDataFromRequest($employee, $r, [
+            'avatar',
+            'roles_text',
+        ]);
+        $msg = 'Employee account created successfully!';
+        if ($isCreating) {
+
+            //phone_number_1 is required
+            if ($r->phone_number_1 == null || strlen($r->phone_number_1) < 3) {
+                return $this->error('Phone number is required.');
+            }
+            //phone_number_1 must start with +
+            if (substr($r->phone_number_1, 0, 1) != '+') {
+                return $this->error('Phone number must start with +.');
+            }
+
+            $with_same_phone = User::where('phone_number_1', $r->phone_number_1)->first();
+            if ($with_same_phone != null) {
+                return $this->error('This phone number (' . $r->phone_number_1 . ') is already in use.');
+            }
+
+            //check phone_number_1 by username
+            $with_same_username = User::where('username', $r->phone_number_1)->first();
+            if ($with_same_username != null) {
+                return $this->error('This username (' . $r->phone_number_1 . ') is already in use.');
+            }
+
+            if ($r->email != null && strlen($r->email) > 3) {
+                $hasEmail = User::where('email', $r->email)->first();
+                if ($hasEmail != null) {
+                    return $this->error('This email address (' . $r->email . ') is already in use.');
+                }
+                //check by username
+                $hasUsername = User::where('username', $r->email)->first();
+                if ($hasUsername != null) {
+                    return $this->error('This username (' . $r->email . ') is already in use.');
+                }
+            }
+
+            $employee->user_type = 'employee';
+            $employee->username = $r->phone_number_1;
+            if ($employee->password == null || strlen($employee->password) < 3) {
+                $employee->password = password_hash('4321', PASSWORD_DEFAULT);
+                $employee->plain_password = '4321';
+            } else {
+                $employee->password = password_hash($employee->password, PASSWORD_DEFAULT);
+                $employee->plain_password = $employee->password;
+            }
+            $employee->verification = 1;
+            $employee->status = 1;
+        } else {
+            $msg = 'Employee account updated successfully!';
+
+            //check if phone number is being changed
+
+            $with_same_phone = User::where('phone_number_1', $r->phone_number_1)->first();
+            if ($with_same_phone != null) {
+                if ($with_same_phone->id != $employee->id) {
+                    return $this->error('This phone number (' . $r->phone_number_1 . ') is already in use.');
+                }
+            }
+
+
+            //check if email is being changed
+
+            if ($r->email != null && strlen($r->email) > 3) {
+                $hasEmail = User::where('email', $r->email)->first();
+                if ($hasEmail != null) {
+                    if ($hasEmail->id != $employee->id) {
+                        return $this->error('This email address (' . $r->email . ') is already in use.');
+                    }
+                }
+            }
+
+            $employee->user_type = 'employee';
+        }
+
+        //date_of_birth is not null
+        /*  if ($r->date_of_birth != null && strlen($r->date_of_birth) > 4) {
+            try {
+                $employee->date_of_birth = Carbon::parse($r->date_of_birth);
+            } catch (\Throwable $th) { 
+                $employee->date_of_birth = $r->date_of_birth;
+            }
+        } */
+
+        //check 
+
+        $employee->enterprise_id = $u->enterprise_id;
+        try {
+            $employee->save();
+        } catch (\Throwable $th) {
+            return $this->error('Failed to save employee account because ' . $th->getMessage());
+        }
+        $employee = User::find($employee->id);
+        if ($employee == null) {
+            return $this->error('Failed to find employee account.');
+        }
+
+        //roles_text
+        if (isset($r->new_roles) && strlen($r->new_roles) > 2) {
+            $ids = [];
+            try {
+                $ids = json_decode($r->new_roles);
+            } catch (\Throwable $th) {
+                $ids = [];
+            }
+
+            $existing_roles = AdminRoleUser::where([
+                'user_id' => $employee->id,
+            ])->get();
+            foreach ($existing_roles as $key => $value) {
+                //check if role id is not in $ids and delete it
+                if (!in_array($value->role_id, $ids)) {
+                    //delete
+                    /* delete using 'role_id' => $m->role_id,
+                'user_id' => $m->user_id, */
+                    $sql = "DELETE FROM admin_role_users WHERE role_id = {$value->role_id} AND user_id = {$employee->id}";
+                    DB::statement($sql);
+                    continue;
+                }
+            }
+
+            foreach ($ids as $key => $id) {
+                $checkIfUserRole = AdminRoleUser::where([
+                    'user_id' => $employee->id,
+                    'role_id' => $id
+                ])->first();
+                if ($checkIfUserRole != null) {
+                    continue;
+                }
+                $newRecord = new AdminRoleUser();
+                $newRecord->user_id = $employee->id;
+                $newRecord->role_id = $id;
+                $newRecord->save();
+            }
+        }
+
+        if (!empty($_FILES)) {
+            //logo_path
+            if (isset($_FILES['avatar_path'])) {
+                $file = $r->file('avatar_path');
+                $file_name = time() . rand(100000, 9999999) . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('storage/images'), $file_name);
+                $employee->avatar = "images/" . $file_name;
+                $employee->save();
+                $employee = User::find($employee->id);
+            }
+        }
+
+        return $this->success(
+            $employee,
+            $msg
+        );
+    }
+
+
+    public function enterprise_create(Request $r)
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User account not found.');
+        }
+        $u = User::find($u->id);
+        if ($u == null) {
+            return $this->error('User account not found.');
+        }
+
+
+        $email = trim($r->email);
+        //validate email
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return $this->error('Invalid email address.');
+        }
+
+        $ent = Enterprise::where([
+            'email' => $email,
+        ])->first();
+        if ($ent != null) {
+            // return $this->error('School with same email address already exists.');
+        }
+
+
+        $ent = Enterprise::where([
+            'name' => trim($r->name),
+        ])->first();
+
+        if ($ent != null) {
+            // return $this->error('School with same name already exists.');
+        }
+
+
+        $hasEnt = Enterprise::where('administrator_id', $u->id)->first();
+        if ($hasEnt == null) {
+            $ent = new Enterprise();
+        } else {
+            $ent = $hasEnt;
+        }
+
+        $ent->administrator_id = $u->id;
+        $ent->name = $r->name ?? $ent->name;
+        $ent->short_name = $r->short_name ?? $ent->short_name;
+        $ent->details = $r->details ?? $ent->details;
+        $ent->logo = $r->logo ?? $ent->logo;
+        $ent->phone_number = $r->phone_number ?? $ent->phone_number;
+        $ent->email = $r->email ?? $ent->email;
+        $ent->address = $r->address ?? $ent->address;
+        $ent->expiry = $r->expiry ?? $ent->expiry;
+        $ent->subdomain = $r->subdomain ?? $ent->subdomain;
+        $ent->color = $r->color ?? $ent->color;
+        $ent->welcome_message = $r->welcome_message ?? $ent->welcome_message;
+        $ent->type = $r->type ?? $ent->type;
+        $ent->phone_number_2 = $r->phone_number_2 ?? $ent->phone_number_2;
+        $ent->p_o_box = $r->p_o_box ?? $ent->p_o_box;
+        $ent->hm_signature = $r->hm_signature ?? $ent->hm_signature;
+        $ent->dos_signature = $r->dos_signature ?? $ent->dos_signature;
+        $ent->bursar_signature = $r->bursar_signature ?? $ent->bursar_signature;
+        $ent->dp_year = $r->dp_year ?? $ent->dp_year;
+        $ent->school_pay_code = $r->school_pay_code ?? $ent->school_pay_code;
+        $ent->school_pay_password = $r->school_pay_password ?? $ent->school_pay_password;
+        $ent->has_theology = $r->has_theology ?? $ent->has_theology;
+        $ent->dp_term_id = $r->dp_term_id ?? $ent->dp_term_id;
+        $ent->motto = $r->motto ?? $ent->motto;
+        $ent->can_send_messages = 'No';
+        $ent->has_valid_lisence = 'Yes';
+        $ent->school_pay_status = null;
+
+        if (!empty($_FILES)) {
+            //logo_path
+            if (isset($_FILES['logo_path'])) {
+                $file = $r->file('logo_path');
+                $file_name = time() . rand(100000, 9999999) . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('storage/images'), $file_name);
+                $ent->logo = "images/" . $file_name;
+            }
+        }
+
+        try {
+            $ent->save();
+        } catch (\Throwable $th) {
+            return $this->error('Failed to save enterprise because ' . $th->getMessage());
+        }
+        $ent = Enterprise::find($ent->id);
+
+        if ($ent == null) {
+            return $this->error('Failed to find enterprise.');
+        }
+
+        $u->enterprise_id = $ent->id;
+        $hasAdminRole = AdminRoleUser::where([
+            'user_id' => $u->id,
+            'role_id' => 2,
+        ])->first();
+        if ($hasAdminRole == null) {
+            $hasAdminRole = new AdminRoleUser();
+            $hasAdminRole->user_id = $u->id;
+            $hasAdminRole->role_id = 2;
+            $hasAdminRole->save();
+        }
+
+        //check if has role 6
+        $hasAdminRole = AdminRoleUser::where([
+            'user_id' => $u->id,
+            'role_id' => 6,
+        ])->first();
+        if ($hasAdminRole == null) {
+            $hasAdminRole = new AdminRoleUser();
+            $hasAdminRole->user_id = $u->id;
+            $hasAdminRole->role_id = 6;
+            $hasAdminRole->save();
+        }
+
+        //check if has role 7   
+        $hasAdminRole = AdminRoleUser::where([
+            'user_id' => $u->id,
+            'role_id' => 7,
+        ])->first();
+        if ($hasAdminRole == null) {
+            $hasAdminRole = new AdminRoleUser();
+            $hasAdminRole->user_id = $u->id;
+            $hasAdminRole->role_id = 7;
+            $hasAdminRole->save();
+        }
+
+        //check if has role 10
+        $hasAdminRole = AdminRoleUser::where([
+            'user_id' => $u->id,
+            'role_id' => 10,
+        ])->first();
+        if ($hasAdminRole == null) {
+            $hasAdminRole = new AdminRoleUser();
+            $hasAdminRole->user_id = $u->id;
+            $hasAdminRole->role_id = 10;
+            $hasAdminRole->save();
+        }
+
+        try {
+            $u->save();
+        } catch (\Throwable $th) {
+            return $this->error('Failed to save user.');
+        }
+
+        $mgs = "School created successfully!";
+        if ($hasEnt != null) {
+            $mgs = "School updated successfully!";
+        }
+        return $this->success(
+            $ent,
+            $mgs,
+        );
+    }
+    public function email_verify_request_token(Request $r)
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User account not found.');
+        }
+        $u = User::find($u->id);
+        if ($u == null) {
+            return $this->error('User account not found.');
+        }
+
+        $email = trim($r->email);
+        //check for valid email address 
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return $this->error('Invalid email address.');
+        }
+
+        //check if email is not same as current email
+        if ($u->email != $email) {
+            $anotherAccount = User::where('email', $email)->first();
+            if ($anotherAccount == null) {
+                $anotherAccount = User::where('username', $email)->first();
+            }
+            if ($anotherAccount != null) {
+                if ($anotherAccount->id != $u->id) {
+                    return $this->error('Email address is already in use.');
+                }
+            }
+            $u->email = $email;
+            $u->username = $email;
+            try {
+                $u->save();
+            } catch (\Throwable $th) {
+                return $this->error('Failed to save email address.');
+            }
+        }
+
+        try {
+            $u->sendEmailVerificationNotification();
+        } catch (\Throwable $th) {
+            return $this->error('Failed to send email verification token.');
+        }
+
+        return $this->success(
+            null,
+            'Email verification CODE sent successfully!. Check your email (' . $u->email . ') inbox. If you don\'t see it, check your spam folder.'
+        );
+    }
+
+    public function roles()
+    {
+        $roles = AdminRole::where('id', '!=', 1)->get();
+        //$term = $u->ent->active_term();
+        return $this->success($roles, $message = "Success", 200);
+    }
+
     public function transport_vehicles()
     {
         $u = auth('api')->user();
@@ -975,6 +1488,19 @@ class ApiMainController extends Controller
     }
 
 
+
+    public function employees()
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        $data = User::where(['enterprise_id' => $u->enterprise_id])
+            ->limit(1000)
+            ->orderBy('id', 'desc')
+            ->get();
+        return $this->success($data, $message = "Success", 1);
+    }
 
     public function trips()
     {

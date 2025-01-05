@@ -44,6 +44,7 @@ use App\Models\TheologyTermlyReportCard;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Utils;
+use Dflydev\DotAccessData\Util;
 use Encore\Admin\Auth\Database\Administrator;
 use Facade\FlareClient\Report;
 use Faker\Core\Uuid;
@@ -281,7 +282,12 @@ Route::get('process-theology-report-cards', function (Request $request) {
   die("done");
 });
 Route::get('test-1', function (Request $request) {
+  $ent = Enterprise::find(7);
+  $x = null;
 
+  $ent->name = $x ?? null;
+
+  die($ent->name);
 
   $ents = Enterprise::where([
     'type' => 'Primary',
@@ -351,6 +357,14 @@ Route::get('app', function (Request $request) {
   return view('app');
 });
 Route::get('test', function (Request $request) {
+
+  $ent = Enterprise::find(7);
+  $ent = Utils::fetchDataFromRequest($ent, $request);
+  dd($ent->name);
+
+  dd($request->all());
+
+  die("tome to test");
 
   $marks = TheologyMarkRecord::where([
     'enterprise_id' => 7,

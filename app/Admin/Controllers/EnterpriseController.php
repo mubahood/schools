@@ -35,6 +35,7 @@ class EnterpriseController extends AdminController
             $actions->disableView();
         });
 
+        $grid->column('color', __('color'))->sortable()->editable();
         $grid->column('id', __('Id'))->sortable();
         $grid->column('name', __('Name'))->sortable();
         $grid->column('administrator_id', __('Onwer'))->display(function () {
@@ -109,9 +110,9 @@ class EnterpriseController extends AdminController
             })
             ->rules('required');
 
-        $form->text('name', __('Name'))->required();
-        $form->text('short_name', __('Short name'))->required();
-        $form->text('motto', __('School Motto'))->required();
+        $form->text('name', __('Name'))->rules('required');
+        $form->text('short_name', __('Short name'));
+        $form->text('motto', __('School Motto'));
 
         $form->select('type', __('School type'))
             ->options([
@@ -128,17 +129,17 @@ class EnterpriseController extends AdminController
             ->rules('required');
 
         $form->text('hm_name', __('Head Teacher Name'));
-        //$form->textarea('welcome_message', __('Welcome_message'))->required();
-        $form->quill('welcome_message', __('Welcome_message'))->required();
-        $form->text('subdomain', __('Subdomain'))->required();
+        //$form->textarea('welcome_message', __('Welcome_message'));
+        $form->quill('welcome_message', __('Welcome_message'));
+        $form->text('subdomain', __('Subdomain'));
         $form->image('logo', __('Logo'));
-        $form->text('color', __('Primary color'))->required();
+        $form->color('color', __('Primary color'));
         $form->text('phone_number', __('Phone number'));
         $form->text('phone_number_2', __('Phone number 2'));
-        $form->text('email', __('Email'))->attribute('type', 'email')->required();
-        $form->text('website', __('Website'))->attribute('type', 'Website')->required();
+        $form->text('email', __('Email'))->attribute('type', 'email');
+        $form->text('website', __('Website'))->attribute('type', 'Website');
         $form->text('address', __('Address'));
-        $form->date('expiry', __('Expiry'))->required();
+        $form->date('expiry', __('Expiry'));
         $form->textarea('details', __('Details'));
         $form->divider('SCHOOL PAY INFO');
 

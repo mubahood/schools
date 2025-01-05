@@ -76,15 +76,27 @@ class Gen extends Model
         $_key = str_replace('_id', '_text', $key);
 
         $_data .= 'FormBuilderTextField(
-          decoration: CustomTheme.in_3(
+          decoration: CustomTheme.in_4(
             label: GetStringUtils("' . (str_replace('_', ' ', $_key)) . '").capitalize!,
           ),
           initialValue: item.' . $_key . ',
-          textCapitalization: TextCapitalization.words,
+          textCapitalization: TextCapitalization.sentences,
           name: "' . $_key . '",
+          enableSuggestions: true, 
           onChanged: (x) {
             item.' . $_key . ' = x.toString();
           },
+           validator: FormBuilderValidators.compose([
+                                FormBuilderValidators.required(
+                                  errorText: "' . $_key . ' is required.",
+                                ),
+                                //min 4
+                                FormBuilderValidators.minLength(3,
+                                    errorText: "' . $_key . ' is too short."),
+                                //max 30
+                                FormBuilderValidators.maxLength(100,
+                                    errorText: "' . $_key . ' is too long."),
+                              ]),
           textInputAction: TextInputAction.next,
         ),const SizedBox(height: 15),';
       }
@@ -392,11 +404,13 @@ class Gen extends Model
   import 'package:flutter_form_builder/flutter_form_builder.dart';
   import 'package:flutx/flutx.dart';
   import 'package:get/get.dart'; 
+  import 'package:form_builder_validators/form_builder_validators.dart';
   
   import '../../models/$this->class_name.dart';
-  import '../../models/RespondModel.dart';
-  import '../../utils/CustomTheme.dart';
-  import '../../utils/Utilities.dart';
+  import '../../models/RespondModel.dart'; 
+  import '../../theme/custom_theme.dart';
+  import '../../utils/Utils.dart'; 
+  
   
   class {$this->class_name}EditScreen extends StatefulWidget {
     Map&ltString, dynamic&gt params = {};
@@ -418,9 +432,15 @@ class Gen extends Model
     String error_message = "";
     {$this->class_name} item = {$this->class_name}();
   
+    bool isUpdating = false; 
     Future&ltbool&gt init_form() async {
       if (widget.params['item'].runtimeType == item.runtimeType) {
         item = widget.params['item'];
+        if (item.id > 0) {
+          isUpdating = true;
+        } else {
+          isUpdating = false;
+        }
       }
       return true;
     }
@@ -437,7 +457,8 @@ class Gen extends Model
       return Scaffold(
         appBar: AppBar(
           title: FxText.titleMedium(
-            "Editing profile",
+            isUpdating ? 'Edit {$this->class_name}' : 'Add {$this->class_name}',
+            color: Colors.white,
             fontSize: 20,
             fontWeight: 700,
           ),
@@ -445,7 +466,7 @@ class Gen extends Model
           backgroundColor: CustomTheme.primary,
           actions: [
             is_loading
-                ? const Padding(
+                ? Padding(
                     padding: EdgeInsets.only(right: 20, top: 10, bottom: 10),
                     child: Center(
                       child: CircularProgressIndicator(
@@ -460,10 +481,11 @@ class Gen extends Model
                       submit_form();
                     },
                     backgroundColor: Colors.white,
-                    child: FxText.bodyLarge(
-                      "SAVE",
-                      fontWeight: 800,
-                    ))
+                    child:  Icon(
+                    FeatherIcons.check,
+                    color: Colors.white,
+                    size: 35,
+                  ))
           ],
         ),
         body: FutureBuilder(
@@ -520,16 +542,17 @@ class Gen extends Model
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     FxText.titleLarge(
-                                      'NEXT',
+                                      'SUBMIT',
                                       color: Colors.white,
                                     ),
                                     const SizedBox(
                                       width: 10,
                                     ),
-                                    const Icon(
-                                      FeatherIcons.arrowRight,
-                                      color: Colors.white,
-                                    )
+                                    const  Icon(
+                                          FeatherIcons.check,
+                                          color: Colors.white,
+                                          size: 35,
+                                        )
                                   ],
                                 )))
                   ],

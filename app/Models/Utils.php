@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Queue\Jobs\SyncJob;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Str;
 use Milon\Barcode\DNS1D;
@@ -50,6 +51,49 @@ define('COLORS',  [
 class Utils  extends Model
 {
 
+
+
+    public static function fetchDataFromRequest($object, $request, $exclude = [])
+    {
+        $table = $object->getTable();
+        $table_columns = DB::getSchemaBuilder()->getColumnListing($table);
+        foreach ($table_columns as $column) {
+            if (in_array($column, $exclude)) {
+                continue;
+            }
+            if ($request->has($column)) {
+                $val = $request->$column;
+                if ($val == null) {
+                    continue;
+                }
+                if (is_array($val)) {
+                    $val = json_encode($val);
+                }
+                $object->$column = $val;
+            }
+        }
+        return $object;
+    }
+    public static function mail_sender($data)
+    {
+        try {
+            Mail::send(
+                'mails/mail-1',
+                [
+                    'body' => $data['body'],
+                    'title' => $data['subject']
+                ],
+                function ($m) use ($data) {
+                    $m->to($data['email'], $data['name'])
+                        ->subject($data['subject']);
+                    $m->from(env('MAIL_FROM_ADDRESS'), $data['subject']);
+                }
+            );
+        } catch (\Throwable $th) {
+            $msg = 'failed';
+            throw $th;
+        }
+    }
 
     public static function getSuperscriptSuffix($number)
     {

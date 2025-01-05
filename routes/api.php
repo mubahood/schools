@@ -20,12 +20,20 @@ use Illuminate\Support\Facades\Route;
 
 Route::POST("users/register", [ApiAuthController::class, "register"]);
 Route::POST("users/login", [ApiAuthController::class, "login"]);
+Route::POST("forget-password-request", [ApiMainController::class, 'forget_password_request']);
+Route::POST("forget-password-reset", [ApiMainController::class, 'forget_password_reset']);
 
 Route::middleware([JwtMiddleware::class])->group(function () {
+    Route::post("employee-create", [ApiMainController::class, 'employee_create']);
+    Route::post("enterprise-create", [ApiMainController::class, 'enterprise_create']);
+    Route::post("email-verify-request-token", [ApiMainController::class, 'email_verify_request_token']);
+    Route::post("email-verify-review-code", [ApiMainController::class, 'email_verify_review_code']);
+    Route::get("roles", [ApiMainController::class, 'roles']);
     Route::get("transport-vehicles", [ApiMainController::class, 'transport_vehicles']);
     Route::get("transport-routes", [ApiMainController::class, 'transport_routes']);
     Route::get("transport-subscriptions", [ApiMainController::class, 'transport_subscriptions']);
     Route::get("trips", [ApiMainController::class, 'trips']);
+    Route::get("employees", [ApiMainController::class, 'employees']);
     Route::get("student-verification", [ApiMainController::class, 'student_verification']);
     Route::get("service-subscriptions", [ApiMainController::class, 'service_subscriptions']);
     Route::post("service-subscriptions", [ApiMainController::class, 'service_subscriptions_store']);
