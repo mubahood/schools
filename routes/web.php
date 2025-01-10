@@ -701,6 +701,9 @@ Route::get('/gen', function () {
 Route::get('/gen-form', function () {
   die(Gen::find($_GET['id'])->make_forms());
 })->name("gen-form");
+Route::get('/gen-list', function () {
+  die(Gen::find($_GET['id'])->make_list());
+})->name("gen-list");
 
 
 Route::get('create-streams', [Utils::class, 'create_streams']);

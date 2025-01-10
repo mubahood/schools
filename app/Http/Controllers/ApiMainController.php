@@ -10,6 +10,7 @@ use App\Models\AdminRole;
 use App\Models\AdminRoleUser;
 use App\Models\DisciplinaryRecord;
 use App\Models\Enterprise;
+use App\Models\MainCourse;
 use App\Models\Mark;
 use App\Models\MarkRecord;
 use App\Models\Participant;
@@ -1022,6 +1023,192 @@ class ApiMainController extends Controller
             'Email address verified successfully! '
         );
     }
+
+    public function subject_create(Request $r)
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User account not found.');
+        }
+        $u = User::find($u->id);
+        if ($u == null) {
+            return $this->error('User account not found.');
+        }
+
+        $academic_class = AcademicClass::find($r->academic_class_id);
+        if ($academic_class == null) {
+            return $this->error("Class not found.");
+        }
+
+        $course = MainCourse::find($r->course_id);
+        if ($course == null) {
+            return $this->error("Course not found.");
+        }
+
+        $sub = Subject::find($r->id);
+        $isEdit = false;
+        if ($sub == null) {
+            $isEdit = false;
+            $sub = new Subject();
+            $sub->enterprise_id = $u->enterprise_id;
+            $sub->academic_class_id = $academic_class->id;
+            $sub->course_id = $course->id;
+            $sub->subject_name = $course->name;
+            $sub->course_id = $course->id;
+            $sub->main_course_id = $course->id;
+            $sub->parent_course_id = $r->parent_course_id;
+        } else {
+            $isEdit = true;
+        }
+        $sub->subject_teacher = $r->subject_teacher;
+        $sub->code = $r->code;
+        $sub->details = $r->details;
+        $sub->is_optional = $r->is_optional;
+        $sub->teacher_1 = $r->teacher_1;
+        $sub->teacher_2 = $r->teacher_2;
+        $sub->teacher_3 = $r->teacher_3;
+        $sub->show_in_report = $r->show_in_report;
+        $sub->grade_subject = $r->grade_subject;
+
+        try {
+            $sub->save();
+        } catch (\Throwable $th) {
+            return $this->error('Failed to save because ' . $th->getMessage());
+        }
+
+        $sub = Subject::find($sub->id);
+        if ($sub == null) {
+            return $this->error('Failed to find created subject');
+        }
+        $msg = "Subject #{$sub->id} created successfully.";
+        if ($isEdit) {
+            $msg = "Subject #{$sub->id} updated successfully.";
+        }
+        return $this->success($sub, $msg);
+    }
+
+
+    public function student_create(Request $r)
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User account not found.');
+        }
+        $u = User::find($u->id);
+        if ($u == null) {
+            return $this->error('User account not found.');
+        }
+
+        $isCreating = true;
+        if ($r->id != null && strlen($r->id) > 0) {
+            $student = User::find($r->id);
+            if ($student == null) {
+                $isCreating = true;
+                $student = new User();
+            } else {
+                $isCreating = false;
+            }
+        }
+
+        //first_name is required
+        if ($r->first_name == null || strlen($r->first_name) < 3) {
+            return $this->error('First name is required.');
+        }
+
+        //last_name is required
+        if ($r->last_name == null || strlen($r->last_name) < 3) {
+            return $this->error('Last name is required.');
+        }
+
+        //phone_number_1 is required
+        if ($r->phone_number_1 == null || strlen($r->phone_number_1) < 3) {
+            return $this->error('Phone number is required.');
+        }
+        //sex is required
+        if ($r->sex == null || strlen($r->sex) < 3) {
+            return $this->error('Sex is required.');
+        }
+
+        $student = Utils::fetchDataFromRequest($student, $r, [
+            'avatar',
+            'roles_text',
+            'current_class_id',
+        ]);
+        $msg = 'Student account created successfully!';
+
+        if ($r->phone_number_1 != null && strlen($r->phone_number_1) > 3) {
+            //phone_number_1 must start with +
+            if (substr($r->phone_number_1, 0, 1) != '+') {
+                return $this->error('Phone number must start with +.');
+            }
+        }
+
+        $current_class = AcademicClass::find($r->current_class_id);
+        if($current_class == null){
+            return $this->error("Class not found.");
+        }
+
+        if ($isCreating) {
+
+            $student->user_type = 'student';
+            if ($student->password == null || strlen($student->password) < 3) {
+                $student->password = password_hash('4321', PASSWORD_DEFAULT);
+                $student->plain_password = '4321';
+            } else {
+                $student->password = password_hash($student->password, PASSWORD_DEFAULT);
+                $student->plain_password = $student->password;
+            }
+            $student->verification = 1;
+            $student->current_class_id = $current_class->id;
+            $student->status = 1;
+        } else {
+            $msg = 'Student account updated successfully!';
+
+            //check if phone number is being changed
+            $student->user_type = 'student';
+        }
+
+        //date_of_birth is not null
+        /*  if ($r->date_of_birth != null && strlen($r->date_of_birth) > 4) {
+            try {
+                $employee->date_of_birth = Carbon::parse($r->date_of_birth);
+            } catch (\Throwable $th) { 
+                $employee->date_of_birth = $r->date_of_birth;
+            }
+        } */
+
+        //check 
+
+        $student->enterprise_id = $u->enterprise_id;
+        try {
+            $student->save();
+        } catch (\Throwable $th) {
+            return $this->error('Failed to save student account because ' . $th->getMessage());
+        }
+        $student = User::find($student->id);
+        if ($student == null) {
+            return $this->error('Failed to find employee account.');
+        }
+
+ 
+        if (!empty($_FILES)) {
+            //logo_path
+            if (isset($_FILES['avatar_path'])) {
+                $file = $r->file('avatar_path');
+                $file_name = time() . rand(100000, 9999999) . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('storage/images'), $file_name);
+                $student->avatar = "images/" . $file_name;
+                $student->save();
+                $student = User::find($student->id);
+            }
+        }
+
+        return $this->success(
+            $student,
+            $msg
+        );
+    }
+
 
     public function employee_create(Request $r)
     {
@@ -2267,6 +2454,68 @@ lin
             }
             $subjects[] = $theology_subject;
         }
+        return $this->success($subjects, $message = "Success", 200);
+    }
+
+
+    public function main_courses()
+    {
+        $u = auth('api')->user();
+        $u = User::find($u->id);
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        $ent = Enterprise::find($u->enterprise_id);
+        if ($ent == null) {
+            return $this->error('Enterprise not found.');
+        }
+        $subs = [];
+        if ($ent->type == 'Primary') {
+        } else {
+            $subs = MainCourse::where('subject_type', 'Secondary')
+                ->get();
+        }
+        foreach (
+            MainCourse::where([])
+                ->get() as $key => $sub
+        ) {
+            if ($ent->type == 'Primary') {
+                if (
+                    $sub->subject_type == 'Primary' ||
+                    $sub->subject_type == 'Nursery'
+                ) {
+                    $subs[] = $sub;
+                }
+            } else {
+                if (
+                    $sub->subject_type == 'Primary' ||
+                    $sub->subject_type == 'Nursery'
+                ) {
+                    continue;
+                }
+                $subs[] = $sub;
+            }
+        }
+
+        return $this->success($subs, $message = "Success", 200);
+    }
+
+    public function subjects()
+    {
+        $u = auth('api')->user();
+        $ent = Enterprise::find($u->enterprise_id);
+        if ($ent == null) {
+            return $this->error("Ent not found.");
+        }
+        $academiYear = $ent->active_academic_year();
+        if ($academiYear == null) {
+            return $this->error("Academic year not found.");
+        }
+
+        $subjects = Subject::where([
+            'academic_year_id'  => $academiYear->id
+        ])->get();
+
         return $this->success($subjects, $message = "Success", 200);
     }
 

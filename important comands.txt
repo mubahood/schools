@@ -1,4 +1,4 @@
-php artisan make:migration change_verification_to_int_admin_users --table=admin_users
+php artisan make:migration add_title_users --table=gens
 
          $table->date('check_in_time')->nullable();
             $table->date('check_out_time')->nullable();

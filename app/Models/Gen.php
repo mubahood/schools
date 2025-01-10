@@ -190,6 +190,11 @@ class Gen extends Model
      String get_name() {
       return name;
     }
+  
+    String get_description() {
+      return name;
+    }
+
 
     static fromJson(dynamic m) {
     $this->class_name obj = new $this->class_name();
@@ -577,9 +582,7 @@ class Gen extends Model
         error_message = "";
         is_loading = true;
       });
-  
-      Utils.toast('Updating...', color: Colors.green.shade700);
-  
+        
       RespondModel resp = RespondModel(
           await Utils.http_post({$this->class_name}.end_point, item.toJson()));
   
@@ -595,13 +598,252 @@ class Gen extends Model
         Utils.toast('Failed', color: Colors.red.shade700);
         return;
       }
+
+
+
   
-      Utils.toast('Successfully!');
-  
+      {$this->class_name}? s;
+      try {
+        s = {$this->class_name}.fromJson(resp.data);
+      } catch (x) {
+        Utils.toast("Saved but Failed to parse.");
+        Navigator.pop(context);
+        return;
+      }
+      if (s == null) {
+        Utils.toast("Saved but did not manage to parse.");
+        Navigator.pop(context);
+        return;
+      }
+      if (s.id < 1) {
+        Utils.toast("Saved but did not manage to parse.");
+        Navigator.pop(context);
+        return;
+      }
+      await s.save();
+      
+      Utils.toast(resp.message, color: Colors.green.shade700);
+
       Navigator.pop(context);
+      
       return;
     }
   }  
+  </pre>
+  EOT;
+
+    return  $x;
+  }
+
+
+
+
+
+  public function make_list()
+  {
+    $tables = Schema::getColumnListing($this->table_name);
+    $generate_vars = $this->makeVars($tables);
+    $fromJson = Gen::fromJsons($tables);
+    $toJson = Gen::to_json($tables);
+    $sqlTableVars = Gen::sqlTableVars($tables);
+    $x = <<<EOT
+      <pre>
+      import 'package:sqflite/sqflite.dart';
+      import 'package:flutter/material.dart';
+      import 'package:flutx/widgets/text/text.dart';
+      import 'package:get/get.dart';
+      import 'package:schooldynamics/models/{$this->class_name}.dart';
+      import 'package:schooldynamics/sections/widgets.dart';
+      import 'package:schooldynamics/utils/Utils.dart';      
+      class {$this->class_name}sScreen extends StatefulWidget {
+        Map&lt;String, dynamic&gt; params;
+        {$this->class_name}sScreen(
+          this.params, {
+          super.key,
+        });
+        @override
+        State&lt;{$this->class_name}sScreen&gt; createState() =&gt; _{$this->class_name}sScreenState();
+      }
+
+      class _{$this->class_name}sScreenState extends State&lt{$this->class_name}sScreen&gt {
+        List&lt;{$this->class_name}&gt; items = [];
+        List&lt;{$this->class_name}&gt; allItems = [];
+
+        @override
+        void initState() {
+          // TODO: implement initState
+          super.initState();
+          myInit();
+        }
+
+        bool isLoading = false;
+        bool is_select = false;
+        bool isSearch = false;
+        bool searchIsOpen = false;
+        String searchWord = "";
+
+        Future&lt;void&gt; myInit() async {
+          if (widget.params['is_select'].toString() == 'is_select') {
+            is_select = true;
+          }
+
+          setState(() {
+            isLoading = true;
+          });
+          allItems = await {$this->class_name}.get_items();
+          items = [];
+
+          allItems.forEach((element) {
+            if (element.get_name().toLowerCase().contains(searchWord.toLowerCase())) {
+              items.add(element);
+            }
+          });
+
+          setState(() {
+            isLoading = false;
+          });
+        }        
+
+ 
+            Widget searchInput() {
+              return Container(
+                padding: EdgeInsets.symmetric(vertical: 0, horizontal: 15),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: TextField(
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    hintText: "Search",
+                    border: InputBorder.none,
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      searchWord = value;
+                    });
+                    myInit();
+                  },
+                ),
+              );
+            }
+
+            @override
+            Widget build(BuildContext context) {
+              return Scaffold(
+                floatingActionButton: FloatingActionButton(
+                  onPressed: () {
+                    Get.to(()=>{$this->class_name}EditScreen({})); 
+                  },
+                  child: Icon(Icons.add),
+                ),
+                appBar: AppBar(
+                  title: searchIsOpen
+                      ? searchInput()
+                      : FxText.titleLarge(
+                          "{$this->title}s",
+                          color: Colors.white,
+                          fontWeight: 700,
+                        ),
+                  systemOverlayStyle: Utils.overlay(),
+                  actions: [
+                    IconButton(
+                      icon: Icon(
+                        searchIsOpen ? Icons.close : Icons.search,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          searchIsOpen = !searchIsOpen;
+                        });
+                        if (!searchIsOpen) {
+                          searchWord = "";
+                          myInit();
+                        }
+                      },
+                    ),
+                    SizedBox(
+                      width: 15,
+                    ),
+                  ],
+                ),
+                body: isLoading
+                    ? const Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    : items.isEmpty
+                        ? noItemWidget('No Item Found', () {
+                            myInit();
+                          })
+                        : RefreshIndicator(
+                            onRefresh: myInit,
+                            backgroundColor: Colors.white,
+                            child: ListView.builder(
+                              itemCount: items.length,
+                              itemBuilder: (context, index) {
+                                {$this->class_name} item = items[index];
+                                return Container(
+                                  color:
+                                      index.isOdd ? Colors.grey[100] : Colors.grey[300],
+                                  child: ListTile(
+                                    dense: true,
+                                    onTap: () {
+                                      if (is_select) {
+                                        Get.back(result: item);
+                                        return;
+                                      }
+                                      // Get.to(()=>CourseScreen({'item': item}), arguments: item);
+                                    },
+                                    title: FxText.bodyMedium(
+                                      item.get_name(),
+                                      color: Colors.black,
+                                      fontWeight: 700,
+                                    ),
+                                    subtitle: FxText.bodySmall(
+                                      item.get_description(),
+                                    ),
+                                    //popup menu with edit and delete
+                                    trailing: PopupMenuButton(
+                                      itemBuilder: (BuildContext context) {
+                                        return [
+                                          PopupMenuItem(
+                                            child: ListTile(
+                                              dense: true,
+                                              title: FxText.bodyMedium("Edit"),
+                                              onTap: () {
+                                                Get.back();
+                                                Get.to(()=>{$this->class_name}EditScreen({'item': item}), arguments: item);
+                                              },
+                                            ),
+                                          ),
+                                          PopupMenuItem(
+                                            child: ListTile(
+                                              title: FxText.bodyMedium("Delete"),
+                                              dense: true,
+                                              onTap: () {
+                                                Utils.confirmDialog(
+                                                  context,
+                                                  "Delete",
+                                                  "Are you sure you want to delete this item?",
+                                                  () async {
+                                                    await item.delete();
+                                                    myInit();
+                                                  },
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ];
+                                      },
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+              );
+            }
+          }
+        
   </pre>
   EOT;
 

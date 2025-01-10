@@ -29,6 +29,7 @@ class GenController extends AdminController
 
         $grid->model()->orderBy('id', 'desc');
         $grid->column('id', __('Id'))->sortable();
+        $grid->column('title', __('Title'))->sortable()->editable(); 
         $grid->column('class_name', __('Class'));
         $grid->column('table_name', __('Table'));
         $grid->column('gen', __('Gen-Model'))->display(function () {
@@ -36,6 +37,9 @@ class GenController extends AdminController
         });
         $grid->column('gen-form', __('Gen-form'))->display(function () {
             return '<a target="_blank" href="' . url('gen-form?id=' . $this->id) . '">Make Forms</a>';
+        });
+        $grid->column('gen-list', __('Gen-List'))->display(function () {
+            return '<a target="_blank" href="' . url('gen-list?id=' . $this->id) . '">Make List</a>';
         });
         return $grid;
     }
@@ -71,7 +75,8 @@ class GenController extends AdminController
     {
         $form = new Form(new Gen());
 
-        $form->text('class_name', __('Class Name'));
+        $form->text('title', __('Class Name'))->required();
+        $form->text('class_name', __('Class Name'))->required();
         $tables = DB::select("SHOW TABLES");
         $data = [];
         foreach ($tables as $key => $table) {

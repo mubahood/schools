@@ -24,7 +24,9 @@ Route::POST("forget-password-request", [ApiMainController::class, 'forget_passwo
 Route::POST("forget-password-reset", [ApiMainController::class, 'forget_password_reset']);
 
 Route::middleware([JwtMiddleware::class])->group(function () {
+    Route::post("subject-create", [ApiMainController::class, 'subject_create']);
     Route::post("employee-create", [ApiMainController::class, 'employee_create']);
+    Route::post("student-create", [ApiMainController::class, 'student_create']);
     Route::post("enterprise-create", [ApiMainController::class, 'enterprise_create']);
     Route::post("email-verify-request-token", [ApiMainController::class, 'email_verify_request_token']);
     Route::post("email-verify-review-code", [ApiMainController::class, 'email_verify_review_code']);
@@ -61,6 +63,8 @@ Route::middleware([JwtMiddleware::class])->group(function () {
     Route::post("update-guardian/{id}", [ApiMainController::class, 'update_guardian']);
     Route::post("session-create", [ApiMainController::class, 'session_create']);
     Route::get("my-subjects", [ApiMainController::class, 'my_subjects']);
+    Route::get("subjects", [ApiMainController::class, 'subjects']);
+    Route::get("main-courses", [ApiMainController::class, 'main_courses']);
     Route::get("theology-subjects", [ApiMainController::class, 'theology_subjects']);
     Route::get("schemework-items", [ApiMainController::class, 'schemework_items']);
     Route::get("student-has-class", [ApiMainController::class, 'student_has_class']);

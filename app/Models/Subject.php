@@ -152,6 +152,7 @@ class Subject extends Model
         'teacher_2_name',
         'teacher_3_name',
         'teacher_name',
+        'academic_class_text',
     ];
 
     //teacher_name getter
@@ -161,7 +162,7 @@ class Subject extends Model
         if ($admin != null) {
             return $admin->name;
         }
-        return "";
+        return "N/A";
     }
 
     // getter attribute
@@ -192,5 +193,15 @@ class Subject extends Model
             return $admin->name;
         }
         return "";
+    }
+
+    //get academic_class_text attribute
+    public function getAcademicClassTextAttribute()
+    {
+        $text = "";
+        if ($this->academic_class != null) {
+            $text = $this->academic_class->name_text;
+        }
+        return $text;
     }
 }
