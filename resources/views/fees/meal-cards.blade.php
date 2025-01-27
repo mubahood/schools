@@ -77,7 +77,7 @@ use App\Models\Utils;
                         @php
                             $acc = $rec[$super_count];
                         @endphp
-                        @if ($IS_GATE_PASS)
+                        @if ($IS_GATE_PASS && isset($rec[$super_count + 1]))
                             @include('fees.meal-card-item-3', [
                                 'ent' => $ent,
                                 'demand' => $demand,
