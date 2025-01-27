@@ -63,7 +63,7 @@ class PostgreSQLSchemaManager extends AbstractSchemaManager
      */
     public function listTableDetails($name)
     {
-        Deprecation::trigger(
+        Deprecation::triggerIfCalledFromOutside(
             'doctrine/dbal',
             'https://github.com/doctrine/dbal/pull/5595',
             '%s is deprecated. Use introspectTable() instead.',
@@ -218,7 +218,7 @@ SQL,
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     protected function _getPortableTableForeignKeyDefinition($tableForeignKey)
     {
@@ -264,7 +264,7 @@ SQL,
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     protected function _getPortableViewDefinition($view)
     {
@@ -272,7 +272,7 @@ SQL,
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     protected function _getPortableTableDefinition($table)
     {
@@ -286,9 +286,7 @@ SQL,
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @link http://ezcomponents.org/docs/api/trunk/DatabaseSchema/ezcDbSchemaPgsqlReader.html
+     * {@inheritDoc}
      */
     protected function _getPortableTableIndexesList($tableIndexes, $tableName = null)
     {
@@ -325,7 +323,7 @@ SQL,
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     protected function _getPortableDatabaseDefinition($database)
     {
@@ -333,7 +331,7 @@ SQL,
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      *
      * @deprecated Use {@see listSchemaNames()} instead.
      */
@@ -350,7 +348,7 @@ SQL,
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     protected function _getPortableSequenceDefinition($sequence)
     {
@@ -364,7 +362,7 @@ SQL,
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     protected function _getPortableTableColumnDefinition($tableColumn)
     {
@@ -463,6 +461,7 @@ SQL,
                 $length = null;
                 break;
 
+            case 'json':
             case 'text':
             case '_varchar':
             case 'varchar':
@@ -530,7 +529,6 @@ SQL,
             'precision'     => $precision,
             'scale'         => $scale,
             'fixed'         => $fixed,
-            'unsigned'      => false,
             'autoincrement' => $autoincrement,
             'comment'       => isset($tableColumn['comment']) && $tableColumn['comment'] !== ''
                 ? $tableColumn['comment']
@@ -539,7 +537,7 @@ SQL,
 
         $column = new Column($tableColumn['field'], Type::getType($type), $options);
 
-        if (isset($tableColumn['collation']) && ! empty($tableColumn['collation'])) {
+        if (! empty($tableColumn['collation'])) {
             $column->setPlatformOption('collation', $tableColumn['collation']);
         }
 
@@ -617,7 +615,7 @@ SQL;
             $sql .= ' c.relname AS table_name, n.nspname AS schema_name,';
         }
 
-        $sql .= <<<'SQL'
+        $sql .= sprintf(<<<'SQL'
             a.attnum,
             quote_ident(a.attname) AS field,
             t.typname AS type,
@@ -633,11 +631,7 @@ SQL;
                 AND pg_index.indkey[0] = a.attnum
                 AND pg_index.indisprimary = 't'
             ) AS pri,
-            (SELECT pg_get_expr(adbin, adrelid)
-             FROM pg_attrdef
-             WHERE c.oid = pg_attrdef.adrelid
-                AND pg_attrdef.adnum=a.attnum
-            ) AS default,
+            (%s) AS default,
             (SELECT pg_description.description
                 FROM pg_description WHERE pg_description.objoid = c.oid AND a.attnum = pg_description.objsubid
             ) AS comment
@@ -651,7 +645,8 @@ SQL;
                 LEFT JOIN pg_depend d
                     ON d.objid = c.oid
                         AND d.deptype = 'e'
-SQL;
+                        AND d.classid = (SELECT oid FROM pg_class WHERE relname = 'pg_class')
+SQL, $this->_platform->getDefaultColumnValueSQLSnippet());
 
         $conditions = array_merge([
             'a.attnum > 0',
@@ -732,6 +727,7 @@ SQL;
     {
         $sql = <<<'SQL'
 SELECT c.relname,
+       CASE c.relpersistence WHEN 'u' THEN true ELSE false END as unlogged,
        obj_description(c.oid, 'pg_class') AS comment
 FROM pg_class c
      INNER JOIN pg_namespace n

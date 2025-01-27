@@ -2,6 +2,7 @@
 
 namespace Maatwebsite\Excel;
 
+use Illuminate\Support\Arr;
 use Maatwebsite\Excel\Concerns\WithBackgroundColor;
 use Maatwebsite\Excel\Concerns\WithCustomValueBinder;
 use Maatwebsite\Excel\Concerns\WithDefaultStyles;
@@ -143,6 +144,16 @@ class Writer
     }
 
     /**
+     * Determine if the application is running in a serverless environment.
+     *
+     * @return bool
+     */
+    public function isRunningServerless(): bool
+    {
+        return isset($_ENV['AWS_LAMBDA_RUNTIME_API']);
+    }
+
+    /**
      * @param  object  $export
      * @param  TemporaryFile  $temporaryFile
      * @param  string  $writerType
@@ -165,8 +176,13 @@ class Writer
             $export
         );
 
+        if ($temporaryFile instanceof RemoteTemporaryFile && !$temporaryFile->existsLocally() && !$this->isRunningServerless()) {
+            $temporaryFile = resolve(TemporaryFileFactory::class)
+                ->makeLocal(Arr::last(explode('/', $temporaryFile->getLocalPath())));
+        }
+
         $writer->save(
-            $path = $temporaryFile->getLocalPath()
+            $temporaryFile->getLocalPath()
         );
 
         if ($temporaryFile instanceof RemoteTemporaryFile) {
@@ -187,7 +203,7 @@ class Writer
      *
      * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
-    public function addNewSheet(int $sheetIndex = null)
+    public function addNewSheet(?int $sheetIndex = null)
     {
         return new Sheet($this->spreadsheet->createSheet($sheetIndex));
     }

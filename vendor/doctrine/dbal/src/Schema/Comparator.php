@@ -636,7 +636,7 @@ class Comparator
         // null != 0, null != false, null != '' etc. This affects platform's table alteration SQL generation.
         if (
             ($properties1['default'] === null) !== ($properties2['default'] === null)
-            || $properties1['default'] != $properties2['default']
+            || $properties1['default'] != $properties2['default'] // @phpstan-ignore notEqual.notAllowed
         ) {
             $changedProperties[] = 'default';
         }
@@ -702,7 +702,7 @@ class Comparator
     /**
      * Finds the difference between the indexes $index1 and $index2.
      *
-     * Compares $index1 with $index2 and returns $index2 if there are any
+     * Compares $index1 with $index2 and returns true if there are any
      * differences or false in case there are no differences.
      *
      * @internal The method should be only used from within the {@see Comparator} class hierarchy.

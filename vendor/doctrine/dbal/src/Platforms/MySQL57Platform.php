@@ -9,7 +9,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\Deprecations\Deprecation;
 
 /**
- * Provides the behavior, features and SQL dialect of the MySQL 5.7 (5.7.9 GA) database platform.
+ * Provides the behavior, features and SQL dialect of the MySQL 5.7 database platform.
  *
  * @deprecated This class will be merged with {@see MySQLPlatform} in 4.0 because support for MySQL
  *             releases prior to 5.7 will be dropped.
@@ -17,7 +17,7 @@ use Doctrine\Deprecations\Deprecation;
 class MySQL57Platform extends MySQLPlatform
 {
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      *
      * @deprecated
      */
@@ -34,7 +34,7 @@ class MySQL57Platform extends MySQLPlatform
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getJsonTypeDeclarationSQL(array $column)
     {
@@ -47,7 +47,7 @@ class MySQL57Platform extends MySQLPlatform
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     protected function getPreAlterTableRenameIndexForeignKeySQL(TableDiff $diff)
     {
@@ -55,7 +55,7 @@ class MySQL57Platform extends MySQLPlatform
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     protected function getPostAlterTableRenameIndexForeignKeySQL(TableDiff $diff)
     {
@@ -63,7 +63,7 @@ class MySQL57Platform extends MySQLPlatform
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     protected function getRenameIndexSQL($oldIndexName, Index $index, $tableName)
     {
@@ -71,7 +71,7 @@ class MySQL57Platform extends MySQLPlatform
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      *
      * @deprecated Implement {@see createReservedKeywordsList()} instead.
      */
@@ -88,7 +88,7 @@ class MySQL57Platform extends MySQLPlatform
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     protected function initializeDoctrineTypeMappings()
     {

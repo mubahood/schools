@@ -31,7 +31,7 @@ use function strtolower;
  * Base class for schema managers. Schema managers are used to inspect and/or
  * modify the database schema/structure.
  *
- * @template T of AbstractPlatform
+ * @template-covariant T of AbstractPlatform
  */
 abstract class AbstractSchemaManager
 {
@@ -215,7 +215,7 @@ abstract class AbstractSchemaManager
         if ($database === null) {
             $database = $this->getDatabase(__METHOD__);
         } else {
-            Deprecation::trigger(
+            Deprecation::triggerIfCalledFromOutside(
                 'doctrine/dbal',
                 'https://github.com/doctrine/dbal/issues/5284',
                 'Passing $database to AbstractSchemaManager::listTableColumns() is deprecated.',
@@ -242,10 +242,10 @@ abstract class AbstractSchemaManager
         if ($database === null) {
             $database = $this->getDatabase(__METHOD__);
         } else {
-            Deprecation::trigger(
+            Deprecation::triggerIfCalledFromOutside(
                 'doctrine/dbal',
                 'https://github.com/doctrine/dbal/issues/5284',
-                'Passing $database to AbstractSchemaManager::listTableColumns() is deprecated.',
+                'Passing $database to AbstractSchemaManager::doListTableColumns() is deprecated.',
             );
         }
 
@@ -442,7 +442,7 @@ abstract class AbstractSchemaManager
      */
     public function listTableDetails($name)
     {
-        Deprecation::trigger(
+        Deprecation::triggerIfCalledFromOutside(
             'doctrine/dbal',
             'https://github.com/doctrine/dbal/pull/5595',
             '%s is deprecated. Use introspectTable() instead.',
@@ -1740,6 +1740,10 @@ abstract class AbstractSchemaManager
      */
     public function extractDoctrineTypeFromComment($comment, $currentType)
     {
+        if ($this->_conn->getConfiguration()->getDisableTypeComments()) {
+            return $currentType;
+        }
+
         if ($comment !== null && preg_match('(\(DC2Type:(((?!\)).)+)\))', $comment, $match) === 1) {
             return $match[1];
         }
@@ -1757,6 +1761,10 @@ abstract class AbstractSchemaManager
      */
     public function removeDoctrineTypeFromComment($comment, $type)
     {
+        if ($this->_conn->getConfiguration()->getDisableTypeComments()) {
+            return $comment;
+        }
+
         if ($comment === null) {
             return null;
         }

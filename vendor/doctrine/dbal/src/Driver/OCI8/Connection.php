@@ -81,7 +81,7 @@ final class Connection implements ServerInfoAwareConnection
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function quote($value, $type = ParameterType::STRING)
     {
@@ -104,7 +104,7 @@ final class Connection implements ServerInfoAwareConnection
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      *
      * @param string|null $name
      *
@@ -142,7 +142,7 @@ final class Connection implements ServerInfoAwareConnection
 
     public function commit(): bool
     {
-        if (! oci_commit($this->connection)) {
+        if (! @oci_commit($this->connection)) {
             throw Error::new($this->connection);
         }
 

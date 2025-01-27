@@ -1,7 +1,7 @@
 # Optimize images in your Laravel app
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/spatie/laravel-image-optimizer.svg?style=flat-square)](https://packagist.org/packages/spatie/laravel-image-optimizer)
-![Tests](https://github.com/spatie/laravel-image-optimizer/workflows/tests/badge.svg)
+![Tests](https://github.com/spatie/laravel-image-optimizer/actions/workflows/run-tests.yml/badge.svg)
 [![Total Downloads](https://img.shields.io/packagist/dt/spatie/laravel-image-optimizer.svg?style=flat-square)](https://packagist.org/packages/spatie/laravel-image-optimizer)
 
 This package is the Laravel 6.0 and up specific integration of [spatie/image-optimizer](https://github.com/spatie/image-optimizer). It can optimize PNGs, JPGs, SVGs and GIFs by running them through a chain of various [image optimization tools](https://github.com/spatie/image-optimizer#optimization-tools). The package will automatically detect which optimization binaries are installed on your system and use them.
@@ -121,7 +121,7 @@ If you want to automatically optimize images that get uploaded to your applicati
 
 ```php
 // app/Http/Kernel.php
-protected $routeMiddleware = [
+protected $middlewareAliases = [
    ...
    'optimizeImages' => \Spatie\LaravelImageOptimizer\Middlewares\OptimizeImages::class,
 ];
@@ -190,11 +190,11 @@ composer test
 
 ## Contributing
 
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
+Please see [CONTRIBUTING](https://github.com/spatie/.github/blob/main/CONTRIBUTING.md) for details.
 
 ## Security
 
-If you discover any security related issues, please email freek@spatie.be instead of using the issue tracker.
+If you've found a bug regarding security please mail [security@spatie.be](mailto:security@spatie.be) instead of using the issue tracker.
 
 ## Postcardware
 

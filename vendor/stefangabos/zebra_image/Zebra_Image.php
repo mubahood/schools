@@ -20,14 +20,14 @@ define('ZEBRA_IMAGE_CROP_BOTTOMRIGHT', 10);
 ini_set('gd.jpeg_ignore_warning', '1');
 
 /**
- *  A compact (one-file only) and lightweight PHP library for image manipulation providing methods for performing several
- *  types of image manipulation operations and applying filters to images. Supports WEBP format.
+ *  A single-file, lightweight PHP library designed for efficient image manipulation featuring methods for modifying
+ *  images and applying filters Supports WEBP format.
  *
  *  Read more {@link https://github.com/stefangabos/Zebra_Image/ here}
  *
  *  @author     Stefan Gabos <contact@stefangabos.ro>
- *  @version    2.8.1 (last revision: October 10, 2022)
- *  @copyright  © 2006 - 2022 Stefan Gabos
+ *  @version    2.8.2 (last revision: January 25, 2023)
+ *  @copyright  © 2006 - 2023 Stefan Gabos
  *  @license    https://www.gnu.org/licenses/lgpl-3.0.txt GNU LESSER GENERAL PUBLIC LICENSE
  *  @package    Zebra_Image
  */
@@ -49,6 +49,20 @@ class Zebra_Image {
      *  @var boolean
      */
     public $auto_handle_exif_orientation;
+
+    /**
+     *  Indicates whether BMP images should be compressed with run-length encoding (RLE), or not.
+     *
+     *  >   Used only if PHP version is `7.2.0+` and the file at {@link target_path} is a `BMP` image, or it will be
+     *      ignored otherwise.
+     *
+     *  Default is `TRUE`
+     *
+     *  @since 2.8.1
+     *
+     *  @var boolean
+     */
+    public $bmp_compressed;
 
     /**
      *  Indicates the file system permissions to be set for newly created images.
@@ -109,7 +123,7 @@ class Zebra_Image {
     /**
      *  Indicates whether the created image should be saved as a progressive JPEG.
      *
-     *  Used only if the file at {@link target_path} is a `JPG/JPEG` image, or will be ignored otherwise.
+     *  >   Used only if the file at {@link target_path} is a `JPG/JPEG` image, or will be ignored otherwise.
      *
      *  Default is `false`
      *
@@ -189,7 +203,7 @@ class Zebra_Image {
     /**
      *  Path to an image file to apply the transformations to.
      *
-     *  Supported file types are `GIF`, `PNG`, `JPEG` and `WEBP`.
+     *  Supported file types are `BMP`, `GIF`, `JPEG`, `PNG` and `WEBP`.
      *
      *  >   `WEBP` support is available for PHP version `7.0.0+`.<br><br>
      *      Note that even though `WEBP` support was added to PHP in version `5.5.0`, it only started working with version
@@ -197,6 +211,8 @@ class Zebra_Image {
      *      available only if PHP version is at least `7.0.0`<br><br>
      *      Animated `WEBP` images are not currently supported by GD.
      *      See {@link https://github.com/libgd/libgd/issues/648 here} and {@link https://bugs.php.net/bug.php?id=79809&thanks=4 here}.
+     *
+     *  >   `BMP` support is available for PHP version `7.2.0+`
      *
      *  @var    string
      */
@@ -206,7 +222,7 @@ class Zebra_Image {
      *  Path (including file name) to where to save the transformed image.
      *
      *  >   Can be a different format than the file at {@link source_path}. The format of the transformed image will be
-     *      determined by the file's extension. Supported file types are `GIF`, `PNG`, `JPEG` and `WEBP`
+     *      determined by the file's extension. Supported file types are `BMP`, `GIF`, `JPEG`, `PNG` and `WEBP`.
      *
      *  >   `WEBP` support is available for PHP version `7.0.0+`.<br><br>
      *      Note that even though `WEBP` support was added to PHP in version `5.5.0`, it only started working with version
@@ -214,6 +230,8 @@ class Zebra_Image {
      *      available only if PHP version is at least `7.0.0`<br><br>
      *      Animated `WEBP` images are not currently supported by GD.
      *      See {@link https://github.com/libgd/libgd/issues/648 here} and {@link https://bugs.php.net/bug.php?id=79809&thanks=4 here}.
+     *
+     *  >   `BMP` support is available for PHP version `7.2.0+`
      *
      *  @var    string
      */
@@ -295,7 +313,7 @@ class Zebra_Image {
 
         $this->webp_quality = 80;
 
-        $this->preserve_aspect_ratio = $this->preserve_time = $this->enlarge_smaller_images = true;
+        $this->preserve_aspect_ratio = $this->preserve_time = $this->enlarge_smaller_images = $this->bmp_compressed = true;
 
         $this->sharpen_images = $this->auto_handle_exif_orientation = $this->jpeg_interlace = false;
 
@@ -1437,9 +1455,14 @@ class Zebra_Image {
         // and if it founds an unsupported file type
         } elseif (
 
+            ($this->source_type = strtolower(substr($this->source_path, strrpos($this->source_path, '.') + 1))) &&
+
+            !(version_compare(PHP_VERSION, '7.0.0') < 0 && $this->source_type === 'webp') &&
+            !(version_compare(PHP_VERSION, '7.2.0') < 0 && $this->source_type === 'bmp') &&
+
             // getimagesize() doesn't support WEBP until 7.1.0 so we will handle that differently
-            !(version_compare(PHP_VERSION, '7.0.0') >= 0 && version_compare(PHP_VERSION, '7.1.0') < 0 && ($this->source_type = strtolower(substr($this->source_path, strrpos($this->source_path, '.') + 1))) === 'webp') &&
-            !list($this->source_width, $this->source_height, $this->source_type) = @getimagesize($this->source_path)
+            ($this->source_path !== 'webp' && !list($this->source_width, $this->source_height, $this->source_type) = @getimagesize($this->source_path))
+
         ) {
 
             // save the error level and stop the execution of the script
@@ -1462,7 +1485,7 @@ class Zebra_Image {
                 }
 
                 // if PHP version is less than 7.1.0
-                if (version_compare(PHP_VERSION, '7.0.0') >= 0 && version_compare(PHP_VERSION, '7.1.0') < 0) {
+                if (version_compare(PHP_VERSION, '7.1.0') < 0) {
 
                     // flag these so we compute them later on
                     $this->source_width = -1;
@@ -1479,6 +1502,14 @@ class Zebra_Image {
             // checks for file extension
             switch ($this->source_type) {
 
+                // if BMP
+                case IMAGETYPE_BMP:
+
+                    // create an image from file
+                    $identifier = imagecreatefrombmp($this->source_path);
+
+                    break;
+
                 // if GIF
                 case IMAGETYPE_GIF:
 
@@ -1489,20 +1520,24 @@ class Zebra_Image {
                     if (($this->source_transparent_color_index = imagecolortransparent($identifier)) >= 0) {
 
                         // get the transparent color's RGB values
-                        // we have to mute errors because there are GIF images which *are* transparent and everything
-                        // works as expected, but imagecolortransparent() returns a color that is outside the range of
-                        // colors in the image's pallette...
-                        $this->source_transparent_color = @imagecolorsforindex($identifier, $this->source_transparent_color_index);
+                        // there are GIF images which *are* transparent and everything works as expected, but
+                        // imagecolortransparent() returns a color that is outside the range of colors in the image's pallette...
+                        // therefore, we check first if the index is in range
+                        if ($this->source_transparent_color_index < imagecolorstotal($identifier)) {
+
+                            // if transparent color index is in range, get the transparent color's RGB values
+                            $this->source_transparent_color = @imagecolorsforindex($identifier, $this->source_transparent_color_index);
+
+                        // if transparent color index is outside the range of colors in the image's pallette
+                        } else {
+
+                            // get RGB values for color at index 0
+                            // (so that we don't have error further in the code)
+                            $this->source_transparent_color = @imagecolorsforindex($identifier, 0);
+
+                        }
 
                     }
-
-                    break;
-
-                // if JPEG
-                case IMAGETYPE_JPEG:
-
-                    // create an image from file
-                    $identifier = imagecreatefromjpeg($this->source_path);
 
                     break;
 
@@ -1517,6 +1552,14 @@ class Zebra_Image {
 
                     // save full alpha channel information
                     imagesavealpha($identifier, true);
+
+                    break;
+
+                // if JPEG
+                case IMAGETYPE_JPEG:
+
+                    // create an image from file
+                    $identifier = imagecreatefromjpeg($this->source_path);
 
                     break;
 
@@ -1537,7 +1580,7 @@ class Zebra_Image {
                     if (fread($fh, 4) === 'VP8X') {
 
                         // look for the "Animation (A)" bit
-                        fseek($fh, 16);
+                        fseek($fh, 20);
 
                         // is this is an animated WEBP?
                         $is_animated = ((ord(fread($fh, 1)) >> 1) & 1);
@@ -1547,7 +1590,7 @@ class Zebra_Image {
                     fclose($fh);
 
                     // if this is an animated WEBP
-                    if ($is_animated) {
+                    if (isset($is_animated) && $is_animated) {
 
                         // flag as unsupported file type
                         $this->error = 4;
@@ -1580,8 +1623,8 @@ class Zebra_Image {
                 default:
 
                     // if unsupported file type
-                    // note that we call this if the file is not GIF, JPG, PNG or WEBP even though the getimagesize function
-                    // handles more image types
+                    // note that we call this if the file is not BMP, GIF, JPG, PNG or WEBP even though the getimagesize function
+                    // might handle more image types
                     $this->error = 4;
 
                     return false;
@@ -1823,7 +1866,7 @@ class Zebra_Image {
             // allocate a transparent color
             $background_color = imagecolorallocatealpha($identifier, 0, 0, 0, 127);
 
-            // we also need to set this for saving gifs
+            // we also need to set this for saving GIFs
             imagecolortransparent($identifier, $background_color);
 
             // save full alpha channel information
@@ -1914,6 +1957,29 @@ class Zebra_Image {
 
         // image saving process goes according to required extension
         switch ($this->target_type) {
+
+            // if BMP
+            case 'bmp':
+
+                // if GD support for this file type is not available
+                if (!function_exists('imagebmp')) {
+
+                    // save the error level and stop the execution of the script
+                    $this->error = 6;
+
+                    return false;
+
+                // if, for some reason, file could not be created
+                } elseif (@!imagebmp($identifier, $this->target_path, $this->bmp_compressed)) {
+
+                    // save the error level and stop the execution of the script
+                    $this->error = 3;
+
+                    return false;
+
+                }
+
+                break;
 
             // if GIF
             case 'gif':

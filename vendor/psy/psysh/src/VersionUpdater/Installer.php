@@ -3,7 +3,7 @@
 /*
  * This file is part of Psy Shell.
  *
- * (c) 2012-2022 Justin Hileman
+ * (c) 2012-2023 Justin Hileman
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -25,7 +25,7 @@ class Installer
      */
     protected $tempDirectory;
 
-    public function __construct(string $tempDirectory = null)
+    public function __construct(?string $tempDirectory = null)
     {
         $this->tempDirectory = $tempDirectory ?: \sys_get_temp_dir();
         $this->installLocation = \Phar::running(false);
@@ -33,8 +33,6 @@ class Installer
 
     /**
      * Public to allow the Downloader to use the temporary directory if it's been set.
-     *
-     * @return string
      */
     public function getTempDirectory(): string
     {
@@ -43,8 +41,6 @@ class Installer
 
     /**
      * Verify the currently installed PsySH phar is writable so it can be replaced.
-     *
-     * @return bool
      */
     public function isInstallLocationWritable(): bool
     {
@@ -53,8 +49,6 @@ class Installer
 
     /**
      * Verify the temporary directory is writable so downloads and backups can be saved there.
-     *
-     * @return bool
      */
     public function isTempDirectoryWritable(): bool
     {
@@ -63,10 +57,6 @@ class Installer
 
     /**
      * Verifies the downloaded archive can be extracted with \PharData.
-     *
-     * @param string $sourceArchive
-     *
-     * @return bool
      */
     public function isValidSource(string $sourceArchive): bool
     {
@@ -80,10 +70,6 @@ class Installer
 
     /**
      * Extract the "psysh" phar from the archive and move it, replacing the currently installed phar.
-     *
-     * @param string $sourceArchive
-     *
-     * @return bool
      */
     public function install(string $sourceArchive): bool
     {
@@ -107,10 +93,6 @@ class Installer
 
     /**
      * Create a backup of the currently installed PsySH phar in the temporary directory with a version number postfix.
-     *
-     * @param string $version
-     *
-     * @return bool
      */
     public function createBackup(string $version): bool
     {
@@ -126,11 +108,7 @@ class Installer
     /**
      * Restore the backup file to the original PsySH install location.
      *
-     * @param string $version
-     *
      * @throws ErrorException If the backup file could not be found
-     *
-     * @return bool
      */
     public function restoreFromBackup(string $version): bool
     {
@@ -145,10 +123,6 @@ class Installer
 
     /**
      * Get the full path for the backup target file location.
-     *
-     * @param string $version
-     *
-     * @return string
      */
     public function getBackupFilename(string $version): string
     {

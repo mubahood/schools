@@ -22,6 +22,9 @@ trait TranslatorTrait
 {
     private ?string $locale = null;
 
+    /**
+     * @return void
+     */
     public function setLocale(string $locale)
     {
         $this->locale = $locale;
@@ -32,7 +35,7 @@ trait TranslatorTrait
         return $this->locale ?: (class_exists(\Locale::class) ? \Locale::getDefault() : 'en');
     }
 
-    public function trans(?string $id, array $parameters = [], string $domain = null, string $locale = null): string
+    public function trans(?string $id, array $parameters = [], ?string $domain = null, ?string $locale = null): string
     {
         if (null === $id || '' === $id) {
             return '';

@@ -93,7 +93,7 @@ class AuthenticateSession
 
         $request->session()->flush();
 
-        throw new AuthenticationException('Unauthenticated', [$this->auth->getDefaultDriver()]);
+        throw new AuthenticationException('Unauthenticated.', [$this->auth->getDefaultDriver()]);
     }
 
     /**

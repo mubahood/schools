@@ -51,7 +51,7 @@ class OracleSchemaManager extends AbstractSchemaManager
      */
     public function listTableDetails($name)
     {
-        Deprecation::trigger(
+        Deprecation::triggerIfCalledFromOutside(
             'doctrine/dbal',
             'https://github.com/doctrine/dbal/pull/5595',
             '%s is deprecated. Use introspectTable() instead.',
@@ -86,7 +86,7 @@ class OracleSchemaManager extends AbstractSchemaManager
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     protected function _getPortableViewDefinition($view)
     {
@@ -96,7 +96,7 @@ class OracleSchemaManager extends AbstractSchemaManager
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     protected function _getPortableTableDefinition($table)
     {
@@ -106,9 +106,7 @@ class OracleSchemaManager extends AbstractSchemaManager
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @link http://ezcomponents.org/docs/api/trunk/DatabaseSchema/ezcDbSchemaPgsqlReader.html
+     * {@inheritDoc}
      */
     protected function _getPortableTableIndexesList($tableIndexes, $tableName = null)
     {
@@ -137,7 +135,7 @@ class OracleSchemaManager extends AbstractSchemaManager
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     protected function _getPortableTableColumnDefinition($tableColumn)
     {
@@ -236,7 +234,7 @@ class OracleSchemaManager extends AbstractSchemaManager
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     protected function _getPortableTableForeignKeysList($tableForeignKeys)
     {
@@ -282,7 +280,7 @@ class OracleSchemaManager extends AbstractSchemaManager
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     protected function _getPortableSequenceDefinition($sequence)
     {
@@ -296,7 +294,7 @@ class OracleSchemaManager extends AbstractSchemaManager
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     protected function _getPortableDatabaseDefinition($database)
     {
@@ -306,7 +304,7 @@ class OracleSchemaManager extends AbstractSchemaManager
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function createDatabase($database)
     {
@@ -344,7 +342,7 @@ class OracleSchemaManager extends AbstractSchemaManager
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function dropTable($name)
     {

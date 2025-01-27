@@ -4,6 +4,7 @@ namespace Doctrine\DBAL;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Type;
+use SensitiveParameter;
 
 use function get_class;
 use function gettype;
@@ -12,7 +13,6 @@ use function is_object;
 use function spl_object_hash;
 use function sprintf;
 
-/** @psalm-immutable */
 class Exception extends \Exception
 {
     public static function notSupported(string $method): self
@@ -61,8 +61,10 @@ class Exception extends \Exception
     }
 
     /** @param string|null $url The URL that was provided in the connection parameters (if any). */
-    public static function driverRequired(?string $url = null): self
-    {
+    public static function driverRequired(
+        #[SensitiveParameter]
+        ?string $url = null
+    ): self {
         if ($url !== null) {
             return new self(
                 sprintf(
