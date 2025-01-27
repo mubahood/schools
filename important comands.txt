@@ -1,4 +1,4 @@
-php artisan make:migration add_title_users --table=gens
+php artisan make:migration add_direction_to_school_fees_demands --table=school_fees_demands
 
          $table->date('check_in_time')->nullable();
             $table->date('check_out_time')->nullable();

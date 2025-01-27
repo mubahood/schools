@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class SchoolFeesDemand extends Model
 {
     use HasFactory;
+
     public function getClassesAttribute($value)
     {
         if ($value == null || strlen($value) < 3) {
@@ -41,8 +42,7 @@ class SchoolFeesDemand extends Model
     function get_demand_records()
     {
 
-        $balance = abs($this->amount);
-        $balance = -1 * $balance;
+        $balance =  (int)($this->amount);
 
         $recs = [];
         foreach ($this->classes as $key => $class) {
@@ -60,28 +60,35 @@ class SchoolFeesDemand extends Model
                 'enterprise_id' => $this->enterprise_id,
             ])
                 ->whereIn('administrator_id', $ids)
-                ->where('balance', '<=', $balance)
+                ->where('balance', $this->direction, $balance)
                 ->get();
             $recs[$class] = $accounts;
         }
         return $recs;
     }
 
-    function get_meal_card_records($residence)
+    function get_meal_card_records()
     {
 
-        $balance = abs($this->amount);
-        $balance = -1 * $balance;
+        $balance = (int)($this->amount);
+        $conds = [
+            'enterprise_id' => $this->enterprise_id,
+            'user_type' => 'student',
+            'status' => 1,
+        ];
+        if ($this->target_type == 'ALL') {
+        } else if ($this->target_type == 'DAY_SCHOLAR') {
+            $conds['residence'] = $this->target_type;
+        } else if ($this->target_type == 'BOARDER') {
+            $conds['residence'] = $this->target_type;
+        } else {
+            throw new \Exception('Invalid target type');
+        }
 
         $recs = [];
         foreach ($this->classes as $key => $class) {
-            $ids = User::where([
-                'enterprise_id' => $this->enterprise_id,
-                'user_type' => 'student',
-                'status' => 1,
-                'residence' => $residence,
-                'current_class_id' => $class
-            ])
+            $conds['current_class_id'] = $class;
+            $ids = User::where($conds)
                 ->get()
                 ->pluck('id')
                 ->toArray();
@@ -90,7 +97,8 @@ class SchoolFeesDemand extends Model
                 'enterprise_id' => $this->enterprise_id,
             ])
                 ->whereIn('administrator_id', $ids)
-                ->where('balance', '>=', $balance)
+                ->where('balance', $this->direction, $balance)
+                ->orderBy('balance', 'desc')
                 ->get();
             $recs[$class] = $accounts;
         }

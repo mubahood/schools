@@ -5,11 +5,57 @@ use App\Models\Utils;
 
 ?>
 @include('print.css')
+<div class="mb-3 text-center">
+    <p><strong>Balance:</strong> {{ $demand->direction }} UGX {{ number_format($demand->amount) }}</p>
+</div>
+<hr>
 @foreach ($recs as $index => $rec)
-    @php
+    <?php
         $class = AcademicClass::find($index);
-    @endphp
+        if ($type == 'LIST') {
+            echo '<h2 class="text-center">' . $class->name_text . '</h2>';
+            
+            ?>
+    <table class="w-100 table table-bordered table-sm table-striped">
+        <tr>
+            <th class="text-left">Name</th>
+            <th class="text-left">Class</th>
+            <th class="text-left">Residence</th>
+            <th class="text-center">Balance (UGX)</th>
+        </tr>
+        <?php
+        $ii = 0;
+        $balance_total = 0;
+        //sort $rec by balance
+        // $rec->sortBy('balance');
+        foreach ($rec as $item) {
+            $ii++;
+            $balance_total += $item->balance;
+            $owner = $item->owner;
+            echo '<tr class="text-left p-1">';
+            echo '<td class="text-left p-1">' . $ii . '. ' . $owner->name . '</td>';
+            echo '<td class="text-left p-1">' . $owner->current_class->name_text . '</td>';
+            echo '<td class="text-left p-1">' . $owner->residence . '</td>';
+            echo '<td class="text-right p-1">UGX <b>' . number_format($item->balance) . '</b></td>';
+            echo '</tr>';
+        }
+        ?>
+        <tr>
+            <td colspan="3" class="text-right p-1">Total</td>
+            <td class="text-right p-1">UGX <b>{{ number_format($balance_total) }}</b></td>
+        </tr>
+    </table>
+
+
+
+    <?php
+            continue;
+        }
+    ?>
     @php
+        if ($type == 'LIST') {
+            break;
+        }
         $count = 0;
         $super_count = 0;
     @endphp
@@ -31,18 +77,26 @@ use App\Models\Utils;
                         @php
                             $acc = $rec[$super_count];
                         @endphp
-
-                        @if ($acc->owner->residence != 'BOARDER')
+                        @if ($IS_GATE_PASS)
+                            @include('fees.meal-card-item-3', [
+                                'ent' => $ent,
+                                'demand' => $demand,
+                                'item' => $rec[$super_count + 1],
+                                'balance' => 'UGX ' . number_format($item->balance),
+                            ])
+                        @elseif ($acc->owner->residence != 'BOARDER')
                             @include('fees.meal-card-item', [
                                 'ent' => $ent,
                                 'demand' => $demand,
                                 'item' => $rec[$super_count],
+                                'balance' => 'UGX ' . number_format($item->balance),
                             ])
                         @else
                             @include('fees.meal-card-item-1', [
                                 'ent' => $ent,
                                 'demand' => $demand,
                                 'item' => $rec[$super_count],
+                                'balance' => 'UGX ' . number_format($item->balance),
                             ])
                         @endif
                     @endif
@@ -53,18 +107,26 @@ use App\Models\Utils;
                         @php
                             $acc = $rec[$super_count + 1];
                         @endphp
-
-                        @if ($acc->owner->residence != 'BOARDER')
+                        @if ($IS_GATE_PASS)
+                            @include('fees.meal-card-item-3', [
+                                'ent' => $ent,
+                                'demand' => $demand,
+                                'item' => $rec[$super_count + 1],
+                                'balance' => 'UGX ' . number_format($item->balance),
+                            ])
+                        @elseif ($acc->owner->residence != 'BOARDER')
                             @include('fees.meal-card-item', [
                                 'ent' => $ent,
                                 'demand' => $demand,
                                 'item' => $rec[$super_count + 1],
+                                'balance' => 'UGX ' . number_format($item->balance),
                             ])
                         @else
                             @include('fees.meal-card-item-1', [
                                 'ent' => $ent,
                                 'demand' => $demand,
                                 'item' => $rec[$super_count + 1],
+                                'balance' => 'UGX ' . number_format($item->balance),
                             ])
                         @endif
                     @endif

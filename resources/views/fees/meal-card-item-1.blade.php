@@ -43,14 +43,15 @@ if ($demand->message_4 != null && $demand->message_4 != '') {
     <p class="p-0 m-0 fs-16 lh-14 text-center" style="font-size: 12px;"><b>{{ strtoupper($ent->name) }}</b></p>
 
     <div class="text-center">
-        <p class="p-p m-0 pl-1 pr-1 mt-1 pb-1 fs-14" style="border: solid black 2px; display: inline-block; font-size: 10px;"><b>STUDENT
+        <p class="p-p m-0 pl-1 pr-1 mt-1 pb-1 fs-14"
+            style="border: solid black 2px; display: inline-block; font-size: 10px;"><b>STUDENT
                 MEAL CARD</b></p>
     </div>
 
     <p class="fs-14 text-uppercase mt-1 mb-2 " style=" font-size: 12px; line-height: 1.1">
         NAME: <u><b>&nbsp;{{ $item->owner->name }}&nbsp;</b></u> CLASS:
         <u><b>&nbsp;{{ $item->owner->current_class->short_name }}&nbsp;</b></u> MONTH: <b><u>{{ $month }}</u></b>
-        TERM: <b><u>{{ $active_term->name_text }}</u></b>
+        BAL: <b class=" bg-dark text-white"><u>{{ $balance }}</u></b>
     </p>
 
     <table class="table table-bordered my-bordered-table mt-0" style="border-color: black!important;">

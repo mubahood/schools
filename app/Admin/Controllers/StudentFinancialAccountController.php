@@ -265,13 +265,12 @@ class StudentFinancialAccountController extends AdminController
 
 
         $grid->column('owner.current_class_id', __('Class'))
-            ->sortable()
             ->display(function ($x) {
 
                 if ($this->owner->current_class == null) {
                     return "-";
                 }
-                return $this->owner->current_class->short_name;
+                return $this->owner->current_class->name_text;
 
                 return "-";
             });

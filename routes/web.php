@@ -496,11 +496,20 @@ Route::get('meal-cards', function (Request $r) {
   $idCard = SchoolFeesDemand::find($_GET['id']);
   $pdf = App::make('dompdf.wrapper');
   $ent = Enterprise::find($idCard->enterprise_id);
-  $recs = $idCard->get_meal_card_records($r->type);
+  $recs = $idCard->get_meal_card_records();
+
+  $IS_GATE_PASS = false;
+  if (isset($r->type) && $r->type == 'GATE_PASS') {
+    $IS_GATE_PASS = true;
+  }
+
+
   $pdf->loadHTML(view('fees.meal-cards', [
     'recs' => $recs,
     'ent' => $ent,
-    'demand' => $idCard
+    'type' => $r->type,
+    'demand' => $idCard,
+    'IS_GATE_PASS' => $IS_GATE_PASS
   ]));
   $pdf->render();
   return $pdf->stream();
@@ -612,7 +621,7 @@ Route::get('photos-zip-generation', function () {
 
   //check if file exists
   if (!file_exists($zip_file)) {
-    return "ZIP File not found fro ".$zip_file;
+    return "ZIP File not found fro " . $zip_file;
   }
 
   //zip file size

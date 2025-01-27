@@ -38,7 +38,32 @@ class SchoolFeesDemandController extends AdminController
             })
             ->sortable();
         $grid->column('description', __('Title'))->sortable();
-        $grid->column('amount', __('Amount'));
+        $grid->column('amount', __('Amount (UGX)'))
+            ->display(function ($f) {
+                return $this->direction . " " . number_format($f);
+            })
+            ->sortable();
+
+        // classes
+        $grid->column('classes', __('Target Classes'))
+            ->display(function ($f) {
+                $classes = [];
+                foreach ($f as $v) {
+                    $classes[] = AcademicClass::find($v)->name_text;
+                }
+                return implode(', ', $classes);
+            });
+        $grid->column('target_type', __('Residence'))->sortable()
+            ->label([
+                'DAY_SCHOLAR' => 'success',
+                'BOARDER' => 'info',
+                'ALL' => 'warning',
+            ])->filter([
+                'DAY_SCHOLAR' => 'Day Scholar',
+                'BOARDER' => 'Boarder',
+                'ALL' => 'All',
+            ])->sortable();
+
         $grid->column('demand_notice', __('Demand Notice'))
             ->display(function ($f) {
                 $url = url('generate-demand-notice?id=' . $this->id);
@@ -47,13 +72,23 @@ class SchoolFeesDemandController extends AdminController
         $grid->column('meal-cards', __('Meal Card (DAY SCHOLARS)'))
             ->display(function ($f) {
                 $url = url('meal-cards?id=' . $this->id . '&type=DAY_SCHOLAR');
-                return '<a href="' . $url . '" target="_blank">Generate Meal Cards for (DAY SCHOLAR)</a>';
+                return '<a href="' . $url . '" target="_blank">Generate Meal Cards for (' . $this->target_type . ')</a>';
             });
-        $grid->column('meal-cards-2', __('Meal Card (BOARDERS)'))
+
+
+        $grid->column('meal-cards', __('Gate Pass'))
             ->display(function ($f) {
-                $url = url('meal-cards?id=' . $this->id . '&type=BOARDER');
-                return '<a href="' . $url . '" target="_blank">Generate Meal Cards for (BOARDER)</a>';
+                $url = url('meal-cards?id=' . $this->id . '&type=GATE_PASS');
+                return '<a href="' . $url . '" target="_blank">Generate GATE-PASS for (' . $this->target_type . ')</a>';
             });
+
+
+        $grid->column('meal-cards-3', __('List of Students'))
+            ->display(function ($f) {
+                $url = url('meal-cards?id=' . $this->id . '&type=LIST');
+                return '<a href="' . $url . '" target="_blank">Generate List</a>';
+            });
+
 
         /*         $grid->column('message_1', __('Message 1'));
         $grid->column('message_2', __('Message 2'));
@@ -96,12 +131,25 @@ class SchoolFeesDemandController extends AdminController
      */
     protected function form()
     {
-   
+
         $form = new Form(new SchoolFeesDemand());
         $u = Admin::user();
         $form->hidden('enterprise_id')->value($u->enterprise_id);
         $form->text('description', __('Title'))->rules('required');
-        $form->decimal('amount', __('Balance'))->default(0)->rules('required');
+        $form->decimal('amount', __('Balance'))
+            ->rules([
+                'required',
+                'numeric',
+            ])
+            ->required();
+        $form->radio('direction', 'Direction')->options([
+            '<=' => 'Less than or equal to (<=)',
+            '>=' => 'Greater than or equal to (>=)',
+            '=' => 'Equal to (=)',
+            '>' => 'Greater than (>)',
+            '<' => 'Less than (<)',
+        ])->rules('required')->required();
+
         $form->quill('message_1', __('Demand Notice Template'))
             ->default('Dear Parent,<br>We write to inform you that your child <b>[STUDENT_NAME] - [STUDENT_CLASS]</b> has an outstanding balance of UGX <b>[BALANCE_AMOUNT]</b>.We request you to clear the balance to avoid inconvenience.<br><b>[STUDENT_NAME]</b> will not be permitted in school unless this balance is cleared.')
             ->required();
@@ -127,7 +175,16 @@ class SchoolFeesDemandController extends AdminController
         $form->date('message_4', __('Due Date'))->default(date('Y-m-d'))->rules('required');
 
         $form->multipleSelect('classes', 'Target Classes')
-            ->options($classes);
+            ->options($classes)
+            ->rules('required')
+            ->required();
+
+        //target_type borders or day scholars
+        $form->radio('target_type', 'Target Residence Type')->options([
+            'BOARDER' => 'Boarders',
+            'DAY_SCHOLAR' => 'Day Scholars',
+            'ALL' => 'All'
+        ])->rules('required')->required();
 
         /*         $form->textarea('', __('Message 3'));
         $form->textarea('', __('Message 4'));
