@@ -36,7 +36,7 @@ class User extends Administrator implements JWTSubject
             $roles = AdminRoleUser::where([
                 'user_id' => $m->id
             ]);
-            $m->roles_text = json_encode($roles->pluck('role_id')->toArray());
+            $m->roles_text = json_encode($roles);
             return $m;
         });
 
@@ -567,7 +567,7 @@ class User extends Administrator implements JWTSubject
     {
         $role_ids = [];
         foreach ($this->roles as $role) {
-            $role_ids[] = $role->id;
+            $role_ids[] = $role;
         }
         return json_encode($role_ids);
     }
