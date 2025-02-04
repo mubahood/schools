@@ -28,6 +28,8 @@ class EnterpriseController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Enterprise());
+        $grid->disableBatchActions();
+        $grid->quickSearch('name', 'id', 'short_name')->placeholder('Search by name, id or short name');
 
         $grid->model()->orderBy('id', 'DESC');
 

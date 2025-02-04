@@ -1528,107 +1528,74 @@ class Utils  extends Model
     public static function schoool_pay_sync()
     {
 
-        //Utils::school_pay_import();
-
+        $now = Carbon::now();
+        $lastReconciler = Reconciler::orderBy('id', 'desc')->first();
+        $dif_secs = 30;
+        if ($lastReconciler != null) {
+            $last = Carbon::parse($lastReconciler->created_at);
+            $dif_secs = $now->diffInSeconds($last);
+        }
+        if ($dif_secs < 30) {
+            // die("Last reconciler was done $dif_secs seconds ago.");
+        }
 
         $done = [];
         $data = [];
-
-        foreach (DB::select("SELECT enterprise_id FROM reconcilers ORDER BY id DESC LIMIT 10000") as $key => $d) {
-            if (in_array($d->enterprise_id, $done)) {
-                continue;
-            }
-            $done[] = $d->enterprise_id;
-            $data[] = $d->enterprise_id;
-        }
-
-        $ent = null;
-        $last_ent = 0;
-
-        foreach ($data as $id) {
-
-            if ($last_ent == 0) {
-
-                $ent = Enterprise::where('id', $id)
-                    ->where([
-                        'school_pay_status' => 'Yes'
-                    ])
-                    ->first();
-                if ($ent != null) {
-                    $last_ent = $id;
-                    continue;
-                }
-            }
-
-            if ($last_ent != $id) {
-                $ent = Enterprise::where('id', $id)
-                    ->where([
-                        'school_pay_status' => 'Yes'
-                    ])
-                    ->first();
-                if ($ent != null) {
-                    $last_ent = $id;
-                }
-            }
-        }
-        $ent = Enterprise::where('id', $last_ent)
-            ->where([
-                'school_pay_status' => 'Yes'
-            ])
-            ->first();
-
-        $ents = Enterprise::where([
+        $school_pay_schools = Enterprise::where([
             'school_pay_status' => 'Yes'
         ])
+            ->whereNotNull('school_pay_code')
+            ->orderBy('id', 'asc')
             ->get();
 
-        $have_records = [];
-
-        foreach (DB::select("SELECT DISTINCT enterprise_id FROM reconcilers") as $value) {
-            $have_records[] = $value->enterprise_id;
+        if ($school_pay_schools->count() == 0) {
+            die("No school pay schools found.");
         }
 
 
-        foreach ($ents as $key => $value) {
-            if (!in_array($value->id, $have_records)) {
-                $_ent = Enterprise::where('id', $value->id)
-                    ->where([
-                        'school_pay_status' => 'Yes'
-                    ])
-                    ->first();
-                if ($_ent != null) {
-                    $ent = $_ent;
-                    break;
+        $last_enterprise = Reconciler::whereIn(
+            'enterprise_id',
+            $school_pay_schools->pluck('id')
+        )->orderBy('id', 'desc')->first();
+
+        $next_school_id = 0;
+        if ($last_enterprise != null) {
+            foreach ($school_pay_schools as $key => $school) {
+                if ($school->id <= $last_enterprise->enterprise_id) {
+                    continue;
                 }
+                $next_school_id = $school->id;
+                break;
             }
         }
-
-
-        if ($ent == null) {
-            $ent = Enterprise::where([
-                'school_pay_status' => 'Yes'
-            ])
-                ->first();
+        if ($next_school_id == 0) {
+            $next_school_id = $school_pay_schools->first()->id;
         }
+        $rec = new Reconciler();
+        $rec->enterprise_id = $next_school_id;
+        $rec->last_update = time();
+        $rec->back_day = 0;
+        $rec->save();
 
+        $ent = Enterprise::find($next_school_id);
         if ($ent == null) {
             die("ent not found.");
         }
+
 
         $last_rec = Reconciler::where([
             'enterprise_id' => $ent->id
         ])->orderBy('id', 'Desc')->first();
 
 
-        $back_day = 0;
-        $max_back_days = 95;
 
+        $back_day = 0;
+        $max_back_days = 30;
 
         $rec = new Reconciler();
         $rec->enterprise_id = $ent->id;
         $rec->last_update = time();
         $rec_date = date('Y-m-d');
-
 
         if ($last_rec != null) {
             $last_day = Carbon::createFromTimestamp($last_rec->last_update);
