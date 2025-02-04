@@ -1710,12 +1710,13 @@ class Utils  extends Model
                     continue;
                 }
             }
+            $rec->enterprise_id =  $ent->id;
             $rec->details .= "$rec_date - $data->returnMessage";
             $rec->save();
         } else {
             $rec->last_update = time();
             $rec->back_day = $last_rec->back_day;
-            $rec->enterprise_id = 0;
+            $rec->enterprise_id =  $ent->id;
             $rec->details = $resp;
             $rec->save();
         }
