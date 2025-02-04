@@ -1530,12 +1530,12 @@ class Utils  extends Model
 
         $now = Carbon::now();
         $lastReconciler = Reconciler::orderBy('id', 'desc')->first();
-        $dif_secs = 30;
+        $dif_secs = 10;
         if ($lastReconciler != null) {
             $last = Carbon::parse($lastReconciler->created_at);
             $dif_secs = $now->diffInSeconds($last);
         }
-        if ($dif_secs < 30) {
+        if ($dif_secs < 10) {
             // die("Last reconciler was done $dif_secs seconds ago.");
         }
 
