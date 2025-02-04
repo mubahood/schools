@@ -1571,11 +1571,7 @@ class Utils  extends Model
         if ($next_school_id == 0) {
             $next_school_id = $school_pay_schools->first()->id;
         }
-        $rec = new Reconciler();
-        $rec->enterprise_id = $next_school_id;
-        $rec->last_update = time();
-        $rec->back_day = 0;
-        $rec->save();
+        // $next_school_id = 13; 
 
         $ent = Enterprise::find($next_school_id);
         if ($ent == null) {
