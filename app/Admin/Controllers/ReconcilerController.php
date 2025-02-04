@@ -32,7 +32,7 @@ class ReconcilerController extends AdminController
             $filter->like('details', __('Details'));
             $filter->equal('enterprise_id', __('Enterprise'))->select(Enterprise::all()->pluck('name', 'id'));
             //SEARCH IN DETAILS
-            $filter->scope('search_in_details', 'Search in details')->where('details', 'like', "%{$this->input}%");
+            $filter->like('details', __('Details'));
         });
 
         $grid->column('id', __('Id'))->sortable();
