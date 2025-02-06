@@ -3,6 +3,12 @@ use App\Models\AcademicClass;
 use App\Models\SchoolFeesDemand;
 use App\Models\Utils;
 
+$logo = public_path('storage/' . $ent->logo);
+
+if (!file_exists($logo)) {
+    $logo = public_path('storage/logo.png');
+}
+
 ?>
 @include('print.css')
 <div class="mb-3 text-center">
@@ -82,6 +88,7 @@ use App\Models\Utils;
                                 'ent' => $ent,
                                 'demand' => $demand,
                                 'item' => $rec[$super_count + 1],
+                                'logo' => $logo,
                                 'balance' => 'UGX ' . number_format($item->balance),
                             ])
                         @elseif ($acc->owner->residence != 'BOARDER')
