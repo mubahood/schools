@@ -91,6 +91,7 @@ class ConfigurationController extends AdminController
         $form->text('p_o_box', __('P.O.BOX'));
         $form->text('email', __('Email'));
         $form->color('color', __('School Color'))->default('color')->required();
+        $form->color('sec_color', __('Secondary color'))->rules('required')->required();
         $form->quill('welcome_message', __('Welcome message'));
         $form->radioCard('can_send_messages', __('Enable Message Sending'))
             ->options([

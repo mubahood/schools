@@ -39,7 +39,7 @@ if ($demand->message_4 != null && $demand->message_4 != '') {
         padding-bottom: 3px;
     }
 </style>
-<div class="p-2 m-0" style="border: solid black .2rem;">
+<div class="p-2 m-0" style="border: solid {{ $ent->sec_color }} .2rem;">
 
     {{-- $logo --}}
     <table class="w-100">

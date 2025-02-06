@@ -39,14 +39,25 @@ if ($demand->message_4 != null && $demand->message_4 != '') {
         padding-bottom: 3px;
     }
 </style>
-<div class="p-2 m-0" style="border: solid black .2rem;">
-    <p class="p-0 m-0 fs-16 lh-14 text-center" style="font-size: 12px;"><b>{{ strtoupper($ent->name) }}</b></p>
+<div class="p-2 m-0" style="border: solid {{ $ent->sec_color }} .2rem;">
+    {{-- $logo --}}
+    <table class="w-100">
+        <tr>
+            <td class="text-left p-0 m-0" style="width: 50px; height: 50px;">
+                <img src="{{ $logo }}" alt="logo" style="width: 50px; height: 50px;">
+            </td>
+            <td class="text-center">
+                <p class="p-0 m-0 fs-16 lh-14 text-center" style="font-size: 14px;"><b>{{ strtoupper($ent->name) }}</b>
+                </p>
+                <p class="p-p m-0 pl-1 pr-1 mt-1 pb-1 fs-14 text-center"
+                    style="font-weight: 900; background-color: {{ $ent->color }}; color: white; border: solid {{ $ent->color }} 2px; display: inline-block; font-size: 14px;">
+                    <b>STUDENT
+                        MEAL CARD</b>
+                </p>
 
-    <div class="text-center">
-        <p class="p-p m-0 pl-1 pr-1 mt-1 pb-1 fs-14"
-            style="border: solid black 2px; display: inline-block; font-size: 10px;"><b>STUDENT
-                MEAL CARD</b></p>
-    </div>
+            </td>
+        </tr>
+    </table>
 
     <p class="fs-14 text-uppercase mt-1 mb-2 " style=" font-size: 12px; line-height: 1.1">
         NAME: <u><b>&nbsp;{{ $item->owner->name }}&nbsp;</b></u> CLASS:

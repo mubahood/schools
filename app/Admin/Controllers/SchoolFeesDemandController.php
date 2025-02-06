@@ -69,14 +69,14 @@ class SchoolFeesDemandController extends AdminController
                 $url = url('generate-demand-notice?id=' . $this->id);
                 return '<a href="' . $url . '" target="_blank">Generate Demand Notices</a>';
             });
-        $grid->column('meal-cards', __('Meal Card (DAY SCHOLARS)'))
+        $grid->column('meal-cards', __('Meal Card'))
             ->display(function ($f) {
-                $url = url('meal-cards?id=' . $this->id . '&type=DAY_SCHOLAR');
+                $url = url('meal-cards?id=' . $this->id . '&type=MEAL_CARD');
                 return '<a href="' . $url . '" target="_blank">Generate Meal Cards for (' . $this->target_type . ')</a>';
             });
 
 
-        $grid->column('meal-cards', __('Gate Pass'))
+        $grid->column('gate-pass', __('Gate Pass'))
             ->display(function ($f) {
                 $url = url('meal-cards?id=' . $this->id . '&type=GATE_PASS');
                 return '<a href="' . $url . '" target="_blank">Generate GATE-PASS for (' . $this->target_type . ')</a>';
