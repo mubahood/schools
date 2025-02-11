@@ -36,6 +36,7 @@ use Illuminate\Console\Scheduling\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+
 Utils::system_boot(Admin::user());
 
 //dd(Utils::docs_root()); 
@@ -53,6 +54,7 @@ $u = Auth::user();
 if ($u != null) {
     if ($u->ent != null) {
         if ($u->ent->has_valid_lisence != 'Yes') {
+            die("System under maintenance. New features are being added. Please check back later.");
             die('License for <b>' . $u->ent->name . '</b> has expired. Please contact, <b>Newline Technologies Ltd</b>. for renewal.');
         }
     }
