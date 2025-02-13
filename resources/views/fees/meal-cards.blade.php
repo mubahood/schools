@@ -83,11 +83,11 @@ if (!file_exists($logo)) {
                         @php
                             $acc = $rec[$super_count];
                         @endphp
-                        @if ($IS_GATE_PASS && isset($rec[$super_count + 1]))
+                        @if ($IS_GATE_PASS && isset($rec[$super_count ]))
                             @include('fees.meal-card-item-3', [
                                 'ent' => $ent,
                                 'demand' => $demand,
-                                'item' => $rec[$super_count + 1],
+                                'item' => $rec[$super_count ],
                                 'logo' => $logo,
                                 'balance' => 'UGX ' . number_format($item->balance),
                             ])
