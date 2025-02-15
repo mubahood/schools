@@ -28,11 +28,16 @@ class SchoolFeesDemand extends Model
 
     public static function get_demand_message($demand, $account)
     {
+        $school_pay_payment_code = "";
+        if ($account->owner->school_pay_payment_code != null && strlen($account->owner->school_pay_payment_code) > 0) {
+            $school_pay_payment_code = $account->owner->school_pay_payment_code;
+        }
         $content = $demand->message_1;
         if ($account->owner != null) {
             $content = str_replace("[STUDENT_NAME]", $account->owner->name, $content);
         }
         $content = str_replace("[BALANCE_AMOUNT]", number_format($account->balance), $content);
+        $content = str_replace("[SCHOOL_PAY_CODE]", $school_pay_payment_code, $content);
         if ($account->owner->current_class != null) {
             $content = str_replace("[STUDENT_CLASS]", $account->owner->current_class->name_text, $content);
         }
@@ -45,13 +50,23 @@ class SchoolFeesDemand extends Model
         $balance =  (int)($this->amount);
 
         $recs = [];
+        $target_type = $this->target_type;
         foreach ($this->classes as $key => $class) {
-            $ids = User::where([
+            $conds = [
                 'enterprise_id' => $this->enterprise_id,
                 'user_type' => 'student',
                 'status' => 1,
                 'current_class_id' => $class
-            ])
+            ];
+            if ($target_type == 'ALL') {
+            } else if ($target_type == 'DAY_SCHOLAR') {
+                $conds['residence'] = $target_type;
+            } else if ($target_type == 'BOARDER') {
+                $conds['residence'] = $target_type;
+            } else {    
+                throw new \Exception('Invalid target type');
+            }
+            $ids = User::where($conds)
                 ->get()
                 ->pluck('id')
                 ->toArray();

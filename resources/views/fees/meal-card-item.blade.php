@@ -63,8 +63,7 @@ if ($demand->message_4 != null && $demand->message_4 != '') {
 
     <p class="fs-14 text-uppercase mt-1 mb-2">
         NAME: <u><b>&nbsp;{{ $item->owner->name }}&nbsp;</b></u> CLASS:
-        <u><b>&nbsp;{{ $item->owner->current_class->short_name }}&nbsp;</b></u> MONTH: <b><u>{{ $month }}</u></b>
-        BAL: <b class="   "><u>{{ $balance }}</u></b>
+        <u><b>&nbsp;{{ $item->owner->current_class->short_name }}&nbsp;</b></u> MONTH: <b><u>{{ $month }}</u></b> 
     </p>
 
 

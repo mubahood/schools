@@ -64,9 +64,9 @@ if ($demand->message_4 != null && $demand->message_4 != '') {
         NAME: <u><b>&nbsp;{{ $item->owner->name }}&nbsp;</b></u> CLASS:
         <u><b>&nbsp;{{ $item->owner->current_class->short_name }}
     </p>
-    <p class="fs-14 text-uppercase mt-1 mb-2 " style=" font-size: 14px; line-height: 1.3">
+   {{--  <p class="fs-14 text-uppercase mt-1 mb-2 " style=" font-size: 14px; line-height: 1.3">
         SCHOOL FEES BALANCE: <b class=" bg-dark text-white"> {{ $balance }} </b>
-    </p>
+    </p> --}}
     <p class="fs-14 text-uppercase mt-1 mb-2 " style=" font-size: 14px; line-height: 1.1">
 
         </b> EXIPIRY DATE: <b><u>{{ $demand->message_4 }}</u></b>
