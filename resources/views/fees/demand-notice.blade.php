@@ -50,10 +50,9 @@ use App\Models\Utils;
             <hr class="p-0 m-0 mt-2 mb-1 bg-dark">
             <p class="text-right mt-2">{{ Utils::my_date($demand->created_at) }}</p>
             <h2 class="text-center fs-16 mt-2 fs-18"><u>FEES DEMAND NOTICE</u></h2>
-            <div class="text-justify">
+            <div class="text-justify" style="font-size: 12px;">
                 {!! SchoolFeesDemand::get_demand_message($demand, $item) !!}
-            </div>
-            <br>
+            </div> 
             <p class="text-right"><b>Signature:................................</b></p>
         </div>
         @php 
