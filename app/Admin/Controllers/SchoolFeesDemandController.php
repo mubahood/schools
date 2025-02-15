@@ -152,7 +152,8 @@ class SchoolFeesDemandController extends AdminController
 
         //ADD [SCHOOL_PAY_CODE]
         $form->quill('message_1', __('Demand Notice Template'))
-            ->default('Dear Parent,<br>We write to inform you that your child <b>[STUDENT_NAME] - [STUDENT_CLASS]</b> has an outstanding balance of UGX <b>[BALANCE_AMOUNT]</b>. We request you to clear the balance to avoid inconvenience.<br><b>[STUDENT_NAME]. You can pay using Mobile Money through <b>School Pay Gateway.</b> Use the code <b>[SCHOOL_PAY_CODE]</b><br>Thank you.') 
+            ->default('Dear Parent,<br>We write to inform you that your child <b>[STUDENT_NAME] - [STUDENT_CLASS]</b> has an outstanding balance of UGX <b>[BALANCE_AMOUNT]</b>. 
+            We request you to clear the balance to avoid inconvenience.<br>You can pay using Mobile Money through <b>School Pay Gateway.</b> Use the code <b>[SCHOOL_PAY_CODE]</b><br>Thank you.') 
             ->required();
         $form->textarea('message_2', __('SMS Template'))
             ->default('Dear Parent, you are reminded to clear the outstanding balance of UGX [BALANCE_AMOUNT] for your child [STUDENT_NAME]. Thank you.')
