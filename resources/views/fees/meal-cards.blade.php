@@ -74,9 +74,6 @@ if (!file_exists($logo)) {
                 $count = 0;
                 $break_style = 'page-break-after: always;';
             }
-            if($super_count > 5){
-                break;
-            }
         @endphp
 
         <table class="w-100">
