@@ -62,7 +62,7 @@ if ($demand->message_4 != null && $demand->message_4 != '') {
     <p class="fs-14 text-uppercase mt-1 mb-2 " style=" font-size: 12px; line-height: 1.1">
         NAME: <u><b>&nbsp;{{ $item->owner->name }}&nbsp;</b></u> CLASS:
         <u><b>&nbsp;{{ $item->owner->current_class->short_name }}&nbsp;</b></u> MONTH: <b><u>{{ $month }}</u></b>
-
+        BALANCE: <b><u>{{ $balance }}</u></b>
     </p>
 
     <table class="table table-bordered my-bordered-table mt-0" style="border-color: black!important;">
