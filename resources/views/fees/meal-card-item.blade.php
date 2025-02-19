@@ -38,7 +38,8 @@ if ($demand->message_4 != null && $demand->message_4 != '') {
         padding-bottom: 3px;
     }
 </style>
-<div class="p-2 m-0" style="border: solid {{ $ent->sec_color }} .2rem;">
+<div class="p-2 m-0" style="border: solid {{ $ent->sec_color }} .2rem;"> 
+
 
     <table class="w-100">
         <tr>
@@ -61,8 +62,7 @@ if ($demand->message_4 != null && $demand->message_4 != '') {
 
     <p class="fs-14 text-uppercase mt-1 mb-2">
         NAME: <u><b>&nbsp;{{ $item->owner->name }}&nbsp;</b></u> CLASS:
-        <u><b>&nbsp;{{ $item->owner->current_class->short_name }}&nbsp;</b></u> MONTH: <b><u>{{ $month }}</u></b>
-        BALANCE: <b><u>{{ $balance }}</u></b>
+        <u><b>&nbsp;{{ $item->owner->current_class->short_name }}&nbsp;</b></u> MONTH: <b><u>{{ $month }}</u></b> 
     </p>
 
 

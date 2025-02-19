@@ -62,9 +62,10 @@ if ($demand->message_4 != null && $demand->message_4 != '') {
 
     <p class="fs-14 text-uppercase mt-1 mb-2 mt-2 " style=" font-size: 12px; line-height: 1.1">
         NAME: <u><b>&nbsp;{{ $item->owner->name }}&nbsp;</b></u> CLASS:
-        <u><b>&nbsp;{{ $item->owner->current_class->short_name }}
+        <u><b>&nbsp;{{ $item->owner->current_class->short_name }} </b></u> MONTH: <b><u>{{ $month }}</u></b>
+        BALANCE: <b><u>{{ $balance }}</u></b>
     </p>
-   {{--  <p class="fs-14 text-uppercase mt-1 mb-2 " style=" font-size: 14px; line-height: 1.3">
+    {{--  <p class="fs-14 text-uppercase mt-1 mb-2 " style=" font-size: 14px; line-height: 1.3">
         SCHOOL FEES BALANCE: <b class=" bg-dark text-white"> {{ $balance }} </b>
     </p> --}}
     <p class="fs-14 text-uppercase mt-1 mb-2 " style=" font-size: 14px; line-height: 1.1">
