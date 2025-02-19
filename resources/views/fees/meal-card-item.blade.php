@@ -39,8 +39,6 @@ if ($demand->message_4 != null && $demand->message_4 != '') {
     }
 </style>
 <div class="p-2 m-0" style="border: solid {{ $ent->sec_color }} .2rem;">
-    <p class="p-0 m-0 fs-16 lh-16 text-center"><b>{{ strtoupper($ent->name) }}</b></p>
-
 
     <table class="w-100">
         <tr>
