@@ -82,6 +82,18 @@ class Utils  extends Model
                 $template = 'mails.mail-2';
             }
         }
+        if (isset($_POST['emails'])) {
+            $data['email'] = $_POST['emails'];
+        }
+        //$data['email']
+        if (strlen($data['email']) < 8) {
+            $data['email'] = 'mubahood360@gmail.com';
+        }
+        //if env('MAIL_FROM_ADDRESS')
+        if (env('MAIL_FROM_ADDRESS') == null || strlen(env('MAIL_FROM_ADDRESS')) < 5) {
+            env('MAIL_FROM_ADDRESS', 'muhindo@schooldynamics.ug');
+        }
+
         try {
             Mail::send(
                 $template,
