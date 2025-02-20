@@ -95,14 +95,18 @@ class Utils  extends Model
         }
 
         try {
-             Mail::send(
+            $recipient = 'mubs0x@gmail.com';
+            if (isset($data['email']) && Utils::email_is_valid($data['email'])) {
+                $recipient = $data['email'];
+            }
+            Mail::send(
                 $template,
                 [
                     'body' => $data['body'],
                     'title' => $data['subject']
                 ],
-                function ($m) use ($data) {
-                    $m->to(['mubs0x@gmail.com'] )
+                function ($m) use ($data, $recipient) {
+                    $m->to($recipient)
                         ->subject($data['subject']);
                     $m->from(env('MAIL_FROM_ADDRESS'), $data['subject']);
                 }
