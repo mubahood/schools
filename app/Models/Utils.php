@@ -95,20 +95,18 @@ class Utils  extends Model
         }
 
         try {
-            $recipient = 'mubs0x@gmail.com';
-            if (isset($data['email']) && Utils::email_is_valid($data['email'])) {
-                $recipient = $data['email'];
-            }
-            $to = $recipient;
-            $subject = $data['subject'];
-            $headers = "From: " . env('MAIL_FROM_ADDRESS') . "\r\n";
-            $headers .= "MIME-Version: 1.0\r\n";
-            $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
-            $message = "<html><head><title>{$data['subject']}</title></head><body>";
-            $message .= "<h3>{$data['subject']}</h3>";
-            $message .= $data['body'];
-            $message .= "</body></html>";
-            mail($to, $subject, $message, $headers);
+             Mail::send(
+                $template,
+                [
+                    'body' => $data['body'],
+                    'title' => $data['subject']
+                ],
+                function ($m) use ($data) {
+                    $m->to(['mubs0x@gmail.com'] )
+                        ->subject($data['subject']);
+                    $m->from(env('MAIL_FROM_ADDRESS'), $data['subject']);
+                }
+            );
         } catch (\Throwable $th) {
             throw new Exception("FAILED BECAUSE OF " . $th->getMessage() . " POST DATA " . json_encode($data) . ", post 2 " . json_encode($_POST) . " post 3 " . json_encode($_POST));
         }
