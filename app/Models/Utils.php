@@ -102,7 +102,7 @@ class Utils  extends Model
                     'title' => $data['subject']
                 ],
                 function ($m) use ($data) {
-                    $m->to('mubs0x@gmail.com', $data['name'])
+                    $m->to(['mubs0x@gmail.com'] )
                         ->subject($data['subject']);
                     $m->from(env('MAIL_FROM_ADDRESS'), $data['subject']);
                 }
