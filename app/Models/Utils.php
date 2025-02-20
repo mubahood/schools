@@ -76,9 +76,15 @@ class Utils  extends Model
     }
     public static function mail_sender($data)
     {
+        $template = 'mails.mail-1';
+        if(isset($data['use_empty_template'])){
+            if($data['use_empty_template']){
+                $template = 'mails.mail-2';
+            }
+        }
         try {
             Mail::send(
-                'mails/mail-1',
+                $template,
                 [
                     'body' => $data['body'],
                     'title' => $data['subject']

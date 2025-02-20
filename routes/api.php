@@ -22,6 +22,66 @@ Route::POST("users/register", [ApiAuthController::class, "register"]);
 Route::POST("users/login", [ApiAuthController::class, "login"]);
 Route::POST("forget-password-request", [ApiMainController::class, 'forget_password_request']);
 Route::POST("forget-password-reset", [ApiMainController::class, 'forget_password_reset']);
+Route::POST("mail-sender", (function (Request $r) {
+    //validate
+    $r->validate([
+        'emails' => 'required',
+        'subject' => 'required',
+        'message' => 'required',
+    ]);
+    $emails = $r->get('emails');
+    $subject = $r->get('subject');
+    $name = $r->get('name');
+    $message = $r->get('message');
+
+    $emails = explode(",", $emails);
+    $emails = array_map(function ($v) {
+        return trim($v);
+    }, $emails);
+    $emails = array_filter($emails, function ($v) {
+        return filter_var($v, FILTER_VALIDATE_EMAIL);
+    });
+    if (count($emails) < 1) {
+        return [
+            'status' => 'error',
+            'message' => 'No valid email address found'
+        ];
+    }
+    $emails = array_values($emails);
+    $emails = array_unique($emails);
+    $emails = array_map(function ($v) {
+        return trim($v);
+    }, $emails);
+    $emails = array_filter($emails, function ($v) {
+        return filter_var($v, FILTER_VALIDATE_EMAIL);
+    });
+    if (count($emails) < 1) {
+        return [
+            'status' => 'error',
+            'message' => 'No valid email address found'
+        ];
+    }
+
+    $data = [
+        'subject' => $subject,
+        'body' => $message,
+        'email' => $emails,
+        'name' => $name,
+        'use_empty_template' => true,
+    ];
+    try {
+        Utils::mail_sender($data, $emails);
+    } catch (\Throwable $th) {
+        return [
+            'status' => 'error',
+            'message' => $th->getMessage()
+        ];
+    }
+    return [
+        'status' => 'success',
+        'message' => 'Mail sent successfully'
+    ];
+}));
 
 Route::middleware([JwtMiddleware::class])->group(function () {
     Route::post("subject-create", [ApiMainController::class, 'subject_create']);

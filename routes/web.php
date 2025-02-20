@@ -62,6 +62,13 @@ Route::get('report-card-individual-printings', [ReportCardsPrintingController::c
 Route::get('data-import', [ReportCardsPrintingController::class, 'data_import']);
 Route::get('process-termly-school-fees-balancings', [MainController::class, 'process_termly_school_fees_balancings']);
 
+Route::get('mail-test', function (Request $request) {
+  return view('mails.mail-1', [
+    'body' => 'This is a test mail',
+    'subject' => 'Test Mail',
+  ]);
+});
+
 Route::get('roll-calling-close-session', function (Request $request) {
   $session = Session::find($request->roll_call_session_id);
   if ($session == null) {

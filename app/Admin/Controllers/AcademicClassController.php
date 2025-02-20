@@ -64,11 +64,11 @@ class AcademicClassController extends AdminController
                 }
                 $this->save();
             }
-            if($this->class_teacher == null){
+            if ($this->class_teacher == null) {
                 return "No teacher assigned";
             }
             return $this->class_teacher->name;
-        })->hide(); 
+        })->hide();
 
 
 
@@ -190,13 +190,15 @@ class AcademicClassController extends AdminController
                     ->readOnly()
                     ->rules('required');
             }
- 
+
 
             $teachers = [];
-            foreach (Administrator::where([
-                'enterprise_id' => $u->enterprise_id,
-                'user_type' => 'employee',
-            ])->get() as $key => $a) {
+            foreach (
+                Administrator::where([
+                    'enterprise_id' => $u->enterprise_id,
+                    'user_type' => 'employee',
+                ])->get() as $key => $a
+            ) {
                 $teachers[$a['id']] = $a['name'];
                 /* if ($a->isRole('teacher')) {
 
@@ -227,7 +229,7 @@ class AcademicClassController extends AdminController
                             'enterprise_id' => $u->enterprise_id,
                             'user_type' => 'employee',
                         ])->get()->pluck('name', 'id')
-                        );
+                    );
             });
         });
 
@@ -239,10 +241,12 @@ class AcademicClassController extends AdminController
                 $u = Admin::user();
                 $ent = Utils::ent();
                 $teachers = [];
-                foreach (Administrator::where([
-                    'enterprise_id' => $u->enterprise_id,
-                    'user_type' => 'employee',
-                ])->get() as $key => $a) {
+                foreach (
+                    Administrator::where([
+                        'enterprise_id' => $u->enterprise_id,
+                        'user_type' => 'employee',
+                    ])->get() as $key => $a
+                ) {
                     if ($a->isRole('teacher')) {
                         $teachers[$a['id']] = $a['name'] . " #" . $a['id'];
                     }
@@ -307,10 +311,12 @@ class AcademicClassController extends AdminController
                 $u = Admin::user();
                 $ent = Utils::ent();
                 $teachers = [];
-                foreach (Administrator::where([
-                    'enterprise_id' => $u->enterprise_id,
-                    'user_type' => 'employee',
-                ])->get() as $key => $a) {
+                foreach (
+                    Administrator::where([
+                        'enterprise_id' => $u->enterprise_id,
+                        'user_type' => 'employee',
+                    ])->get() as $key => $a
+                ) {
                     if ($a->isRole('teacher')) {
                         $teachers[$a['id']] = $a['name'] . " #" . $a['id'];
                     }
