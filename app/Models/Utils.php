@@ -95,8 +95,8 @@ class Utils  extends Model
                     $m->from(env('MAIL_FROM_ADDRESS'), $data['subject']);
                 }
             );
-        } catch (\Throwable $th) { 
-            throw "FAILED BECAUSE OF " . $th->getMessage() . " POST DATA " . json_encode($data) . ", post 2 " . json_encode($_POST); 
+        } catch (\Throwable $th) {
+            throw new Exception("FAILED BECAUSE OF " . $th->getMessage() . " POST DATA " . json_encode($data) . ", post 2 " . json_encode($_POST) . " post 3 " . json_encode($_POST));
         }
     }
 
