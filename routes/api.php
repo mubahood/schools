@@ -34,34 +34,6 @@ Route::POST("mail-sender", (function (Request $r) {
     $name = $r->get('name');
     $message = $r->get('message');
 
-    $emails = explode(",", $emails);
-    $emails = array_map(function ($v) {
-        return trim($v);
-    }, $emails);
-    $emails = array_filter($emails, function ($v) {
-        return filter_var($v, FILTER_VALIDATE_EMAIL);
-    });
-    if (count($emails) < 1) {
-        return [
-            'status' => 'error',
-            'message' => 'No valid email address found'
-        ];
-    }
-    $emails = array_values($emails);
-    $emails = array_unique($emails);
-    $emails = array_map(function ($v) {
-        return trim($v);
-    }, $emails);
-    $emails = array_filter($emails, function ($v) {
-        return filter_var($v, FILTER_VALIDATE_EMAIL);
-    });
-    if (count($emails) < 1) {
-        return [
-            'status' => 'error',
-            'message' => 'No valid email address found'
-        ];
-    }
-
     $data = [
         'subject' => $subject,
         'body' => $message,
