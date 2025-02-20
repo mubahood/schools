@@ -9,7 +9,7 @@ class AcademicClassSctream extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['enterprise_id', 'academic_class_id', 'name'];
+    protected $fillable = ['enterprise_id', 'academic_class_id', 'name','teacher_id'];
 
 
     public static function getItemsToArray($conds)

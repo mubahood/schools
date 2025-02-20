@@ -3,6 +3,8 @@
 namespace App\Admin\Controllers;
 
 use App\Admin\Actions\Post\ChangeStudentsStatus;
+use App\Admin\Actions\Post\PromoteStudentsClass;
+use App\Admin\Actions\Post\UpdateStudentsSecularStream;
 use App\Models\AcademicClass;
 use App\Models\AcademicClassSctream;
 use App\Models\AcademicYear;
@@ -77,6 +79,8 @@ class StudentsController extends AdminController
         $grid->batchActions(function ($batch) {
             $batch->disableDelete();
             $batch->add(new ChangeStudentsStatus());
+            $batch->add(new PromoteStudentsClass());
+            $batch->add(new UpdateStudentsSecularStream());
         });
         $grid->actions(function ($actions) {
             if (!Auth::user()->isRole('admin')) {

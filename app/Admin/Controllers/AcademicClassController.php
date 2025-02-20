@@ -190,11 +190,7 @@ class AcademicClassController extends AdminController
                     ->readOnly()
                     ->rules('required');
             }
-
-
-
-
-
+ 
 
             $teachers = [];
             foreach (Administrator::where([
@@ -225,6 +221,13 @@ class AcademicClassController extends AdminController
                 $u = Admin::user();
                 $form->hidden('enterprise_id')->default($u->enterprise_id);
                 $form->text('name', __('Class stream name'))->rules('required');
+                $form->select('teacher_id', __('Stream teacher'))
+                    ->options(
+                        Administrator::where([
+                            'enterprise_id' => $u->enterprise_id,
+                            'user_type' => 'employee',
+                        ])->get()->pluck('name', 'id')
+                        );
             });
         });
 
