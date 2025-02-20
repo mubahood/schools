@@ -5,6 +5,7 @@ use App\Http\Controllers\DummyDataController;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\PrintController2;
 use App\Http\Controllers\ReportCardsPrintingController;
+use App\Mail\TestMail;
 use App\Models\AcademicClass;
 use App\Models\AcademicClassFee;
 use App\Models\Account;
@@ -53,8 +54,9 @@ use Mockery\Matcher\Subset;
 use Faker\Factory as Faker;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Mail;
 
 Route::get('assessment-sheets-generate', [ReportCardsPrintingController::class, 'assessment_sheets_generate']);
 Route::get('report-card-printings', [ReportCardsPrintingController::class, 'index']);
@@ -62,7 +64,30 @@ Route::get('report-card-individual-printings', [ReportCardsPrintingController::c
 Route::get('data-import', [ReportCardsPrintingController::class, 'data_import']);
 Route::get('process-termly-school-fees-balancings', [MainController::class, 'process_termly_school_fees_balancings']);
 
+Route::get('clear', function () {
+
+  Artisan::call('config:clear');
+  Artisan::call('cache:clear');
+  Artisan::call('route:clear');
+  Artisan::call('view:clear');
+  Artisan::call('optimize');
+  Artisan::call('cache:clear');
+  Artisan::call('view:clear');
+  Artisan::call('route:clear');
+  Artisan::call('config:clear');
+  Artisan::call('optimize:clear');
+  exec('composer dump-autoload -o');
+  return Artisan::output();
+});
+//migration
+Route::get('migrate', function () {
+  Artisan::call('migrate');
+  return Artisan::output();
+});
 Route::get('mail-test', function (Request $request) {
+
+  Mail::to('mubs0x@gmail.com')->send(new TestMail('subject', 'body'));
+  return "Mail sent"; 
   return view('mails.mail-1', [
     'body' => 'This is a test mail',
     'subject' => 'Test Mail',
