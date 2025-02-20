@@ -47,10 +47,7 @@ Route::POST("mail-sender", (function (Request $r) {
             'errors' => $errors
         ], 400);
     }
-    return [
-        'status' => 'error',
-        'message' => '22 Mail sent successfully'
-    ]; 
+    
     $data = [
         'subject' => $subject,
         'body' => $message,
@@ -63,7 +60,7 @@ Route::POST("mail-sender", (function (Request $r) {
     } catch (\Throwable $th) {
         return [
             'status' => 'error',
-            'message' => $th->getMessage()
+            'message' => "from error: ".$th->getMessage()
         ];
     }
     return [
