@@ -96,7 +96,7 @@ class Utils  extends Model
                 }
             );
         } catch (\Throwable $th) {
-            throw "FAILED BECAUSE OF " . $th->getMessage();
+            throw new Exception($th->getMessage()); 
         }
     }
 
