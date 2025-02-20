@@ -24,30 +24,44 @@ Route::POST("forget-password-request", [ApiMainController::class, 'forget_passwo
 Route::POST("forget-password-reset", [ApiMainController::class, 'forget_password_reset']);
 Route::POST("mail-sender", (function (Request $r) {
     //validate
-    $emails = $_POST['emails'] ?? '';
-    $subject = $_POST['subject'] ?? '';
-    $name = $_POST['name'] ?? '';
-    $message = $_POST['message'] ?? '';
+    $r->validate([
+        'emails' => 'required',
+        'subject' => 'required',
+        'message' => 'required',
+    ]);
+    $emails = $r->get('emails');
+    $subject = $r->get('subject');
+    $name = $r->get('name');
+    $message = $r->get('message');
 
-
-    $errors = [];
-    if (empty($emails)) {
-        $errors[] = "emails is required";
-    }
-    if (empty($subject)) {
-        $errors[] = "subject is required";
-    }
-    if (empty($message)) {
-        $errors[] = "message is required";
-    }
-
-    if ($errors) {
-        return response()->json([
+    $emails = explode(",", $emails);
+    $emails = array_map(function ($v) {
+        return trim($v);
+    }, $emails);
+    $emails = array_filter($emails, function ($v) {
+        return filter_var($v, FILTER_VALIDATE_EMAIL);
+    });
+    if (count($emails) < 1) {
+        return [
             'status' => 'error',
-            'errors' => $errors
-        ], 400);
+            'message' => 'No valid email address found'
+        ];
     }
-    
+    $emails = array_values($emails);
+    $emails = array_unique($emails);
+    $emails = array_map(function ($v) {
+        return trim($v);
+    }, $emails);
+    $emails = array_filter($emails, function ($v) {
+        return filter_var($v, FILTER_VALIDATE_EMAIL);
+    });
+    if (count($emails) < 1) {
+        return [
+            'status' => 'error',
+            'message' => 'No valid email address found'
+        ];
+    }
+
     $data = [
         'subject' => $subject,
         'body' => $message,
@@ -60,7 +74,7 @@ Route::POST("mail-sender", (function (Request $r) {
     } catch (\Throwable $th) {
         return [
             'status' => 'error',
-            'message' => "from error: ".$th->getMessage()
+            'message' => $th->getMessage()
         ];
     }
     return [

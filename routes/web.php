@@ -5,7 +5,6 @@ use App\Http\Controllers\DummyDataController;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\PrintController2;
 use App\Http\Controllers\ReportCardsPrintingController;
-use App\Mail\TestMail;
 use App\Models\AcademicClass;
 use App\Models\AcademicClassFee;
 use App\Models\Account;
@@ -56,14 +55,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
+
 
 Route::get('assessment-sheets-generate', [ReportCardsPrintingController::class, 'assessment_sheets_generate']);
 Route::get('report-card-printings', [ReportCardsPrintingController::class, 'index']);
 Route::get('report-card-individual-printings', [ReportCardsPrintingController::class, 'report_card_individual_printings']);
 Route::get('data-import', [ReportCardsPrintingController::class, 'data_import']);
 Route::get('process-termly-school-fees-balancings', [MainController::class, 'process_termly_school_fees_balancings']);
-
 Route::get('clear', function () {
 
   Artisan::call('config:clear');
@@ -84,21 +82,6 @@ Route::get('migrate', function () {
   Artisan::call('migrate');
   return Artisan::output();
 });
-Route::get('mail-test', function (Request $request) {
-
-  try {
-    Mail::to('mubs0x@gmail.com')->send(new TestMail('subject', 'body'));
-  } catch (\Exception $e) {
-    return $e->getMessage();
-  }
-
-  return "Mail sent";
-  return view('mails.mail-1', [
-    'body' => 'This is a test mail',
-    'subject' => 'Test Mail',
-  ]);
-});
-
 Route::get('roll-calling-close-session', function (Request $request) {
   $session = Session::find($request->roll_call_session_id);
   if ($session == null) {

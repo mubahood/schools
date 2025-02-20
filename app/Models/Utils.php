@@ -82,33 +82,21 @@ class Utils  extends Model
                 $template = 'mails.mail-2';
             }
         }
-        if (isset($_POST['emails'])) {
-            $data['email'] = $_POST['emails'];
-        }
-        //$data['email']
-        if (strlen($data['email']) < 8) {
-            $data['email'] = 'mubahood360@gmail.com';
-        }
-        //if env('MAIL_FROM_ADDRESS')
-        if (env('MAIL_FROM_ADDRESS') == null || strlen(env('MAIL_FROM_ADDRESS')) < 5) {
-            env('MAIL_FROM_ADDRESS', 'muhindo@schooldynamics.ug');
-        }
-
         try {
-             Mail::send(
+            Mail::send(
                 $template,
                 [
                     'body' => $data['body'],
                     'title' => $data['subject']
                 ],
                 function ($m) use ($data) {
-                    $m->to(['mubs0x@gmail.com'] )
+                    $m->to($data['email'], $data['name'])
                         ->subject($data['subject']);
                     $m->from(env('MAIL_FROM_ADDRESS'), $data['subject']);
                 }
             );
         } catch (\Throwable $th) {
-            throw new Exception("FAILED BECAUSE OF " . $th->getMessage() . " POST DATA " . json_encode($data) . ", post 2 " . json_encode($_POST) . " post 3 " . json_encode($_POST));
+            throw "FAILED BECAUSE OF " . $th->getMessage();
         }
     }
 
@@ -1787,7 +1775,7 @@ class Utils  extends Model
             return false;
         }
         if (strlen($num) > 15) {
-            return false; 
+            return false;
         }
         return true;
     }
