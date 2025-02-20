@@ -86,8 +86,13 @@ Route::get('migrate', function () {
 });
 Route::get('mail-test', function (Request $request) {
 
-  Mail::to('mubs0x@gmail.com')->send(new TestMail('subject', 'body'));
-  return "Mail sent"; 
+  try {
+    Mail::to('mubs0x@gmail.com')->send(new TestMail('subject', 'body'));
+  } catch (\Exception $e) {
+    return $e->getMessage();
+  }
+
+  return "Mail sent";
   return view('mails.mail-1', [
     'body' => 'This is a test mail',
     'subject' => 'Test Mail',
