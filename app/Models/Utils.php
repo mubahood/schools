@@ -1787,7 +1787,7 @@ class Utils  extends Model
             return false;
         }
         if (strlen($num) > 15) {
-            return false;
+            return false; 
         }
         return true;
     }
