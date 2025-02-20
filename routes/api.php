@@ -29,6 +29,10 @@ Route::POST("mail-sender", (function (Request $r) {
     $name = $_POST['name'] ?? '';
     $message = $_POST['message'] ?? '';
 
+    return [
+        'status' => 'error',
+        'message' => 'Mail sent successfully'
+    ]; 
     $errors = [];
     if (empty($emails)) {
         $errors[] = "emails is required";
