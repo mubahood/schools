@@ -77,8 +77,8 @@ class Utils  extends Model
     public static function mail_sender($data)
     {
         $template = 'mails.mail-1';
-        if(isset($data['use_empty_template'])){
-            if($data['use_empty_template']){
+        if (isset($data['use_empty_template'])) {
+            if ($data['use_empty_template']) {
                 $template = 'mails.mail-2';
             }
         }
@@ -95,9 +95,8 @@ class Utils  extends Model
                     $m->from(env('MAIL_FROM_ADDRESS'), $data['subject']);
                 }
             );
-        } catch (\Throwable $th) {
-            $msg = 'failed';
-            throw $th;
+        } catch (\Throwable $th) { 
+            throw "FAILED BECAUSE OF " . $th->getMessage() . " POST DATA " . json_encode($data) . ", post 2 " . json_encode($_POST); 
         }
     }
 
