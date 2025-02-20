@@ -24,15 +24,28 @@ Route::POST("forget-password-request", [ApiMainController::class, 'forget_passwo
 Route::POST("forget-password-reset", [ApiMainController::class, 'forget_password_reset']);
 Route::POST("mail-sender", (function (Request $r) {
     //validate
-    $r->validate([
-        'emails' => 'required',
-        'subject' => 'required',
-        'message' => 'required',
-    ]);
-    $emails = $r->get('emails');
-    $subject = $r->get('subject');
-    $name = $r->get('name');
-    $message = $r->get('message');
+    $emails = $_POST['emails'] ?? '';
+    $subject = $_POST['subject'] ?? '';
+    $name = $_POST['name'] ?? '';
+    $message = $_POST['message'] ?? '';
+
+    $errors = [];
+    if (empty($emails)) {
+        $errors[] = "emails is required";
+    }
+    if (empty($subject)) {
+        $errors[] = "subject is required";
+    }
+    if (empty($message)) {
+        $errors[] = "message is required";
+    }
+
+    if ($errors) {
+        return response()->json([
+            'status' => 'error',
+            'errors' => $errors
+        ], 400);
+    }
 
     $data = [
         'subject' => $subject,
