@@ -95,8 +95,7 @@ class Utils  extends Model
         }
 
         try {
-            throw new Exception("HERE WITH BECAUSE OF "  . " POST DATA " . json_encode($data) . ", post 2 " . json_encode($_POST) . " post 3 " . json_encode($_POST)); 
-            Mail::send(
+             Mail::send(
                 $template,
                 [
                     'body' => $data['body'],
