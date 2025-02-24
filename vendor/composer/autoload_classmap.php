@@ -189,6 +189,7 @@ return array(
     'App\\Http\\Middleware\\TrustHosts' => $baseDir . '/app/Http/Middleware/TrustHosts.php',
     'App\\Http\\Middleware\\TrustProxies' => $baseDir . '/app/Http/Middleware/TrustProxies.php',
     'App\\Http\\Middleware\\VerifyCsrfToken' => $baseDir . '/app/Http/Middleware/VerifyCsrfToken.php',
+    'App\\Mail\\TestMail' => $baseDir . '/app/Mail/TestMail.php',
     'App\\Models\\AcademicClass' => $baseDir . '/app/Models/AcademicClass.php',
     'App\\Models\\AcademicClassFee' => $baseDir . '/app/Models/AcademicClassFee.php',
     'App\\Models\\AcademicClassLevel' => $baseDir . '/app/Models/AcademicClassLevel.php',

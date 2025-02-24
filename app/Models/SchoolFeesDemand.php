@@ -63,13 +63,21 @@ class SchoolFeesDemand extends Model
                 $conds['residence'] = $target_type;
             } else if ($target_type == 'BOARDER') {
                 $conds['residence'] = $target_type;
-            } else {    
+            } else {
                 throw new \Exception('Invalid target type');
             }
-            $ids = User::where($conds)
-                ->get()
-                ->pluck('id')
-                ->toArray();
+
+            $ids = [];
+            if ($this->has_specific_students == 'Yes') {
+                foreach ($this->target_students as $key => $student_id) {
+                    $ids[] = (int)($student_id);
+                }
+            } else {
+                $ids = User::where($conds)
+                    ->get()
+                    ->pluck('id')
+                    ->toArray();
+            }
 
             $accounts = Account::where([
                 'enterprise_id' => $this->enterprise_id,
@@ -103,10 +111,18 @@ class SchoolFeesDemand extends Model
         $recs = [];
         foreach ($this->classes as $key => $class) {
             $conds['current_class_id'] = $class;
-            $ids = User::where($conds)
-                ->get()
-                ->pluck('id')
-                ->toArray();
+
+            $ids = [];
+            if ($this->has_specific_students == 'Yes') {
+                foreach ($this->target_students as $key => $student_id) {
+                    $ids[] = (int)($student_id);
+                }
+            } else {
+                $ids = User::where($conds)
+                    ->get()
+                    ->pluck('id')
+                    ->toArray();
+            }
 
             $accounts = Account::where([
                 'enterprise_id' => $this->enterprise_id,
@@ -118,5 +134,26 @@ class SchoolFeesDemand extends Model
             $recs[$class] = $accounts;
         }
         return $recs;
+    }
+
+
+    //getter for target_students
+    public function getTargetStudentsAttribute($value)
+    {
+        if ($value == null || strlen($value) < 3) {
+            return [];
+        }
+        return json_decode($value);
+    }
+
+    //setter for target_students
+    public function setTargetStudentsAttribute($value)
+    {
+        if ($value != null && is_array($value)) {
+            $this->attributes['target_students'] = json_encode($value);
+        } else {
+            $this->attributes['target_students'] = '[]';
+        }
+        $this->attributes['target_students'] = json_encode($value);
     }
 }

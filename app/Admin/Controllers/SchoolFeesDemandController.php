@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Models\AcademicClass;
 use App\Models\SchoolFeesDemand;
+use App\Models\User;
 use App\Models\Utils;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -153,13 +154,13 @@ class SchoolFeesDemandController extends AdminController
         //ADD [SCHOOL_PAY_CODE]
         $form->quill('message_1', __('Demand Notice Template'))
             ->default('Dear Parent,<br>We write to inform you that your child <b>[STUDENT_NAME] - [STUDENT_CLASS]</b> has an outstanding balance of UGX <b>[BALANCE_AMOUNT]</b>. 
-            We request you to clear the balance to avoid inconvenience.<br>You can pay using Mobile Money through <b>School Pay Gateway.</b> Use the code <b>[SCHOOL_PAY_CODE]</b><br>Thank you.') 
+            We request you to clear the balance to avoid inconvenience.<br>You can pay using Mobile Money through <b>School Pay Gateway.</b> Use the code <b>[SCHOOL_PAY_CODE]</b><br>Thank you.')
             ->required();
         $form->textarea('message_2', __('SMS Template'))
             ->default('Dear Parent, you are reminded to clear the outstanding balance of UGX [BALANCE_AMOUNT] for your child [STUDENT_NAME]. Thank you.')
             ->required();
-            //ADD SCHOOL_PAY_CODE
-        $form->html('<code>[BALANCE_AMOUNT]</code> <code>[STUDENT_NAME]</code> <code>[STUDENT_CLASS]</code> <code>[SCHOOL_PAY_CODE]</code>')->help('Use the following placeholders in your message template.')->required(); 
+        //ADD SCHOOL_PAY_CODE
+        $form->html('<code>[BALANCE_AMOUNT]</code> <code>[STUDENT_NAME]</code> <code>[STUDENT_CLASS]</code> <code>[SCHOOL_PAY_CODE]</code>')->help('Use the following placeholders in your message template.')->required();
 
         $u = Admin::user();
         $year = $u->ent->active_academic_year();
@@ -188,6 +189,26 @@ class SchoolFeesDemandController extends AdminController
             'DAY_SCHOLAR' => 'Day Scholars',
             'ALL' => 'All'
         ])->rules('required')->required();
+
+
+        $form->radio('has_specific_students', __('Specific Students'))->options([
+            'Yes' => 'Yes',
+            'No' => 'No',
+        ])->default('No')->required()
+            ->when('Yes', function (Form $form) {
+                $u = Admin::user();
+                $ajax_url = url('/api/ajax-users?enterprise_id=' . $u->enterprise_id . "");
+                $form->multipleSelect('target_students', "Select Students")
+                    ->options(function ($ids) {
+                        if (!is_array($ids)) {
+                            return [];
+                        }
+                        $data = User::whereIn('id', $ids)->pluck('name', 'id');
+                        return $data;
+                    })
+                    ->ajax($ajax_url)->rules('required');
+            })
+            ->rules('required');
 
         /*         $form->textarea('', __('Message 3'));
         $form->textarea('', __('Message 4'));
