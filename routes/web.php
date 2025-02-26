@@ -11,8 +11,10 @@ use App\Models\Account;
 use App\Models\BatchServiceSubscription;
 use App\Models\Book;
 use App\Models\BooksCategory;
+use App\Models\BulkMessage;
 use App\Models\Course;
 use App\Models\DataExport;
+use App\Models\DirectMessage;
 use App\Models\Enterprise;
 use App\Models\Exam;
 use App\Models\FinancialRecord;
@@ -523,7 +525,7 @@ Route::get('meal-cards', function (Request $r) {
     $IS_GATE_PASS = true;
   }
 
-/* 
+  /* 
   foreach ($recs as $key => $class) {
     foreach ($class as $key => $student) {
       echo  $student->id . "<br>" . $student->owner->name . "<br>" . $student->balance . "<hr>"; 
@@ -871,6 +873,69 @@ Route::get('print-admission-letter', function () {
 
   $pdf->loadHTML(view('print/print-admission-letter'));
   return $pdf->stream();
+});
+
+Route::get('bulk-messages-sending', function (Request $request) {
+  $bulkMsg = BulkMessage::find($request->id);
+  BulkMessage::do_prepare_messages($bulkMsg);
+  $messages = DirectMessage::where(['bulk_message_id' => $bulkMsg->id])->get();
+
+  $output = '<div style="font-family: sans-serif; margin: 20px; line-height: 1.6; max-width: 800px; margin: 0 auto;">';
+
+  if ($bulkMsg->status != 'Send') {
+    $output .= '<h1 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">NOTE: These messages will not be sent because the bulk message is not marked as \'Send\'.</h1>';
+  }
+
+  $id = 0;
+  $sent_count = 0;
+  $fail_count = 0;
+  $isOdd = true; // For striped rows
+
+  foreach ($messages as $key => $msg) {
+    $id++;
+    $rowBgColor = $isOdd ? '#f9f9f9' : '#ffffff'; // Striped row background
+
+    $output .= '<div style="border-bottom: 1px solid #eee; padding: 10px 0; background-color: ' . $rowBgColor . ';">';
+    $output .= '<span style="display:inline;">' . $id . '. ' . htmlspecialchars($msg->receiver_number) . ' => ' . htmlspecialchars($msg->message_body) . '</span>';
+
+    if ($bulkMsg->status != 'Send') {
+      $output .= '<span style="display:inline; margin-left:5px; padding: 3px 6px; border-radius: 3px; background-color: #ffe0e0; color: #d32f2f;">NOTE SENT</span><span style="display:inline; margin-left:5px;">Because bulk message is not marked as \'Send\'.</span>';
+      $fail_count++;
+      $output .= '</div>';
+      $isOdd = !$isOdd;
+      continue;
+    }
+
+    if ($msg->status == 'Sent') {
+      $output .= '<span style="display:inline; margin-left:5px; padding: 3px 6px; border-radius: 3px; background-color: #e0ffe0; color: #388e3c;">SKIPPED</span><span style="display:inline; margin-left:5px;">Because already sent.</span>';
+      $fail_count++;
+      $output .= '</div>';
+      $isOdd = !$isOdd;
+      continue;
+    }
+
+    $msg->status = 'Pending';
+    try {
+      DirectMessage::send_message($msg);
+      $output .= '<span style="display:inline; margin-left:5px; padding: 3px 6px; border-radius: 3px; background-color: #e0ffe0; color: #388e3c;">SENT</span>';
+      $sent_count++;
+    } catch (\Exception $e) {
+      $output .= '<span style="display:inline; margin-left:5px; padding: 3px 6px; border-radius: 3px; background-color: #ffe0e0; color: #d32f2f;">FAILED</span><span style="display:inline; margin-left:5px;">Because: ' . htmlspecialchars($e->getMessage()) . '</span>';
+      $fail_count++;
+    }
+    $output .= '</div>';
+    $isOdd = !$isOdd;
+  }
+
+  $output .= '<div style="margin-top: 30px; padding: 15px; background-color: #f9f9f9; border: 1px solid #eee;">';
+  $output .= '<h1 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">SUMMARY</h1>';
+  $output .= 'Total: ' . $id . ', Sent: ' . $sent_count . ', Failed: ' . $fail_count;
+  $output .= '</div>';
+
+  $output .= '</div>'; // Close the main container div
+
+  echo $output;
+  die('');
 });
 Route::get('print-receipt', function () {
   $pdf = App::make('dompdf.wrapper');

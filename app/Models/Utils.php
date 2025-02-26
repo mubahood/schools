@@ -96,7 +96,7 @@ class Utils  extends Model
                 }
             );
         } catch (\Throwable $th) {
-            throw new Exception($th->getMessage()); 
+            throw new Exception($th->getMessage());
         }
     }
 
@@ -1783,12 +1783,12 @@ class Utils  extends Model
 
     public static function send_messages()
     {
+        return;
         foreach (
             DirectMessage::where([
                 'status' => 'Pending'
             ])->get() as $key => $msg
         ) {
-            DirectMessage::send_message($msg);
         }
     }
     public static function reconcile(Request $r)

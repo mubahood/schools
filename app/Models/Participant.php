@@ -66,7 +66,6 @@ class Participant extends Model
         $msg->status = 'Pending';
         $msg->message_body = $message;
         $msg->save();
-        DirectMessage::send_message($msg);
 
         $sql = "UPDATE participants SET sms_is_sent = 'Yes' WHERE id = ?";
         DB::update($sql, [$m->id]);

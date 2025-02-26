@@ -37,6 +37,12 @@ class BulkMessage extends Model
         $messages = [];
         $hasError = false;
         $errorMessage = "";
+        $enterprise = Enterprise::find($m->enterprise_id);
+        if ($enterprise == null) {
+            $hasError = true;
+            $errorMessage .= "Enterprise was not found.";
+        }
+        $administrator_id = $enterprise->administrator_id;
         if ($m->target_types == 'Individuals') {
             if ($m->target_individuals_phone_numbers != null && strlen($m->target_individuals_phone_numbers) > 2) {
                 try {
@@ -46,11 +52,26 @@ class BulkMessage extends Model
                             'receiver_number' => $receiver_number,
                             'bulk_message_id' => $m->id
                         ])->first();
-                        if ($msg != null) {
+
+                        if ($msg == null) {
                             $msg = new DirectMessage();
                         }
                         $msg->receiver_number = $receiver_number;
                         $msg->enterprise_id = $m->enterprise_id;
+                        $msg->bulk_message_id = $m->id;
+                        $msg->administrator_id = $m->administrator_id;
+                        $msg->status = 'Pending';
+                        if ($m->message_delivery_type == 'Now') {
+                            $msg->delivery_time = Carbon::now();
+                            $msg->is_scheduled = 'Yes';
+                        } else {
+                            $msg->is_scheduled = 'No';
+                            $msg->delivery_time = Carbon::parse($m->message_delivery_time);
+                        }
+                        if ($m->send_action != 'Send') {
+                            $msg->status = 'Draft';
+                        }
+                        $msg->message_body = $m->message_body;
                         $messages[] = $msg;
                     }
                 } catch (\Throwable $th) {
@@ -225,7 +246,7 @@ class BulkMessage extends Model
 
                             if ($phone_number == null || strlen($phone_number) < 2) {
                                 $phone_number = $parent->phone_number_2;
-                            } 
+                            }
                             $msg->receiver_number = $phone_number;
                             $msg->administrator_id = $parent->id;
                             $msg->balance = $balance;
@@ -240,6 +261,14 @@ class BulkMessage extends Model
         }
 
         foreach ($messages as $key => $_msg) {
+
+            $isExisting = DirectMessage::where([
+                'receiver_number' => $_msg->receiver_number,
+                'bulk_message_id' => $m->id
+            ])->first();
+            if ($isExisting != null) {
+                continue;
+            } 
             $msg = $_msg;
             $msg->status = 'Pending';
             if ($m->message_delivery_type == 'Now') {
@@ -258,10 +287,16 @@ class BulkMessage extends Model
             $msg->message_body = str_replace('[STUDENT_NAME]', $msg->STUDENT_NAME, $msg->message_body);
             $msg->message_body = str_replace('[PARENT_NAME]', $msg->PARENT_NAME, $msg->message_body);
             $msg->message_body = str_replace('[TEACHER_NAME]', $msg->TEACHER_NAME, $msg->message_body);
+            if (!isset($msg->administrator_id)) {
+                $msg->administrator_id = $enterprise->administrator_id;
+            } 
+            if ($msg->administrator_id == null) {
+                $msg->administrator_id = $enterprise->administrator_id; 
+            }  
             $msg->message_body = str_replace('[FEES_BALANCE]', "UGX " . number_format($msg->balance), $msg->message_body);
-            $msg->save();
+            $msg->save(); 
         }
-        Utils::send_messages();
+        // Utils::send_messages();
     }
 
 

@@ -37,7 +37,7 @@ class BulkMessageController extends AdminController
         $m->target_parents_condition_fees_amount = -200000;
         $m->save(); 
         dd($m); */
-        
+
         $grid = new Grid(new BulkMessage());
         $grid->disableBatchActions();
         $u = Auth::user();
@@ -74,6 +74,14 @@ class BulkMessageController extends AdminController
             ->display(function () {
                 return $this->direct_messages->count();
             });
+
+        //   Utils::send_messages();
+        //button for send now messages
+        $grid->column('send_now', __('Send Now'))->display(function () {
+            return '<a 
+            target="_blank"
+            href="' . url('bulk-messages-sending?id=' . $this->id) . '" class="btn btn-success">Send Messages Now</a>';
+        });
 
         return $grid;
     }
@@ -196,14 +204,18 @@ class BulkMessageController extends AdminController
             });
 
 
-        $form->radioCard('message_delivery_type', __('Message delivery'))->options([
+        /* $form->radioCard('message_delivery_type', __('Message delivery'))->options([
             'Sheduled' => 'Sheduled',
             'Send Now' => 'Send Now'
         ])->when('Sheduled', function ($form) {
             $form->datetime('message_delivery_time', __('Scheduled Message Delivery Time'))->default(date('Y-m-d H:i:s'))->rules('required');
-        })->rules('required');
+        })->rules('required'); */
 
-        $form->radioCard('clone_action', __('Duplicate this messaging'))->options([
+        ///message_delivery_type HIDDEN
+        $form->hidden('message_delivery_type', __('Message delivery type'))
+            ->default('Send Now');
+
+        /*   $form->radioCard('clone_action', __('Duplicate this messaging'))->options([
             'Duplicate' => 'Duplicate',
             'Dont Duplicate' => 'Don\'t Duplicate',
         ])->when('Duplicate', function ($form) {
@@ -211,27 +223,26 @@ class BulkMessageController extends AdminController
                 'Yes' => 'Yes',
                 'No' => 'No',
             ])->rules('required');
-        })->rules('required');
+        })->rules('required'); */
 
-        $form->radioCard('do_process_messages', __('Process Messages'))->options([
+        /*    $form->radioCard('do_process_messages', __('Process Messages'))->options([
             'Yes' => 'Yes',
             'No' => 'No',
-        ])->rules('required');
+        ])->rules('required'); */
+        //HIdden do_process_messages
+        $form->hidden('do_process_messages', __('Process Messages'))
+            ->default('Yes');
 
 
         $form->radioCard('send_action', __('Sending Action'))->options([
             'Send' => 'Send Now',
             'Draft' => 'Save as Draft'
-        ])->when('Send', function ($form) {
-            $form->radioCard('send_confirm', __('Are you sure you want to send these messages now?'))->options([
-                'Yes' => 'Yes',
-                'No' => 'No',
-            ])->rules('required');
-        })->rules('required');
+        ]);
 
 
 
-        $form->textarea('message_body', __('Compose Message'))->rules('required');
+        $form->textarea('message_body', __('Compose Message'))->rules('required')
+            ->default('Dear Parent, you are reminded to clear the outstanding balance of UGX [FEES_BALANCE] for your child [STUDENT_NAME]. BFSS Adminstration.');
         $form->html('<p><b>Available Keywords</b></p>
         <p class="p-0 m-0">Student\'s Name: <code>[STUDENT_NAME]</code></p>
         <p class="p-0 m-0">Parent\'s Name: <code>[PARENT_NAME]</code></p>
