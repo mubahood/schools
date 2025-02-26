@@ -882,7 +882,7 @@ Route::get('bulk-messages-sending', function (Request $request) {
 
   $output = '<div style="font-family: sans-serif; margin: 20px; line-height: 1.6; max-width: 800px; margin: 0 auto;">';
 
-  if ($bulkMsg->status != 'Send') {
+  if ($bulkMsg->send_action != 'Send Now') {
     $output .= '<h1 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">NOTE: These messages will not be sent because the bulk message is not marked as \'Send\'.</h1>';
   }
 
@@ -898,7 +898,7 @@ Route::get('bulk-messages-sending', function (Request $request) {
     $output .= '<div style="border-bottom: 1px solid #eee; padding: 10px 0; background-color: ' . $rowBgColor . ';">';
     $output .= '<span style="display:inline;">' . $id . '. ' . htmlspecialchars($msg->receiver_number) . ' => ' . htmlspecialchars($msg->message_body) . '</span>';
 
-    if ($bulkMsg->status != 'Send') {
+    if ($bulkMsg->send_action != 'Send Now') {
       $output .= '<span style="display:inline; margin-left:5px; padding: 3px 6px; border-radius: 3px; background-color: #ffe0e0; color: #d32f2f;">NOTE SENT</span><span style="display:inline; margin-left:5px;">Because bulk message is not marked as \'Send\'.</span>';
       $fail_count++;
       $output .= '</div>';
