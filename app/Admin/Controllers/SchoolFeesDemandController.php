@@ -67,26 +67,27 @@ class SchoolFeesDemandController extends AdminController
 
         $grid->column('demand_notice', __('Demand Notice'))
             ->display(function ($f) {
-                $url = url('generate-demand-notice?id=' . $this->id);
+                $salt = '&salt=' . rand(1000, 9999) . time();
+                $url = url('generate-demand-notice?id=' . $this->id) . $salt;
                 return '<a href="' . $url . '" target="_blank">Generate Demand Notices</a>';
             });
         $grid->column('meal-cards', __('Meal Card'))
             ->display(function ($f) {
-                $url = url('meal-cards?id=' . $this->id . '&type=MEAL_CARD');
+                $url = url('meal-cards?id=' . $this->id . '&type=MEAL_CARD') . '&salt=' . rand(1000, 9999) . time();
                 return '<a href="' . $url . '" target="_blank">Generate Meal Cards for (' . $this->target_type . ')</a>';
             });
 
 
         $grid->column('gate-pass', __('Gate Pass'))
             ->display(function ($f) {
-                $url = url('meal-cards?id=' . $this->id . '&type=GATE_PASS');
+                $url = url('meal-cards?id=' . $this->id . '&type=GATE_PASS') . '&salt=' . rand(1000, 9999) . time();
                 return '<a href="' . $url . '" target="_blank">Generate GATE-PASS for (' . $this->target_type . ')</a>';
             });
 
 
         $grid->column('meal-cards-3', __('List of Students'))
             ->display(function ($f) {
-                $url = url('meal-cards?id=' . $this->id . '&type=LIST');
+                $url = url('meal-cards?id=' . $this->id . '&type=LIST') . '&salt=' . rand(1000, 9999) . time();
                 return '<a href="' . $url . '" target="_blank">Generate List</a>';
             });
 
