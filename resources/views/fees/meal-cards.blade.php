@@ -81,7 +81,7 @@ if (!file_exists($logo)) {
                 <td style="width: {{ 100 / 2 }}%!important" class="pr-1 pb-2">
                     @if (isset($rec[$super_count]))
                         @php
-                            $acc = $rec[$super_count];
+                            $acc = $rec[$super_count]; 
                         @endphp
                         @if ($IS_GATE_PASS && isset($rec[$super_count ]))
                             @include('fees.meal-card-item-3', [
@@ -89,21 +89,21 @@ if (!file_exists($logo)) {
                                 'demand' => $demand,
                                 'item' => $rec[$super_count ],
                                 'logo' => $logo,
-                                'balance' => 'UGX ' . number_format($item->balance),
+                                'balance' => 'UGX ' . number_format($acc->balance),
                             ])
                         @elseif ($acc->owner->residence != 'BOARDER')
                             @include('fees.meal-card-item', [
                                 'ent' => $ent,
                                 'demand' => $demand,
                                 'item' => $rec[$super_count],
-                                'balance' => 'UGX ' . number_format($item->balance),
+                                'balance' => 'UGX ' . number_format($acc->balance),
                             ])
                         @else
                             @include('fees.meal-card-item-1', [
                                 'ent' => $ent,
                                 'demand' => $demand,
                                 'item' => $rec[$super_count],
-                                'balance' => 'UGX ' . number_format($item->balance),
+                                'balance' => 'UGX ' . number_format($acc->balance),
                             ])
                         @endif
                     @endif
@@ -119,21 +119,21 @@ if (!file_exists($logo)) {
                                 'ent' => $ent,
                                 'demand' => $demand,
                                 'item' => $rec[$super_count + 1],
-                                'balance' => 'UGX ' . number_format($item->balance),
+                                'balance' => 'UGX ' . number_format($acc->balance),
                             ])
                         @elseif ($acc->owner->residence != 'BOARDER')
                             @include('fees.meal-card-item', [
                                 'ent' => $ent,
                                 'demand' => $demand,
                                 'item' => $rec[$super_count + 1],
-                                'balance' => 'UGX ' . number_format($item->balance),
+                                'balance' => 'UGX ' . number_format($acc->balance),
                             ])
                         @else
                             @include('fees.meal-card-item-1', [
                                 'ent' => $ent,
                                 'demand' => $demand,
                                 'item' => $rec[$super_count + 1],
-                                'balance' => 'UGX ' . number_format($item->balance),
+                                'balance' => 'UGX ' . number_format($acc->balance),
                             ])
                         @endif
                     @endif

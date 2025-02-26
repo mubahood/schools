@@ -523,7 +523,14 @@ Route::get('meal-cards', function (Request $r) {
     $IS_GATE_PASS = true;
   }
 
-
+/* 
+  foreach ($recs as $key => $class) {
+    foreach ($class as $key => $student) {
+      echo  $student->id . "<br>" . $student->owner->name . "<br>" . $student->balance . "<hr>"; 
+    }
+  }
+  die("done");
+ */
   $pdf->loadHTML(view('fees.meal-cards', [
     'recs' => $recs,
     'ent' => $ent,
