@@ -380,6 +380,7 @@ Route::get('app', function (Request $request) {
 });
 Route::get('test', function (Request $request) {
 
+  return view('test');
   $url = "https://www.socnetsolutions.com/projects/bulk/amfphp/services/blast.php?username=mubaraka&passwd=muh1nd0@2023";
   //$m->receiver_number = '+256706638494';
   $url .= "&msg=" . trim('$m->message_body');
@@ -899,7 +900,7 @@ Route::get('bulk-messages-sending', function (Request $request) {
   //set unlimited time
   set_time_limit(-1);
   //set unlimited memory
-  ini_set('memory_limit', '-1'); 
+  ini_set('memory_limit', '-1');
   $bulkMsg = BulkMessage::find($request->id);
   BulkMessage::do_prepare_messages($bulkMsg);
   $messages = DirectMessage::where(['bulk_message_id' => $bulkMsg->id])->get();
