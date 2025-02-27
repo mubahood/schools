@@ -380,6 +380,26 @@ Route::get('app', function (Request $request) {
 });
 Route::get('test', function (Request $request) {
 
+  $url = "https://www.socnetsolutions.com/projects/bulk/amfphp/services/blast.php?username=mubaraka&passwd=muh1nd0@2023";
+  //$m->receiver_number = '+256706638494';
+  $url .= "&msg=" . trim('$m->message_body');
+  $url .= "&numbers=" . '+256783204665';
+
+  try {
+    $result = file_get_contents($url, false, stream_context_create([
+      'http' => [
+        'method' => 'POST',
+        'header' => 'Content-Type: application/json',
+        /* 'content' => json_encode($m), */
+      ],
+    ]));
+    dd($result);
+  } catch (\Throwable $th) {
+    dd($th);
+  }
+
+  die("done");
+
   $ent = Enterprise::find(7);
   $ent = Utils::fetchDataFromRequest($ent, $request);
   dd($ent->name);
@@ -876,6 +896,10 @@ Route::get('print-admission-letter', function () {
 });
 
 Route::get('bulk-messages-sending', function (Request $request) {
+  //set unlimited time
+  set_time_limit(-1);
+  //set unlimited memory
+  ini_set('memory_limit', '-1'); 
   $bulkMsg = BulkMessage::find($request->id);
   BulkMessage::do_prepare_messages($bulkMsg);
   $messages = DirectMessage::where(['bulk_message_id' => $bulkMsg->id])->get();
