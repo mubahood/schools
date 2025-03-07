@@ -116,6 +116,7 @@ class SchoolFeesDemand extends Model
             if ($this->has_specific_students == 'Yes') {
                 foreach ($this->target_students as $key => $student_id) {
                     $ids[] = (int)($student_id);
+                    break;   
                 }
             } else {
                 $ids = User::where($conds)

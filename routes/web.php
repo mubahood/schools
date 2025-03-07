@@ -554,7 +554,6 @@ Route::get('meal-cards', function (Request $r) {
   }
   die("done");
  */
-$recs = []; 
   $pdf->loadHTML(view('fees.meal-cards', [
     'recs' => $recs,
     'ent' => $ent,
