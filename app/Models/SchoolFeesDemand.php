@@ -84,6 +84,8 @@ class SchoolFeesDemand extends Model
             ])
                 ->whereIn('administrator_id', $ids)
                 ->where('balance', $this->direction, $balance)
+                ->orderBy('balance', 'desc')
+                ->limit(1)
                 ->get();
             $recs[$class] = $accounts;
         }
@@ -116,7 +118,6 @@ class SchoolFeesDemand extends Model
             if ($this->has_specific_students == 'Yes') {
                 foreach ($this->target_students as $key => $student_id) {
                     $ids[] = (int)($student_id);
-                    break;   
                 }
             } else {
                 $ids = User::where($conds)
@@ -131,6 +132,7 @@ class SchoolFeesDemand extends Model
                 ->whereIn('administrator_id', $ids)
                 ->where('balance', $this->direction, $balance)
                 ->orderBy('balance', 'desc')
+                ->limit(1) 
                 ->get();
             $recs[$class] = $accounts;
         }

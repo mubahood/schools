@@ -535,7 +535,6 @@ Route::get('meal-cards', function (Request $r) {
   if (!isset($r->type)) {
     return "ID not set";
   }
-  
   set_time_limit(-1);
   $idCard = SchoolFeesDemand::find($_GET['id']);
   $pdf = App::make('dompdf.wrapper');
