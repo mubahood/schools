@@ -326,5 +326,11 @@ class Account extends Model
             ->sum('amount');
     }
 
-    protected $appends = ['debit', 'credit'];
+    //getter for verification
+    public function getVerificationAttribute()
+    {
+        return $this->status;
+    }
+
+    protected $appends = ['debit', 'credit', 'verification'];
 }
