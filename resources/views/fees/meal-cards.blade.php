@@ -84,8 +84,7 @@ if (!file_exists($logo)) {
     @foreach ($rec as $item)
         @php
 
-            if ($count < $min || $count > $max) {
-                $count++;
+            if ($super_count < $min || $super_count > $max) {
                 $super_count++;
                 continue;
             }
