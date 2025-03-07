@@ -535,6 +535,8 @@ Route::get('meal-cards', function (Request $r) {
   if (!isset($r->type)) {
     return "ID not set";
   }
+
+  return 'ID: ' . $r->id;  
   set_time_limit(-1);
   $idCard = SchoolFeesDemand::find($_GET['id']);
   $pdf = App::make('dompdf.wrapper');
@@ -581,7 +583,7 @@ Route::get('meal-cards', function (Request $r) {
   $idCard->save();
   //reutn the link as text
   $file_url = url('storage/files/' . $idCard->id . '-' . $rand . '.pdf');
-  return "GENERATED: <a href='$file_url' target='_blank'>Download</a>";
+  return "GENERATED: <a href='$file_url' target='_blank'>Download</a>"; 
   return redirect('identification-cards-print?id=' . $idCard->id . '&rand=' . $rand);
 });
 
