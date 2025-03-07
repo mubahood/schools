@@ -24,9 +24,6 @@ if (!file_exists($logo)) {
         {{ $min }} - {{ $max }}</p>
 </div>
 <hr>
-@php
-    $my_counter = 0;
-@endphp
 @foreach ($recs as $index => $rec)
     <?php
         $class = AcademicClass::find($index);
@@ -46,14 +43,14 @@ if (!file_exists($logo)) {
         $balance_total = 0;
         //sort $rec by balance
         // $rec->sortBy('balance');
-        foreach ($rec as $item) {
-            //check if $my_counter is within the range min and max
-            if ($my_counter < $min || $my_counter > $max) {
-                $my_counter++;
+        foreach ($rec as $item) { 
+            if ($ii <= $min || $ii => $max) {
+                $ii++;
                 continue;
-            }
-            $my_counter++;
+            } 
             $ii++;
+
+            $item = $rec[$ii];
         
             $balance_total += $item->balance;
             $owner = $item->owner;
@@ -87,11 +84,10 @@ if (!file_exists($logo)) {
     @foreach ($rec as $item)
         @php
 
-            if ($my_counter < $min || $my_counter > $max) {
-                $my_counter++;
+            if ($super_count < $min || $super_count > $max) {
+                $super_count++;
                 continue;
             }
-            $my_counter++;
             $count++;
             $super_count++;
             $break_style = '';
