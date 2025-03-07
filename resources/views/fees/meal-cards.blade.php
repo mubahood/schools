@@ -20,7 +20,8 @@ if (!file_exists($logo)) {
 ?>
 @include('print.css')
 <div class="mb-3 text-center">
-    <p><strong>Balance:</strong> {{ $demand->direction }} UGX {{ number_format($demand->amount) }}</p>
+    <p><strong>Balance:</strong> {{ $demand->direction }} UGX {{ number_format($demand->amount) }}. RANGE:
+        {{ $min }} - {{ $max }}</p>
 </div>
 <hr>
 @php
