@@ -536,6 +536,9 @@ Route::get('meal-cards', function (Request $r) {
     return "ID not set";
   }
   set_time_limit(-1);
+  //set memory limit
+  ini_set('memory_limit', '-1');
+
   $idCard = SchoolFeesDemand::find($_GET['id']);
   $pdf = App::make('dompdf.wrapper');
   $ent = Enterprise::find($idCard->enterprise_id);
@@ -554,13 +557,21 @@ Route::get('meal-cards', function (Request $r) {
   }
   die("done");
  */
-  $pdf->loadHTML(view('fees.meal-cards', [
-    'recs' => $recs,
-    'ent' => $ent,
-    'type' => $r->type,
-    'demand' => $idCard,
-    'IS_GATE_PASS' => $IS_GATE_PASS
-  ]));
+
+  try {
+    $pdf->loadHTML(view('fees.meal-cards', [
+      'recs' => $recs,
+      'ent' => $ent,
+      'type' => $r->type,
+      'demand' => $idCard,
+      'IS_GATE_PASS' => $IS_GATE_PASS
+    ]));
+  } catch (\Throwable $th) {
+    echo $th->getMessage();
+    echo "<hr>";  
+    throw $th;
+  }
+
   // $pdf->render();
   // return $pdf->stream();
 
