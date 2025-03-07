@@ -85,7 +85,7 @@ class SchoolFeesDemand extends Model
                 ->whereIn('administrator_id', $ids)
                 ->where('balance', $this->direction, $balance)
                 ->orderBy('balance', 'desc')
-                ->limit(1)
+                ->limit(10)
                 ->get();
             $recs[$class] = $accounts;
         }
@@ -132,7 +132,7 @@ class SchoolFeesDemand extends Model
                 ->whereIn('administrator_id', $ids)
                 ->where('balance', $this->direction, $balance)
                 ->orderBy('balance', 'desc')
-                ->limit(1) 
+                ->limit(10) 
                 ->get();
             $recs[$class] = $accounts;
         }
