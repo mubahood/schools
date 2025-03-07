@@ -114,14 +114,14 @@ class TheologyMarkController extends AdminController
         }
 
         $grid->filter(function ($filter) {
-            if (
-                (!Admin::user()->isRole('dos')) &&
-                (
-                    (!isset($_GET['theology_subject_id'])) ||
-                    (((int)($_GET['theology_subject_id'])) < 1)
-                ) {
-                $filter->expand();
-            }
+            // if (
+            //     (!Admin::user()->isRole('dos')) &&
+            //     (
+            //         (!isset($_GET['theology_subject_id'])) ||
+            //         (((int)($_GET['theology_subject_id'])) < 1)
+            //     ) {
+            //     $filter->expand();
+            // }
 
 
             // Remove the default id filter
