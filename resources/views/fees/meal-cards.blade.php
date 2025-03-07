@@ -44,7 +44,7 @@ if (!file_exists($logo)) {
         //sort $rec by balance
         // $rec->sortBy('balance');
         foreach ($rec as $item) { 
-            if ($ii <= $min || $ii => $max) {
+            if ($ii < $min || $ii > $max) {
                 $ii++;
                 continue;
             } 
@@ -84,7 +84,8 @@ if (!file_exists($logo)) {
     @foreach ($rec as $item)
         @php
 
-            if ($super_count < $min || $super_count > $max) {
+            if ($count < $min || $count > $max) {
+                $count++;
                 $super_count++;
                 continue;
             }
