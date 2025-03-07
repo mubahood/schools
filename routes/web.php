@@ -575,6 +575,9 @@ Route::get('meal-cards', function (Request $r) {
   file_put_contents($store_file_path, $pdf->output());
   $idCard->pdf_generated = 'Yes';
   $idCard->file_link = $store_file_path;
+  if (isset($r->type)) {
+    $idCard->file_type = $r->type;
+  }
   $idCard->save();
   //reutn the link as text
   $file_url = url('storage/files/' . $idCard->id . '-' . $rand . '.pdf');
