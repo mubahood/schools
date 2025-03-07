@@ -329,7 +329,7 @@ class Account extends Model
     //getter for verification
     public function getVerificationAttribute()
     {
-        return $this->status;
+        return $this->status . "";
     }
 
     protected $appends = ['debit', 'credit', 'verification'];
