@@ -561,18 +561,24 @@ Route::get('meal-cards', function (Request $r) {
     'demand' => $idCard,
     'IS_GATE_PASS' => $IS_GATE_PASS
   ]));
-  $pdf->render();
-  return $pdf->stream();
+  // $pdf->render();
+  // return $pdf->stream();
 
-  $store_file_path = public_path('storage/files/' . $idCard->id . '.pdf');
-  file_put_contents($store_file_path, $output);
+  $rand = rand(1, 100000) . time();
+
+  $store_file_path = public_path('storage/files/' . $idCard->id . '-' . $rand . '.pdf');
+
+  //check if file exists and delete
+  if (file_exists($idCard->file_link)) {
+    unlink($idCard->file_link);
+  }
+  file_put_contents($store_file_path, $pdf->output());
   $idCard->pdf_generated = 'Yes';
   $idCard->file_link = $store_file_path;
   $idCard->save();
-  //redirect to the print
-  $rand = rand(1, 100000) . time();
   //reutn the link as text
-  return "PDF Generated: <a href='" . url('storage/files/' . $idCard->id . '.pdf') . "' target='_blank'>Download</a>";   
+  $file_url = url('storage/files/' . $idCard->id . '-' . $rand . '.pdf');
+  return "GENERATED: <a href='$file_url' target='_blank'>Download</a>";
   return redirect('identification-cards-print?id=' . $idCard->id . '&rand=' . $rand);
 });
 
