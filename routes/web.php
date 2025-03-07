@@ -581,7 +581,21 @@ Route::get('meal-cards', function (Request $r) {
   $idCard->save();
   //reutn the link as text
   $file_url = url('storage/files/' . $idCard->id . '-' . $rand . '.pdf');
-  return "GENERATED: <a href='$file_url' target='_blank'>Download</a>"; 
+  $RESP = <<<EOD
+  GENERATED: <a href='$file_url' target='_blank'>Download PDF File</a>
+  <br/>OR COPY THIS LINK:
+  <input type="text" id="clipLink" value="$file_url" readonly style="width: 500px;" />
+  <button onclick="copyLink()">Copy Link</button>
+  <script>
+    function copyLink() {
+      var copyText = document.getElementById("clipLink");
+      copyText.select();
+      document.execCommand("copy");
+      alert("Link copied to clipboard");
+    }
+  </script>
+  EOD;
+  return $RESP;
   return redirect('identification-cards-print?id=' . $idCard->id . '&rand=' . $rand);
 });
 
