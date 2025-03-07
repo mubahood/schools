@@ -571,6 +571,8 @@ Route::get('meal-cards', function (Request $r) {
   $idCard->save();
   //redirect to the print
   $rand = rand(1, 100000) . time();
+  //reutn the link as text
+  return "PDF Generated: <a href='" . url('storage/files/' . $idCard->id . '.pdf') . "' target='_blank'>Download</a>";   
   return redirect('identification-cards-print?id=' . $idCard->id . '&rand=' . $rand);
 });
 
