@@ -215,6 +215,19 @@ class SchoolFeesDemandController extends AdminController
         $form->textarea('', __('Message 4'));
         $form->textarea('message_5', __('Message 5')); */
 
+        /*             $table->string('has_range')->default('No')->nullable();
+            $table->integer('min_range')->nullable();
+            $table->integer('max_range')->nullable(); */
+        $form->radio('has_range', 'Has Range')->options([
+            'Yes' => 'Yes',
+            'No' => 'No',
+        ])->default('No')->required()
+            ->when('Yes', function (Form $form) {
+                $form->decimal('min_range', 'Min Range')->rules('required');
+                $form->decimal('max_range', 'Max Range')->rules('required');
+            })
+            ->rules('required');
+
         return $form;
     }
 }

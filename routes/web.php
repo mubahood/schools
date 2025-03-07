@@ -558,17 +558,39 @@ Route::get('meal-cards', function (Request $r) {
   die("done");
  */
 
+  /* 
+         $form->radio('has_range', 'Has Range')->options([
+            'Yes' => 'Yes',
+            'No' => 'No',
+        ])->default('No')->required()
+            ->when('Yes', function (Form $form) {
+                $form->decimal('min_range', 'Min Range')->rules('required');
+                $form->decimal('max_range', 'Max Range')->rules('required');
+            })
+            ->rules('required');
+ */
+
+  $min = 0;
+  $max  = 100000;
+
+  if ($idCard->has_range == 'Yes') {
+    $min = $idCard->min_range;
+    $max = $idCard->max_range;
+  }
+
   try {
     $pdf->loadHTML(view('fees.meal-cards', [
       'recs' => $recs,
       'ent' => $ent,
       'type' => $r->type,
       'demand' => $idCard,
-      'IS_GATE_PASS' => $IS_GATE_PASS
+      'IS_GATE_PASS' => $IS_GATE_PASS,
+      'min' => $min,
+      'max' => $max, 
     ]));
   } catch (\Throwable $th) {
     echo $th->getMessage();
-    echo "<hr>";  
+    echo "<hr>";
     throw $th;
   }
 

@@ -5,6 +5,14 @@ use App\Models\Utils;
 
 $logo = public_path('storage/' . $ent->logo);
 
+if (!isset($min)) {
+    $min = 0;
+}
+
+if (!isset($max)) {
+    $max = 100000;
+}
+
 if (!file_exists($logo)) {
     $logo = public_path('storage/logo.png');
 }
@@ -15,6 +23,9 @@ if (!file_exists($logo)) {
     <p><strong>Balance:</strong> {{ $demand->direction }} UGX {{ number_format($demand->amount) }}</p>
 </div>
 <hr>
+@php
+    $my_counter = 0;
+@endphp
 @foreach ($recs as $index => $rec)
     <?php
         $class = AcademicClass::find($index);
@@ -35,7 +46,14 @@ if (!file_exists($logo)) {
         //sort $rec by balance
         // $rec->sortBy('balance');
         foreach ($rec as $item) {
+            //check if $my_counter is within the range min and max
+            if ($my_counter < $min || $my_counter > $max) {
+                $my_counter++;
+                continue;
+            }
+            $my_counter++;
             $ii++;
+        
             $balance_total += $item->balance;
             $owner = $item->owner;
             echo '<tr class="text-left p-1">';
@@ -67,6 +85,12 @@ if (!file_exists($logo)) {
     @endphp
     @foreach ($rec as $item)
         @php
+
+            if ($my_counter < $min || $my_counter > $max) {
+                $my_counter++;
+                continue;
+            }
+            $my_counter++;
             $count++;
             $super_count++;
             $break_style = '';
@@ -81,13 +105,13 @@ if (!file_exists($logo)) {
                 <td style="width: {{ 100 / 2 }}%!important" class="pr-1 pb-2">
                     @if (isset($rec[$super_count]))
                         @php
-                            $acc = $rec[$super_count]; 
+                            $acc = $rec[$super_count];
                         @endphp
-                        @if ($IS_GATE_PASS && isset($rec[$super_count ]))
+                        @if ($IS_GATE_PASS && isset($rec[$super_count]))
                             @include('fees.meal-card-item-3', [
                                 'ent' => $ent,
                                 'demand' => $demand,
-                                'item' => $rec[$super_count ],
+                                'item' => $rec[$super_count],
                                 'logo' => $logo,
                                 'balance' => 'UGX ' . number_format($acc->balance),
                             ])
