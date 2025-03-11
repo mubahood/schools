@@ -43,13 +43,17 @@ if (!file_exists($logo)) {
         $balance_total = 0;
         //sort $rec by balance
         // $rec->sortBy('balance');
-        foreach ($rec as $item) { 
+        foreach ($rec as $item) {
             if ($ii < $min || $ii > $max) {
                 $ii++;
                 continue;
-            } 
+            }
             $ii++;
-
+        
+            if (!isset($rec[$ii])) {
+                continue;
+            }
+        
             $item = $rec[$ii];
         
             $balance_total += $item->balance;
