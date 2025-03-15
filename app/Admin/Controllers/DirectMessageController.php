@@ -110,7 +110,7 @@ class DirectMessageController extends AdminController
         //button to resend message
         $grid->column('resend', __('Resend'))->display(function () {
 
-            $url = url('send-message?id' . $this->id);
+            $url = url('send-message?id=' . $this->id);
             // open in new tab
             return "<a href='$url' target='_blank' class='btn btn-xs btn-primary'>Resend</a>";
         });
