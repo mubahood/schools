@@ -86,7 +86,7 @@ Route::get('send-message', function (Request $request) {
   try {
     DirectMessage::send_message($directMessage);
   } catch (\Throwable $th) {
-    return "Failed to send message";
+    return "Failed to send message because: " . $th->getMessage(); 
   }
 
   $directMessage = DirectMessage::find($request->id);

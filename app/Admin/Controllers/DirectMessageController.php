@@ -93,12 +93,8 @@ class DirectMessageController extends AdminController
         $grid->column('error_message_message', __('Error message message'))->hide();
         $grid->column('response', __('Response'))->hide();
 
-        $grid->column('status', __('Status'))->label([
-            'Pending' => 'info',
-            'Sent' => 'success',
-            'Failed' => 'danger',
-            'Draft' => 'warning',
-        ])->filter([
+        $grid->column('status', __('Status'))
+        ->filter([
             'Pending' => 'Pending',
             'Sent' => 'Sent',
             'Failed' => 'Failed',
