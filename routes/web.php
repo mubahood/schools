@@ -80,6 +80,29 @@ Route::get('clear', function () {
   return Artisan::output();
 });
 //migration
+Route::get('send-message', function (Request $request) {
+  $directMessage = DirectMessage::find($request->id);
+
+  try {
+    DirectMessage::send_message($directMessage);
+  } catch (\Throwable $th) {
+    return "Failed to send message";
+  }
+
+  $directMessage = DirectMessage::find($request->id);
+  echo <<<EOF
+  <div style="font-family: Arial, sans-serif; margin: 20px;">
+    <h2>Message Status</h2>
+    <p><strong>Status:</strong> {$directMessage->status}</p>
+    <p><strong>Error:</strong> {$directMessage->error_message_message}</p>
+    <p><strong>Receiver:</strong> {$directMessage->receiver_number}</p>
+    <p><strong>Message:</strong> {$directMessage->message_body}</p>
+    <p><strong>ID:</strong> {$directMessage->id}</p>
+  </div>
+  EOF;
+}); 
+
+//migration
 Route::get('sms-test', function () {
   $url = "https://www.socnetsolutions.com/projects/bulk/amfphp/services/blast.php?username=mubaraka&passwd=muh1nd0@2023";
   //$m->receiver_number = '+256706638494';
