@@ -94,19 +94,18 @@ class DirectMessageController extends AdminController
         $grid->column('response', __('Response'))->hide();
 
         $grid->column('status', __('Status'))
-        ->filter([
-            'Pending' => 'Pending',
-            'Sent' => 'Sent',
-            'Failed' => 'Failed',
-            'Draft' => 'Draft',
-        ])
-            ->sortable()
-            ->editable('select', [
+            ->label([
+                'Pending' => 'info',
+                'Sent' => 'success',
+                'Failed' => 'danger',
+                'Draft' => 'warning',
+            ])->filter([
                 'Pending' => 'Pending',
                 'Sent' => 'Sent',
                 'Failed' => 'Failed',
                 'Draft' => 'Draft',
-            ]);
+            ])
+            ->sortable();
         //button to resend message
         $grid->column('resend', __('Resend'))->display(function () {
 
