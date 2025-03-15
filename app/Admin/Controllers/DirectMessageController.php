@@ -104,6 +104,14 @@ class DirectMessageController extends AdminController
         $grid->column('error_message_message', __('Error message message'))->hide();
         $grid->column('response', __('Response'))->hide();
 
+        //button to resend message
+        $grid->column('resend', __('Resend'))->display(function () {
+
+            $url = url('send-message?id' . $this->id);
+            // open in new tab
+            return "<a href='$url' target='_blank' class='btn btn-xs btn-primary'>Resend</a>"; 
+        });
+
 
         return $grid;
     }
