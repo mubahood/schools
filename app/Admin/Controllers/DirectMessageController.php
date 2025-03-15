@@ -55,6 +55,13 @@ class DirectMessageController extends AdminController
                 ->select($cats);
             //add range filter by date
             $filter->between('created_at', 'Created At')->datetime(); 
+            //status filter
+            $filter->equal('status', 'Status')->select([
+                'Pending' => 'Pending',
+                'Sent' => 'Sent',
+                'Failed' => 'Failed',
+                'Draft' => 'Draft',
+            ]); 
         });
         $u = Auth::user();
         $grid->model()
@@ -105,11 +112,6 @@ class DirectMessageController extends AdminController
                 'Sent' => 'success',
                 'Failed' => 'danger',
                 'Draft' => 'warning',
-            ])->filter([
-                'Pending' => 'Pending',
-                'Sent' => 'Sent',
-                'Failed' => 'Failed',
-                'Draft' => 'Draft',
             ])
             ->sortable();
         //button to resend message
