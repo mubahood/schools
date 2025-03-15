@@ -83,7 +83,7 @@ Route::get('clear', function () {
 Route::get('send-message', function (Request $request) {
   $directMessage = DirectMessage::find($request->id);
   $directMessage->status = 'Pending';
-  
+
 
   try {
     DirectMessage::send_message($directMessage);
@@ -119,8 +119,9 @@ Route::get('sms-test', function () {
         /* 'content' => json_encode($m), */
       ],
     ]));
-    echo "success";
-    dd($result);
+    echo "<pre>";
+    print_r($result);
+    echo "</pre>";
   } catch (\Throwable $th) {
     echo "failed";
     dd($th);

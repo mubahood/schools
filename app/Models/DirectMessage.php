@@ -34,67 +34,90 @@ class DirectMessage extends Model
 
     public static function send_message($m)
     {
-        if ($m->status != 'Pending') {
+        if ($m->status !== 'Pending') {
             return;
         }
-
+    
+        // Validate phone number
         if (!Utils::validateUgandanPhoneNumber($m->receiver_number)) {
             $m->status = 'Failed';
-            $m->error_message_message = 'Invalid phone number' . " - $m->receiver_number.";
+            $m->error_message_message = 'Invalid phone number - ' . $m->receiver_number;
             $m->save();
             return;
         }
-
+    
+        // Validate enterprise
         $ent = Enterprise::find($m->enterprise_id);
-        if ($ent == null) {
+        if ($ent === null) {
             $m->status = 'Failed';
             $m->error_message_message = 'Enterprise is not active.';
             $m->save();
             return;
         }
-
+    
+        // Check wallet balance
         if ($ent->wallet_balance < 50) {
             $m->status = 'Failed';
             $m->error_message_message = 'Insufficient funds.';
             $m->save();
             return;
         }
-
-        if ($m->message_body == null || strlen($m->message_body) < 1) {
+    
+        // Validate message body
+        if (empty(trim($m->message_body))) {
             $m->status = 'Failed';
             $m->error_message_message = 'Message body is empty.';
             $m->save();
             return;
         }
-        if ($ent->can_send_messages != 'Yes') {
+    
+        // Check if messaging is enabled
+        if ($ent->can_send_messages !== 'Yes') {
             $m->status = 'Failed';
             $m->error_message_message = 'Messages are not enabled.';
             $m->save();
             return;
         }
-        // $m->status = 'Sent';
-        // $m->save();
-        // return;
-        $url = "https://www.socnetsolutions.com/projects/bulk/amfphp/services/blast.php?username=mubaraka&passwd=muh1nd0@2023";
-        //$m->receiver_number = '+256706638494';
-        $url .= "&msg=" . trim($m->message_body);
-        $url .= "&numbers=" . $m->receiver_number;
-
+    
+        // Construct API URL
+        $url = "https://www.socnetsolutions.com/projects/bulk/amfphp/services/blast.php";
+        $params = [
+            'username' => 'mubaraka',
+            'passwd'   => 'muh1nd0@2023',
+            'msg'      => trim($m->message_body),
+            'numbers'  => $m->receiver_number
+        ];
+    
+        // Send request using cURL
         try {
-            $result = file_get_contents($url, false, stream_context_create([
-                'http' => [
-                    'method' => 'POST',
-                    'header' => 'Content-Type: application/json',
-                    /* 'content' => json_encode($m), */
-                ],
-            ]));
-            $m->response = $result;
-            if (str_contains($result, 'Send ok')) {
+            $ch = curl_init();
+            $url .= '?' . http_build_query($params);
+    
+            curl_setopt_array($ch, [
+                CURLOPT_URL            => $url,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_SSL_VERIFYHOST => false,
+                CURLOPT_TIMEOUT        => 30,
+            ]);
+    
+            $response = curl_exec($ch);
+            
+            if (curl_errno($ch)) {
+                throw new \Exception('cURL Error: ' . curl_error($ch));
+            }
+    
+            curl_close($ch);
+    
+            $m->response = $response;
+    
+            // Extract useful information from response
+            if (self::isMessageSent($response)) {
                 $m->status = 'Sent';
-                $no_of_messages  = 1;
-                if (strlen($m->message_body) > 160) {
-                    $no_of_messages = ceil(strlen($m->message_body) / 160);
-                }
+    
+                // Deduct wallet balance based on message length
+                $no_of_messages = max(1, ceil(strlen($m->message_body) / 160));
                 $wallet_rec = new WalletRecord();
                 $wallet_rec->enterprise_id = $m->enterprise_id;
                 $wallet_rec->amount = $no_of_messages * -50;
@@ -102,15 +125,27 @@ class DirectMessage extends Model
                 $wallet_rec->save();
             } else {
                 $m->status = 'Failed';
+                $m->error_message_message = "Failed to send message. Response: $response";
             }
-            $m->save();
         } catch (\Throwable $th) {
             $m->status = 'Failed';
-            $error_message = $th->getMessage();
-            $m->error_message_message = "error: $error_message, url: $url";
-            $m->save();
+            $m->error_message_message = "Error: {$th->getMessage()}, URL: $url";
         }
+    
+        $m->save();
     }
+    
+    /**
+     * Parses the response to determine if the message was successfully sent.
+     */
+    private static function isMessageSent($response)
+    {
+        // Check if response contains "Send ok"
+        return preg_match('/Send ok:/', $response);
+    }
+
+    
+    
     public function bulk_message()
     {
         return $this->belongsTo(BulkMessage::class);
