@@ -106,7 +106,8 @@ class DirectMessage extends Model
             $m->save();
         } catch (\Throwable $th) {
             $m->status = 'Failed';
-            $m->error_message_message = $th->getMessage();
+            $error_message = $th->getMessage();
+            $m->error_message_message = "error: $error_message, url: $url";
             $m->save();
         }
     }
