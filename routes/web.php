@@ -80,6 +80,27 @@ Route::get('clear', function () {
   return Artisan::output();
 });
 //migration
+Route::get('sms-test', function () {
+  $url = "https://www.socnetsolutions.com/projects/bulk/amfphp/services/blast.php?username=mubaraka&passwd=muh1nd0@2023";
+  //$m->receiver_number = '+256706638494';
+  $url .= "&msg=" . trim("Hello muhindo.");
+  $url .= "&numbers=" . '+256706638494';
+
+  try {
+    $result = file_get_contents($url, false, stream_context_create([
+      'http' => [
+        'method' => 'POST',
+        'header' => 'Content-Type: application/json',
+        /* 'content' => json_encode($m), */
+      ],
+    ]));
+    echo "success";
+    dd($result);
+  } catch (\Throwable $th) {
+    echo "failed";
+    dd($th);
+  }
+});
 Route::get('migrate', function () {
   Artisan::call('migrate');
   return Artisan::output();
@@ -586,7 +607,7 @@ Route::get('meal-cards', function (Request $r) {
       'demand' => $idCard,
       'IS_GATE_PASS' => $IS_GATE_PASS,
       'min' => $min,
-      'max' => $max, 
+      'max' => $max,
     ]));
   } catch (\Throwable $th) {
     echo $th->getMessage();
