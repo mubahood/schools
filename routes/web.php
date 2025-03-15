@@ -82,6 +82,8 @@ Route::get('clear', function () {
 //migration
 Route::get('send-message', function (Request $request) {
   $directMessage = DirectMessage::find($request->id);
+  $directMessage->status = 'Pending';
+  
 
   try {
     DirectMessage::send_message($directMessage);
