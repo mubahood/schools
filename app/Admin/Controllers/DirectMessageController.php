@@ -83,6 +83,16 @@ class DirectMessageController extends AdminController
             })->sortable();
         $grid->column('receiver_number', __('Receiver Number'))->sortable();
         $grid->column('message_body', __('Message'))->sortable();
+
+        $grid->column('is_scheduled', __('Scheduled'))->sortable()->hide();
+        $grid->column('delivery_time', __('Delivery Time'))
+            ->display(function ($delivery_time) {
+                return date('d-m-Y H:i:s', strtotime($delivery_time));
+            })
+            ->sortable()->hide();
+        $grid->column('error_message_message', __('Error message message'))->hide();
+        $grid->column('response', __('Response'))->hide();
+
         $grid->column('status', __('Status'))->label([
             'Pending' => 'info',
             'Sent' => 'success',
@@ -94,22 +104,19 @@ class DirectMessageController extends AdminController
             'Failed' => 'Failed',
             'Draft' => 'Draft',
         ])
-            ->sortable();
-        $grid->column('is_scheduled', __('Scheduled'))->sortable()->hide();
-        $grid->column('delivery_time', __('Delivery Time'))
-            ->display(function ($delivery_time) {
-                return date('d-m-Y H:i:s', strtotime($delivery_time));
-            })
-            ->sortable()->hide();
-        $grid->column('error_message_message', __('Error message message'))->hide();
-        $grid->column('response', __('Response'))->hide();
-
+            ->sortable()
+            ->editable('select', [
+                'Pending' => 'Pending',
+                'Sent' => 'Sent',
+                'Failed' => 'Failed',
+                'Draft' => 'Draft',
+            ]);
         //button to resend message
         $grid->column('resend', __('Resend'))->display(function () {
 
             $url = url('send-message?id' . $this->id);
             // open in new tab
-            return "<a href='$url' target='_blank' class='btn btn-xs btn-primary'>Resend</a>"; 
+            return "<a href='$url' target='_blank' class='btn btn-xs btn-primary'>Resend</a>";
         });
 
 
