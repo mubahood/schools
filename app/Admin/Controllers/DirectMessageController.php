@@ -47,8 +47,14 @@ class DirectMessageController extends AdminController
                 ->select()->ajax($ajax_url);
 
 
+            $cats = [];
+            foreach (BulkMessage::where('enterprise_id', $u->enterprise_id)->get() as $cat) {
+                $cats[$cat->id] = $cat->message_title . ' - #' . $cat->id;
+            }
             $filter->equal('bulk_message_id', 'By Message Category')
-                ->select(BulkMessage::where('enterprise_id', $u->enterprise_id)->pluck('message_title', 'id'));
+                ->select($cats);
+            //add range filter by date
+            $filter->between('created_at', 'Created At')->datetime(); 
         });
         $u = Auth::user();
         $grid->model()
