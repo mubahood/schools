@@ -64,6 +64,23 @@ Route::get('report-card-printings', [ReportCardsPrintingController::class, 'inde
 Route::get('report-card-individual-printings', [ReportCardsPrintingController::class, 'report_card_individual_printings']);
 Route::get('data-import', [ReportCardsPrintingController::class, 'data_import']);
 Route::get('process-termly-school-fees-balancings', [MainController::class, 'process_termly_school_fees_balancings']);
+Route::get('remove-sex', function () {
+  $students = Administrator::where([
+    'last_name' => 'Male'
+  ])->get();
+
+  foreach ($students as $key => $stud) {
+    if ($stud->given_name != null && strlen($stud->given_name) > 2) {
+      echo "<hr> FROM " . $stud->id . ". " . $stud->name . "<br> TO ";
+      $stud->last_name =  $stud->given_name;
+      $stud->given_name = null;
+      $stud->name = $stud->first_name . ' ' . $stud->last_name;
+      $stud->save();
+      echo $stud->id . ". " . $stud->name . "<br> ";
+      break;
+    }
+  }
+});
 Route::get('clear', function () {
 
   Artisan::call('config:clear');
@@ -88,7 +105,7 @@ Route::get('send-message', function (Request $request) {
   try {
     DirectMessage::send_message($directMessage);
   } catch (\Throwable $th) {
-    return "Failed to send message because: " . $th->getMessage(); 
+    return "Failed to send message because: " . $th->getMessage();
   }
 
   $directMessage = DirectMessage::find($request->id);
@@ -102,7 +119,7 @@ Route::get('send-message', function (Request $request) {
     <p><strong>ID:</strong> {$directMessage->id}</p>
   </div>
   EOF;
-}); 
+});
 
 //migration
 Route::get('sms-test', function () {
