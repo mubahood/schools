@@ -66,7 +66,7 @@ Route::get('data-import', [ReportCardsPrintingController::class, 'data_import'])
 Route::get('process-termly-school-fees-balancings', [MainController::class, 'process_termly_school_fees_balancings']);
 Route::get('remove-sex', function () {
   $students = Administrator::where([
-    'last_name' => 'Male'
+    'last_name' => 'Female'
   ])->get();
 
   echo "Found: " . count($students) . "<br>";
