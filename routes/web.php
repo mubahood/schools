@@ -69,6 +69,8 @@ Route::get('remove-sex', function () {
     'last_name' => 'Male'
   ])->get();
 
+  echo "Found: " . count($students) . "<br>";
+
   foreach ($students as $key => $stud) {
     if ($stud->given_name != null && strlen($stud->given_name) > 2) {
       echo "<hr> FROM " . $stud->id . ". " . $stud->name . "<br> TO ";
@@ -77,7 +79,7 @@ Route::get('remove-sex', function () {
       $stud->name = $stud->first_name . ' ' . $stud->last_name;
       $stud->save();
       echo $stud->id . ". " . $stud->name . "<br> ";
-      break;
+      // break;
     }
   }
 });
