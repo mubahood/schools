@@ -20,17 +20,18 @@ class TheologyStream extends Model
         return $this->belongsTo(TheologyClass::class, 'theology_class_id',);
     }
 
-    public function studentHasTheologyClasses(){
-        return $this->hasMany(StudentHasTheologyClass::class,'theology_stream_id');
+    public function studentHasTheologyClasses()
+    {
+        return $this->hasMany(StudentHasTheologyClass::class, 'theology_stream_id');
     }
 
     //teacher
     public function teacher()
     {
         return $this->belongsTo(User::class, 'teacher_id');
-    } 
+    }
 
-   /*  //setter for teacher_id
+    /*  //setter for teacher_id
     public function setTeacherIdAttribute($value)
     {
         $this->attributes['teacher_id'] = $value;
@@ -43,8 +44,16 @@ class TheologyStream extends Model
             return  $this->theology_class->name_text;
         }
         return 'N/A';
-    } 
-    
+    }
+
+    public function getNameTextAttribute()
+    {
+        if ($this->theology_class != null) {
+            return   $this->theology_class->name . ' - ' . $this->name;
+        }
+        return 'N/A';
+    }
+
     //appends theology_class_text
-    protected $appends = ['theology_class_text']; 
+    protected $appends = ['theology_class_text', 'name_text'];
 }

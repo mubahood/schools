@@ -5,6 +5,7 @@ namespace App\Admin\Controllers;
 use App\Admin\Actions\Post\ChangeStudentsStatus;
 use App\Admin\Actions\Post\PromoteStudentsClass;
 use App\Admin\Actions\Post\UpdateStudentsSecularStream;
+use App\Admin\Actions\Post\UpdateStudentsTheologyStream;
 use App\Models\AcademicClass;
 use App\Models\AcademicClassSctream;
 use App\Models\AcademicYear;
@@ -49,7 +50,11 @@ class StudentsController extends AdminController
      */
     protected function grid()
     {
-
+       /*  $u = User::find(2317);
+        $u->religion .= '.'; 
+        $u->update_theo_classes();
+ 
+        die(); */
 
         /*
         $u = Administrator::find(2334);
@@ -81,6 +86,10 @@ class StudentsController extends AdminController
             $batch->add(new ChangeStudentsStatus());
             $batch->add(new PromoteStudentsClass());
             $batch->add(new UpdateStudentsSecularStream());
+            $segments = request()->segments();
+            if (in_array('students', $segments)) {
+                $batch->add(new UpdateStudentsTheologyStream()); 
+            } 
         });
         $grid->actions(function ($actions) {
             if (!Auth::user()->isRole('admin')) {
@@ -88,6 +97,7 @@ class StudentsController extends AdminController
             }
         });
 
+     
 
 
         Utils::display_checklist(Utils::students_checklist(Admin::user()));

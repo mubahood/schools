@@ -42,12 +42,11 @@ class User extends Administrator implements JWTSubject
 
         //updated
         self::updated(function ($m) {
-            if ($m->status == 1) {
-                $m->update_fees();
-            }
+
 
             //check if has parent
-            if ($m->user_type == 'student') {
+            if (strtolower($m->user_type) == 'student') {
+              
                 $p = $m->getParent();
                 if ($p == null) {
                     try {
@@ -57,16 +56,20 @@ class User extends Administrator implements JWTSubject
                     }
                 }
             }
+
+            $m->update_theo_classes();
         });
 
         //created
         self::created(function ($m) {
-            if ($m->status == 1) {
-                $m->update_fees();
-            }
+
 
             //check if has parent
-            if ($m->user_type == 'student') {
+            if (strtolower($m->user_type) == 'student') {
+                if ($m->status == 1) {
+                    $m->update_fees();
+                    $m->update_theo_classes();
+                }
                 $p = $m->getParent();
                 if ($p == null) {
                     try {
@@ -78,6 +81,7 @@ class User extends Administrator implements JWTSubject
             }
         });
     }
+
 
     /**
      * The attributes that are mass assignable.

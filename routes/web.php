@@ -59,30 +59,15 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 
 
+/* Route::get('/', function (Request $request) {
+  return view('landing.index'); 
+}); 
+ */
 Route::get('assessment-sheets-generate', [ReportCardsPrintingController::class, 'assessment_sheets_generate']);
 Route::get('report-card-printings', [ReportCardsPrintingController::class, 'index']);
 Route::get('report-card-individual-printings', [ReportCardsPrintingController::class, 'report_card_individual_printings']);
 Route::get('data-import', [ReportCardsPrintingController::class, 'data_import']);
 Route::get('process-termly-school-fees-balancings', [MainController::class, 'process_termly_school_fees_balancings']);
-Route::get('remove-sex', function () {
-  $students = Administrator::where([
-    'last_name' => 'Female'
-  ])->get();
-
-  echo "Found: " . count($students) . "<br>";
-
-  foreach ($students as $key => $stud) {
-    if ($stud->given_name != null && strlen($stud->given_name) > 2) {
-      echo "<hr> FROM " . $stud->id . ". " . $stud->name . "<br> TO ";
-      $stud->last_name =  $stud->given_name;
-      $stud->given_name = null;
-      $stud->name = $stud->first_name . ' ' . $stud->last_name;
-      $stud->save();
-      echo $stud->id . ". " . $stud->name . "<br> ";
-      // break;
-    }
-  }
-});
 Route::get('clear', function () {
 
   Artisan::call('config:clear');

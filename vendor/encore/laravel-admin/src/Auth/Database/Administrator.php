@@ -15,6 +15,7 @@ use App\Models\StudentHasFee;
 use App\Models\StudentHasTheologyClass;
 use App\Models\Subject;
 use App\Models\TheologyClass;
+use App\Models\TheologyStream;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Utils;
@@ -570,6 +571,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
     }
     public static function my_update($m)
     {
+        $m->update_theo_classes(); 
         $acc = Account::create($m->id);
         if ($m->user_type == 'student') {
             if ($m->current_class_id != null) {
@@ -1303,5 +1305,50 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
             return 0;
         }
         return $this->account->status . "";
+    }
+
+
+    public function update_theo_classes()
+    {
+        if (strtolower($this->user_type) != 'student') {
+            return;
+        }
+
+        if ($this->status != 1) {
+            return;
+        }
+
+
+   
+        if ($this->theology_stream_id != null) {
+            $theology_stream = TheologyStream::find($this->theology_stream_id);
+            if ($theology_stream != null) {
+                $this->current_theology_class_id = $theology_stream->theology_class_id;
+            } 
+        }
+
+
+
+        if ($this->current_theology_class_id != null) {
+            $theology_class = TheologyClass::find($this->current_theology_class_id);
+            if ($theology_class != null) {
+                $student_has_theo_class = StudentHasTheologyClass::where([
+                    'theology_class_id' => $theology_class->id,
+                    'administrator_id' => $this->id,
+                ])->first();
+                
+
+                if ($student_has_theo_class == null) { 
+                    $student_has_theo_class = new StudentHasTheologyClass();
+                } 
+
+                $student_has_theo_class->theology_class_id = $theology_class->id;
+                $student_has_theo_class->administrator_id = $this->id;
+                $student_has_theo_class->theology_stream_id = $this->theology_stream_id;
+                $student_has_theo_class->enterprise_id = $this->enterprise_id; 
+                $student_has_theo_class->save();
+            }
+        }
+ 
     }
 }
