@@ -77,6 +77,29 @@ Route::get('temp-import', function () {
     return "File not found";
   }
 
+
+  //remove dups
+  //same name, same reg no, same class
+  $students = Administrator::where([
+    'enterprise_id' => $last_ent->id,
+  ])->get();
+  $dups = [];
+  foreach ($students as $key => $student) {
+    $dup = Administrator::where([
+      'enterprise_id' => $last_ent->id,
+      'user_id' => $student->user_id,
+      'current_class_id' => $student->current_class_id,
+    ])->where('id', '!=', $student->id)->first();
+    if ($dup != null) {
+      $dups[] = $dup;
+      echo $dup->user_id . " is a duplicate<br>";
+      $dup->status = 0; 
+      $dup->save(); 
+    }
+  }
+ 
+  die("done"); 
+
   $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
   $spreadsheet = $reader->load($file);
   $sheet = $spreadsheet->getActiveSheet();
