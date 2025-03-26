@@ -86,16 +86,17 @@ Route::get('temp-import', function () {
   $dups = [];
   foreach ($students as $key => $student) {
     $dup = Administrator::where([
-      'enterprise_id' => $last_ent->id,
-      'user_id' => $student->user_id,
+      'enterprise_id' => $last_ent->id, 
       'current_class_id' => $student->current_class_id,
-    ])->where('id', '!=', $student->id)->first();
-    if ($dup != null) {
-      $dups[] = $dup;
-      echo $dup->user_id . " is a duplicate<br>";
-      $dup->status = 0; 
-      $dup->save(); 
-    }
+      'first_name' => $student->first_name,
+      'last_name' => $student->last_name,  
+    ])->where('id', '!=', $student->id)->get();
+    foreach ($dup as $key => $d) {
+      $dups[] = $d;
+      echo $d->user_id . " is a duplicate<br>";
+      $d->status = 0; 
+      $d->save(); 
+    } 
   }
  
   die("done"); 
