@@ -71,7 +71,7 @@ Route::get('temp-import', function () {
   set_time_limit(-1);
   $last_ent = Enterprise::orderBy('id', 'desc')->first();
   //file 1_bushra_students_table.xlsx
-  $file = public_path('1_bushra_students_table.xlsx');
+  $file = public_path('2_bushra_students_table.xlsx');
   //check if file exists
   if (!file_exists($file)) {
     return "File not found";
@@ -125,13 +125,15 @@ Route::get('temp-import', function () {
     if ($stud->user_id == null || strlen($stud->user_id) < 1) {
       $fail++;
       $fail_text .= "REG NO: " . $row[1] . " has no user id<br>";
-      echo $count . ". " . "Failed to save REG NO: " . $row[1] . " has no user id<br>";
+      echo $count . ". SKIPPED " . "Failed to save REG NO: " . $row[1] . " has no user id<br>";
       continue;
     }
 
     $name = $row[1];
     $name = str_replace('  ', ' ', $name);
     $names = explode(' ', $name);
+    //remvoe all spaces
+
     if (count($names) < 1) {
       $fail++;
       $fail_text .= "REG NO: " . $row[1] . " has no first name and last name<br>";
@@ -142,19 +144,22 @@ Route::get('temp-import', function () {
     if (count($names) == 2) {
       $stud->first_name = $names[0];
       $stud->last_name = $names[1];
+      $name = $stud->first_name . " " . $stud->last_name;
     } else if (count($names) == 3) {
       $stud->first_name = $names[0];
       $stud->given_name = $names[1];
       $stud->last_name = $names[2];
+      $name = $stud->first_name . " " . $stud->given_name . " " . $stud->last_name;
     } else if (count($names) == 1) {
       $stud->first_name = $names[0];
+      $stud->last_name = $names[0];
     } else {
       $stud->first_name = $names[0];
       $stud->last_name = $names[count($names) - 1];
+      $name = $stud->first_name . " " . $stud->last_name;
     }
     $stud->name = $name;
     $stud->sex = $row[2];
-
 
 
     if ($stud->sex != null) {
@@ -169,23 +174,34 @@ Route::get('temp-import', function () {
     $phone = null;
     if (isset($row[5])) {
       $phone = str_replace(' ', '', $row[5]);
-      $phone = '+256' . $phone;
-      $phone = str_replace('(', '', $phone);
-      $phone = str_replace(')', '', $phone);
-      $phone = str_replace(',', '', $phone);
+      if (strlen($phone) > 5) {
+        $phone = '+256' . $phone;
+        $phone = str_replace('(', '', $phone);
+        $phone = str_replace(')', '', $phone);
+        $phone = str_replace(',', '', $phone);
+      }
     }
-
-    $stud->home_address = $phone;
-    $stud->current_address = $phone;
+ 
+    $stud->home_address = $row[4];
+    $stud->current_address = $row[4];
     $stud->phone_number_1 = $phone;
     $stud->father_phone = $phone;
     $stud->mother_phone = $phone;
     $stud->emergency_person_phone = $phone;
-    $class_ = $row[3];
-    $class_ = str_replace(' ', '', $class_);
-    $class_ = str_replace('p', '', $class_);
-    $class_ = str_replace('P', '', $class_);
-    $class_num  = (int)($class_);
+    $class_ = $row[3]; 
+    $class_ = str_replace('  ', ' ', $class_);
+    $class_ = str_replace('  ', ' ', $class_);
+    $class_ = str_replace('  ', ' ', $class_);
+    $class_ = str_replace('  ', ' ', $class_);
+    $class_ = str_replace('  ', ' ', $class_);
+    $class_ = str_replace('  ', ' ', $class_);
+    $class_ = str_replace('  ', ' ', $class_);
+    $class_ = str_replace('  ', ' ', $class_);
+    $class_ = str_replace('  ', ' ', $class_);
+    $class_ = str_replace('  ', ' ', $class_);
+    $class_ = trim( $class_);
+  
+    $class_num  = $class_ ;
     if ($class_num < 1) {
       $fail++;
       $fail_text .= "REG NO: " . $row[1] . " has no class<br>";
@@ -194,7 +210,7 @@ Route::get('temp-import', function () {
     }
 
     $real_class = AcademicClass::where([
-      'short_name' => 'P.' . $class_num,
+      'name' =>  $class_num,
       'enterprise_id' => $last_ent->id,
     ])->first();
 
@@ -220,7 +236,7 @@ Route::get('temp-import', function () {
       $fail++;
       $fail_text .= "REG NO: " . $row[1] . " already exists<br>";
       echo $count . ". " . "Failed to save REG NO: " . $row[1] . " already exists<br>";
-
+      continue; 
       //check if this user is not pending
       if ($existing->status == 0) {
         $another = User::where([
@@ -235,12 +251,11 @@ Route::get('temp-import', function () {
           $existing->save();
           $success++;
           echo $stud->user_id . "<= " . "REG NO: " . $row[1] . ", NAME: " . $name . " saved<br>";
-        }  
-      }
-
+        }
+      } 
       continue;
     }
-
+ 
     try {
       $stud->save();
       $success++;

@@ -247,7 +247,7 @@ class AcademicClassController extends AdminController
                         'user_type' => 'employee',
                     ])->get() as $key => $a
                 ) {
-                    if ($a->isRole('teacher')) {
+                    if ($a->isRole('teacher') || $a->isRole('admin')) {
                         $teachers[$a['id']] = $a['name'] . " #" . $a['id'];
                     }
                 }
