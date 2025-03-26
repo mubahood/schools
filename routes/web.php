@@ -80,7 +80,7 @@ Route::get('temp-import', function () {
 
   //remove dups
   //same name, same reg no, same class
-  $students = Administrator::where([
+  /*   $students = Administrator::where([
     'enterprise_id' => $last_ent->id,
   ])->get();
   $dups = [];
@@ -99,7 +99,7 @@ Route::get('temp-import', function () {
     } 
   }
  
-  die("done"); 
+  die("done");  */
 
   $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
   $spreadsheet = $reader->load($file);
@@ -114,7 +114,7 @@ Route::get('temp-import', function () {
   ])->get();
   // dd($classes);
   foreach ($rows as $key => $row) {
-  
+
     $count++;
     if ($count < 2) {
       continue;
@@ -125,26 +125,17 @@ Route::get('temp-import', function () {
     if ($stud->user_id == null || strlen($stud->user_id) < 1) {
       $fail++;
       $fail_text .= "REG NO: " . $row[1] . " has no user id<br>";
-      echo $count.". "."Failed to save REG NO: " . $row[1] . " has no user id<br>"; 
+      echo $count . ". " . "Failed to save REG NO: " . $row[1] . " has no user id<br>";
       continue;
     }
-    $existing = User::where([
-      'user_id' => $stud->user_id,
-      'enterprise_id' => $last_ent->id,
-    ])->first();
-    if ($existing != null) {
-      $fail++;
-      $fail_text .= "REG NO: " . $row[1] . " already exists<br>";
-      echo $count.". "."Failed to save REG NO: " . $row[1] . " already exists<br>";
-      continue;
-    }
+
     $name = $row[1];
     $name = str_replace('  ', ' ', $name);
     $names = explode(' ', $name);
     if (count($names) < 1) {
       $fail++;
       $fail_text .= "REG NO: " . $row[1] . " has no first name and last name<br>";
-      echo $count.". "."Failed to save REG NO: " . $row[1] . " has no first name and last name<br>";
+      echo $count . ". " . "Failed to save REG NO: " . $row[1] . " has no first name and last name<br>";
       continue;
     }
 
@@ -164,6 +155,8 @@ Route::get('temp-import', function () {
     $stud->name = $name;
     $stud->sex = $row[2];
 
+
+
     if ($stud->sex != null) {
       if (strlen($stud->sex) > 0) {
         if (strtoupper(substr($stud->sex, 0, 1)) == 'M') {
@@ -174,9 +167,9 @@ Route::get('temp-import', function () {
       }
     }
     $phone = null;
-    if(isset($row[5])){
+    if (isset($row[5])) {
       $phone = str_replace(' ', '', $row[5]);
-      $phone = '+256' . $phone; 
+      $phone = '+256' . $phone;
       $phone = str_replace('(', '', $phone);
       $phone = str_replace(')', '', $phone);
       $phone = str_replace(',', '', $phone);
@@ -193,22 +186,22 @@ Route::get('temp-import', function () {
     $class_ = str_replace('p', '', $class_);
     $class_ = str_replace('P', '', $class_);
     $class_num  = (int)($class_);
-    if($class_num < 1){
+    if ($class_num < 1) {
       $fail++;
       $fail_text .= "REG NO: " . $row[1] . " has no class<br>";
-      echo $stud->user_id. "<= # ".$class_."==" .$count.". "."Failed to save REG NO: " . $row[1] . " , NAME: " . $name . " has no class<br>"; 
+      echo $stud->user_id . "<= # " . $class_ . "==" . $count . ". " . "Failed to save REG NO: " . $row[1] . " , NAME: " . $name . " has no class<br>";
       continue;
     }
 
     $real_class = AcademicClass::where([
-      'short_name' => 'P.'.$class_num,
+      'short_name' => 'P.' . $class_num,
       'enterprise_id' => $last_ent->id,
     ])->first();
 
-    if($real_class == null){
+    if ($real_class == null) {
       $fail++;
       $fail_text .= "REG NO: " . $row[1] . " has no class<br>";
-      echo  $stud->user_id. "<= ".$count.". "."Failed to save REG NO: " . $row[1] . " , NAME: " . $name . " has no class<br>"; 
+      echo  $stud->user_id . "<= " . $count . ". " . "Failed to save REG NO: " . $row[1] . " , NAME: " . $name . " has no class<br>";
       continue;
     }
 
@@ -216,20 +209,34 @@ Route::get('temp-import', function () {
     $stud->user_type = 'student';
     $stud->enterprise_id = $last_ent->id;
     $stud->status = 2;
+
+    $existing = User::where([
+      'enterprise_id' => $last_ent->id,
+      'first_name' => $stud->first_name,
+      'last_name' => $stud->last_name,
+      'current_class_id' => $stud->current_class_id,
+    ])->first();
+    if ($existing != null) {
+      $fail++;
+      $fail_text .= "REG NO: " . $row[1] . " already exists<br>";
+      echo $count . ". " . "Failed to save REG NO: " . $row[1] . " already exists<br>";
+      continue;
+    }
+
     try {
       $stud->save();
       $success++;
-      echo   $stud->user_id. "<= "."REG NO: " . $row[1] . ", NAME: " . $name . " saved<br>";
+      echo   $stud->user_id . "<= " . "REG NO: " . $row[1] . ", NAME: " . $name . " saved<br>";
     } catch (\Throwable $th) {
       $fail++;
       echo "<hr>";
       print_r($th->getMessage());
       echo "<hr>";
       $fail_text .= "REG NO: " . $row[1] . " failed to save<br>";
-      echo $stud->user_id. "<= ".$count." Failed to save REG NO: " . $row[1] . " , NAME: " . $name . " failed to save. SAVINGERROR <br>";
+      echo $stud->user_id . "<= " . $count . " Failed to save REG NO: " . $row[1] . " , NAME: " . $name . " failed to save. SAVINGERROR <br>";
     }
-    
-    continue;  
+
+    continue;
 
     dd($real_class);
 
