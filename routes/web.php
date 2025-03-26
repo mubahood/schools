@@ -220,6 +220,24 @@ Route::get('temp-import', function () {
       $fail++;
       $fail_text .= "REG NO: " . $row[1] . " already exists<br>";
       echo $count . ". " . "Failed to save REG NO: " . $row[1] . " already exists<br>";
+
+      //check if this user is not pending
+      if ($existing->status == 0) {
+        $another = User::where([
+          'enterprise_id' => $last_ent->id,
+          'first_name' => $stud->first_name,
+          'last_name' => $stud->last_name,
+          'current_class_id' => $stud->current_class_id,
+          'status' => 2,
+        ])->first();
+        if ($another == null) {
+          $existing->status = 2;
+          $existing->save();
+          $success++;
+          echo $stud->user_id . "<= " . "REG NO: " . $row[1] . ", NAME: " . $name . " saved<br>";
+        }  
+      }
+
       continue;
     }
 
