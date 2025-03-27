@@ -55,7 +55,7 @@ class Utils  extends Model
 
     public static function app_name()
     {
-        return env('APP_NAME');
+        return 'Tusome';
     }
     public static function get_logo()
     {
