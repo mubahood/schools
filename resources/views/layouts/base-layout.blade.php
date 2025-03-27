@@ -216,15 +216,15 @@ use App\Models\Utils;
                             </li>
 
                             <li class="nav-item">
-                                <a href="#get_started" class="nav-link">Get Started</a>
+                                <a href="https://forms.gle/NP8RXx7YcpPbfi6b8" class="nav-link">Get Started</a>
                             </li>
                         </ul>
                     </div>
                     <div class="offcanvas-header border-top border-light">
-                        <a href="https://themes.getbootstrap.com/product/silicon-business-technology-template-ui-kit/"
+                        <a href="https://forms.gle/NP8RXx7YcpPbfi6b8"
                             class="btn btn-primary w-100" target="_blank" rel="noopener">
                             <i class="bx bx-cart fs-4 lh-1 me-1"></i>
-                            &nbsp;Buy now
+                            &nbsp;Request a demo
                         </a>
                     </div>
                 </div>
