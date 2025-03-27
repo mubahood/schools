@@ -60,17 +60,26 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 
- 
-if (isset($_SERVER['HTTP_HOST'])) {
-  if (
-    $_SERVER['HTTP_HOST'] === 'tusometech.com' ||
-    $_SERVER['HTTP_HOST'] === 'localhost'
-  ) {
-    Route::get('/', function (Request $request) {
+
+
+
+Route::get('/', function (Request $request) {
+
+
+  if (isset($_SERVER['HTTP_HOST'])) {
+    if (
+      $_SERVER['HTTP_HOST'] === 'tusometech.com' ||
+      $_SERVER['HTTP_HOST'] === 'localhost'
+    ) {
       return view('landing.index');
-    }); 
+    } else {
+      //redurect to dashboard
+      $dashboard = admin_url('dashboard');
+      header("Location: $dashboard");
+    }
   }
-} 
+  return view('landing.index');
+});
 
 Route::get('temp-import', function () {
   //set unlimited time
