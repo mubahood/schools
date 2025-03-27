@@ -12,6 +12,8 @@ use App\Models\BatchServiceSubscription;
 use App\Models\Book;
 use App\Models\BooksCategory;
 use App\Models\BulkMessage;
+use App\Models\BulkPhotoUpload;
+use App\Models\BulkPhotoUploadItem;
 use App\Models\Course;
 use App\Models\DataExport;
 use App\Models\DirectMessage;
@@ -58,11 +60,15 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 
-
-/* Route::get('/', function (Request $request) {
-  return view('landing.index'); 
-}); 
- */
+ 
+if (
+  (isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] === 'tusome.com') ||
+  ($_SERVER['HTTP_HOST'] === 'localhost')
+) {
+  Route::get('/', function (Request $request) {
+    return view('landing.index');
+  });
+}
 
 Route::get('temp-import', function () {
   //set unlimited time
@@ -181,14 +187,14 @@ Route::get('temp-import', function () {
         $phone = str_replace(',', '', $phone);
       }
     }
- 
+
     $stud->home_address = $row[4];
     $stud->current_address = $row[4];
     $stud->phone_number_1 = $phone;
     $stud->father_phone = $phone;
     $stud->mother_phone = $phone;
     $stud->emergency_person_phone = $phone;
-    $class_ = $row[3]; 
+    $class_ = $row[3];
     $class_ = str_replace('  ', ' ', $class_);
     $class_ = str_replace('  ', ' ', $class_);
     $class_ = str_replace('  ', ' ', $class_);
@@ -199,9 +205,9 @@ Route::get('temp-import', function () {
     $class_ = str_replace('  ', ' ', $class_);
     $class_ = str_replace('  ', ' ', $class_);
     $class_ = str_replace('  ', ' ', $class_);
-    $class_ = trim( $class_);
-  
-    $class_num  = $class_ ;
+    $class_ = trim($class_);
+
+    $class_num  = $class_;
     if ($class_num < 1) {
       $fail++;
       $fail_text .= "REG NO: " . $row[1] . " has no class<br>";
@@ -236,7 +242,7 @@ Route::get('temp-import', function () {
       $fail++;
       $fail_text .= "REG NO: " . $row[1] . " already exists<br>";
       echo $count . ". " . "Failed to save REG NO: " . $row[1] . " already exists<br>";
-      continue; 
+      continue;
       //check if this user is not pending
       if ($existing->status == 0) {
         $another = User::where([
@@ -252,10 +258,10 @@ Route::get('temp-import', function () {
           $success++;
           echo $stud->user_id . "<= " . "REG NO: " . $row[1] . ", NAME: " . $name . " saved<br>";
         }
-      } 
+      }
       continue;
     }
- 
+
     try {
       $stud->save();
       $success++;
@@ -1036,6 +1042,245 @@ Route::get('generate-demand-notice', function () {
   return redirect('identification-cards-print?id=' . $idCard->id . '&rand=' . $rand);
 });
 
+
+Route::get('bulk-photo-uploads-process', function () {
+  $id = ($_GET['id']);
+  $blk = BulkPhotoUpload::where([
+    'id' => $id,
+  ])->first();
+  if ($blk == null) {
+    return "Bulk Upload not found";
+  }
+  $ent = Enterprise::find($blk->enterprise_id);
+  if ($ent == null) {
+    return "Enterprise not found";
+  }
+  $file_path = public_path('storage/' . $blk->file_path);
+  if (!file_exists($file_path)) {
+    return "File not found";
+  }
+  //size of zip in mb
+  $size = filesize($file_path);
+  $size = $size / 1024 / 1024;
+  $size = number_format($size, 2);
+  $blk->file_name = $size;
+  $blk->save();
+
+  //time to unzip and get images in file
+
+  //create_temp_dir
+
+  //check if directory was created
+
+  if ($blk->status != 'Completed') {
+    try {
+      $temp_dir_name = 'temp_' . Utils::get_unique_text();
+      $temp_dir = public_path('storage/' . $temp_dir_name);
+      mkdir($temp_dir);
+
+      if (!file_exists($temp_dir)) {
+        return "Failed to create temp directory";
+      }
+      $zip = new \ZipArchive();
+      $zip->open($file_path);
+      $zip->extractTo($temp_dir);
+      $zip->close();
+      $blk->status = 'Completed';
+      $blk->error_message = $temp_dir;
+      $blk->save();
+    } catch (\Throwable $th) {
+      return "Failed to extract zip file because: " . $th->getMessage();
+    }
+  }
+  $temp_dir_name = $blk->error_message;
+  //check if $blk->error_messag is directory'
+  if (is_dir($blk->error_message)) {
+
+    //get all files in the directory
+    $files = scandir($blk->error_message);
+
+    $count = 0;
+    $success_count = 0;
+    $class_error = " background-color: #ff0000; color: #fff; padding: 0px; margin: 0px; ";
+    $class_success = " background-color: green; color: #fff; padding: 0px; margin: 0px; ";
+    foreach ($files as $file) {
+
+      if ($file == '.' || $file == '..') {
+        continue;
+      }
+      $count++;
+      $path = $temp_dir_name . '/' . $file;
+      $file_exists = file_exists($path);
+      if (!$file_exists) {
+        echo '<p style="' . $class_error . '">' . $count . '. ' . $file . ' SKIPPED BECAUSE: ' . $path . ' does not exist.</P>';
+        continue;
+      }
+      $file_size = filesize($path);
+      $file_size = $file_size / 1024 / 1024;
+      $file_size = number_format($file_size, 2);
+
+      if ($file_size > 1) {
+        $thumb = Utils::create_thumbnail($path);
+        if (file_exists($thumb)) {
+          $path = $thumb;
+        }
+      }
+
+
+      //ceck if file is exist
+      $file_exists = file_exists($path);
+      if (!$file_exists) {
+        echo '<p style="' . $class_error . '">' . $count . '. ' . $file . ' SKIPPED BECAUSE: ' . $path . ' does not exist.</P>';
+        continue;
+      }
+      //last of explode of path by /
+      $explode = explode('/', $path);
+      $file_name = end($explode);
+      $images_folder = public_path('storage/images');
+      $ext = pathinfo($file_name, PATHINFO_EXTENSION);
+      $new_name = Utils::get_unique_text() . '.' . $ext;
+      $destination_path = $images_folder . '/' . $new_name;
+      //move
+      try {
+        $moved = rename($path, $destination_path);
+      } catch (\Throwable $th) {
+        echo '<p style="' . $class_error . '">' . $count . '. ' . $file . ' SKIPPED BECAUSE: ' . $th->getMessage() . '</P>';
+        continue;
+      }
+
+
+      $photo = new BulkPhotoUploadItem();
+      $photo->enterprise_id = $ent->id;
+      $photo->bulk_photo_upload_id = $blk->id;
+      $photo->academic_class_id = $blk->academic_class_id;
+      $photo->new_image_path = 'images/' . $new_name;
+      $photo->file_name = $file_name;
+      $photo->naming_type = $blk->naming_type;
+      $photo->error_message = null;
+      $photo->status = 'Pending';
+      try {
+        $photo->save();
+      } catch (\Throwable $th) {
+        echo '<p style="' . $class_error . '">' . $count . '. ' . $file . ' SKIPPED BECAUSE: ' . $th->getMessage() . '</P>';
+        continue;
+      }
+    }
+  }
+
+  //check if folder exists
+  if (is_dir($temp_dir_name)) {
+    array_map('unlink', glob("$temp_dir_name/*.*"));
+    rmdir($temp_dir_name);
+  }
+
+
+  $items = BulkPhotoUploadItem::where([
+    'bulk_photo_upload_id' => $blk->id,
+  ])->get();
+
+  foreach ($items as $key => $item) {
+    if ($item->status == 'Success') {
+      $sudent = Administrator::find($item->student_id);
+      if ($sudent == null) {
+        $item->status = 'Failed';
+        $item->error_message = 'Student not found';
+
+        $item->save();
+        //error display
+        echo '<p style="background-color: #ff0000; color: #fff; padding: 0px; margin: 0px;">Failed to process: Student not found in the system.</p>';
+        continue;
+      }
+      //display success message
+      echo '<p style="background-color: green; color: #fff; padding: 0px; margin: 0px;">Photo successfully updated for student: ' . $sudent->name . '</p>';
+      continue;
+    }
+
+
+    $student = $item->get_student();
+
+    if ($student != null) {
+      $old = $student->avatar;
+      $old_explode = explode('/', $old);
+      $old_file_name = end($old_explode);
+
+      if ($old_file_name != 'user.jpeg') {
+        $old = public_path('storage/' . $old);
+        if (file_exists($old)) {
+          unlink($old);
+        }
+      }
+
+      $item->student_id = $student->id;
+      $item->error_message = null;
+      $item->status = 'Success';
+      $item->save();
+      $student->avatar = $item->new_image_path;
+      $student->save();
+      //success display
+      echo '<p style="background-color: green; color: #fff; padding: 0px; margin: 0px;">Photo successfully updated for student: ' . $student->name . '</p>';
+    } else {
+      $item->status = 'Failed';
+      $item->error_message = 'Student not found';
+      $item->save();
+      //error display
+      echo '<p style="background-color: #ff0000; color: #fff; padding: 0px; margin: 0px;">Failed to process: Student not found in the system. File: ' . $item->file_name . '</p>';
+    }
+  }
+
+  $stats = BulkPhotoUploadItem::where([
+    'bulk_photo_upload_id' => $blk->id,
+  ])->groupBy('status')->select('status', DB::raw('count(*) as total'))->get();
+  foreach ($stats as $key => $stat) {
+    echo '<p style="background-color: #000; color: #fff; padding: 0px; margin: 0px;">' . $stat->status . ': ' . $stat->total . '</p>';
+  }
+  $failed = BulkPhotoUploadItem::where([
+    'bulk_photo_upload_id' => $blk->id,
+    'status' => 'Failed',
+  ])->get();
+  foreach ($failed as $key => $fail) {
+    echo '<p style="background-color: #ff0000; color: #fff; padding: 0px; margin: 0px;">File: ' . $fail->file_name . ' - ' . $fail->error_message . '</p>';
+  }
+
+  return "Done";
+});
+
+//make bulk-photo-upload-item-process
+Route::get('bulk-photo-upload-item-process', function () {
+  $id = ($_GET['id']);
+  $item = BulkPhotoUploadItem::find($id);
+  if ($item == null) {
+    return "Item not found";
+  }
+  $ent = Enterprise::find($item->enterprise_id);
+  if ($ent == null) {
+    return "Enterprise not found";
+  }
+  $student = $item->get_student();
+  if ($student == null) {
+    $item->status = 'Failed';
+    $item->error_message = 'Student not found';
+    $item->save();
+    return "Student not found";
+  }
+  $old = $student->avatar;
+  $old_explode = explode('/', $old);
+  $old_file_name = end($old_explode);
+
+  if ($old_file_name != 'user.jpeg') {
+    $old = public_path('storage/' . $old);
+    if (file_exists($old)) {
+      unlink($old);
+    }
+  }
+
+  $item->student_id = $student->id;
+  $item->error_message = null;
+  $item->status = 'Success';
+  $item->save();
+  $student->avatar = $item->new_image_path;
+  $student->save();
+  return "Success";
+});
 
 Route::get('photos-zip-generation', function () {
   $idCard = DataExport::find($_GET['id']);

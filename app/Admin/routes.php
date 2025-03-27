@@ -133,6 +133,8 @@ Route::group([
     $router->resource('transport-stages', TransportStageController::class);
     $router->resource('data-exports', DataExportController::class);
     $router->resource('reconcilers', ReconcilerController::class);
+    $router->resource('bulk-photo-uploads', BulkPhotoUploadController::class);
+    $router->resource('bulk-photo-upload-items', BulkPhotoUploadItemController::class);
 
 
     //$router->get('/fixed-asset-records-stats', 'FixedAssetRecordController@stats');
@@ -141,9 +143,9 @@ Route::group([
     //$router->resource('fees', StudentHasFeeController::class);
 
     $router->get('/statistics', 'HomeController@stats')->name('statistics');
-    $router->get('/dashboard', 'HomeController@index')->name('dashboard');
+    // $router->get('/dashboard', 'HomeController@index')->name('dashboard');
 
-    $router->get('/', 'HomeController@stats')->name('home');
+    $router->get('dashboard', 'HomeController@stats')->name('home');
     $router->get('/reports-finance', 'HomeController@reports_finance')->name('home');
     $router->resource('assessment-sheets', AssessmentSheetController::class);
 

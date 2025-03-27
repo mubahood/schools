@@ -53,6 +53,23 @@ class Utils  extends Model
 
 
 
+    public static function app_name()
+    {
+        return env('APP_NAME');
+    }
+    public static function get_logo()
+    {
+        $url = url('assets/8tech.png');
+        return $url;
+    }
+
+    //get unique text
+    static function get_unique_text()
+    {
+        return time() . "-" . rand(100000, 1000000) . '-' . rand(100000, 1000000). '-' . rand(100000, 1000000). '-' . rand(100000, 1000000);
+    }
+
+
     public static function fetchDataFromRequest($object, $request, $exclude = [])
     {
         $table = $object->getTable();

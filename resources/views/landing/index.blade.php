@@ -1,19 +1,24 @@
-@extends('layouts.base-layout')
+<?php
+//use Utils model
+use App\Models\Utils;
+
+?>@extends('layouts.base-layout')
 @section('content')
     <!-- Hero -->
-    <section class="position-relative overflow-hidden">
+    <section class="position-relative overflow-hidden" id="home">
         <div class="position-relative bg-dark zindex-4 pt-lg-3 pt-xl-5">
 
             <!-- Text -->
             <div class="container zindex-5 pt-5">
                 <div class="row justify-content-center text-center pt-4 pb-sm-2 py-lg-5">
                     <div class="col-xl-8 col-lg-9 col-md-10 py-5">
-                        <h1 class="display-4 text-light pt-sm-2 pb-1 pb-sm-3 mb-3">Task Management Assistant You
-                            Gonna Love</h1>
-                        <p class="fs-lg text-light opacity-70 pb-2 pb-sm-0 mb-4 mb-sm-5">We offer you a new
-                            generation of task and project management system. Plan, manage and track all your tasks
-                            in one flexible software!</p>
-                        <a href="#" class="btn btn-primary shadow-primary btn-lg">Get early access</a>
+                        <h1 class="display-4 text-light pt-sm-2 pb-1 pb-sm-3 mb-3">Automate all your school Processes with
+                            <span class="text-primary">{{ Utils::app_name() }}</span>!
+                        </h1>
+                        <p class="fs-lg text-light opacity-70 pb-2 pb-sm-0 mb-4 mb-sm-5">Eliminate your school administrative
+                            headaches - Smoothly manage admissions, academics, marks, report-cards generation, school fees
+                            and much more in one powerful system.</p>
+                        <a href="https://forms.gle/NP8RXx7YcpPbfi6b8" class="btn btn-primary shadow-primary btn-lg">Request a Demo</a>
                     </div>
                 </div>
             </div>
@@ -48,13 +53,16 @@
 
 
     <!-- Features -->
-    <section class="position-relative py-5">
+    <section class="position-relative py-5" id="features">
         <div class="container position-relative zindex-5 pb-md-4 pt-md-2 pt-lg-3 pb-lg-5">
             <div class="row justify-content-center text-center pb-3 mb-sm-2 mb-lg-3">
                 <div class="col-xl-6 col-lg-7 col-md-9">
-                    <h2 class="h1 mb-lg-4">What Do You Get with Our Tool?</h2>
-                    <p class="fs-lg text-muted mb-0">Make sure all your tasks are organized so you can set the
-                        priorities and focus on important.</p>
+                    <h2 class="h1 mb-lg-4">Empowering Education, One Click at a Time</h2>
+                    <p class="fs-lg text-muted mb-0">
+                        Simplify every aspect of your school's operations.
+                        <span class="text-primary">{{ Utils::app_name() }}</span> helps you save time, reduce effort,
+                        and cut costs—so you can focus on what matters most.
+                    </p>
                 </div>
             </div>
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-0 pb-xl-3">
@@ -63,13 +71,16 @@
                 <div class="col position-relative">
                     <div class="card border-0 bg-transparent rounded-0 p-md-1 p-xl-3">
                         <div class="d-table bg-secondary rounded-3 p-3 mx-auto mt-3 mt-md-4">
-                            <img src="silicon/assets/img/landing/saas-2/features/comments.svg" width="40"
+                            <img src="silicon/assets/img/landing/saas-2/features/6.png" width="40"
                                 alt="Comments">
                         </div>
                         <div class="card-body text-center">
-                            <h3 class="h5 pb-1 mb-2">Comments on Tasks</h3>
-                            <p class="mb-0">Id mollis consectetur congue egestas egestas suspendisse blandit
-                                justo.</p>
+                            <h3 class="h5 pb-1 mb-2">Effortless Student Enrollment</h3>
+                            <p class="mb-0">
+                                Overwhelmed by paperwork and manual record-keeping?
+                                <b class="text-primary">{{ Utils::app_name() }}</b> streamlines the entire admissions
+                                process—from online applications to batch imports—so you can enroll students with ease.
+                            </p>
                         </div>
                     </div>
                     <hr class="position-absolute top-0 end-0 w-1 h-100 d-none d-sm-block">
@@ -80,13 +91,16 @@
                 <div class="col position-relative">
                     <div class="card border-0 bg-transparent rounded-0 p-md-1 p-xl-3">
                         <div class="d-table bg-secondary rounded-3 p-3 mx-auto mt-3 mt-md-4">
-                            <img src="silicon/assets/img/landing/saas-2/features/analytics.svg" width="40"
+                            <img src="silicon/assets/img/landing/saas-2/features/5.png" width="40"
                                 alt="Analytics">
                         </div>
                         <div class="card-body text-center">
-                            <h3 class="h5 pb-1 mb-2">Tasks Analytics</h3>
-                            <p class="mb-0">Non imperdiet facilisis nulla tellus Morbi scelerisque eget
-                                adipiscing vulputate.</p>
+                            <h3 class="h5 pb-1 mb-2">Smart Fees & Billing</h3>
+                            <p class="mb-0">
+                                Tired of chasing late payments and juggling financial tracking?
+                                <b class="text-primary">{{ Utils::app_name() }}</b> automates invoices, follows up on
+                                payments in real time, and integrates with <b>School Pay</b> for stress-free fee collection.
+                            </p>
                         </div>
                     </div>
                     <hr class="position-absolute top-0 end-0 w-1 h-100 d-none d-md-block">
@@ -97,12 +111,15 @@
                 <div class="col position-relative">
                     <div class="card border-0 bg-transparent rounded-0 p-md-1 p-xl-3">
                         <div class="d-table bg-secondary rounded-3 p-3 mx-auto mt-3 mt-md-4">
-                            <img src="silicon/assets/img/landing/saas-2/features/group.svg" width="40" alt="Group">
+                            <img src="silicon/assets/img/landing/saas-2/features/4.png" width="40" alt="Group">
                         </div>
                         <div class="card-body text-center">
-                            <h3 class="h5 pb-1 mb-2">Multiple Assignees</h3>
-                            <p class="mb-0">A elementum, imperdiet enim, pretium etiam facilisi in aenean quam
-                                mauris.</p>
+                            <h3 class="h5 pb-1 mb-2">Advanced Academics & Reports</h3>
+                            <p class="mb-0">
+                                Spending hours on grading and report generation?
+                                <b class="text-primary">{{ Utils::app_name() }}</b> automates marks entry, manages grading
+                                scales, and creates report cards—so you can keep everyone informed without the headache.
+                            </p>
                         </div>
                     </div>
                     <hr class="position-absolute top-0 end-0 w-1 h-100 d-none d-sm-block d-md-none">
@@ -113,51 +130,58 @@
                 <div class="col position-relative">
                     <div class="card border-0 bg-transparent rounded-0 p-md-1 p-xl-3">
                         <div class="d-table bg-secondary rounded-3 p-3 mx-auto mt-3 mt-md-4">
-                            <img src="silicon/assets/img/landing/saas-2/features/notifications.svg" width="40"
-                                alt="Notifications">
-                        </div>
-                        <div class="card-body text-center">
-                            <h3 class="h5 pb-1 mb-2">Notifications</h3>
-                            <p class="mb-0">Diam, suspendisse velit cras ac. Lobortis diam volutpat, eget
-                                pellentesque viverra.</p>
-                        </div>
-                    </div>
-                    <hr class="position-absolute top-0 end-0 w-1 h-100 d-none d-md-block">
-                    <hr class="position-absolute top-100 start-0 w-100 d-none d-sm-block d-md-none">
-                </div>
-
-                <!-- Item -->
-                <div class="col position-relative">
-                    <div class="card border-0 bg-transparent rounded-0 p-md-1 p-xl-3">
-                        <div class="d-table bg-secondary rounded-3 p-3 mx-auto mt-3 mt-md-4">
-                            <img src="silicon/assets/img/landing/saas-2/features/tasks.svg" width="40" alt="Tasks">
-                        </div>
-                        <div class="card-body text-center">
-                            <h3 class="h5 pb-1 mb-2">Sections &amp; Subtasks</h3>
-                            <p class="mb-0">Mi feugiat hac id in. Sit elit placerat lacus nibh lorem ridiculus
-                                lectus.</p>
-                        </div>
-                    </div>
-                    <hr class="position-absolute top-0 end-0 w-1 h-100 d-none d-sm-block">
-                </div>
-
-                <!-- Item -->
-                <div class="col position-relative">
-                    <div class="card border-0 bg-transparent rounded-0 p-md-1 p-xl-3">
-                        <div class="d-table bg-secondary rounded-3 p-3 mx-auto mt-3 mt-md-4">
-                            <img src="silicon/assets/img/landing/saas-2/features/security.svg" width="40"
+                            <img src="silicon/assets/img/landing/saas-2/features/3.png" width="40"
                                 alt="Security">
                         </div>
                         <div class="card-body text-center">
-                            <h3 class="h5 pb-1 mb-2">Data Security</h3>
-                            <p class="mb-0">Aliquam malesuada neque eget elit nulla vestibulum nunc cras.</p>
+                            <h3 class="h5 pb-1 mb-2">Convenient Mobile App</h3>
+                            <p class="mb-0">
+                                Want instant access to your school's data, anytime? Our iOS and Android apps give parents,
+                                teachers, and admins quick access to everything from student records to fee updates—wherever
+                                they are.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item -->
+                <div class="col position-relative">
+                    <div class="card border-0 bg-transparent rounded-0 p-md-1 p-xl-3">
+                        <div class="d-table bg-secondary rounded-3 p-3 mx-auto mt-3 mt-md-4">
+                            <img src="silicon/assets/img/landing/saas-2/features/2.png" width="40"
+                                alt="Security">
+                        </div>
+                        <div class="card-body text-center">
+                            <h3 class="h5 pb-1 mb-2">Instant Notifications</h3>
+                            <p class="mb-0">
+                                Having a hard time keeping parents and staff up to speed? Send bulk messages, announcements,
+                                and automated alerts through SMS, email, or push notifications—so everyone stays in the
+                                loop.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item -->
+                <div class="col position-relative">
+                    <div class="card border-0 bg-transparent rounded-0 p-md-1 p-xl-3">
+                        <div class="d-table bg-secondary rounded-3 p-3 mx-auto mt-3 mt-md-4">
+                            <img src="silicon/assets/img/landing/saas-2/features/1.png" width="40"
+                                alt="Security">
+                        </div>
+                        <div class="card-body text-center">
+                            <h3 class="h5 pb-1 mb-2">And So Much More</h3>
+                            <p class="mb-0">
+                                Looking for a full-featured school management system?
+                                <b>{{ Utils::app_name() }}</b> also covers hostels, transport, library, inventory,
+                                visitor logs, and more—everything you need in one platform.
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="position-absolute top-0 start-0 w-100 h-100" style="background-color: rgba(255,255,255,.05);">
-        </div>
+        <div class="position-absolute top-0 start-0 w-100 h-100" style="background-color: rgba(255,255,255,.05);"></div>
     </section>
 
 
@@ -191,11 +215,12 @@
 
 
     <!-- Testimonials -->
-    <section class="container py-5 my-2 my-md-4 my-lg-5">
+    <section class="container py-5 my-2 my-md-4 my-lg-5" id="testimonials">
         <div class="row pt-2 py-xl-3">
             <div class="col-lg-3 col-md-4">
                 <h2 class="h1 text-center text-md-start mx-auto mx-md-0 pt-md-2" style="max-width: 300px;">What
-                    <br class="d-none d-md-inline">People Say <br class="d-none d-md-inline">About App:
+                    <br class="d-none d-md-inline">People Say <br class="d-none d-md-inline">About
+                    <span class="text-primary">{{ Utils::app_name() }}</span>:
                 </h2>
 
                 <!-- Slider controls (Prev / next buttons) -->
@@ -243,9 +268,10 @@
                                         <i class="bx bxs-quote-left"></i>
                                     </span>
                                     <blockquote class="card-body pb-3 mb-0">
-                                        <p class="mb-0">Id mollis consectetur congue egestas egestas suspendisse
-                                            blandit justo. Tellus augue commodo id quis tempus etiam pulvinar at
-                                            maecenas.</p>
+                                        <p class="mb-0"><b>{{ Utils::app_name() }}</b> has completely transformed our
+                                            school operations. From
+                                            admissions to finance, everything is automated, saving us time and reducing
+                                            errors!</p>
                                     </blockquote>
                                     <div class="card-footer border-0 text-nowrap pt-0">
                                         <i class="bx bxs-star text-warning"></i>
@@ -256,11 +282,11 @@
                                     </div>
                                 </div>
                                 <figcaption class="d-flex align-items-center ps-4 pt-4">
-                                    <img src="silicon/assets/img/avatar/16.jpg" width="48" class="rounded-circle"
+                                    <img src="silicon/assets/img/avatar/1.jpg" width="48" class="rounded-circle"
                                         alt="Robert Fox">
                                     <div class="ps-3">
-                                        <h6 class="fs-sm fw-semibold mb-0">Robert Fox</h6>
-                                        <span class="fs-xs text-muted">Founder of Lorem Company</span>
+                                        <h6 class="fs-sm fw-semibold mb-0">– Bursar</h6>
+                                        <span class="fs-xs text-muted">BRIGHT FUTURE SS - Kaliro</span>
                                     </div>
                                 </figcaption>
                             </figure>
@@ -275,9 +301,10 @@
                                         <i class="bx bxs-quote-left"></i>
                                     </span>
                                     <blockquote class="card-body pb-3 mb-0">
-                                        <p class="mb-0">Phasellus luctus nisi id orci condimentum, at cursus nisl
-                                            vestibulum. Orci varius natoque penatibus et magnis dis parturient
-                                            montes commodo.</p>
+                                        <p class="mb-0">Managing student records and communication used to be a
+                                            nightmare. With <b>{{ Utils::app_name() }}</b>, parents, teachers, and
+                                            administrators are always in
+                                            sync!.</p>
                                     </blockquote>
                                     <div class="card-footer border-0 text-nowrap pt-0">
                                         <i class="bx bxs-star text-warning"></i>
@@ -288,11 +315,11 @@
                                     </div>
                                 </div>
                                 <figcaption class="d-flex align-items-center ps-4 pt-4">
-                                    <img src="silicon/assets/img/avatar/08.jpg" width="48" class="rounded-circle"
+                                    <img src="silicon/assets/img/avatar/2.jpg" width="48" class="rounded-circle"
                                         alt="Annette Black">
                                     <div class="ps-3">
-                                        <h6 class="fs-sm fw-semibold mb-0">Annette Black</h6>
-                                        <span class="fs-xs text-muted">CEO of Ipsum Company</span>
+                                        <h6 class="fs-sm fw-semibold mb-0">– Head Teacher</h6>
+                                        <span class="fs-xs text-muted">LUKMAN PRIMARY SCHOOL</span>
                                     </div>
                                 </figcaption>
                             </figure>
@@ -307,8 +334,10 @@
                                         <i class="bx bxs-quote-left"></i>
                                     </span>
                                     <blockquote class="card-body pb-3 mb-0">
-                                        <p class="mb-0">Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                                            Mauris ipsum odio, bibendum ornare mi at, efficitur urna.</p>
+                                        <p class="mb-0">School fees tracking has never been easier! Our collections have
+                                            improved significantly since we started using <b>{{ Utils::app_name() }}</b>’s
+                                            automated billing system.
+                                        </p>
                                     </blockquote>
                                     <div class="card-footer border-0 text-nowrap pt-0">
                                         <i class="bx bxs-star text-warning"></i>
@@ -319,11 +348,11 @@
                                     </div>
                                 </div>
                                 <figcaption class="d-flex align-items-center ps-4 pt-4">
-                                    <img src="silicon/assets/img/avatar/13.jpg" width="48" class="rounded-circle"
+                                    <img src="silicon/assets/img/avatar/3.jpg" width="48" class="rounded-circle"
                                         alt="Jerome Bell">
                                     <div class="ps-3">
-                                        <h6 class="fs-sm fw-semibold mb-0">Jerome Bell</h6>
-                                        <span class="fs-xs text-muted">Founder of the Agency </span>
+                                        <h6 class="fs-sm fw-semibold mb-0">– Finance Manager</h6>
+                                        <span class="fs-xs text-muted">Kira Junior School - Kito</span>
                                     </div>
                                 </figcaption>
                             </figure>
@@ -338,9 +367,9 @@
                                         <i class="bx bxs-quote-left"></i>
                                     </span>
                                     <blockquote class="card-body pb-3 mb-0">
-                                        <p class="mb-0">Pellentesque finibus congue egestas egestas suspendisse
-                                            blandit justo. Tellus augue commodo id quis tempus etiam pulvinar at
-                                            maecenas.</p>
+                                        <p class="mb-0">The mobile app is a game-changer! Parents can check student
+                                            progress, fees, and updates in real time, improving engagement and satisfaction.
+                                        </p>
                                     </blockquote>
                                     <div class="card-footer border-0 text-nowrap pt-0">
                                         <i class="bx bxs-star text-warning"></i>
@@ -351,11 +380,11 @@
                                     </div>
                                 </div>
                                 <figcaption class="d-flex align-items-center ps-4 pt-4">
-                                    <img src="silicon/assets/img/avatar/09.jpg" width="48" class="rounded-circle"
+                                    <img src="silicon/assets/img/avatar/4.jpg" width="48" class="rounded-circle"
                                         alt="Albert Flores">
                                     <div class="ps-3">
-                                        <h6 class="fs-sm fw-semibold mb-0">Albert Flores</h6>
-                                        <span class="fs-xs text-muted">CEO of Dolor Ltd.</span>
+                                        <h6 class="fs-sm fw-semibold mb-0">- Parent</h6>
+                                        <span class="fs-xs text-muted">Al-bushra Islamic junior school</span>
                                     </div>
                                 </figcaption>
                             </figure>
@@ -368,7 +397,7 @@
 
 
     <!-- App download CTA -->
-    <section class="container">
+    <section class="container" id="apps">
         <div class="bg-secondary rounded-3 overflow-hidden py-5 px-4 ps-lg-0 pe-md-5 pe-lg-0">
             <div class="row align-items-center py-sm-2">
 
@@ -401,11 +430,12 @@
                                         <i class="bx bxs-star text-warning"></i>
                                         <i class="bx bxs-star text-warning"></i>
                                     </div>
-                                    <h3 class="h4 mb-1">Editor's Choice</h3>
-                                    <p class="mb-0">rating 4.7, 187K+ reviews</p>
+                                    <h3 class="h4 mb-1">iOS</h3>
+                                    <p class="mb-0">rating 4.7, 217+ reviews</p>
                                 </div>
                                 <div class="col d-lg-flex justify-content-end">
-                                    <a href="#" class="btn btn-dark btn-lg px-3 py-2">
+                                    <a href="https://apps.apple.com/us/app/school-dynamics/id6469381244" target="_blank"
+                                        class="btn btn-dark btn-lg px-3 py-2">
                                         <img src="silicon/assets/img/market/appstore-light.svg" class="light-mode-img"
                                             width="124" alt="App Store">
                                         <img src="silicon/assets/img/market/appstore-dark.svg" class="dark-mode-img"
@@ -425,11 +455,12 @@
                                         <i class="bx bxs-star text-warning"></i>
                                         <i class="bx bxs-star text-warning"></i>
                                     </div>
-                                    <h3 class="h4 mb-1">App of the Day</h3>
-                                    <p class="mb-0">rating 4.8, 30K+ reviews</p>
+                                    <h3 class="h4 mb-1">Android</h3>
+                                    <p class="mb-0">rating 4.8, 412+ reviews</p>
                                 </div>
                                 <div class="col d-lg-flex justify-content-end">
-                                    <a href="#" class="btn btn-dark btn-lg px-3 py-2">
+                                    <a href="https://play.google.com/store/apps/details?id=schooldynamics.ug&hl=en"
+                                        target="_blank" class="btn btn-dark btn-lg px-3 py-2">
                                         <img src="silicon/assets/img/market/googleplay-light.svg" class="light-mode-img"
                                             width="139" alt="Google Play">
                                         <img src="silicon/assets/img/market/googleplay-dark.svg" class="dark-mode-img"
@@ -443,154 +474,82 @@
             </div>
         </div>
     </section>
-
-
-    <!-- Pricing -->
-    <section class="container pt-5">
-        <div class="row justify-content-center text-center pt-2 pt-md-4 pt-lg-5 pb-4 pb-lg-5 mb-1">
-            <div class="col-xl-6 col-lg-7 col-md-9 col-sm-11 pt-xl-3">
-                <h2 class="h1 mb-lg-4">Transparent Pricing for You</h2>
-                <p class="fs-lg text-muted mb-0">Varius sed maecenas massa dictum viverra in. Viverra vel in elit,
-                    vivamus dui interdum. Nulla congue lobortis amet amet eleifend.</p>
-            </div>
-        </div>
-        <div class="table-responsive-lg">
-            <div class="d-flex align-items-center pb-4">
-
-                <!-- Pricing plan -->
-                <div class="bg-primary rounded-3 shadow-primary p-4" style="width: 36%; min-width: 18rem;">
-                    <div class="card bg-transparent border-light py-3 py-sm-4 py-lg-5">
-                        <div class="card-body text-light text-center">
-                            <h3 class="text-light mb-2">Team</h3>
-                            <div class="fs-lg opacity-70 pb-4 mb-3">Best for small teams</div>
-                            <div class="display-5 mb-1">$10</div>
-                            <div class="opacity-50 mb-5">per month</div>
-                        </div>
-                        <div class="card-footer border-0 text-center pt-0 pb-4">
-                            <a href="#" class="btn btn-light btn-lg shadow-secondary">Get started now</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="row flex-nowrap border rounded-3 rounded-start-0 shadow-sm g-0"
-                    style="width: 64%; min-width: 32rem;">
-
-                    <!-- Pricing plan -->
-                    <div class="col">
-                        <div class="card bg-light h-100 border-0 border-end rounded-0 py-3 py-sm-4 py-lg-5">
-                            <div class="card-body text-center">
-                                <h3 class="mb-2">Company</h3>
-                                <div class="fs-lg pb-4 mb-3">Best for growing teams</div>
-                                <div class="display-5 text-dark mb-1">$25</div>
-                                <div class="text-muted mb-5">per month</div>
-                            </div>
-                            <div class="card-footer border-0 text-center pt-0 pb-4">
-                                <a href="#" class="btn btn-outline-primary btn-lg">Get started now</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Pricing plan -->
-                    <div class="col">
-                        <div class="card bg-light h-100 border-0 rounded-start-0 py-3 py-sm-4 py-lg-5">
-                            <div class="card-body text-center">
-                                <h3 class="mb-2">Enterprise</h3>
-                                <div class="fs-lg pb-4 mb-3">Best for large teams</div>
-                                <div class="display-5 text-dark mb-1">$50</div>
-                                <div class="text-muted mb-5">per month</div>
-                            </div>
-                            <div class="card-footer border-0 text-center pt-0 pb-4">
-                                <a href="#" class="btn btn-outline-primary btn-lg">Get started now</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
+ 
 
     <!-- Integrations -->
-    <section class="container mt-n1 mt-md-0 py-5">
+    <section class="container mt-n1 mt-md-0 py-5" id="schools">
         <div class="row justify-content-center text-center pt-md-3 pb-4 py-lg-5 mb-1">
             <div class="col-xl-8 col-lg-9 col-md-10">
-                <h2 class="h1 mb-lg-4">Integrate Top Work Tools</h2>
-                <p class="fs-lg text-muted mb-0">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
-                    volutpat mollis egestas. Nam luctus facilisis ultrices. Pellentesque volutpat ligula est. Mattis
-                    fermentum, at nec lacus.</p>
+                <h2 class="h1 mb-lg-4">Who's Using <span class="text-primary">{{ Utils::app_name() }}</span>?</h2>
+                <p class="fs-lg text-muted mb-0">Trusted by Schools Everywhere - Empowering Over 76 Schools Across Uganda
+                    to Simplify Management and Enhance Learning.</p>
             </div>
         </div>
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-2 g-sm-3 g-lg-4 pb-md-3 pb-lg-5">
 
             <!-- Item -->
             <div class="col">
-                <div class="card card-body card-hover bg-light border-0">
-                    <img src="silicon/assets/img/brands/google.svg" class="d-block mb-4" width="56" alt="Google">
-                    <p class="mb-0">Lorem magnis pretium sed curabitur nunc facilisi nunc cursus sagittis
-                        pretium.</p>
+                <div class="card card-body card-hover bg-light border-1 border-primary">
+                    <img src="silicon/assets/img/avatar/1.jpg" class="d-block mb-4" width="56" alt="Google">
+                    <p class="mb-0">BRIGHT FUTURE SECONDARY SCHOOL - Kaliro</p>
                 </div>
             </div>
 
             <!-- Item -->
             <div class="col">
-                <div class="card card-body card-hover bg-light border-0">
-                    <img src="silicon/assets/img/brands/zoom.svg" class="d-block mb-4" width="56" alt="Zoom">
-                    <p class="mb-0">In eget a mauris quis. Tortor dui tempus quis integer est sit natoque
-                        placerat dolor.</p>
+                <div class="card card-body card-hover bg-light border-1 border-primary">
+                    <img src="silicon/assets/img/avatar/2.jpg" class="d-block mb-4" width="56" alt="Zoom">
+                    <p class="mb-0"><span class="text-uppercase">Al-bushra Islamic junior school</span>	- Kivebulaya road.</p>
                 </div>
             </div>
 
             <!-- Item -->
             <div class="col">
-                <div class="card card-body card-hover bg-light border-0">
-                    <img src="silicon/assets/img/brands/slack.svg" class="d-block mb-4" width="56" alt="Slack">
-                    <p class="mb-0">Id mollis consectetur congue egestas egestas suspendisse blandit justo.</p>
+                <div class="card card-body card-hover bg-light border-1 border-primary">
+                    <img src="silicon/assets/img/avatar/3.jpg" class="d-block mb-4" width="56" alt="Slack">
+                    <p class="mb-0"><span class="text-uppercase">KIRA Junior School Kito</span> - Kira</p>
                 </div>
             </div>
 
             <!-- Item -->
             <div class="col">
-                <div class="card card-body card-hover bg-light border-0">
-                    <img src="silicon/assets/img/brands/gmail.svg" class="d-block mb-4" width="56" alt="Gmail">
-                    <p class="mb-0">Rutrum interdum tortor, sed at nulla. A cursus bibendum elit purus cras
-                        praesent.</p>
+                <div class="card card-body card-hover bg-light border-1 border-primary">
+                    <img src="silicon/assets/img/avatar/4.jpg" class="d-block mb-4" width="56" alt="Gmail">
+                    <p class="mb-0">LUKMAN PRIMARY SCHOOL - Entebbe</p>
                 </div>
             </div>
 
             <!-- Item -->
             <div class="col">
-                <div class="card card-body card-hover bg-light border-0">
-                    <img src="silicon/assets/img/brands/trello.svg" class="d-block mb-4" width="56" alt="Trello">
-                    <p class="mb-0">Congue pellentesque amet, viverra curabitur quam diam scelerisque fermentum
-                        urna.</p>
+                <div class="card card-body card-hover bg-light border-1 border-primary">
+                    <img src="silicon/assets/img/avatar/5.jpg" class="d-block mb-4" width="56" alt="Trello">
+                    <p class="mb-0"><span class="text-uppercase">Bilal Islamic Secondary School</span> - Bwaise</p>
                 </div>
             </div>
 
             <!-- Item -->
             <div class="col">
-                <div class="card card-body card-hover bg-light border-0">
-                    <img src="silicon/assets/img/brands/mailchimp.svg" class="d-block mb-4" width="56"
+                <div class="card card-body card-hover bg-light border-1 border-primary">
+                    <img src="silicon/assets/img/avatar/6.jpg" class="d-block mb-4" width="56"
                         alt="Mailchimp">
-                    <p class="mb-0">A elementum, imperdiet enim, pretium etiam facilisi in aenean quam mauris
-                        integer.</p>
+                    <p class="mb-0"><span class="text-uppercase">ANWAR MUSLIM SECONDARY SCHOOL</span> - Mpererwe</p>
                 </div>
             </div>
 
             <!-- Item -->
             <div class="col">
-                <div class="card card-body card-hover bg-light border-0">
-                    <img src="silicon/assets/img/brands/dropbox.svg" class="d-block mb-4" width="56" alt="Dropbox">
-                    <p class="mb-0">Ut in turpis consequat odio diam lectus elementum. Est faucibus blandit
-                        platea.</p>
+                <div class="card card-body card-hover bg-light border-1 border-primary">
+                    <img src="silicon/assets/img/avatar/7.jpg" class="d-block mb-4" width="56" alt="Dropbox">
+                    <p class="mb-0">QUEEN OF PEACE NOBLE'S SCHOOL</span> - KYEGEGWA</p>
                 </div>
             </div>
 
             <!-- Item -->
             <div class="col">
-                <div class="card card-body card-hover bg-light border-0">
-                    <img src="silicon/assets/img/brands/evernote.svg" class="d-block mb-4" width="56"
+                <div class="card card-body card-hover bg-light border-1 border-primary">
+                    <img src="silicon/assets/img/avatar/8.jpg" class="d-block mb-4" width="56"
                         alt="Evernote">
-                    <p class="mb-0">Faucibus cursus maecenas lorem cursus nibh. Sociis sit risus id. Sit
-                        facilisis dolor arcu.</p>
+                    <p class="mb-0"><span class="text-uppercase">Tasneem Junior School - Nsanji</p>
                 </div>
             </div>
         </div>
@@ -598,11 +557,11 @@
 
 
     <!-- CTA -->
-    <section class="bg-secondary py-5">
+    <section class="bg-secondary py-5" id="get_started">
         <div class="container text-center py-1 py-md-4 py-lg-5">
             <h2 class="h1 mb-4">Ready to Get Started?</h2>
             <p class="lead pb-3 mb-3">Organize your tasks with a 14-day free trial</p>
-            <a href="#" class="btn btn-primary shadow-primary btn-lg mb-1">Get started</a>
+            <a href="https://forms.gle/NP8RXx7YcpPbfi6b8" class="btn btn-primary shadow-primary btn-lg mb-1">Request a demo</a>
         </div>
     </section>
 @endsection

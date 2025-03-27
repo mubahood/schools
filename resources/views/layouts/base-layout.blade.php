@@ -1,3 +1,8 @@
+<?php
+//use Utils model
+use App\Models\Utils;
+
+?>
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="light">
 
@@ -7,13 +12,22 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Silicon | SaaS Landing v.2</title>
+    <title>{{ Utils::app_name() }} | School Management System</title>
 
     <!-- SEO Meta Tags -->
-    <meta name="description" content="Silicon - Multipurpose Technology Bootstrap Template">
-    <meta name="keywords"
-        content="bootstrap, business, creative agency, mobile app showcase, saas, fintech, finance, online courses, software, medical, conference landing, services, e-commerce, shopping cart, multipurpose, shop, ui kit, marketing, seo, landing, blog, portfolio, html5, css3, javascript, gallery, slider, touch, creative">
-    <meta name="author" content="Createx Studio">
+    <meta name="description" content="{{ Utils::app_name() }} is a comprehensive school management system designed to streamline administrative tasks, enhance communication, and improve efficiency in schools.">
+    <meta name="keywords" content="school management system, education software, school administration, student management, teacher tools, school communication, online learning, school software, education technology">
+    <meta name="author" content="8Technologies Consults">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="{{ Utils::app_name() }} | School Management System">
+    <meta property="og:description" content="{{ Utils::app_name() }} helps schools manage their operations efficiently with advanced tools and features.">
+    <meta property="og:image" content="{{ Utils::get_logo() }}">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ Utils::app_name() }} | School Management System">
+    <meta name="twitter:description" content="{{ Utils::app_name() }} is a powerful tool for managing school operations effectively.">
+    <meta name="twitter:image" content="{{ Utils::get_logo() }}">
 
     <!-- Viewport -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -22,14 +36,14 @@
     <script src="silicon/assets/js/theme-switcher.js"></script>
 
     <!-- Favicon and Touch Icons -->
-    <link rel="apple-touch-icon" sizes="180x180" href="silicon/assets/favicon/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="silicon/assets/favicon/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="silicon/assets/favicon/favicon-16x16.png">
-    <link rel="manifest" href="silicon/assets/favicon/site.webmanifest">
-    <link rel="mask-icon" href="silicon/assets/favicon/safari-pinned-tab.svg" color="#6366f1">
-    <link rel="shortcut icon" href="silicon/assets/favicon/favicon.ico">
-    <meta name="msapplication-TileColor" content="#080032">
-    <meta name="msapplication-config" content="silicon/assets/favicon/browserconfig.xml">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ Utils::get_logo() }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ Utils::get_logo() }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ Utils::get_logo() }}">
+    <link rel="manifest" href="{{ Utils::get_logo() }}">
+    <link rel="mask-icon" href="{{ Utils::get_logo() }}" color="#6366f1">
+    <link rel="shortcut icon" href="{{ Utils::get_logo() }}">
+    <meta name="msapplication-TileColor" content="#00b3fa">
+    <meta name="msapplication-config" content="{{ Utils::get_logo() }}">
     <meta name="theme-color" content="#ffffff">
 
     <!-- Vendor Styles -->
@@ -167,9 +181,9 @@
         <!-- Remove "navbar-sticky" class to make navigation bar scrollable with the page -->
         <header class="header navbar navbar-expand-lg navbar-dark position-absolute navbar-sticky">
             <div class="container px-3">
-                <a href="index-2.html" class="navbar-brand pe-3">
-                    <img src="silicon/assets/img/logo.svg" width="47" alt="Silicon">
-                    Silicon
+                <a href="#home" class="navbar-brand pe-3">
+                    <img src="{{ Utils::get_logo() }}" width="47" alt="Silicon">
+                    {{ Utils::app_name() }}
                 </a>
                 <div id="navbarNav" class="offcanvas offcanvas-end bg-dark">
                     <div class="offcanvas-header border-bottom border-light">
@@ -179,179 +193,24 @@
                     </div>
                     <div class="offcanvas-body">
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                            <li class="nav-item dropdown">
-                                <a href="#" class="nav-link dropdown-toggle active" data-bs-toggle="dropdown"
-                                    aria-current="page">Landings</a>
-                                <div class="dropdown-menu dropdown-menu-dark p-0">
-                                    <div class="d-lg-flex">
-                                        <div class="mega-dropdown-column d-flex justify-content-center align-items-center rounded-3 rounded-end-0 px-0"
-                                            style="margin: -1px; background-color: #f3f6ff;">
-                                            <img src="silicon/assets/img/landings.jpg" alt="Landings">
-                                        </div>
-                                        <div class="mega-dropdown-column pt-lg-3 pb-lg-4"
-                                            style="--si-mega-dropdown-column-width: 15rem;">
-                                            <ul class="list-unstyled mb-0">
-                                                <li><a href="index-2.html" class="dropdown-item">Template Intro Page</a>
-                                                </li>
-                                                <li><a href="landing-mobile-app-showcase-v1.html"
-                                                        class="dropdown-item">Mobile App Showcase v.1</a></li>
-                                                <li><a href="landing-mobile-app-showcase-v2.html"
-                                                        class="dropdown-item">Mobile App Showcase v.2</a></li>
-                                                <li><a href="landing-mobile-app-showcase-v3.html"
-                                                        class="dropdown-item">Mobile App Showcase v.3<span
-                                                            class="badge bg-success ms-2">New</span></a></li>
-                                                <li><a href="landing-product.html"
-                                                        class="dropdown-item d-flex align-items-center">Product
-                                                        Landing</a></li>
-                                                <li><a href="landing-saas-v1.html" class="dropdown-item">SaaS v.1</a>
-                                                </li>
-                                                <li><a href="landing-saas-v2.html" class="dropdown-item">SaaS v.2</a>
-                                                </li>
-                                                <li><a href="landing-saas-v3.html" class="dropdown-item">SaaS v.3</a>
-                                                </li>
-                                                <li><a href="landing-saas-v4.html" class="dropdown-item">SaaS v.4</a>
-                                                </li>
-                                                <li><a href="landing-saas-v5.html" class="dropdown-item">SaaS v.5<span
-                                                            class="badge bg-success ms-2">New</span></a></li>
-                                            </ul>
-                                        </div>
-                                        <div class="mega-dropdown-column pt-lg-3 pb-lg-4">
-                                            <ul class="list-unstyled mb-0">
-                                                <li><a href="landing-startup.html"
-                                                        class="dropdown-item d-flex align-items-center">Startup</a>
-                                                </li>
-                                                <li><a href="landing-financial.html" class="dropdown-item">Financial
-                                                        Consulting</a></li>
-                                                <li><a href="landing-online-courses.html" class="dropdown-item">Online
-                                                        Courses</a></li>
-                                                <li><a href="landing-medical.html" class="dropdown-item">Medical</a>
-                                                </li>
-                                                <li><a href="landing-software-dev-agency-v1.html"
-                                                        class="dropdown-item">Software Dev Agency v.1</a></li>
-                                                <li><a href="landing-software-dev-agency-v2.html"
-                                                        class="dropdown-item">Software Dev Agency v.2</a></li>
-                                                <li><a href="landing-software-dev-agency-v3.html"
-                                                        class="dropdown-item">Software Dev Agency v.3</a></li>
-                                                <li><a href="landing-conference.html"
-                                                        class="dropdown-item">Conference</a></li>
-                                                <li><a href="landing-digital-agency.html"
-                                                        class="dropdown-item">Digital Agency</a></li>
-                                                <li><a href="landing-blog.html" class="dropdown-item">Blog
-                                                        Homepage</a></li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
+
+                            <li class="nav-item">
+                                <a href="#features" class="nav-link">Features</a>
                             </li>
-                            <li class="nav-item dropdown">
-                                <a href="#" class="nav-link dropdown-toggle"
-                                    data-bs-toggle="dropdown">Pages</a>
-                                <div class="dropdown-menu dropdown-menu-dark">
-                                    <div class="d-lg-flex pt-lg-3">
-                                        <div class="mega-dropdown-column">
-                                            <h6 class="text-light px-3 mb-2">About</h6>
-                                            <ul class="list-unstyled mb-3">
-                                                <li><a href="about-v1.html" class="dropdown-item py-1">About v.1</a>
-                                                </li>
-                                                <li><a href="about-v2.html" class="dropdown-item py-1">About v.2</a>
-                                                </li>
-                                                <li><a href="about-v3.html" class="dropdown-item py-1">About v.3</a>
-                                                </li>
-                                            </ul>
-                                            <h6 class="text-light px-3 mb-2">Blog</h6>
-                                            <ul class="list-unstyled mb-3">
-                                                <li><a href="blog-list-with-sidebar.html"
-                                                        class="dropdown-item py-1">List View with Sidebar</a></li>
-                                                <li><a href="blog-grid-with-sidebar.html"
-                                                        class="dropdown-item py-1">Grid View with Sidebar</a></li>
-                                                <li><a href="blog-list-no-sidebar.html"
-                                                        class="dropdown-item py-1">List View no Sidebar</a></li>
-                                                <li><a href="blog-grid-no-sidebar.html"
-                                                        class="dropdown-item py-1">Grid View no Sidebar</a></li>
-                                                <li><a href="blog-simple-feed.html" class="dropdown-item py-1">Simple
-                                                        Feed</a></li>
-                                                <li><a href="blog-single.html" class="dropdown-item py-1">Single
-                                                        Post</a></li>
-                                                <li><a href="blog-podcast.html" class="dropdown-item py-1">Podcast</a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                        <div class="mega-dropdown-column">
-                                            <h6 class="text-light px-3 mb-2">Portfolio</h6>
-                                            <ul class="list-unstyled mb-3">
-                                                <li><a href="portfolio-grid.html" class="dropdown-item py-1">Grid
-                                                        View</a></li>
-                                                <li><a href="portfolio-list.html" class="dropdown-item py-1">List
-                                                        View</a></li>
-                                                <li><a href="portfolio-slider.html" class="dropdown-item py-1">Slider
-                                                        View</a></li>
-                                                <li><a href="portfolio-courses.html"
-                                                        class="dropdown-item py-1">Courses</a></li>
-                                                <li><a href="portfolio-single-project.html"
-                                                        class="dropdown-item py-1">Single Project</a></li>
-                                                <li><a href="portfolio-single-course.html"
-                                                        class="dropdown-item py-1">Single Course</a></li>
-                                            </ul>
-                                            <h6 class="text-light px-3 mb-2">Services</h6>
-                                            <ul class="list-unstyled mb-3">
-                                                <li><a href="services-v1.html" class="dropdown-item py-1">Services
-                                                        v.1</a></li>
-                                                <li><a href="services-v2.html" class="dropdown-item py-1">Services
-                                                        v.2</a></li>
-                                                <li><a href="services-single-v1.html"
-                                                        class="dropdown-item py-1">Service Details v.1</a></li>
-                                                <li><a href="services-single-v2.html"
-                                                        class="dropdown-item py-1">Service Details v.2</a></li>
-                                            </ul>
-                                        </div>
-                                        <div class="mega-dropdown-column">
-                                            <h6 class="text-light px-3 mb-2">Pricing</h6>
-                                            <ul class="list-unstyled mb-3">
-                                                <li><a href="pricing.html" class="dropdown-item py-1">Pricing Page</a>
-                                                </li>
-                                            </ul>
-                                            <h6 class="text-light px-3 mb-2">Contacts</h6>
-                                            <ul class="list-unstyled mb-3">
-                                                <li><a href="contacts-v1.html" class="dropdown-item py-1">Contacts
-                                                        v.1</a></li>
-                                                <li><a href="contacts-v2.html" class="dropdown-item py-1">Contacts
-                                                        v.2</a></li>
-                                                <li><a href="contacts-v3.html" class="dropdown-item py-1">Contacts
-                                                        v.3</a></li>
-                                            </ul>
-                                            <h6 class="text-light px-3 mb-2">Specialty</h6>
-                                            <ul class="list-unstyled">
-                                                <li><a href="404-v1.html" class="dropdown-item py-1">404 Error v.1</a>
-                                                </li>
-                                                <li><a href="404-v2.html" class="dropdown-item py-1">404 Error v.2</a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                            <li class="nav-item dropdown">
-                                <a href="#" class="nav-link dropdown-toggle"
-                                    data-bs-toggle="dropdown">Account</a>
-                                <ul class="dropdown-menu dropdown-menu-dark">
-                                    <li><a href="account-details.html" class="dropdown-item">Account Details</a></li>
-                                    <li><a href="account-security.html" class="dropdown-item">Security</a></li>
-                                    <li><a href="account-notifications.html" class="dropdown-item">Notifications</a>
-                                    </li>
-                                    <li><a href="account-messages.html" class="dropdown-item">Messages</a></li>
-                                    <li><a href="account-saved-items.html" class="dropdown-item">Saved Items</a></li>
-                                    <li><a href="account-collections.html" class="dropdown-item">My Collections</a>
-                                    </li>
-                                    <li><a href="account-payment.html" class="dropdown-item">Payment Details</a></li>
-                                    <li><a href="account-signin.html" class="dropdown-item">Sign In</a></li>
-                                    <li><a href="account-signup.html" class="dropdown-item">Sign Up</a></li>
-                                </ul>
+
+                            <li class="nav-item">
+                                <a href="#schools" class="nav-link">Schools</a>
                             </li>
                             <li class="nav-item">
-                                <a href="components/typography.html" class="nav-link">UI Kit</a>
+                                <a href="#testimonials" class="nav-link">Testimonials</a>
                             </li>
+
                             <li class="nav-item">
-                                <a href="docs/getting-started.html" class="nav-link">Docs</a>
+                                <a href="#apps" class="nav-link">Mobile App</a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a href="#get_started" class="nav-link">Get Started</a>
                             </li>
                         </ul>
                     </div>
@@ -374,11 +233,11 @@
                     aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <a href="https://themes.getbootstrap.com/product/silicon-business-technology-template-ui-kit/"
+                <a href="https://forms.gle/NP8RXx7YcpPbfi6b8"
                     class="btn btn-primary btn-sm fs-sm rounded d-none d-lg-inline-flex" target="_blank"
                     rel="noopener">
                     <i class="bx bx-cart fs-5 lh-1 me-1"></i>
-                    &nbsp;Buy now
+                    &nbsp;Request a demo
                 </a>
             </div>
         </header>
@@ -392,25 +251,27 @@
     <footer class="footer bg-dark pt-5 pb-4 pb-lg-5" data-bs-theme="dark">
         <div class="container text-center pt-lg-3">
             <div class="navbar-brand justify-content-center text-dark mb-2 mb-lg-4">
-                <img src="silicon/assets/img/logo.svg" class="me-2" width="60" alt="Silicon">
-                <span class="fs-4">Silicon</span>
+                <img src="{{ Utils::get_logo() }}" class="me-2" width="60" alt="Silicon">
+                <span class="fs-4">{{ Utils::app_name() }}</span>
             </div>
             <ul class="nav justify-content-center pt-3 pb-4 pb-lg-5">
-                <li class="nav-item"><a href="#" class="nav-link">Home</a></li>
-                <li class="nav-item"><a href="#" class="nav-link">Features</a></li>
-                <li class="nav-item"><a href="#" class="nav-link">Overview</a></li>
-                <li class="nav-item"><a href="#" class="nav-link">Blog</a></li>
-                <li class="nav-item"><a href="#" class="nav-link">Contacts</a></li>
-                <li class="nav-item"><a href="#" class="nav-link">Account</a></li>
+                <li class="nav-item"><a href="#home" class="nav-link">Home</a></li>
+                <li class="nav-item"><a href="#features" class="nav-link">Features</a></li>
+                <li class="nav-item"><a href="#schools" class="nav-link">Schools</a></li>
+                <li class="nav-item"><a href="#testimonials" class="nav-link">Testimonials</a></li>
+                <li class="nav-item"><a href="#apps" class="nav-link">Mobile App</a></li>
+                <li class="nav-item"><a href="#get_started" class="nav-link">Get Started</a></li>
             </ul>
             <div class="d-flex flex-column flex-sm-row justify-content-center">
-                <a href="#" class="btn btn-dark btn-lg px-3 py-2 me-sm-4 mb-3">
+                <a href="https://apps.apple.com/us/app/school-dynamics/id6469381244"
+                    class="btn btn-dark btn-lg px-3 py-2 me-sm-4 mb-3">
                     <img src="silicon/assets/img/market/appstore-light.svg" class="light-mode-img" width="124"
                         alt="App Store">
                     <img src="silicon/assets/img/market/appstore-dark.svg" class="dark-mode-img" width="124"
                         alt="App Store">
                 </a>
-                <a href="#" class="btn btn-dark btn-lg px-3 py-2 mb-3">
+                <a href="https://play.google.com/store/apps/details?id=schooldynamics.ug&hl=en"
+                    class="btn btn-dark btn-lg px-3 py-2 mb-3">
                     <img src="silicon/assets/img/market/googleplay-light.svg" class="light-mode-img" width="139"
                         alt="Google Play">
                     <img src="silicon/assets/img/market/googleplay-dark.svg" class="dark-mode-img" width="139"
@@ -418,23 +279,27 @@
                 </a>
             </div>
             <div class="d-flex justify-content-center pt-4 mt-lg-3">
-                <a href="#" class="btn btn-icon btn-secondary btn-facebook mx-2" aria-label="Facebook">
+               {{--  <a href="https://facebook.com" class="btn btn-icon btn-secondary btn-facebook mx-2"
+                    aria-label="Facebook" target="_blank" rel="noopener">
                     <i class="bx bxl-facebook"></i>
-                </a>
-                <a href="#" class="btn btn-icon btn-secondary btn-instagram mx-2" aria-label="Instagram">
+                </a> --}}
+             {{--    <a href="https://instagram.com" class="btn btn-icon btn-secondary btn-instagram mx-2"
+                    aria-label="Instagram" target="_blank" rel="noopener">
                     <i class="bx bxl-instagram"></i>
-                </a>
-                <a href="#" class="btn btn-icon btn-secondary btn-twitter mx-2" aria-label="Twitter">
+                </a> --}}
+                <a href="https://x.com/8TechConsults" class="btn btn-icon btn-secondary btn-twitter mx-2"
+                    aria-label="Twitter" target="_blank" rel="noopener">
                     <i class="bx bxl-twitter"></i>
                 </a>
-                <a href="#" class="btn btn-icon btn-secondary btn-youtube mx-2" aria-label="YouTube">
+                {{-- <a href="https://youtube.com" class="btn btn-icon btn-secondary btn-youtube mx-2"
+                    aria-label="YouTube" target="_blank" rel="noopener">
                     <i class="bx bxl-youtube"></i>
-                </a>
+                </a> --}}
             </div>
             <p class="nav d-block fs-sm text-center pt-5 mt-lg-4 mb-0">
                 <span class="text-light opacity-60">&copy; All rights reserved. Made by </span>
-                <a class="nav-link d-inline-block p-0" href="https://createx.studio/" target="_blank"
-                    rel="noopener">Createx Studio</a>
+                <a class="nav-link d-inline-block p-0" href="https://8technologies.net" target="_blank"
+                    rel="noopener">8Technologies Consults</a>
             </p>
         </div>
     </footer>
