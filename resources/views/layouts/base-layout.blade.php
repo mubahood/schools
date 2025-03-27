@@ -14,19 +14,25 @@ use App\Models\Utils;
     <meta charset="utf-8">
     <title>{{ Utils::app_name() }} | School Management System</title>
 
+    <link rel="manifest" href="{{ url('manifest.json') }}">
+
     <!-- SEO Meta Tags -->
-    <meta name="description" content="{{ Utils::app_name() }} is a comprehensive school management system designed to streamline administrative tasks, enhance communication, and improve efficiency in schools.">
-    <meta name="keywords" content="school management system, education software, school administration, student management, teacher tools, school communication, online learning, school software, education technology">
+    <meta name="description"
+        content="{{ Utils::app_name() }} is a comprehensive school management system designed to streamline administrative tasks, enhance communication, and improve efficiency in schools.">
+    <meta name="keywords"
+        content="school management system, education software, school administration, student management, teacher tools, school communication, online learning, school software, education technology">
     <meta name="author" content="8Technologies Consults">
     <meta name="robots" content="index, follow">
     <meta property="og:title" content="{{ Utils::app_name() }} | School Management System">
-    <meta property="og:description" content="{{ Utils::app_name() }} helps schools manage their operations efficiently with advanced tools and features.">
+    <meta property="og:description"
+        content="{{ Utils::app_name() }} helps schools manage their operations efficiently with advanced tools and features.">
     <meta property="og:image" content="{{ Utils::get_logo() }}">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ Utils::app_name() }} | School Management System">
-    <meta name="twitter:description" content="{{ Utils::app_name() }} is a powerful tool for managing school operations effectively.">
+    <meta name="twitter:description"
+        content="{{ Utils::app_name() }} is a powerful tool for managing school operations effectively.">
     <meta name="twitter:image" content="{{ Utils::get_logo() }}">
 
     <!-- Viewport -->
@@ -279,11 +285,11 @@ use App\Models\Utils;
                 </a>
             </div>
             <div class="d-flex justify-content-center pt-4 mt-lg-3">
-               {{--  <a href="https://facebook.com" class="btn btn-icon btn-secondary btn-facebook mx-2"
+                {{--  <a href="https://facebook.com" class="btn btn-icon btn-secondary btn-facebook mx-2"
                     aria-label="Facebook" target="_blank" rel="noopener">
                     <i class="bx bxl-facebook"></i>
                 </a> --}}
-             {{--    <a href="https://instagram.com" class="btn btn-icon btn-secondary btn-instagram mx-2"
+                {{--    <a href="https://instagram.com" class="btn btn-icon btn-secondary btn-instagram mx-2"
                     aria-label="Instagram" target="_blank" rel="noopener">
                     <i class="bx bxl-instagram"></i>
                 </a> --}}
