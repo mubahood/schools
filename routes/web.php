@@ -61,13 +61,15 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 
  
-if (
-  (isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] === 'tusome.com') ||
-  ($_SERVER['HTTP_HOST'] === 'localhost')
-) {
-  Route::get('/', function (Request $request) {
-    return view('landing.index');
-  });
+if (isset($_SERVER['HTTP_HOST'])) {
+  if (
+    $_SERVER['HTTP_HOST'] === 'tusome.com' ||
+    $_SERVER['HTTP_HOST'] === 'localhost'
+  ) {
+    Route::get('/', function (Request $request) {
+      return view('landing.index');
+    });
+  }
 }
 
 Route::get('temp-import', function () {
