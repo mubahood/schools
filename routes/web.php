@@ -63,9 +63,15 @@ use Illuminate\Support\Facades\DB;
 
 
 
+Route::get('termly-report', function (Request $r) {
+  $termlyReport = TermlyReportCard::find($r->id);
+  dd($termlyReport);
+  /*
+  http://localhost/schools/generate-report-card?id=10963
+  */
+});
+
 Route::get('/', function (Request $request) {
-
-
   if (isset($_SERVER['HTTP_HOST'])) {
     if (
       $_SERVER['HTTP_HOST'] === 'tusometech.com' ||
@@ -94,29 +100,6 @@ Route::get('temp-import', function () {
     return "File not found";
   }
 
-
-  //remove dups
-  //same name, same reg no, same class
-  /*   $students = Administrator::where([
-    'enterprise_id' => $last_ent->id,
-  ])->get();
-  $dups = [];
-  foreach ($students as $key => $student) {
-    $dup = Administrator::where([
-      'enterprise_id' => $last_ent->id, 
-      'current_class_id' => $student->current_class_id,
-      'first_name' => $student->first_name,
-      'last_name' => $student->last_name,  
-    ])->where('id', '!=', $student->id)->get();
-    foreach ($dup as $key => $d) {
-      $dups[] = $d;
-      echo $d->user_id . " is a duplicate<br>";
-      $d->status = 0; 
-      $d->save(); 
-    } 
-  }
- 
-  die("done");  */
 
   $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
   $spreadsheet = $reader->load($file);
@@ -287,123 +270,6 @@ Route::get('temp-import', function () {
     }
 
     continue;
-
-    dd($real_class);
-
-    dd($stud->emergency_person_phone);
-    /* (
-        [3] => P7
- 
-        [5] => 759,309,740
-        [6] => true
-    ) */
-
-    /*  
-    "" => "admin"
-    "" => "$2y$10$FeweM5V9nuQlsM6KmUYPF.VVGR2q86IaxzrQ8ZIMHQcyRWN14N/jK"
-    "name" => "System Admin"
-    "avatar" => "images/7424d6a15f419b6c38ab0ca4ac2d2bd6.png"
-    "remember_token" => "jH6xy16cppuOgMyHa8rTNBkF4Ef5UVbJpuekaoZe0O4PGeYqA8fXQ05QWfeP"
-    "created_at" => "2022-06-05 08:47:55"
-    "updated_at" => "2025-02-02 02:03:05"
-    "enterprise_id" => 1
-    "first_name" => null
-    "last_name" => null
-    "date_of_birth" => null
-    "place_of_birth" => null
-    "sex" => null
-    "home_address" => null
-    "current_address" => null
-    "phone_number_1" => ""
-    "phone_number_2" => ""
-    "email" => "6654"
-    "nationality" => null
-    "religion" => null
-    "spouse_name" => null
-    "spouse_phone" => null
-    "father_name" => null
-    "father_phone" => null
-    "mother_name" => null
-    "mother_phone" => null
-    "languages" => null
-    "emergency_person_name" => null
-    "emergency_person_phone" => null
-    "national_id_number" => null
-    "passport_number" => null
-    "tin" => null
-    "nssf_number" => null
-    "bank_name" => null
-    "bank_account_number" => null
-    "primary_school_name" => null
-    "primary_school_year_graduated" => null
-    "seconday_school_name" => null
-    "seconday_school_year_graduated" => null
-    "high_school_name" => null
-    "high_school_year_graduated" => null
-    "degree_university_name" => null
-    "degree_university_year_graduated" => null
-    "masters_university_name" => null
-    "masters_university_year_graduated" => null
-    "phd_university_name" => null
-    "phd_university_year_graduated" => null
-    "user_type" => "employee"
-    "demo_id" => 0
-    "user_id" => null
-    "user_batch_importer_id" => 0
-    "school_pay_account_id" => null
-    "school_pay_payment_code" => null
-    "given_name" => null
-    "deleted_at" => null
-    "marital_status" => null
-    "verification" => 0
-    "current_class_id" => 0
-    "current_theology_class_id" => 0
-    "status" => 2
-    "parent_id" => null
-    "main_role_id" => 1
-    "stream_id" => null
-    "account_id" => null
-    "has_personal_info" => "No"
-    "has_educational_info" => "No"
-    "has_account_info" => "No"
-    "diploma_school_name" => "No"
-    "diploma_year_graduated" => "No"
-    "certificate_school_name" => "No"
-    "certificate_year_graduated" => "No"
-    "theology_stream_id" => null
-    "lin" => null
-    "occupation" => null
-    "last_seen" => "2025-02-01 17:03:05"
-    "supervisor_id" => null
-    "user_number" => null
-    "token" => null
-    "roles_text" => null
-    "residence" => "DAY_SCHOLAR"
-    "plain_password" => null
-    "mail_verification_token" => null
-*/
-    $student = new User();
-    echo '<pre>';
-    print_r($row);
-    die();
-    $name = $row[0];
-    $reg_no = $row[1];
-    $class = $row[2];
-    $stream = $row[3];
-    $gender = $row[4];
-    $dob = $row[5];
-    $phone = $row[6];
-    $email = $row[7];
-    $address = $row[8];
-    $parent_name = $row[9];
-    $parent_phone = $row[10];
-    $parent_email = $row[11];
-    $parent_address = $row[12];
-    $parent_occupation = $row[13];
-    $parent_relationship = $row[14];
-    $student = new User();
-    $student->name = $name;
-    $student->reg_no = $reg_no;
   }
   return "Done";
 });
@@ -1158,7 +1024,7 @@ Route::get('bulk-photo-uploads-process', function () {
 
 
       $student = $item->get_student();
-    
+
       if ($student != null) {
         $old = $student->avatar;
         $old_explode = explode('/', $old);
@@ -1187,7 +1053,7 @@ Route::get('bulk-photo-uploads-process', function () {
         echo '<p style="background-color: #ff0000; color: #fff; padding: 0px; margin: 0px;">Failed to process: Student not found in the system. File: ' . $item->file_name . '</p>';
       }
     }
- 
+
 
     echo '<p style="background-color: green; color: #fff; padding: 5px; margin: 5px;">Success: ' . $stats_success . '</p>';
     echo '<p style="background-color: #ff0000; color: #fff; padding: 5px; margin: 5px;">Failed: ' . $stats_failed . '</p>';

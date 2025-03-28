@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Admin\Actions\Post\ChangeStudentsStatus;
 use App\Admin\Actions\Post\PromoteStudentsClass;
+use App\Admin\Actions\Post\StudentsChangeGender;
 use App\Admin\Actions\Post\UpdateStudentsSecularStream;
 use App\Admin\Actions\Post\UpdateStudentsTheologyStream;
 use App\Models\AcademicClass;
@@ -50,7 +51,7 @@ class StudentsController extends AdminController
      */
     protected function grid()
     {
-       /*  $u = User::find(2317);
+        /*  $u = User::find(2317);
         $u->religion .= '.'; 
         $u->update_theo_classes();
  
@@ -88,8 +89,9 @@ class StudentsController extends AdminController
             $batch->add(new UpdateStudentsSecularStream());
             $segments = request()->segments();
             if (in_array('students', $segments)) {
-                $batch->add(new UpdateStudentsTheologyStream()); 
-            } 
+                $batch->add(new UpdateStudentsTheologyStream());
+            }
+            $batch->add(new StudentsChangeGender());
         });
         $grid->actions(function ($actions) {
             if (!Auth::user()->isRole('admin')) {
@@ -97,7 +99,7 @@ class StudentsController extends AdminController
             }
         });
 
-     
+
 
 
         Utils::display_checklist(Utils::students_checklist(Admin::user()));
@@ -360,13 +362,15 @@ class StudentsController extends AdminController
                     return 'No Stream';
                 }
                 return $this->theology_stream->name;
-            })->hide()->sortable();
+            })->sortable();
 
 
 
         $grid->column('sex', __('Gender'))
             ->sortable()
-            ->filter(['Male' => 'Male', 'Female' => 'Female']);
+            ->filter(['Male' => 'Male', 'Female' => 'Female'])
+            ->editable('select', ['Male' => 'Male', 'Female' => 'Female']);
+            
         $grid->column('emergency_person_name', __('Guardian'))
             ->hide()
             ->sortable()
@@ -440,7 +444,7 @@ class StudentsController extends AdminController
             ])->filter([
                 'DAY_SCHOLAR' => 'Day Scholar',
                 'BOARDER' => 'Boarder',
-            ])->sortable();
+            ])->sortable()->hide();
 
         //theology_stream_id
 
