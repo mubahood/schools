@@ -192,6 +192,7 @@ $stream = $assessment->get_stream();
             <th class="p-0 text-center">C5</th>
             <th class="p-0 text-center">C6</th>
             <th class="p-0 text-center">P7</th>
+            <th class="p-0 text-center">P8</th>
             <th class="p-0 text-center">F9</th>
             <th class="p-0 text-center">X</th>
         </thead>
@@ -206,6 +207,7 @@ $stream = $assessment->get_stream();
                     <td class="p-0 text-center">{{ $sub->c5 }}</td>
                     <td class="p-0 text-center">{{ $sub->c6 }}</td>
                     <td class="p-0 text-center">{{ $sub->p7 }}</td>
+                    <td class="p-0 text-center">{{ $sub->p8 }}</td>
                     <td class="p-0 text-center">{{ $sub->f9 }}</td>
                     <td class="p-0 text-center">{{ $sub->x }}</td>
                 </tr>
