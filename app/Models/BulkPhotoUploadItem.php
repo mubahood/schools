@@ -10,11 +10,20 @@ class BulkPhotoUploadItem extends Model
 {
     use HasFactory;
 
+    //on saving file_name , remove images/ from the file_name
+    public function setFileNameAttribute($value)
+    {
+        $this->attributes['file_name'] = str_replace('images/', '', $value);
+    } 
+
     public function get_student()
     {
         $naming_type = $this->naming_type;
         $student  = null;
         $ent = Enterprise::find($this->enterprise_id);
+        //this remaplce images/
+        $this->file_name = str_replace('images/', '', $this->file_name);
+ 
 
         if ($naming_type == 'school_pay') {
             $exp = explode('.', $this->file_name);

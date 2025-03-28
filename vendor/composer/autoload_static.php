@@ -745,6 +745,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Admin\\Controllers\\BuildingController' => __DIR__ . '/../..' . '/app/Admin/Controllers/BuildingController.php',
         'App\\Admin\\Controllers\\BulkMessageController' => __DIR__ . '/../..' . '/app/Admin/Controllers/BulkMessageController.php',
         'App\\Admin\\Controllers\\BulkPhotoUploadController' => __DIR__ . '/../..' . '/app/Admin/Controllers/BulkPhotoUploadController.php',
+        'App\\Admin\\Controllers\\BulkPhotoUploadItemController' => __DIR__ . '/../..' . '/app/Admin/Controllers/BulkPhotoUploadItemController.php',
         'App\\Admin\\Controllers\\BursaryBeneficiaryController' => __DIR__ . '/../..' . '/app/Admin/Controllers/BursaryBeneficiaryController.php',
         'App\\Admin\\Controllers\\BursaryController' => __DIR__ . '/../..' . '/app/Admin/Controllers/BursaryController.php',
         'App\\Admin\\Controllers\\ClassTeacherCommentController' => __DIR__ . '/../..' . '/app/Admin/Controllers/ClassTeacherCommentController.php',

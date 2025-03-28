@@ -1056,6 +1056,8 @@ Route::get('generate-demand-notice', function () {
 
 Route::get('bulk-photo-uploads-process', function () {
   $id = ($_GET['id']);
+  $class_error = " background-color: #ff0000; color: #fff; padding: 0px; margin: 0px; ";
+  $class_success = " background-color: green; color: #fff; padding: 0px; margin: 0px; ";
   $blk = BulkPhotoUpload::where([
     'id' => $id,
   ])->first();
@@ -1066,6 +1068,135 @@ Route::get('bulk-photo-uploads-process', function () {
   if ($ent == null) {
     return "Enterprise not found";
   }
+
+
+  if ($blk->file_type == 'images') {
+    //if not array
+    if (!is_array($blk->images)) {
+      return "File path is not an array";
+    }
+
+    //if empty
+    if (count($blk->images) < 1) {
+      return "No files to process";
+    }
+
+
+    //for images
+    foreach ($blk->images as $key => $file) {
+      $path = public_path('storage/' . $file);
+      if (!file_exists($path)) {
+        echo '<p style="background-color: #ff0000; color: #fff; padding: 5px; margin: 5px;">File not found: ' . htmlspecialchars($file) . '</p>';
+        continue;
+      }
+
+      $ext = pathinfo($file, PATHINFO_EXTENSION);
+      $new_name = Utils::get_unique_text() . '.' . $ext;
+      $destination_path = public_path('storage/images/' . $new_name);
+      $moved = rename($path, $destination_path);
+      if (!$moved) {
+        echo '<p style="background-color: #ff0000; color: #fff; padding: 5px; margin: 5px;">Failed to move file: ' . htmlspecialchars($file) . '</p>';
+        continue;
+      }
+      $photo = new BulkPhotoUploadItem();
+      $photo->enterprise_id = $ent->id;
+      $photo->bulk_photo_upload_id = $blk->id;
+      $photo->academic_class_id = $blk->academic_class_id;
+      $photo->new_image_path = 'images/' . $new_name;
+      $photo->file_name = $file;
+      $photo->naming_type = $blk->naming_type;
+      $photo->error_message = null;
+      $photo->status = 'Pending';
+      try {
+        $photo->save();
+        //echo context
+        echo '<p style="background-color: green; color: #fff; padding: 5px; margin: 5px;">' . $file . ' saved as ' . $new_name . '</p>';
+      } catch (\Throwable $th) {
+        echo '<p style="background-color: #ff0000; color: #fff; padding: 5px; margin: 5px;">Failed to save file: ' . htmlspecialchars($file) . '</p>';
+        continue;
+      }
+    }
+    $blk->status = 'Completed';
+    $blk->save();
+
+    $stats_success = BulkPhotoUploadItem::where([
+      'bulk_photo_upload_id' => $blk->id,
+      'status' => 'Success',
+    ])->count();
+
+    $stats_failed = BulkPhotoUploadItem::where([
+      'bulk_photo_upload_id' => $blk->id,
+      'status' => 'Failed',
+    ])->count();
+
+    $stats_pending = BulkPhotoUploadItem::where([
+      'bulk_photo_upload_id' => $blk->id,
+      'status' => 'Pending',
+    ])->count();
+
+
+    $items = BulkPhotoUploadItem::where([
+      'bulk_photo_upload_id' => $blk->id,
+    ])->get();
+
+    foreach ($items as $key => $item) {
+      if ($item->status == 'Success') {
+        $sudent = Administrator::find($item->student_id);
+        if ($sudent == null) {
+          $item->status = 'Failed';
+          $item->error_message = 'Student not found';
+
+          $item->save();
+          //error display
+          echo '<p style="background-color: #ff0000; color: #fff; padding: 0px; margin: 0px;">Failed to process: Student not found in the system.</p>';
+          continue;
+        }
+        //display success message
+        echo '<p style="background-color: green; color: #fff; padding: 0px; margin: 0px;">Photo successfully updated for student: ' . $sudent->name . '</p>';
+        continue;
+      }
+
+
+      $student = $item->get_student();
+    
+      if ($student != null) {
+        $old = $student->avatar;
+        $old_explode = explode('/', $old);
+        $old_file_name = end($old_explode);
+
+        if ($old_file_name != 'user.jpeg') {
+          $old = public_path('storage/' . $old);
+          if (file_exists($old)) {
+            unlink($old);
+          }
+        }
+
+        $item->student_id = $student->id;
+        $item->error_message = null;
+        $item->status = 'Success';
+        $item->save();
+        $student->avatar = $item->new_image_path;
+        $student->save();
+        //success display
+        echo '<p style="background-color: green; color: #fff; padding: 0px; margin: 0px;">Photo successfully updated for student: ' . $student->name . '</p>';
+      } else {
+        $item->status = 'Failed';
+        $item->error_message = 'Student not found';
+        $item->save();
+        //error display
+        echo '<p style="background-color: #ff0000; color: #fff; padding: 0px; margin: 0px;">Failed to process: Student not found in the system. File: ' . $item->file_name . '</p>';
+      }
+    }
+ 
+
+    echo '<p style="background-color: green; color: #fff; padding: 5px; margin: 5px;">Success: ' . $stats_success . '</p>';
+    echo '<p style="background-color: #ff0000; color: #fff; padding: 5px; margin: 5px;">Failed: ' . $stats_failed . '</p>';
+    echo '<p style="background-color: #0000ff; color: #fff; padding: 5px; margin: 5px;">Pending: ' . $stats_pending . '</p>';
+
+
+    return "done";
+  }
+
   $file_path = public_path('storage/' . $blk->file_path);
   if (!file_exists($file_path)) {
     return "File not found";
@@ -1076,6 +1207,9 @@ Route::get('bulk-photo-uploads-process', function () {
   $size = number_format($size, 2);
   $blk->file_name = $size;
   $blk->save();
+
+
+
 
   //time to unzip and get images in file
 
@@ -1112,8 +1246,7 @@ Route::get('bulk-photo-uploads-process', function () {
 
     $count = 0;
     $success_count = 0;
-    $class_error = " background-color: #ff0000; color: #fff; padding: 0px; margin: 0px; ";
-    $class_success = " background-color: green; color: #fff; padding: 0px; margin: 0px; ";
+
     foreach ($files as $file) {
 
       if ($file == '.' || $file == '..') {

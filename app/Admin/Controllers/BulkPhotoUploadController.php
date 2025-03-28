@@ -133,14 +133,23 @@ class BulkPhotoUploadController extends AdminController
         }
 
 
-        $form->radio('academic_class_id', 'Select Class')->options($classes)->rules('required');
+        $form->radio('academic_class_id', 'Select Class')->options($classes)->rules('required')->required();
 
         if ($form->isCreating()) {
-            $form->file('file_path', __('Select zip file'))->rules('required')
-                ->uniqueName()
-                ->rules('mimes:zip|required')
-                ->required()
+            /* 
+           $table->string('file_type')->nullable();
+            $table->longText('images')->nullable();
+*/
+            $form->radio('file_type', 'Select File Type')->options([
+                'zip' => 'Zip',
+                'images' => 'Images',
+            ])->rules('required')->required();
+            $form->file('file_path', __('Select zip file'))
+                ->uniqueName() 
                 ->help('Select a zip file containing images. The images should be named as per the naming type selected below. The zip file should not contain any subdirectories and should contain only image files. The zip file should not be password protected"');
+
+            $form->multipleImage('images', __('Select images'))
+                ->help('Select images. The images should be named as per the naming type selected below. The images should not be password protected"');
         }
         // $form->textarea('file_name', __('File name')); file_name
         $form->radio('naming_type', __('Image naming type'))->options([

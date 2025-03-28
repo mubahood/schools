@@ -40,6 +40,7 @@ return array(
     'App\\Admin\\Controllers\\BuildingController' => $baseDir . '/app/Admin/Controllers/BuildingController.php',
     'App\\Admin\\Controllers\\BulkMessageController' => $baseDir . '/app/Admin/Controllers/BulkMessageController.php',
     'App\\Admin\\Controllers\\BulkPhotoUploadController' => $baseDir . '/app/Admin/Controllers/BulkPhotoUploadController.php',
+    'App\\Admin\\Controllers\\BulkPhotoUploadItemController' => $baseDir . '/app/Admin/Controllers/BulkPhotoUploadItemController.php',
     'App\\Admin\\Controllers\\BursaryBeneficiaryController' => $baseDir . '/app/Admin/Controllers/BursaryBeneficiaryController.php',
     'App\\Admin\\Controllers\\BursaryController' => $baseDir . '/app/Admin/Controllers/BursaryController.php',
     'App\\Admin\\Controllers\\ClassTeacherCommentController' => $baseDir . '/app/Admin/Controllers/ClassTeacherCommentController.php',
