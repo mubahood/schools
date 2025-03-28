@@ -145,10 +145,11 @@ class BulkPhotoUploadController extends AdminController
                 'images' => 'Images',
             ])->rules('required')->required();
             $form->file('file_path', __('Select zip file'))
-                ->uniqueName() 
+                ->uniqueName()
                 ->help('Select a zip file containing images. The images should be named as per the naming type selected below. The zip file should not contain any subdirectories and should contain only image files. The zip file should not be password protected"');
 
             $form->multipleImage('images', __('Select images'))
+                ->removable()
                 ->help('Select images. The images should be named as per the naming type selected below. The images should not be password protected"');
         }
         // $form->textarea('file_name', __('File name')); file_name
