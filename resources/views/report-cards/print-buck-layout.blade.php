@@ -180,7 +180,7 @@ $school_email = 'admin@kjs.com';
                                     <th>60 - 69</th>
                                     <th>70 - 79</th>
                                     <th>80 - 89</th>
-                                    <th>90 - 100</th>
+                                    <th>95 - 100</th>
                                 </tr>
                                 <tr>
                                     <th class="text-left">Aggregates</th>

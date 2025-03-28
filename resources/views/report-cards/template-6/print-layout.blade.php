@@ -604,7 +604,7 @@ dd($theology_termly_report_card); */
                                 <th class="fs-10 p-0 lh-1 pt-2">60 - 69</th>
                                 <th class="fs-10 p-0 lh-1 pt-2">70 - 79</th>
                                 <th class="fs-10 p-0 lh-1 pt-2">80 - 89</th>
-                                <th class="fs-10 p-0 lh-1 pt-2">90 - 100</th>
+                                <th class="fs-10 p-0 lh-1 pt-2">95 - 100</th>
                             </tr>
                             <tr>
                                 <th class="text-left fs-12 lh-1 pt-2">Aggregates</th>
