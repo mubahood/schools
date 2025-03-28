@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 
 class StudentsChangeGender extends BatchAction
 {
-    public $name = 'Change Students\'s Gender';
+    public $name = 'Change Students\ Gender';
 
     public function handle(Collection $collection, Request $r)
     {
