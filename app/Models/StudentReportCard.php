@@ -211,7 +211,7 @@ class StudentReportCard extends Model
         $msg->bulk_message_id = null;
         $msg->administrator_id = $this->student_id;
         $msg->receiver_number = $phone;
-        $msg->message_body = "Dear Parent, download report card for your child " . $this->owner->name . "'s : " . url('storage/files/' . $this->pdf_url);
+        $msg->message_body = "Dear Parent, download report card for your child " . $this->owner->name . "'s : " . url('storage/files/' . $this->pdf_url)."\n Thank you";
         $msg->status = 'Pending';
         $msg->is_scheduled = 'No';
         $msg->delivery_time = Carbon::now();
