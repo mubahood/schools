@@ -90,11 +90,7 @@ Route::get('send-report-card', function (Request $r) {
       if ($email == null || strlen($email) < 5) {
         return "Email not found";
       }
-
-      //use filter
-      if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        return "Email not valid";
-      }
+ 
       $rep = $reportCard->send_mail_to_parent();
       die($rep);
     } else if ($task == 'sms') {
@@ -137,7 +133,7 @@ Route::get('send-report-card', function (Request $r) {
 
     }
   } catch (\Throwable $th) {
-    return "Failed to send email because: " . $th->getMessage();
+    return "Failed to send email because: " . $th->getMessage()." Email: ".$email; 
   }
 
   dd($email);

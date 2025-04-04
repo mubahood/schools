@@ -142,16 +142,15 @@ class StudentReportCard extends Model
         if ($student == null) {
             return "Student not found";
         }
-        $email = $student->email;
-        $email = 'mubahood360@gmail.com';
+        $email = $student->email; 
         //validate email $email
         if ($email == null || strlen($email) < 5) {
-            throw new Exception("Email not found.");
+            throw new Exception("Email not found. $email");
         }
 
         //use filter
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new Exception("Email not valid.");
+            // throw new Exception("Email not valid. $email");
         }
         //mail to parent
         $mail_body =
