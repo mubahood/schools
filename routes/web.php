@@ -98,6 +98,43 @@ Route::get('send-report-card', function (Request $r) {
       $rep = $reportCard->send_mail_to_parent();
       die($rep);
     } else if ($task == 'sms') {
+
+      $rep = $reportCard->send_sms_to_parent();
+      
+      /* 
+          "current_address" => "Kikumbi"
+    "phone_number_1" => null
+    "phone_number_2" => null
+    "email" => "RauhunKasule3015"
+    "nationality" => "Ugandan"
+    "religion" => "Islam"
+    "spouse_name" => null
+    "spouse_phone" => null
+    "father_name" => null
+    "father_phone" => null
+    "mother_name" => "Haitham Mohammed Juma"
+    "mother_phone" => "0708608228"
+    "languages" => null
+    "emergency_person_name" => "Kasuke Joseph"
+    "emergency_person_phone" => null
+    "national_id_number" => null
+    "passport_number" => null
+    "tin" => null
+      */
+      dd($student);
+      $phone = $student->phone_number_1;
+      if ($phone == null || strlen($phone) < 5) {
+        return "Phone number not found";
+      }
+      //use filter
+      if (!filter_var($phone, FILTER_VALIDATE_INT)) {
+        return "Phone number not valid";
+      }
+      $rep = $reportCard->send_sms_to_parent();
+      die($rep);
+    } else {
+      return "Task not found";
+
     }
   } catch (\Throwable $th) {
     return "Failed to send email because: " . $th->getMessage();

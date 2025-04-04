@@ -174,8 +174,58 @@ class StudentReportCard extends Model
         } catch (\Throwable $th) {
             throw $th;
         }
-        
+
         return "Mail sent to parent.";
+    }
+
+
+    function send_sms_to_parent()
+    {
+
+
+        $phone = $this->owner->phone_number_1;
+        if ($phone == null || strlen($phone) < 5) {
+            $phone = $this->owner->phone_number_2;
+        }
+        if ($phone == null || strlen($phone) < 5) {
+            $phone = $this->owner->mother_phone;
+        }
+        if ($phone == null || strlen($phone) < 5) {
+            $phone = $this->owner->father_phone;
+        }
+        if ($phone == null || strlen($phone) < 5) {
+            throw new Exception("Phone number not found.");
+        }
+
+        $last = DirectMessage::where([])
+            ->orderBy('id', 'desc')
+            ->first();
+        $phone = '+256783204665';
+        $msg = new DirectMessage();
+        $msg->enterprise_id = $this->enterprise_id;
+        $msg->bulk_message_id = null;
+        $msg->administrator_id = $this->student_id;
+        $msg->receiver_number = $phone;
+        $msg->message_body = "Dear Parent, download report card for your child " . $this->owner->name . "'s : " . url('storage/files/' . $this->pdf_url);
+        $msg->status = 'Pending';
+        $msg->is_scheduled = 'No';
+        $msg->delivery_time = Carbon::now();
+        $msg->error_message_message = null;
+        $msg->response = null;
+        $msg->balance = 0;
+        $msg->STUDENT_NAME = $this->owner->name;
+        $msg->PARENT_NAME = $this->owner->name;
+        $msg->STUDENT_CLASS = $this->academic_class_text;
+        $msg->TEACHER_NAME = $this->owner->name;
+        $msg->save();
+        $msg = DirectMessage::find($msg->id);
+        try {
+           $resp = DirectMessage::send_message($msg);
+           die($resp);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+        dd($msg);
     }
     function termly_report_card()
     {

@@ -35,7 +35,7 @@ class DirectMessage extends Model
     public static function send_message($m)
     {
         if ($m->status !== 'Pending') {
-            return;
+            return "Message status is not 'Pending'. Current status: {$m->status}";
         }
     
         // Validate phone number
@@ -43,16 +43,15 @@ class DirectMessage extends Model
             $m->status = 'Failed';
             $m->error_message_message = 'Invalid phone number - ' . $m->receiver_number;
             $m->save();
-            return;
+            return $m->error_message_message;
         }
-    
         // Validate enterprise
         $ent = Enterprise::find($m->enterprise_id);
         if ($ent === null) {
             $m->status = 'Failed';
             $m->error_message_message = 'Enterprise is not active.';
             $m->save();
-            return;
+            return $m->error_message_message;
         }
     
         // Check wallet balance
@@ -60,7 +59,7 @@ class DirectMessage extends Model
             $m->status = 'Failed';
             $m->error_message_message = 'Insufficient funds.';
             $m->save();
-            return;
+            return $m->error_message_message;
         }
     
         // Validate message body
@@ -68,7 +67,7 @@ class DirectMessage extends Model
             $m->status = 'Failed';
             $m->error_message_message = 'Message body is empty.';
             $m->save();
-            return;
+            return $m->error_message_message;
         }
     
         // Check if messaging is enabled
@@ -76,7 +75,7 @@ class DirectMessage extends Model
             $m->status = 'Failed';
             $m->error_message_message = 'Messages are not enabled.';
             $m->save();
-            return;
+            return $m->error_message_message;
         }
     
         // Construct API URL
@@ -126,13 +125,17 @@ class DirectMessage extends Model
             } else {
                 $m->status = 'Failed';
                 $m->error_message_message = "Failed to send message. Response: $response";
+                $m->save();
+                return $m->error_message_message;
             }
         } catch (\Throwable $th) {
             $m->status = 'Failed';
             $m->error_message_message = "Error: {$th->getMessage()}, URL: $url";
+            $m->save();
+            return $m->error_message_message;
         }
     
-        $m->save();
+        return $m->status;
     }
     
     /**
