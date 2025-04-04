@@ -130,6 +130,53 @@ class StudentReportCard extends Model
         $this->save();
     }
 
+    function send_mail_to_parent()
+    {
+        $file_path = public_path('storage/files/' . $this->pdf_url);
+        if (!file_exists($file_path)) {
+            throw new Exception("File not found.");
+        }
+
+        $url = url('storage/files/' . $this->pdf_url);
+        $student = $this->owner;
+        if ($student == null) {
+            return "Student not found";
+        }
+        $email = $student->email;
+        $email = 'mubahood360@gmail.com';
+        //validate email $email
+        if ($email == null || strlen($email) < 5) {
+            throw new Exception("Email not found.");
+        }
+
+        //use filter
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new Exception("Email not valid.");
+        }
+        //mail to parent
+        $mail_body =
+            <<<EOD
+        <p>Dear Parent of <b>$student->name</b>,</p>
+        <p>Please find attached the report card for your child.</p>
+        <p>Click on the link below to download the report card.</p>
+        <p><a href="{$url}">Download Report Card</a></p>
+        <p>Best regards,</p>
+        <p>Admin Team.</p>
+        EOD;
+        $data['body'] = $mail_body;
+        $data['data'] = $data['body'];
+        $data['name'] = $student->name;
+        $data['email'] = $email;
+        $data['subject'] = 'Report Card - ' . env('APP_NAME') . ' - ' . date('Y-m-d') . ".";
+
+        try {
+            Utils::mail_sender($data);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+        
+        return "Mail sent to parent.";
+    }
     function termly_report_card()
     {
         return $this->belongsTo(TermlyReportCard::class);

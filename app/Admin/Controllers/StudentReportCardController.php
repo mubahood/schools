@@ -50,12 +50,14 @@ class StudentReportCardController extends AdminController
                     $term_id = $term->id;
                     $rows = [];
 
-                    foreach (AcademicClass::where([
-                        'enterprise_id' => $u->enterprise_id,
-                        'academic_year_id' => $term->academic_year_id
-                    ])
-                        ->orderBy('id', 'Desc')
-                        ->get() as $v) {
+                    foreach (
+                        AcademicClass::where([
+                            'enterprise_id' => $u->enterprise_id,
+                            'academic_year_id' => $term->academic_year_id
+                        ])
+                            ->orderBy('id', 'Desc')
+                            ->get() as $v
+                    ) {
 
 
 
@@ -93,11 +95,13 @@ class StudentReportCardController extends AdminController
                     $u = Admin::user();
                     $rows = [];
 
-                    foreach (AcademicClass::where([
-                        'enterprise_id' => $u->enterprise_id
-                    ])
-                        ->orderBy('id', 'Desc')
-                        ->get() as $v) {
+                    foreach (
+                        AcademicClass::where([
+                            'enterprise_id' => $u->enterprise_id
+                        ])
+                            ->orderBy('id', 'Desc')
+                            ->get() as $v
+                    ) {
 
                         $term_id = 5;
                         $rs = StudentReportCard::where([
@@ -134,11 +138,13 @@ class StudentReportCardController extends AdminController
                     $u = Admin::user();
                     $rows = [];
 
-                    foreach (AcademicClass::where([
-                        'enterprise_id' => $u->enterprise_id
-                    ])
-                        ->orderBy('id', 'Desc')
-                        ->get() as $v) {
+                    foreach (
+                        AcademicClass::where([
+                            'enterprise_id' => $u->enterprise_id
+                        ])
+                            ->orderBy('id', 'Desc')
+                            ->get() as $v
+                    ) {
 
                         $term_id = 6;
                         if (Auth::user()->enterprise_id == 9) {
@@ -181,11 +187,13 @@ class StudentReportCardController extends AdminController
                     $u = Admin::user();
                     $rows = [];
 
-                    foreach (AcademicClass::where([
-                        'enterprise_id' => $u->enterprise_id
-                    ])
-                        ->orderBy('id', 'Desc')
-                        ->get() as $v) {
+                    foreach (
+                        AcademicClass::where([
+                            'enterprise_id' => $u->enterprise_id
+                        ])
+                            ->orderBy('id', 'Desc')
+                            ->get() as $v
+                    ) {
 
                         $term_id = 7;
                         if (Auth::user()->enterprise_id == 9) {
@@ -316,13 +324,15 @@ class StudentReportCardController extends AdminController
 
 
             $streams = [];
-            foreach (AcademicClassSctream::where(
-                [
-                    'enterprise_id' => $u->enterprise_id,
-                ]
-            )
-                ->orderBy('id', 'desc')
-                ->get() as $ex) {
+            foreach (
+                AcademicClassSctream::where(
+                    [
+                        'enterprise_id' => $u->enterprise_id,
+                    ]
+                )
+                    ->orderBy('id', 'desc')
+                    ->get() as $ex
+            ) {
                 $streams[$ex->id] = $ex->academic_class->short_name . " - " . $ex->name;
             }
             $filter->equal('stream_id', 'Filter by Stream')->select($streams);
@@ -404,20 +414,25 @@ class StudentReportCardController extends AdminController
 
 
         $grid->column('print', __('GENERATE'))->display(function ($m) {
-            $d = '<a class="btn btn-sm btn-primary" target="_blank" href="' . url('print?id=' . $this->id) . '" >PRINT</a><br>';
-            $d .= '<a class="btn btn-sm btn-info" target="_blank" href="' . url('generate-report-card?id=' . $this->id) . '" >GENERATE PDF NOW</a><br>';
+            $d = '<a class="btn btn-xs btn-primary" style="margin-bottom: 5px;" target="_blank" href="' . url('print?id=' . $this->id) . '" >PRINT</a><br>';
+            $d .= '<a class="btn btn-xs btn-info" style="margin-bottom: 5px;" target="_blank" href="' . url('generate-report-card?id=' . $this->id) . '" >GENERATE PDF NOW</a><br>';
             if (
                 ($this->pdf_url != null) &&
                 strlen($this->pdf_url) > 3
             ) {
                 $url = url('storage/files/' . $this->pdf_url);
-                $d .= '<a class="btn btn-sm btn-success" target="_blank" href="' . $url . '" >DOWNLOAD PDF</a>';
+                $d .= '<a class="btn btn-xs btn-success" style="margin-bottom: 5px;" target="_blank" href="' . $url . '" >DOWNLOAD PDF</a>';
+
+                $d .= '<br><a class="btn btn-xs btn-warning" style="margin-bottom: 5px;" target="_blank" href="' . url('student-report-card-items?student_report_card_id=' . $this->id) . '" >EDIT</a>';
+                //add send email button
+                $d .= '<br><a class="btn btn-xs btn-danger" style="margin-bottom: 5px;" target="_blank" href="' . url('send-report-card?task=email&id=' . $this->id) . '" >SEND EMAIL</a>';
+                //add send sms
+                $d .= '<br><a class="btn btn-xs btn-danger" style="margin-bottom: 5px;" target="_blank" href="' . url('send-report-card?task=sms&id=' . $this->id) . '" >SEND SMS</a>';
             }
 
-            $d .= '<br><a class="btn btn-sm btn-warning" target="_blank" href="' . url('student-report-card-items?student_report_card_id=' . $this->id) . '" >EDIT</a>';
+
             return $d;
         });
-
         $grid->column('is_ready', __('Ready for parent view'))->editable('select', ['No' => 'No', 'Yes' => 'Yes'])->sortable();
         $grid->column('created_at', __('DATE'))->sortable();
         $grid->column('term_id', __('Term'))

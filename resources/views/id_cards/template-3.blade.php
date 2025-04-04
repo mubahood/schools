@@ -67,7 +67,7 @@ $next_year = date('Y', strtotime('+1 year'));
                     <p class="label mt-1">NAME</p>
                     <p class="value">{{ $user->name }}</p>
 
-                   {{--  <p class="label">POISITION</p>
+                   {{--  <p class="label">POSITION</p>
                     <p class="value">{{ strtoupper($user->user_type) }}</p> --}}
 
                     <p class="label">{{ strtoupper($user->user_type) }} NUMBER</p>

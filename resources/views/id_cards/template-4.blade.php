@@ -83,7 +83,7 @@ $next_year = date('Y', strtotime('+1 year'));
                     ">
 
 
-                    {{--  <p class="label">POISITION</p>
+                    {{--  <p class="label">POSITION</p>
                     <p class="value">{{ strtoupper($user->user_type) }}</p> --}}
 
                     <table>

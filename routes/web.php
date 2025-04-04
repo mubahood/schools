@@ -63,6 +63,69 @@ use Illuminate\Support\Facades\DB;
 
 
 
+Route::get('send-report-card', function (Request $r) {
+  $reportCard = StudentReportCard::find($r->id);
+  if ($reportCard == null) {
+    return "Report card not found";
+  }
+  $task = $r->task;
+  if ($task == null) {
+    return "Task not found";
+  }
+  //if task not email or sms
+  if ($task != 'email' && $task != 'sms') {
+    return "Task not found";
+  }
+  $url = url('storage/files/' . $reportCard->pdf_url);
+  $student = $reportCard->owner;
+  if ($student == null) {
+    return "Student not found";
+  }
+  $email = $student->email;
+  $email = 'mubahood360@gmail.com';
+  //validate email $email
+
+
+  try {
+    if ($task == 'email') {
+      if ($email == null || strlen($email) < 5) {
+        return "Email not found";
+      }
+
+      //use filter
+      if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        return "Email not valid";
+      }
+      $rep = $reportCard->send_mail_to_parent();
+      die($rep);
+    } else if ($task == 'sms') {
+    }
+  } catch (\Throwable $th) {
+    return "Failed to send email because: " . $th->getMessage();
+  }
+
+  dd($email);
+
+  /* 
+    "phone_number_1" => null
+    "phone_number_2" => null
+    "email" => "RauhunKasule3015"
+    "nationality" => "Ugandan"
+    "religion" => "Islam"
+    "spouse_name" => null
+    "spouse_phone" => null
+    "father_name" => null
+    "father_phone" => null
+    "mother_name" => "Haitham Mohammed Juma"
+    "mother_phone" => "0708608228"
+    "languages" => null
+    "emergency_person_name" => "Kasuke Joseph"
+    "emergency_person_phone" => null
+  */
+
+  dd($student->email);
+});
+
 Route::get('termly-report', function (Request $r) {
   $termlyReport = TermlyReportCard::find($r->id);
   dd($termlyReport);
