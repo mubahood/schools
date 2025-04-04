@@ -200,7 +200,7 @@ class StudentReportCard extends Model
         $last = DirectMessage::where([])
             ->orderBy('id', 'desc')
             ->first();
-        $phone = '+256783204665';
+        // $phone = '+256783204665';
         $msg = new DirectMessage();
         $msg->enterprise_id = $this->enterprise_id;
         $msg->bulk_message_id = null;
