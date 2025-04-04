@@ -81,8 +81,7 @@ Route::get('send-report-card', function (Request $r) {
   if ($student == null) {
     return "Student not found";
   }
-  $email = $student->email;
-  $email = 'mubahood360@gmail.com';
+  $email = $student->email; 
   //validate email $email
 
 
