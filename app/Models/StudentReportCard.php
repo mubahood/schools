@@ -182,8 +182,13 @@ class StudentReportCard extends Model
     function send_sms_to_parent()
     {
 
+       
 
-        $phone = $this->owner->phone_number_1;
+        $phone = $this->owner->emergency_person_phone;
+        if ($phone == null || strlen($phone) < 5) {
+            $phone = $this->owner->phone_number_1;
+        }
+ 
         if ($phone == null || strlen($phone) < 5) {
             $phone = $this->owner->phone_number_2;
         }
