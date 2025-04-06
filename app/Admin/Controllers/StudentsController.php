@@ -290,7 +290,8 @@ class StudentsController extends AdminController
 
 
         $grid->column('id', __('ID'))
-            ->sortable();
+            ->sortable()
+            ->hide();
 
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
@@ -370,7 +371,7 @@ class StudentsController extends AdminController
             ->sortable()
             ->filter(['Male' => 'Male', 'Female' => 'Female'])
             ->editable('select', ['Male' => 'Male', 'Female' => 'Female']);
-            
+
         $grid->column('emergency_person_name', __('Guardian'))
             ->hide()
             ->sortable()

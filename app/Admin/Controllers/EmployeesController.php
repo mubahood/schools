@@ -84,7 +84,11 @@ class EmployeesController extends AdminController
 
         $grid->quickSearch('name')->placeholder('Search by name');
         $grid->disableBatchActions();
-        $grid->column('id', __('Id'))->sortable();
+        $grid->column('id', __('Id'))->sortable()->hide();
+
+        $grid->column('avatar', __('Photo'))
+            ->lightbox(['width' => 60, 'height' => 60])
+            ->sortable();
         $grid->column('name', __('Name'))->sortable();
         /*  $grid->column('main_role_id', __('Main role'))
             ->display(function ($x) {
