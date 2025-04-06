@@ -16,5 +16,5 @@ use App\Models\Utils;
 
     </div>
     <!-- Default to the left -->
-    <strong>Powered by <a href="{{ Utils::app_company_link() }}">{{ Utils::app_name() }}</a></strong>
+    <strong>Powered by <a href="{{ Utils::app_company_link() }}">{{ Utils::company_name() }}</a></strong>
 </footer>

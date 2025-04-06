@@ -53,6 +53,19 @@ class Utils  extends Model
 
 
 
+    public static function company_name()
+    {
+        $name_1 = 'Eight Tech Consults Limited';
+        $name_2 = 'Newlife Technologies';
+        $current_url = url()->current();
+        //check if the url contains tusometech.com and retuen
+        $domain = 'tusometech.com';
+        if (str_contains($current_url, $domain)) {
+            return $name_1;
+        } else {
+            return $name_2;
+        }
+    }
     public static function app_name()
     {
         $name_1 = 'Tusome';
