@@ -55,7 +55,28 @@ class Utils  extends Model
 
     public static function app_name()
     {
-        return 'Tusome';
+        $name_1 = 'Tusome';
+        $name_2 = 'School Dynamics';
+        $current_url = url()->current();
+        //check if the url contains tusometech.com and retuen
+        $domain = 'tusometech.com';
+        if (str_contains($current_url, $domain)) {
+            return $name_1;
+        } else {
+            return $name_2;
+        }
+    }
+
+    public static function app_company_link()
+    {
+        $current_url = url()->current();
+        //check if the url contains tusometech.com and retuen 
+        $domain = 'tusometech.com';
+        if (str_contains($current_url, $domain)) {
+            return 'https://8technologies.net';
+        } else {
+            return 'https://8technologies.net';
+        }
     }
     public static function get_logo()
     {
@@ -66,7 +87,7 @@ class Utils  extends Model
     //get unique text
     static function get_unique_text()
     {
-        return time() . "-" . rand(100000, 1000000) . '-' . rand(100000, 1000000). '-' . rand(100000, 1000000). '-' . rand(100000, 1000000);
+        return time() . "-" . rand(100000, 1000000) . '-' . rand(100000, 1000000) . '-' . rand(100000, 1000000) . '-' . rand(100000, 1000000);
     }
 
 

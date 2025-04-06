@@ -1,4 +1,6 @@
-<!-- Main Footer -->
+<?php
+use App\Models\Utils;
+?><!-- Main Footer -->
 <footer class="main-footer">
     <!-- To the right -->
     <div class="pull-right hidden-xs">
@@ -14,5 +16,5 @@
 
     </div>
     <!-- Default to the left -->
-    <strong>Powered by <a href="javscript:;">Newline Technologies</a></strong>
+    <strong>Powered by <a href="{{ Utils::app_company_link() }}">{{ Utils::app_name() }}</a></strong>
 </footer>

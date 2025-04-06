@@ -15,6 +15,18 @@ use App\Models\Utils;
     <title>{{ Utils::app_name() }} | School Management System</title>
 
     <link rel="manifest" href="{{ url('manifest.json') }}">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-SX5CX1TH3H"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+
+        gtag('config', 'G-SX5CX1TH3H');
+    </script>
 
     <!-- SEO Meta Tags -->
     <meta name="description"
@@ -56,6 +68,8 @@ use App\Models\Utils;
     <link rel="stylesheet" media="screen" href="silicon/assets/vendor/boxicons/css/boxicons.min.css">
     <link rel="stylesheet" media="screen" href="silicon/assets/vendor/swiper/swiper-bundle.min.css">
     <link rel="stylesheet" media="screen" href="silicon/assets/vendor/img-comparison-slider/dist/styles.css">
+    <link rel="stylesheet" media="screen" href="silicon/assets/vendor/lightgallery/css/lightgallery-bundle.min.css">
+
 
     <!-- Main Theme Styles + Bootstrap -->
     <link rel="stylesheet" media="screen" href="silicon/assets/css/theme.min.css">
@@ -221,8 +235,8 @@ use App\Models\Utils;
                         </ul>
                     </div>
                     <div class="offcanvas-header border-top border-light">
-                        <a href="https://forms.gle/NP8RXx7YcpPbfi6b8"
-                            class="btn btn-primary w-100" target="_blank" rel="noopener">
+                        <a href="https://forms.gle/NP8RXx7YcpPbfi6b8" class="btn btn-primary w-100" target="_blank"
+                            rel="noopener">
                             <i class="bx bx-cart fs-4 lh-1 me-1"></i>
                             &nbsp;Request a demo
                         </a>
@@ -323,6 +337,9 @@ use App\Models\Utils;
     <script src="silicon/assets/vendor/rellax/rellax.min.js"></script>
     <script src="silicon/assets/vendor/swiper/swiper-bundle.min.js"></script>
     <script src="silicon/assets/vendor/img-comparison-slider/dist/index.js"></script>
+    <script src="silicon/assets/vendor/lightgallery/lightgallery.min.js"></script>
+    <script src="silicon/assets/vendor/lightgallery/plugins/video/lg-video.min.js"></script>
+
 
     <!-- Main Theme Script -->
     <script src="silicon/assets/js/theme.min.js"></script>
