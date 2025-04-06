@@ -38,6 +38,17 @@ class Enterprise extends Model
         });
 
         self::updated(function ($m) {
+
+
+            if ($m->id != 1) {
+                $owner = Administrator::find($m->administrator_id);
+                if ($owner != null) {
+                    $owner->enterprise_id = $m->id;
+                    $owner->user_type = 'employee';
+                    $owner->save();
+                }
+            }
+
             Enterprise::my_update($m);
         });
     }
@@ -171,6 +182,7 @@ class Enterprise extends Model
         $owner = Administrator::find($m->administrator_id);
         if ($owner != null) {
             $owner->enterprise_id = $m->id;
+            $owner->user_type = 'employee';
             $owner->save();
         }
 
