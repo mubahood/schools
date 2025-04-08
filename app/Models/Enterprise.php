@@ -34,6 +34,16 @@ class Enterprise extends Model
         });
 
         self::created(function ($m) {
+            if ($m->id != 1) {
+                $owner = User::find($m->administrator_id);
+                if ($owner != null) {
+                    $owner->enterprise_id = $m->id;
+                    $owner->user_type = 'employee';
+                    $owner->status = 1;
+                    $owner->save();
+                }
+            }
+
             Enterprise::my_update($m);
         });
 
@@ -41,10 +51,11 @@ class Enterprise extends Model
 
 
             if ($m->id != 1) {
-                $owner = Administrator::find($m->administrator_id);
+                $owner = User::find($m->administrator_id);
                 if ($owner != null) {
                     $owner->enterprise_id = $m->id;
                     $owner->user_type = 'employee';
+                    $owner->status = 1;
                     $owner->save();
                 }
             }
