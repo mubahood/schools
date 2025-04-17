@@ -85,8 +85,12 @@ class AcademicClassController extends AdminController
             return count($this->subjects);
         });
 
-        $grid->column('students', __('Students'))->display(function () {
-            return count($this->students);
+        $grid->column('students_count', __('Students'))->display(function () {
+            $count = User::where ([  
+                'current_class_id' => $this->id,
+                'status' => 1,
+            ])->count();
+            return $count; 
         });
 
         /*         $grid->column('competences', __('Competences'))->display(function () {

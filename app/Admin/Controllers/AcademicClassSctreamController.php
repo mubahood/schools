@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Models\AcademicClass;
 use App\Models\AcademicClassSctream;
+use App\Models\User;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -60,7 +61,11 @@ class AcademicClassSctreamController extends AdminController
         $grid->column('name', __('Stream'))->sortable();
         $grid->column('students_count', __('Students'))
             ->display(function ($x) {
-                return $this->studentHasClasses->count();
+                $count = User::where ([  
+                    'stream_id' => $this->id,
+                    'status' => 1,
+                ])->count(); 
+                return $count; 
             });
 
         //teacher_id

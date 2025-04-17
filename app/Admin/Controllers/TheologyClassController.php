@@ -6,6 +6,7 @@ use App\Models\AcademicYear;
 use App\Models\Course;
 use App\Models\TheologyClass;
 use App\Models\TheologyCourse;
+use App\Models\User;
 use App\Models\Utils;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
@@ -62,7 +63,11 @@ class TheologyClassController extends AdminController
             return count($this->subjects);
         });
         $grid->column('students', __('Students'))->display(function () {
-            return count($this->students);
+            $count = User::where([
+                'current_theology_class_id' => $this->id,
+                'status' => 1,
+            ])->count();
+            return $count;
         });
         $grid->column('streams', __('Streams'))->display(function () {
             return count($this->streams);
@@ -108,10 +113,12 @@ class TheologyClassController extends AdminController
 
         $form->tab('Basic info', function (Form $form) {
             $teachers = [];
-            foreach (Administrator::where([
-                'enterprise_id' => Admin::user()->enterprise_id,
-                'user_type' => 'employee',
-            ])->get() as $key => $a) {
+            foreach (
+                Administrator::where([
+                    'enterprise_id' => Admin::user()->enterprise_id,
+                    'user_type' => 'employee',
+                ])->get() as $key => $a
+            ) {
                 if ($a->isRole('teacher')) {
                     $teachers[$a['id']] = $a['name'] . " #" . $a['id'];
                 }
@@ -145,10 +152,12 @@ class TheologyClassController extends AdminController
                 $u = Admin::user();
                 $ent = Utils::ent();
                 $teachers = [];
-                foreach (Administrator::where([
-                    'enterprise_id' => $u->enterprise_id,
-                    'user_type' => 'employee',
-                ])->get() as $key => $a) {
+                foreach (
+                    Administrator::where([
+                        'enterprise_id' => $u->enterprise_id,
+                        'user_type' => 'employee',
+                    ])->get() as $key => $a
+                ) {
                     if ($a->isRole('teacher')) {
                         $teachers[$a['id']] = $a['name'] . " #" . $a['id'];
                     }
@@ -198,11 +207,13 @@ class TheologyClassController extends AdminController
                 $form->text('name', __('Class name'))->rules('required');
 
                 $teachers = [];
-                foreach (Administrator::where([
-                    'enterprise_id' => $u->enterprise_id,
-                    'user_type' => 'employee',
-                ])->get() as $key => $a) {
-                    $teachers[$a['id']] = $a['name']; 
+                foreach (
+                    Administrator::where([
+                        'enterprise_id' => $u->enterprise_id,
+                        'user_type' => 'employee',
+                    ])->get() as $key => $a
+                ) {
+                    $teachers[$a['id']] = $a['name'];
                 }
 
 
