@@ -1,4 +1,4 @@
-php artisan make:migration add_file_type_to_bulk_photo_uploads --table=bulk_photo_uploads
+php artisan make:migration add_change_type_of_record_date --table=stock_records
 ls
          $table->date('check_in_time')->nullable();
             $table->date('check_out_time')->nullable();

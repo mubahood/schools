@@ -723,6 +723,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Admin\\Actions\\Post\\MessageStatus' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/MessageStatus.php',
         'App\\Admin\\Actions\\Post\\PromoteStudentsClass' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/PromoteStudentsClass.php',
         'App\\Admin\\Actions\\Post\\SchoolPayTransactionImport' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/SchoolPayTransactionImport.php',
+        'App\\Admin\\Actions\\Post\\StudentsChangeGender' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/StudentsChangeGender.php',
         'App\\Admin\\Actions\\Post\\TransactionChangeDueTerm' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/TransactionChangeDueTerm.php',
         'App\\Admin\\Actions\\Post\\UpdateStudentsSecularStream' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/UpdateStudentsSecularStream.php',
         'App\\Admin\\Actions\\Post\\UpdateStudentsTheologyStream' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/UpdateStudentsTheologyStream.php',

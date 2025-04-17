@@ -18,6 +18,7 @@ return array(
     'App\\Admin\\Actions\\Post\\MessageStatus' => $baseDir . '/app/Admin/Actions/Post/MessageStatus.php',
     'App\\Admin\\Actions\\Post\\PromoteStudentsClass' => $baseDir . '/app/Admin/Actions/Post/PromoteStudentsClass.php',
     'App\\Admin\\Actions\\Post\\SchoolPayTransactionImport' => $baseDir . '/app/Admin/Actions/Post/SchoolPayTransactionImport.php',
+    'App\\Admin\\Actions\\Post\\StudentsChangeGender' => $baseDir . '/app/Admin/Actions/Post/StudentsChangeGender.php',
     'App\\Admin\\Actions\\Post\\TransactionChangeDueTerm' => $baseDir . '/app/Admin/Actions/Post/TransactionChangeDueTerm.php',
     'App\\Admin\\Actions\\Post\\UpdateStudentsSecularStream' => $baseDir . '/app/Admin/Actions/Post/UpdateStudentsSecularStream.php',
     'App\\Admin\\Actions\\Post\\UpdateStudentsTheologyStream' => $baseDir . '/app/Admin/Actions/Post/UpdateStudentsTheologyStream.php',

@@ -68,10 +68,12 @@ class StockRecordController extends AdminController
 
         $terms = [];
         $active_term = 0;
-        foreach (Term::where(
-            'enterprise_id',
-            Admin::user()->enterprise_id
-        )->orderBy('id', 'desc')->get() as $key => $term) {
+        foreach (
+            Term::where(
+                'enterprise_id',
+                Admin::user()->enterprise_id
+            )->orderBy('id', 'desc')->get() as $key => $term
+        ) {
             $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
             if ($term->is_active) {
                 $active_term = $term->id;
@@ -109,9 +111,11 @@ class StockRecordController extends AdminController
             })->ajax($ajax_url);
 
             $cats = [];
-            foreach (StockItemCategory::where([
-                'enterprise_id' => Admin::user()->enterprise_id,
-            ])->get() as $val) {
+            foreach (
+                StockItemCategory::where([
+                    'enterprise_id' => Admin::user()->enterprise_id,
+                ])->get() as $val
+            ) {
                 $p = Str::plural($val->measuring_unit);
                 $cats[$val->id] = $val->name . " - (in $p)";
             }
@@ -119,10 +123,12 @@ class StockRecordController extends AdminController
             $filter->equal('stock_item_category_id', 'Stock category')->select($cats);
 
             $terms = [];
-            foreach (Term::where(
-                'enterprise_id',
-                Admin::user()->enterprise_id
-            )->orderBy('id', 'desc')->get() as $key => $term) {
+            foreach (
+                Term::where(
+                    'enterprise_id',
+                    Admin::user()->enterprise_id
+                )->orderBy('id', 'desc')->get() as $key => $term
+            ) {
                 $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
             }
 
@@ -272,11 +278,13 @@ class StockRecordController extends AdminController
             ->value(Admin::user()->id);
 
         $cats = [];
-        foreach (StockBatch::where([
-            'enterprise_id' => Admin::user()->enterprise_id,
-        ])
-            ->where('current_quantity', '>', 0)
-            ->get() as $val) {
+        foreach (
+            StockBatch::where([
+                'enterprise_id' => Admin::user()->enterprise_id,
+            ])
+                ->where('current_quantity', '>', 0)
+                ->get() as $val
+        ) {
             $p = Str::plural($val->cat->measuring_unit);
             $cats[$val->id] = $val->cat->name . " " . number_format($val->current_quantity) . " $p - STOCK ID #{$val->id}";
         }
@@ -309,6 +317,9 @@ class StockRecordController extends AdminController
         ])->orderBy('id', 'desc')->first();
         if ($last_rec != null) {
             $record_date = $last_rec->record_date;
+        }
+        if ($record_date == null || $record_date == "") {
+            $record_date =  date('Y-m-d H:i:s');
         }
 
 
