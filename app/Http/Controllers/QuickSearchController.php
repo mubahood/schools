@@ -43,14 +43,22 @@ class QuickSearchController extends Controller
             ];
         }
         $data = [];
-        foreach (Account::where([
+        $user_ids = User::where([
             'enterprise_id' => $u->enterprise_id,
-            'type' => 'STUDENT_ACCOUNT',
+            'user_type' => 'student',
         ])
             ->where('name', 'like', "%$s%")
             ->limit(20)
             ->orderBy('name', 'asc')
-            ->get() as $key => $val) {
+            ->pluck('id')
+            ->toArray();
+
+        foreach (
+            Account::whereIn('administrator_id', $user_ids)
+                ->limit(20)
+                ->orderBy('name', 'asc')
+                ->get() as $key => $val
+        ) {
             $current_class_text = "";
             if ($val->owner != null) {
 
