@@ -356,7 +356,7 @@ class TransactionController extends AdminController
             ->attribute('type', 'number')
             ->rules('required|int');
 
-        $form->date('payment_date', __('Date'))
+        $form->datetime('payment_date', __('Date'))
             ->rules('required');
 
         $form->textarea('description', __('Description'))->rules('required');

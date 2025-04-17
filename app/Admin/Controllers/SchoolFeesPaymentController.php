@@ -69,7 +69,7 @@ class SchoolFeesPaymentController extends AdminController
                 'enterprise_id' => Admin::user()->enterprise_id,
                 'type' => 'FEES_PAYMENT',
             ])
-            ->orderBy('id', 'DESC');
+            ->orderBy('payment_date', 'DESC');
 
         $grid->column('id', __('ID'))->sortable()->hide();
 

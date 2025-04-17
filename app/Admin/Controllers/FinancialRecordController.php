@@ -247,7 +247,7 @@ class FinancialRecordController extends AdminController
                 ->pluck('name_text', 'id'))
             ->default($term->id)
             ->rules('required');
-        $form->date('payment_date', __('Due Date'))->default(date('Y-m-d'))->rules('required');
+        $form->datetime('payment_date', __('Due Date'))->default(date('Y-m-d'))->rules('required');
         $form->divider();
 
         $ajax_url = url(
