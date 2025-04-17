@@ -69,7 +69,7 @@ class SchoolFeesPaymentController extends AdminController
                 'enterprise_id' => Admin::user()->enterprise_id,
                 'type' => 'FEES_PAYMENT',
             ])
-            ->orderBy('payment_date', 'DESC');
+            ->orderBy('id', 'DESC');
 
         $grid->column('id', __('ID'))->sortable()->hide();
 
@@ -235,7 +235,7 @@ class SchoolFeesPaymentController extends AdminController
             ->rules('required|int');
 
         //->format('YYYY-MM-DD HH:mm:ss')
-        $form->date('payment_date', __('Date'))
+        $form->datetime('payment_date', __('Date'))
             ->default(date('Y-m-d H:i:s'))
             ->rules('required');
 
