@@ -230,6 +230,10 @@ class TheologyMarkRecordController extends AdminController
                     ->orderBy('id', 'desc')
                     ->get() as $ex
             ) {
+                if ($ex->theology_class == null) {
+                    $ex->delete();
+                    return 'Deleted';
+                }
                 $streams[$ex->id] = $ex->theology_class->short_name . " - " . $ex->name;
             }
             $filter->equal('theology_stream_id', 'Filter by Stream')->select($streams);
@@ -420,7 +424,7 @@ class TheologyMarkRecordController extends AdminController
 
 
 
-        $grid->column('total_score_display', __('Average Mark'))->sortable(); 
+        $grid->column('total_score_display', __('Average Mark'))->sortable();
         return $grid;
     }
 
