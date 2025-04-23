@@ -149,14 +149,16 @@ class MarkRecordController extends AdminController
                 if (Admin::user()->isRole('dos')) {
                     $subs[$ex->id] = $ex->subject_name . " - " . $ex->academic_class->name_text;
                 } else {
+                    $u = Admin::user();
                     if (
-                        $ex->subject_teacher == Admin::user()->id ||
-                        $ex->teacher_1 == Admin::user()->id ||
-                        $ex->teacher_2 == Admin::user()->id ||
-                        $ex->teacher_3 == Admin::user()->id
+                        $ex->subject_teacher != $u->id &&
+                        $ex->teacher_1 != $u->id &&
+                        $ex->teacher_2 != $u->id &&
+                        $ex->teacher_3 != $u->id
                     ) {
-                        $subs[$ex->id] = $ex->subject_name . " - " . $ex->academic_class->name_text;
+                        continue;
                     }
+                    $subs[$ex->id] = $ex->subject_name . " - " . $ex->academic_class->name_text;
                 }
             }
             $filter->equal('subject_id', 'Filter by subject')->select($subs);
@@ -374,7 +376,7 @@ class MarkRecordController extends AdminController
                 8 => 'P8',
                 9 => 'F9',
                 0 => 'X',
-            ]); 
+            ]);
 
         return $grid;
     }

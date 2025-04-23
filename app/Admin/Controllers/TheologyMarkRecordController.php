@@ -198,17 +198,20 @@ class TheologyMarkRecordController extends AdminController
                         ->orderBy('theology_course_id', 'asc')
                         ->get() as $ex
                 ) {
+                    $u = Admin::user();
                     if (
-                        $ex->subject_teacher == Admin::user()->id ||
-                        $ex->teacher_1 == Admin::user()->id ||
-                        $ex->teacher_2 == Admin::user()->id ||
-                        $ex->teacher_3 == Admin::user()->id
+                        $ex->subject_teacher != $u->id &&
+                        $ex->teacher_1 != $u->id &&
+                        $ex->teacher_2 != $u->id &&
+                        $ex->teacher_3 != $u->id
                     ) {
-                        if ($ex->theology_class->academic_year_id != $dpYear->id) {
-                            continue;
-                        }
-                        $subs[$ex->id] = $ex->course->name . " - " . $ex->theology_class->name . " - " . $dpYear->name;
+                        continue;
                     }
+
+                    if ($ex->theology_class->academic_year_id != $dpYear->id) {
+                        continue;
+                    }
+                    $subs[$ex->id] = $ex->course->name . " - " . $ex->theology_class->name . " - " . $dpYear->name;
                 }
             }
 
