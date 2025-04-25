@@ -78,8 +78,12 @@ class TheologryStudentReportCardController extends AdminController
 
 
 
-        $grid->disableBatchActions();
-        $grid->disableActions();
+        if (!Admin::user()->isRole('dos')) {
+            $grid->disableBatchActions();
+            $grid->disableActions();
+        }
+
+
         $grid->disableCreateButton();
         $grid->column('id', __('#ID'))->sortable();
 
