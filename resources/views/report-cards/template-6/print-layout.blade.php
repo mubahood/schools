@@ -527,7 +527,7 @@ dd($theology_termly_report_card); */
                         <th>{{ (int) $tr->average_aggregates }}</th>
                     @endif
                     @if ($theology_termly_report_card->reports_include_eot == 'Yes')
-                        <th class="text-center">{{-- {{ $eot_tot }} --}}</th>
+                        <th class="text-center">{{ $eot_tot }}</th>
                     @endif
                     {{-- <td>{{ (int) $tr->average_aggregates }}</td> --}}
                     {{--                     <td><b>{{ $tr->total_aggregates }}</b></td> --}}
