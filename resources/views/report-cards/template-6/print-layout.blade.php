@@ -40,7 +40,7 @@ if ($tr != null) {
     }
 }
 
-$theo_stream_class = '.......';
+$theo_stream_class = '.......'; 
 if ($tr != null) {
     $theology_termly_report_card = $tr->termly_report_card;
 
@@ -69,7 +69,14 @@ if ($hasClass != null) {
     }
 }
 
- 
+if ($tr != null) {
+    $hasTheologyClass = StudentHasTheologyClass::where(['administrator_id' => $tr->owner->id, 'theology_class_id' => $tr->theology_class_id])->first();
+    if ($hasTheologyClass != null) {
+        if ($hasTheologyClass->stream != null) {
+            // $theo_stream_class = ' - ' . $hasTheologyClass->stream->name;
+        }
+    }
+}
 if ($tr == null) {
     $tr = $r->get_theology_report();
 }
