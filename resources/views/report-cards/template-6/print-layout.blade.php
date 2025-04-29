@@ -1,5 +1,6 @@
 <?php
 use App\Models\Utils;
+use App\Models\TheologyStream;
 use App\Models\StudentHasClass;
 use App\Models\StudentHasTheologyClass;
 
@@ -27,6 +28,11 @@ if ($r->academic_class != null) {
         $class_teacher_name = $r->academic_class->class_teacher->name;
     }
 }
+if($owner->stream!= null){
+    if($owner->stream->teacher != null){
+        $class_teacher_name = $owner->stream->teacher->name;
+    }
+}
 
 if ($tr != null) {
     if ($tr->termly_report_card == null) {
@@ -41,6 +47,14 @@ if ($tr != null) {
         $_teacher = $tr->theology_class->get_class_teacher();
         if ($_teacher != null) {
             $class_teacher_name_1 = $_teacher->name;
+        }
+        if($owner->theology_stream_id != null){
+            $theo_stream = TheologyStream::find($owner->theology_stream_id);
+            if($theo_stream!=null){
+                if($theo_stream->teacher != null){
+                    $class_teacher_name_1 = $theo_stream->teacher->name;
+                }
+            }
         }
     }
 }
@@ -345,8 +359,8 @@ dd($theology_termly_report_card); */
 
 
         <p class="mt-2 " style="font-size: 16!important;"><span class="text-uppercase">Class Teacher:</span>
-            {{-- <b style="font-size: 14px" class="text-uppercase">{{ $class_teacher_name }}</b>,&nbsp; --}}
-            <b style="font-size: 14px" class="text-uppercase">.......................................</b>&nbsp;
+            <b style="font-size: 14px" class="text-uppercase comment">&nbsp;&nbsp;{{ $class_teacher_name }}&nbsp;&nbsp;</b>,&nbsp;
+            {{-- <b style="font-size: 14px" class="text-uppercase">.......................................</b>&nbsp; --}}
             <span class="text-uppercase fs-14 ">Signature:<b>.....................</b></span>
         </p>
 
@@ -527,9 +541,9 @@ dd($theology_termly_report_card); */
                         : Utils::get_empty_spaces(150) . '<br>' . Utils::get_empty_spaces(150) !!}
                 </b></p>
             <p class="mt-2 fw-16"><span class="text-uppercase" style="font-size: 18px">Class Teacher's Name:</span>
-                {{-- <b style="font-size: 14px" class="text-uppercase">{{ $class_teacher_name_1 }}</b>,&nbsp; --}}
-                <b style="font-size: 18px"
-                    class="text-uppercase">.............................................</b>,&nbsp;
+                <b style="font-size: 14px" class="text-uppercase comment">&nbsp;{{ $class_teacher_name_1 }}&nbsp;&nbsp;&nbsp;</b>,&nbsp;
+                {{-- <b style="font-size: 18px"
+                    class="text-uppercase">.............................................</b>,&nbsp; --}}
                 <span class="text-uppercase fs-16 ">Signature:<b>............................</b></span>
             </p>
         @endif
