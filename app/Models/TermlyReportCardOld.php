@@ -440,7 +440,7 @@ class TermlyReportCardOld extends Model
                 $report->position = 0;
                 if ($report->average_aggregates <= 12) {
                     $report->grade = '1';
-                } else if ($report->average_aggregates <= 23) {
+                } else if ($report->average_aggregates <= 24) {
                     $report->grade = '2';
                 } else if ($report->average_aggregates <= 29) {
                     $report->grade = '3';
