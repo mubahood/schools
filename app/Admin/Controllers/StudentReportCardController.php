@@ -451,7 +451,7 @@ class StudentReportCardController extends AdminController
                 if ($phone != null && strlen($phone) > 5) {
                     $recipient = Utils::prepare_phone_number($phone);
                     $msg  = "Hello,\n\nI am sending you the report card of your child *{$this->owner->name}* from {$this->ent->name}.\n\n";
-                    $msg .= "Click here to download it:\n{$fileUrl}\n\n Thank you.";
+                    $msg .= "Click here 👇 to download it:\n{$fileUrl}\n\n Thank you.";
                     $waUrl = 'https://wa.me/' . $recipient . '?text=' . urlencode($msg);
 
                     $btn .= '<a class="btn btn-xs btn-success mb-1" target="_blank" href="' . $waUrl . '">SEND WHATSAPP (' . $recipient . ')</a><br>';
