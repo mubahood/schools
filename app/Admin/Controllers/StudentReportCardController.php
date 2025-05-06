@@ -10,6 +10,7 @@ use App\Models\StudentReportCard;
 use App\Models\Term;
 use App\Models\TermlyReportCard;
 use App\Models\User;
+use App\Models\Utils;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -25,6 +26,7 @@ use Encore\Admin\Widgets\InfoBox;
 use Encore\Admin\Widgets\Table;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Storage;
 
 class StudentReportCardController extends AdminController
 {
@@ -413,26 +415,59 @@ class StudentReportCardController extends AdminController
 
 
 
-        $grid->column('print', __('GENERATE'))->display(function ($m) {
-            $d = '<a class="btn btn-xs btn-primary" style="margin-bottom: 5px;" target="_blank" href="' . url('print?id=' . $this->id) . '" >PRINT</a><br>';
-            $d .= '<a class="btn btn-xs btn-info" style="margin-bottom: 5px;" target="_blank" href="' . url('generate-report-card?id=' . $this->id) . '" >GENERATE PDF NOW</a><br>';
-            if (
-                ($this->pdf_url != null) &&
-                strlen($this->pdf_url) > 3
-            ) {
-                $url = url('storage/files/' . $this->pdf_url);
-                $d .= '<a class="btn btn-xs btn-success" style="margin-bottom: 5px;" target="_blank" href="' . $url . '" >DOWNLOAD PDF</a>';
+        $grid->column('print', __('GENERATE'))->display(function () {
 
-                $d .= '<br><a class="btn btn-xs btn-warning" style="margin-bottom: 5px;" target="_blank" href="' . url('student-report-card-items?student_report_card_id=' . $this->id) . '" >EDIT</a>';
-                //add send email button
-                $d .= '<br><a class="btn btn-xs btn-danger" style="margin-bottom: 5px;" target="_blank" href="' . url('send-report-card?task=email&id=' . $this->id) . '" >SEND EMAIL</a>';
-                //add send sms
-                $d .= '<br><a class="btn btn-xs btn-danger" style="margin-bottom: 5px;" target="_blank" href="' . url('send-report-card?task=sms&id=' . $this->id) . '" >SEND SMS</a>';
+            $btn  = '';
+
+            $editUrl = url('student-report-card-items?student_report_card_id=' . $this->id);
+            $btn .= '<a class="btn btn-xs btn-warning mb-1" target="_blank" href="' . $editUrl . '">EDIT</a><br>';
+
+            $btn .= '<a class="btn btn-xs btn-info mb-1" target="_blank" ';
+            $btn .= 'href="' . url('generate-report-card?id=' . $this->id) . '">GENERATE PDF NOW</a><br>';
+
+            // Only show extra actions once a PDF exists
+            if (!empty($this->pdf_url)) {
+
+                $fileUrl = url('storage/files/' . $this->pdf_url);
+
+
+                $owner = $this->owner;
+                $phone = null;
+                if ($owner != null) {
+                    $phone = $this->owner->getParentPhonNumber();
+                }
+
+
+
+
+                $btn .= '<a class="btn btn-xs btn-primary mb-1" target="_blank" ';
+                $btn .= 'href="' . url('print?id=' . $this->id) . '">PRINT</a><br>';
+
+
+                $btn .= '<a class="btn btn-xs btn-success mb-1" target="_blank" href="' . $fileUrl . '">DOWNLOAD PDF</a><br>';
+
+
+                // ----------------- WhatsApp link -----------------
+                if ($phone != null && strlen($phone) > 5) {
+                    $recipient = Utils::prepare_phone_number($phone);
+                    $msg  = "Hello,\n\nI am sending you the report card of your child *{$this->owner->name}* from {$this->ent->name}.\n\n";
+                    $msg .= "Click here to download it:\n{$fileUrl}\n\n Thank you.";
+                    $waUrl = 'https://wa.me/' . $recipient . '?text=' . urlencode($msg);
+
+                    $btn .= '<a class="btn btn-xs btn-success mb-1" target="_blank" href="' . $waUrl . '">SEND WHATSAPP (' . $recipient . ')</a><br>';
+                } else {
+                    //add word no phone number
+                    $btn .= 'NO PARENT PHONE NUMBER<br>';
+                }
+
+                // Optional SMS hook (kept as‑is)
+                $btn .= '<a class="btn btn-xs btn-danger mb-1" target="_blank" ';
+                $btn .= 'href="' . url('send-report-card?task=sms&id=' . $this->id) . '">SEND SMS</a>';
             }
 
-
-            return $d;
+            return $btn;
         });
+
         $grid->column('is_ready', __('Ready for parent view'))->editable('select', ['No' => 'No', 'Yes' => 'Yes'])->sortable();
         $grid->column('created_at', __('DATE'))->sortable();
         $grid->column('term_id', __('Term'))

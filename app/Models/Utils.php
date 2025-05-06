@@ -2354,6 +2354,12 @@ class Utils  extends Model
     }
     public static function prepare_phone_number($phone_number)
     {
+        //check if it starts with 0
+        if (substr($phone_number, 0, 1) == "0") {
+            return "+256" . substr($phone_number, 1, strlen($phone_number));
+        }
+
+
         $phone_number = trim($phone_number);
         if (strlen($phone_number) < 6) {
             return $phone_number;
@@ -2362,9 +2368,8 @@ class Utils  extends Model
         if (substr($phone_number, 0, 1) == "+") {
             return $phone_number;
         }
+
         $original = $phone_number;
-        //$phone_number = '+256783204665';
-        //0783204665
         if (strlen($phone_number) > 10) {
             $phone_number = str_replace("+", "", $phone_number);
             $phone_number = substr($phone_number, 3, strlen($phone_number));

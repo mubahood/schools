@@ -575,4 +575,6 @@ class User extends Administrator implements JWTSubject
         }
         return json_encode($role_ids);
     }
+
+  
 }
