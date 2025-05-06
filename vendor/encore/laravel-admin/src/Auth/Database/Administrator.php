@@ -66,12 +66,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
         ) {
             return $this->phone_number_2;
         }
-        if (
-            $this->spouse_phone != null &&
-            strlen($this->spouse_phone) > 2
-        ) {
-            return $this->spouse_phone;
-        }
+     
         if (
             $this->father_phone != null &&
             strlen($this->father_phone) > 2
@@ -90,31 +85,27 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
         ) {
             return $this->emergency_person_phone;
         }
-        if ($this->username == null) {
-            return $this->username;
-        }
-
-        if ($this->user_type == 'parent') {
-            if ($this->kids != null) {
-                if (!empty($this->kids)) {
-                    if (isset($this->kids[0])) {
-                        $k = $this->kids[0];
-                        if ($k->user_type == 'student') {
-                            $this->phone_number_1 = $k->getParentPhonNumber();
-                            if ($this->phone_number_1 != null) {
-                                if (strlen($this->phone_number_1) > 3) {
-                                    try {
-                                        $this->save();
-                                    } catch (\Throwable $th) {
-                                    }
-                                    return $this->phone_number_1;
-                                }
-                            }
-                        }
-                    }
-                }
+        
+        $parent = User::where([
+            'user_type' => 'parent',
+            'enterprise_id' => $this->enterprise_id,
+            'id' => $this->parent_id,
+        ])->first();
+        if ($parent != null) {
+            if (
+                $parent->phone_number_1 != null &&
+                strlen($parent->phone_number_1) > 2
+            ) {
+                return $parent->phone_number_1;
+            }
+            if (
+                $parent->phone_number_2 != null &&
+                strlen($parent->phone_number_2) > 2
+            ) {
+                return $parent->phone_number_2;
             }
         }
+        
 
         return null;
     }
