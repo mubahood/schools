@@ -4,8 +4,10 @@ namespace App\Admin\Controllers;
 
 use App\Models\AcademicYear;
 use App\Models\Term;
+use App\Models\TermlyReportCard;
 use App\Models\TheologryStudentReportCard;
 use App\Models\TheologyClass;
+use App\Models\TheologyTermlyReportCard;
 use App\Models\User;
 use App\Models\Utils;
 use Encore\Admin\Auth\Database\Administrator;
@@ -14,6 +16,8 @@ use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
+use Encore\Admin\Widgets\Box;
+use Encore\Admin\Widgets\Table;
 use NumberFormatter;
 
 class TheologryStudentReportCardController extends AdminController
@@ -141,6 +145,106 @@ class TheologryStudentReportCardController extends AdminController
             $numFormat = new NumberFormatter('en_US', NumberFormatter::ORDINAL);
             return $numFormat->format(((int)($position)));
         })->editable()->sortable();
+
+        $ent = Admin::user()->ent;
+        $year = $ent->dpYear();
+        $term = $ent->active_term();
+        $reportCard = TermlyReportCard::where([
+            'enterprise_id' => Admin::user()->enterprise_id,
+            'term_id' => $term->id,
+        ])->first();
+
+        $thoReportCard = TheologyTermlyReportCard::where([
+            'enterprise_id' => Admin::user()->enterprise_id,
+            'term_id' => $term->id,
+        ])->first(); 
+
+
+        $grid->column('details', 'Marks', 'Expand to view MARKS')->expand(function ($model) use ($reportCard, $thoReportCard) {
+
+            if (!$reportCard)                 return 'No termly report card found.';
+            if (!$owner = $this->owner)       return 'No student found.';
+
+            $marks = $reportCard->get_student_marks($owner->id);
+            if (!$marks || !count($marks))    return 'No marks found.';
+
+            $rows        = [];
+            $totalMarks  = 0;
+            $totalAggr   = 0;           // drop if grades are letters
+
+            foreach ($marks as $m) {
+
+                $rows[] = [
+                    $m->subject->subject_name,
+                    $m->bot_score . " ({$m->bot_grade})",
+                    $m->mot_score . " ({$m->mot_grade})",
+                    $m->eot_score . " ({$m->eot_grade})",
+                    (int) $m->total_score_display,
+                    $m->aggr_name,
+                ];
+
+                $totalMarks += $m->total_score_display;
+                $totalAggr  += (int) $m->aggr_name;   // remove if letters only
+            }
+
+            $table  = new Table(['Subject', 'B.O.T', 'M.O.T', 'E.O.T', 'Score', 'Grade'], $rows);
+            $table->style('success');
+            $table->striped();
+            $table->bordered();
+            $table->responsive();
+            $table->hover();
+            $table->setBordered(true);
+            $table->setStriped(true);
+
+
+            $table2 = null;
+
+            if ($thoReportCard != null) {
+                $marks2 = $thoReportCard->get_student_marks($owner->id);
+                if ($marks2 != null && count($marks2) > 0) {
+                    $table2 = new Table(['Subject', 'B.O.T', 'M.O.T', 'E.O.T', 'Score', 'Grade'], $rows);
+                    $rows2 = [];
+                    $totalMarks2 = 0;
+                    $totalAggr2 = 0;           // drop if grades are letters
+                    foreach ($marks2 as $m) {
+
+                        $rows2[] = [
+                            $m->subject->name,
+                            $m->bot_score . " ({$m->bot_grade})",
+                            $m->mot_score . " ({$m->mot_grade})",
+                            $m->eot_score . " ({$m->eot_grade})",
+                            (int) $m->total_score_display,
+                            $m->aggr_name,
+                        ];
+
+                        $totalMarks2 += $m->total_score_display;
+                        $totalAggr2  += (int) $m->aggr_name;   // remove if letters only
+                    }
+                    $table2 = new Table(['Subject', 'B.O.T', 'M.O.T', 'E.O.T', 'Score', 'Grade'], $rows2);
+                    $table2->style('success');
+                    $table2->striped();
+                    $table2->bordered();
+                    $table2->responsive();
+                    $table2->hover();
+                    $table2->setBordered(true);
+                    $table2->setStriped(true);
+
+    
+                }
+            }
+            
+            $content = (new Box('Secular Marks', $table))->render();
+            if($table2 != null){
+                $table2->setBordered(true);
+                $table2->setStriped(true);
+                $content .= (new Box('Theology Marks', $table2))->render();
+            }
+
+            return $content;
+        },);
+
+
+
         $grid->column('class_teacher_comment', __('Class Teacher Remarks'))
             /* ->display(function ($position) {
 

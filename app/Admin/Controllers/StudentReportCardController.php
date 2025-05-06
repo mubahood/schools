@@ -10,6 +10,7 @@ use App\Models\StudentHasClass;
 use App\Models\StudentReportCard;
 use App\Models\Term;
 use App\Models\TermlyReportCard;
+use App\Models\TheologyTermlyReportCard;
 use App\Models\User;
 use App\Models\Utils;
 use Encore\Admin\Controllers\AdminController;
@@ -288,6 +289,14 @@ class StudentReportCardController extends AdminController
             'term_id' => $term->id,
         ])->first();
 
+        $thoReportCard = TheologyTermlyReportCard::where([
+            'enterprise_id' => Admin::user()->enterprise_id,
+            'term_id' => $term->id,
+        ])->first();
+
+
+
+
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
         ])->orderBy('id', 'DESC');
@@ -425,7 +434,7 @@ class StudentReportCardController extends AdminController
         $grid->column('mentor_comment', __('Mentor\'s Comment'))->editable('textarea')->sortable();
         $grid->column('nurse_comment', __('Nurse\'s Comment'))->editable('textarea')->sortable();
 
-        $grid->column('details', 'Marks', 'Expand to view MARKS')->expand(function ($model) use ($reportCard) {
+        $grid->column('details', 'Marks', 'Expand to view MARKS')->expand(function ($model) use ($reportCard, $thoReportCard) {
 
             if (!$reportCard)                 return 'No termly report card found.';
             if (!$owner = $this->owner)       return 'No student found.';
@@ -452,18 +461,64 @@ class StudentReportCardController extends AdminController
                 $totalAggr  += (int) $m->aggr_name;   // remove if letters only
             }
 
-            // grand‑total row
-            /*   $rows[] = [
-                '<b>TOTAL</b>',
-                '<b>' . $totalMarks . '</b>',
-                '<b>' . $totalAggr . '</b>',
-            ]; */
-
             $table  = new Table(['Subject', 'B.O.T', 'M.O.T', 'E.O.T', 'Score', 'Grade'], $rows);
+            $table->style('success');
+            $table->striped();
+            $table->bordered();
+            $table->responsive();
+            $table->hover();
+            $table->setBordered(true);
+            $table->setStriped(true);
 
-            return new Box(null, $table);
+
+            $table2 = null;
+
+            if ($thoReportCard != null) {
+                $marks2 = $thoReportCard->get_student_marks($owner->id);
+                if ($marks2 != null && count($marks2) > 0) {
+                    $table2 = new Table(['Subject', 'B.O.T', 'M.O.T', 'E.O.T', 'Score', 'Grade'], $rows);
+                    $rows2 = [];
+                    $totalMarks2 = 0;
+                    $totalAggr2 = 0;           // drop if grades are letters
+                    foreach ($marks2 as $m) {
+
+                        $rows2[] = [
+                            $m->subject->name,
+                            $m->bot_score . " ({$m->bot_grade})",
+                            $m->mot_score . " ({$m->mot_grade})",
+                            $m->eot_score . " ({$m->eot_grade})",
+                            (int) $m->total_score_display,
+                            $m->aggr_name,
+                        ];
+
+                        $totalMarks2 += $m->total_score_display;
+                        $totalAggr2  += (int) $m->aggr_name;   // remove if letters only
+                    }
+                    $table2 = new Table(['Subject', 'B.O.T', 'M.O.T', 'E.O.T', 'Score', 'Grade'], $rows2);
+                    $table2->style('success');
+                    $table2->striped();
+                    $table2->bordered();
+                    $table2->responsive();
+                    $table2->hover();
+                    $table2->setBordered(true);
+                    $table2->setStriped(true);
+
+    
+                }
+            }
+            
+            $content = (new Box('Secular Marks', $table))->render();
+            if($table2 != null){
+                $table2->setBordered(true);
+                $table2->setStriped(true);
+                $content .= (new Box('Theology Marks', $table2))->render();
+            }
+
+            return $content;
         },);
 
+
+        
 
         $grid->column('print', __('GENERATE'))->display(function () {
 
