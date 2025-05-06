@@ -254,7 +254,7 @@ class StudentsController extends AdminController
         //user_number column
 
 
-        $grid->quickSearch('name', 'lin', 'school_pay_payment_code', 'user_number')
+        $grid->quickSearch('name', 'lin', 'school_pay_payment_code', 'user_number', 'phone_number_1', 'phone_number_2')
             ->placeholder("Search by name or LIN or school pay code or ID number");
         //on export, emergency_person_name as it is
         $grid->export(function ($export) {
