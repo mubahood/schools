@@ -5,6 +5,7 @@ namespace App\Admin\Controllers;
 use App\Models\AcademicClass;
 use App\Models\AcademicClassSctream;
 use App\Models\AcademicYear;
+use App\Models\MarkRecord;
 use App\Models\StudentHasClass;
 use App\Models\StudentReportCard;
 use App\Models\Term;
@@ -275,7 +276,18 @@ class StudentReportCardController extends AdminController
         /*  $grid->header(function ($query) {
             return new Box('Gender ratio', 'Romina Love');
         });
+
+        
  */
+
+        $ent = Admin::user()->ent;
+        $year = $ent->dpYear();
+        $term = $ent->active_term();
+        $reportCard = TermlyReportCard::where([
+            'enterprise_id' => Admin::user()->enterprise_id,
+            'term_id' => $term->id,
+        ])->first();
+
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
         ])->orderBy('id', 'DESC');
@@ -398,10 +410,10 @@ class StudentReportCardController extends AdminController
             ->sortable();
 
         $grid->column('total_marks', __('Total marks'))->editable()->sortable();
-        $grid->column('average_aggregates', __('Average aggregates'))->editable()->sortable();
+        $grid->column('average_aggregates', __('Aggregates'))->editable()->sortable();
         $grid->column('grade', __('Grade'))->editable()->sortable();
 
-        $grid->column('position', __('Position in class'))->display(function ($position) {
+        $grid->column('position', __('Position'))->display(function ($position) {
             $numFormat = new NumberFormatter('en_US', NumberFormatter::ORDINAL);
             return $numFormat->format($position);
         })->editable()->sortable();
@@ -413,6 +425,44 @@ class StudentReportCardController extends AdminController
         $grid->column('mentor_comment', __('Mentor\'s Comment'))->editable('textarea')->sortable();
         $grid->column('nurse_comment', __('Nurse\'s Comment'))->editable('textarea')->sortable();
 
+        $grid->column('details', 'Marks', 'Expand to view MARKS')->expand(function ($model) use ($reportCard) {
+
+            if (!$reportCard)                 return 'No termly report card found.';
+            if (!$owner = $this->owner)       return 'No student found.';
+
+            $marks = $reportCard->get_student_marks($owner->id);
+            if (!$marks || !count($marks))    return 'No marks found.';
+
+            $rows        = [];
+            $totalMarks  = 0;
+            $totalAggr   = 0;           // drop if grades are letters
+
+            foreach ($marks as $m) {
+
+                $rows[] = [
+                    $m->subject->subject_name,
+                    $m->bot_score . " ({$m->bot_grade})",
+                    $m->mot_score . " ({$m->mot_grade})",
+                    $m->eot_score . " ({$m->eot_grade})",
+                    (int) $m->total_score_display,
+                    $m->aggr_name,
+                ];
+
+                $totalMarks += $m->total_score_display;
+                $totalAggr  += (int) $m->aggr_name;   // remove if letters only
+            }
+
+            // grand‑total row
+            /*   $rows[] = [
+                '<b>TOTAL</b>',
+                '<b>' . $totalMarks . '</b>',
+                '<b>' . $totalAggr . '</b>',
+            ]; */
+
+            $table  = new Table(['Subject', 'B.O.T', 'M.O.T', 'E.O.T', 'Score', 'Grade'], $rows);
+
+            return new Box(null, $table);
+        },);
 
 
         $grid->column('print', __('GENERATE'))->display(function () {
@@ -524,6 +574,7 @@ class StudentReportCardController extends AdminController
             die("Item not found.");
         }
 
+
         $form->hidden('enterprise_id', __('Enterprise id'));
         $form->display('_term_id', __('Term'))->default($item->term->name_text);
         $form->display('_student_id', __('Student'))->default($item->owner->name);
@@ -544,6 +595,9 @@ class StudentReportCardController extends AdminController
             5 => 'Failure - F',
             6 => 'Uganda pass - U',
         ])->rules('required');
+
+        //has many items 
+
         $form->decimal('position', 'Position in class')->rules('required');
         $form->decimal('total_students', 'Total students in class')->rules('required');
         $form->text('class_teacher_comment', 'Class teacher\'s comment');
