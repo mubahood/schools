@@ -470,7 +470,7 @@ class StudentsController extends AdminController
     protected function detail($id)
     {
 
-        $u = Administrator::findOrFail($id);
+        $u = User::findOrFail($id);
         $tab = new Tab();
         $term = $u->ent->active_term();
         $active_term_transactions = $u->account->transactions()->where([
@@ -540,9 +540,7 @@ class StudentsController extends AdminController
     protected function form()
     {
 
-        /*  $u  = Administrator::find(10615);
-        Administrator::my_update($u);
-        die("done romina"); */
+
         $u = Admin::user();
         $form = new Form(new Administrator());
 

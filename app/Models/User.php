@@ -12,7 +12,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-
+use Illuminate\Support\Facades\DB;
 
 class User extends Administrator implements JWTSubject
 {
@@ -30,6 +30,18 @@ class User extends Administrator implements JWTSubject
             return false;
         });
 
+        //creating
+        self::creating(function ($m) {
+
+            if ($m->user_type == 'student') {
+                $parent = $m->getParent();
+                if ($parent != null) {
+                    $m->parent_id = $parent->id;
+                }
+            }
+            return $m;
+        });
+
 
         //updating
         self::updating(function ($m) {
@@ -37,6 +49,13 @@ class User extends Administrator implements JWTSubject
                 'user_id' => $m->id
             ]);
             $m->roles_text = json_encode($roles);
+
+            if ($m->user_type == 'student') {
+                $parent = $m->getParent();
+                if ($parent != null) {
+                    $m->parent_id = $parent->id;
+                }
+            }
             return $m;
         });
 
@@ -46,7 +65,7 @@ class User extends Administrator implements JWTSubject
 
             //check if has parent
             if (strtolower($m->user_type) == 'student') {
-              
+
                 $p = $m->getParent();
                 if ($p == null) {
                     try {
@@ -139,16 +158,21 @@ class User extends Administrator implements JWTSubject
 
     public static function createParent($s)
     {
+        if (strtolower($s->user_type) != 'student') {
+            return null;
+        }
+
         $p = $s->getParent();
         if ($p != null) {
+            $table = $s->getTable();
+            $sql = "UPDATE $table SET parent_id = ? WHERE id = ?";
             $s->parent_id = $p->id;
-            $s->save();
+            DB::update($sql, [$p->id, $s->id]);
+            $p = $s->getParent();
             return $s;
         }
 
-        if (strtolower($s->user_type) != 'student') {
-            return $p;
-        }
+
 
         if ($p == null) {
             $p = new Administrator();
@@ -232,63 +256,6 @@ class User extends Administrator implements JWTSubject
             }
         }
         return  $p;
-    }
-    public function getParent()
-    {
-        $s = $this;
-        $p = User::where([
-            'user_type' => 'parent',
-            'enterprise_id' => $s->enterprise_id,
-            'id' => $s->parent_id,
-        ])->first();
-
-        $phone_number_1 = Utils::prepare_phone_number($s->phone_number_1);
-
-        if (
-            $p == null &&
-            Utils::phone_number_is_valid($phone_number_1)
-        ) {
-            $p = User::where([
-                'user_type' => 'parent',
-                'enterprise_id' => $s->enterprise_id,
-                'phone_number_1' => $phone_number_1,
-            ])->first();
-        }
-        if (
-            $p == null &&
-            $s->school_pay_account_id != null &&
-            strlen($s->school_pay_account_id) > 4
-        ) {
-            $p = User::where([
-                'user_type' => 'parent',
-                'enterprise_id' => $s->enterprise_id,
-                'school_pay_account_id' => $s->school_pay_account_id,
-            ])->first();
-        }
-
-        if (
-            $p == null &&
-            $s->user_id != null &&
-            strlen($s->user_id) > 0
-        ) {
-            $p = User::where([
-                'user_type' => 'parent',
-                'enterprise_id' => $s->enterprise_id,
-                'user_id' => $s->user_id,
-            ])->first();
-        }
-        if (
-            $p == null &&
-            $s->school_pay_payment_code != null &&
-            strlen($s->school_pay_payment_code) > 4
-        ) {
-            $p = User::where([
-                'user_type' => 'parent',
-                'enterprise_id' => $s->enterprise_id,
-                'school_pay_payment_code' => $s->school_pay_payment_code,
-            ])->first();
-        }
-        return $p;
     }
 
 
@@ -575,6 +542,4 @@ class User extends Administrator implements JWTSubject
         }
         return json_encode($role_ids);
     }
-
-  
 }

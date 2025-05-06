@@ -46,6 +46,14 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
 
     public function getParentPhonNumber()
     {
+
+        if (
+            $this->emergency_person_phone != null &&
+            strlen($this->emergency_person_phone) > 2
+        ) {
+            return $this->emergency_person_phone;
+        }
+
         if (
             $this->phone_number_1 != null &&
             strlen($this->phone_number_1) > 2
@@ -348,7 +356,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
 
         self::created(function ($m) {
             if (strtolower($m->user_type) == 'student') {
-                //User::createParent($m); 
+                User::createParent($m);
                 Administrator::my_update($m);
             }
             //created Administrator
@@ -522,14 +530,16 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
         self::updated(function ($m) {
             Administrator::my_update($m);
 
-            self::updated(function ($m) {
-                $x = User::find($m->id);
-                if ($x != null) {
-                    if ($x->status == 1) {
-                        $x->update_fees();
-                    }
+            if (trim(strtolower($m->user_type)) == 'student') {
+                User::createParent($m);
+            }
+
+            $x = User::find($m->id);
+            if ($x != null) {
+                if ($x->status == 1) {
+                    $x->update_fees();
                 }
-            });
+            }
         });
 
 
@@ -571,7 +581,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
     }
     public static function my_update($m)
     {
-        $m->update_theo_classes(); 
+        $m->update_theo_classes();
         $acc = Account::create($m->id);
         if ($m->user_type == 'student') {
             if ($m->current_class_id != null) {
@@ -736,6 +746,50 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
     {
         return $this->hasMany(StudentHasClass::class);
     }
+
+    public function getParent()
+    {
+        $s = $this;
+        $p = User::where([
+            'user_type' => 'parent',
+            'enterprise_id' => $s->enterprise_id,
+            'id' => $s->parent_id,
+        ])->first();
+
+        if ($p != null) {
+            return $p;
+        }
+
+        $phone_number_1 = Utils::prepare_phone_number($s->emergency_person_phone);
+
+        if (
+            $p == null &&
+            Utils::phone_number_is_valid($phone_number_1)
+        ) {
+            $p = User::where([
+                'user_type' => 'parent',
+                'enterprise_id' => $s->enterprise_id,
+                'phone_number_1' => $phone_number_1,
+            ])->first();
+            if ($p != null) {
+                return $p;
+            }
+        }
+
+        if ($p == null) {
+            $p = User::where([
+                'user_type' => 'parent',
+                'enterprise_id' => $s->enterprise_id,
+                'phone_number_1' => $s->emergency_person_phone,
+            ])->first();
+            if ($p != null) {
+                return $p;
+            }
+        }
+
+        return $p;
+    }
+
 
 
     public function get_my_theology_classes()
@@ -1319,12 +1373,12 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
         }
 
 
-   
+
         if ($this->theology_stream_id != null) {
             $theology_stream = TheologyStream::find($this->theology_stream_id);
             if ($theology_stream != null) {
                 $this->current_theology_class_id = $theology_stream->theology_class_id;
-            } 
+            }
         }
 
 
@@ -1336,19 +1390,18 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                     'theology_class_id' => $theology_class->id,
                     'administrator_id' => $this->id,
                 ])->first();
-                
 
-                if ($student_has_theo_class == null) { 
+
+                if ($student_has_theo_class == null) {
                     $student_has_theo_class = new StudentHasTheologyClass();
-                } 
+                }
 
                 $student_has_theo_class->theology_class_id = $theology_class->id;
                 $student_has_theo_class->administrator_id = $this->id;
                 $student_has_theo_class->theology_stream_id = $this->theology_stream_id;
-                $student_has_theo_class->enterprise_id = $this->enterprise_id; 
+                $student_has_theo_class->enterprise_id = $this->enterprise_id;
                 $student_has_theo_class->save();
             }
         }
- 
     }
 }
