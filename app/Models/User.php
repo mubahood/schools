@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Encore\Admin\Auth\Database\Administrator;
+use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form\Field\BelongsToMany;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -162,6 +163,10 @@ class User extends Administrator implements JWTSubject
             return null;
         }
 
+        $s = Administrator::find($s->id);
+        if ($s == null) {
+            return null;
+        } 
         $p = $s->getParent();
         if ($p != null) {
             $table = $s->getTable();
