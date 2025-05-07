@@ -35,7 +35,7 @@ class ParentsController extends AdminController
         });
 
         $grid->export(function ($export) {
-            $export->except(['kids','children']);
+            $export->except(['kids', 'children']);
         });
 
 
@@ -66,7 +66,7 @@ class ParentsController extends AdminController
         });
 
 
-/*         $grid->disableExport();
+        /*         $grid->disableExport();
         $grid->disableCreateButton(); */
         $grid->quickSearch('name')->placeholder('Search by name');
         $grid->disableBatchActions();
@@ -179,7 +179,7 @@ class ParentsController extends AdminController
         $form->hidden('enterprise_id')->rules('required')->default($u->enterprise_id)
             ->value($u->enterprise_id);
 
-        $form->hidden('user_type')->default('employee')->value('employee');
+        $form->hidden('user_type')->default('parent')->value('parent');
 
         $form->text('first_name')->rules('required');
         $form->text('last_name')->rules('required');
