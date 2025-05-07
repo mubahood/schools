@@ -173,6 +173,10 @@ class TheologryStudentReportCardController extends AdminController
             $totalAggr   = 0;           // drop if grades are letters
 
             foreach ($marks as $m) {
+                if($m->subject == null){
+                    $m->delete();
+                    continue;
+                }
 
                 $rows[] = [
                     $m->subject->subject_name,
@@ -207,7 +211,10 @@ class TheologryStudentReportCardController extends AdminController
                     $totalMarks2 = 0;
                     $totalAggr2 = 0;           // drop if grades are letters
                     foreach ($marks2 as $m) {
-
+                        if($m->subject == null){
+                            $m->delete();
+                            continue;
+                        }
                         $rows2[] = [
                             $m->subject->name,
                             $m->bot_score . " ({$m->bot_grade})",

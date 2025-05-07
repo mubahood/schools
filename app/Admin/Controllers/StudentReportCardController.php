@@ -484,6 +484,7 @@ class StudentReportCardController extends AdminController
                     $totalAggr2 = 0;           // drop if grades are letters
                     foreach ($marks2 as $m) {
                         if($m->subject == null){
+                            $m->delete();
                             continue;
                         }
                         $rows2[] = [
