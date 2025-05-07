@@ -157,7 +157,7 @@ class TheologryStudentReportCardController extends AdminController
         $thoReportCard = TheologyTermlyReportCard::where([
             'enterprise_id' => Admin::user()->enterprise_id,
             'term_id' => $term->id,
-        ])->first(); 
+        ])->first();
 
 
         $grid->column('details', 'Marks', 'Expand to view MARKS')->expand(function ($model) use ($reportCard, $thoReportCard) {
@@ -173,7 +173,7 @@ class TheologryStudentReportCardController extends AdminController
             $totalAggr   = 0;           // drop if grades are letters
 
             foreach ($marks as $m) {
-                if($m->subject == null){
+                if ($m->subject == null) {
                     $m->delete();
                     continue;
                 }
@@ -211,7 +211,7 @@ class TheologryStudentReportCardController extends AdminController
                     $totalMarks2 = 0;
                     $totalAggr2 = 0;           // drop if grades are letters
                     foreach ($marks2 as $m) {
-                        if($m->subject == null){
+                        if ($m->subject == null) {
                             $m->delete();
                             continue;
                         }
@@ -235,13 +235,11 @@ class TheologryStudentReportCardController extends AdminController
                     $table2->hover();
                     $table2->setBordered(true);
                     $table2->setStriped(true);
-
-    
                 }
             }
-            
+
             $content = (new Box('Secular Marks', $table))->render();
-            if($table2 != null){
+            if ($table2 != null) {
                 $table2->setBordered(true);
                 $table2->setStriped(true);
                 $content .= (new Box('Theology Marks', $table2))->render();
