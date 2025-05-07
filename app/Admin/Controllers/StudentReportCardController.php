@@ -447,7 +447,9 @@ class StudentReportCardController extends AdminController
             $totalAggr   = 0;           // drop if grades are letters
 
             foreach ($marks as $m) {
-
+                if($m->subject == null){
+                    continue;
+                }
                 $rows[] = [
                     $m->subject->subject_name,
                     $m->bot_score . " ({$m->bot_grade})",
@@ -481,7 +483,9 @@ class StudentReportCardController extends AdminController
                     $totalMarks2 = 0;
                     $totalAggr2 = 0;           // drop if grades are letters
                     foreach ($marks2 as $m) {
-
+                        if($m->subject == null){
+                            continue;
+                        }
                         $rows2[] = [
                             $m->subject->name,
                             $m->bot_score . " ({$m->bot_grade})",
