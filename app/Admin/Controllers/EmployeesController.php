@@ -124,6 +124,7 @@ class EmployeesController extends AdminController
         $grid->column('tin', 'TIN')->hide();
         $grid->column('nssf_number')->hide();
         $grid->column('bank_name')->hide();
+        $grid->column('user_type')->sortable()->hide();
         $grid->column('bank_account_number')->hide();
         $grid->column('primary_school_name')->hide();
         $grid->column('primary_school_year_graduated')->hide();
@@ -150,6 +151,7 @@ class EmployeesController extends AdminController
                 '0' => 'Not Active',
                 '1' => 'Active'
             ]);
+
         return $grid;
     }
 
@@ -325,6 +327,18 @@ class EmployeesController extends AdminController
         });
 
 
+        if ($form->isEditing()) {
+
+            //user_type
+            $form->radio('user_type', 'User type')
+                ->options([
+                    'employee' => 'Employee',
+                    'student' => 'Student',
+                    'parent' => 'Parent',
+                    'supplier' => 'Supplier',
+                ])
+                ->rules('required')->default('employee');
+        }
 
         $form->radio('status')->options([
             1 => 'Active',
