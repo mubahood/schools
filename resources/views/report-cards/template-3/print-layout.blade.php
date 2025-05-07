@@ -28,7 +28,6 @@ if ($r->academic_class != null) {
 
 if ($tr != null) {
     $theology_termly_report_card = $tr->termly_report_card;
-
     if ($tr->theology_class != null) {
         $_teacher = $tr->theology_class->get_class_teacher();
         if ($_teacher != null) {
@@ -39,12 +38,23 @@ if ($tr != null) {
 $stream_class = '';
 $theo_stream_class = '.......';
 $hasTheologyClass = null;
+$teacher_signature = null;
+$teacher_signature_1 = null;
 $hasClass = StudentHasClass::where(['administrator_id' => $r->owner->id, 'academic_class_id' => $r->academic_class_id])->first();
 if ($hasClass != null) {
     if ($hasClass->stream != null) {
         $stream_class = ' - ' . $hasClass->stream->name;
         if ($hasClass->stream->teacher != null) {
             $class_teacher_name = $hasClass->stream->teacher->name;
+            $teacher = $hasClass->stream->teacher;
+            if ($teacher != null) {
+                if ($teacher->sign != null) {
+                    $path = public_path('storage/' . $teacher->sign);
+                    if (file_exists($path)) {
+                        $teacher_signature = $path;
+                    }
+                }
+            }
         }
     }
 }
@@ -56,6 +66,15 @@ if ($tr != null) {
             $theo_stream_class = ' - ' . $hasTheologyClass->stream->name;
             if ($hasTheologyClass->stream->teacher != null) {
                 $class_teacher_name_1 = $hasTheologyClass->stream->teacher->name;
+                $teacher = $hasTheologyClass->stream->teacher;
+                if ($teacher != null) {
+                    if ($teacher->sign != null) {
+                        $path = public_path('storage/' . $teacher->sign);
+                        if (file_exists($path)) {
+                            $teacher_signature_1 = $path;
+                        }
+                    }
+                }
             }
         }
     }
@@ -174,8 +193,7 @@ $mainReport = $r;
         DIVISION: <b class="text-danger">{{ $r->grade }}</b> &nbsp;
 
         @if ($r->termly_report_card->display_positions == 'Yes')
-            position: <b
-                class="text-danger">{{ (int) $r->position }}</b> &nbsp;
+            position: <b class="text-danger">{{ (int) $r->position }}</b> &nbsp;
             OUT OF: <b class="text-danger">{{ (int) $r->total_students }}</b> &nbsp;
         @elseif ($r->termly_report_card->display_positions == 'Manual')
             position: <b class="text-danger">......</b> &nbsp;
@@ -318,7 +336,15 @@ $mainReport = $r;
             class="text-uppercase comment">{{ $class_teacher_name != null && strlen($class_teacher_name) > 2 ? $class_teacher_name : Utils::get_empty_spaces(60) }}</b>&nbsp;
         {{-- <b style="font-size: 14px"
             class="text-uppercase">......................................................</b> --}}&nbsp;
-        <span class="text-uppercase fs-16 ">Signature:<b class="comment">{{ Utils::get_empty_spaces(40) }}</b></span>
+
+        @if ($teacher_signature != null)
+            <span class="text-uppercase fs-16 ">Signature:
+                <img style="width: 70px; " src="{{ $teacher_signature }}">
+            </span>
+        @else
+            <span class="text-uppercase fs-16 ">Signature:<b
+                    class="comment">{{ Utils::get_empty_spaces(40) }}</b></span>
+        @endif
     </p>
 
     @if ($tr != null)
@@ -336,8 +362,7 @@ $mainReport = $r;
             Aggregate: <b class="text-danger">{{ (int) $tr->average_aggregates }}</b> &nbsp;
             DIVISION: <b class="text-danger">{{ $tr->grade }}</b> &nbsp;
             @if ($r->termly_report_card->display_positions == 'Yes')
-                POS: <b
-                    class="text-danger">{{ (int) $r->position }}</b> &nbsp;
+                POS: <b class="text-danger">{{ (int) $r->position }}</b> &nbsp;
                 OUT OF: <b class="text-danger">{{ (int) $r->total_students }}</b> &nbsp;
             @elseif ($r->termly_report_card->display_positions == 'Manual')
                 position: <b class="text-danger">......</b> &nbsp;
@@ -483,8 +508,14 @@ $mainReport = $r;
                 class="text-uppercase comment">{{ $class_teacher_name_1 != null && strlen($class_teacher_name_1) > 2 ? $class_teacher_name_1 : Utils::get_empty_spaces(60) }}</b>&nbsp;
             {{-- <b style="font-size: 14px"
                 class="text-uppercase">......................................................</b> --}}&nbsp;
-            <span class="text-uppercase fs-16 ">Signature:<b
-                    class="comment">{{ Utils::get_empty_spaces(40) }}</b></span>
+            @if ($teacher_signature_1 != null)
+                <span class="text-uppercase fs-16 ">Signature:
+                    <img style="width: 70px; " src="{{ $teacher_signature_1 }}">
+                </span>
+            @else
+                <span class="text-uppercase fs-16 ">Signature:<b
+                        class="comment">{{ Utils::get_empty_spaces(40) }}</b></span>
+            @endif
         </p>
 
     @endif

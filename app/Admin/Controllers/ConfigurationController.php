@@ -34,7 +34,7 @@ class ConfigurationController extends AdminController
 
         $grid->column('name', __('School Name'));
         $grid->column('short_name', __('Short name'));
-        $grid->column('logo', __('Logo'));
+        $grid->column('logo', __('Logo'))->lightbox(['width' => 100, 'height' => 100]);
         $grid->column('phone_number', __('Phone number'));
         $grid->column('email', __('Email'));
         $grid->column('address', __('Address'));
@@ -83,7 +83,7 @@ class ConfigurationController extends AdminController
 
         $form->text('name', __('School Name'))->required();
         $form->text('motto', __('School Motto'))->required();
-        $form->image('logo', __('School badge'));
+        $form->image('logo', __('School badge'))->uniqueName();
         $form->text('address', __('School Address'))->required();
         $form->quill('details', __('School details'));
         $form->text('phone_number', __('Phone number'));
@@ -101,7 +101,7 @@ class ConfigurationController extends AdminController
         $form->divider();
         $form->text('hm_name', __('Head Teacher Name'));
         $form->image('hm_signature', __('Head Teacher signature'));
-        $form->image('dos_signature', __('Head Teacher signature'));
+        $form->image('dos_signature', __('D.O.S signature'));
         $form->image('bursar_signature', __('Bursar signature'));
 
         return $form;

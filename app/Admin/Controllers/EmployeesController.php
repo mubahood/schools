@@ -303,6 +303,7 @@ class EmployeesController extends AdminController
 
         $form->divider('SYSTEM ACCOUNT');
         $form->image('avatar', trans('admin.avatar'));
+        $form->image('sign', "Signature")->uniqueName();
 
         $form->text('email', 'Email address')
             ->creationRules(["unique:admin_users"]);
