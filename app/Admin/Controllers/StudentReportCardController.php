@@ -447,7 +447,7 @@ class StudentReportCardController extends AdminController
             $totalAggr   = 0;           // drop if grades are letters
 
             foreach ($marks as $m) {
-                if($m->subject == null){
+                if ($m->subject == null) {
                     continue;
                 }
                 $rows[] = [
@@ -483,7 +483,7 @@ class StudentReportCardController extends AdminController
                     $totalMarks2 = 0;
                     $totalAggr2 = 0;           // drop if grades are letters
                     foreach ($marks2 as $m) {
-                        if($m->subject == null){
+                        if ($m->subject == null) {
                             $m->delete();
                             continue;
                         }
@@ -507,13 +507,11 @@ class StudentReportCardController extends AdminController
                     $table2->hover();
                     $table2->setBordered(true);
                     $table2->setStriped(true);
-
-    
                 }
             }
-            
+
             $content = (new Box('Secular Marks', $table))->render();
-            if($table2 != null){
+            if ($table2 != null) {
                 $table2->setBordered(true);
                 $table2->setStriped(true);
                 $content .= (new Box('Theology Marks', $table2))->render();
@@ -523,7 +521,7 @@ class StudentReportCardController extends AdminController
         },);
 
 
-        
+
 
         $grid->column('print', __('GENERATE'))->display(function () {
 
@@ -558,15 +556,32 @@ class StudentReportCardController extends AdminController
 
 
                 // ----------------- WhatsApp link -----------------
-                if ($phone != null && strlen($phone) > 5) {
+                if ($phone && strlen($phone) > 5) {
+
+                    $termly_report_card = $this->term; 
                     $recipient = Utils::prepare_phone_number($phone);
-                    $msg  = "Hello,\n\nI am sending you the report card of your child *{$this->owner->name}* from {$this->ent->name}.\n\n";
-                    $msg .= "Click on the link below to download it.\n\n{$fileUrl}\n\n Thank you.";
+                    $date      = now()->format('d. m. Y');                  // e.g. “10. 05. 2025”
+                    $school    = $this->ent->name;                          // e.g. “Lukman Primary School”
+                    $child     = $this->owner->name;                        // pupil’s name
+                    $term      = $termly_report_card->term_name;            // e.g. “Term I”
+                    $year      = $termly_report_card->year;                 // e.g. “2025”
+
+                    // Build the message
+                    $msg  = "{$date},\n\n";
+                    $msg .= "Dear Parent / Guardian,\n\n";
+                    $msg .= "Assalaam alaikum warahmatu-Llaahi wabarakaatuh.\n\n";
+                    $msg .= "Sir / Madam, this is {$school}. Please find herebelow the Report Card ";
+                    $msg .= "(in soft copy form) of your child / pupil *{$child}* for end of {$term} {$year}.\n\n";
+                    $msg .= "Kindly click on the link below to download it:\n{$fileUrl}\n\n";
+                    $msg .= "Much thanks. Jazaakum Allaahu khairan. Baaraka Allaahu fiikum.\n\n";
+                    $msg .= "From Office of the Headteacher.";
+
+                    // URL-encode and build WhatsApp URL
                     $waUrl = 'https://wa.me/' . $recipient . '?text=' . urlencode($msg);
 
-                    $btn .= '<a class="btn btn-xs btn-success mb-1" target="_blank" href="' . $waUrl . '">SEND WHATSAPP (' . $recipient . ')</a><br>';
+                    $btn  .= '<a class="btn btn-xs btn-success mb-1" target="_blank" '
+                        . 'href="' . $waUrl . '">SEND WHATSAPP (' . $recipient . ')</a><br>';
                 } else {
-                    //add word no phone number
                     $btn .= 'NO PARENT PHONE NUMBER<br>';
                 }
 
