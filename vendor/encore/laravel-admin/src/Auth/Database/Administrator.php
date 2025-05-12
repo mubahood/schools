@@ -735,7 +735,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
 
     public function classes()
     {
-        return $this->hasMany(StudentHasClass::class);
+        return $this->hasMany(StudentHasClass::class, 'administrator_id');
     }
 
     public function getParent()
