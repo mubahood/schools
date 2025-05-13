@@ -1587,35 +1587,34 @@ class Utils  extends Model
 
     public static function schoool_pay_sync()
     {
-        // 1) Ensure Kampala timezone
+        // 1) Timezone
         date_default_timezone_set('Africa/Kampala');
-
         $now            = Carbon::now();
         $lastReconciler = Reconciler::orderBy('id', 'desc')->first();
         $dif_secs       = $lastReconciler
-            ? $now->diffInSeconds(Carbon::parse($lastReconciler->created_at))
-            : 10;
-
-        // (optional) throttle to at least 10s between runs
+                          ? $now->diffInSeconds(Carbon::parse($lastReconciler->created_at))
+                          : 10;
+    
+        // throttle if needed
         if ($dif_secs < 10) {
             // die("Last reconciler was done $dif_secs seconds ago.");
         }
-
-        // 2) Find schools enabled for SchoolPay
+    
+        // 2) Get all SchoolPay-enabled enterprises
         $schools = Enterprise::where('school_pay_status', 'Yes')
-            ->whereNotNull('school_pay_code')
-            ->orderBy('id')
-            ->get();
-
+                             ->whereNotNull('school_pay_code')
+                             ->orderBy('id', 'asc')
+                             ->get();
+    
         if ($schools->isEmpty()) {
             die("No school pay schools found.");
         }
-
-        // 3) Pick next school after last reconciled
+    
+        // 3) Find next school after the last reconciled one
         $lastEntRec = Reconciler::whereIn('enterprise_id', $schools->pluck('id'))
-            ->orderByDesc('id')
-            ->first();
-
+                                 ->orderBy('id', 'desc')
+                                 ->first();
+    
         $nextId = 0;
         if ($lastEntRec) {
             foreach ($schools as $s) {
@@ -1626,62 +1625,68 @@ class Utils  extends Model
             }
         }
         $nextId = $nextId ?: $schools->first()->id;
-
+    
         $ent = Enterprise::find($nextId);
-        if (!$ent) {
+        if (! $ent) {
             die("Enterprise not found.");
         }
-
-        // 4) Determine which date to sync (today or back-fill)
-        $lastRec   = Reconciler::where('enterprise_id', $ent->id)
-            ->orderByDesc('id')
-            ->first();
-        $rec       = new Reconciler(['enterprise_id' => $ent->id]);
-        $rec->last_update = time();
-        $rec_date = Carbon::now()->format('Y-m-d');
-
+    
+        // 4) Figure out which date to sync (today or back-fill)
+        $lastRec = Reconciler::where('enterprise_id', $ent->id)
+                             ->orderBy('id', 'desc')
+                             ->first();
+    
+        // create a fresh Reconciler record, setting attributes one by one
+        $rec               = new Reconciler();
+        $rec->enterprise_id = $ent->id;
+        $rec->last_update   = time();
+        $rec->back_day      = 0;
+    
+        // default sync date is today
+        $rec_date = Carbon::now('Africa/Kampala')->format('Y-m-d');
+    
         if ($lastRec) {
             $lastDay = Carbon::createFromTimestamp($lastRec->last_update);
-            $backDay = $lastRec->back_day ?? 0;
-
-            if (! $lastDay->isToday()) {
-                // keep $rec_date as today
-                $rec->back_day = $backDay;
+            // if we already synced today, increment back_day up to 30
+            if ($lastDay->isToday()) {
+                $back = min(($lastRec->back_day ?? 0) + 1, 30);
+                $rec->back_day    = $back;
+                $rec_date         = Carbon::today('Africa/Kampala')->subDays($back)->format('Y-m-d');
+                $rec->last_update = Carbon::today('Africa/Kampala')->subDays($back)->toDateTimeString();
             } else {
-                $backDay = min($backDay + 1, 30);
-                $rec->back_day = $backDay;
-                $rec_date = Carbon::today()->subDays($backDay)->format('Y-m-d');
-                $rec->last_update = Carbon::today()->subDays($backDay)->toDateTimeString();
+                // otherwise keep the same back_day
+                $rec->back_day = $lastRec->back_day;
             }
         }
-
-        // 5) Build the uppercase MD5 signature
-        $raw     = $ent->school_pay_code . $rec_date . $ent->school_pay_password;
-        $sig     = strtoupper(md5($raw));
-        $url     = "https://schoolpay.co.ug/paymentapi/AndroidRS/SyncSchoolTransactions/"
-            . "{$ent->school_pay_code}/{$rec_date}/{$sig}";
-
-        // 6) Fetch via Guzzle
-        $client = new Client();
+    
+        // 5) Build uppercase MD5 signature
+        $raw = $ent->school_pay_code . $rec_date . $ent->school_pay_password;
+        $sig = strtoupper(md5($raw));
+    
+        $url = "https://schoolpay.co.ug/paymentapi/AndroidRS/SyncSchoolTransactions/"
+             . "{$ent->school_pay_code}/{$rec_date}/{$sig}";
+    
+        // 6) Guzzle request
+        $client = new \GuzzleHttp\Client();
         try {
             $response = $client->get($url, [
-                'verify' => false, // if you must skip SSL verification
+                'verify'  => false,
                 'timeout' => 10,
             ]);
-        } catch (RequestException $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
             die("HTTP request failed: " . $e->getMessage());
         }
-
-        $body = (string) $response->getBody();
+    
+        $body = (string)$response->getBody();
         $data = json_decode($body);
-
+    
         echo "<pre><h1>Syncing School Pay Transactions for {$rec_date}</h1>";
         echo "<hr>URL: {$url}<br>";
-        echo "Response raw: {$body}<br>";
+        echo "Raw response: {$body}<br>";
         print_r($data);
         echo "<hr>";
-
-        // 7) Process results
+    
+        // 7) Determine success
         $success = (
             $data
             && isset($data->returnCode)
@@ -1689,21 +1694,19 @@ class Utils  extends Model
             && isset($data->transactions)
             && is_array($data->transactions)
         );
-
+    
         if ($success) {
             foreach ($data->transactions as $v) {
-                // your existing import logic here...
-                // e.g. look up $student, skip duplicates, save SchoolPayTransaction, etc.
+                // … your existing import loop …
             }
             $rec->details = "{$rec_date} - {$data->returnMessage}";
         } else {
             $rec->details = "Failed on {$rec_date}: " . ($body ?: 'no response');
         }
-
+    
+        // 8) Save without fillable issues
         $rec->save();
-    }
-
-
+    } 
 
 
     public static function prepareUgandanPhoneNumber($phoneNumber)
