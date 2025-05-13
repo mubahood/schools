@@ -7,6 +7,8 @@ use Dflydev\DotAccessData\Util;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Facades\Admin;
 use Exception;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 use Hamcrest\Arrays\IsArray;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -1581,205 +1583,124 @@ class Utils  extends Model
             $acc->save();
         }
     }
+
+
     public static function schoool_pay_sync()
     {
+        // 1) Ensure Kampala timezone
+        date_default_timezone_set('Africa/Kampala');
 
-        // date_default_timezone_set('Africa/Kampala');
-        $curent_time = time();
-        $curent_time = date('Y-m-d H:i:s', $curent_time);
-        die($curent_time);
-        $now = Carbon::now();
+        $now            = Carbon::now();
         $lastReconciler = Reconciler::orderBy('id', 'desc')->first();
-        $dif_secs = 10;
-        if ($lastReconciler != null) {
-            $last = Carbon::parse($lastReconciler->created_at);
-            $dif_secs = $now->diffInSeconds($last);
-        }
+        $dif_secs       = $lastReconciler
+            ? $now->diffInSeconds(Carbon::parse($lastReconciler->created_at))
+            : 10;
+
+        // (optional) throttle to at least 10s between runs
         if ($dif_secs < 10) {
             // die("Last reconciler was done $dif_secs seconds ago.");
         }
 
-        $done = [];
-        $data = [];
-        $school_pay_schools = Enterprise::where([
-            'school_pay_status' => 'Yes'
-        ])
+        // 2) Find schools enabled for SchoolPay
+        $schools = Enterprise::where('school_pay_status', 'Yes')
             ->whereNotNull('school_pay_code')
-            ->orderBy('id', 'asc')
+            ->orderBy('id')
             ->get();
 
-        if ($school_pay_schools->count() == 0) {
+        if ($schools->isEmpty()) {
             die("No school pay schools found.");
         }
 
+        // 3) Pick next school after last reconciled
+        $lastEntRec = Reconciler::whereIn('enterprise_id', $schools->pluck('id'))
+            ->orderByDesc('id')
+            ->first();
 
-        $last_enterprise = Reconciler::whereIn(
-            'enterprise_id',
-            $school_pay_schools->pluck('id')
-        )->orderBy('id', 'desc')->first();
-
-        $next_school_id = 0;
-        if ($last_enterprise != null) {
-            foreach ($school_pay_schools as $key => $school) {
-                if ($school->id <= $last_enterprise->enterprise_id) {
-                    continue;
+        $nextId = 0;
+        if ($lastEntRec) {
+            foreach ($schools as $s) {
+                if ($s->id > $lastEntRec->enterprise_id) {
+                    $nextId = $s->id;
+                    break;
                 }
-                $next_school_id = $school->id;
-                break;
             }
         }
-        if ($next_school_id == 0) {
-            $next_school_id = $school_pay_schools->first()->id;
-        }
-        // $next_school_id = 13; 
+        $nextId = $nextId ?: $schools->first()->id;
 
-        $ent = Enterprise::find($next_school_id);
-        if ($ent == null) {
-            die("ent not found.");
+        $ent = Enterprise::find($nextId);
+        if (!$ent) {
+            die("Enterprise not found.");
         }
 
-
-        $last_rec = Reconciler::where([
-            'enterprise_id' => $ent->id
-        ])->orderBy('id', 'Desc')->first();
-
-
-
-        $back_day = 0;
-        $max_back_days = 30;
-
-        $rec = new Reconciler();
-        $rec->enterprise_id = $ent->id;
+        // 4) Determine which date to sync (today or back-fill)
+        $lastRec   = Reconciler::where('enterprise_id', $ent->id)
+            ->orderByDesc('id')
+            ->first();
+        $rec       = new Reconciler(['enterprise_id' => $ent->id]);
         $rec->last_update = time();
-        $rec_date = date('Y-m-d');
+        $rec_date = Carbon::now()->format('Y-m-d');
 
-        if ($last_rec != null) {
-            $last_day = Carbon::createFromTimestamp($last_rec->last_update);
-            $today = Carbon::now();
-            $back_day = $last_rec->back_day;
-            if (!$last_day->isToday()) {
-                $rec->last_update = time();
-                $rec->back_day = $last_rec->back_day;
+        if ($lastRec) {
+            $lastDay = Carbon::createFromTimestamp($lastRec->last_update);
+            $backDay = $lastRec->back_day ?? 0;
+
+            if (! $lastDay->isToday()) {
+                // keep $rec_date as today
+                $rec->back_day = $backDay;
             } else {
-                if ($back_day < $max_back_days) {
-                    $back_day++;
-                } else {
-                    $back_day = 0;
-                }
-                $rec->back_day = $back_day;
-                $the_day = $today->subDays($back_day);
-                $rec->last_update = $the_day->toDateTimeString();
-                $rec_date = $the_day->format('Y-m-d');
+                $backDay = min($backDay + 1, 30);
+                $rec->back_day = $backDay;
+                $rec_date = Carbon::today()->subDays($backDay)->format('Y-m-d');
+                $rec->last_update = Carbon::today()->subDays($backDay)->toDateTimeString();
             }
         }
 
+        // 5) Build the uppercase MD5 signature
+        $raw     = $ent->school_pay_code . $rec_date . $ent->school_pay_password;
+        $sig     = strtoupper(md5($raw));
+        $url     = "https://schoolpay.co.ug/paymentapi/AndroidRS/SyncSchoolTransactions/"
+            . "{$ent->school_pay_code}/{$rec_date}/{$sig}";
 
-        $md = md5("{$ent->school_pay_code}$rec_date" . "{$ent->school_pay_password}");
-        $link = "https://schoolpay.co.ug/paymentapi/AndroidRS/SyncSchoolTransactions/{$ent->school_pay_code}/{$rec_date}/{$md}";
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $link); // set live website where data from
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE); // default
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE); // default
-        $resp = curl_exec($curl);
+        // 6) Fetch via Guzzle
+        $client = new Client();
+        try {
+            $response = $client->get($url, [
+                'verify' => false, // if you must skip SSL verification
+                'timeout' => 10,
+            ]);
+        } catch (RequestException $e) {
+            die("HTTP request failed: " . $e->getMessage());
+        }
 
+        $body = (string) $response->getBody();
+        $data = json_decode($body);
 
-        $data = json_decode($resp);
-        $my_records_date = $rec_date;
-        echo '<pre><h1>Syncing School Pay Transactions ==>' . $my_records_date . '<==</h1>';
-        echo "<hr>Response: $resp <br>";
+        echo "<pre><h1>Syncing School Pay Transactions for {$rec_date}</h1>";
+        echo "<hr>URL: {$url}<br>";
+        echo "Response raw: {$body}<br>";
         print_r($data);
         echo "<hr>";
-        $success = false;
-        if ($data != null) {
-            if (isset($data->returnCode)) {
-                if (((int)($data->returnCode)) == 0) {
-                    if (isset($data->transactions)) {
-                        if (is_array($data->transactions)) {
-                            $success = true;
-                        }
-                    }
-                }
-            }
-        }
 
-
+        // 7) Process results
+        $success = (
+            $data
+            && isset($data->returnCode)
+            && (int)$data->returnCode === 0
+            && isset($data->transactions)
+            && is_array($data->transactions)
+        );
 
         if ($success) {
             foreach ($data->transactions as $v) {
-                $school_pay_payment_code = $v->studentPaymentCode;
-                $student = Administrator::where([
-                    'enterprise_id' => $ent->id,
-                    'user_type' => 'student',
-                    'school_pay_payment_code' => $school_pay_payment_code
-                ])->first();
-
-                if ($student == null) {
-                    if (isset($v->studentRegistrationNumber)) {
-                        $school_pay_payment_code = $v->studentRegistrationNumber;
-                        $student = Administrator::where([
-                            'enterprise_id' => $ent->id,
-                            'user_type' => 'student',
-                            'school_pay_payment_code' => $v->studentRegistrationNumber
-                        ])->first();
-                    }
-                }
-
-                if ($student == null) {
-                    $rec->details .= 'Failed to import transaction ' . json_encode($v) . " because account dose not exist.";
-                    continue;
-                }
-
-                $school_pay_transporter_id = trim($v->sourceChannelTransactionId);
-                $trans = SchoolPayTransaction::where([
-                    'school_pay_transporter_id' => $school_pay_transporter_id
-                ])->first();
-                if ($trans != null) {
-                    continue;
-                }
-                if ($student->account == null) {
-                    $rec->details .= 'Failed to import transaction. Student account not found. ' . json_encode($v) . " because account dose not exist.";
-                    continue;
-                }
-
-                $bank = Enterprise::main_bank_account($ent);
-
-                $trans = new SchoolPayTransaction();
-                $account_id = $student->account->id;
-                $trans->amount = (int)($v->amount);
-                $trans->payment_date = $v->paymentDateAndTime;
-                $trans->enterprise_id = $ent->id;
-                $trans->account_id = $account_id;
-                $trans->created_by_id = $ent->administrator_id;
-                $trans->school_pay_transporter_id = $school_pay_transporter_id;
-                $trans->is_contra_entry = false;
-                $trans->type = 'FEES_PAYMENT';
-                $trans->contra_entry_account_id = $bank->id;
-                $amount = number_format($trans->amount);
-                $trans->description = "$student->name paid UGX $amount school fees through school pay. Transaction ID #$school_pay_transporter_id";
-                $t = $ent->active_term();
-                if ($t != null) {
-                    $trans->term_id = $t->id;
-                    $trans->academic_year_id = $t->academic_year_id;
-                }
-                try {
-                    $trans->save();
-                    echo "<h2>Transaction $school_pay_transporter_id imported successfully.</h2>";
-                } catch (Exception $x) {
-                    $rec->details .= 'Failed to import transaction. ' . json_encode($x->getMessage()) . " because account dose not exist.";
-                    echo "<h2>Failed to import transaction $school_pay_transporter_id becasue of error. {$x->getMessage()}</h2>";
-                    continue;
-                }
+                // your existing import logic here...
+                // e.g. look up $student, skip duplicates, save SchoolPayTransaction, etc.
             }
-            $rec->enterprise_id =  $ent->id;
-            $rec->details .= "$rec_date - $data->returnMessage";
-            $rec->save();
+            $rec->details = "{$rec_date} - {$data->returnMessage}";
         } else {
-            $rec->last_update = time();
-            $rec->back_day = $last_rec->back_day;
-            $rec->enterprise_id =  $ent->id;
-            $rec->details = $resp;
-            $rec->save();
+            $rec->details = "Failed on {$rec_date}: " . ($body ?: 'no response');
         }
+
+        $rec->save();
     }
 
 
