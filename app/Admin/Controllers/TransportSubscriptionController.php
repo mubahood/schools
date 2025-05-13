@@ -161,6 +161,7 @@ class TransportSubscriptionController extends AdminController
         $show->field('trip_type', __('Trip type'));
         $show->field('amount', __('Amount'));
         $show->field('description', __('Description'));
+        $show->field('transport_stage_id', __('Transport stage id'));
 
         return $show;
     }

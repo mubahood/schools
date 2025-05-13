@@ -13,8 +13,7 @@ class TransportSubscription extends Model
     public static function boot()
     {
         parent::boot();
-        self::deleting(function ($m) {
-        });
+        self::deleting(function ($m) {});
         self::creating(function ($m) {
             $m = self::prepare($m);
             return $m;
@@ -38,6 +37,12 @@ class TransportSubscription extends Model
         } else {
             $model->amount = $route->single_trip_fare;
         }
+        //transport_stage_id
+
+        if ($route->route == null) {
+            throw new \Exception("Route stage not found.", 1);
+        }
+        $model->transport_stage_id = $route->route->id;
 
         $student_sub = TransportSubscription::where('user_id', $model->user_id)
             ->where('term_id', $model->term_id)
@@ -55,6 +60,12 @@ class TransportSubscription extends Model
     public function route()
     {
         return $this->belongsTo(TransportRoute::class, 'transport_route_id');
+    }
+
+    //belongs to transport_stage_id
+    public function transport_stage()
+    {
+        return $this->belongsTo(TransportStage::class, 'transport_stage_id');
     }
 
     //subscriber

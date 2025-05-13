@@ -44,6 +44,7 @@ use App\Traits\ApiResponser;
 use Carbon\Carbon;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Form\Field\Display;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
@@ -54,6 +55,70 @@ class ApiMainController extends Controller
 {
 
     use ApiResponser;
+
+    public function dynamic_listing(Request $r, $model)
+    {
+
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        $u = Administrator::find($u->id);
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        $className = "App\Models\\" . $model;
+        $obj = new $className;
+
+        if (isset($_POST['_method'])) {
+            unset($_POST['_method']);
+        }
+        if (isset($_GET['_method'])) {
+            unset($_GET['_method']);
+        }
+
+        $conditions = [];
+        foreach ($_GET as $k => $v) {
+            if (substr($k, 0, 2) == 'q_') {
+                $conditions[substr($k, 2, strlen($k))] = trim($v);
+            }
+        }
+        $is_private = true;
+        if (isset($_GET['is_not_private'])) {
+            $is_not_private = ((int)($_GET['is_not_private']));
+            if ($is_not_private == 1) {
+                $is_private = false;
+            }
+        }
+        if ($is_private) {
+            if ($u == null) {
+                return Utils::response([
+                    'status' => 0,
+                    'message' => "User not found.",
+                ]);
+            }
+            $conditions['enterprise_id'] = $u->enterprise_id;
+        }
+
+        $items = [];
+        $msg = "";
+
+        try {
+            $items = $className::where($conditions)->get();
+            $msg = "Success";
+            $success = true;
+        } catch (Exception $e) {
+            $success = false;
+            $msg = $e->getMessage();
+        }
+
+        if ($success) {
+            return $this->success($items, $message = $msg, 1);
+        } else {
+            return $this->error($msg);
+        }
+    }
+
 
 
     public function theology_mark_records_update(Request $r)
@@ -1144,7 +1209,7 @@ class ApiMainController extends Controller
         }
 
         $current_class = AcademicClass::find($r->current_class_id);
-        if($current_class == null){
+        if ($current_class == null) {
             return $this->error("Class not found.");
         }
 
@@ -1190,7 +1255,7 @@ class ApiMainController extends Controller
             return $this->error('Failed to find employee account.');
         }
 
- 
+
         if (!empty($_FILES)) {
             //logo_path
             if (isset($_FILES['avatar_path'])) {

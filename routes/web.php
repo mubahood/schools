@@ -46,6 +46,7 @@ use App\Models\TheologyMark;
 use App\Models\TheologyStream;
 use App\Models\TheologyTermlyReportCard;
 use App\Models\Transaction;
+use App\Models\TransportSubscription;
 use App\Models\User;
 use App\Models\Utils;
 use Dflydev\DotAccessData\Util;
@@ -63,6 +64,15 @@ use Illuminate\Support\Facades\DB;
 
 
 
+Route::get('process-transport', function (Request $r) {
+  $subs = TransportSubscription::where([])->get();
+  foreach ($subs as $sub) {
+    $sub->description = $sub->description . '.';
+    $sub->save();
+    echo $sub->id . " => " . $sub->description . "<br>";
+  }
+  die("done");
+});
 Route::get('send-report-card', function (Request $r) {
   $reportCard = StudentReportCard::find($r->id);
   if ($reportCard == null) {
@@ -81,7 +91,7 @@ Route::get('send-report-card', function (Request $r) {
   if ($student == null) {
     return "Student not found";
   }
-  $email = $student->email; 
+  $email = $student->email;
   //validate email $email
 
 
@@ -90,13 +100,13 @@ Route::get('send-report-card', function (Request $r) {
       if ($email == null || strlen($email) < 5) {
         return "Email not found";
       }
- 
+
       $rep = $reportCard->send_mail_to_parent();
       die($rep);
     } else if ($task == 'sms') {
 
       $rep = $reportCard->send_sms_to_parent();
-      
+
       /* 
           "current_address" => "Kikumbi"
     "phone_number_1" => null
@@ -130,10 +140,9 @@ Route::get('send-report-card', function (Request $r) {
       die($rep);
     } else {
       return "Task not found";
-
     }
   } catch (\Throwable $th) {
-    return "Failed to send email because: " . $th->getMessage()." Email: ".$email; 
+    return "Failed to send email because: " . $th->getMessage() . " Email: " . $email;
   }
 
   dd($email);

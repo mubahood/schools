@@ -153,6 +153,9 @@ Route::middleware([JwtMiddleware::class])->group(function () {
     Route::get("theology-mark-records", [ApiMainController::class, 'theology_mark_records']);
     Route::post("mark-records-update", [ApiMainController::class, 'mark_records_update']);
     Route::post("theology-mark-records-update", [ApiMainController::class, 'theology_mark_records_update']);
+    
+    Route::get('api/{model}', [ApiMainController::class, 'dynamic_listing']); 
+
     /*========END OF Exams & Report Cards========*/
 });
 
