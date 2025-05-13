@@ -65,6 +65,7 @@ use Illuminate\Support\Facades\DB;
 
 
 Route::get('process-transport', function (Request $r) {
+  return; 
   $subs = TransportSubscription::where([])->get();
   foreach ($subs as $sub) {
     $sub->description = $sub->description . '.';
