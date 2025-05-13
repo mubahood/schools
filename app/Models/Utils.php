@@ -1584,6 +1584,10 @@ class Utils  extends Model
     public static function schoool_pay_sync()
     {
 
+        // date_default_timezone_set('Africa/Kampala');
+        $curent_time = time();
+        $curent_time = date('Y-m-d H:i:s', $curent_time);
+        die($curent_time);
         $now = Carbon::now();
         $lastReconciler = Reconciler::orderBy('id', 'desc')->first();
         $dif_secs = 10;
