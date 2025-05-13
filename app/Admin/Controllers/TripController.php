@@ -31,6 +31,10 @@ class TripController extends AdminController
         $grid = new Grid(new Trip());
         $grid->disableCreateButton();
         $grid->disableBatchActions();
+        //add a hint
+        $grid->header(function ($query) {
+            return '<div class="alert alert-primary">Login to mobile app as a driver to create a trip</div>';
+        });
         $u = Admin::user();
         $grid->quickSearch('name', 'phone_number')->placeholder('Search by name or phone number');
         $grid->model()->where('enterprise_id', $u->enterprise_id)

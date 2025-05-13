@@ -38,8 +38,16 @@ class TransportStageController extends AdminController
         /* $grid->column('created_at', __('Created at'));
         $grid->column('updated_at', __('Updated at')); */
         // $grid->column('enterprise_id', __('Enterprise id'));
+
+
+
+
         $grid->column('name', __('Name'))->sortable();
-        $grid->column('description', __('Description'))->hide();
+        //NUMBER OF stages
+        $grid->column('routes_count', __('Number of stages'))->display(function ($routes_count) {
+            return '<span class="label label-info">' . count($this->routes) . '</span>';
+        });
+        $grid->column('description', __('Description'));
 
         return $grid;
     }
@@ -75,9 +83,25 @@ class TransportStageController extends AdminController
         $u = Admin::user();
         $form->hidden('enterprise_id', __('Enterprise id'))
             ->default($u->enterprise_id);
-        $form->text('name', __('Name'))->required();
-        $form->textarea('description', __('Description'));
+        $form->text('name', __('Route Name'))->required();
+        $form->text('description', __('Description'));
 
+        $form->divider('STAGES');
+
+        $form->hasMany('routes', 'Press "new button" to add a stage to this route.', function (Form\NestedForm $form) {
+            $form->text('name', __('Stage Name'))->rules('required');
+            $form->decimal('round_trip_fare', __('Round trip fare (UGX)'))->rules('required');
+            $form->decimal('single_trip_fare', __('Single trip fare (UGX)'))->rules('required');
+            $form->text('description', __('Description'));
+            //enterprise_id
+            $u = Admin::user();
+            $form->hidden('enterprise_id', __('Enterprise id'))
+                ->default($u->enterprise_id);
+        });
+
+        $form->disableReset();
+        $form->disableViewCheck();
+        $form->disableCreatingCheck();
         return $form;
     }
 }

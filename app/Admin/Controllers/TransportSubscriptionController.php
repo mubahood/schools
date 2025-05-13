@@ -29,6 +29,11 @@ class TransportSubscriptionController extends AdminController
     {
         $grid = new Grid(new TransportSubscription());
 
+        //add a hint
+        $grid->header(function ($query) {
+            return '<div class="alert alert-primary">To add a new subscription, go to School Fees > Transport Subscription > Add New Subscription then clck on "Link this subscription with a transport" button</div>';
+        });
+
 
         $grid->filter(
             function ($filter) {

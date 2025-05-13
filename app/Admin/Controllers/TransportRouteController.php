@@ -33,14 +33,25 @@ class TransportRouteController extends AdminController
         $grid->disableBatchActions();
         $grid->quickSearch();
         $grid->column('name', __('Name'))->sortable();
-        $grid->column('stage_id', __('Stage'))->display(function ($stage) {
+        $grid->column('stage_id', __('Route'))->display(function ($stage) {
             if ($this->route == null) {
                 return 'N/A';
             }
             return $this->route->name;
         })->sortable();
-        $grid->column('single_trip_fare', __('Single trip fare'))->sortable();
-        $grid->column('round_trip_fare', __('Round trip fare'))->sortable();
+        $grid->column('single_trip_fare', __('Single trip fare (UGX)'))
+        ->display(function ($single_trip_fare) {
+            return number_format($single_trip_fare, 2);
+        })->sortable();
+        $grid->column('round_trip_fare', __('Round trip fare (UGX)'))
+        ->display(function ($round_trip_fare) {
+            return number_format($round_trip_fare, 2);
+        })->sortable();
+
+        //SUBCRIBERS
+        $grid->column('subscribers_count', __('Number of subscribers'))->display(function ($subscribers_count) {
+            return '<span class="label label-info">' . count($this->subscribers) . '</span>';
+        });
         $grid->column('description', __('Description'))->hide(); //
 
 
