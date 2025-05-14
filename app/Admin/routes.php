@@ -135,7 +135,9 @@ Route::group([
     $router->resource('reconcilers', ReconcilerController::class);
     $router->resource('bulk-photo-uploads', BulkPhotoUploadController::class);
     $router->resource('bulk-photo-upload-items', BulkPhotoUploadItemController::class);
-
+    $router->resource('passenger-records', PassengerRecordController::class);
+    $router->resource('transport-stats', PassengerRecordController::class);
+    
 
     //$router->get('/fixed-asset-records-stats', 'FixedAssetRecordController@stats');
 
@@ -143,6 +145,7 @@ Route::group([
     //$router->resource('fees', StudentHasFeeController::class);
 
     $router->get('/statistics', 'HomeController@stats')->name('statistics');
+    $router->get('/transport-stats', 'HomeController@transportStats')->name('transportStats');
     // $router->get('/dashboard', 'HomeController@index')->name('dashboard');
 
     $router->get('dashboard', 'HomeController@stats')->name('home');

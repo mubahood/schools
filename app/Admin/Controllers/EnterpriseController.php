@@ -53,6 +53,27 @@ class EnterpriseController extends AdminController
         $grid->column('address', __('Address'))->hide();
         $grid->column('created_at', __('Created'));
         $grid->column('details', __('Details'))->hide();
+        //school_pay_status
+        $grid->column('school_pay_status_1', __('School-pay status'))->display(function ($school_pay_status) {
+            if ($this->school_pay_status == null) {
+                return 'N/A';
+            }
+            //add context color
+            if ($this->school_pay_status == 'Yes') {
+                return '<span class="label label-success">Enabled</span>';
+            } else {
+                return '<span class="label label-danger">Disabled</span>';
+            }
+        });
+        //school_pay_status
+        $grid->column('school_pay_status', __('school_pay_status'))->editable('select', [
+            'Yes' => 'Yes',
+            'No' => 'No',
+        ])->filter([
+            'Yes' => 'Yes',
+            'No' => 'No',
+        ])->sortable();
+        
 
         return $grid;
     }

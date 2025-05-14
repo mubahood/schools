@@ -247,7 +247,7 @@ Route::get('ajax-users', function (Request $r) {
             continue;
         }
 
-        if ($user_type == 'student') {
+        if (strtolower($user_type) == 'student') {
             if ($v->current_class != null) {
                 $surfix = " - " . $v->current_class->name_text;
             }

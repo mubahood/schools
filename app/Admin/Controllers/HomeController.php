@@ -33,6 +33,11 @@ use Encore\Admin\Layout\Row;
 use Encore\Admin\Widgets\Box;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+
+use App\Models\PassengerRecord;
+use App\Models\TransportSubscription;
+use App\Models\TransportRoute;
+use App\Models\Trip;
 use PDO;
 
 class HomeController extends Controller
@@ -45,8 +50,196 @@ class HomeController extends Controller
             'u' => $u
         ]);
     }
+ 
+    public function transportStats(Content $content)
+    {
+        $u            = Admin::user();
+        $eid          = $u->enterprise_id;
+        $now          = Carbon::now();
+        $currStart    = $now->copy()->startOfMonth();
+        $currEnd      = $now;
+        $lastStart    = $now->copy()->subMonth()->startOfMonth();
+        $lastEnd      = $now->copy()->subMonth()->endOfMonth();
+        $twoStart     = $now->copy()->subMonths(2)->startOfMonth();
+        $twoEnd       = $now->copy()->subMonths(2)->endOfMonth();
+
+        //
+        // 1. Subscription & Billing
+        //
+
+        // A) Active subscriptions by trip type
+        $currByType = TransportSubscription::where('enterprise_id',$eid)
+            ->where('status','active')
+            ->whereBetween('created_at', [$currStart,$currEnd])
+            ->groupBy('trip_type')
+            ->select('trip_type', DB::raw('count(*) as cnt'))
+            ->pluck('cnt','trip_type');
+
+        $lastByType = TransportSubscription::where('enterprise_id',$eid)
+            ->where('status','active')
+            ->whereBetween('created_at', [$lastStart,$lastEnd])
+            ->groupBy('trip_type')
+            ->select('trip_type', DB::raw('count(*) as cnt'))
+            ->pluck('cnt','trip_type');
+
+        // B) New vs Renewals
+        $currUsers = TransportSubscription::where('enterprise_id',$eid)
+            ->whereBetween('created_at', [$currStart,$currEnd])
+            ->pluck('user_id')->unique();
+
+        $lastUsers = TransportSubscription::where('enterprise_id',$eid)
+            ->whereBetween('created_at', [$lastStart,$lastEnd])
+            ->pluck('user_id')->unique();
+
+        $prevUsers = TransportSubscription::where('enterprise_id',$eid)
+            ->whereBetween('created_at', [$twoStart,$twoEnd])
+            ->pluck('user_id')->unique();
+
+        [$currNew, $currRenew] = [
+          $currUsers->diff($lastUsers)->count(),
+          $currUsers->intersect($lastUsers)->count(),
+        ];
+        [$lastNew, $lastRenew] = [
+          $lastUsers->diff($prevUsers)->count(),
+          $lastUsers->intersect($prevUsers)->count(),
+        ];
+
+        // C) Revenue breakdown
+        $currRevenue = TransportSubscription::where('enterprise_id',$eid)
+            ->where('status','active')
+            ->whereBetween('created_at', [$currStart,$currEnd])
+            ->sum('amount');
+        $lastRevenue = TransportSubscription::where('enterprise_id',$eid)
+            ->where('status','active')
+            ->whereBetween('created_at', [$lastStart,$lastEnd])
+            ->sum('amount');
+
+        $currTop = TransportSubscription::where('enterprise_id',$eid)
+            ->where('status','active')
+            ->whereBetween('created_at', [$currStart,$currEnd])
+            ->groupBy('transport_route_id')
+            ->select('transport_route_id', DB::raw('sum(amount) as rev'))
+            ->orderByDesc('rev')
+            ->first();
+        $lastTop = TransportSubscription::where('enterprise_id',$eid)
+            ->where('status','active')
+            ->whereBetween('created_at', [$lastStart,$lastEnd])
+            ->groupBy('transport_route_id')
+            ->select('transport_route_id', DB::raw('sum(amount) as rev'))
+            ->orderByDesc('rev')
+            ->first();
+
+        $currTopName = $currTop
+            ? TransportRoute::find($currTop->transport_route_id)->name
+            : '—';
+        $lastTopName = $lastTop
+            ? TransportRoute::find($lastTop->transport_route_id)->name
+            : '—';
+
+        // D) Outstanding balances
+        $currTotalSubs    = TransportSubscription::where('enterprise_id',$eid)
+            ->whereBetween('created_at',[$currStart,$currEnd])->count();
+        $currOutCount     = TransportSubscription::where('enterprise_id',$eid)
+            ->where('status','inactive')
+            ->whereBetween('created_at',[$currStart,$currEnd])->count();
+        $lastTotalSubs    = TransportSubscription::where('enterprise_id',$eid)
+            ->whereBetween('created_at',[$lastStart,$lastEnd])->count();
+        $lastOutCount     = TransportSubscription::where('enterprise_id',$eid)
+            ->where('status','inactive')
+            ->whereBetween('created_at',[$lastStart,$lastEnd])->count();
+
+        $currOutPercent = $currTotalSubs
+            ? round($currOutCount/$currTotalSubs*100,1)
+            : 0;
+        $lastOutPercent = $lastTotalSubs
+            ? round($lastOutCount/$lastTotalSubs*100,1)
+            : 0;
+
+        //
+        // 2. Trip & Passenger Insights
+        //
+        $currTrips = Trip::where('enterprise_id',$eid)
+            ->whereBetween('date',[$currStart,$currEnd])->get();
+        $lastTrips = Trip::where('enterprise_id',$eid)
+            ->whereBetween('date',[$lastStart,$lastEnd])->get();
+
+        $currTotalTrips = $currTrips->count();
+        $lastTotalTrips = $lastTrips->count();
+
+        $currCompleted = $currTrips->where('status','Completed');
+        $lastCompleted = $lastTrips->where('status','Completed');
+
+        $currAvgLoad   = $currCompleted->count()
+            ? round($currCompleted->sum('actual_passengers')/$currCompleted->count(),1)
+            : 0;
+        $lastAvgLoad   = $lastCompleted->count()
+            ? round($lastCompleted->sum('actual_passengers')/$lastCompleted->count(),1)
+            : 0;
+
+        $currNoShow   = $currCompleted->sum('absent_passengers');
+        $lastNoShow   = $lastCompleted->sum('absent_passengers');
+        $currExpSum   = $currCompleted->sum('expected_passengers') ?: 1;
+        $lastExpSum   = $lastCompleted->sum('expected_passengers') ?: 1;
+
+        $currNoShowRate = round($currNoShow/$currExpSum*100,1);
+        $lastNoShowRate = round($lastNoShow/$lastExpSum*100,1);
+
+        $currDirCounts = $currTrips->groupBy('trip_direction')->map->count();
+        $lastDirCounts = $lastTrips->groupBy('trip_direction')->map->count();
+
+        $currDirPerc = [
+          'To School'   => round(($currDirCounts['To School'] ?? 0)/($currTotalTrips?:1)*100,1),
+          'From School' => round(($currDirCounts['From School'] ?? 0)/($currTotalTrips?:1)*100,1),
+        ];
+        $lastDirPerc = [
+          'To School'   => round(($lastDirCounts['To School'] ?? 0)/($lastTotalTrips?:1)*100,1),
+          'From School' => round(($lastDirCounts['From School'] ?? 0)/($lastTotalTrips?:1)*100,1),
+        ];
+
+        //
+        // 3. Charts (2 examples)
+        //
+        // A) Daily boardings (last 7 days)
+        $chartA_labels = [];
+        $chartA_data   = [];
+        for ($i=6; $i>=0; $i--) {
+            $day = Carbon::today()->subDays($i);
+            $chartA_labels[] = $day->format('d M');
+            $chartA_data[]   = PassengerRecord::whereHas('trip', fn($q)=> 
+                                    $q->where('enterprise_id',$eid))
+                                ->whereDate('created_at',$day)
+                                ->whereIn('status',['Onboard','Arrived'])
+                                ->count();
+        }
+        // B) Revenue by route (current month)
+        $revRows = TransportSubscription::where('enterprise_id',$eid)
+            ->where('status','active')
+            ->whereBetween('created_at',[$currStart,$currEnd])
+            ->groupBy('transport_route_id')
+            ->select('transport_route_id', DB::raw('sum(amount) as revenue'))
+            ->get();
+        $chartB_labels = $revRows->map(fn($r)=>TransportRoute::find($r->transport_route_id)->name)->toArray();
+        $chartB_data   = $revRows->pluck('revenue')->toArray();
+
+        return $content
+            ->header('Transport Dashboard')
+            ->description('Current vs Last Month — key KPIs at a glance')
+            ->body(view('admin.transport.stats', compact(
+              'currByType','lastByType',
+              'currNew','currRenew','lastNew','lastRenew',
+              'currRevenue','lastRevenue',
+              'currTopName','lastTopName',
+              'currOutCount','lastOutCount','currOutPercent','lastOutPercent',
+              'currTotalTrips','lastTotalTrips',
+              'currAvgLoad','lastAvgLoad',
+              'currNoShowRate','lastNoShowRate',
+              'currDirPerc','lastDirPerc',
+              'chartA_labels','chartA_data','chartB_labels','chartB_data'
+            )));
+    } 
 
 
+    
     public function stats(Content $content)
     {
 

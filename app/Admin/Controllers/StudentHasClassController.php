@@ -137,18 +137,12 @@ class StudentHasClassController extends AdminController
             ])->orderBy('id', 'Desc')->get()->pluck('name', 'id'));
 
             $u = Admin::user();
-            $ajax_url = url(
-                '/api/ajax?'
-                    . 'enterprise_id=' . $u->enterprise_id
-                    . "&search_by_1=name"
-                    . "&search_by_2=id"
-                    . "&model=User"
-            );
+            $ajax_url = url('/api/ajax-users?enterprise_id=' . $u->enterprise_id . "&user_type=student");
 
             $filter->equal('administrator_id', 'Student')->select(function ($id) {
                 $a = User::find($id);
                 if ($a) {
-                    return [$a->id => $a->name];
+                    return [$a->id => $a->name_text];
                 }
             })->ajax($ajax_url);
         });

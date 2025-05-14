@@ -1728,6 +1728,7 @@ class ApiMainController extends Controller
             }
             $sub['id'] = $val->id;
             $sub['user_id'] = $val->user_id;
+            $sub['transport_stage_id'] = $val->transport_stage_id;
             $sub['transport_route_id'] = $val->transport_route_id;
             $sub['status'] = $val->status;
             $sub['trip_type'] = $val->trip_type;

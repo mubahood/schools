@@ -12,7 +12,7 @@ php artisan make:migration slot
 
 php artisan make:model BulkPhotoUploadItemItem -m
 
-php artisan admin:make ReconcilerController --model=App\\Models\\Reconciler
+php artisan admin:make PassengerRecordController --model=App\\Models\\PassengerRecord
 php artisan admin:make BulkPhotoUploadItemController --model=App\Models\BulkPhotoUploadItem
 
 17-35-P.1_Theology_-_Term_2_-_2024-0200.pdf
