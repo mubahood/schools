@@ -793,119 +793,123 @@ use App\Models\Utils;
     </section>
 
 
-    {{-- Contact Section --}}
-    <section id="contact" class="container py-5">
-        <div class="row justify-content-center text-center mb-5">
-            <div class="col-lg-8">
-                <h2 class="display-5 section-animate">Reach Out to Us</h2>
-                <p class="lead text-muted section-animate" style="animation-delay:0.2s;">
-                    Connect with us easily! Use our form, call, email or WhatsApp—whatever you prefer.
-                </p>
-            </div>
-        </div>
-
-        <div class="row gy-4">
-            {{-- Contact Form --}}
-            <div class="col-md-6 section-animate" style="animation-delay:0.3s;">
-                <div class="card border-0 shadow-sm p-4">
-                    <form action="{{ url('contact.send') }}" method="POST">
-                        @csrf
-                        <div class="mb-3">
-                            <label class="form-label">Your Name</label>
-                            <input type="text" name="name" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Email Address</label>
-                            <input type="email" name="email" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Phone Number</label>
-                            <input type="tel" name="phone" class="form-control">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Message</label>
-                            <textarea name="message" rows="4" class="form-control" required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100 pulse-animation">
-                            Send Message
-                        </button>
-                    </form>
+    {{-- CONTACT --}}
+    <section id="contact" class="py-5">
+        <div class="container">
+            {{-- Heading --}}
+            <div class="row text-center mb-5">
+                <div class="col">
+                    <h2 class="h1 mb-2">Reach Out to Us</h2>
+                    <p class="fs-lg text-muted">
+                        Connect with us easily! Find our location, call or WhatsApp, email, or visit our website below.
+                    </p>
                 </div>
             </div>
 
-            {{-- Contact Details & Map --}}
-            <div class="col-md-6">
-                <div class="row g-4">
-                    {{-- WhatsApp --}}
-                    <div class="col-sm-6 section-animate" style="animation-delay:0.4s;">
-                        <div class="card h-100 border-0 shadow-sm p-3 text-center">
-                            <div class="mb-2">
-                                <i class="bx bxl-whatsapp fs-2 text-success"></i>
-                            </div>
-                            <h5 class="mb-1">WhatsApp</h5>
-                            <a href="https://wa.me/256779490831?text=Hello%20{{ Utils::app_name() }}%2C%20I%20would%20like%20to%20get%20in%20touch."
-                                class="stretched-link text-decoration-none">
-                                +256 779 490 831
-                            </a>
+            <div class="row g-4">
+                {{-- Info Boxes --}}
+                <div class="col-lg-6">
+                    {{-- Location --}}
+                    <div class="d-flex mb-4">
+                        <div class="me-3">
+                            <i class="bx bxs-map fs-2 text-primary"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-1">Our Location</h5>
+                            <p class="mb-0">
+                                Eight Tech Corporation Towers,<br>
+                                Palm Springs Estates, Kitagobwa,<br>
+                                Nangabo, Kasangati Town Council,<br>
+                                Wakiso District
+                            </p>
                         </div>
                     </div>
 
                     {{-- Phone --}}
-                    <div class="col-sm-6 section-animate" style="animation-delay:0.5s;">
-                        <div class="card h-100 border-0 shadow-sm p-3 text-center">
-                            <div class="mb-2">
-                                <i class="bx bxs-phone fs-2 text-primary"></i>
-                            </div>
-                            <h5 class="mb-1">Call Us</h5>
+                    <div class="d-flex mb-4">
+                        <div class="me-3">
+                            <i class="bx bxs-phone-call fs-2 text-primary"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-1">Phone</h5>
                             <p class="mb-0">
-                                <a href="tel:+256778167775">+256 778 167 775</a><br>
-                                <a href="tel:+256393256165">+256 393 256 165</a>
+                                <a href="tel:+256778167775"
+                                    class="text-decoration-none">+256&nbsp;778&nbsp;167&nbsp;775</a><br>
+                                <a href="tel:+256393256165"
+                                    class="text-decoration-none">+256&nbsp;393&nbsp;256&nbsp;165</a>
+                            </p>
+                        </div>
+                    </div>
+
+                    {{-- WhatsApp --}}
+                    <div class="d-flex mb-4">
+                        <div class="me-3">
+                            <i class="bx bxl-whatsapp fs-2 text-primary"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-1">WhatsApp</h5>
+                            <p class="mb-0">
+                                <a href="https://wa.me/256779490831?text=Hello%20Tusome%20Team%2C%20I%27d%20like%20to%20learn%20more%20about%20your%20school%20management%20solution."
+                                    target="_blank" class="text-decoration-none">
+                                    +256&nbsp;779&nbsp;490&nbsp;831
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+
+                    {{-- Booking Demo --}}
+                    <div class="d-flex mb-4">
+                        <div class="me-3">
+                            <i class="bx bx-calendar-check fs-2 text-primary"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-1">Book a Demo</h5>
+                            <p class="mb-0">
+                                <a href="tel:+256779490831" class="text-decoration-none">
+                                    +256&nbsp;779&nbsp;490&nbsp;831
+                                </a>
                             </p>
                         </div>
                     </div>
 
                     {{-- Email --}}
-                    <div class="col-sm-6 section-animate" style="animation-delay:0.6s;">
-                        <div class="card h-100 border-0 shadow-sm p-3 text-center">
-                            <div class="mb-2">
-                                <i class="bx bxs-envelope fs-2 text-danger"></i>
-                            </div>
+                    <div class="d-flex mb-4">
+                        <div class="me-3">
+                            <i class="bx bxs-envelope fs-2 text-primary"></i>
+                        </div>
+                        <div>
                             <h5 class="mb-1">Email</h5>
                             <p class="mb-0">
-                                <a href="mailto:cto@8technologies.net">cto@8technologies.net</a><br>
-                                <a href="mailto:bm@8technologies.net">bm@8technologies.net</a>
+                                <a href="mailto:cto@8technologies.net"
+                                    class="text-decoration-none">cto@8technologies.net</a><br>
+                                <a href="mailto:bm@8technologies.net"
+                                    class="text-decoration-none">bm@8technologies.net</a>
                             </p>
                         </div>
                     </div>
 
                     {{-- Website --}}
-                    <div class="col-sm-6 section-animate" style="animation-delay:0.7s;">
-                        <div class="card h-100 border-0 shadow-sm p-3 text-center">
-                            <div class="mb-2">
-                                <i class="bx bx-globe fs-2 text-info"></i>
-                            </div>
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <i class="bx bxl-chrome fs-2 text-primary"></i>
+                        </div>
+                        <div>
                             <h5 class="mb-1">Website</h5>
-                            <a href="https://8technologies.net/" target="_blank" class="stretched-link">
-                                8technologies.net
-                            </a>
+                            <p class="mb-0">
+                                <a href="https://8technologies.net/" target="_blank" class="text-decoration-none">
+                                    8technologies.net
+                                </a>
+                            </p>
                         </div>
                     </div>
+                </div>
 
-                    {{-- Location --}}
-                    <div class="col-12 section-animate" style="animation-delay:0.8s;">
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-body p-0">
-                                <iframe
-                                    src="https://www.google.com/maps?q=Eight+Tech+Corporation+Towers,+Palm+Springs+Estates,+Kitagobwa,+Nangabo,+Kasangati+Town+Council,+Wakiso+District&output=embed"
-                                    width="100%" height="250" style="border:0;" allowfullscreen=""
-                                    loading="lazy"></iframe>
-                            </div>
-                            <div class="card-footer bg-white text-center">
-                                <i class="bx bxs-map fs-4 me-1"></i>
-                                Eight Tech Corporation Towers, Palm Springs Estates, Kitagobwa, Nangabo, Kasangati Town
-                                Council, Wakiso District
-                            </div>
-                        </div>
+                {{-- Google Map --}}
+                <div class="col-lg-6">
+                    <div class="ratio ratio-16x9 rounded-3 overflow-hidden shadow-sm">
+                        <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3960.0000000000005!2d32.60000000000001!3d0.4000000000000001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x177db0b000000001%3A0x0000000000000000!2sEight%20Tech%20Corporation%20Towers!5e0!3m2!1sen!2sug!4v1694949083101!5m2!1sen!2sug"
+                            allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                     </div>
                 </div>
             </div>
