@@ -403,7 +403,7 @@ use App\Models\Utils;
     </section>
 
 
-     
+
     <!-- Light / Dark mode (Comparison slider) -->
     <section class="d-flex w-100 position-relative overflow-hidden">
         <div class="position-relative flex-xl-shrink-0 zindex-5 start-50 translate-middle-x" style="max-width: 1920px;">
@@ -792,6 +792,125 @@ use App\Models\Utils;
         </div>
     </section>
 
+
+    {{-- Contact Section --}}
+    <section id="contact" class="container py-5">
+        <div class="row justify-content-center text-center mb-5">
+            <div class="col-lg-8">
+                <h2 class="display-5 section-animate">Reach Out to Us</h2>
+                <p class="lead text-muted section-animate" style="animation-delay:0.2s;">
+                    Connect with us easily! Use our form, call, email or WhatsApp—whatever you prefer.
+                </p>
+            </div>
+        </div>
+
+        <div class="row gy-4">
+            {{-- Contact Form --}}
+            <div class="col-md-6 section-animate" style="animation-delay:0.3s;">
+                <div class="card border-0 shadow-sm p-4">
+                    <form action="{{ url('contact.send') }}" method="POST">
+                        @csrf
+                        <div class="mb-3">
+                            <label class="form-label">Your Name</label>
+                            <input type="text" name="name" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" name="email" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" name="phone" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Message</label>
+                            <textarea name="message" rows="4" class="form-control" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 pulse-animation">
+                            Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            {{-- Contact Details & Map --}}
+            <div class="col-md-6">
+                <div class="row g-4">
+                    {{-- WhatsApp --}}
+                    <div class="col-sm-6 section-animate" style="animation-delay:0.4s;">
+                        <div class="card h-100 border-0 shadow-sm p-3 text-center">
+                            <div class="mb-2">
+                                <i class="bx bxl-whatsapp fs-2 text-success"></i>
+                            </div>
+                            <h5 class="mb-1">WhatsApp</h5>
+                            <a href="https://wa.me/256779490831?text=Hello%20{{ Utils::app_name() }}%2C%20I%20would%20like%20to%20get%20in%20touch."
+                                class="stretched-link text-decoration-none">
+                                +256 779 490 831
+                            </a>
+                        </div>
+                    </div>
+
+                    {{-- Phone --}}
+                    <div class="col-sm-6 section-animate" style="animation-delay:0.5s;">
+                        <div class="card h-100 border-0 shadow-sm p-3 text-center">
+                            <div class="mb-2">
+                                <i class="bx bxs-phone fs-2 text-primary"></i>
+                            </div>
+                            <h5 class="mb-1">Call Us</h5>
+                            <p class="mb-0">
+                                <a href="tel:+256778167775">+256 778 167 775</a><br>
+                                <a href="tel:+256393256165">+256 393 256 165</a>
+                            </p>
+                        </div>
+                    </div>
+
+                    {{-- Email --}}
+                    <div class="col-sm-6 section-animate" style="animation-delay:0.6s;">
+                        <div class="card h-100 border-0 shadow-sm p-3 text-center">
+                            <div class="mb-2">
+                                <i class="bx bxs-envelope fs-2 text-danger"></i>
+                            </div>
+                            <h5 class="mb-1">Email</h5>
+                            <p class="mb-0">
+                                <a href="mailto:cto@8technologies.net">cto@8technologies.net</a><br>
+                                <a href="mailto:bm@8technologies.net">bm@8technologies.net</a>
+                            </p>
+                        </div>
+                    </div>
+
+                    {{-- Website --}}
+                    <div class="col-sm-6 section-animate" style="animation-delay:0.7s;">
+                        <div class="card h-100 border-0 shadow-sm p-3 text-center">
+                            <div class="mb-2">
+                                <i class="bx bx-globe fs-2 text-info"></i>
+                            </div>
+                            <h5 class="mb-1">Website</h5>
+                            <a href="https://8technologies.net/" target="_blank" class="stretched-link">
+                                8technologies.net
+                            </a>
+                        </div>
+                    </div>
+
+                    {{-- Location --}}
+                    <div class="col-12 section-animate" style="animation-delay:0.8s;">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body p-0">
+                                <iframe
+                                    src="https://www.google.com/maps?q=Eight+Tech+Corporation+Towers,+Palm+Springs+Estates,+Kitagobwa,+Nangabo,+Kasangati+Town+Council,+Wakiso+District&output=embed"
+                                    width="100%" height="250" style="border:0;" allowfullscreen=""
+                                    loading="lazy"></iframe>
+                            </div>
+                            <div class="card-footer bg-white text-center">
+                                <i class="bx bxs-map fs-4 me-1"></i>
+                                Eight Tech Corporation Towers, Palm Springs Estates, Kitagobwa, Nangabo, Kasangati Town
+                                Council, Wakiso District
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- CTA -->
     <section class="bg-secondary py-5" id="get_started">
