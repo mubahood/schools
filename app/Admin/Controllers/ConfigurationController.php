@@ -93,11 +93,20 @@ class ConfigurationController extends AdminController
         $form->color('color', __('School Color'))->default('color')->required();
         $form->color('sec_color', __('Secondary color'))->rules('required')->required();
         $form->quill('welcome_message', __('Welcome message'));
-        $form->radioCard('can_send_messages', __('Enable Message Sending'))
+        $form->radio('can_send_messages', __('Enable Message Sending'))
             ->options([
                 'Yes' => 'Yes',
                 'No' => 'No',
             ])->default('No');
+ 
+
+        $form->radio('school_pay_import_automatically', __('Import SchoolPay to Students Accounts Automatically?'))
+            ->options([
+                'Yes' => 'Yes',
+                'No' => 'No',
+            ])->default('No')
+            ->rules('required');
+        $form->date('school_pay_last_accepted_date', __('Last SchoolPay Import Date'))->rules('required')->default(date('Y-m-d'));
         $form->divider();
         $form->text('hm_name', __('Head Teacher Name'));
         $form->image('hm_signature', __('Head Teacher signature'));

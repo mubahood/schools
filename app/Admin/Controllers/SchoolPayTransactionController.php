@@ -109,7 +109,7 @@ class SchoolPayTransactionController extends AdminController
 
         $grid->batchActions(function ($batch) {
             $batch->disableDelete();
-            $batch->add(new SchoolPayTransactionImport()); 
+            $batch->add(new SchoolPayTransactionImport());
         });
 
         $grid->model()->where([
@@ -159,11 +159,13 @@ class SchoolPayTransactionController extends AdminController
         $grid->column('status', __('Status'))
             ->label([
                 "Imported" => 'success',
-                "Not Imported" => 'danger',
+                "Not Imported" => 'warning',
+                "Error" => 'danger',
             ])
             ->filter([
                 "Imported" => 'Imported',
                 "Not Imported" => 'Not Imported',
+                "Error" => 'Error',
             ])
             ->sortable()->width(100);
 
@@ -185,6 +187,10 @@ class SchoolPayTransactionController extends AdminController
                 return number_format($x);
             })->width(120);
 
+        //description
+        $grid->column('description', __('Description'))->display(function ($x) {
+            return '<spap title="' . $x . '" >' . Str::limit($x, 40, '...') . '</span>';
+        })->width(200)->hide();
 
 
         return $grid;
@@ -227,10 +233,12 @@ class SchoolPayTransactionController extends AdminController
 
         $terms = [];
         $active_term = 0;
-        foreach (Term::where(
-            'enterprise_id',
-            Admin::user()->enterprise_id
-        )->orderBy('id', 'desc')->get() as $key => $term) {
+        foreach (
+            Term::where(
+                'enterprise_id',
+                Admin::user()->enterprise_id
+            )->orderBy('id', 'desc')->get() as $key => $term
+        ) {
             $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
             if ($term->is_active) {
                 $active_term = $term->id;

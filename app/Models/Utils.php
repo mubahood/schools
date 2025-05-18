@@ -504,7 +504,7 @@ class Utils  extends Model
 
         return $my_t . " " . $t->toTimeString();
     }
-    public static function number_format($num, $unit)
+    public static function number_format($num, $unit = null)
     {
         $num = (int)($num);
         $resp = number_format($num);
@@ -1589,30 +1589,30 @@ class Utils  extends Model
     {
         // 1) Timezone
         date_default_timezone_set('Africa/Kampala');
-    
+
         // 2) Pick up the next Enterprise to sync (same logic as before)...
         $now            = Carbon::now();
         $lastReconciler = Reconciler::orderBy('id', 'desc')->first();
         $dif_secs       = $lastReconciler
-                          ? $now->diffInSeconds(Carbon::parse($lastReconciler->created_at))
-                          : 10;
-    
+            ? $now->diffInSeconds(Carbon::parse($lastReconciler->created_at))
+            : 10;
+
         if ($dif_secs < 10) {
             // throttle if needed
         }
-    
-        $schools = Enterprise::where('school_pay_status','Yes')
-                             ->whereNotNull('school_pay_code')
-                             ->orderBy('id','asc')
-                             ->get();
-    
+
+        $schools = Enterprise::where('school_pay_status', 'Yes')
+            ->whereNotNull('school_pay_code')
+            ->orderBy('id', 'asc')
+            ->get();
+
         if ($schools->isEmpty()) {
             die("No school pay schools found.");
         }
-    
-        $lastEntRec = Reconciler::whereIn('enterprise_id',$schools->pluck('id'))
-                                 ->orderBy('id','desc')->first();
-    
+
+        $lastEntRec = Reconciler::whereIn('enterprise_id', $schools->pluck('id'))
+            ->orderBy('id', 'desc')->first();
+
         $nextId = 0;
         if ($lastEntRec) {
             foreach ($schools as $s) {
@@ -1623,21 +1623,29 @@ class Utils  extends Model
             }
         }
         $nextId = $nextId ?: $schools->first()->id;
-    
+
         $ent = Enterprise::find($nextId);
         if (! $ent) {
             die("Enterprise not found.");
         }
-    
+
+
+
+        $active_term = $ent->active_term();
+        if ($active_term == null) {
+            die("No active term found.");
+        }
+
+
         // 3) Determine rec_date (today or back-fill up to 30 days)
-        $lastRec = Reconciler::where('enterprise_id',$ent->id)
-                             ->orderBy('id','desc')->first();
-    
+        $lastRec = Reconciler::where('enterprise_id', $ent->id)
+            ->orderBy('id', 'desc')->first();
+
         $rec = new Reconciler();
         $rec->enterprise_id = $ent->id;
         $rec->last_update   = time();
         $rec->back_day      = 0;
-    
+
         $rec_date = date('Y-m-d');                    // e.g. "2025-05-13"
         if ($lastRec) {
             $lastDay = Carbon::createFromTimestamp($lastRec->last_update);
@@ -1650,24 +1658,42 @@ class Utils  extends Model
                 $rec->back_day = $lastRec->back_day;
             }
         }
-    
+
+
+        if ($ent->school_pay_last_accepted_date != null) {
+            $school_pay_last_accepted_date = Carbon::parse($ent->school_pay_last_accepted_date);
+            if ($school_pay_last_accepted_date != null) {
+                $fetching_date = Carbon::parse($rec_date);
+                //if is less than school_pay_last_accepted_date and 
+                if ($fetching_date->isBefore($school_pay_last_accepted_date)) {
+                    $rec_date = $school_pay_last_accepted_date->format('Y-m-d');
+                    $rec->back_day = 0;
+                    $rec->save();
+                    echo "Fetching date is before school_pay_last_accepted_date. <br>";
+                    echo "Fetching date: {$fetching_date->format('Y-m-d')} <br>";
+                    echo "school_pay_last_accepted_date: {$school_pay_last_accepted_date->format('Y-m-d')} <br>";
+                    return;
+                }
+            }
+        }
+
         // 4) Build and debug the signature
         $code     = trim($ent->school_pay_code);
         $password = trim($ent->school_pay_password);
         $raw      = $code . $rec_date . $password;
         $sig      = strtoupper(md5($raw));
-    
+
         echo "<pre>";
         echo "To be hashed: [{$raw}]\n";
         echo "Computed MD5: [{$sig}]\n";
-    
+
         // 5) Fire the Guzzle request
         $url = "https://schoolpay.co.ug/paymentapi/AndroidRS/"
-             . "SyncSchoolTransactions/{$code}/{$rec_date}/{$sig}";
-    
+            . "SyncSchoolTransactions/{$code}/{$rec_date}/{$sig}";
+
         echo "Request URL: {$url}\n";
         echo "</pre>";
-    
+
         $client = new \GuzzleHttp\Client();
         try {
             $response = $client->get($url, [
@@ -1675,18 +1701,20 @@ class Utils  extends Model
                 'timeout' => 10,
             ]);
         } catch (\GuzzleHttp\Exception\RequestException $e) {
+            $rec->details = "Failed on {$rec_date}: " . $e->getMessage();
+            $rec->save();
             die("HTTP request failed: " . $e->getMessage());
         }
-    
+
         $body = (string)$response->getBody();
         $data = json_decode($body);
-    
+
         // 6) Output and process
         echo "<pre><h1>Response for {$rec_date}</h1>";
         echo $body . "\n";
         print_r($data);
         echo "</pre>";
-    
+
         $success = (
             $data
             && isset($data->returnCode)
@@ -1694,18 +1722,53 @@ class Utils  extends Model
             && isset($data->transactions)
             && is_array($data->transactions)
         );
-    
+
         if ($success) {
             foreach ($data->transactions as $v) {
-                // … your import logic here …
+
+                $existing = SchoolPayTransaction::where([
+                    'school_pay_transporter_id' => $v->schoolpayReceiptNumber,
+                ])->first();
+                if ($existing != null) {
+                    echo "Already imported transaction {$v->schoolpayReceiptNumber}.\n";
+                    continue;
+                }
+
+                $tran = new SchoolPayTransaction();
+                $tran->enterprise_id = $ent->id;
+                // $tran->account_id = $v->accountId;
+                $tran->academic_year_id = $active_term->academic_year_id;
+                $tran->term_id = $active_term->id;
+                $tran->amount = $v->amount;
+                $tran->payment_date = $v->paymentDateAndTime;
+                $tran->source = $v->sourcePaymentChannel;
+                $tran->school_pay_transporter_id = $v->schoolpayReceiptNumber;
+                $tran->status = 'Not Imported';
+                $tran->type = 'FEES_PAYMENT';
+                $tran->is_contra_entry = 0;
+                $tran->termly_school_fees_balancing_id = null;
+                $tran->contra_entry_transaction_id = null;
+                $tran->contra_entry_account_id = null;
+                $tran->created_by_id = $ent->administrator_id;
+                $tran->description = json_encode($v);
+                $tran->data = json_encode($v);
+                $tran->save();
+
+                if ($ent->school_pay_import_automatically == 'Yes') {
+                    try {
+                        $tran->doImport();
+                        echo "Imported transaction {$v->schoolpayReceiptNumber}.\n<br>";
+                    } catch (Exception $e) {
+                        echo "Failed to import transaction {$v->schoolpayReceiptNumber}: " . $e->getMessage() . "<br>";
+                    }
+                }
             }
             $rec->details = "{$rec_date} - {$data->returnMessage}";
         } else {
             $rec->details = "Failed on {$rec_date}: " . ($body ?: 'no response');
         }
-    
         $rec->save();
-    } 
+    }
 
 
     public static function prepareUgandanPhoneNumber($phoneNumber)

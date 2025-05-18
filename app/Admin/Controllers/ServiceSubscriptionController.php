@@ -336,7 +336,7 @@ class ServiceSubscriptionController extends AdminController
                 foreach (\App\Models\TransportRoute::where('enterprise_id', $u->enterprise_id)->get() as $key => $route) {
                     $routes[$route->id] = $route->name;
                 }
-                $form->select('transport_route_id', __('Transport Rqoute'))
+                $form->select('transport_route_id', __('Transport Stage'))
                     ->options($routes)
                     ->rules('required');
                 $form->radio('trip_type', __('Trip Type'))
@@ -377,10 +377,10 @@ class ServiceSubscriptionController extends AdminController
                     'enterprise_id',
                     Admin::user()->enterprise_id
                 )->get()->pluck('name_text', 'id'))->rules('required');
-                $form->decimal('quantity', __('Quantity'))->default(1)->rules('required');  
+                $form->decimal('quantity', __('Quantity'))->default(1)->rules('required');
             })->disableCreate()
-            ->disableDelete()
-            ->disable();
+                ->disableDelete()
+                ->disable();
         }
 
         $form->disableReset();

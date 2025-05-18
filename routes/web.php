@@ -65,7 +65,7 @@ use Illuminate\Support\Facades\DB;
 
 
 Route::get('process-transport', function (Request $r) {
-  return; 
+  return;
   $subs = TransportSubscription::where([])->get();
   foreach ($subs as $sub) {
     $sub->description = $sub->description . '.';
@@ -1770,11 +1770,22 @@ Route::get('import-transaction', function (Request $request) {
   $trans = Transaction::where([
     'school_pay_transporter_id' => $schoo_pay->school_pay_transporter_id
   ])->first();
+
+
+
   if ($trans != null) {
     $schoo_pay->status = 'Imported';
     $schoo_pay->save();
+
+    $account = $trans->account;
+    $msg = "Transaction already imported. Account: " . $account->name . ", BALANCE: UGX " . Utils::number_format($account->balance, null);
+
+    //display message inlucing the link to the account. click here to view account details
+    $link = admin_url('students/' . $account->administrator_id);
+    $msg .= ", <a href='$link' >Click here to view account details</a>";
+
     $style = 'background-color: red; color: white; padding: 10px;';
-    return "<h1 style='$style'>Transaction already imported.</h1>";
+    return "<h1 style='$style'>$msg</h1>";
   }
   try {
     $schoo_pay->doImport();
@@ -1784,6 +1795,20 @@ Route::get('import-transaction', function (Request $request) {
     return "<h1 style='$style'>$msg</h1>";
   }
 
+  $trans = Transaction::where([
+    'school_pay_transporter_id' => $schoo_pay->school_pay_transporter_id
+  ])->first();
+
+  if ($trans == null) {
+    $style = 'background-color: red; color: white; padding: 10px;';
+    return "<h1 style='$style'>Transaction not found.</h1>";
+  }
+
   $style = 'background-color: green; color: white; padding: 10px;';
-  return "<h1 style='$style'>Transaction imported successfully</h1>";
+
+  $msg = "Transaction imported successfully. Account: " . $trans->account->name . ", BALANCE: UGX " . Utils::number_format($trans->account->balance, null);
+  //display message inlucing the link to the account. click here to view account details
+  $link = admin_url('students/' . $trans->account->administrator_id);
+  $msg .= ", <a href='$link' >Click here to view account details</a>";
+  return "<h1 style='$style'>$msg</h1>";
 });

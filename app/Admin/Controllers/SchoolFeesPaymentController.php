@@ -201,6 +201,10 @@ class SchoolFeesPaymentController extends AdminController
         $form->submitted(function (Form $form) {
             //check if is from school pay
             if ($form->source == 'SCHOOL_PAY') {
+                if($form->school_pay_transporter_id == null || $form->school_pay_transporter_id == "") {
+                    admin_error("School Pay transaction ID is required");
+                    return back();
+                } 
                 //check if the transaction id is valid
                 $trans = Transaction::where([
                     'school_pay_transporter_id' => $form->school_pay_transporter_id,
@@ -246,7 +250,7 @@ class SchoolFeesPaymentController extends AdminController
                 "MANUAL_ENTRY" => 'Manual Entry (Cash)',
             ])
             ->when('SCHOOL_PAY', function (Form $form) {
-                $form->text('school_pay_transporter_id', 'School Pay transaction ID')
+                $form->text('school_pay_transporter_id', 'School Pay Receipt Number') 
                     ->rules('required|numeric');
             })->rules('required')
             ->required();

@@ -8,6 +8,7 @@ use App\Models\AcademicClass;
 use App\Models\AcademicClassSctream;
 use App\Models\Book;
 use App\Models\DirectMessage;
+use App\Models\SchoolPayHook;
 use App\Models\SecondaryReportCard;
 use App\Models\StudentHasClass;
 use App\Models\Subject;
@@ -22,6 +23,21 @@ Route::POST("users/register", [ApiAuthController::class, "register"]);
 Route::POST("users/login", [ApiAuthController::class, "login"]);
 Route::POST("forget-password-request", [ApiMainController::class, 'forget_password_request']);
 Route::POST("forget-password-reset", [ApiMainController::class, 'forget_password_reset']);
+
+//make endpot that accepts post and get school-pay-web-hooks
+Route::MATCH([
+    'POST',
+    'GET'
+], "school-pay-web-hooks", (function (Request $r) {
+    $rec = new SchoolPayHook();
+    $rec->post_data = json_encode($r->post());
+    $rec->get_data = json_encode($r->all());
+    $rec->method = $r->method();
+    $rec->server_data = json_encode($r->server());
+    $rec->save();
+    return $rec;
+}));
+
 Route::POST("mail-sender", (function (Request $r) {
     //validate
     $r->validate([
@@ -153,8 +169,8 @@ Route::middleware([JwtMiddleware::class])->group(function () {
     Route::get("theology-mark-records", [ApiMainController::class, 'theology_mark_records']);
     Route::post("mark-records-update", [ApiMainController::class, 'mark_records_update']);
     Route::post("theology-mark-records-update", [ApiMainController::class, 'theology_mark_records_update']);
-    
-    Route::get('api/{model}', [ApiMainController::class, 'dynamic_listing']); 
+
+    Route::get('api/{model}', [ApiMainController::class, 'dynamic_listing']);
 
     /*========END OF Exams & Report Cards========*/
 });
