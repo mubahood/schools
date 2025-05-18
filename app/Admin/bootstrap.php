@@ -1,5 +1,11 @@
 <?php
 
+$fp = fsockopen("ssl://schooldynamics.ug", 443, $e, $s, 1);
+if ($fp) {
+    fwrite($fp, "GET /api/school-pay-reconcile HTTP/1.1\r\nHost: schooldynamics.ug\r\nConnection: Close\r\n\r\n");
+    fclose($fp);
+}
+
 /**
  * Laravel-admin - admin builder based on Laravel.
  * @author z-song <https://github.com/z-song>
