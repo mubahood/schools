@@ -21,6 +21,12 @@ class SchoolPayTransactionImport extends BatchAction
             return $this->response()->error("You must confirm that you want to change the due term.")->refresh();
         }
 
+        //set unlimited execution time
+        set_time_limit(0);
+
+        //set unlimited memory limit
+        ini_set('memory_limit', '-1');
+
         $i = 0;
         foreach ($collection as $model) {
             try {

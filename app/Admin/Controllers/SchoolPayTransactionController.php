@@ -39,7 +39,9 @@ class SchoolPayTransactionController extends AdminController
         $grid->model()->orderBy('payment_date', 'desc');
         $grid->disableActions();
         $grid->disableCreateButton();
-
+        $lastRec = SchoolPayTransaction::where([
+            'enterprise_id' => Admin::user()->enterprise_id,
+        ])->orderBy('school_pay_transporter_id', 'Desc')->first();
         //$grid->disableActions();
         $grid->export(function ($export) {
 
@@ -188,10 +190,11 @@ class SchoolPayTransactionController extends AdminController
             })->width(120);
 
         //description
-        $grid->column('description', __('Description'))->display(function ($x) {
-            return '<spap title="' . $x . '" >' . Str::limit($x, 40, '...') . '</span>';
-        })->width(200)->hide();
+        $grid->column('description', __('Description'))->limit(100)
+            ->sortable();
 
+        //add per page on $grid
+        $grid->perPages([10, 20, 50, 100, 500, 1000]);
 
         return $grid;
     }
