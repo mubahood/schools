@@ -25,7 +25,7 @@ class SchoolPayTransactionImport extends BatchAction
         set_time_limit(0);
 
         //set unlimited memory limit
-        ini_set('memory_limit', '-1');
+        ini_set('memory_limit', '-1'); 
 
         $i = 0;
         foreach ($collection as $model) {

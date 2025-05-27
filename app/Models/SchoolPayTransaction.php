@@ -123,7 +123,7 @@ class SchoolPayTransaction extends Model
 
             $user = User::where('school_pay_payment_code', $data->studentPaymentCode)->first();
             if ($user == null) {
-                $this->description = "User not found. ref: " . $data->studentPaymentCode;
+                $this->error_alert = "User not found. ref: " . $data->studentPaymentCode;
                 $this->status = 'Error';
                 $this->save();
                 throw new Exception("Account not found.", 1);
@@ -131,7 +131,7 @@ class SchoolPayTransaction extends Model
             $account = $user->account;
 
             if ($account == null) {
-                $this->description = "Account not found. ref: " . $data->studentPaymentCode;
+                $this->error_alert = "Account not found. ref: " . $data->studentPaymentCode;
                 $this->status = 'Error';
                 $this->save();
                 throw new Exception("Account not found.", 1);

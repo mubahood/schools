@@ -191,7 +191,30 @@ class SchoolPayTransactionController extends AdminController
 
         //description
         $grid->column('description', __('Description'))->limit(100)
-            ->sortable();
+            ->sortable()
+            ->hide();
+
+
+        $grid->column('schoolpayReceiptNumber', __('Schoolpay Receipt Number'))->hide();
+        $grid->column('studentRegistrationNumber', __('Student Registration Number'))->hide();
+        $grid->column('paymentDateAndTime', __('Payment Date and Time'))->hide();
+        $grid->column('settlementBankCode', __('Settlement Bank Code'))->hide();
+        $grid->column('sourceChannelTransDetail', __('Source Channel Transaction Detail'))->hide();
+        $grid->column('sourceChannelTransactionId', __('Source Channel Transaction ID'))->hide();
+        $grid->column('sourcePaymentChannel', __('Source Payment Channel'))->hide();
+        $grid->column('studentClass', __('Student Class'))->hide();
+        $grid->column('studentName', __('Student Name'))->sortable();
+        $grid->column('studentPaymentCode', __('Student Payment Code'))->sortable();
+        $grid->column('data', __('DATA'))->sortable();
+        $grid->column('transactionCompletionStatus', __('Transaction Completion Status'))->hide();
+        //error_alert
+        $grid->column('error_alert', __('Error Alert'))
+            ->display(function () {
+                if ($this->status == 'Error') {
+                    return "<span class='text-danger'>Error: " . $this->description . "</span>";
+                }
+                return $this->description;
+            })->sortable();
 
         //add per page on $grid
         $grid->perPages([10, 20, 50, 100, 500, 1000]);

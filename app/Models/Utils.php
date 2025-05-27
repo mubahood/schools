@@ -1752,7 +1752,82 @@ class Utils  extends Model
                 $tran->created_by_id = $ent->administrator_id;
                 $tran->description = json_encode($v);
                 $tran->data = json_encode($v);
+
+                if (isset($v->schoolpayReceiptNumber)) {
+                    if ($v->schoolpayReceiptNumber != null) {
+                        $tran->schoolpayReceiptNumber = $v->schoolpayReceiptNumber;
+                    }
+                }
+
+                if (isset($v->studentRegistrationNumber)) {
+                    if ($v->studentRegistrationNumber != null) {
+                        $tran->studentRegistrationNumber = $v->studentRegistrationNumber;
+                    }
+                }
+                //paymentDateAndTime
+                if (isset($v->paymentDateAndTime)) {
+                    if ($v->paymentDateAndTime != null) {
+                        $tran->paymentDateAndTime = $v->paymentDateAndTime;
+                    }
+                }
+
+                //settlementBankCode
+                if (isset($v->settlementBankCode)) {
+                    if ($v->settlementBankCode != null) {
+                        $tran->settlementBankCode = $v->settlementBankCode;
+                    }
+                }
+                //sourceChannelTransDetail
+                if (isset($v->sourceChannelTransDetail)) {
+                    if ($v->sourceChannelTransDetail != null) {
+                        $tran->sourceChannelTransDetail = $v->sourceChannelTransDetail;
+                    }
+                }
+
+                //sourceChannelTransactionId
+                if (isset($v->sourceChannelTransactionId)) {
+                    if ($v->sourceChannelTransactionId != null) {
+                        $tran->sourceChannelTransactionId = $v->sourceChannelTransactionId;
+                    }
+                }
+
+                //sourcePaymentChannel
+                if (isset($v->sourcePaymentChannel)) {
+                    if ($v->sourcePaymentChannel != null) {
+                        $tran->sourcePaymentChannel = $v->sourcePaymentChannel;
+                    }
+                }
+
+                //studentClass
+                if (isset($v->studentClass)) {
+                    if ($v->studentClass != null) {
+                        $tran->studentClass = $v->studentClass;
+                    }
+                }
+
+                //studentName
+                if (isset($v->studentName)) {
+                    if ($v->studentName != null) {
+                        $tran->studentName = $v->studentName;
+                    }
+                }
+
+                //studentPaymentCode
+                if (isset($v->studentPaymentCode)) {
+                    if ($v->studentPaymentCode != null) {
+                        $tran->studentPaymentCode = $v->studentPaymentCode;
+                    }
+                }
+
+                //transactionCompletionStatus
+                if (isset($v->transactionCompletionStatus)) {
+                    if ($v->transactionCompletionStatus != null) {
+                        $tran->transactionCompletionStatus = $v->transactionCompletionStatus;
+                    }
+                }
+
                 $tran->save();
+
 
                 if ($ent->school_pay_import_automatically == 'Yes') {
                     try {
