@@ -195,14 +195,14 @@ class SchoolPayTransactionController extends AdminController
             ->hide();
 
 
-        $grid->column('schoolpayReceiptNumber', __('Schoolpay Receipt Number'))->hide();
-        $grid->column('studentRegistrationNumber', __('Student Registration Number'))->hide();
+        $grid->column('schoolpayReceiptNumber', __('Schoolpay Receipt Number'))->sortable();
+        $grid->column('studentRegistrationNumber', __('Student Registration Number'))->sortable();
         $grid->column('paymentDateAndTime', __('Payment Date and Time'))->hide();
         $grid->column('settlementBankCode', __('Settlement Bank Code'))->hide();
-        $grid->column('sourceChannelTransDetail', __('Source Channel Transaction Detail'))->hide();
+        $grid->column('sourceChannelTransDetail', __('Source Channel Transaction Detail'))->sortable();
         $grid->column('sourceChannelTransactionId', __('Source Channel Transaction ID'))->hide();
         $grid->column('sourcePaymentChannel', __('Source Payment Channel'))->hide();
-        $grid->column('studentClass', __('Student Class'))->hide();
+        $grid->column('studentClass', __('Student Class'))->sortable();
         $grid->column('studentName', __('Student Name'))->sortable();
         $grid->column('studentPaymentCode', __('Student Payment Code'))->sortable();
         $grid->column('data', __('DATA'))->sortable()->hide(); 
