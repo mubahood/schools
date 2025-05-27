@@ -203,9 +203,103 @@ class SchoolPayTransactionController extends AdminController
         $grid->column('sourceChannelTransactionId', __('Source Channel Transaction ID'))->hide();
         $grid->column('sourcePaymentChannel', __('Source Payment Channel'))->hide();
         $grid->column('studentClass', __('Student Class'))->sortable();
-        $grid->column('studentName', __('Student Name'))->sortable();
+        $grid->column('studentName', __('Student Name'))
+            ->display(function ($studentName) {
+                if ($studentName == null || $studentName == '') {
+                    if ($this->data != null) {
+                        if (strlen($this->data) > 100) {
+                            $tran = $this;
+                            try {
+                                $v = json_decode($this->data);
+                            } catch (\Exception $e) {
+                                $v = null;
+                            }
+                            if ($v == null) {
+                                return 'N/A';
+                            }
+                            if (isset($v->schoolpayReceiptNumber)) {
+                                if ($v->schoolpayReceiptNumber != null) {
+                                    $tran->schoolpayReceiptNumber = $v->schoolpayReceiptNumber;
+                                }
+                            }
+
+                            if (isset($v->studentRegistrationNumber)) {
+                                if ($v->studentRegistrationNumber != null) {
+                                    $tran->studentRegistrationNumber = $v->studentRegistrationNumber;
+                                }
+                            }
+                            //paymentDateAndTime
+                            if (isset($v->paymentDateAndTime)) {
+                                if ($v->paymentDateAndTime != null) {
+                                    $tran->paymentDateAndTime = $v->paymentDateAndTime;
+                                }
+                            }
+
+                            //settlementBankCode
+                            if (isset($v->settlementBankCode)) {
+                                if ($v->settlementBankCode != null) {
+                                    $tran->settlementBankCode = $v->settlementBankCode;
+                                }
+                            }
+                            //sourceChannelTransDetail
+                            if (isset($v->sourceChannelTransDetail)) {
+                                if ($v->sourceChannelTransDetail != null) {
+                                    $tran->sourceChannelTransDetail = $v->sourceChannelTransDetail;
+                                }
+                            }
+
+                            //sourceChannelTransactionId
+                            if (isset($v->sourceChannelTransactionId)) {
+                                if ($v->sourceChannelTransactionId != null) {
+                                    $tran->sourceChannelTransactionId = $v->sourceChannelTransactionId;
+                                }
+                            }
+
+                            //sourcePaymentChannel
+                            if (isset($v->sourcePaymentChannel)) {
+                                if ($v->sourcePaymentChannel != null) {
+                                    $tran->sourcePaymentChannel = $v->sourcePaymentChannel;
+                                }
+                            }
+
+                            //studentClass
+                            if (isset($v->studentClass)) {
+                                if ($v->studentClass != null) {
+                                    $tran->studentClass = $v->studentClass;
+                                }
+                            }
+
+                            //studentName
+                            if (isset($v->studentName)) {
+                                if ($v->studentName != null) {
+                                    $tran->studentName = $v->studentName;
+                                }
+                            }
+
+                            //studentPaymentCode
+                            if (isset($v->studentPaymentCode)) {
+                                if ($v->studentPaymentCode != null) {
+                                    $tran->studentPaymentCode = $v->studentPaymentCode;
+                                }
+                            }
+
+                            //transactionCompletionStatus
+                            if (isset($v->transactionCompletionStatus)) {
+                                if ($v->transactionCompletionStatus != null) {
+                                    $tran->transactionCompletionStatus = $v->transactionCompletionStatus;
+                                } 
+                            }
+                            $tran->save();
+                            return $tran->studentName;
+                        }
+                    }
+                    return 'N/A';
+                }
+                return $studentName;
+            })->width(200)
+            ->sortable();
         $grid->column('studentPaymentCode', __('Student Payment Code'))->sortable();
-        $grid->column('data', __('DATA'))->sortable()->hide(); 
+        $grid->column('data', __('DATA'))->sortable()->hide();
         $grid->column('transactionCompletionStatus', __('Transaction Completion Status'))->hide();
         //error_alert
         $grid->column('error_alert', __('Error Alert'))
