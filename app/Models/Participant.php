@@ -19,6 +19,17 @@ class Participant extends Model
             // self::send_sms($m);
         });
 
+        self::creating(function ($m) {
+            if ($m->type == null || $m->type == '') {
+                $session = Session::find($m->session_id);
+                if ($session != null) {
+                    $m->type = $session->type;
+                    $m->title = $session->title;
+                    $m->details = $session->details;
+                }
+            }
+        });
+
         self::updated(function ($m) {
             self::send_sms($m);
         });

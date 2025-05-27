@@ -99,6 +99,7 @@ return array(
     'App\\Admin\\Controllers\\SchemeWorkController' => $baseDir . '/app/Admin/Controllers/SchemeWorkController.php',
     'App\\Admin\\Controllers\\SchoolFeesDemandController' => $baseDir . '/app/Admin/Controllers/SchoolFeesDemandController.php',
     'App\\Admin\\Controllers\\SchoolFeesPaymentController' => $baseDir . '/app/Admin/Controllers/SchoolFeesPaymentController.php',
+    'App\\Admin\\Controllers\\SchoolPayHookController' => $baseDir . '/app/Admin/Controllers/SchoolPayHookController.php',
     'App\\Admin\\Controllers\\SchoolPayTransactionController' => $baseDir . '/app/Admin/Controllers/SchoolPayTransactionController.php',
     'App\\Admin\\Controllers\\SecondaryCompetenceController' => $baseDir . '/app/Admin/Controllers/SecondaryCompetenceController.php',
     'App\\Admin\\Controllers\\SecondaryReportCardController' => $baseDir . '/app/Admin/Controllers/SecondaryReportCardController.php',

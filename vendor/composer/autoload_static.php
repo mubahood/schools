@@ -804,6 +804,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Admin\\Controllers\\SchemeWorkController' => __DIR__ . '/../..' . '/app/Admin/Controllers/SchemeWorkController.php',
         'App\\Admin\\Controllers\\SchoolFeesDemandController' => __DIR__ . '/../..' . '/app/Admin/Controllers/SchoolFeesDemandController.php',
         'App\\Admin\\Controllers\\SchoolFeesPaymentController' => __DIR__ . '/../..' . '/app/Admin/Controllers/SchoolFeesPaymentController.php',
+        'App\\Admin\\Controllers\\SchoolPayHookController' => __DIR__ . '/../..' . '/app/Admin/Controllers/SchoolPayHookController.php',
         'App\\Admin\\Controllers\\SchoolPayTransactionController' => __DIR__ . '/../..' . '/app/Admin/Controllers/SchoolPayTransactionController.php',
         'App\\Admin\\Controllers\\SecondaryCompetenceController' => __DIR__ . '/../..' . '/app/Admin/Controllers/SecondaryCompetenceController.php',
         'App\\Admin\\Controllers\\SecondaryReportCardController' => __DIR__ . '/../..' . '/app/Admin/Controllers/SecondaryReportCardController.php',
