@@ -205,15 +205,15 @@ class SchoolPayTransactionController extends AdminController
         $grid->column('studentClass', __('Student Class'))->hide();
         $grid->column('studentName', __('Student Name'))->sortable();
         $grid->column('studentPaymentCode', __('Student Payment Code'))->sortable();
-        $grid->column('data', __('DATA'))->sortable();
+        $grid->column('data', __('DATA'))->sortable()->hide(); 
         $grid->column('transactionCompletionStatus', __('Transaction Completion Status'))->hide();
         //error_alert
         $grid->column('error_alert', __('Error Alert'))
-            ->display(function () {
-                if ($this->status == 'Error') {
+            ->display(function ($error_alert) {
+                if ($error_alert != null) {
                     return "<span class='text-danger'>Error: " . $this->description . "</span>";
                 }
-                return $this->description;
+                return 'N/A';
             })->sortable();
 
         //add per page on $grid
