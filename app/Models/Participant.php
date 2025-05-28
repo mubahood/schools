@@ -20,6 +20,16 @@ class Participant extends Model
         });
 
         self::creating(function ($m) {
+
+            $exist = Participant::where([
+                'enterprise_id' => $m->enterprise_id,
+                'session_id' => $m->session_id,
+                'administrator_id' => $m->administrator_id,
+            ])->first();
+            if ($exist != null) {
+                throw new \Exception("Participant already exists for this session and user.");
+            }
+
             if ($m->type == null || $m->type == '') {
                 $session = Session::find($m->session_id);
                 if ($session != null) {

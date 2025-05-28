@@ -122,7 +122,7 @@ class SessionController extends AdminController
         $grid->export(function ($export) {
 
             $export->filename('roll-calls.csv');
-            $export->except(['is_open','session_decision']);
+            $export->except(['is_open', 'session_decision']);
         });
 
         // $grid->disableActions();
@@ -157,6 +157,12 @@ class SessionController extends AdminController
             ->hide();
 
         $grid->column('target_text', __('Target'))
+            ->display(function ($target) {
+                if ($this->target == 'ENTIRE_SCHOOL') {
+                    return "All active students";
+                }
+                return $target;
+            })
             ->sortable();
 
 
@@ -201,8 +207,8 @@ class SessionController extends AdminController
                 }
                 return "<span class='label label-warning'>Ongoing</span>";
             })
-            ->sortable(); 
-        
+            ->sortable();
+
         //condut session column
         $grid->column('is_open', __('Results'))
             ->display(function () {
@@ -482,9 +488,9 @@ class SessionController extends AdminController
                 if ($user == null) {
                     continue;
                 }
-                $participants[$c->administrator_id] = $user ->user_number . " - " . $user->name_text;
+                $participants[$c->administrator_id] = $user->user_number . " - " . $user->name_text;
             }
-             
+
 
 
             $form->listbox('participants', 'Participants')->options($participants)

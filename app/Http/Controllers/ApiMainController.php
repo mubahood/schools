@@ -542,9 +542,29 @@ class ApiMainController extends Controller
     public function streams()
     {
         $u = auth('api')->user();
-        $data1 = AcademicClassSctream::where([
+        $ent = $u->ent;
+        if ($u == null) {
+            return $this->error('Enterprise not found.');
+        }
+
+        $active_term = $ent->active_term();
+        if ($active_term == null) {
+            return $this->error('Active term not found.');
+        }
+
+        $academic_class_ids = [];
+        $academic_class = AcademicClass::where([
             'enterprise_id' => $u->enterprise_id,
+            'academic_year_id' => $active_term->academic_year_id,
         ])->limit(10000)->orderBy('id', 'desc')->get();
+        foreach ($academic_class as $key => $value) {
+            $academic_class_ids[] = $value->id;
+        }
+
+        $data1 = AcademicClassSctream::wherein('academic_class_id', $academic_class_ids)
+            ->where([
+                'enterprise_id' => $u->enterprise_id,
+            ])->limit(10000)->orderBy('id', 'desc')->get();
 
         $data = [];
         foreach ($data1 as $key => $value) {
@@ -558,9 +578,26 @@ class ApiMainController extends Controller
     public function theology_streams()
     {
         $u = auth('api')->user();
-        $data1 = TheologyStream::where([
+        $ent = $u->ent;
+        if ($u == null) {
+            return $this->error('Enterprise not found.');
+        }
+        $active_term = $ent->active_term();
+        if ($active_term == null) {
+            return $this->error('Active term not found.');
+        }
+        $academic_class_ids = [];
+        $academic_class = TheologyClass::where([
             'enterprise_id' => $u->enterprise_id,
+            'academic_year_id' => $active_term->academic_year_id,
         ])->limit(10000)->orderBy('id', 'desc')->get();
+        foreach ($academic_class as $key => $value) {
+            $academic_class_ids[] = $value->id;
+        }
+        $data1 = TheologyStream::wherein('theology_class_id', $academic_class_ids)
+            ->where([
+                'enterprise_id' => $u->enterprise_id,
+            ])->limit(10000)->orderBy('id', 'desc')->get();
 
         /* $data = [];
         foreach ($data1 as $key => $value) {
@@ -573,75 +610,147 @@ class ApiMainController extends Controller
 
     public function session_create(Request $r)
     {
-
-        if (
-            $r->due_date == null ||
-            $r->type == null ||
-            $r->present == null
-        ) {
-            return $this->error('Some params are missing.');
-        }
-        $stream = null;
-        $populations = [];
-        $u = auth('api')->user();
-        if ($r->type == 'CLASS_ATTENDANCE') {
-            $stream = AcademicClassSctream::find($r->stream_id);
-            if ($stream == null) {
-                return $this->error('Stream not found.');
-            }
-            $subject = Subject::find($r->subject_id);
-            if ($subject == null) {
-                return $this->error('Subject not found.');
-            }
-            $populations = User::where('stream_id', $stream->id)->get();
-        } else if ($r->type == 'THEOLOGY_ATTENDANCE') {
-            $stream = TheologyStream::find($r->stream_id);
-            if ($stream == null) {
-                return $this->error('Stream not found.');
-            }
-            $subject = TheologySubject::find($r->subject_id);
-            if ($subject == null) {
-                return $this->error('Subject not found.');
-            }
-            $populations = User::where('theology_stream_id', $stream->id)->get();
-            if ($populations->count() < 1) {
-                return $this->error('No students found in this stream.');
-            }
-        } else {
-            $populations = User::where([
-                'enterprise_id' => $u->enterprise_id,
-                'user_type' => 'student',
-                'status' => 1,
-            ])->get();
-        }
-
         $u = auth('api')->user();
         if ($u == null) {
             return $this->error('User not found.');
         }
-        $active_term = $u->ent->active_term();
+        $u = User::find($u->id);
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        if ($r->due_date == null) {
+            return $this->error('Due date is missing.');
+        }
+
+        if ($r->type == null) {
+            return $this->error('Type is missing.');
+        }
+
+        if ($r->present == null) {
+            return $this->error('Present is missing.');
+        }
+
+        if ($r->target == null) {
+            return $this->error('Target is missing Update your App to the latest version and try again.');
+        }
+
+        $ACCEPTED_TARGETS = [
+            'ENTIRE_SCHOOL', //done
+            'SECULAR_CLASSES',
+            'THEOLOGY_CLASSES',
+            'SECULAR_STREAM',
+            'THEOLOGY_STREAM',
+            'SERVICE',
+        ];
+
+        if (!in_array($r->target, $ACCEPTED_TARGETS)) {
+            return $this->error('Target is not valid. Update your App to the latest version and try again.');
+        }
+
+
+        if ($r->id == null || ((int)($r->id)) < 10) {
+            return $this->error('Session ID is missing. Update your App to the latest version and try again.');
+        }
+
+        $session = Session::where([
+            'local_id' => $r->id,
+            'enterprise_id' => $u->enterprise_id,
+            'administrator_id' => $u->id,
+        ])->first();
+        if ($session != null) {
+            // return $this->error('Session already submitted. Update your App to the latest version and try again.');
+        } else {
+            $session =  new Session();
+        }
+
+        $ent = $u->ent;
+        if ($ent == null) {
+            return $this->error('Enterprise not found.');
+        }
+        $active_term = $ent->active_term();
         if ($active_term == null) {
             return $this->error('Active term not found.');
         }
-        $session = new Session();
+
+
+        $session->local_id = $r->id;
         $session->enterprise_id = $u->enterprise_id;
+        $session->administrator_id = $u->id;
+        $session->academic_year_id = $active_term->academic_year_id;
+        $session->term_id = $active_term->id;
         $session->academic_class_id = $r->academic_class_id;
         $session->subject_id = $r->subject_id;
-        $session->service_id = (int)$r->service_id;
-        $session->type = $r->type;
-        $session->title = $r->title;
-        $session->stream_id = $r->stream_id;
-        $session->is_open = 0;
-        $session->prepared = 1;
-        $session->administrator_id = $u->id;
+
+        //if SERVICE
+        if ($r->target == 'SERVICE') {
+            if ($r->service_id == null || $r->service_id == '') {
+                return $this->error('Service ID is missing.');
+            }
+            $service = Service::find($r->service_id);
+            if ($service == null) {
+                return $this->error('Service not found.');
+            }
+            $session->service_id = $r->service_id;
+        }
+
         $session->due_date = Carbon::parse($r->due_date);
-        $session->term_id = $active_term->id;
-        $session->academic_year_id = $active_term->academic_year_id;
-        $session->save();
+
+        //check $r->type
+        if ($r->type == null || strlen($r->type) < 3) {
+            return $this->error('Type is missing.');
+        }
+        $session->type = $r->type;
+
+        //title is required
+        if ($r->title == null || strlen($r->title) < 3) {
+            return $this->error('Title is missing.');
+        }
+        $session->title = $r->title;
+        $session->is_open = 'No';
+        $session->prepared = 1;
+
+        //check if THEOLOGY_STREAM
+        if ($r->target == 'THEOLOGY_STREAM') {
+            if ($r->theology_stream_id == null || $r->theology_stream_id == '') {
+                return $this->error('Theology stream ID is missing.');
+            }
+            $stream = TheologyStream::find($r->theology_stream_id);
+            if ($stream == null) {
+                return $this->error('Theology stream not found.');
+            }
+            $session->theology_stream_id = $r->theology_stream_id;
+            $session->stream_id = $r->theology_stream_id;
+        }
+        $session->notify_present = $r->notify_present;
+        $session->notify_absent = $r->notify_absent;
+
+        //expected is required
+        if ($r->expected == null || $r->expected == '') {
+            return $this->error('Expected value missing. Update your App to the latest version and try again.');
+        }
+
+        $expected = [];
 
         $present = [];
         try {
-            $_present = json_decode($r['present']);
+            $_expected = json_decode($r->expected);
+            foreach ($_expected as $key => $value) {
+                $expected[] = $value;
+            }
+        } catch (Throwable $t) {
+            $expected = [];
+        }
+
+
+
+        if (count($expected) < 1) {
+            return $this->error('Expected value is empty. Update your App to the latest version and try again.');
+        }
+
+
+        $present = [];
+        try {
+            $_present = json_decode($r->present);
             foreach ($_present as $key => $value) {
                 $present[] = (int)$value;
             }
@@ -649,42 +758,186 @@ class ApiMainController extends Controller
             $present = [];
         }
 
-        $m = $session;
+
+        $session->participants = $present;
+
+        //SECULAR_CLASSES
+        if ($r->target == 'SECULAR_CLASSES') {
+            if ($r->secular_casses == null || strlen($r->secular_casses) < 2) {
+                return $this->error('Secular classes is missing. ==> ' . $r->secular_casses);
+            }
+            $secular_classes = [];
+            try {
+                $_secular_classes = json_decode($r->secular_casses);
+                foreach ($_secular_classes as $key => $value) {
+                    $secular_classes[] = (int)$value;
+                }
+            } catch (Throwable $t) {
+                $secular_classes = [];
+            }
+            if (count($secular_classes) < 1) {
+                return $this->error('Secular classes is empty. Update your App to the latest version and try again.');
+            }
+            $session->secular_casses = $secular_classes;
+        }
+
+        //THEOLOGY_CLASSES => theology_classes
+        if ($r->target == 'THEOLOGY_CLASSES') {
+            if ($r->theology_classes == null || strlen($r->theology_classes) < 2) {
+                return $this->error('Theology classes is missing.');
+            }
+            $theology_classes = [];
+            try {
+                $_theology_classes = json_decode($r->theology_classes);
+                foreach ($_theology_classes as $key => $value) {
+                    $theology_classes[] = (int)$value;
+                }
+            } catch (Throwable $t) {
+                $theology_classes = [];
+            }
+            if (count($theology_classes) < 1) {
+                return $this->error('Theology classes is empty. Update your App to the latest version and try again.');
+            }
+            $session->theology_classes = $theology_classes;
+        }
 
 
-        foreach ($populations as $key =>  $student) {
+        //SECULAR_STREAM => secular_stream_id
+        if ($r->target == 'SECULAR_STREAM') {
+            if ($r->secular_stream_id == null || $r->secular_stream_id == '') {
+                return $this->error('Secular stream ID is missing.');
+            }
+            $stream = AcademicClassSctream::find($r->secular_stream_id);
+            if ($stream == null) {
+                return $this->error('Secular stream not found.');
+            }
+            $session->secular_stream_id = $r->secular_stream_id;
+            $session->stream_id = $r->secular_stream_id;
+        }
+
+        //THEOLOGY_STREAM => theology_stream_id
+        if ($r->target == 'THEOLOGY_STREAM') {
+            if ($r->theology_stream_id == null || $r->theology_stream_id == '') {
+                return $this->error('Theology stream ID is missing.');
+            }
+            $stream = TheologyStream::find($r->theology_stream_id);
+            if ($stream == null) {
+                return $this->error('Theology stream not found.');
+            }
+            $session->theology_stream_id = $r->theology_stream_id;
+            $session->stream_id = $r->theology_stream_id;
+        }
+
+
+        //total_expected
+        $total_expected = 0;
+        foreach ($expected as $key => $value) {
+            if (is_numeric($value)) {
+                $total_expected += (int)$value;
+            }
+        }
+        $session->total_expected = $total_expected;
+        //total_present
+        $total_present = 0;
+        foreach ($present as $key => $value) {
+            if (is_numeric($value)) {
+                $total_present += (int)$value;
+            }
+        }
+        $session->total_present = $total_present;
+        //total_absent
+        $total_absent = $total_expected - $total_present;
+        $session->total_absent = $total_absent;
+        $session->session_decision = 'Yes';
+        $session->is_open = 'No';
+        $session->source = 'API';
+
+        //details
+        $session->details = $r->details;
+        if ($r->details == null || strlen($r->details) < 3) {
+            $session->details = $r->title;
+        }
+
+        //target_text is required
+        if ($r->target_text == null || strlen($r->target_text) < 3) {
+            return $this->error('Target text is missing. Update your App to the latest version and try again.');
+        }
+
+        //target_text is required
+        if ($r->target_text == null || strlen($r->target_text) < 3) {
+            return $this->error('Target text is missing. Update your App to the latest version and try again.');
+        }
+        $session->target_text = $r->target_text;
+        $session->target = $r->target;
+
+        if ($session->notify_present != 'Yes') {
+            $session->notify_present = 'No';
+        }
+
+        if ($session->notify_absent != 'Yes') {
+            $session->notify_absent = 'No';
+        }
+
+
+        try {
+            $session->save();
+            $session = Session::find($session->id);
+        } catch (\Throwable $th) {
+            return $this->error('Failed to create session. Because: ' . $th->getMessage());
+        }
+
+ 
+
+        foreach ($expected as $key =>  $student) {
+            $exist = Participant::where([
+                'session_id' => $session->id,
+                'administrator_id' => $student->id,
+            ])->first();
+            if ($exist != null) {
+                continue;
+            }
             $p = new Participant();
-            $p->enterprise_id = $m->enterprise_id;
+            $p->enterprise_id = $session->enterprise_id;
             $p->administrator_id = $student->id;
-            $p->academic_year_id = $m->academic_year_id;
-            $p->term_id = $m->term_id;
-            $p->academic_class_id = $m->academic_class_id;
-            $p->subject_id = $m->subject_id;
-            $p->service_id = $m->service_id;
+            $p->academic_year_id = $session->academic_year_id;
+            $p->term_id = $session->term_id;
+            $p->academic_class_id = $session->academic_class_id;
+            $p->subject_id = $session->subject_id;
+            $p->service_id = $session->service_id;
+            $p->title = $session->title;
+            $p->details = $session->details;
+            $p->type = $session->type;
             $p->is_done = 1;
-            $p->session_id = $m->id;
+            $p->session_id = $session->id;
+
             $p->sms_is_sent = 'No';
-
-
             if (in_array($p->administrator_id, $present)) {
                 $p->is_present = 1;
             } else {
-                //if type is ACTIVITY_ATTENDANCE, continue
-                if ($m->type != 'THEOLOGY_ATTENDANCE' && $m->type != 'CLASS_ATTENDANCE') {
-                    continue;
-                }
-
                 $p->is_present = 0;
             }
-            $p->save();
+            try {
+                $p->save();
+            } catch (\Throwable $th) {
+                // return $this->error('Failed to create participant. Because: ' . $th->getMessage());
+            }
         }
 
-        $session->is_open = 0;
-        $session->prepared = 1;
-        $session->save();
+        $total_present = Participant::where('session_id', $session->id)->where('is_present', 1)->count();
+        $session->total_present = $total_present;
+        //total absent
+        $total_absent = Participant::where('session_id', $session->id)->where('is_present', 0)->count();
+        $session->total_absent = $total_absent;
+        //total expected
+        $total_expected = Participant::where('session_id', $session->id)->count();
+        $session->total_expected = $total_expected;
 
-        $session = Session::find($session->id);
-        return $this->success($session, $message = "Success", 1);
+        try {
+            $session->save();
+        } catch (\Throwable $th) {
+            return $this->error('Failed to update session. Because: ' . $th->getMessage());
+        }
+        return $this->success($session, $message = "Successfully created session.", 1);
     }
 
     public function mark_submit(Request $r)
@@ -1843,6 +2096,7 @@ class ApiMainController extends Controller
             $user['stream_id'] = $val->stream_id;
             $user['user_number'] = $val->user_number;
             $user['theology_stream_id'] = $val->theology_stream_id;
+            $user['theology_class_id'] = $val->current_theology_class_id;
 
             $class = AcademicClass::find($val->current_class_id);
             if ($class != null) {
@@ -1852,7 +2106,7 @@ class ApiMainController extends Controller
             if ($term != null) {
                 $services = ServiceSubscription::where([
                     'administrator_id' => $val->id,
-                    'due_term_id' => $val->due_term_id,
+                    'due_term_id' => $term->id,
                 ])->get();
                 $services_ids = [];
                 foreach ($services as $key => $value) {
@@ -3014,6 +3268,8 @@ lin
         $admin->last_seen = Carbon::now();
         $admin->save();
         $ent = Enterprise::find($admin->enterprise_id);
+        $ent->expiry = '4';
+
         if ($ent == null) {
             return $this->error('Enterprise not found.');
         }

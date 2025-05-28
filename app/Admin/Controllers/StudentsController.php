@@ -15,6 +15,7 @@ use App\Models\AdminRoleUser;
 use App\Models\StudentHasClass;
 use App\Models\Subject;
 use App\Models\TheologyClass;
+use App\Models\TheologyStream;
 use App\Models\TheologySubject;
 use App\Models\Transaction;
 use App\Models\User;
@@ -244,6 +245,32 @@ class StudentsController extends AdminController
             $filter->equal('stream_id', 'Filter by Stream')->select($streams);
 
 
+            $ent = $u->ent;
+
+            $active_term = $ent->active_term();
+            if ($active_term == null) {
+                return $this->error('Active term not found.');
+            }
+
+            //theology streams
+            $theology_streams = [];
+            $academic_class_ids = [];
+            $academic_class = TheologyClass::where([
+                'enterprise_id' => $u->enterprise_id,
+                'academic_year_id' => $active_term->academic_year_id,
+            ])->limit(10000)->orderBy('id', 'desc')->get();
+            foreach ($academic_class as $key => $value) {
+                $academic_class_ids[] = $value->id;
+            }
+            foreach (
+                TheologyStream::wherein('theology_class_id', $academic_class_ids)
+                    ->where([
+                        'enterprise_id' => $u->enterprise_id,
+                    ])->limit(10000)->orderBy('id', 'desc')->get() as $key => $value
+            ) {
+                $theology_streams[$value->id] = $value->name_text;
+            }
+            $filter->equal('theology_stream_id', 'Filter by Theology Stream')->select($theology_streams); 
 
             // Remove the default id filter
             $filter->disableIdFilter();

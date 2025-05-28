@@ -1,4 +1,4 @@
-php artisan make:migration add_erroralert_school_pay_transactions --table=school_pay_transactions
+php artisan make:migration add_local_id_to_sessions --table=sessions
 ls
          $table->date('check_in_time')->nullable();
             $table->date('check_out_time')->nullable();
