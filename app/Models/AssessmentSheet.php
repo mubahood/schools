@@ -139,7 +139,6 @@ class AssessmentSheet extends Model
             ->orderBy('total_marks', 'desc')
             ->get();
 
-        $m->total_students = count($reportCards);
         $m->first_grades = 0;
         $m->second_grades = 0;
         $m->third_grades = 0;
@@ -186,7 +185,7 @@ class AssessmentSheet extends Model
         }
 
         $m->subjects = json_encode($subs);
-
+        $m->total_students = 0;
         foreach ($reportCards as $key => $reportCard) {
             if ($reportCard->owner == null) {
                 throw new Exception("Report Card owner not found", 1);
@@ -195,7 +194,7 @@ class AssessmentSheet extends Model
             if ($reportCard->owner->status . "" != '1') {
                 continue;
             }
-
+            $m->total_students++;
             if (((int)($reportCard->grade)) == 1) {
                 $m->first_grades++;
             } else if (((int)($reportCard->grade)) == 2) {
@@ -305,16 +304,17 @@ class AssessmentSheet extends Model
             $subs[] = $s;
         }
         $m->subjects = json_encode($subs);
+        $m->total_students = 0;
         foreach ($reportCards as $key => $reportCard) {
 
-             if ($reportCard->owner == null) {
+            if ($reportCard->owner == null) {
                 throw new Exception("Report Card owner not found", 1);
             }
 
             if ($reportCard->owner->status . "" != '1') {
                 continue;
             }
-
+            $m->total_students++;
             if (((int)($reportCard->grade)) == 1) {
                 $m->first_grades++;
             } else if (((int)($reportCard->grade)) == 2) {
