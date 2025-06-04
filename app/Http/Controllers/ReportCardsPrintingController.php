@@ -161,6 +161,20 @@ class ReportCardsPrintingController extends Controller
             'ent' => $ent
         ]); */
 
+        $temp = $reportCards;
+        $reportCards = [];
+
+        //get only active students
+        foreach ($temp as $key => $r) {
+            if ($r->owner == null) {
+                continue;
+            }
+            if ($r->owner->status . "" != '1') {
+                continue;
+            }
+            $reportCards[] = $r;
+        }
+
         $pdf->loadHTML(view('print.assessment-sheets', [
             'assessment' => $assessment,
             'subjects' => $subjects,
@@ -356,7 +370,7 @@ class ReportCardsPrintingController extends Controller
                 'min_count' => $printing->min_count,
                 'max_count' => $printing->max_count,
             ]));
-        } else { 
+        } else {
             $my_items = [];
             foreach ($items as $key => $item) {
                 $my_items[] = $item['r'];
