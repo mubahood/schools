@@ -10,10 +10,10 @@ php artisan make:migration slot
 
 
 
-php artisan make:model SchoolPayLog -m
+php artisan make:model SchoolReport -m
 
-php artisan admin:make SchoolPayHookController --model=App\\Models\\SchoolPayHook
-php artisan admin:make BulkPhotoUploadItemController --model=App\Models\BulkPhotoUploadItem
+php artisan admin:make SchoolReportController --model=App\\Models\\SchoolReport
+php artisan admin:make SchoolReportController --model=App\Models\SchoolReport
 
 17-35-P.1_Theology_-_Term_2_-_2024-0200.pdf
 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

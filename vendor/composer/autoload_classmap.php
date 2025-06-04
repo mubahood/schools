@@ -275,6 +275,7 @@ return array(
     'App\\Models\\SchoolFeesDemand' => $baseDir . '/app/Models/SchoolFeesDemand.php',
     'App\\Models\\SchoolPayHook' => $baseDir . '/app/Models/SchoolPayHook.php',
     'App\\Models\\SchoolPayTransaction' => $baseDir . '/app/Models/SchoolPayTransaction.php',
+    'App\\Models\\SchoolReport' => $baseDir . '/app/Models/SchoolReport.php',
     'App\\Models\\SecondaryCompetence' => $baseDir . '/app/Models/SecondaryCompetence.php',
     'App\\Models\\SecondaryReportCard' => $baseDir . '/app/Models/SecondaryReportCard.php',
     'App\\Models\\SecondaryReportCardItem' => $baseDir . '/app/Models/SecondaryReportCardItem.php',

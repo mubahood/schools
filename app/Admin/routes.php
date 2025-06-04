@@ -137,6 +137,7 @@ Route::group([
     $router->resource('bulk-photo-upload-items', BulkPhotoUploadItemController::class);
     $router->resource('passenger-records', PassengerRecordController::class);
     $router->resource('school-pay-hooks', SchoolPayHookController::class);
+    $router->resource('school-reports', SchoolReportController::class);
 
 
     //$router->get('/fixed-asset-records-stats', 'FixedAssetRecordController@stats');

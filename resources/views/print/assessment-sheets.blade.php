@@ -102,7 +102,8 @@ $stream = $assessment->get_stream();
             <tr>
                 <td class="p-1"> @include('print.title-detail', [
                     't' => 'Term',
-                    'd' => 'Term ' . $assessment->term->name_text,
+                    'd' => 'Term ________' ,
+                    // 'd' => 'Term ' . $assessment->term->name_text,
                 ])</td>
 
                 @if ($class != null)

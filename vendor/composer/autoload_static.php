@@ -980,6 +980,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Models\\SchoolFeesDemand' => __DIR__ . '/../..' . '/app/Models/SchoolFeesDemand.php',
         'App\\Models\\SchoolPayHook' => __DIR__ . '/../..' . '/app/Models/SchoolPayHook.php',
         'App\\Models\\SchoolPayTransaction' => __DIR__ . '/../..' . '/app/Models/SchoolPayTransaction.php',
+        'App\\Models\\SchoolReport' => __DIR__ . '/../..' . '/app/Models/SchoolReport.php',
         'App\\Models\\SecondaryCompetence' => __DIR__ . '/../..' . '/app/Models/SecondaryCompetence.php',
         'App\\Models\\SecondaryReportCard' => __DIR__ . '/../..' . '/app/Models/SecondaryReportCard.php',
         'App\\Models\\SecondaryReportCardItem' => __DIR__ . '/../..' . '/app/Models/SecondaryReportCardItem.php',
