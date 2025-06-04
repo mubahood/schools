@@ -188,6 +188,13 @@ class AssessmentSheet extends Model
         $m->subjects = json_encode($subs);
 
         foreach ($reportCards as $key => $reportCard) {
+            if ($reportCard->owner == null) {
+                throw new Exception("Report Card owner not found", 1);
+            }
+
+            if ($reportCard->owner->status . "" != '1') {
+                continue;
+            }
             if (((int)($reportCard->grade)) == 1) {
                 $m->first_grades++;
             } else if (((int)($reportCard->grade)) == 2) {
@@ -273,7 +280,7 @@ class AssessmentSheet extends Model
                 ])->pluck('administrator_id')->toArray(); */
         } else {
             $marks_conds['academic_class_id'] = $m->academic_class_id;
-           /*  $student_ids = StudentHasClass::where([
+            /*  $student_ids = StudentHasClass::where([
                 'academic_class_id' => $m->academic_class_id
             ])->pluck('administrator_id')->toArray(); */
         }
