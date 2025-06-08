@@ -29,6 +29,7 @@ use App\Models\ReportsFinance;
 use App\Models\SchemWorkItem;
 use App\Models\SchoolFeesDemand;
 use App\Models\SchoolPayTransaction;
+use App\Models\SchoolReport;
 use App\Models\Service;
 use App\Models\ServiceSubscription;
 use App\Models\Session;
@@ -63,6 +64,152 @@ use Illuminate\Support\Facades\DB;
 
 
 
+
+Route::get('generate-school-report', function (Request $request) {
+  // ## 1. Validation and Context Setup ##
+  $request->validate(['id' => 'required|integer']);
+  $report = SchoolReport::findOrFail($request->id);
+
+  // Use firstOrFail() to ensure relationships exist or fail gracefully.
+  $term = $report->term()->firstOrFail();
+  $enterprise = $report->enterprise()->firstOrFail();
+
+  $enterpriseId = $enterprise->id;
+  $termId = $term->id;
+  $academicYearId = $term->academic_year_id;
+
+  // ## 2. Optimized Data Aggregation ##
+  // Fetch all relevant transactions for the term in one go.
+  $transactions = DB::table('transactions')
+    ->where('enterprise_id', $enterpriseId)
+    ->where('term_id', $termId)
+    ->get();
+
+  // Separate transactions into payments (positive) and bills (negative).
+  $payments = $transactions->where('amount', '>', 0);
+  $bills = $transactions->where('amount', '<', 0);
+
+  // Map accounts to users to link transactions to students.
+  $accountToUserMap = Account::whereIn('id', $transactions->pluck('account_id')->unique())
+    ->pluck('administrator_id', 'id');
+
+  // Get a definitive list of users who have associated accounts.
+  $validUserIds = User::whereIn('id', $accountToUserMap->values()->unique())->pluck('id')->all();
+
+  // ## 3. Bulk-Load Relational Data ##
+  // Eager-load 'user' and 'class' to prevent N+1 queries and "property on null" errors.
+  $studentClasses = StudentHasClass::whereIn('administrator_id', $validUserIds)
+    ->where('academic_year_id', $academicYearId)
+    ->with('class', 'user') // CRITICAL: Eager-load both relationships
+    ->get()->keyBy('administrator_id');
+
+  // Get the standard fee amount for each class.
+  $classFeeTotals = AcademicClassFee::whereIn('academic_class_id', $studentClasses->pluck('academic_class_id')->unique())
+    ->where('due_term_id', $termId)
+    ->get()->groupBy('academic_class_id')->map->sum('amount');
+
+  // ## 4. Process Metrics for Each Student ##
+  $studentMetrics = [];
+  $totalFeesBilled = 0;
+  $totalOutstanding = 0;
+  $totalFeesCollected = 0;
+  foreach ($validUserIds as $userId) {
+    $accountId = $accountToUserMap->search($userId);
+    if (!$accountId || !isset($studentClasses[$userId])) continue;
+
+    $classAssignment = $studentClasses[$userId];
+
+    // CRITICAL FIX: Check for null relationships due to deleted records.
+    if (!$classAssignment->user || !$classAssignment->class) {
+      continue;
+    }
+
+    $expected = $classFeeTotals->get($classAssignment->class->id, 0);
+    // $balance = $payments->where('account_id', $accountId)->sum('amount');
+    $balance = DB::table('transactions')
+      ->where('account_id', $accountId)
+      ->where('term_id', $termId)
+      ->sum('amount');
+    $paid = $expected + $balance;
+    
+    $totalFeesBilled += $expected;
+    $totalOutstanding += $balance;
+    $totalFeesCollected += $paid;
+
+    
+
+
+    // This array will hold both raw numbers for calculation and names for display.
+    $studentMetrics[$userId] = [
+      'name'            => $classAssignment->user->name,
+      'class_name'      => $classAssignment->class->name,
+      'class_id'        => $classAssignment->class->id,
+      'raw_expected'    => $expected,
+      'raw_paid'        => $paid,
+      'raw_outstanding' => $expected - $paid,
+    ];
+  }
+
+  // ## 5. Prepare Final Data Structures for the View ##
+
+ /*  $totalFeesBilled = collect($studentMetrics)->sum('raw_expected');
+  $totalOutstanding = collect($studentMetrics)->sum('raw_outstanding');
+  $totalFeesCollected = $totalFeesBilled + $totalOutstanding;  */
+ 
+  // 5a. High-Level Summary (KPIs)
+  $summary = [
+    'totalFeesBilled'     => number_format(collect($studentMetrics)->sum('raw_expected')),
+    'totalFeesCollected'  => number_format($totalFeesCollected),
+    'totalOutstanding'    => number_format(collect($studentMetrics)->sum('raw_outstanding')),
+    'totalSchoolPay'      => number_format($payments->where('source', 'SCHOOL_PAY')->sum('amount')),
+    'totalManualEntry'    => number_format($payments->where('source', 'MANUAL_ENTRY')->sum('amount')),
+    'totalGenerated'      => number_format($bills->where('source', 'GENERATED')->sum('amount')),
+  ];
+
+  // 5b. Class-Level Breakdown
+  $classBreakdown = collect($studentMetrics)->groupBy('class_name')
+    ->map(function ($group) use ($classFeeTotals) {
+      $classId = $group->first()['class_id'];
+      return [
+        'name'                    => $group->first()['class_name'],
+        'students'                => $group->count(),
+        'fees_bill_per_student'   => number_format($classFeeTotals->get($classId, 0)),
+        'billed'                  => number_format($group->sum('raw_expected')),
+        'collected'               => number_format($group->sum('raw_paid')),
+        'outstanding'             => number_format($group->sum('raw_outstanding')),
+      ];
+    })->sortBy('name')->values()->all();
+
+  // 5c. Student data, grouped by class ID and sorted descending.
+  $studentsByClass = collect($studentMetrics)
+    ->groupBy('class_id')
+    ->sortByDesc(fn($group, $classId) => $classId);
+
+  // 5d. Assemble all data to be passed to the view.
+  $data = [
+    'ent'             => $enterprise,
+    'term'            => $term,
+    'summary'         => $summary,
+    'classBreakdown'  => $classBreakdown,
+    'studentsByClass' => $studentsByClass,
+    'date'            => now()->format('d-M-Y'),
+  ];
+
+  // ## 6. Generate and Stream the PDF ##
+  $pdf = App::make('dompdf.wrapper');
+  $pdf->loadView('reports.school_fees_condensed', $data)->setPaper('a4', 'portrait');
+
+  $report->total_students = collect($studentMetrics)->count();
+  $report->expected_fees = collect($studentMetrics)->sum('raw_expected');
+  $report->fees_collected_manual_entry = $payments->where('source', 'MANUAL_ENTRY')->sum('amount');
+  $report->fees_collected_schoolpay = $payments->where('source', 'SCHOOL_PAY')->sum('amount');
+  $report->fees_collected_total = $payments->sum('amount');
+  $report->fees_collected_other = $payments->whereNotIn('source', ['MANUAL_ENTRY', 'SCHOOL_PAY'])->sum('amount');
+  $report->save();
+ 
+  $fileName = 'School-Fees-Report-' . str_replace(' ', '-', $term->name) . '.pdf';
+  return $pdf->stream($fileName);
+});
 
 Route::get('process-transport', function (Request $r) {
   return;

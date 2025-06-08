@@ -151,6 +151,13 @@ class StudentHasClass extends Model
     }
 
 
+    //belongs to user
+
+
+    function user()
+    {
+        return $this->belongsTo(Administrator::class, 'administrator_id');
+    }
 
     function student()
     {
