@@ -34,7 +34,7 @@ if ($demand->message_4 != null && $demand->message_4 != '') {
     .my-bordered-table th {
         padding: 0;
         margin: 0;
-        font-size: 10px;
+        font-size: 10px; 
         font-weight: bold;
         padding-bottom: 3px;
     }
