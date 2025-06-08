@@ -8,9 +8,9 @@ $year = date('Y');
 $active_term = $ent->active_term();
 
 if ($demand->message_4 != null && $demand->message_4 != '') {
-    $month = date('F', strtotime($demand->message_4));
+    $month = date('m', strtotime($demand->message_4));
     $year = date('Y', strtotime($demand->message_4));
-}
+} 
 
 ?>
 <style>
@@ -50,17 +50,16 @@ if ($demand->message_4 != null && $demand->message_4 != '') {
                 <p class="p-0 m-0 fs-16 lh-14 text-center" style="font-size: 14px;"><b>{{ strtoupper($ent->name) }}</b>
                 </p>
                 <p class="p-p m-0 pl-1 pr-1 mt-1 pb-1 fs-14 text-center"
-                    style="font-weight: 900; background-color: {{ $ent->color }}; color: white; border: solid {{ $ent->color }} 2px; display: inline-block; font-size: 14px;">
-                    <b>STUDENT
-                        MEAL CARD</b>
+                    style="font-weight: 900; background-color: {{ $ent->color }}; color: white; border: solid {{ $ent->color }} 2px; display: inline-block; font-size: 12px;">
+                    <b>STUDENT  MEAL CARD</b>
                 </p>
 
             </td>
         </tr>
     </table>
 
-    <p class="fs-14 text-uppercase mt-1 mb-2 " style=" font-size: 12px; line-height: 1.1">
-        NAME: <u><b>&nbsp;{{ $item->owner->name }}&nbsp;</b></u> CLASS:
+    <p class="fs-10 text-uppercase mt-1 mb-2 " style=" font-size: 10px; line-height: 1.1">
+        NAME: <u><b>&nbsp;{{ $item->owner->name }}&nbsp;</b></u> - 
         <u><b>&nbsp;{{ $item->owner->current_class->short_name }}&nbsp;</b></u> MONTH: <b><u>{{ $month }}</u></b>
 
     </p>
@@ -234,9 +233,6 @@ if ($demand->message_4 != null && $demand->message_4 != '') {
             <td>&nbsp;</td>
             <td>&nbsp;</td>
         </tr>
-
-
     </table>
-    <p class="m-0 mt-2">Signature: __________________________</p>
 
 </div>

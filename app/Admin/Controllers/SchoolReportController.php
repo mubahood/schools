@@ -35,7 +35,7 @@ class SchoolReportController extends AdminController
         })->sortable();
         /*     
         $grid->column('updated_at', __('Updated At'))->display(function ($value) {
-            return date('Y-m-d H:i', strtotime($value));
+            return date('Y-m-d H:i', strtotime($value)); 
         }); */
         $grid->disableBatchActions();
         $grid->column('term_id', __('Term'))->display(function ($termId) {
