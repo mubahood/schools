@@ -59,8 +59,8 @@ if ($demand->message_4 != null && $demand->message_4 != '') {
     </table>
 
     <p class="fs-10 text-uppercase mt-1 mb-2 " style=" font-size: 10px; line-height: 1.1">
-        NAME: <u><b>&nbsp;{{ $item->owner->name }}&nbsp;</b></u> - 
-        <u><b>&nbsp;{{ $item->owner->current_class->short_name }}&nbsp;</b></u> MONTH: <b><u>{{ $month }}</u></b>
+        NAME: <u><b>{{ $item->owner->name }}</b></u> - 
+        <u><b>&nbsp;{{ $item->owner->current_class->short_name }}</b></u> MONTH: <b><u>{{ $month }}</u></b>
 
     </p>
 
