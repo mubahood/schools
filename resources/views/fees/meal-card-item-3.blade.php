@@ -5,8 +5,7 @@ use App\Models\Utils;
 
 $month = date('F');
 $year = date('Y');
-$active_term = $ent->active_term();
-
+$active_term = $ent->active_term(); 
 if ($demand->message_4 != null && $demand->message_4 != '') {
     $month = date('F', strtotime($demand->message_4));
     $year = date('Y', strtotime($demand->message_4));
@@ -48,14 +47,16 @@ if ($demand->message_4 != null && $demand->message_4 != '') {
                 <img src="{{ $logo }}" alt="logo" style="width: 50px; height: 50px;">
             </td>
             <td class="text-center">
-                <p class="p-0 m-0 fs-16 lh-14 text-center" style="font-size: 14px;"><b>{{ strtoupper($ent->name) }}</b>
+                <p class="p-0 m-0 fs-16 lh-14 text-center" style="font-size: 12px;"><b>{{ strtoupper($ent->name) }}</b>
                 </p>
-                <p class="p-p m-0 pl-1 pr-1 mt-1 pb-1 fs-14 text-center"
-                    style="font-weight: 900; background-color: {{ $ent->color }}; color: white; border: solid {{ $ent->color }} 2px; display: inline-block; font-size: 14px;">
+                <p class="p-p m-0 pl-1 pr-1 mt-1 pb-0 pt-0 fs-12 text-center"
+                    style="font-weight: 900; background-color: {{ $ent->color }}; color: white; border: solid {{ $ent->color }} 2px; display: inline-block; font-size: 12px;">
                     <b>SCHOOL GATE
                         PASS</b>
                 </p>
-
+            </td>
+            <td class="text-left p-0 m-0" style="width: 50px; height: 50px;">
+                <img src="{{ $item->owner->avatar }}" alt="logo" style="width: 50px; height: 50px;">
             </td>
         </tr>
     </table>

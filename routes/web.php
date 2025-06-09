@@ -1107,8 +1107,8 @@ Route::get('meal-cards', function (Request $r) {
     throw $th;
   }
 
-  // $pdf->render();
-  // return $pdf->stream();
+  $pdf->render();
+  return $pdf->stream();
 
   $rand = rand(1, 100000) . time();
 

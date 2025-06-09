@@ -10,7 +10,7 @@ $active_term = $ent->active_term();
 if ($demand->message_4 != null && $demand->message_4 != '') {
     $month = date('m', strtotime($demand->message_4));
     $year = date('Y', strtotime($demand->message_4));
-} 
+}
 
 ?>
 <style>
@@ -34,7 +34,7 @@ if ($demand->message_4 != null && $demand->message_4 != '') {
     .my-bordered-table th {
         padding: 0;
         margin: 0;
-        font-size: 10px; 
+        font-size: 10px;
         font-weight: bold;
         padding-bottom: 3px;
     }
@@ -46,20 +46,22 @@ if ($demand->message_4 != null && $demand->message_4 != '') {
             <td class="text-left p-0 m-0" style="width: 50px; height: 50px;">
                 <img src="{{ $logo }}" alt="logo" style="width: 50px; height: 50px;">
             </td>
-            <td class="text-center">
-                <p class="p-0 m-0 fs-16 lh-14 text-center" style="font-size: 14px;"><b>{{ strtoupper($ent->name) }}</b>
+            <td class="text-center"> 
+                <p class="p-0 m-0 fs-16 lh-14 text-center" style="font-size: 12px;"><b>{{ strtoupper($ent->name) }}</b>
                 </p>
-                <p class="p-p m-0 pl-1 pr-1 mt-1 pb-1 fs-14 text-center"
+                <p class="p-p m-0 pl-1 pr-1 mt-1 pb-0 pt-0 fs-12 text-center"
                     style="font-weight: 900; background-color: {{ $ent->color }}; color: white; border: solid {{ $ent->color }} 2px; display: inline-block; font-size: 12px;">
-                    <b>STUDENT  MEAL CARD</b>
+                    <b>STUDENT MEAL CARD</b>
                 </p>
-
+            </td>
+            <td class="text-left p-0 m-0" style="width: 50px; height: 50px;">
+                <img src="{{ $item->owner->avatar }}" alt="logo" style="width: 50px; height: 50px;">
             </td>
         </tr>
     </table>
 
     <p class="fs-10 text-uppercase mt-1 mb-2 " style=" font-size: 10px; line-height: 1.1">
-        NAME: <u><b>{{ $item->owner->name }}</b></u> - 
+        NAME: <u><b>{{ $item->owner->name }}</b></u> -
         <u><b>&nbsp;{{ $item->owner->current_class->short_name }}</b></u> MONTH: <b><u>{{ $month }}</u></b>
 
     </p>
