@@ -184,6 +184,13 @@ class SchoolFeesDemandController extends AdminController
             ->rules('required')
             ->required();
 
+        //include_student_photos
+        $form->radio('include_student_photos', 'Include Student Photos on Cards?')->options([
+            'Yes' => 'Yes',
+            'No' => 'No',
+        ])->default('No')->required()
+            ->rules('required');
+
         //target_type borders or day scholars
         $form->radio('target_type', 'Target Residence Type')->options([
             'BOARDER' => 'Boarders',
