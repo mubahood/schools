@@ -1145,6 +1145,7 @@ class Utils  extends Model
         if ($u == null) {
             return;
         }
+        return; 
         $admission_letter = Document::where([
             'enterprise_id' => $u->enterprise_id,
             'name' => DOCUMENT_ADMISSION
