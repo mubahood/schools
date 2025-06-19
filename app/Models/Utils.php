@@ -1145,19 +1145,23 @@ class Utils  extends Model
         if ($u == null) {
             return;
         }
-        return; 
+        
         $admission_letter = Document::where([
             'enterprise_id' => $u->enterprise_id,
             'name' => DOCUMENT_ADMISSION
         ])->first();
         if ($admission_letter == null) {
-            $admission_letter = new Document();
-            $admission_letter->name = DOCUMENT_ADMISSION;
-            $admission_letter->enterprise_id = $u->enterprise_id;
-            $admission_letter->print_hearder = 1;
-            $admission_letter->print_water_mark = 1;
-            $admission_letter->body = file_get_contents(Utils::docs_root() . '/templates/admission-letter.html');
-            $admission_letter->save();
+            try {
+                $admission_letter = new Document();
+                $admission_letter->name = DOCUMENT_ADMISSION;
+                $admission_letter->enterprise_id = $u->enterprise_id;
+                $admission_letter->print_hearder = 1;
+                $admission_letter->print_water_mark = 1;
+                $admission_letter->body = file_get_contents(public_path('templates/admission-letter.html'));
+                $admission_letter->save();
+            } catch (\Throwable $e) {
+                // Handle or log the exception as needed
+            }
         }
     }
 
