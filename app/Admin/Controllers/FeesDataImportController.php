@@ -191,7 +191,7 @@ class FeesDataImportController extends AdminController
             ->options($collumn_names)
             ->help('Select columns that contain services subscriptions data.');
 
-        $form->radio('Previous Term Balance ColumnPrevious Term Balance ColumnPrevious Term Balance ColumnPrevious Term Balance ColumnPrevious Term Balance ColumnPrevious Term Balance ColumnPrevious Term Balance Column', __('Previous Term Balance Column'))
+        $form->select('Previous Term Balance ColumnPrevious Term Balance ColumnPrevious Term Balance ColumnPrevious Term Balance ColumnPrevious Term Balance ColumnPrevious Term Balance ColumnPrevious Term Balance Column', __('Previous Term Balance Column'))
             ->options($collumn_names)
             ->help('Select the column for previous term balance.');
 
