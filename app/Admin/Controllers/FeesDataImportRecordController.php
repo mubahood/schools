@@ -1,0 +1,170 @@
+<?php
+
+namespace App\Admin\Controllers;
+
+use App\Models\FeesDataImportRecord;
+use App\Models\User;
+use Encore\Admin\Controllers\AdminController;
+use Encore\Admin\Form;
+use Encore\Admin\Grid;
+use Encore\Admin\Show;
+use Encore\Admin\Facades\Admin;
+use App\Models\Utils;
+
+class FeesDataImportRecordController extends AdminController
+{
+    /**
+     * Title for current resource.
+     *
+     * @var string
+     */
+    protected $title = 'Import Records';
+
+    /**
+     * Make a grid builder.
+     *
+     * @return Grid
+     */
+    protected function grid()
+    {
+        $grid = new Grid(new FeesDataImportRecord());
+        $user = Admin::user();
+        // Only show records for current enterprise
+        $grid->model()->where('enterprise_id', $user->enterprise_id)
+            ->orderBy('created_at', 'desc');
+
+        // Columns
+        $grid->column('id', 'ID')->sortable();
+        $grid->quickSearch('id', 'reg_number', 'school_pay', 'status', 'summary')
+            ->placeholder('Search by ID, Reg Number, Pay Code, Status or Summary'); 
+        /*  $grid->column('created_at', 'Created')->display(function($v) {
+            return Utils::my_date_3($v);
+        });
+        $grid->column('updated_at', 'Updated')->display(function($v) {
+            return Utils::my_date_3($v);
+        }); */
+        $grid->column('fees_data_import_id', 'Batch Import ID');
+        $grid->column('index', 'Row # index')->sortable();
+        $grid->column('reg_number', 'Student')->sortable()
+            ->display(function ($regNumber) {
+                $u = User::find($this->reg_number);
+
+                if ($u) {
+                    return "<a href='" . admin_url('students/' . $u->id) . "' target='_blank'>" . e($u->name) . "</a>";
+                }
+                return e($regNumber);
+            });
+        $grid->column('school_pay', 'Pay Code')->sortable();
+        $grid->column('previous_fees_term_balance', 'Prev Term Bal')->sortable();
+        $grid->column('udpated_balance', 'Updated Bal')->sortable();
+        $grid->column('current_balance', 'Current Bal')->sortable();
+        $grid->column('status', 'Status')->dot([
+            'Processing' => 'info',
+            'Completed'  => 'success',
+            'Failed'     => 'danger',
+        ])
+            ->filter([
+                'Processing' => 'Processing',
+                'Completed'  => 'Completed',
+                'Failed'     => 'Failed',
+            ]);
+
+        $grid->column('summary', 'Summary')->limit(50);
+        $grid->column('error_message', 'Error')->limit(50);
+        $grid->column('data', 'Raw Data')->display(function ($json) {
+            return "<pre style='max-height:150px;overflow:auto;'>" . e($json) . "</pre>";
+        })->hide();
+        $grid->column('services_data', 'Services')->display(function ($json) {
+            return "<pre style='max-height:150px;overflow:auto;'>" . e($json) . "</pre>";
+        })->hide();
+
+        // Disable row selection and creation
+        $grid->disableRowSelector();
+        $grid->disableCreateButton();
+
+        // Only allow view
+        $grid->actions(function ($actions) {
+            $actions->disableEdit();
+            $actions->disableDelete();
+        });
+
+        return $grid;
+    }
+
+    /**
+     * Make a show builder.
+     *
+     * @param mixed $id
+     * @return Show
+     */
+    protected function detail($id)
+    {
+        $show = new Show(FeesDataImportRecord::findOrFail($id));
+
+        $show->field('id', 'ID');
+        $show->field('created_at', 'Created At');
+        $show->field('updated_at', 'Updated At');
+        $show->field('fees_data_import_id', 'Import ID');
+        $show->field('index', 'Row #');
+        $show->field('identify_by', 'Identified By');
+        $show->field('reg_number', 'Reg Number');
+        $show->field('school_pay', 'School Pay Code');
+        $show->field('previous_fees_term_balance', 'Prev Term Balance');
+        $show->field('udpated_balance', 'Updated Balance');
+        $show->field('current_balance', 'Current Balance');
+        $show->field('status', 'Status')->as(function ($status) {
+            return strtoupper($status);
+        })->label([
+            'processing' => 'info',
+            'completed'  => 'success',
+            'failed'     => 'danger',
+        ]);
+        $show->field('summary', 'Summary')->unescape();
+        $show->field('error_message', 'Error Message')->unescape();
+        $show->field('data', 'Raw Row Data')->as(function ($json) {
+            return "<pre>" . e(json_encode(json_decode($json), JSON_PRETTY_PRINT)) . "</pre>";
+        })->unescape();
+        $show->field('services_data', 'Services Data')->as(function ($json) {
+            return "<pre>" . e(json_encode(json_decode($json), JSON_PRETTY_PRINT)) . "</pre>";
+        })->unescape();
+
+        return $show;
+    }
+
+    /**
+     * Make a form builder.
+     *
+     * @return Form
+     */
+    protected function form()
+    {
+        $form = new Form(new FeesDataImportRecord());
+
+        // Records are generated by import process—no manual creation
+        $form->tools(function (Form\Tools $tools) {
+            $tools->disableDelete();
+            $tools->disableView();
+        });
+        $form->disableReset();
+        $form->disableCreatingCheck();
+        $form->disableEditingCheck();
+
+        // Only allow viewing existing fields
+        $form->display('id', 'ID');
+        $form->display('fees_data_import_id', 'Import ID');
+        $form->display('index', 'Row #');
+        $form->display('identify_by', 'Identified By');
+        $form->display('reg_number', 'Reg Number');
+        $form->display('school_pay', 'School Pay');
+        $form->display('previous_fees_term_balance', 'Prev Term Balance');
+        $form->display('udpated_balance', 'Updated Balance');
+        $form->display('current_balance', 'Current Balance');
+        $form->display('status', 'Status');
+        $form->display('summary', 'Summary');
+        $form->display('error_message', 'Error Message');
+        $form->display('data', 'Raw Data');
+        $form->display('services_data', 'Services Data');
+
+        return $form;
+    }
+}

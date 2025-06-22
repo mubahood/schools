@@ -48,7 +48,7 @@ trait Has
      * @param  \Closure|null  $callback
      * @return $this
      */
-    public function has($key, $length = null, Closure $callback = null): self
+    public function has($key, $length = null, ?Closure $callback = null): self
     {
         $prop = $this->prop();
 

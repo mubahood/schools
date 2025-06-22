@@ -124,7 +124,17 @@ class HandleExceptions
 
             $driver = $config->get('logging.deprecations') ?? 'null';
 
-            $config->set('logging.channels.deprecations', $config->get("logging.channels.{$driver}"));
+            if (is_array($driver)) {
+                $driver = 'null';
+            }
+
+            $config->set(
+                'logging.channels.deprecations',
+                $config->get("logging.channels.{$driver}", [
+                    'driver' => 'monolog',
+                    'handler' => NullHandler::class,
+                ])
+            );
         });
     }
 

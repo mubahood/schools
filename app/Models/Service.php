@@ -37,7 +37,7 @@ class Service extends Model
 
 
     public static function update_fees($m)
-    { 
+    {
 
         foreach ($m->subs as  $s) {
             $fd = FeeDepositConfirmation::where([
@@ -50,18 +50,18 @@ class Service extends Model
 
             $ent = Enterprise::find($m->enterprise_id);
             if ($ent == null) {
-                throw("Ent not found.");
+                throw ("Ent not found.");
             }
             $admin = Administrator::find($s->administrator_id);
             if ($admin == null) {
-                throw("Admin acc not found.");
+                throw ("Admin acc not found.");
             }
             if ($admin->account == null) {
-                $acc = Account::create($s->administrator_id); 
+                $acc = Account::create($s->administrator_id);
             }
 
             if ($admin->account == null) {
-                throw("Fin Acc not found.");
+                throw ("Fin Acc not found.");
             }
 
             $account_id = $admin->account->id;
@@ -76,7 +76,7 @@ class Service extends Model
             if ($by == null) {
                 throw new Exception("User not found", 1);
             }
-            $trans->created_by_id = $by->id; 
+            $trans->created_by_id = $by->id;
 
             $trans->school_pay_transporter_id = '-';
             $trans->amount = ((-1) * $m->fee);
@@ -106,7 +106,6 @@ class Service extends Model
             $fee_dep->save();
             $trans->save();
         }
-
     }
     public function subs()
     {
@@ -116,6 +115,40 @@ class Service extends Model
     //appends name_text
     public function getNameTextAttribute()
     {
-        return $this->name.' - UGX '.number_format($this->fee);
-    } 
+        return $this->name . ' - UGX ' . number_format($this->fee);
+    }
+
+
+    //create service if not exists
+    public static function createIfNotExists(array $data)
+    {
+        if (
+            !isset($data['name']) ||
+            !isset($data['fee']) ||
+            !isset($data['service_category_id']) ||
+            !isset($data['enterprise_id'])
+        ) {
+            throw new Exception("Required fields are missing.");
+        }
+
+        $service = self::where([
+            'name' => $data['name'],
+            'fee' => $data['fee'],
+            'enterprise_id' => $data['enterprise_id'],
+        ])->first();
+
+        if (!$service) {
+            $service = new self();
+            $service->name = $data['name'];
+            $service->fee = $data['fee'];
+            $service->service_category_id = $data['service_category_id'];
+            $service->enterprise_id = $data['enterprise_id'];
+            if (isset($data['description'])) {
+                $service->description = $data['description'];
+            }
+            $service->save();
+        }
+
+        return $service;
+    }
 }

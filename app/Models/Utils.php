@@ -55,6 +55,20 @@ class Utils  extends Model
 
 
 
+    //function that converts alphabets number to php array index, e.g. A = 0, B = 1, C = 2, ..., Z = 25
+    public static function alphabet_to_index($letter)
+    {
+        $letter = strtoupper($letter);
+        if (strlen($letter) != 1) {
+            return -1;
+        }
+        $index = ord($letter) - ord('A');
+        if ($index < 0 || $index > 25) {
+            return -1;
+        }
+        return $index;
+    } 
+
     public static function company_name()
     {
         $name_1 = 'Eight Tech Consults Limited';

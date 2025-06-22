@@ -19,6 +19,8 @@ use App\Models\DataExport;
 use App\Models\DirectMessage;
 use App\Models\Enterprise;
 use App\Models\Exam;
+use App\Models\FeesDataImport;
+use App\Models\FeesDataImportRecord;
 use App\Models\FinancialRecord;
 use App\Models\Gen;
 use App\Models\IdentificationCard;
@@ -31,6 +33,7 @@ use App\Models\SchoolFeesDemand;
 use App\Models\SchoolPayTransaction;
 use App\Models\SchoolReport;
 use App\Models\Service;
+use App\Models\ServiceCategory;
 use App\Models\ServiceSubscription;
 use App\Models\Session;
 use App\Models\TheologyMarkRecord;
@@ -50,8 +53,10 @@ use App\Models\Transaction;
 use App\Models\TransportSubscription;
 use App\Models\User;
 use App\Models\Utils;
+use Carbon\Carbon;
 use Dflydev\DotAccessData\Util;
 use Encore\Admin\Auth\Database\Administrator;
+use Encore\Admin\Facades\Admin;
 use Facade\FlareClient\Report;
 use Faker\Core\Uuid;
 use Illuminate\Support\Facades\Route;
@@ -63,6 +68,402 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 
 
+
+
+Route::get('fees-data-import-do-import', function (Request $request) {
+  $u = Admin::user();
+  if ($u == null) {
+    return "You are not logged in";
+  }
+
+  $importedServiceCategory = null;
+  try {
+    $importedServiceCategory = ServiceCategory::getOrCreateImportedCategory($u->enterprise_id);
+  } catch (\Throwable $th) {
+    $importedServiceCategory = null;
+    throw $th;
+  }
+  if ($importedServiceCategory == null) {
+    return "Failed to get or create imported service category.";
+  }
+  $ent = Enterprise::find($u->enterprise_id);
+  if ($ent == null) {
+    return "Enterprise not found";
+  }
+
+  $active_term = $ent->active_term();
+  if ($active_term == null) {
+    return "No active term found for this enterprise.";
+  }
+
+
+  $feesDataImport = FeesDataImport::find($request->id);
+  if ($feesDataImport == null) {
+    return "Fees Data Import not found";
+  }
+
+  $file_path = public_path('storage/' . $feesDataImport->file_path);
+  if (!file_exists($file_path)) {
+    return "File not found: $file_path";
+  }
+
+
+  if (!in_array($feesDataImport->identify_by, ['school_pay_account_id', 'reg_number'])) {
+    return "Invalid identify_by value: " . htmlspecialchars($feesDataImport->identify_by);
+  }
+
+  set_time_limit(-1);
+  //set unlimited memory
+  ini_set('memory_limit', '-1');
+  $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+  $spreadsheet = $reader->load($file_path);
+  $sheet = $spreadsheet->getActiveSheet();
+  $rows = $sheet->toArray();
+  $count = 0;
+  $success = 0;
+  $fail = 0;
+  $fail_text = "";
+
+  //firstrow
+  if (count($rows) < 2) {
+    return "No data found in the file. Please check the file and try again.";
+  }
+  $firstRow = $rows[0];
+
+  $services = [];
+  if (is_array($feesDataImport->services_columns)) {
+    try {
+      $index = 0;
+      foreach ($feesDataImport->services_columns as $col) {
+        $col = trim($col);
+        if (strlen($col) > 0) {
+          $index = Utils::alphabet_to_index($col);
+
+          //check if $firstRow index is set and has some value
+          if (!isset($firstRow[$index]) || strlen($firstRow[$index]) < 1) {
+            $fail++;
+            $fail_text .= "Column '$col' not found in the first row.<br>";
+            echo "Column '$col' not found in the first row.<br>";
+            continue;
+          }
+          $my_col = [];
+          $my_col['index'] = $index;
+          $my_col['name'] = $firstRow[$index];
+          $my_col['column'] = $col;
+          $services[] = $my_col;
+        }
+      }
+    } catch (\Exception $e) {
+      $services = [];
+    }
+  }
+
+  $services_indexes = [];
+  foreach ($services as $service) {
+    $services_indexes[] = $service['index'];
+  }
+
+
+  $balance_column_index = Utils::alphabet_to_index($feesDataImport->current_balance_column);
+
+  foreach ($rows as $key => $row) {
+    $count++;
+    if ($count < 1) {
+      continue;
+    }
+    $record = FeesDataImportRecord::where([
+      'fees_data_import_id' => $feesDataImport->id,
+      'index' => $count,
+    ])->first();
+    if ($record == null) {
+      $record = new FeesDataImportRecord();
+      $record->fees_data_import_id = $feesDataImport->id;
+      $record->enterprise_id = $feesDataImport->enterprise_id;
+      $record->index = $count;
+    }
+
+
+    $student_identifier = null;
+    $student = null;
+    if ($feesDataImport->identify_by == 'school_pay_account_id') {
+      // Check if the column index is set before accessing
+      $colIndex = Utils::alphabet_to_index($feesDataImport->school_pay_column);
+      if (!isset($row[$colIndex])) {
+        $fail++;
+        $fail_text .= "Row $count: School Pay Account column '$colIndex' not set.<br>";
+        echo "Row $count: School Pay Account column '$colIndex' not set.<br>";
+        $record->error_message = "Row $count: School Pay Account column '$colIndex' not set.";
+        $record->status = 'Failed';
+        $record->save();
+        continue;
+      }
+      $student_identifier = $row[$colIndex];
+
+      if ($student_identifier == null || strlen($student_identifier) < 1) {
+        $fail++;
+        $fail_text .= "Row $count: School Pay Account ID is empty.<br>";
+        echo "Row $count: School Pay Account ID is empty.<br>";
+        $record->error_message = "Row $count: School Pay Account ID is empty. (School Pay ID: {$student_identifier})";
+        $record->status = 'Failed';
+        $record->save();
+        continue;
+      }
+      $student = User::where([
+        'school_pay_payment_code' => $student_identifier,
+      ])->first();
+    } else if ($feesDataImport->identify_by == 'reg_number') {
+      $colIndex = Utils::alphabet_to_index($feesDataImport->reg_number_column);
+      if (!isset($row[$colIndex])) {
+        $fail++;
+        $fail_text .= "Row $count: Registration Number column '$colIndex' not set.<br>";
+        echo "Row $count: Registration Number column '$colIndex' not set.<br>";
+        $record->error_message = "Row $count: Registration Number column '$colIndex' not set. (Reg Number: " . (isset($row[$colIndex]) ? $row[$colIndex] : 'N/A') . ")";
+        $record->status = 'Failed';
+        $record->save();
+        continue;
+      }
+      $student_identifier = $row[$colIndex];
+      if ($student_identifier == null || strlen($student_identifier) < 1) {
+        $fail++;
+        $fail_text .= "Row $count: Registration Number is empty.<br>";
+        echo "Row $count: Registration Number is empty.<br>";
+        $record->error_message = "Row $count: Registration Number is empty. (Reg Number: {$student_identifier})";
+        $record->status = 'Failed';
+        $record->save();
+        continue;
+      }
+      $student = User::where([
+        'user_number' => $student_identifier,
+      ])->first();
+    }
+
+    if ($student == null) {
+      $fail++;
+      $fail_text .= "Row $count: Student with identifier '$student_identifier' not found.<br>";
+      echo "Row $count: Student with identifier '$student_identifier' not found.<br>";
+      $record->error_message = "Row $count: Student with identifier '$student_identifier' not found.";
+      $record->status = 'Failed';
+      continue;
+    }
+    $account = $student->account;
+    $record->identify_by = $feesDataImport->identify_by;
+    $record->reg_number = $student->id; // Assuming reg_number is the student ID
+    $record->school_pay = $student_identifier;
+    $record->enterprise_id = $feesDataImport->enterprise_id;
+    $record->index = $count;
+    $record->identify_by = $feesDataImport->identify_by;
+    $record->reg_number = $student_identifier; // Assuming reg_number is the student identifier
+    //add data
+    $record->data = json_encode($row); // Store the raw data of the record
+    $record->services_data = json_encode($services); // Store the services data if applicable
+    $record->status = 'Processing'; // Set status to processing
+    //save
+    try {
+      $record->save();
+    } catch (\Throwable $th) {
+      throw new \Exception("Failed to save record for row $count: " . $th->getMessage());
+    }
+
+    if ($account == null) {
+      $fail++;
+      $fail_text .= "Row $count: Student with identifier '$student_identifier' has no account.<br>";
+      echo "Row $count: Student with identifier '$student_identifier' has no account.<br>";
+      $record->error_message = "Row $count: Student with identifier '$student_identifier' has no account.";
+      $record->status = 'Failed';
+      continue;
+    }
+
+    $last_term_balance = 0;
+    $previous_fees_term_balance_column = Utils::alphabet_to_index($feesDataImport->previous_fees_term_balance_column);
+    if (isset($row[$previous_fees_term_balance_column]) && strlen($row[$previous_fees_term_balance_column]) > 0) {
+      $last_term_balance =  preg_replace('/[^\d.]/', '', $row[$previous_fees_term_balance_column]);
+    } else {
+      $last_term_balance = 0; // Default to 0 if not set or not numeric
+    }
+    if ($last_term_balance != 0) {
+      $last_term_balance = abs((int)$last_term_balance);
+      $last_term_balance = $last_term_balance * -1; // Make it negative as it's a balance owed
+
+      $action_done = '';
+      $last_term_balance_record = Transaction::where([
+        'account_id' => $account->id,
+        'term_id' => $active_term->id,
+        'is_contra_entry' => 'Yes',
+      ])->first();
+
+      if ($last_term_balance_record == null) {
+        $last_term_balance_record = new Transaction();
+        $last_term_balance_record->enterprise_id = $feesDataImport->enterprise_id;
+        $last_term_balance_record->account_id = $account->id;
+        $last_term_balance_record->created_by_id = $feesDataImport->created_by_id;
+        $last_term_balance_record->amount = $last_term_balance;
+        $last_term_balance_record->description = "Shool fees balance for previous term.";
+        $last_term_balance_record->academic_year_id = $active_term->academic_year_id;
+        $last_term_balance_record->term_id = $active_term->id;
+        $last_term_balance_record->type = 'FEES_BILL';
+        $last_term_balance_record->payment_date = Carbon::now();
+        $last_term_balance_record->source = 'GENERATED'; // Assuming this is a manual entry
+        $last_term_balance_record->save();
+        $action_done .= "Row $count: Created new last term balance record for student '{$student->name}' with amount UGX " . number_format($last_term_balance) . ".<br>";
+      } else {
+        // Update existing record if it exists
+        $last_term_balance_record->amount = $last_term_balance;
+        $last_term_balance_record->description = "Previous term balance adjustment for {$student->name} ({$student->school_pay_payment_code})";
+        $last_term_balance_record->save();
+        $action_done .= "Row $count: Updated existing last term balance record for student '{$student->name}' with amount UGX " . number_format($last_term_balance) . ".<br>";
+      }
+    }
+
+    //loop through the services and see if there is any value sent in index
+    foreach ($services as $service) {
+      $service_index = $service['index'];
+      if (!isset($row[$service_index]) || strlen($row[$service_index]) < 1) {
+        //skip this service
+        continue;
+      }
+      $service_amount = $row[$service_index];
+
+      //clean $service_amount to numeric
+      $service_amount = preg_replace('/[^\d.]/', '', $service_amount);
+      if (!is_numeric($service_amount) || $service_amount <= 0) {
+        //skip this service
+        $action_done .= "Row $count: Service amount for service '{$service['name']}' is not a valid number or is less than or equal to zero. Skipping this service.<br>";
+        continue;
+      }
+      $service_name = trim($service['name']) . ' - ' . $service_amount;
+
+      //add details for this service to the record
+      $description = "Service: $service_name, Amount: $service_amount";
+
+      $serviceObject = Service::createIfNotExists([
+        'name' => $service_name,
+        'fee' => $service_amount,
+        'service_category_id' => $importedServiceCategory->id,
+        'enterprise_id' => $feesDataImport->enterprise_id,
+        'description' => $description,
+      ]);
+
+      if ($serviceObject == null) {
+        $fail++;
+        $fail_text .= "Row $count: Failed to create or find service '$service_name'.<br>";
+        echo "Row $count: Failed to create or find service '$service_name'.<br>";
+        $record->error_message = "Row $count: Failed to create or find service '$service_name'.";
+        $record->status = 'Failed';
+        $action_done .= "Row $count: Failed to create or find service '$service_name'.<br>";
+        continue;
+      }
+
+      //check if already have this service for this term 
+      $serviceSubscription = ServiceSubscription::where([
+        'service_id' => $serviceObject->id,
+        'administrator_id' => $student->id,
+        'due_term_id' => $active_term->id,
+      ])->first();
+
+      if ($serviceSubscription != null) {
+        $action_done .= "Row $count: Service '$service_name' already exists for student '{$student->name}' in the current term. Skipping this service.<br>";
+      } else {
+
+        $serviceSubscription = new ServiceSubscription();
+        $serviceSubscription->enterprise_id = $feesDataImport->enterprise_id;
+        $serviceSubscription->ref_id = $feesDataImport->id;
+        $serviceSubscription->service_id = $serviceObject->id;
+        $serviceSubscription->administrator_id = $student->id;
+        $serviceSubscription->quantity = 1; // Assuming quantity is always 1 for this import
+        $serviceSubscription->total = $serviceObject->fee * 1; // Assuming quantity is always 1 for this import
+        $serviceSubscription->due_academic_year_id = $active_term->academic_year_id;
+        $serviceSubscription->due_term_id = $active_term->id;
+        $serviceSubscription->is_processed = 'No'; // Assuming we want to process it later
+
+        try {
+          $serviceSubscription->save();
+          $action_done .= "Row $count: Creating new service subscription for student '{$student->name}' with service '$service_name'.<br>";
+        } catch (\Throwable $th) {
+          $fail++;
+          $fail_text .= "Row $count: Failed to create service subscription for student '{$student->name}' with service '$service_name'. Error: " . $th->getMessage() . "<br>";
+          echo "Row $count: Failed to create service subscription for student '{$student->name}' with service '$service_name'. Error: " . $th->getMessage() . "<br>";
+          $record->error_message = "Row $count: Failed to create service subscription for student '{$student->name}' with service '$service_name'. Error: " . $th->getMessage();
+          $record->status = 'Failed';
+          continue;
+        }
+      }
+    }
+
+
+    $current_balance = 0;
+    $current_balance_column = Utils::alphabet_to_index($feesDataImport->current_balance_column);
+    if (isset($row[$current_balance_column]) && strlen($row[$current_balance_column]) > 0) {
+      $current_balance =  preg_replace('/[^\d.]/', '', $row[$current_balance_column]);
+    } else {
+      $current_balance = 0; // Default to 0 if not set or not numeric
+    }
+    $current_balance = ((int)$current_balance);
+
+    if ($current_balance != 0) {
+      //cater_for_balance 
+      if ($feesDataImport->cater_for_balance != 'Yes') {
+        $current_balance = abs($current_balance); // Make it positive if not catering for negative sign
+        $current_balance = $current_balance * -1; // Make it negative as it's a balance owed
+      }
+      $ACCOUNT_BALANCE = (int)$account->balance;
+      if ($ACCOUNT_BALANCE != $current_balance) {
+        $account->new_balance_amount = $current_balance;
+        $account->new_balance = 1;
+        try {
+          $account->save();
+          $action_done .= "Row $count: Updated account balance for student '{$student->name}' to UGX " . number_format($current_balance) . ".<br>";
+        } catch (\Throwable $th) {
+          $fail++;
+          $fail_text .= "Row $count: Failed to update account balance for student '{$student->name}'. Error: " . $th->getMessage() . "<br>";
+          echo "Row $count: Failed to update account balance for student '{$student->name}'. Error: " . $th->getMessage() . "<br>";
+          $record->error_message = "Row $count: Failed to update account balance for student '{$student->name}'. Error: " . $th->getMessage();
+          $record->status = 'Failed';
+          $record->udpated_balance = $current_balance;
+          $record->current_balance = $current_balance;
+          $record->previous_fees_term_balance = $last_term_balance;
+          $record->summary = $action_done;
+          $record->data = json_encode($row); // Store the raw data of the record
+          $record->services_data = json_encode($services); // Store the services data if applicable
+          $record->save();
+          continue;
+        }
+      }
+    }
+    $record->identify_by = $feesDataImport->identify_by;
+    $record->reg_number = $student->id; // Assuming reg_number is the student ID 
+    $record->udpated_balance = $current_balance;
+    $record->school_pay = $student_identifier;
+    $record->current_balance = $current_balance;
+    $record->previous_fees_term_balance = $last_term_balance;
+    $record->status = 'Completed'; // Mark as completed if no errors
+    $record->summary = $action_done;
+    $record->data = json_encode($row); // Store the raw data of the record
+    $record->services_data = json_encode($services); // Store the services data if applicable
+    try {
+      $record->save();
+      $success++;
+      echo "Row $count: Successfully processed student '{$student->name}' with identifier '$student_identifier'.<br>";
+      echo "<hr>";
+    } catch (\Throwable $th) {
+      $fail++;
+      $fail_text .= "Row $count: Failed to save record for student '{$student->name}' with identifier '$student_identifier'. Error: " . $th->getMessage() . "<br>";
+      echo "Row $count: Failed to save record for student '{$student->name}' with identifier '$student_identifier'. Error: " . $th->getMessage() . "<br>";
+      $record->error_message = "Row $count: Failed to save record for student '{$student->name}' with identifier '$student_identifier'. Error: " . $th->getMessage();
+      $record->status = 'Failed';
+      echo "<hr>";
+      continue;
+    }
+  }
+  $feesDataImport->status = 'Completed';
+  $feesDataImport->summary = "Total Rows: $count, Success: $success, Fail: $fail<br>" . $fail_text;
+  try {
+    $feesDataImport->save();
+    echo "Fees Data Import completed successfully. Total Rows: $count, Success: $success, Fail: $fail<br>" . $fail_text;
+  } catch (\Throwable $th) {
+    echo "Failed to update Fees Data Import status. Error: " . $th->getMessage() . "<br>";
+  }
+  return '';
+});
 
 
 Route::get('generate-school-report', function (Request $request) {
@@ -131,12 +532,12 @@ Route::get('generate-school-report', function (Request $request) {
       ->where('term_id', $termId)
       ->sum('amount');
     $paid = $expected + $balance;
-    
+
     $totalFeesBilled += $expected;
     $totalOutstanding += $balance;
     $totalFeesCollected += $paid;
 
-    
+
 
 
     // This array will hold both raw numbers for calculation and names for display.
@@ -152,10 +553,10 @@ Route::get('generate-school-report', function (Request $request) {
 
   // ## 5. Prepare Final Data Structures for the View ##
 
- /*  $totalFeesBilled = collect($studentMetrics)->sum('raw_expected');
+  /*  $totalFeesBilled = collect($studentMetrics)->sum('raw_expected');
   $totalOutstanding = collect($studentMetrics)->sum('raw_outstanding');
   $totalFeesCollected = $totalFeesBilled + $totalOutstanding;  */
- 
+
   // 5a. High-Level Summary (KPIs)
   $summary = [
     'totalFeesBilled'     => number_format(collect($studentMetrics)->sum('raw_expected')),
@@ -206,7 +607,7 @@ Route::get('generate-school-report', function (Request $request) {
   $report->fees_collected_total = $payments->sum('amount');
   $report->fees_collected_other = $payments->whereNotIn('source', ['MANUAL_ENTRY', 'SCHOOL_PAY'])->sum('amount');
   $report->save();
- 
+
   $fileName = 'School-Fees-Report-' . str_replace(' ', '-', $term->name) . '.pdf';
   return $pdf->stream($fileName);
 });

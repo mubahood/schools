@@ -138,6 +138,8 @@ Route::group([
     $router->resource('passenger-records', PassengerRecordController::class);
     $router->resource('school-pay-hooks', SchoolPayHookController::class);
     $router->resource('school-reports', SchoolReportController::class);
+    $router->resource('fees-data-import', FeesDataImportController::class);
+    $router->resource('fees-data-import-records', FeesDataImportRecordController::class);
 
 
     //$router->get('/fixed-asset-records-stats', 'FixedAssetRecordController@stats');

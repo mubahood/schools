@@ -25,7 +25,7 @@ class TransactionController extends AdminController
      *
      * @var string
      */
-    protected $title = 'Transaction';
+    protected $title = 'Transactions';
 
     /** 
      * Make a grid builder.
@@ -35,7 +35,7 @@ class TransactionController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Transaction());
-       /*  $u = Admin::user();
+        /*  $u = Admin::user();
         StudentHasFee::where('enterprise_id', $u->enterprise_id)
             ->delete(); */
 
@@ -151,7 +151,7 @@ class TransactionController extends AdminController
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
         ])
-            ->orderBy('payment_date', 'Desc');
+            ->orderBy('id', 'Desc');
 
         /*         $grid->column('id', __('Id'))->sortable(); */
 
