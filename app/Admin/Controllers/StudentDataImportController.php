@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\Post\DuplicateStudentDataImports;
 use App\Models\StudentDataImport;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Form;
@@ -18,6 +19,10 @@ class StudentDataImportController extends AdminController
     {
         $grid = new Grid(new StudentDataImport());
 
+        $grid->batchActions(function ($batch) {
+            // … any other batch actions …
+            $batch->add(new \App\Admin\Actions\Post\BatchReplicate());
+        });
         // scope to current enterprise
         $grid->model()
             ->where('enterprise_id', Admin::user()->enterprise_id)
@@ -68,8 +73,6 @@ class StudentDataImportController extends AdminController
             return "<a href='{$url}' class='btn btn-xs {$cls}' target='_blank'>{$btn}</a>";
         });
 
-        // disable batch delete
-        $grid->disableBatchActions();
 
         return $grid;
     }
