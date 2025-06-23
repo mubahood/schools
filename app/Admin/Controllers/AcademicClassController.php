@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\Post\BatchCopyAcademicClass;
 use App\Models\AcademicClass;
 use App\Models\AcademicClassFee;
 use App\Models\AcademicClassLevel;
@@ -43,8 +44,12 @@ class AcademicClassController extends AdminController
         //Utils::display_system_checklist();
 
         $grid = new Grid(new AcademicClass());
-        //$grid->disableCreateButton();
-        $grid->disableBatchActions();
+
+
+        $grid->batchActions(function ($batch) {
+            // disable delete or other batch actions as needed
+            $batch->add(new BatchCopyAcademicClass());
+        });
         $grid->model()
             ->orderBy('id', 'Desc')
             ->where(
@@ -54,11 +59,17 @@ class AcademicClassController extends AdminController
             );
 
         $grid->column('id', __('Class #ID'))->sortable();
-        $grid->column('name', __('Name'))->sortable();
-        $grid->column('short_name', __('Short name'));
-        $grid->column('academic_year_id', __('Academic year'))->display(function ($ay) {
-            return $this->academic_year->name;
-        })->sortable();
+        $grid->column('name', __('Name'))->sortable()->editable();
+        $grid->column('short_name', __('Short name'))->editable();
+
+        $years = AcademicYear::where([
+            'enterprise_id' => Admin::user()->enterprise_id,
+        ])->get()->pluck('name', 'id');
+
+        $grid->column('academic_year_id', __('Academic year'))
+            ->sortable()
+            ->editable('select', $years);
+
         $grid->column('class_teahcer_id', __('Class teahcer'))->display(function ($ay) {
             if ($this->class_teacher == null) {
                 $this->class_teahcer_id = $this->ent->administrator_id;

@@ -255,6 +255,16 @@ class AcademicClass extends Model
     }
     public static function my_update($class)
     {
+        $ent = Enterprise::find($class->enterprise_id);
+        if ($ent == null) {
+            throw new Exception("Enterprise not found.", 1);
+        }
+
+        //if type university, return
+        if ($ent->type == 'University') {
+            return $class;
+        } 
+
         $_class = AcademicClass::where([
             'enterprise_id' => $class->enterprise_id,
             'academic_year_id' => $class->academic_year_id,
