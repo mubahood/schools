@@ -342,14 +342,17 @@ class TransactionController extends AdminController
         );
         $ajax_url = trim($ajax_url);
 
-        $form->select('account_id', "Account")
+        $form->select('account_id', "Student Account")
             ->options(function ($id) {
                 $a = Account::find($id);
                 if ($a) {
                     return [$a->id => "#" . $a->id . " - " . $a->name];
                 }
             })
-            ->ajax($ajax_url)->rules('required');
+            ->ajax(url(
+                '/api/studentsFinancialAccounts?'
+                    . 'user_id=' . $u->id
+            ))->rules('required');
 
 
         $form->decimal('amount', __('Amount'))
@@ -361,18 +364,22 @@ class TransactionController extends AdminController
 
         $form->textarea('description', __('Description'))->rules('required');
 
-        if ($form->isCreating()) {
-            $form->divider();
-
-            $form->select('contra_entry_account_id', "Contra-entry Account")
-                ->options($_accs)
-                ->help("Source/Destination of the funds.")
-                ->rules('required');
-        }
+        $form->radio('source', "Money deposited to")
+            ->options([
+                "SCHOOL_PAY" => 'School Pay',
+                "MANUAL_ENTRY" => 'Manual Entry (Cash)',
+            ])
+            ->when('SCHOOL_PAY', function (Form $form) {
+                $form->text('school_pay_transporter_id', 'School Pay Receipt Number')
+                    ->rules('required|numeric');
+            })->rules('required')
+            ->required();
 
         $form->disableCreatingCheck();
         $form->disableReset();
         $form->disableViewCheck();
+
+        $form->hidden('is_contra_entry', __('is_contra_entry'))->default(0)->rules('required');
         $form->disableEditingCheck();
 
 
