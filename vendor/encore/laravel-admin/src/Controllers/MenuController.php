@@ -41,7 +41,17 @@ class MenuController extends Controller
                     $form->text('title', trans('admin.title'))->rules('required');
                     $form->icon('icon', trans('admin.icon'))->default('fa-bars')->rules('required')->help($this->iconHelp());
                     $form->text('uri', trans('admin.uri'));
-                    $form->multipleSelect('roles', trans('admin.roles'))->options($roleModel::all()->pluck('name', 'id'));
+                    $form->checkbox('roles', trans('admin.roles'))->options($roleModel::all()->pluck('name', 'id'));
+                    // checkbox for access_by
+                    $form->checkbox('access_by', 'Access By')
+                        ->options([
+                            'All' => 'All Users',
+                            'Primary' => 'Primary School',
+                            'Secondary' => 'Secondary School',
+                            'Advanced' => 'Advanced Level',
+                            'University' => 'University',
+                        ])
+                        ->help('Select the user types that can access this menu.');
                     if ((new $menuModel())->withPermission()) {
                         $form->select('permission', trans('admin.permission'))->options($permissionModel::pluck('name', 'slug'));
                     }
@@ -129,7 +139,7 @@ class MenuController extends Controller
         $form->text('title', trans('admin.title'))->rules('required');
         $form->icon('icon', trans('admin.icon'))->default('fa-bars')->rules('required')->help($this->iconHelp());
         $form->text('uri', trans('admin.uri'));
-        $form->multipleSelect('roles', trans('admin.roles'))->options($roleModel::all()->pluck('name', 'id'));
+        $form->checkbox('roles', trans('admin.roles'))->options($roleModel::all()->pluck('name', 'id'));
         if ($form->model()->withPermission()) {
             $form->select('permission', trans('admin.permission'))->options($permissionModel::pluck('name', 'slug'));
         }
