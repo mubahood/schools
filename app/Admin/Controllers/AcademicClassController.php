@@ -139,7 +139,6 @@ class AcademicClassController extends AdminController
 
         //Utils::display_system_checklist();
 
-        $form->disableCreatingCheck();
         $form->disableReset();
         $form->disableViewCheck();
 
