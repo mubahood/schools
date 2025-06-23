@@ -53,6 +53,73 @@ define('COLORS',  [
 class Utils  extends Model
 {
 
+    public static function get_word($word)
+    {
+        if ($word == null) {
+            return "";
+        }
+        $u = Admin::user();
+        if ($u == null) {
+            return $word;
+        }
+        $ent = $u->ent;
+        if ($ent == null) {
+            return $word;
+        }
+        if ($ent->type == 'University') {
+            $temp_word = strtolower($word);
+
+            // Define mapping for replacements
+            $replacements = [
+                'class' => 'Course',
+                'classes' => 'Courses',
+                'student' => 'Learner',
+                'students' => 'Learners',
+                'parent' => 'Guardian',
+                'parents' => 'Guardians',
+                'teacher' => 'Lecturer',
+                'teachers' => 'Lecturers',
+                'subject' => 'Course Unit',
+                'subjects' => 'Course Units',
+                'exam' => 'Assessment',
+                'exams' => 'Assessments',
+                'fee' => 'Tuition',
+                'fees' => 'Tuition Fees',
+                'school' => 'University',
+                'school fees' => 'Tuition Fees',
+                'school fee' => 'Tuition Fee',
+                'school dynamics' => 'University Dynamics',
+                'school dynamics ug' => 'University Dynamics UG',
+                'school dynamics uganda' => 'University Dynamics Uganda',
+                'school dynamics ltd' => 'University Dynamics Ltd',
+                'term' => 'Semester',
+                'terms' => 'Semesters',
+                'stream' => 'Program',
+                'streams' => 'Programs',
+            ];
+
+            // Sort keys by length (desc) to replace longer phrases first
+            uksort($replacements, function($a, $b) {
+                return strlen($b) - strlen($a);
+            });
+
+            // Replace all occurrences in the sentence, case-insensitive, word boundaries
+            foreach ($replacements as $find => $replace) {
+                $pattern = '/\b' . preg_quote($find, '/') . '\b/i';
+                $word = preg_replace_callback($pattern, function($matches) use ($replace) {
+                    // Preserve case of first letter
+                    if (ctype_upper($matches[0][0])) {
+                        return ucfirst($replace);
+                    }
+                    return $replace;
+                }, $word);
+            }
+
+
+            return $word;
+        }
+        return $word;
+    }
 
 
     //function that converts alphabets number to php array index, e.g. A = 0, B = 1, C = 2, ..., Z = 25
@@ -67,7 +134,7 @@ class Utils  extends Model
             return -1;
         }
         return $index;
-    } 
+    }
 
     public static function company_name()
     {
@@ -1159,7 +1226,7 @@ class Utils  extends Model
         if ($u == null) {
             return;
         }
-        
+
         $admission_letter = Document::where([
             'enterprise_id' => $u->enterprise_id,
             'name' => DOCUMENT_ADMISSION

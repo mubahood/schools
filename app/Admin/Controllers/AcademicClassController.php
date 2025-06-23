@@ -26,6 +26,11 @@ class AcademicClassController extends AdminController
      */
     protected $title = 'Classes';
 
+    public function title()
+    {
+        return admin_trans($this->title);
+    }
+
     /**
      * Make a grid builder.
      *
@@ -45,7 +50,6 @@ class AcademicClassController extends AdminController
             ->where(
                 [
                     'enterprise_id' => Admin::user()->enterprise_id,
-                    'academic_year_id' => Admin::user()->ent->dp_year,
                 ]
             );
 
@@ -86,11 +90,11 @@ class AcademicClassController extends AdminController
         });
 
         $grid->column('students_count', __('Students'))->display(function () {
-            $count = User::where ([  
+            $count = User::where([
                 'current_class_id' => $this->id,
                 'status' => 1,
             ])->count();
-            return $count; 
+            return $count;
         });
 
         /*         $grid->column('competences', __('Competences'))->display(function () {
@@ -163,6 +167,7 @@ class AcademicClassController extends AdminController
                 }
             }
 
+            $form->text('name', __('Class Name'))->rules('required');
 
             if ($form->isCreating()) {
                 $form->select('academic_year_id', 'Academic year')
@@ -174,12 +179,10 @@ class AcademicClassController extends AdminController
                     )->rules('required');
 
                 $form->select('academic_class_level_id', __('Class'))
-                    ->options($class_levels)
-                    ->rules('required');
+                    ->options($class_levels);
             } else {
 
-                $form->text('name', __('Class Name'))->rules('required');
-                $form->text('short_name', __('Short Name'))->rules('required');
+
                 $form->select('academic_year_id', 'Academic year')
                     ->readOnly()
                     ->options(
@@ -187,14 +190,13 @@ class AcademicClassController extends AdminController
                             'enterprise_id' => $u->enterprise_id,
                         ])->get()
                             ->pluck('name', 'id')
-                    )->rules('required');
+                    );;
 
                 $form->select('academic_class_level_id', __('Class'))
                     ->options($class_levels)
-                    ->readOnly()
-                    ->rules('required');
+                    ->readOnly();
             }
-
+            $form->text('short_name', __('Short Name'))->rules('required');
 
             $teachers = [];
             foreach (
@@ -270,7 +272,7 @@ class AcademicClassController extends AdminController
                     ])->get();
                 } else {
                     $subjects = MainCourse::where([
-                        'subject_type' => 'Secondary'
+                        'subject_type' => $u->ent->type
                     ])->get();
                 }
 
@@ -278,7 +280,7 @@ class AcademicClassController extends AdminController
                 $form->select('course_id', 'Subject')
                     ->options(
                         $subjects->pluck('name', 'id')
-                    )->rules('required');
+                    );
 
                 $form->radio('is_optional', 'Subject type')
                     ->options([

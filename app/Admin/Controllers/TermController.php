@@ -17,7 +17,10 @@ class TermController extends AdminController
      *
      * @var string
      */
-    protected $title = 'Terms';
+    public function title()
+    {
+        return __('Terms');
+    }
 
     /**
      * Make a grid builder.

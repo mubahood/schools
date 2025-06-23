@@ -1,4 +1,4 @@
-php artisan make:migration add_cater_for_balance_fees_data_imports --table=fees_data_imports
+php artisan make:migration add_academic_classes_to_academic_classes --table=academic_classes
 ls
          $table->date('check_in_time')->nullable();
             $table->date('check_out_time')->nullable();
@@ -10,9 +10,9 @@ php artisan make:migration slot
 
 
 
-php artisan make:model FeesDataImportRecord -m
+php artisan make:model StudentDataImport --migration
 
-php artisan admin:make FeesDataImportRecordController --model=App\\Models\\FeesDataImportRecord
+php artisan admin:make StudentDataImportController --model=App\\Models\\StudentDataImport
 php artisan admin:make FeesDataImportController --model=App\Models\FeesDataImport
 
 17-35-P.1_Theology_-_Term_2_-_2024-0200.pdf

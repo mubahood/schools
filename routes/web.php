@@ -70,6 +70,8 @@ use Illuminate\Support\Facades\DB;
 
 
 
+Route::get('student-data-import-do-import', [MainController::class, 'student_data_import_do_import']);
+
 Route::get('fees-data-import-do-import', function (Request $request) {
   $u = Admin::user();
   if ($u == null) {

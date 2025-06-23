@@ -166,7 +166,7 @@ class User extends Administrator implements JWTSubject
         $s = Administrator::find($s->id);
         if ($s == null) {
             return null;
-        } 
+        }
         $p = $s->getParent();
         if ($p != null) {
             $table = $s->getTable();
@@ -546,5 +546,41 @@ class User extends Administrator implements JWTSubject
             $role_ids[] = $role;
         }
         return json_encode($role_ids);
+    }
+
+    public function getDefaultRole()
+    {
+        $ent = $this->ent;
+        if ($ent == null) {
+            throw new \Exception("Enterprise not found for user", 1);
+        }
+
+        $defaultRole = AdminRole::where([
+            'slug' => $ent->type,
+        ])->first();
+        if ($defaultRole == null) {
+            throw new \Exception("Default role not found for enterprise type: " . $ent->type, 1);
+        }
+
+        $role = AdminRoleUser::where([
+            'user_id' => $this->id,
+            'role_id' => $defaultRole->id,
+        ])->first();
+
+
+        if ($role == null) {
+            $role = new AdminRoleUser();
+            $role->user_id = $this->id;
+            $role->role_id = $defaultRole->id;
+            $role->save();
+        }
+        $role = AdminRoleUser::where([
+            'user_id' => $this->id,
+            'role_id' => $defaultRole->id,
+        ])->first();
+        if ($role == null) {
+            throw new \Exception("Role not found for user: " . $this->name, 1);
+        }
+        return $role;
     }
 }

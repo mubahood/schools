@@ -2,23 +2,248 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AcademicClass;
 use App\Models\Account;
 use App\Models\Enterprise;
+use App\Models\StudentDataImport;
 use App\Models\StudentHasClass;
 use App\Models\Term;
 use App\Models\TermlySchoolFeesBalancing;
 use App\Models\Transaction;
+use App\Models\User;
 use App\Models\Utils;
 use Carbon\Carbon;
 use Encore\Admin\Auth\Database\Administrator;
+use Encore\Admin\Facades\Admin;
 use Excel;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use PhpOffice\PhpSpreadsheet\Reader\Csv;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 
 use function PHPUnit\Framework\fileExists;
 
 class MainController extends Controller
 {
+
+
+    public function student_data_import_do_import(Request $request)
+    {
+        $admin = Admin::user();
+        if (!$admin) {
+            return "<span style='color:red;'>You are not logged in.</span>";
+        }
+
+        $import = StudentDataImport::find($request->get('id'));
+        if (!$import) {
+            return "<span style='color:red;'>Import #{$request->get('id')} not found.</span>";
+        }
+
+        $file = public_path('storage/' . $import->file_path);
+        if (!file_exists($file)) {
+            return "<span style='color:red;'>File not found: {$file}</span>";
+        }
+
+        // Choose reader by extension
+        $ext    = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+        $reader = $ext === 'csv'
+            ? (new Csv())->setDelimiter(',')->setReadDataOnly(true)
+            : new Xlsx();
+
+        set_time_limit(0);
+        ini_set('memory_limit', '-1');
+
+        $sheet  = $reader->load($file)->getActiveSheet();
+        $rows   = $sheet->toArray(null, true, true, false);
+
+        if (count($rows) < 2) {
+            return "<span style='color:red;'>No data found in the file.</span>";
+        }
+
+        // Header row
+        $header = array_shift($rows);
+        $needed = [
+            'identify'     => $import->identify_by === 'reg_number'
+                ? $import->reg_number_column
+                : $import->school_pay_column,
+            'name'         => $import->name_column,
+            'class'        => $import->class_column,
+            // optional
+            'gender'       => $import->gender_column,
+            'dob'          => $import->dob_column,
+            'phone'        => $import->phone_column,
+            'email'        => $import->email_column,
+            'address'      => $import->address_column,
+            'parent_name'  => $import->parent_name_column,
+            'parent_phone' => $import->parent_phone_column,
+        ];
+
+        // Map letters → indexes
+        $idx = [];
+        foreach ($needed as $key => $col) {
+            if (!$col) {
+                $idx[$key] = null;
+                continue;
+            }
+            $n = Utils::alphabet_to_index(trim($col));
+            if (!isset($header[$n])) {
+                return "<span style='color:red;'>Column '{$col}' ({$key}) not found.</span>";
+            }
+            $idx[$key] = $n;
+        }
+
+        // Counters & messages
+        $total   = $created = $skipped = $failed = 0;
+        $output  = [];
+
+        foreach ($rows as $r => $row) {
+            $line = $r + 2;  // Excel row number
+            $total++;
+
+            // 1) identifier
+            $idv = trim((string)($row[$idx['identify']] ?? ''));
+            if ($idv === '') {
+                $failed++;
+                $output[] = "<span style='color:orange;'>Row {$line}:</span> empty identifier &mdash; skipped.";
+                continue;
+            }
+
+            // 2) duplicate?
+            $exists = $import->identify_by === 'reg_number'
+                ? User::where('user_number', $idv)
+                ->where('enterprise_id', $admin->enterprise_id)
+                ->exists()
+                : User::where('school_pay_payment_code', $idv)
+                ->where('enterprise_id', $admin->enterprise_id)
+                ->exists();
+
+            if ($exists) {
+                $skipped++;
+                $output[] = "<span style='color:orange;'>Row {$line}:</span> '{$idv}' already exists &mdash; skipped.";
+                continue;
+            }
+
+            // 3) class
+            $clsVal = trim((string)($row[$idx['class']] ?? ''));
+            if ($clsVal === '' || !is_numeric($clsVal)) {
+                $failed++;
+                $output[] = "<span style='color:orange;'>Row {$line}:</span> invalid class '{$clsVal}' &mdash; skipped.";
+                continue;
+            }
+            $klass = AcademicClass::where('enterprise_id', $admin->enterprise_id)
+                ->find($clsVal);
+            if (!$klass) {
+                $failed++;
+                $output[] = "<span style='color:orange;'>Row {$line}:</span> class ID {$clsVal} not found &mdash; skipped.";
+                continue;
+            }
+
+            // 4) name
+            $fullName = trim((string)($row[$idx['name']] ?? ''));
+            if ($fullName === '') {
+                $failed++;
+                $output[] = "<span style='color:orange;'>Row {$line}:</span> empty name &mdash; skipped.";
+                continue;
+            }
+            $parts = preg_split('/\s+/', $fullName, 3);
+
+            // 5) normalize gender
+            // 5) normalize gender
+            $gender = null;
+            if ($idx['gender'] !== null) {
+                $g = trim((string)($row[$idx['gender']] ?? ''));
+                if ($g !== '') {
+                    $gNorm = strtolower($g);
+                    if (in_array($gNorm, ['m', 'male', 'boy'])) {
+                        $gender = 'Male';
+                    } elseif (in_array($gNorm, ['f', 'female', 'girl'])) {
+                        $gender = 'Female';
+                    } else {
+                        // Try to guess by first letter
+                        $first = strtoupper($g[0]);
+                        if ($first === 'M') {
+                            $gender = 'Male';
+                        } elseif ($first === 'F') {
+                            $gender = 'Female';
+                        }
+                    }
+                }
+            }
+
+            // 6) build & save
+            try {
+                $u = new User();
+                $u->enterprise_id           = $admin->enterprise_id;
+                $u->user_type               = 'student';
+                $u->status                  = 2;                   // Pending
+                if ($import->identify_by === 'reg_number') {
+                    $u->user_number         = $idv;
+                } else {
+                    $u->school_pay_payment_code = $idv;
+                }
+                $u->username                = $idv;
+                $u->password                = Hash::make('4321');
+
+                $u->name                    = $fullName;
+                $u->first_name              = $parts[0] ?? null;
+                $u->given_name              = $parts[1] ?? null;
+                $u->last_name               = $parts[2] ?? null;
+
+                if ($gender) {
+                    $u->sex                 = $gender;
+                }
+                if ($idx['dob']) {
+                    $raw = $row[$idx['dob']];
+                    if (is_numeric($raw)) {
+                        $dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($raw);
+                        $u->date_of_birth    = $dt->format('Y-m-d');
+                    } else {
+                        $u->date_of_birth    = Carbon::parse($raw)->toDateString();
+                    }
+                }
+                if ($idx['phone']) {
+                    $u->phone_number_1      = Utils::prepare_phone_number($row[$idx['phone']]);
+                }
+                if ($idx['email']) {
+                    $u->email               = trim((string)$row[$idx['email']]);
+                }
+                if ($idx['address']) {
+                    $u->home_address        = trim((string)$row[$idx['address']]);
+                }
+                if ($idx['parent_name']) {
+                    $u->emergency_person_name  = trim((string)$row[$idx['parent_name']]);
+                }
+                if ($idx['parent_phone']) {
+                    $u->emergency_person_phone = Utils::prepare_phone_number($row[$idx['parent_phone']]);
+                }
+
+                $u->current_class_id       = $klass->id;
+                $u->save();
+
+                $created++;
+                $output[] = "<span style='color:green;'>Row {$line}:</span> created <b>{$fullName}</b> ({$idv}).";
+            } catch (\Throwable $e) {
+                $failed++;
+                $output[] = "<span style='color:red;'>Row {$line} ERROR:</span> '{$idv}' &mdash; "
+                    . htmlspecialchars($e->getMessage());
+            }
+        }
+
+        // 7) finalize import record
+        $import->status  = 'Completed';
+        $import->summary = "Total {$total}; Created {$created}; Skipped {$skipped}; Failed {$failed}";
+        $import->save();
+
+        // 8) echo summary + details
+        echo "<div style='font-weight:bold;'>{$import->summary}</div><br>";
+        foreach ($output as $line) {
+            echo $line . "<br>";
+        }
+
+        return '';
+    }
+
     function student_data_import()
     {
         die("staring...");

@@ -73,7 +73,7 @@ class EnterpriseController extends AdminController
             'Yes' => 'Yes',
             'No' => 'No',
         ])->sortable();
-        
+
 
         return $grid;
     }
@@ -137,11 +137,12 @@ class EnterpriseController extends AdminController
         $form->text('short_name', __('Short name'));
         $form->text('motto', __('School Motto'));
 
-        $form->select('type', __('School type'))
+        $form->radio('type', __('School type'))
             ->options([
                 'Primary' => 'Primary school school',
                 'Secondary' => 'O\'level school',
                 'Advanced' => 'Both O\'level and A\'level school',
+                'University' => 'University',
             ])
             ->rules('required');
         $form->radio('has_theology', __('Has theology'))

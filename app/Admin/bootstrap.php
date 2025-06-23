@@ -41,6 +41,7 @@ use App\Models\StudentReportCard;
 use App\Models\Term;
 use App\Models\TheologyMarkRecord;
 use App\Models\Transaction;
+use App\Models\User;
 use App\Models\Utils;
 use Dflydev\DotAccessData\Util;
 use Encore\Admin\Auth\Database\Administrator;
@@ -79,6 +80,10 @@ if ($u != null) {
         $ent->dp_year = $active_term->academic_year_id;
         $ent->dp_term_id = $active_term->id;
         $ent->save();
+        $u = User::find($u->id);
+        if($u != null) {
+            $u->getDefaultRole();
+        }
     } catch (\Exception $e) {
         //die($e->getMessage());
     }

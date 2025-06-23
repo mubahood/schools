@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Utils;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Auth\Factory as AuthFactory;
@@ -866,6 +867,8 @@ if (! function_exists('__')) {
         if (is_null($key)) {
             return $key;
         }
+
+        $key = Utils::get_word($key); 
 
         return trans($key, $replace, $locale);
     }

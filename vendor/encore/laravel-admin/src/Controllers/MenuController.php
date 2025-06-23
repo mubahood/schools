@@ -1,7 +1,7 @@
 <?php
 
 namespace Encore\Admin\Controllers;
- 
+
 use Encore\Admin\Form;
 use Encore\Admin\Layout\Column;
 use Encore\Admin\Layout\Content;
@@ -134,9 +134,20 @@ class MenuController extends Controller
             $form->select('permission', trans('admin.permission'))->options($permissionModel::pluck('name', 'slug'));
         }
 
+        //checkbox for access_by
+        $form->checkbox('access_by', 'Access By')
+            ->options([
+                'All' => 'All Users',
+                'Primary' => 'Primary School',
+                'Secondary' => 'Secondary School',
+                'Advanced' => 'Advanced Level',
+                'University' => 'University',
+            ])
+            ->help('Select the user types that can access this menu.');
+        /* 
         $form->display('created_at', trans('admin.created_at'));
         $form->display('updated_at', trans('admin.updated_at'));
-
+ */
         return $form;
     }
 

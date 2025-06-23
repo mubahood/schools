@@ -140,6 +140,8 @@ Route::group([
     $router->resource('school-reports', SchoolReportController::class);
     $router->resource('fees-data-import', FeesDataImportController::class);
     $router->resource('fees-data-import-records', FeesDataImportRecordController::class);
+    
+    $router->resource('student-data-imports', StudentDataImportController::class);
 
 
     //$router->get('/fixed-asset-records-stats', 'FixedAssetRecordController@stats');
@@ -155,6 +157,8 @@ Route::group([
     $router->get('/reports-finance', 'HomeController@reports_finance')->name('home');
     $router->resource('assessment-sheets', AssessmentSheetController::class);
 
+
+    $router->resource('university-programmes', UniversityProgrammeController::class);
 
     $router->resources([
         'enterprises' => EnterpriseController::class

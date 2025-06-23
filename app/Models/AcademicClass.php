@@ -27,8 +27,7 @@ class AcademicClass extends Model
     public static function boot()
     {
         parent::boot();
-        self::deleting(function ($m) {
-        });
+        self::deleting(function ($m) {});
 
 
         self::created(function ($m) {
@@ -62,10 +61,12 @@ class AcademicClass extends Model
             return;
         }
 
-        foreach (ParentCourse::where([
-            'type' => 'Secondary',
-            'is_compulsory' => 1,
-        ])->get() as $pc) {
+        foreach (
+            ParentCourse::where([
+                'type' => 'Secondary',
+                'is_compulsory' => 1,
+            ])->get() as $pc
+        ) {
 
             $ent = Enterprise::find($m->enterprise_id);
             if ($ent == null) {
@@ -170,6 +171,15 @@ class AcademicClass extends Model
     public static function generate_subjects($m)
     {
 
+        $ent = Enterprise::find($m->enterprise_id);
+        if ($ent == null) {
+            throw new Exception("Enterprise not found.", 1);
+        }
+
+        if ($ent->type == 'University') {
+            return;
+        } 
+
         $category = $m->class_type;
         $courses = MainCourse::where([
             'subject_type' => $category
@@ -193,10 +203,12 @@ class AcademicClass extends Model
             ) {
 
 
-                foreach (ParentCourse::where([
-                    'type' => 'Secondary',
-                    'is_compulsory' => 1,
-                ])->get() as $pc) {
+                foreach (
+                    ParentCourse::where([
+                        'type' => 'Secondary',
+                        'is_compulsory' => 1,
+                    ])->get() as $pc
+                ) {
                     foreach ($pc->papers as $paper) {
                         $sub = Subject::where([
                             'academic_class_id' => $m->id,
@@ -272,10 +284,11 @@ class AcademicClass extends Model
 
         $level = AcademicClassLevel::find($class->academic_class_level_id);
         if ($level == null) {
+            return  null;
             throw new Exception("Academic class level not found.", 1);
         }
- 
-        if($class->name == null || strlen($class->name)<3){
+
+        if ($class->name == null || strlen($class->name) < 3) {
             $class->name = $level->name;
             $class->short_name = $level->short_name;
         }
@@ -356,9 +369,11 @@ class AcademicClass extends Model
         }
 
         //billing for secular class
-        foreach (StudentHasClass::where([
-            'administrator_id' => $m->id,
-        ])->get() as $key => $val) {
+        foreach (
+            StudentHasClass::where([
+                'administrator_id' => $m->id,
+            ])->get() as $key => $val
+        ) {
             if ($val != null) {
                 if ($val->class != null) {
                     if ($val->class->academic_class_fees != null) {
@@ -399,9 +414,11 @@ class AcademicClass extends Model
 
 
         //bulling theology classes
-        foreach (StudentHasTheologyClass::where([
-            'administrator_id' => $m->id,
-        ])->get() as $key => $val) {
+        foreach (
+            StudentHasTheologyClass::where([
+                'administrator_id' => $m->id,
+            ])->get() as $key => $val
+        ) {
             if ($val != null) {
                 if ($val->class != null) {
                     if ($val->class->academic_class_fees != null) {
