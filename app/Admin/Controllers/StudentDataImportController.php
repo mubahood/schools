@@ -204,14 +204,7 @@ class StudentDataImportController extends AdminController
             ->readOnly();
 
         $form->textarea('summary', 'Summary')->readonly();
-
-        // Prevent editing completed imports
-        $form->saving(function (Form $form) {
-            if ($form->model()->status === 'Completed') {
-                admin_error('Not Allowed', 'Cannot modify a completed import.');
-                return back();
-            }
-        });
+ 
 
         // Tidy up footer
         $form->disableReset();
