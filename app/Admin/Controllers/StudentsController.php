@@ -275,7 +275,7 @@ class StudentsController extends AdminController
             ) {
                 $theology_streams[$value->id] = $value->name_text;
             }
-            $filter->equal('theology_stream_id', 'Filter by Theology Stream')->select($theology_streams); 
+            $filter->equal('theology_stream_id', 'Filter by Theology Stream')->select($theology_streams);
 
             // Remove the default id filter
             $filter->disableIdFilter();
@@ -395,7 +395,8 @@ class StudentsController extends AdminController
                     return 'No Stream';
                 }
                 return $this->theology_stream->name;
-            })->sortable();
+            })->sortable()
+            ->hide();
 
 
 
@@ -421,10 +422,22 @@ class StudentsController extends AdminController
         $grid->column('place_of_birth', __('Address'))->sortable()->hide();
         $grid->column('home_address', __('Home address'))->hide();
 
-        $grid->column('lin', __('LIN'))->sortable()->editable()
-            ->filter('like');
+        if ($ent->type != 'University') {
+            $grid->column('lin', __('LIN'))->sortable()->editable()
+                ->filter('like');
+        } else {
+            $grid->column('lin', __('LIN'))->sortable()->editable()
+                ->filter('like')->hide();
+            //has_account_info
+            $grid->column('has_account_info', ('Has Shool Pay Account'))
+                ->filter([
+                    1 => 'Yes',
+                    0 => 'No',
+                ])
+                ->sortable();
+        }
         $grid->column('school_pay_payment_code', __('School pay payment code'))->sortable()
-            ->filter('like');
+            ->filter('like'); 
 
         $grid->column('parent_id', __('Parent'))
             ->display(function ($x) {
