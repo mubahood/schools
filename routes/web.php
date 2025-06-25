@@ -741,116 +741,119 @@ Route::get('/', function (Request $request) {
 });
 
 Route::get('temp-import', function () {
-    // set unlimited time & memory
-    set_time_limit(-1);
-    set_time_limit(-1);
+  // set unlimited time & memory
+  set_time_limit(-1);
+  set_time_limit(-1);
 
-    // get table names dynamically
-    $enterpriseTable     = (new Enterprise)->getTable();
-    $academicClassTable  = (new AcademicClass)->getTable();
-    $userTable           = (new User)->getTable();
+  // get table names dynamically
+  $enterpriseTable     = (new Enterprise)->getTable();
+  $academicClassTable  = (new AcademicClass)->getTable();
+  $userTable           = (new User)->getTable();
 
-    // fetch enterprise id=24
-    $last_ent = DB::table($enterpriseTable)
-                 ->where('id', 24)
-                 ->first();
+  // fetch enterprise id=24
+  $last_ent = DB::table($enterpriseTable)
+    ->where('id', 24)
+    ->first();
 
-    // load spreadsheet
-    $file = public_path('KAMPALA_INSTITUTE_OF_HEALTH_PROFESSIONALS.xlsx');
-    if (! file_exists($file)) {
-        return "File not found";
+  // load spreadsheet
+  $file = public_path('KAMPALA_INSTITUTE_OF_HEALTH_PROFESSIONALS.xlsx');
+  if (! file_exists($file)) {
+    return "File not found";
+  }
+  $reader      = new Xlsx();
+  $spreadsheet = $reader->load($file);
+  $sheet       = $spreadsheet->getActiveSheet();
+  $rows        = $sheet->toArray();
+
+  // preload classes (even if unused)
+  $classes = DB::table($academicClassTable)
+    ->where('enterprise_id', $last_ent->id)
+    ->get();
+
+  $count = 0;
+  foreach ($rows as $row) {
+    $count++;
+    if ($count < 2) {
+      continue;
     }
-    $reader      = new Xlsx();
-    $spreadsheet = $reader->load($file);
-    $sheet       = $spreadsheet->getActiveSheet();
-    $rows        = $sheet->toArray();
-
-    // preload classes (even if unused)
-    $classes = DB::table($academicClassTable)
-                 ->where('enterprise_id', $last_ent->id)
-                 ->get();
-
-    $count = 0;
-    foreach ($rows as $row) {
-        $count++;
-        if ($count < 2) {
-            continue;
-        }
-        if ($count > 50001) {
-            break;
-        }
-
-        // extract columns
-        $first_name       = trim($row[1]);
-        $middle_name      = trim($row[2]);
-        $last_name        = trim($row[3]);
-        $student_account  = $row[4];
-        $schoo_pay_code   = $row[7];
-
-        // build full name for error messages
-        $name = trim(preg_replace('/\s+/', ' ', 
-                  $first_name
-                  . ($middle_name ? ' '.$middle_name : '')
-                  . ($last_name   ? ' '.$last_name   : '')
-               ));
-
-        // base search conditions
-        $conds = [
-            'first_name'       => $first_name,
-            'given_name'       => $last_name,
-            'enterprise_id'    => $last_ent->id,
-            'has_account_info' => 'No',
-            'user_type'        => 'student',
-        ];
-
-        // try multiple permutations until we find users
-        $users = DB::table($userTable)->where($conds)->get();
-        if ($users->count() < 1) {
-            // swap first/given
-            $conds['first_name'] = $last_name;
-            $conds['given_name'] = $first_name;
-            $users = DB::table($userTable)->where($conds)->get();
-        }
-        if ($users->count() < 1) {
-            // swap to last_name column if exists
-            $conds['last_name']  = $first_name;
-            unset($conds['given_name']);
-            $users = DB::table($userTable)->where($conds)->get();
-        }
-        if ($users->count() < 1) {
-            // revert and try again
-            $conds['first_name'] = $first_name;
-            $conds['last_name']  = $last_name;
-            $users = DB::table($userTable)->where($conds)->get();
-        }
-
-        // no match
-        if ($users->count() < 1) {
-            echo "<br><span style='background-color: #ffcccc; color: #a94442; padding: 2px 6px; border-radius: 3px;'>"
-               ."No user found for: ".htmlspecialchars($name).", ROW: ".$count
-               ."</span><br>";
-            continue;
-        }
-
-        // multiple matches
-        if ($users->count() > 1) {
-            $ids_of_students = $users->map(function($u){
-                return $u->id." NAME: ".htmlspecialchars($u->name);
-            })->implode(', ');
-
-            echo "<br><span style='background-color: #ffeeba; color: #856404; padding: 2px 6px; border-radius: 3px;'>"
-               ."Multiple users found for: ".htmlspecialchars($name)
-               .", ROW: ".$count.", IDs: ".$ids_of_students
-               ."</span><br>"; 
-        }
-
-        // exactly one
-        $user = $users->first();
-        // ... you can still reference $user->id, $user->name, etc.
+    if ($count > 50001) {
+      break;
     }
 
-    return "Done";
-}); 
+    // extract columns
+    $first_name       = trim($row[1]);
+    $middle_name      = trim($row[2]);
+    $last_name        = trim($row[3]);
+    $student_account  = $row[4];
+    $schoo_pay_code   = $row[7];
+
+    // build full name for error messages
+    $name = trim(preg_replace(
+      '/\s+/',
+      ' ',
+      $first_name
+        . ($middle_name ? ' ' . $middle_name : '')
+        . ($last_name   ? ' ' . $last_name   : '')
+    ));
+
+    // base search conditions
+    $conds = [
+      'first_name'       => $first_name,
+      'given_name'       => $last_name,
+      'enterprise_id'    => $last_ent->id,
+      'has_account_info' => 'No',
+      'user_type'        => 'student',
+    ];
+
+    // try multiple permutations until we find users
+    $users = DB::table($userTable)->where($conds)->get();
+    if ($users->count() < 1) {
+      // swap first/given
+      $conds['first_name'] = $last_name;
+      $conds['given_name'] = $first_name;
+      $users = DB::table($userTable)->where($conds)->get();
+    }
+    if ($users->count() < 1) {
+      // swap to last_name column if exists
+      $conds['last_name']  = $first_name;
+      unset($conds['given_name']);
+      $users = DB::table($userTable)->where($conds)->get();
+    }
+    if ($users->count() < 1) {
+      // revert and try again
+      $conds['first_name'] = $first_name;
+      $conds['last_name']  = $last_name;
+      $users = DB::table($userTable)->where($conds)->get();
+    }
+
+    // no match
+    if ($users->count() < 1) {
+      echo "<br><span style='background-color: #ffcccc; color: #a94442; padding: 2px 6px; border-radius: 3px;'>"
+        . "No user found for: " . htmlspecialchars($name) . ", ROW: " . $count
+        . "</span><br>";
+      continue;
+    }
+
+    // multiple matches
+    if ($users->count() > 1) {
+      $ids_of_students = $users->map(function ($u) {
+        return $u->id . " NAME: " . htmlspecialchars($u->name);
+      })->implode(', ');
+
+      echo "<br><span style='background-color: #ffeeba; color: #856404; padding: 2px 6px; border-radius: 3px;'>"
+        . "Multiple users found for: " . htmlspecialchars($name)
+        . ", ROW: " . $count . ", IDs: " . $ids_of_students
+        . "</span><br>"; 
+      continue;
+    }
+
+    // exactly one
+    $user = $users->first();
+    // ... you can still reference $user->id, $user->name, etc.
+  }
+
+  return "Done";
+});
 Route::get('assessment-sheets-generate', [ReportCardsPrintingController::class, 'assessment_sheets_generate']);
 Route::get('report-card-printings', [ReportCardsPrintingController::class, 'index']);
 Route::get('report-card-individual-printings', [ReportCardsPrintingController::class, 'report_card_individual_printings']);
