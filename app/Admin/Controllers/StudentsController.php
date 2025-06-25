@@ -465,7 +465,8 @@ class StudentsController extends AdminController
 
                 return $txt;
             })
-            ->sortable();
+            ->sortable()
+            ->hide(); 
         $grid->column('documents', __('Print Documents'))
             ->display(function () {
                 $admission_letter = url('print-admission-letter?id=' . $this->id);
