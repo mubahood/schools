@@ -776,7 +776,7 @@ Route::get('temp-import', function () {
     if ($count < 2) {
       continue;
     }
-    if ($my_count > 50) {
+    if ($my_count > 50000) {
       break;
     }
     $schoo_pay_code = $row[7];
@@ -803,7 +803,7 @@ Route::get('temp-import', function () {
     // $data['middle_name'] = $middle_name;
     $conds['given_name'] = $last_name;
     $conds['enterprise_id'] = $last_ent->id;
-    // $conds['has_account_info'] = 'No';
+    $conds['has_account_info'] = 'No';
     $conds['user_type'] = 'student';
 
     $users = User::where($conds)->get();
@@ -849,7 +849,7 @@ Route::get('temp-import', function () {
 
     if ($user->has_account_info == 'Yes') {
       // echo "<br><span style='background-color: #d1ecf1; color: #0c5460; padding: 2px 6px; border-radius: 3px;'>User already has account info: " . htmlspecialchars($name) . ", ROW: " . $count . ", ID: " . $user->id . "</span><br>";
-      continue;
+      // continue;
     }
 
     $user->school_pay_account_id = $student_account;
@@ -861,106 +861,7 @@ Route::get('temp-import', function () {
     echo "<br><span style='background-color: #d4edda; color: #155724; padding: 2px 6px; border-radius: 3px;'>Updated user: " . htmlspecialchars($name) . ", ROW: " . $count . ", ID: " . $user->id . "</span><br>";
     // die("Done");
     continue;
-
-    /* 
-       "school_pay_account_id" => null
-    "school_pay_payment_code" => null
-    */
-
-
-    /* 
-    "id" => 1
-    "username" => "admin"
-    "password" => "$2y$10$FeweM5V9nuQlsM6KmUYPF.VVGR2q86IaxzrQ8ZIMHQcyRWN14N/jK"
-    "name" => "System Admin"
-    "avatar" => "images/7424d6a15f419b6c38ab0ca4ac2d2bd6.png"
-    "remember_token" => "fzmcRtj8dG2YAcYgvweOtvikHSLJIKwKHwK0PaeDO2s75miuh3GfmV2W1XTa"
-    "created_at" => "2022-06-05 08:47:55"
-    "updated_at" => "2025-02-02 02:03:05"
-    "enterprise_id" => 1
-    "first_name" => null
-    "last_name" => null
-    "date_of_birth" => null
-    "place_of_birth" => null
-    "sex" => null
-    "home_address" => null
-    "current_address" => null
-    "phone_number_1" => ""
-    "phone_number_2" => ""
-    "email" => "6654"
-    "nationality" => null
-    "religion" => null
-    "spouse_name" => null
-    "spouse_phone" => null
-    "father_name" => null
-    "father_phone" => null
-    "mother_name" => null
-    "mother_phone" => null
-    "languages" => null
-    "emergency_person_name" => null
-    "emergency_person_phone" => null
-    "national_id_number" => null
-    "passport_number" => null
-    "tin" => null
-    "nssf_number" => null
-    "bank_name" => null
-    "bank_account_number" => null
-    "primary_school_name" => null
-    "primary_school_year_graduated" => null
-    "seconday_school_name" => null
-    "seconday_school_year_graduated" => null
-    "high_school_name" => null
-    "high_school_year_graduated" => null
-    "degree_university_name" => null
-    "degree_university_year_graduated" => null
-    "masters_university_name" => null
-    "masters_university_year_graduated" => null
-    "phd_university_name" => null
-    "phd_university_year_graduated" => null
-    "user_type" => "employee"
-    "demo_id" => 0
-    "user_id" => null
-    "user_batch_importer_id" => 0
-    "school_pay_account_id" => null
-    "school_pay_payment_code" => null
-    "given_name" => null
-    "deleted_at" => null
-    "marital_status" => null
-    "verification" => 0
-    "current_class_id" => 0
-    "current_theology_class_id" => 0
-    "status" => 2
-    "parent_id" => null
-    "main_role_id" => 1
-    "stream_id" => null
-    "account_id" => null
-    "has_personal_info" => "No"
-    "has_educational_info" => "No"
-    "has_account_info" => "No"
-    "diploma_school_name" => "No"
-    "diploma_year_graduated" => "No"
-    "certificate_school_name" => "No"
-    "certificate_year_graduated" => "No"
-    "theology_stream_id" => null
-    "lin" => null
-    "occupation" => null
-    "last_seen" => "2025-02-01 17:03:05"
-    "supervisor_id" => null
-    "user_number" => null
-    "token" => null
-    "roles_text" => null
-    "residence" => "DAY_SCHOLAR"
-    "plain_password" => null
-    "mail_verification_token" => null
-    "sign" => null
-*/
-
-
-    dd($users);
-    //has_account_info
-    dd($data);
-
-    dd($row);
+ 
 
     $stud = new Administrator();
     $stud->user_id = $row[0];
