@@ -743,279 +743,86 @@ Route::get('/', function (Request $request) {
 });
 
 Route::get('temp-import', function () {
-  //set unlimited time
   set_time_limit(-1);
-  //set unlimited memory
-  set_time_limit(-1);
-  $last_ent = Enterprise::find(24);
-  //file 1_bushra_students_table.xlsx
+  ini_set('memory_limit', '-1');
+  $last_ent = DB::table('enterprises')->where('id', 24)->first();
   $file = public_path('KAMPALA_INSTITUTE_OF_HEALTH_PROFESSIONALS.xlsx');
-  //check if file exists
   if (!file_exists($file)) {
     return "File not found";
   }
-
-
 
   $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
   $spreadsheet = $reader->load($file);
   $sheet = $spreadsheet->getActiveSheet();
   $rows = $sheet->toArray();
   $count = 0;
-  $success = 0;
-  $fail = 0;
-  $fail_text = "";
-  $classes = AcademicClass::where([
-    'enterprise_id' => $last_ent->id,
-  ])->get();
-  // dd($classes);
   $my_count = 0;
-  foreach ($rows as $key => $row) {
 
+  // Preload all users for this enterprise into memory for fast lookup
+  $users = DB::table('users')
+    ->where('enterprise_id', $last_ent->id)
+    ->where('user_type', 'student')
+    ->where('has_account_info', 'No')
+    ->select('id', 'first_name', 'middle_name', 'last_name', 'given_name', 'name')
+    ->get();
+
+  foreach ($rows as $key => $row) {
     $count++;
-    if ($count < 2) {
-      continue;
-    }
-    if ($my_count > 50000) {
-      break;
-    }
-    $schoo_pay_code = $row[7];
+    if ($count < 2) continue;
+    if ($my_count > 50000) break;
+
     $first_name = trim($row[1]);
     $middle_name = trim($row[2]);
     $last_name = trim($row[3]);
     $student_account = $row[4];
 
     $name = $first_name;
-    if ($middle_name != null && strlen($middle_name) > 0) {
-      $name .= ' ' . $middle_name;
-    }
-    if ($last_name != null && strlen($last_name) > 0) {
-      $name .= ' ' . $last_name;
-    }
-    //replance all spaces
-    $name = str_replace('  ', ' ', $name);
-    $name = str_replace('  ', ' ', $name);
-    $name = str_replace('  ', ' ', $name);
-    $name = trim($name);
+    if ($middle_name && strlen($middle_name) > 0) $name .= ' ' . $middle_name;
+    if ($last_name && strlen($last_name) > 0) $name .= ' ' . $last_name;
+    $name = preg_replace('/\s+/', ' ', trim($name));
 
-    // $coutse 24
-    $conds['first_name'] = $first_name;
-    // $data['middle_name'] = $middle_name;
-    $conds['given_name'] = $last_name;
-    $conds['enterprise_id'] = $last_ent->id;
-    $conds['has_account_info'] = 'No';
-    $conds['user_type'] = 'student';
+    // Try to find user by different combinations
+    $found = $users->filter(function ($u) use ($first_name, $last_name) {
+      return $u->first_name == $first_name && $u->given_name == $last_name;
+    });
 
-    $users = User::where($conds)->get();
-
-
-    //if empty, switch to first name
-    if ($users->count() < 1) {
-      $conds['first_name'] = $last_name;
-      $conds['given_name'] = $first_name;
-      $users = User::where($conds)->get();
+    if ($found->count() < 1) {
+      $found = $users->filter(function ($u) use ($first_name, $last_name) {
+        return $u->first_name == $last_name && $u->given_name == $first_name;
+      });
     }
-    //if empty, switch to first name
-    if ($users->count() < 1) {
-      $conds['first_name'] = $last_name;
-      $conds['last_name'] = $first_name;
-      $users = User::where($conds)->get();
+    if ($found->count() < 1) {
+      $found = $users->filter(function ($u) use ($first_name, $last_name) {
+        return $u->first_name == $last_name && $u->last_name == $first_name;
+      });
     }
-    //if empty, switch to first name
-    if ($users->count() < 1) {
-      $conds['last_name'] = $last_name;
-      $conds['first_name'] = $first_name;
-      $users = User::where($conds)->get();
+    if ($found->count() < 1) {
+      $found = $users->filter(function ($u) use ($first_name, $last_name) {
+        return $u->last_name == $last_name && $u->first_name == $first_name;
+      });
     }
 
-
-    //if empty, continue
-    if ($users->count() < 1) {
+    if ($found->count() < 1) {
       echo "<br><span style='background-color: #ffcccc; color: #a94442; padding: 2px 6px; border-radius: 3px;'>No user found for: " . htmlspecialchars($name) . ", ROW: " . $count . "</span><br>";
       continue;
     }
 
-    //if records are more than 1, then we need to check if the user has account info
-    if ($users->count() > 1) {
+    if ($found->count() > 1) {
       $ids_of_students = [];
-      foreach ($users as $user) {
+      foreach ($found as $user) {
         $ids_of_students[] = $user->id . " NAME: " . htmlspecialchars($user->name);
       }
       echo "<br><span style='background-color: #ffeeba; color: #856404; padding: 2px 6px; border-radius: 3px;'>Multiple users found for: " . htmlspecialchars($name) . ", ROW: " . $count . ", IDs: " . implode(', ', $ids_of_students) . "</span><br>";
       die("Multiple users found for: " . $name . ", ROW: " . $count . ", IDs: " . implode(', ', $ids_of_students));
       continue;
     }
-    $user = $users->first();
-
-    if ($user->has_account_info == 'Yes') {
-      // echo "<br><span style='background-color: #d1ecf1; color: #0c5460; padding: 2px 6px; border-radius: 3px;'>User already has account info: " . htmlspecialchars($name) . ", ROW: " . $count . ", ID: " . $user->id . "</span><br>";
-      // continue;
-    }
-
-    $user->school_pay_account_id = $student_account;
-    $user->school_pay_payment_code = $schoo_pay_code;
-    $user->has_account_info = 'Yes';
-    $user->save();
-    $my_count++;
-
-    echo "<br><span style='background-color: #d4edda; color: #155724; padding: 2px 6px; border-radius: 3px;'>Updated user: " . htmlspecialchars($name) . ", ROW: " . $count . ", ID: " . $user->id . "</span><br>";
-    // die("Done");
-    continue;
- 
-
-    $stud = new Administrator();
-    $stud->user_id = $row[0];
-    if ($stud->user_id == null || strlen($stud->user_id) < 1) {
-      $fail++;
-      $fail_text .= "REG NO: " . $row[1] . " has no user id<br>";
-      echo $count . ". SKIPPED " . "Failed to save REG NO: " . $row[1] . " has no user id<br>";
-      continue;
-    }
-
-    $name = $row[1];
-    $name = str_replace('  ', ' ', $name);
-    $names = explode(' ', $name);
-    //remvoe all spaces
-
-    if (count($names) < 1) {
-      $fail++;
-      $fail_text .= "REG NO: " . $row[1] . " has no first name and last name<br>";
-      echo $count . ". " . "Failed to save REG NO: " . $row[1] . " has no first name and last name<br>";
-      continue;
-    }
-
-    if (count($names) == 2) {
-      $stud->first_name = $names[0];
-      $stud->last_name = $names[1];
-      $name = $stud->first_name . " " . $stud->last_name;
-    } else if (count($names) == 3) {
-      $stud->first_name = $names[0];
-      $stud->given_name = $names[1];
-      $stud->last_name = $names[2];
-      $name = $stud->first_name . " " . $stud->given_name . " " . $stud->last_name;
-    } else if (count($names) == 1) {
-      $stud->first_name = $names[0];
-      $stud->last_name = $names[0];
-    } else {
-      $stud->first_name = $names[0];
-      $stud->last_name = $names[count($names) - 1];
-      $name = $stud->first_name . " " . $stud->last_name;
-    }
-    $stud->name = $name;
-    $stud->sex = $row[2];
-
-
-    if ($stud->sex != null) {
-      if (strlen($stud->sex) > 0) {
-        if (strtoupper(substr($stud->sex, 0, 1)) == 'M') {
-          $stud->sex = 'Male';
-        } else {
-          $stud->sex = 'Female';
-        }
-      }
-    }
-    $phone = null;
-    if (isset($row[5])) {
-      $phone = str_replace(' ', '', $row[5]);
-      if (strlen($phone) > 5) {
-        $phone = '+256' . $phone;
-        $phone = str_replace('(', '', $phone);
-        $phone = str_replace(')', '', $phone);
-        $phone = str_replace(',', '', $phone);
-      }
-    }
-
-    $stud->home_address = $row[4];
-    $stud->current_address = $row[4];
-    $stud->phone_number_1 = $phone;
-    $stud->father_phone = $phone;
-    $stud->mother_phone = $phone;
-    $stud->emergency_person_phone = $phone;
-    $class_ = $row[3];
-    $class_ = str_replace('  ', ' ', $class_);
-    $class_ = str_replace('  ', ' ', $class_);
-    $class_ = str_replace('  ', ' ', $class_);
-    $class_ = str_replace('  ', ' ', $class_);
-    $class_ = str_replace('  ', ' ', $class_);
-    $class_ = str_replace('  ', ' ', $class_);
-    $class_ = str_replace('  ', ' ', $class_);
-    $class_ = str_replace('  ', ' ', $class_);
-    $class_ = str_replace('  ', ' ', $class_);
-    $class_ = str_replace('  ', ' ', $class_);
-    $class_ = trim($class_);
-
-    $class_num  = $class_;
-    if ($class_num < 1) {
-      $fail++;
-      $fail_text .= "REG NO: " . $row[1] . " has no class<br>";
-      echo $stud->user_id . "<= # " . $class_ . "==" . $count . ". " . "Failed to save REG NO: " . $row[1] . " , NAME: " . $name . " has no class<br>";
-      continue;
-    }
-
-    $real_class = AcademicClass::where([
-      'name' =>  $class_num,
-      'enterprise_id' => $last_ent->id,
-    ])->first();
-
-    if ($real_class == null) {
-      $fail++;
-      $fail_text .= "REG NO: " . $row[1] . " has no class<br>";
-      echo  $stud->user_id . "<= " . $count . ". " . "Failed to save REG NO: " . $row[1] . " , NAME: " . $name . " has no class<br>";
-      continue;
-    }
-
-    $stud->current_class_id = $real_class->id;
-    $stud->user_type = 'student';
-    $stud->enterprise_id = $last_ent->id;
-    $stud->status = 2;
-
-    $existing = User::where([
-      'enterprise_id' => $last_ent->id,
-      'first_name' => $stud->first_name,
-      'last_name' => $stud->last_name,
-      'current_class_id' => $stud->current_class_id,
-    ])->first();
-    if ($existing != null) {
-      $fail++;
-      $fail_text .= "REG NO: " . $row[1] . " already exists<br>";
-      echo $count . ". " . "Failed to save REG NO: " . $row[1] . " already exists<br>";
-      continue;
-      //check if this user is not pending
-      if ($existing->status == 0) {
-        $another = User::where([
-          'enterprise_id' => $last_ent->id,
-          'first_name' => $stud->first_name,
-          'last_name' => $stud->last_name,
-          'current_class_id' => $stud->current_class_id,
-          'status' => 2,
-        ])->first();
-        if ($another == null) {
-          $existing->status = 2;
-          $existing->save();
-          $success++;
-          echo $stud->user_id . "<= " . "REG NO: " . $row[1] . ", NAME: " . $name . " saved<br>";
-        }
-      }
-      continue;
-    }
-
-    try {
-      $stud->save();
-      $success++;
-      echo   $stud->user_id . "<= " . "REG NO: " . $row[1] . ", NAME: " . $name . " saved<br>";
-    } catch (\Throwable $th) {
-      $fail++;
-      echo "<hr>";
-      print_r($th->getMessage());
-      echo "<hr>";
-      $fail_text .= "REG NO: " . $row[1] . " failed to save<br>";
-      echo $stud->user_id . "<= " . $count . " Failed to save REG NO: " . $row[1] . " , NAME: " . $name . " failed to save. SAVINGERROR <br>";
-    }
-
-    continue;
+    $user = $found->first();
+    // You can perform further SQL operations here if needed
   }
   return "Done";
 });
+
+
 Route::get('assessment-sheets-generate', [ReportCardsPrintingController::class, 'assessment_sheets_generate']);
 Route::get('report-card-printings', [ReportCardsPrintingController::class, 'index']);
 Route::get('report-card-individual-printings', [ReportCardsPrintingController::class, 'report_card_individual_printings']);
