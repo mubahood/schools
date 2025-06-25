@@ -97,14 +97,14 @@ class Utils  extends Model
             ];
 
             // Sort keys by length (desc) to replace longer phrases first
-            uksort($replacements, function($a, $b) {
+            uksort($replacements, function ($a, $b) {
                 return strlen($b) - strlen($a);
             });
 
             // Replace all occurrences in the sentence, case-insensitive, word boundaries
             foreach ($replacements as $find => $replace) {
                 $pattern = '/\b' . preg_quote($find, '/') . '\b/i';
-                $word = preg_replace_callback($pattern, function($matches) use ($replace) {
+                $word = preg_replace_callback($pattern, function ($matches) use ($replace) {
                     // Preserve case of first letter
                     if (ctype_upper($matches[0][0])) {
                         return ucfirst($replace);
@@ -1742,7 +1742,7 @@ class Utils  extends Model
                 $rec->back_day = $lastRec->back_day;
             }
         }
-
+        // $rec_date = '2025-06-19';
 
         if ($ent->school_pay_last_accepted_date != null) {
             $school_pay_last_accepted_date = Carbon::parse($ent->school_pay_last_accepted_date);
@@ -1763,9 +1763,11 @@ class Utils  extends Model
 
         // 4) Build and debug the signature
         $code     = trim($ent->school_pay_code);
-        /* $password = 'Kih@1ii0007ftxas561V';
-        $code     = '14760'; */
         $password = trim($ent->school_pay_password);
+
+        /* $password = '@jx0079MB2LFOI';
+        $code     = '14760'; */
+
         $raw      = $code . $rec_date . $password;
         $sig      = strtoupper(md5($raw));
 

@@ -747,7 +747,7 @@ Route::get('temp-import', function () {
   set_time_limit(-1);
   //set unlimited memory
   set_time_limit(-1);
-  $last_ent = Enterprise::orderBy('id', 'desc')->first();
+  $last_ent = Enterprise::find(24);
   //file 1_bushra_students_table.xlsx
   $file = public_path('KAMPALA_INSTITUTE_OF_HEALTH_PROFESSIONALS.xlsx');
   //check if file exists
@@ -776,23 +776,164 @@ Route::get('temp-import', function () {
       continue;
     }
     $schoo_pay_code = $row[7];
-    $first_name = $row[1];
-    $middle_name = $row[2];
-    $last_name = $row[3];
+    $first_name = trim($row[1]);
+    $middle_name = trim($row[2]);
+    $last_name = trim($row[3]);
+    $student_account = $row[4];
+
     $name = $first_name;
-    if($middle_name != null && strlen($middle_name) > 0) {
+    if ($middle_name != null && strlen($middle_name) > 0) {
       $name .= ' ' . $middle_name;
     }
-    if($last_name != null && strlen($last_name) > 0) {
+    if ($last_name != null && strlen($last_name) > 0) {
       $name .= ' ' . $last_name;
-    } 
+    }
     //replance all spaces
     $name = str_replace('  ', ' ', $name);
     $name = str_replace('  ', ' ', $name);
     $name = str_replace('  ', ' ', $name);
     $name = trim($name);
 
-    // $coutse
+    // $coutse 24
+    $conds['first_name'] = $first_name;
+    // $data['middle_name'] = $middle_name;
+    $conds['last_name'] = $last_name;
+    $conds['enterprise_id'] = $last_ent->id;
+    $conds['has_account_info'] = 'No';
+    $conds['user_type'] = 'student';
+
+    $users = User::where($conds)->get();
+
+
+    //if empty, switch to first name
+    if ($users->count() < 1) {
+      $conds['first_name'] = $last_name;
+      $conds['last_name'] = $first_name;
+      $users = User::where($conds)->get();
+    }
+
+    //if empty, continue
+    if ($users->count() < 1) {
+      echo "<br>No user found for: " . $name . ", ROW: " . $count . "<br>";
+      continue;
+    }
+
+    //if records are more than 1, then we need to check if the user has account info
+    if ($users->count() > 1) {
+      $ids_of_students = [];
+      foreach ($users as $user) {
+        $ids_of_students[] = $user->id . " NAME: " . $user->name;
+      }
+      echo "<br>Multiple users found for: " . $name . ", ROW: " . $count . ", IDs: " . implode(', ', $ids_of_students) . "<br>";
+      continue;
+    }
+    $user = $users->first();
+    $user->school_pay_account_id = $student_account;
+    $user->school_pay_payment_code = $schoo_pay_code;
+    $user->has_account_info = 'Yes';
+    $user->save();
+
+    echo "<br>Updated user: " . $name . ", ROW: " . $count . ", ID: " . $user->id . "<br>";
+    continue;
+    die("Done");
+
+    /* 
+       "school_pay_account_id" => null
+    "school_pay_payment_code" => null
+    */
+
+
+    /* 
+    "id" => 1
+    "username" => "admin"
+    "password" => "$2y$10$FeweM5V9nuQlsM6KmUYPF.VVGR2q86IaxzrQ8ZIMHQcyRWN14N/jK"
+    "name" => "System Admin"
+    "avatar" => "images/7424d6a15f419b6c38ab0ca4ac2d2bd6.png"
+    "remember_token" => "fzmcRtj8dG2YAcYgvweOtvikHSLJIKwKHwK0PaeDO2s75miuh3GfmV2W1XTa"
+    "created_at" => "2022-06-05 08:47:55"
+    "updated_at" => "2025-02-02 02:03:05"
+    "enterprise_id" => 1
+    "first_name" => null
+    "last_name" => null
+    "date_of_birth" => null
+    "place_of_birth" => null
+    "sex" => null
+    "home_address" => null
+    "current_address" => null
+    "phone_number_1" => ""
+    "phone_number_2" => ""
+    "email" => "6654"
+    "nationality" => null
+    "religion" => null
+    "spouse_name" => null
+    "spouse_phone" => null
+    "father_name" => null
+    "father_phone" => null
+    "mother_name" => null
+    "mother_phone" => null
+    "languages" => null
+    "emergency_person_name" => null
+    "emergency_person_phone" => null
+    "national_id_number" => null
+    "passport_number" => null
+    "tin" => null
+    "nssf_number" => null
+    "bank_name" => null
+    "bank_account_number" => null
+    "primary_school_name" => null
+    "primary_school_year_graduated" => null
+    "seconday_school_name" => null
+    "seconday_school_year_graduated" => null
+    "high_school_name" => null
+    "high_school_year_graduated" => null
+    "degree_university_name" => null
+    "degree_university_year_graduated" => null
+    "masters_university_name" => null
+    "masters_university_year_graduated" => null
+    "phd_university_name" => null
+    "phd_university_year_graduated" => null
+    "user_type" => "employee"
+    "demo_id" => 0
+    "user_id" => null
+    "user_batch_importer_id" => 0
+    "school_pay_account_id" => null
+    "school_pay_payment_code" => null
+    "given_name" => null
+    "deleted_at" => null
+    "marital_status" => null
+    "verification" => 0
+    "current_class_id" => 0
+    "current_theology_class_id" => 0
+    "status" => 2
+    "parent_id" => null
+    "main_role_id" => 1
+    "stream_id" => null
+    "account_id" => null
+    "has_personal_info" => "No"
+    "has_educational_info" => "No"
+    "has_account_info" => "No"
+    "diploma_school_name" => "No"
+    "diploma_year_graduated" => "No"
+    "certificate_school_name" => "No"
+    "certificate_year_graduated" => "No"
+    "theology_stream_id" => null
+    "lin" => null
+    "occupation" => null
+    "last_seen" => "2025-02-01 17:03:05"
+    "supervisor_id" => null
+    "user_number" => null
+    "token" => null
+    "roles_text" => null
+    "residence" => "DAY_SCHOLAR"
+    "plain_password" => null
+    "mail_verification_token" => null
+    "sign" => null
+*/
+
+
+    dd($users);
+    //has_account_info
+    dd($data);
 
     dd($row);
 
