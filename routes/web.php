@@ -801,7 +801,7 @@ Route::get('temp-import', function () {
     // $coutse 24
     $conds['first_name'] = $first_name;
     // $data['middle_name'] = $middle_name;
-    $conds['last_name'] = $last_name;
+    $conds['given_name'] = $last_name;
     $conds['enterprise_id'] = $last_ent->id;
     $conds['has_account_info'] = 'No';
     $conds['user_type'] = 'student';
@@ -812,7 +812,19 @@ Route::get('temp-import', function () {
     //if empty, switch to first name
     if ($users->count() < 1) {
       $conds['first_name'] = $last_name;
+      $conds['given_name'] = $first_name;
+      $users = User::where($conds)->get();
+    }
+    //if empty, switch to first name
+    if ($users->count() < 1) {
+      $conds['first_name'] = $last_name;
       $conds['last_name'] = $first_name;
+      $users = User::where($conds)->get();
+    }
+    //if empty, switch to first name
+    if ($users->count() < 1) {
+      $conds['last_name'] = $last_name;
+      $conds['first_name'] = $first_name;
       $users = User::where($conds)->get();
     }
 
