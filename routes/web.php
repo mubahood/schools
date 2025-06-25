@@ -745,6 +745,14 @@ Route::get('temp-import', function () {
   set_time_limit(-1);
   set_time_limit(-1);
 
+  //set memory unlimited
+  ini_set('memory_limit', '-1');
+
+  //set error reporting
+  error_reporting(E_ALL);
+  ini_set('display_errors', 1);
+  
+
   // get table names dynamically
   $enterpriseTable     = (new Enterprise)->getTable();
   $academicClassTable  = (new AcademicClass)->getTable();
