@@ -803,7 +803,7 @@ Route::get('temp-import', function () {
     // $data['middle_name'] = $middle_name;
     $conds['given_name'] = $last_name;
     $conds['enterprise_id'] = $last_ent->id;
-    $conds['has_account_info'] = 'No';
+    // $conds['has_account_info'] = 'No';
     $conds['user_type'] = 'student';
 
     $users = User::where($conds)->get();
@@ -828,10 +828,10 @@ Route::get('temp-import', function () {
       $users = User::where($conds)->get();
     }
 
+
     //if empty, continue
     if ($users->count() < 1) {
-      echo "<br>No user found for: " . $name . ", ROW: " . $count . "<br>";
-      die("No user found for: " . $name . ", ROW: " . $count); 
+      echo "<br><span style='background-color: #ffcccc; color: #a94442; padding: 2px 6px; border-radius: 3px;'>No user found for: " . htmlspecialchars($name) . ", ROW: " . $count . "</span><br>";
       continue;
     }
 
@@ -839,20 +839,26 @@ Route::get('temp-import', function () {
     if ($users->count() > 1) {
       $ids_of_students = [];
       foreach ($users as $user) {
-        $ids_of_students[] = $user->id . " NAME: " . $user->name;
+        $ids_of_students[] = $user->id . " NAME: " . htmlspecialchars($user->name);
       }
-      echo "<br>Multiple users found for: " . $name . ", ROW: " . $count . ", IDs: " . implode(', ', $ids_of_students) . "<br>";
+      echo "<br><span style='background-color: #ffeeba; color: #856404; padding: 2px 6px; border-radius: 3px;'>Multiple users found for: " . htmlspecialchars($name) . ", ROW: " . $count . ", IDs: " . implode(', ', $ids_of_students) . "</span><br>";
       die("Multiple users found for: " . $name . ", ROW: " . $count . ", IDs: " . implode(', ', $ids_of_students));
       continue;
     }
     $user = $users->first();
+
+    if ($user->has_account_info == 'Yes') {
+      echo "<br><span style='background-color: #d1ecf1; color: #0c5460; padding: 2px 6px; border-radius: 3px;'>User already has account info: " . htmlspecialchars($name) . ", ROW: " . $count . ", ID: " . $user->id . "</span><br>";
+      continue;
+    }
+
     $user->school_pay_account_id = $student_account;
     $user->school_pay_payment_code = $schoo_pay_code;
     $user->has_account_info = 'Yes';
     $user->save();
     $my_count++;
 
-    echo "<br>Updated user: " . $name . ", ROW: " . $count . ", ID: " . $user->id . "<br>";
+    echo "<br><span style='background-color: #d4edda; color: #155724; padding: 2px 6px; border-radius: 3px;'>Updated user: " . htmlspecialchars($name) . ", ROW: " . $count . ", ID: " . $user->id . "</span><br>";
     die("Done");
     continue;
 
