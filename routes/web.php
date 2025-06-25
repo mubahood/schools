@@ -769,13 +769,16 @@ Route::get('temp-import', function () {
     'enterprise_id' => $last_ent->id,
   ])->get();
   // dd($classes);
+  $my_count = 0;
   foreach ($rows as $key => $row) {
 
     $count++;
     if ($count < 2) {
       continue;
     }
-    dd($row); 
+    if ($my_count > 50) {
+      break;
+    }
     $schoo_pay_code = $row[7];
     $first_name = trim($row[1]);
     $middle_name = trim($row[2]);
@@ -833,6 +836,7 @@ Route::get('temp-import', function () {
     $user->school_pay_payment_code = $schoo_pay_code;
     $user->has_account_info = 'Yes';
     $user->save();
+    $my_count++;
 
     echo "<br>Updated user: " . $name . ", ROW: " . $count . ", ID: " . $user->id . "<br>";
     continue;
