@@ -293,7 +293,8 @@ class StudentsController extends AdminController
             $export->originalValue([
                 'emergency_person_name',
                 'emergency_person_phone',
-                'lin'
+                'lin',
+                'sex',
             ]);
             $export->except([
                 'parent_id',
@@ -437,7 +438,7 @@ class StudentsController extends AdminController
                 ->sortable();
         }
         $grid->column('school_pay_payment_code', ('SchoolPay code'))->sortable()
-            ->filter('like'); 
+            ->filter('like');
 
         $grid->column('parent_id', __('Parent'))
             ->display(function ($x) {
@@ -466,7 +467,7 @@ class StudentsController extends AdminController
                 return $txt;
             })
             ->sortable()
-            ->hide(); 
+            ->hide();
         $grid->column('documents', __('Print Documents'))
             ->display(function () {
                 $admission_letter = url('print-admission-letter?id=' . $this->id);
