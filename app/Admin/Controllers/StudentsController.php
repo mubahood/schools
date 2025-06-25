@@ -79,6 +79,11 @@ class StudentsController extends AdminController
         } else if (in_array('not-active-students', $segments)) {
             $status = 0;
         }
+        $u = Admin::user();
+        $ent = $u->ent;
+        if ($ent == null) {
+            return $this->error('No enterprise found. Please contact your system administrator.');
+        }
 
         $grid = new Grid(new User());
 
