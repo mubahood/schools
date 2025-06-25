@@ -749,11 +749,12 @@ Route::get('temp-import', function () {
   set_time_limit(-1);
   $last_ent = Enterprise::orderBy('id', 'desc')->first();
   //file 1_bushra_students_table.xlsx
-  $file = public_path('2_bushra_students_table.xlsx');
+  $file = public_path('KAMPALA_INSTITUTE_OF_HEALTH_PROFESSIONALS.xlsx');
   //check if file exists
   if (!file_exists($file)) {
     return "File not found";
   }
+
 
 
   $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
@@ -774,6 +775,26 @@ Route::get('temp-import', function () {
     if ($count < 2) {
       continue;
     }
+    $schoo_pay_code = $row[7];
+    $first_name = $row[1];
+    $middle_name = $row[2];
+    $last_name = $row[3];
+    $name = $first_name;
+    if($middle_name != null && strlen($middle_name) > 0) {
+      $name .= ' ' . $middle_name;
+    }
+    if($last_name != null && strlen($last_name) > 0) {
+      $name .= ' ' . $last_name;
+    } 
+    //replance all spaces
+    $name = str_replace('  ', ' ', $name);
+    $name = str_replace('  ', ' ', $name);
+    $name = str_replace('  ', ' ', $name);
+    $name = trim($name);
+
+    // $coutse
+
+    dd($row);
 
     $stud = new Administrator();
     $stud->user_id = $row[0];

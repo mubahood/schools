@@ -37,6 +37,18 @@ Route::MATCH([
     $rec->save();
     return $rec;
 }));
+Route::MATCH([
+    'POST',
+    'GET'
+], "peg-pay-web-hooks", (function (Request $r) {
+    $rec = new SchoolPayHook();
+    $rec->post_data = json_encode($r->post());
+    $rec->get_data = json_encode($r->all());
+    $rec->method = $r->method();
+    $rec->server_data = json_encode($r->server());
+    $rec->save();
+    return $rec;
+}));
 
 Route::POST("mail-sender", (function (Request $r) {
     //validate

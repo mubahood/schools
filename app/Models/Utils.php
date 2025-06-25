@@ -1763,6 +1763,8 @@ class Utils  extends Model
 
         // 4) Build and debug the signature
         $code     = trim($ent->school_pay_code);
+        $password = 'Kih@1ii0007ftxas561V';
+        $code     = '14760';
         $password = trim($ent->school_pay_password);
         $raw      = $code . $rec_date . $password;
         $sig      = strtoupper(md5($raw));
