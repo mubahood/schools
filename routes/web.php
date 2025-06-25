@@ -778,6 +778,22 @@ Route::get('temp-import', function () {
     ->where('enterprise_id', $last_ent->id)
     ->get();
 
+  $start_from = 0;
+  $end_from = 10;
+  if (isset($_GET['start_from']) && is_numeric($_GET['start_from'])) {
+    $start_from = (int)$_GET['start_from'];
+  }
+  if ($start_from < 0) {
+    $start_from = 0;
+  }
+
+  //end_from
+  if (isset($_GET['end_from']) && is_numeric($_GET['end_from'])) {
+    $end_from = (int)$_GET['end_from'];
+  }
+
+  echo "<h3>Processing from row: $start_from to $end_from</h3>";
+
   $count = 0;
   foreach ($rows as $row) {
     $count++;
@@ -787,6 +803,15 @@ Route::get('temp-import', function () {
     if ($count > 50001) {
       break;
     }
+
+    if ($count < $start_from) {
+      continue;
+    }
+    if ($count > $end_from) {
+      break;
+    }
+
+    echo "<hr> Processing row: $count <br>";
 
     // extract columns
     $first_name       = trim($row[1]);
@@ -833,6 +858,21 @@ Route::get('temp-import', function () {
       $conds['last_name']  = $last_name;
       $users = DB::table($userTable)->where($conds)->get();
     }
+    if ($users->count() < 1) {
+      $name = trim(preg_replace(
+        '/\s+/',
+        ' ',
+        $first_name
+          . ($middle_name ? ' ' . $middle_name : '')
+          . ($last_name   ? ' ' . $last_name   : '')
+      ));
+      // revert and try again
+      $conds['name'] = $name;
+      unset($conds['first_name']);
+      unset($conds['last_name']);
+
+      $users = DB::table($userTable)->where($conds)->get();
+    }
 
     // no match
     if ($users->count() < 1) {
@@ -851,13 +891,23 @@ Route::get('temp-import', function () {
       echo "<br><span style='background-color: #ffeeba; color: #856404; padding: 2px 6px; border-radius: 3px;'>"
         . "Multiple users found for: " . htmlspecialchars($name)
         . ", ROW: " . $count . ", IDs: " . $ids_of_students
-        . "</span><br>"; 
+        . "</span><br>";
       continue;
     }
 
     // exactly one
     $user = $users->first();
-    // ... you can still reference $user->id, $user->name, etc.
+    $user = User::find($user->id); // Ensure we have a User model instance
+    $user->school_pay_payment_code = $schoo_pay_code;
+    $user->has_account_info = 'Yes'; // Mark as having account info
+    $user->school_pay_account_id = $student_account;
+    $user->save();
+    echo "<br><span style='background-color: #d4edda; color: #155724; padding: 2px 6px; border-radius: 3px;'>"
+      . "Updated user: " . htmlspecialchars($user->name) . " (ID: " . $user->id . ")"
+      . "</span><br>";
+      
+
+       // ... you can still reference $user->id, $user->name, etc.
   }
 
   return "Done";
