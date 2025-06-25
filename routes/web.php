@@ -819,6 +819,7 @@ Route::get('temp-import', function () {
     //if empty, continue
     if ($users->count() < 1) {
       echo "<br>No user found for: " . $name . ", ROW: " . $count . "<br>";
+      die("No user found for: " . $name . ", ROW: " . $count); 
       continue;
     }
 
@@ -829,6 +830,7 @@ Route::get('temp-import', function () {
         $ids_of_students[] = $user->id . " NAME: " . $user->name;
       }
       echo "<br>Multiple users found for: " . $name . ", ROW: " . $count . ", IDs: " . implode(', ', $ids_of_students) . "<br>";
+      die("Multiple users found for: " . $name . ", ROW: " . $count . ", IDs: " . implode(', ', $ids_of_students));
       continue;
     }
     $user = $users->first();
@@ -839,8 +841,8 @@ Route::get('temp-import', function () {
     $my_count++;
 
     echo "<br>Updated user: " . $name . ", ROW: " . $count . ", ID: " . $user->id . "<br>";
-    continue;
     die("Done");
+    continue;
 
     /* 
        "school_pay_account_id" => null
