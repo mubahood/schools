@@ -841,8 +841,7 @@ Route::get('temp-import', function () {
             echo "<br><span style='background-color: #ffeeba; color: #856404; padding: 2px 6px; border-radius: 3px;'>"
                ."Multiple users found for: ".htmlspecialchars($name)
                .", ROW: ".$count.", IDs: ".$ids_of_students
-               ."</span><br>";
-            die("Multiple users found for: ".$name.", ROW: ".$count.", IDs: ".$ids_of_students);
+               ."</span><br>"; 
         }
 
         // exactly one
