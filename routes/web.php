@@ -848,7 +848,7 @@ Route::get('temp-import', function () {
     $user = $users->first();
 
     if ($user->has_account_info == 'Yes') {
-      echo "<br><span style='background-color: #d1ecf1; color: #0c5460; padding: 2px 6px; border-radius: 3px;'>User already has account info: " . htmlspecialchars($name) . ", ROW: " . $count . ", ID: " . $user->id . "</span><br>";
+      // echo "<br><span style='background-color: #d1ecf1; color: #0c5460; padding: 2px 6px; border-radius: 3px;'>User already has account info: " . htmlspecialchars($name) . ", ROW: " . $count . ", ID: " . $user->id . "</span><br>";
       continue;
     }
 

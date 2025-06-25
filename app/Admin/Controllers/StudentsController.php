@@ -429,10 +429,10 @@ class StudentsController extends AdminController
             $grid->column('lin', __('LIN'))->sortable()->editable()
                 ->filter('like')->hide();
             //has_account_info
-            $grid->column('has_account_info', ('Has Shool Pay Account'))
+            $grid->column('has_account_info', ('Has ShoolPay'))
                 ->filter([
-                    1 => 'Yes',
-                    0 => 'No',
+                    'Yes' => 'Yes',
+                    'No' => 'No',
                 ])
                 ->sortable();
         }
@@ -481,7 +481,7 @@ class StudentsController extends AdminController
                 return Carbon::parse($date)->format('d-M-Y');
             })->hide()->sortable();
 
-        $grid->column('user_number', __('ID Number'))->sortable();
+        $grid->column('user_number', __('Reg No.'))->sortable();
 
         //residence
         $grid->column('residence', __('Residence'))->sortable()
