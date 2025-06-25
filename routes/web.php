@@ -775,6 +775,7 @@ Route::get('temp-import', function () {
     if ($count < 2) {
       continue;
     }
+    dd($row); 
     $schoo_pay_code = $row[7];
     $first_name = trim($row[1]);
     $middle_name = trim($row[2]);
