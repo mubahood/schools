@@ -859,7 +859,7 @@ Route::get('temp-import', function () {
     $my_count++;
 
     echo "<br><span style='background-color: #d4edda; color: #155724; padding: 2px 6px; border-radius: 3px;'>Updated user: " . htmlspecialchars($name) . ", ROW: " . $count . ", ID: " . $user->id . "</span><br>";
-    die("Done");
+    // die("Done");
     continue;
 
     /* 
