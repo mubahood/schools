@@ -711,7 +711,9 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
     );
 
     public static $classMap = array (
+        'App\\Admin\\Actions\\Post\\BatchCopyAcademicClass' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/BatchCopyAcademicClass.php',
         'App\\Admin\\Actions\\Post\\BatchPrint' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/BatchPrint.php',
+        'App\\Admin\\Actions\\Post\\BatchReplicate' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/BatchReplicate.php',
         'App\\Admin\\Actions\\Post\\BatchSetNotProcessedAccountController' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/BatchSetNotProcessedAccountController.php',
         'App\\Admin\\Actions\\Post\\BatchSetProcessedAccountController' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/BatchSetProcessedAccountController.php',
         'App\\Admin\\Actions\\Post\\BatchStudentFinancialAccountChangeBalance' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/BatchStudentFinancialAccountChangeBalance.php',
@@ -720,6 +722,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Admin\\Actions\\Post\\ChangeSchemeWorkTopic' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/ChangeSchemeWorkTopic.php',
         'App\\Admin\\Actions\\Post\\ChangeStudentsClass' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/ChangeStudentsClass.php',
         'App\\Admin\\Actions\\Post\\ChangeStudentsStatus' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/ChangeStudentsStatus.php',
+        'App\\Admin\\Actions\\Post\\DuplicateStudentDataImports' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/DuplicateStudentDataImports.php',
         'App\\Admin\\Actions\\Post\\MessageStatus' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/MessageStatus.php',
         'App\\Admin\\Actions\\Post\\PromoteStudentsClass' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/PromoteStudentsClass.php',
         'App\\Admin\\Actions\\Post\\SchoolPayTransactionImport' => __DIR__ . '/../..' . '/app/Admin/Actions/Post/SchoolPayTransactionImport.php',
@@ -958,6 +961,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Models\\GradingScale' => __DIR__ . '/../..' . '/app/Models/GradingScale.php',
         'App\\Models\\HeadTeacherComment' => __DIR__ . '/../..' . '/app/Models/HeadTeacherComment.php',
         'App\\Models\\IdentificationCard' => __DIR__ . '/../..' . '/app/Models/IdentificationCard.php',
+        'App\\Models\\ImportSchoolPayTransaction' => __DIR__ . '/../..' . '/app/Models/ImportSchoolPayTransaction.php',
         'App\\Models\\MainCourse' => __DIR__ . '/../..' . '/app/Models/MainCourse.php',
         'App\\Models\\Manifest' => __DIR__ . '/../..' . '/app/Models/Manifest.php',
         'App\\Models\\Mark' => __DIR__ . '/../..' . '/app/Models/Mark.php',

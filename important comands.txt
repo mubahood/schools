@@ -10,9 +10,9 @@ php artisan make:migration slot
 
 
 
-php artisan make:model StudentDataImport --migration
+php artisan make:model ImportSchoolPayTransaction --migration
 
-php artisan admin:make StudentDataImportController --model=App\\Models\\StudentDataImport
+php artisan admin:make ImportSchoolPayTransactionController --model=App\\Models\\ImportSchoolPayTransaction
 php artisan admin:make FeesDataImportController --model=App\Models\FeesDataImport
 
 17-35-P.1_Theology_-_Term_2_-_2024-0200.pdf

@@ -56,6 +56,9 @@ class User extends Administrator implements JWTSubject
                 if ($parent != null) {
                     $m->parent_id = $parent->id;
                 }
+                if ($m->school_pay_payment_code != null && strlen($m->school_pay_payment_code)  > 4) {
+                    $m->has_account_info = 'Yes';
+                }
             }
             return $m;
         });

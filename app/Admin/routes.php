@@ -142,6 +142,8 @@ Route::group([
     $router->resource('fees-data-import-records', FeesDataImportRecordController::class);
     
     $router->resource('student-data-imports', StudentDataImportController::class);
+    $router->resource('import-school-pay-transactions', ImportSchoolPayTransactionController::class);
+
 
 
     //$router->get('/fixed-asset-records-stats', 'FixedAssetRecordController@stats');

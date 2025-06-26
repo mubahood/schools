@@ -24,6 +24,7 @@ use App\Models\FeesDataImportRecord;
 use App\Models\FinancialRecord;
 use App\Models\Gen;
 use App\Models\IdentificationCard;
+use App\Models\ImportSchoolPayTransaction;
 use App\Models\Mark;
 use App\Models\MarkRecord;
 use App\Models\ReportFinanceModel;
@@ -69,6 +70,243 @@ use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 
 Route::get('student-data-import-do-import', [MainController::class, 'student_data_import_do_import']);
+
+Route::get('import-school-pay-transactions-do-import', function (Request $request) {
+  $u = Admin::user();
+  if ($u == null) {
+    return "You are not logged in";
+  }
+
+  $ent = Enterprise::find($u->enterprise_id);
+  if ($ent == null) {
+    return "Enterprise not found";
+  }
+
+  $active_term = $ent->active_term();
+  if ($active_term == null) {
+    return "No active term found for this enterprise.";
+  }
+
+
+  $feesDataImport = ImportSchoolPayTransaction::find($request->id);
+  if ($feesDataImport == null) {
+    return "School Pay Transaction Import not found";
+  }
+
+
+  $file_path = public_path('storage/' . $feesDataImport->file_path);
+  if (!file_exists($file_path)) {
+    return "File not found: $file_path";
+  }
+
+
+
+  set_time_limit(-1);
+  //set unlimited memory
+  ini_set('memory_limit', '-1');
+  $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+  $spreadsheet = $reader->load($file_path);
+  $sheet = $spreadsheet->getActiveSheet();
+  $rows = $sheet->toArray();
+  $count = 0;
+  $success = 0;
+  $fail = 0;
+  $fail_text = "";
+
+  //firstrow
+  if (count($rows) < 2) {
+    return "No data found in the file. Please check the file and try again.";
+  }
+  $firstRow = $rows[0];
+
+  /* 
+array:12 [▼
+  0 => "Date created"
+  1 => "Description"
+  2 => "Student name"
+  3 => "Class code"
+  4 => "Payment code"
+  5 => "Registration number"
+  6 => "Channel trans id"
+  7 => "Reciept number"
+  8 => "Channel code"
+  9 => "Channel memo"
+  10 => "Amount"
+  11 => "Bank name"
+]
+
+array:12 [▼
+  0 => "2025-06-19 18:01:23.190382"
+  1 => "PMNT_RECV-AIRTEL_MONEY_UG - 1005183410 - Nagawa Angella"
+  2 => "Nagawa Angella"
+  3 => "DCM2023"
+  4 => "1005183410"
+  5 => null
+  6 => "125383786036"
+  7 => "42392643"
+  8 => "AIRTEL_MONEY_UG"
+  9 => "1005183410 Nagawa Angella KAMPALA INSTITUTE OF HEALTH DCM2023"
+  10 => "50000"
+  11 => "Bank Of Africa"
+]
+
+  "id" => 1
+    "created_at" => "2025-06-26 00:38:38"
+    "updated_at" => "2025-06-26 01:04:03"
+    "enterprise_id" => 24
+    "school_pay_transporter_id" => "G"
+    "amount" => "K"
+    "description" => "J"
+    "payment_date" => "A"
+    "schoolpayReceiptNumber" => "H"
+    "paymentDateAndTime" => null
+    "settlementBankCode" => null
+    "sourceChannelTransDetail" => "B"
+    "sourceChannelTransactionId" => "G"
+    "sourcePaymentChannel" => "I"
+    "studentClass" => "D"
+    "studentName" => "C"
+    "studentPaymentCode" => "D"
+    "studentRegistrationNumber" => "F"
+    "transactionCompletionStatus" => null
+    "file_path" => "files/62e1dcc59d984537a0d5e09ed6d7fc03.xlsx"
+    "source" => "school_pay"
+*/
+
+
+
+
+  $ent = Enterprise::find($feesDataImport->enterprise_id);
+  if ($ent == null) {
+    return "Enterprise not found";
+  }
+  $active_term = $ent->active_term();
+  if ($active_term == null) {
+    return "No active term found for this enterprise.";
+  }
+
+  $header = [];
+  if (isset($rows[0])) {
+    $header = $rows[0];
+  }
+  foreach ($rows as $key => $row) {
+    $count++;
+    if ($count < 2) {
+      continue;
+    }
+    $rawData = [];
+
+    //must be set and not empty $feesDataImport->payment_date)
+    if (!isset($feesDataImport->payment_date) || strlen($feesDataImport->payment_date) < 1) {
+      $fail++;
+      $fail_text .= "Payment Date column is not set or empty.<br>";
+      echo "Payment Date column is not set or empty.<br>";
+      continue;
+    }
+    $payment_date_col = Utils::alphabet_to_index($feesDataImport->payment_date);
+    //must be set and not empty $feesDataImport->amount)
+    if (!isset($feesDataImport->amount) || strlen($feesDataImport->amount) < 1) {
+      $fail++;
+      $fail_text .= "Amount column is not set or empty.<br>";
+      echo "Amount column is not set or empty.<br>";
+      continue;
+    }
+    //must be set and not empty $feesDataImport->schoolpayReceiptNumber)
+    if (!isset($feesDataImport->schoolpayReceiptNumber) || strlen($feesDataImport->schoolpayReceiptNumber) < 1) {
+      $fail++;
+      $fail_text .= "School Pay Receipt Number is not set or empty.<br>";
+      echo "School Pay Receipt Number is not set or empty.<br>";
+      continue;
+    }
+
+    $schoolpayReceiptNumber_col = Utils::alphabet_to_index($feesDataImport->schoolpayReceiptNumber);
+    $amount_col = Utils::alphabet_to_index($feesDataImport->amount);
+    $description_col = Utils::alphabet_to_index($feesDataImport->description);
+    $sourceChannelTransactionId_col = Utils::alphabet_to_index($feesDataImport->sourceChannelTransactionId);
+
+    //studentPaymentCode is required
+    if (!isset($feesDataImport->studentPaymentCode) || strlen($feesDataImport->studentPaymentCode) < 1) {
+      $fail++;
+      $fail_text .= "Student Payment Code column is not set or empty.<br>";
+      echo "Student Payment Code column is not set or empty.<br>";
+      continue;
+    }
+
+
+    //must be set and not empty $feesDataImport-studentName 
+    if (!isset($feesDataImport->studentName) || strlen($feesDataImport->studentName) < 1) {
+      $fail++;
+      $fail_text .= "Student Name column is not set or empty.<br>";
+      echo "Student Name column is not set or empty.<br>";
+      continue;
+    }
+    //must be set and not empty $feesDataImport->school_pay_transporter_id)
+    if (!isset($feesDataImport->school_pay_transporter_id) || strlen($feesDataImport->school_pay_transporter_id) < 1) {
+      $fail++;
+      $fail_text .= "School Pay Transporter ID is not set or empty.<br>";
+      echo "School Pay Transporter ID is not set or empty.<br>";
+      continue;
+    }
+
+    $source_col = Utils::alphabet_to_index($feesDataImport->sourcePaymentChannel);
+    $sourceChannelTransDetail_col = Utils::alphabet_to_index($feesDataImport->sourceChannelTransDetail);
+    $sourcePaymentChannel_col = Utils::alphabet_to_index($feesDataImport->sourcePaymentChannel);
+    $studentClass_col = Utils::alphabet_to_index($feesDataImport->studentClass);
+    $studentName_col = Utils::alphabet_to_index($feesDataImport->studentName);
+    $studentPaymentCode_col = Utils::alphabet_to_index($feesDataImport->studentPaymentCode);
+    $studentRegistrationNumber_col = Utils::alphabet_to_index($feesDataImport->studentRegistrationNumber);
+
+    $school_pay_transporter_id_col = Utils::alphabet_to_index($feesDataImport->school_pay_transporter_id);
+    foreach ($header as $_index => $_value) {
+      $_row['value'] = $row[$_index];
+      $rawData[$_value] = $row[$_index];
+    }
+
+
+    $schoolpayReceiptNumber = $row[$schoolpayReceiptNumber_col];
+    if (!isset($schoolpayReceiptNumber) || strlen($schoolpayReceiptNumber) < 1) {
+      $fail++;
+      $fail_text .= "Row $count: School Pay Receipt Number is not set or empty.<br>";
+      echo "<span style='background-color: #ffcccc; color: #a94442; padding: 2px 6px; border-radius: 3px;'>Row $count: School Pay Receipt Number is not set or empty.</span><br>";
+      continue;
+    }
+
+    $transaction = SchoolPayTransaction::where([
+      'schoolpayReceiptNumber' => $schoolpayReceiptNumber,
+    ])->first();
+    if ($transaction != null) {
+      //already exists, skip this row
+      echo "<span style='background-color: #dff0d8; color: #3c763d; padding: 2px 6px; border-radius: 3px;'>Row $count: Transaction with School Pay Receipt Number '$schoolpayReceiptNumber' already exists. Skipping this row.</span><br>";
+      continue;
+    }
+    $transaction = new SchoolPayTransaction();
+    $transaction->enterprise_id = $ent->id;
+    $transaction->school_pay_transporter_id = $row[$school_pay_transporter_id_col];
+    $transaction->schoolpayReceiptNumber = $schoolpayReceiptNumber;
+    $transaction->created_by_id = $u->id;
+    $transaction->amount = trim($row[$amount_col]);
+    $transaction->description = trim($row[$description_col]);
+    $transaction->payment_date = trim($row[$payment_date_col]);
+    $transaction->paymentDateAndTime = trim($row[$payment_date_col]);
+    $transaction->source = trim($row[$source_col]);
+    $transaction->sourceChannelTransDetail = trim($row[$sourceChannelTransDetail_col]);
+    $transaction->type = 'FEES_PAYMENT';
+    $transaction->status = 'Pending'; // Default status
+    $transaction->data = json_encode($rawData); // Store the raw data of the record
+    $transaction->sourceChannelTransactionId = trim($row[$sourceChannelTransactionId_col]);
+    $transaction->sourcePaymentChannel = trim($row[$sourcePaymentChannel_col]);
+    $transaction->studentClass = trim($row[$studentClass_col]);
+    $transaction->studentName = trim($row[$studentName_col]);
+    $transaction->studentPaymentCode = trim($row[$studentPaymentCode_col]);
+    $transaction->studentRegistrationNumber = trim($row[$studentRegistrationNumber_col]);
+    $transaction->transactionCompletionStatus = 'Completed';
+    $transaction->academic_year_id = $active_term->academic_year_id;
+    $transaction->term_id = $active_term->id;
+    $transaction->save();
+    echo "<span style='background-color: #dff0d8; color: #3c763d; padding: 2px 6px; border-radius: 3px;'>Row $count: Transaction with School Pay Receipt Number '$schoolpayReceiptNumber' created successfully.</span><br>";
+  }
+});
+
 
 Route::get('fees-data-import-do-import', function (Request $request) {
   $u = Admin::user();
@@ -905,9 +1143,8 @@ Route::get('temp-import', function () {
     echo "<br><span style='background-color: #d4edda; color: #155724; padding: 2px 6px; border-radius: 3px;'>"
       . "Updated user: " . htmlspecialchars($user->name) . " (ID: " . $user->id . ")"
       . "</span><br>";
-      
 
-       // ... you can still reference $user->id, $user->name, etc.
+    // ... you can still reference $user->id, $user->name, etc.
   }
 
   return "Done";
@@ -2306,7 +2543,6 @@ Route::get('import-transaction', function (Request $request) {
   ])->first();
 
 
-
   if ($trans != null) {
     $schoo_pay->status = 'Imported';
     $schoo_pay->save();
@@ -2332,6 +2568,12 @@ Route::get('import-transaction', function (Request $request) {
   $trans = Transaction::where([
     'school_pay_transporter_id' => $schoo_pay->school_pay_transporter_id
   ])->first();
+
+  if ($trans == null) {
+    $trans = Transaction::where([
+      'school_pay_transporter_id' => $schoo_pay->schoolpayReceiptNumber
+    ])->first();
+  }
 
   if ($trans == null) {
     $style = 'background-color: red; color: white; padding: 10px;';

@@ -107,7 +107,8 @@ class SchoolPayTransactionController extends AdminController
             });
         });
 
-        $grid->quickSearch('description');
+        $grid->quickSearch('school_pay_transporter_id', 'account_id', 'amount', 'status', 'payment_date', 'description', 'studentName', 'studentPaymentCode')
+            ->placeholder('Search by ID, Account, Amount, Status, Date, Description, Student Name or Student Payment Code');
 
         $grid->batchActions(function ($batch) {
             $batch->disableDelete();

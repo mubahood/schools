@@ -85,6 +85,9 @@ class StudentsController extends AdminController
             return $this->error('No enterprise found. Please contact your system administrator.');
         }
 
+        $isUniversity = $ent->type == 'University';
+
+
         $grid = new Grid(new User());
 
         $grid->perPages([10, 50, 100, 300, 500]);
@@ -370,13 +373,25 @@ class StudentsController extends AdminController
                 }
                 return $this->current_class->name_text;
             })->sortable();
-        $grid->column('stream_id', __('Stream'))
-            ->display(function () {
-                if ($this->stream == null) {
-                    return 'No Stream';
-                }
-                return $this->stream->name;
-            })->sortable();
+        if ($isUniversity) {
+            $grid->column('stream_id', __('Stream'))
+                ->display(function () {
+                    if ($this->stream == null) {
+                        return 'No Stream';
+                    }
+                    return $this->stream->name;
+                })->sortable()
+                ->hide();
+        } else {
+            $grid->column('stream_id', __('Stream'))
+                ->display(function () {
+                    if ($this->stream == null) {
+                        return 'No Stream';
+                    }
+                    return $this->stream->name;
+                })->sortable();
+        }
+
 
 
 
@@ -406,12 +421,27 @@ class StudentsController extends AdminController
             ->filter(['Male' => 'Male', 'Female' => 'Female'])
             ->editable('select', ['Male' => 'Male', 'Female' => 'Female']);
 
-        $grid->column('emergency_person_name', __('Guardian'))
-            ->hide()
-            ->sortable()
-            ->editable();
-        $grid->column('emergency_person_phone', __('Guardian Phone'))->sortable()
-            ->editable()->filter('like');
+        if ($isUniversity) {
+            $grid->column('emergency_person_name', __('Guardian'))
+                ->hide()
+                ->sortable()
+                ->editable();
+            $grid->column('emergency_person_phone', __('Guardian Phone'))->sortable()
+                ->editable()->filter('like')
+                ->hide();
+        } else {
+            $grid->column('emergency_person_name', __('Guardian'))
+                ->sortable()
+                ->editable()
+                ->filter('like');
+            $grid->column('emergency_person_phone', __('Guardian Phone'))->sortable()
+                ->editable()
+                ->filter('like');
+        }
+
+
+
+
 
 
         $grid->column('phone_number_1', __('Phone number'))->hide();

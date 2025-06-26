@@ -6,7 +6,9 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'App\\Admin\\Actions\\Post\\BatchCopyAcademicClass' => $baseDir . '/app/Admin/Actions/Post/BatchCopyAcademicClass.php',
     'App\\Admin\\Actions\\Post\\BatchPrint' => $baseDir . '/app/Admin/Actions/Post/BatchPrint.php',
+    'App\\Admin\\Actions\\Post\\BatchReplicate' => $baseDir . '/app/Admin/Actions/Post/BatchReplicate.php',
     'App\\Admin\\Actions\\Post\\BatchSetNotProcessedAccountController' => $baseDir . '/app/Admin/Actions/Post/BatchSetNotProcessedAccountController.php',
     'App\\Admin\\Actions\\Post\\BatchSetProcessedAccountController' => $baseDir . '/app/Admin/Actions/Post/BatchSetProcessedAccountController.php',
     'App\\Admin\\Actions\\Post\\BatchStudentFinancialAccountChangeBalance' => $baseDir . '/app/Admin/Actions/Post/BatchStudentFinancialAccountChangeBalance.php',
@@ -15,6 +17,7 @@ return array(
     'App\\Admin\\Actions\\Post\\ChangeSchemeWorkTopic' => $baseDir . '/app/Admin/Actions/Post/ChangeSchemeWorkTopic.php',
     'App\\Admin\\Actions\\Post\\ChangeStudentsClass' => $baseDir . '/app/Admin/Actions/Post/ChangeStudentsClass.php',
     'App\\Admin\\Actions\\Post\\ChangeStudentsStatus' => $baseDir . '/app/Admin/Actions/Post/ChangeStudentsStatus.php',
+    'App\\Admin\\Actions\\Post\\DuplicateStudentDataImports' => $baseDir . '/app/Admin/Actions/Post/DuplicateStudentDataImports.php',
     'App\\Admin\\Actions\\Post\\MessageStatus' => $baseDir . '/app/Admin/Actions/Post/MessageStatus.php',
     'App\\Admin\\Actions\\Post\\PromoteStudentsClass' => $baseDir . '/app/Admin/Actions/Post/PromoteStudentsClass.php',
     'App\\Admin\\Actions\\Post\\SchoolPayTransactionImport' => $baseDir . '/app/Admin/Actions/Post/SchoolPayTransactionImport.php',
@@ -253,6 +256,7 @@ return array(
     'App\\Models\\GradingScale' => $baseDir . '/app/Models/GradingScale.php',
     'App\\Models\\HeadTeacherComment' => $baseDir . '/app/Models/HeadTeacherComment.php',
     'App\\Models\\IdentificationCard' => $baseDir . '/app/Models/IdentificationCard.php',
+    'App\\Models\\ImportSchoolPayTransaction' => $baseDir . '/app/Models/ImportSchoolPayTransaction.php',
     'App\\Models\\MainCourse' => $baseDir . '/app/Models/MainCourse.php',
     'App\\Models\\Manifest' => $baseDir . '/app/Models/Manifest.php',
     'App\\Models\\Mark' => $baseDir . '/app/Models/Mark.php',
