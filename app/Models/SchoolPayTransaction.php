@@ -51,7 +51,24 @@ class SchoolPayTransaction extends Model
                 }
             }
 
-             
+            /* $dup = Transaction::where([
+                'school_pay_transporter_id' => $m->school_pay_transporter_id,
+            ])->first();
+
+            if ($dup == null) {
+                if ($m->sourceChannelTransactionId != null && strlen($m->sourceChannelTransactionId) > 4) {
+                    //check if sourceChannelTransactionId exists
+                    $dup = Transaction::where([
+                        'school_pay_transporter_id' => $m->sourceChannelTransactionId
+                    ])->first();
+                }
+            }
+
+            if ($dup != null) {
+                $m->status = 'Imported';
+            } else {
+                $m->status = 'Not Imported';
+            } */
             return $m;
         });
     }
@@ -203,7 +220,7 @@ class SchoolPayTransaction extends Model
     }
 
     //getter for status attribute
-    public function getStatusAttribute($value)
+  /*   public function getStatusAttribute($value)
     {
 
         if ($value == 'Imported') {
@@ -234,5 +251,5 @@ class SchoolPayTransaction extends Model
             return 'Imported';
         }
         return $value;
-    }
+    } */
 }
