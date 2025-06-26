@@ -70,6 +70,7 @@ use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 
 Route::get('student-data-import-do-import', [MainController::class, 'student_data_import_do_import']);
+Route::get('process-students-enrollment', [MainController::class, 'process_students_enrollment']);
 
 Route::get('import-school-pay-transactions-do-import', function (Request $request) {
   $u = Admin::user();
@@ -526,7 +527,7 @@ Route::get('fees-data-import-do-import', function (Request $request) {
       $last_term_balance_record = Transaction::where([
         'account_id' => $account->id,
         'term_id' => $active_term->id,
-        'is_contra_entry' => 'Yes',
+        'is_last_term_balance' => 'Yes',
       ])->first();
 
       if ($last_term_balance_record == null) {
@@ -535,7 +536,8 @@ Route::get('fees-data-import-do-import', function (Request $request) {
         $last_term_balance_record->account_id = $account->id;
         $last_term_balance_record->created_by_id = $feesDataImport->created_by_id;
         $last_term_balance_record->amount = $last_term_balance;
-        $last_term_balance_record->description = "Shool fees balance for previous term.";
+        $last_term_balance_record->description = "School fees balance for previous term.";
+        $last_term_balance_record->is_last_term_balance = 'Yes';
         $last_term_balance_record->academic_year_id = $active_term->academic_year_id;
         $last_term_balance_record->term_id = $active_term->id;
         $last_term_balance_record->type = 'FEES_BILL';
@@ -546,6 +548,7 @@ Route::get('fees-data-import-do-import', function (Request $request) {
       } else {
         // Update existing record if it exists
         $last_term_balance_record->amount = $last_term_balance;
+        $last_term_balance_record->is_last_term_balance = 'Yes';
         $last_term_balance_record->description = "Previous term balance adjustment for {$student->name} ({$student->school_pay_payment_code})";
         $last_term_balance_record->save();
         $action_done .= "Row $count: Updated existing last term balance record for student '{$student->name}' with amount UGX " . number_format($last_term_balance) . ".<br>";

@@ -1,4 +1,4 @@
-php artisan make:migration add_academic_classes_to_academic_classes --table=academic_classes
+php artisan make:migration add_is_enrolled_to_admin_users --table=admin_users
 ls
          $table->date('check_in_time')->nullable();
             $table->date('check_out_time')->nullable();
@@ -10,9 +10,9 @@ php artisan make:migration slot
 
 
 
-php artisan make:model ImportSchoolPayTransaction --migration
+php artisan make:model StudentHasSemeter --migration
 
-php artisan admin:make ImportSchoolPayTransactionController --model=App\\Models\\ImportSchoolPayTransaction
+php artisan admin:make StudentHasSemeterController --model=App\\Models\\StudentHasSemeter
 php artisan admin:make FeesDataImportController --model=App\Models\FeesDataImport
 
 17-35-P.1_Theology_-_Term_2_-_2024-0200.pdf

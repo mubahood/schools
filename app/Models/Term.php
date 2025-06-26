@@ -48,6 +48,15 @@ class Term extends Model
             }
         });
 
+        //updated
+        self::updated(function ($m) {
+            try {
+                $m->process_students_enrollment();
+            } catch (\Throwable $th) {
+                //throw $th;
+            }
+        });
+
         self::updating(function ($m) {
             $_m = Term::where([
                 'enterprise_id' => $m->enterprise_id,
@@ -98,5 +107,65 @@ class Term extends Model
     public function mark_records()
     {
         return $this->hasMany(MarkRecord::class);
+    }
+
+    public function process_students_enrollment()
+    {
+        $ent = Enterprise::find($this->enterprise_id);
+        if (!$ent) {
+            throw new \Exception("Enterprise not found.");
+        }
+
+        if ($ent->type != 'University') {
+            throw new \Exception("This feature is only available for Universities.");
+        }
+
+        $active_term = $ent->active_term();
+        if (!$active_term) {
+            throw new \Exception("No active term found.");
+        }
+        $academic_year = $ent->active_academic_year();
+        if (!$academic_year) {
+            throw new \Exception("No active academic year found.");
+        }
+        $active_students = User::where([
+            'enterprise_id' => $ent->id,
+            'user_type' => 'student',
+            'status' => 1, // Active
+        ])->get();
+        $pendingStudents = User::where([
+            'enterprise_id' => $ent->id,
+            'user_type' => 'student',
+            'status' => 2, // Pending
+        ])->get();
+        //merge both collections
+        $students = $active_students->merge($pendingStudents);
+        if ($students->isEmpty()) {
+            throw new \Exception("No students found.");
+        }
+        $users_table_name = (new User())->getTable();
+        $student_has_semester_table_name = (new StudentHasSemeter())->getTable();
+        //set unlimited time for the enrollment
+        set_time_limit(0);
+
+        // Set all students to 'No' by default
+        DB::table($users_table_name)
+            ->where('enterprise_id', $ent->id)
+            ->whereIn('id', $students->pluck('id'))
+            ->update(['is_enrolled' => 'No']);
+
+        // Get student IDs who have a semester record for the active term
+        $enrolledStudentIds = DB::table($student_has_semester_table_name)
+            ->where('term_id', $active_term->id)
+            ->whereIn('student_id', $students->pluck('id'))
+            ->pluck('student_id')
+            ->toArray();
+
+        if (!empty($enrolledStudentIds)) {
+            DB::table($users_table_name)
+            ->where('enterprise_id', $ent->id)
+            ->whereIn('id', $enrolledStudentIds)
+            ->update(['is_enrolled' => 'Yes']);
+        }
     }
 }

@@ -14,6 +14,7 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class User extends Administrator implements JWTSubject
 {
@@ -389,7 +390,7 @@ class User extends Administrator implements JWTSubject
             'academic_class_id' => $class->id,
             'enterprise_id' => $this->enterprise_id,
             'due_term_id' => $active_term->id,
-        ])->get();
+        ])->get(); 
 
         $account = $this->account;
         if ($this->account == null) {
@@ -585,5 +586,34 @@ class User extends Administrator implements JWTSubject
             throw new \Exception("Role not found for user: " . $this->name, 1);
         }
         return $role;
+    }
+
+    //import_pending_school_pay_records
+    public function import_pending_school_pay_records()
+    {
+        $recs_with_same_reg = SchoolPayTransaction::where([
+            'enterprise_id' => $this->enterprise_id,
+            'studentRegistrationNumber' => $this->user_number,
+        ])->get();
+
+        $recs_with_same_pay_code = SchoolPayTransaction::where([
+            'enterprise_id' => $this->enterprise_id,
+            'studentPaymentCode' => $this->school_pay_payment_code,
+        ])->get();
+
+        $merged = $recs_with_same_reg->merge($recs_with_same_pay_code);
+        $merged = $merged->unique('id');
+
+        foreach ($merged as $rec) {
+            if ($rec->status == 'Imported') {
+                continue; //skip already imported records
+            } 
+            try {
+                $rec->doImport();
+            } catch (\Throwable $th) {
+                //log the error
+                Log::error("Error importing school pay record: " . $th->getMessage());
+            }
+        }
     }
 }

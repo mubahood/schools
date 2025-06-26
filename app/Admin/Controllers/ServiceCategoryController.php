@@ -79,16 +79,10 @@ class ServiceCategoryController extends AdminController
         $u = Admin::user();
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
         $form->text('name', __('Name'))->rules('required');
+        $form->hidden('want_to_transfer')->default(0);
+        $form->hidden('transfer_keyword')->default('');
 
-        $form->radio('want_to_transfer', "Do you want to transfer serfices tom this category?")
-            ->options([
-                1 => 'Yes',
-                0 => 'No',
-            ])->when(1, function ($f) {
-                $f->text('transfer_keyword', "Transfer keyword")
-                    ->rules('required')
-                    ->help("Any service containing mentioned keyword in its description should be transfered to this category.");
-            })->rules('required');
+   
 
         $form->textarea('description', __('Description'));
 

@@ -143,6 +143,7 @@ Route::group([
     
     $router->resource('student-data-imports', StudentDataImportController::class);
     $router->resource('import-school-pay-transactions', ImportSchoolPayTransactionController::class);
+    $router->resource('student-has-semeters', StudentHasSemeterController::class);
 
 
 

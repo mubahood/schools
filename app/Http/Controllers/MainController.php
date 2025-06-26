@@ -28,6 +28,36 @@ class MainController extends Controller
 {
 
 
+    public function process_students_enrollment(Request $request)
+    {
+        $user = Admin::user();
+        if (!$user) {
+            return "<span style='color:red;'>You are not logged in.</span>";
+        }
+        $ent = Enterprise::find($user->enterprise_id);
+        if (!$ent) {
+            return "<span style='color:red;'>Enterprise not found.</span>";
+        }
+
+        if ($ent->type != 'University') {
+            return "<span style='color:red;'>This feature is only available for Universities.</span>";
+        }
+
+        $active_term = $ent->active_term();
+        if (!$active_term) {
+            return "<span style='color:red;'>No active term found.</span>";
+        }
+        $academic_year = $ent->active_academic_year();
+        if (!$academic_year) {
+            return "<span style='color:red;'>No active academic year found.</span>";
+        }
+        try {
+            $active_term->process_students_enrollment();
+        } catch (\Throwable $th) {
+            return "<span style='color:red;'>Error processing student enrollment: " . $th->getMessage() . "</span>";
+        }
+        return "<span style='color:green;'>Students enrollment processed successfully.</span>"; 
+    }
     public function student_data_import_do_import(Request $request)
     {
         $admin = Admin::user();

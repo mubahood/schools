@@ -429,6 +429,24 @@ class StudentsController extends AdminController
             $grid->column('emergency_person_phone', __('Guardian Phone'))->sortable()
                 ->editable()->filter('like')
                 ->hide();
+            //is_enrolled
+            $grid->column('is_enrolled', __('Enrolled'))
+                ->filter([
+                    'Yes' => 'Enrolled',
+                    'No' => 'Not enrolled',
+                ])
+                ->sortable()
+                ->display(function ($value) {
+                    $url = null;
+                    if ($value != 'Yes') {
+                        $url = '<a target="_blank" href="' . admin_url('student-has-semeters/create?student_id=' . $this->getKey() . '') . '" title="Enroll Now"><i class="fa fa-edit"></i>  Enroll Now</a>';
+                    }
+                    if ($value == 'Yes') {
+                        return '<span class="badge bg-success">Enrolled</span> <br> ';
+                    } else {
+                        return '<span class="badge bg-danger">Not enrolled</span> <br> ' . $url . '';
+                    }
+                });
         } else {
             $grid->column('emergency_person_name', __('Guardian'))
                 ->sortable()

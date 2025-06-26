@@ -50,7 +50,7 @@ class HomeController extends Controller
             'u' => $u
         ]);
     }
- 
+
     public function transportStats(Content $content)
     {
         $u            = Admin::user();
@@ -68,62 +68,62 @@ class HomeController extends Controller
         //
 
         // A) Active subscriptions by trip type
-        $currByType = TransportSubscription::where('enterprise_id',$eid)
-            ->where('status','active')
-            ->whereBetween('created_at', [$currStart,$currEnd])
+        $currByType = TransportSubscription::where('enterprise_id', $eid)
+            ->where('status', 'active')
+            ->whereBetween('created_at', [$currStart, $currEnd])
             ->groupBy('trip_type')
             ->select('trip_type', DB::raw('count(*) as cnt'))
-            ->pluck('cnt','trip_type');
+            ->pluck('cnt', 'trip_type');
 
-        $lastByType = TransportSubscription::where('enterprise_id',$eid)
-            ->where('status','active')
-            ->whereBetween('created_at', [$lastStart,$lastEnd])
+        $lastByType = TransportSubscription::where('enterprise_id', $eid)
+            ->where('status', 'active')
+            ->whereBetween('created_at', [$lastStart, $lastEnd])
             ->groupBy('trip_type')
             ->select('trip_type', DB::raw('count(*) as cnt'))
-            ->pluck('cnt','trip_type');
+            ->pluck('cnt', 'trip_type');
 
         // B) New vs Renewals
-        $currUsers = TransportSubscription::where('enterprise_id',$eid)
-            ->whereBetween('created_at', [$currStart,$currEnd])
+        $currUsers = TransportSubscription::where('enterprise_id', $eid)
+            ->whereBetween('created_at', [$currStart, $currEnd])
             ->pluck('user_id')->unique();
 
-        $lastUsers = TransportSubscription::where('enterprise_id',$eid)
-            ->whereBetween('created_at', [$lastStart,$lastEnd])
+        $lastUsers = TransportSubscription::where('enterprise_id', $eid)
+            ->whereBetween('created_at', [$lastStart, $lastEnd])
             ->pluck('user_id')->unique();
 
-        $prevUsers = TransportSubscription::where('enterprise_id',$eid)
-            ->whereBetween('created_at', [$twoStart,$twoEnd])
+        $prevUsers = TransportSubscription::where('enterprise_id', $eid)
+            ->whereBetween('created_at', [$twoStart, $twoEnd])
             ->pluck('user_id')->unique();
 
         [$currNew, $currRenew] = [
-          $currUsers->diff($lastUsers)->count(),
-          $currUsers->intersect($lastUsers)->count(),
+            $currUsers->diff($lastUsers)->count(),
+            $currUsers->intersect($lastUsers)->count(),
         ];
         [$lastNew, $lastRenew] = [
-          $lastUsers->diff($prevUsers)->count(),
-          $lastUsers->intersect($prevUsers)->count(),
+            $lastUsers->diff($prevUsers)->count(),
+            $lastUsers->intersect($prevUsers)->count(),
         ];
 
         // C) Revenue breakdown
-        $currRevenue = TransportSubscription::where('enterprise_id',$eid)
-            ->where('status','active')
-            ->whereBetween('created_at', [$currStart,$currEnd])
+        $currRevenue = TransportSubscription::where('enterprise_id', $eid)
+            ->where('status', 'active')
+            ->whereBetween('created_at', [$currStart, $currEnd])
             ->sum('amount');
-        $lastRevenue = TransportSubscription::where('enterprise_id',$eid)
-            ->where('status','active')
-            ->whereBetween('created_at', [$lastStart,$lastEnd])
+        $lastRevenue = TransportSubscription::where('enterprise_id', $eid)
+            ->where('status', 'active')
+            ->whereBetween('created_at', [$lastStart, $lastEnd])
             ->sum('amount');
 
-        $currTop = TransportSubscription::where('enterprise_id',$eid)
-            ->where('status','active')
-            ->whereBetween('created_at', [$currStart,$currEnd])
+        $currTop = TransportSubscription::where('enterprise_id', $eid)
+            ->where('status', 'active')
+            ->whereBetween('created_at', [$currStart, $currEnd])
             ->groupBy('transport_route_id')
             ->select('transport_route_id', DB::raw('sum(amount) as rev'))
             ->orderByDesc('rev')
             ->first();
-        $lastTop = TransportSubscription::where('enterprise_id',$eid)
-            ->where('status','active')
-            ->whereBetween('created_at', [$lastStart,$lastEnd])
+        $lastTop = TransportSubscription::where('enterprise_id', $eid)
+            ->where('status', 'active')
+            ->whereBetween('created_at', [$lastStart, $lastEnd])
             ->groupBy('transport_route_id')
             ->select('transport_route_id', DB::raw('sum(amount) as rev'))
             ->orderByDesc('rev')
@@ -137,43 +137,43 @@ class HomeController extends Controller
             : '—';
 
         // D) Outstanding balances
-        $currTotalSubs    = TransportSubscription::where('enterprise_id',$eid)
-            ->whereBetween('created_at',[$currStart,$currEnd])->count();
-        $currOutCount     = TransportSubscription::where('enterprise_id',$eid)
-            ->where('status','inactive')
-            ->whereBetween('created_at',[$currStart,$currEnd])->count();
-        $lastTotalSubs    = TransportSubscription::where('enterprise_id',$eid)
-            ->whereBetween('created_at',[$lastStart,$lastEnd])->count();
-        $lastOutCount     = TransportSubscription::where('enterprise_id',$eid)
-            ->where('status','inactive')
-            ->whereBetween('created_at',[$lastStart,$lastEnd])->count();
+        $currTotalSubs    = TransportSubscription::where('enterprise_id', $eid)
+            ->whereBetween('created_at', [$currStart, $currEnd])->count();
+        $currOutCount     = TransportSubscription::where('enterprise_id', $eid)
+            ->where('status', 'inactive')
+            ->whereBetween('created_at', [$currStart, $currEnd])->count();
+        $lastTotalSubs    = TransportSubscription::where('enterprise_id', $eid)
+            ->whereBetween('created_at', [$lastStart, $lastEnd])->count();
+        $lastOutCount     = TransportSubscription::where('enterprise_id', $eid)
+            ->where('status', 'inactive')
+            ->whereBetween('created_at', [$lastStart, $lastEnd])->count();
 
         $currOutPercent = $currTotalSubs
-            ? round($currOutCount/$currTotalSubs*100,1)
+            ? round($currOutCount / $currTotalSubs * 100, 1)
             : 0;
         $lastOutPercent = $lastTotalSubs
-            ? round($lastOutCount/$lastTotalSubs*100,1)
+            ? round($lastOutCount / $lastTotalSubs * 100, 1)
             : 0;
 
         //
         // 2. Trip & Passenger Insights
         //
-        $currTrips = Trip::where('enterprise_id',$eid)
-            ->whereBetween('date',[$currStart,$currEnd])->get();
-        $lastTrips = Trip::where('enterprise_id',$eid)
-            ->whereBetween('date',[$lastStart,$lastEnd])->get();
+        $currTrips = Trip::where('enterprise_id', $eid)
+            ->whereBetween('date', [$currStart, $currEnd])->get();
+        $lastTrips = Trip::where('enterprise_id', $eid)
+            ->whereBetween('date', [$lastStart, $lastEnd])->get();
 
         $currTotalTrips = $currTrips->count();
         $lastTotalTrips = $lastTrips->count();
 
-        $currCompleted = $currTrips->where('status','Completed');
-        $lastCompleted = $lastTrips->where('status','Completed');
+        $currCompleted = $currTrips->where('status', 'Completed');
+        $lastCompleted = $lastTrips->where('status', 'Completed');
 
         $currAvgLoad   = $currCompleted->count()
-            ? round($currCompleted->sum('actual_passengers')/$currCompleted->count(),1)
+            ? round($currCompleted->sum('actual_passengers') / $currCompleted->count(), 1)
             : 0;
         $lastAvgLoad   = $lastCompleted->count()
-            ? round($lastCompleted->sum('actual_passengers')/$lastCompleted->count(),1)
+            ? round($lastCompleted->sum('actual_passengers') / $lastCompleted->count(), 1)
             : 0;
 
         $currNoShow   = $currCompleted->sum('absent_passengers');
@@ -181,19 +181,19 @@ class HomeController extends Controller
         $currExpSum   = $currCompleted->sum('expected_passengers') ?: 1;
         $lastExpSum   = $lastCompleted->sum('expected_passengers') ?: 1;
 
-        $currNoShowRate = round($currNoShow/$currExpSum*100,1);
-        $lastNoShowRate = round($lastNoShow/$lastExpSum*100,1);
+        $currNoShowRate = round($currNoShow / $currExpSum * 100, 1);
+        $lastNoShowRate = round($lastNoShow / $lastExpSum * 100, 1);
 
         $currDirCounts = $currTrips->groupBy('trip_direction')->map->count();
         $lastDirCounts = $lastTrips->groupBy('trip_direction')->map->count();
 
         $currDirPerc = [
-          'To School'   => round(($currDirCounts['To School'] ?? 0)/($currTotalTrips?:1)*100,1),
-          'From School' => round(($currDirCounts['From School'] ?? 0)/($currTotalTrips?:1)*100,1),
+            'To School'   => round(($currDirCounts['To School'] ?? 0) / ($currTotalTrips ?: 1) * 100, 1),
+            'From School' => round(($currDirCounts['From School'] ?? 0) / ($currTotalTrips ?: 1) * 100, 1),
         ];
         $lastDirPerc = [
-          'To School'   => round(($lastDirCounts['To School'] ?? 0)/($lastTotalTrips?:1)*100,1),
-          'From School' => round(($lastDirCounts['From School'] ?? 0)/($lastTotalTrips?:1)*100,1),
+            'To School'   => round(($lastDirCounts['To School'] ?? 0) / ($lastTotalTrips ?: 1) * 100, 1),
+            'From School' => round(($lastDirCounts['From School'] ?? 0) / ($lastTotalTrips ?: 1) * 100, 1),
         ];
 
         //
@@ -202,48 +202,113 @@ class HomeController extends Controller
         // A) Daily boardings (last 7 days)
         $chartA_labels = [];
         $chartA_data   = [];
-        for ($i=6; $i>=0; $i--) {
+        for ($i = 6; $i >= 0; $i--) {
             $day = Carbon::today()->subDays($i);
             $chartA_labels[] = $day->format('d M');
-            $chartA_data[]   = PassengerRecord::whereHas('trip', fn($q)=> 
-                                    $q->where('enterprise_id',$eid))
-                                ->whereDate('created_at',$day)
-                                ->whereIn('status',['Onboard','Arrived'])
-                                ->count();
+            $chartA_data[]   = PassengerRecord::whereHas('trip', fn($q) =>
+            $q->where('enterprise_id', $eid))
+                ->whereDate('created_at', $day)
+                ->whereIn('status', ['Onboard', 'Arrived'])
+                ->count();
         }
         // B) Revenue by route (current month)
-        $revRows = TransportSubscription::where('enterprise_id',$eid)
-            ->where('status','active')
-            ->whereBetween('created_at',[$currStart,$currEnd])
+        $revRows = TransportSubscription::where('enterprise_id', $eid)
+            ->where('status', 'active')
+            ->whereBetween('created_at', [$currStart, $currEnd])
             ->groupBy('transport_route_id')
             ->select('transport_route_id', DB::raw('sum(amount) as revenue'))
             ->get();
-        $chartB_labels = $revRows->map(fn($r)=>TransportRoute::find($r->transport_route_id)->name)->toArray();
+        $chartB_labels = $revRows->map(fn($r) => TransportRoute::find($r->transport_route_id)->name)->toArray();
         $chartB_data   = $revRows->pluck('revenue')->toArray();
 
         return $content
             ->header('Transport Dashboard')
             ->description('Current vs Last Month — key KPIs at a glance')
             ->body(view('admin.transport.stats', compact(
-              'currByType','lastByType',
-              'currNew','currRenew','lastNew','lastRenew',
-              'currRevenue','lastRevenue',
-              'currTopName','lastTopName',
-              'currOutCount','lastOutCount','currOutPercent','lastOutPercent',
-              'currTotalTrips','lastTotalTrips',
-              'currAvgLoad','lastAvgLoad',
-              'currNoShowRate','lastNoShowRate',
-              'currDirPerc','lastDirPerc',
-              'chartA_labels','chartA_data','chartB_labels','chartB_data'
+                'currByType',
+                'lastByType',
+                'currNew',
+                'currRenew',
+                'lastNew',
+                'lastRenew',
+                'currRevenue',
+                'lastRevenue',
+                'currTopName',
+                'lastTopName',
+                'currOutCount',
+                'lastOutCount',
+                'currOutPercent',
+                'lastOutPercent',
+                'currTotalTrips',
+                'lastTotalTrips',
+                'currAvgLoad',
+                'lastAvgLoad',
+                'currNoShowRate',
+                'lastNoShowRate',
+                'currDirPerc',
+                'lastDirPerc',
+                'chartA_labels',
+                'chartA_data',
+                'chartB_labels',
+                'chartB_data'
             )));
-    } 
+    }
 
 
-    
+
     public function stats(Content $content)
     {
 
         $u = Admin::user();
+
+
+        $content->header($u->ent->name . ' - Dashboard');
+
+        $ent = $u->ent;
+        if ($ent) {
+            if ($ent->type == 'University') {
+                $number_of_active_students_but_not_enrolled = User::where([
+                    'user_type' => 'student',
+                    'status' => 1,
+                    'enterprise_id' => $u->enterprise_id
+                ])->where('is_enrolled', '!=', 'YES')
+                    ->count();
+                $number_of_pending_students_but_not_enrolled = User::where([
+                    'user_type' => 'student',
+                    'status' => 2,
+                    'enterprise_id' => $u->enterprise_id
+                ])->where('is_enrolled', '!=', 'YES')
+                    ->count();
+                $message = '';
+                if ($number_of_pending_students_but_not_enrolled > 0) {
+                    $message = 'There are <strong><a href="' . admin_url('pending-students?is_enrolled%5B%5D=No') . '" style="color:#fff; text-decoration:underline;">' . number_format($number_of_pending_students_but_not_enrolled) . '</a></strong> pending students not enrolled this semester.';
+                }
+
+                if ($number_of_active_students_but_not_enrolled > 0) {
+                    $message .= ' There are <strong><a href="' . admin_url('students?is_enrolled%5B%5D=No') . '" style="color:#fff; text-decoration:underline;">' . number_format($number_of_active_students_but_not_enrolled) . '</a></strong> active students not enrolled this semester.';
+                }
+
+                if (strlen($message) > 3) {
+                    $content->description(
+                        "<br><div style='
+                            background: linear-gradient(90deg, #d9534f 0%, #c9302c 100%);
+                            color: #fff;
+                            padding: 14px 22px;
+                            border-radius: 6px;
+                            font-weight: 600;
+                            font-size: 1.05em;
+                            box-shadow: 0 2px 8px rgba(217,83,79,0.08);
+                            margin-bottom: 18px;
+                            display: flex;
+                            align-items: center;
+                        '>
+                            <i class='fa fa-exclamation-triangle' style='margin-right: 12px; font-size: 1.3em;'></i>
+                            <span>{$message}</span>
+                        </div>"
+                    );
+                }
+            }
+        }
 
         //$warnings = Utils::get_system_warnings($u->ent);
 
