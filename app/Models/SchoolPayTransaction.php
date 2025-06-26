@@ -199,6 +199,8 @@ class SchoolPayTransaction extends Model
         try {
             $trans->save();
             $this->contra_entry_transaction_id = $trans->id;
+            $this->status = 'Imported';
+            $this->save();
         } catch (\Exception $e) {
             throw new Exception("Error saving transaction: " . $e->getMessage(), 1);
         }
