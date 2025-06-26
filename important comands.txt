@@ -1,4 +1,4 @@
-php artisan make:migration add_is_enrolled_to_admin_users --table=admin_users
+php artisan make:migration add_university_programme_id_to_academic_classes  --table=academic_classes
 ls
          $table->date('check_in_time')->nullable();
             $table->date('check_out_time')->nullable();

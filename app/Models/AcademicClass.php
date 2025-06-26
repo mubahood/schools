@@ -178,7 +178,7 @@ class AcademicClass extends Model
 
         if ($ent->type == 'University') {
             return;
-        } 
+        }
 
         $category = $m->class_type;
         $courses = MainCourse::where([
@@ -262,8 +262,33 @@ class AcademicClass extends Model
 
         //if type university, return
         if ($ent->type == 'University') {
+            if ($class->university_programme_id == null) {
+                throw new Exception("University programme not set.", 1);
+            }
+            if ($class->academic_year_id == null) {
+                throw new Exception("Academic year not set.", 1);
+            }
+            //see if there is a class with same programme and academic year
+            $existing_class = AcademicClass::where([
+                'enterprise_id' => $class->enterprise_id,
+                'academic_year_id' => $class->academic_year_id,
+                'university_programme_id' => $class->university_programme_id,
+            ])->where('id', '!=', $class->id)->first();
+            if ($existing_class != null) {
+                throw new Exception("A school cannot have same programme twice in same academic year.", 1);
+            }
+
+            if ($class->name == null || strlen($class->name) < 3) {
+                $programme = UniversityProgramme::find($class->university_programme_id);
+                if ($programme == null) {
+                    throw new Exception("University programme not found.", 1);
+                }
+                $class->name = $programme->name;
+                $class->short_name = $programme->code;
+            }
+
             return $class;
-        } 
+        }
 
         $_class = AcademicClass::where([
             'enterprise_id' => $class->enterprise_id,
@@ -703,6 +728,12 @@ class AcademicClass extends Model
     {
         return $this->hasMany(StudentReportCard::class);
     }
+
+    //belongs to university_programme
+    function university_programme()
+    {
+        return $this->belongsTo(UniversityProgramme::class, 'university_programme_id');
+    } 
 
 
 

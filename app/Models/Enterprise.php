@@ -293,4 +293,11 @@ class Enterprise extends Model
         }
         return $d->id;
     }
+
+
+    //has many UniversityProgramme
+    public function universityProgrammes()
+    {
+        return $this->hasMany(UniversityProgramme::class, 'enterprise_id');
+    } 
 }

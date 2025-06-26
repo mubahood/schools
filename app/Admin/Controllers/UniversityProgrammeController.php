@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Models\Course;
 use App\Models\UniversityProgramme;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Form;
@@ -28,6 +29,11 @@ class UniversityProgrammeController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new UniversityProgramme());
+        /*   $course = UniversityProgramme::find(1);
+        $course->description .= '.';
+        $course->save();
+
+        dd($course); */
 
         // Scope to current enterprise & newest first
         $grid->model()
@@ -51,6 +57,13 @@ class UniversityProgrammeController extends AdminController
         $grid->column('name',    'Name')->limit(30);
         $grid->column('code',    'Code')->limit(10);
         $grid->column('description', 'Description')->limit(50);
+
+        //total_semester_bills
+        $grid->column('total_semester_bills', 'Total Bills')
+            ->display(function ($val) {
+                return number_format($val, 2);
+            })->sortable();
+
         $grid->column('status',  'Status')->using([
             'Active'   => 'Active',
             'Inactive' => 'Inactive',
@@ -64,8 +77,15 @@ class UniversityProgrammeController extends AdminController
         $grid->column('updated_at', 'Updated')
             ->display(fn($v) => Utils::my_date_3($v));
 
+        //generate course fees structure
+        $grid->column('fees_structure', 'Fees Structure PDF')->display(function () {
+            $url = 'university-programmes-fees-structure?id=' . $this->id;
+            return '<a href="' . $url . '" target="_blank" class="btn btn-xs btn-primary">Generate PDF</a>';
+        });
+
         // disable batch delete
         $grid->disableBatchActions();
+
 
         return $grid;
     }
@@ -126,6 +146,100 @@ class UniversityProgrammeController extends AdminController
             ->default('Active')
             ->rules('required');
 
+        $form->radio('has_semester_1',     'Has Semester 1')
+            ->options([
+                'Yes'   => 'Yes',
+                'No' => 'No',
+            ])
+            ->required()
+            ->rules('required')
+            ->when('Yes', function (Form $form) {
+                $form->decimal('semester_1_bill', 'Semester 1 Tuition')
+                    ->rules('required|numeric|min:0');
+            });
+        $form->radio('has_semester_2',     'Has Semester 2')
+            ->options([
+                'Yes'   => 'Yes',
+                'No' => 'No',
+            ])
+            ->required()
+            ->rules('required')
+            ->when('Yes', function (Form $form) {
+                $form->decimal('semester_2_bill', 'Semester 2 Tuition')
+                    ->rules('required|numeric|min:0');
+            });
+        $form->radio('has_semester_3',     'Has Semester 3')
+            ->options([
+                'Yes'   => 'Yes',
+                'No' => 'No',
+            ])
+            ->required()
+            ->rules('required')
+            ->when('Yes', function (Form $form) {
+                $form->decimal('semester_3_bill', 'Semester 3 Tuition')
+                    ->rules('required|numeric|min:0');
+            });
+
+        $form->radio('has_semester_4',     'Has Semester 4')
+            ->options([
+                'Yes'   => 'Yes',
+                'No' => 'No',
+            ])
+            ->required()
+            ->rules('required')
+            ->when('Yes', function (Form $form) {
+                $form->decimal('semester_4_bill', 'Semester 4 Tuition')
+                    ->rules('required|numeric|min:0');
+            });
+        $form->radio('has_semester_5',     'Has Semester 5')
+            ->options([
+                'Yes'   => 'Yes',
+                'No' => 'No',
+            ])
+            ->required()
+            ->rules('required')
+            ->when('Yes', function (Form $form) {
+                $form->decimal('semester_5_bill', 'Semester 5 Tuition')
+                    ->rules('required|numeric|min:0');
+            });
+        $form->radio('has_semester_6',     'Has Semester 6')
+            ->options([
+                'Yes'   => 'Yes',
+                'No' => 'No',
+            ])
+            ->required()
+            ->rules('required')
+            ->when('Yes', function (Form $form) {
+                $form->decimal('semester_6_bill', 'Semester 6 Tuition')
+                    ->rules('required|numeric|min:0');
+            });
+        $form->radio('has_semester_7',     'Has Semester 7')
+            ->options([
+                'Yes'   => 'Yes',
+                'No' => 'No',
+            ])
+            ->required()
+            ->rules('required')
+            ->when('Yes', function (Form $form) {
+                $form->decimal('semester_7_bill', 'Semester 7 Tuition')
+                    ->rules('required|numeric|min:0');
+            });
+        $form->radio('has_semester_8',     'Has Semester 8')
+            ->options([
+                'Yes'   => 'Yes',
+                'No' => 'No',
+            ])
+            ->required()
+            ->rules('required')
+            ->when('Yes', function (Form $form) {
+                $form->decimal('semester_8_bill', 'Semester 8 Tuition')
+                    ->rules('required|numeric|min:0');
+            });
+
+
+
+
+
         // prevent enterprise re-assignment
         $form->saving(function (Form $form) {
             $form->model()->enterprise_id = Admin::user()->enterprise_id;
@@ -136,8 +250,8 @@ class UniversityProgrammeController extends AdminController
         $form->footer(function ($footer) {
             // disable view/edit checkboxes
             $footer->disableViewCheck();
-            $footer->disableEditingCheck();
-            $footer->disableCreatingCheck();
+            // $footer->disableEditingCheck();
+            // $footer->disableCreatingCheck(); 
         });
 
         return $form;

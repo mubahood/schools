@@ -52,6 +52,7 @@ use App\Models\TheologyStream;
 use App\Models\TheologyTermlyReportCard;
 use App\Models\Transaction;
 use App\Models\TransportSubscription;
+use App\Models\UniversityProgramme;
 use App\Models\User;
 use App\Models\Utils;
 use Carbon\Carbon;
@@ -2454,6 +2455,26 @@ Route::get('reports-finance-print', function (Request $request) {
     'r' => new ReportsFinance($ent)
   ]));
   return $pdf->stream();
+});
+
+Route::get('university-programmes-fees-structure', function (Request $request) {
+  $id = $request->get('id');
+  $programme = UniversityProgramme::findOrFail($id);
+
+  // force enterprise scoping
+  if ($programme->enterprise_id !== Admin::user()->enterprise_id) {
+    abort(403, 'Unauthorized');
+  }
+
+  $ent = Enterprise::findOrFail($programme->enterprise_id);
+
+  $pdf = App::make('dompdf.wrapper');
+  $pdf->loadHTML(view('print.university-programme-fees-structure', [
+    'programme' => $programme,
+    'ent'       => $ent,
+  ]));
+  // stream with a sensible filename
+  return $pdf->stream("Fees-Structure-{$programme->code}.pdf");
 });
 
 

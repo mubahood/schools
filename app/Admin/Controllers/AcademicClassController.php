@@ -9,6 +9,7 @@ use App\Models\AcademicClassLevel;
 use App\Models\AcademicYear;
 use App\Models\Course;
 use App\Models\MainCourse;
+use App\Models\UniversityProgramme;
 use App\Models\User;
 use App\Models\Utils;
 use Encore\Admin\Auth\Database\Administrator;
@@ -60,7 +61,41 @@ class AcademicClassController extends AdminController
 
         $grid->column('id', __('Class #ID'))->sortable();
         $grid->column('name', __('Name'))->sortable()->editable();
-        $grid->column('short_name', __('Short name'))->editable();
+
+        $grid->column('short_name', __('CODE'))->editable();
+
+        //PROGRAMME
+        $u = Admin::user();
+        if ($u->ent->type == 'University') {
+            $grid->column('university_programme_id', __('Programme'))->display(function ($ay) {
+                $pro = $this->university_programme;
+                if ($pro == null) {
+                    //get programme by code
+                    $pro = UniversityProgramme::where([
+                        'code' => $this->short_name,
+                        'enterprise_id' => $this->enterprise_id,
+                    ])->first();
+
+                    if ($pro != null) {
+                        $this->university_programme_id = $pro->id;
+                        $this->save();
+                    }
+                }
+                if ($pro == null) {
+
+                    $newProgram = new UniversityProgramme();
+                    $newProgram->name = $this->name;
+                    $newProgram->code = $this->short_name;
+                    $newProgram->enterprise_id = $this->enterprise_id;
+                    $newProgram->save();
+                    $this->university_programme_id = $newProgram->id;
+                    $this->save();
+                    $pro = $newProgram;
+                    return "No programme assigned";
+                }
+                return $pro->code;
+            })->sortable();
+        }
 
         $years = AcademicYear::where([
             'enterprise_id' => Admin::user()->enterprise_id,
@@ -177,7 +212,27 @@ class AcademicClassController extends AdminController
                 }
             }
 
-            $form->text('name', __('Class Name'))->rules('required');
+            //university_programme_id
+            $u = Admin::user();
+            $ent = $u->ent;
+
+            if ($u->ent->type == 'University') {
+                $programmes = [];
+                foreach ($ent->universityProgrammes as $programme) {
+                    $programmes[$programme->id] = $programme->name . " - (" . $programme->code . ")";
+                }
+
+                $form->select('university_programme_id', 'University programme')
+                    ->options($programmes)
+                    ->rules('required')
+                    ->required()
+                    ->help('Select the university programme for this class. This is only applicable for university classes');
+            }
+
+            if ($form->isEditing()) {
+                $form->text('name', __('Class Name'))->rules('required');
+                $form->text('short_name', __('Short Name'))->rules('required');
+            }
 
             if ($form->isCreating()) {
                 $form->select('academic_year_id', 'Academic year')
@@ -206,7 +261,7 @@ class AcademicClassController extends AdminController
                     ->options($class_levels)
                     ->readOnly();
             }
-            $form->text('short_name', __('Short Name'))->rules('required');
+
 
             $teachers = [];
             foreach (
@@ -360,15 +415,24 @@ class AcademicClassController extends AdminController
 
 
 
-        /* $form->tab('Fees', function (Form $form) {
-            $form->morphMany('academic_class_fees', 'Click on new to add fees to this class', function (Form\NestedForm $form) {
-                $u = Admin::user();
-                $form->hidden('enterprise_id')->default($u->enterprise_id);
-                $form->text('name', __('Fee title'))->rules('required');
-                $form->text('amount', __('Fee amount'))->rules('required')->rules('int')->attribute('type', 'number');
-            });
-        }); */
-
+        /* 
+       $table->string('has_semester_1')->nullable()->default('No');
+            $table->integer('semester_1_bill')->nullable()->default(0);
+            $table->string('has_semester_2')->nullable()->default('No');
+            $table->integer('semester_2_bill')->nullable()->default(0);
+            $table->string('has_semester_3')->nullable()->default('No');
+            $table->integer('semester_3_bill')->nullable()->default(0);
+            $table->string('has_semester_4')->nullable()->default('No');
+            $table->integer('semester_4_bill')->nullable()->default(0);
+            $table->string('has_semester_5')->nullable()->default('No');
+            $table->integer('semester_5_bill')->nullable()->default(0);
+            $table->string('has_semester_6')->nullable()->default('No');
+            $table->integer('semester_6_bill')->nullable()->default(0);
+            $table->string('has_semester_7')->nullable()->default('No');
+            $table->integer('semester_7_bill')->nullable()->default(0);
+            $table->string('has_semester_8')->nullable()->default('No');
+            $table->integer('semester_8_bill')->nullable()->default(0);
+*/
 
 
         return $form;
