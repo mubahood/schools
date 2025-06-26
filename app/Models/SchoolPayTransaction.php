@@ -5,6 +5,7 @@ namespace App\Models;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class SchoolPayTransaction extends Model
 {
@@ -50,14 +51,7 @@ class SchoolPayTransaction extends Model
                 }
             }
 
-            $dup = Transaction::where([
-                'school_pay_transporter_id' => $m->school_pay_transporter_id,
-            ])->first();
-            if ($dup != null) {
-                $m->status = 'Imported';
-            } else {
-                $m->status = 'Not Imported';
-            }
+             
             return $m;
         });
     }
@@ -206,5 +200,39 @@ class SchoolPayTransaction extends Model
         }
         $this->status = 'Imported';
         $this->save();
+    }
+
+    //getter for status attribute
+    public function getStatusAttribute($value)
+    {
+
+        if ($value == 'Imported') {
+            return $value;
+        }
+        $trans = Transaction::where([
+            'school_pay_transporter_id' => $this->school_pay_transporter_id
+        ])->first();
+
+        if ($trans == null) {
+            $trans = Transaction::where([
+                'school_pay_transporter_id' => $this->sourceChannelTransactionId
+            ])->first();
+        }
+
+        //tryw with receipt number
+        if ($trans == null) {
+            if ($this->schoolpayReceiptNumber != null && strlen($this->schoolpayReceiptNumber) > 4) {
+                $trans = Transaction::where([
+                    'school_pay_transporter_id' => $this->schoolpayReceiptNumber
+                ])->first();
+            }
+        }
+
+        if ($trans != null) {
+            $sql = 'UPDATE school_pay_transactions SET status = "Imported" WHERE id = ' . $this->id;
+            DB::update($sql);
+            return 'Imported';
+        }
+        return $value;
     }
 }
