@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Foundation\Auth\User as Authenticatable1;
+use Illuminate\Support\Facades\Log;
 use Mockery\Matcher\Subset;
 
 /**
@@ -66,7 +67,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
         ) {
             return $this->phone_number_2;
         }
-     
+
         if (
             $this->father_phone != null &&
             strlen($this->father_phone) > 2
@@ -85,7 +86,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
         ) {
             return $this->emergency_person_phone;
         }
-        
+
         $parent = User::where([
             'user_type' => 'parent',
             'enterprise_id' => $this->enterprise_id,
@@ -105,7 +106,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                 return $parent->phone_number_2;
             }
         }
-        
+
 
         return null;
     }
@@ -606,7 +607,12 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
         if ($acc != null) {
             if ($m->user_type == 'student') {
                 if ($m->status == 1) {
-                    AcademicClass::update_fees($m);
+                    try {
+                        AcademicClass::update_fees($m);
+                    } catch (\Throwable $th) {
+                        // Log the error message
+                        Log::error("Error updating fees for student: " . $th->getMessage());
+                    }
                 }
             }
         }

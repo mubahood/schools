@@ -29,6 +29,15 @@ class UniversityProgrammeController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new UniversityProgramme());
+        $grid->tools(function ($tools) {
+            $url = admin_url('university-programmes-fees-structure-all');
+            $tools->append(
+                '<a href="' . $url . '" target="_blank" class="btn btn-sm btn-success" style="margin-right:10px;">
+            <i class="fa fa-file-pdf-o"></i> Generate All Fees Structures PDF
+        </a>'
+            );
+        });
+
         /*   $course = UniversityProgramme::find(1);
         $course->description .= '.';
         $course->save();

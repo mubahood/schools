@@ -53,6 +53,24 @@ define('COLORS',  [
 class Utils  extends Model
 {
 
+    public static function get_dropdown($class, $enterprise_id = null, $var_1, $var_2 = null)
+    {
+        if ($enterprise_id == null) {
+            $enterprise_id = Admin::user()->enterprise_id;
+        }
+        $data = $class::where([
+            'enterprise_id' => $enterprise_id
+        ])->orderBy($var_1, 'asc')->get();
+        $dropdown = [];
+        foreach ($data as $item) {
+            $dp_text = $item->{$var_1};
+            if ($var_2 != null) {
+                $dp_text .= " - " . $item->{$var_2};
+            }
+            $dropdown[$item->id] = $dp_text;
+        }
+        return $dropdown;
+    }
     public static function get_word($word)
     {
         if ($word == null) {

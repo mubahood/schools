@@ -2457,6 +2457,27 @@ Route::get('reports-finance-print', function (Request $request) {
   return $pdf->stream();
 });
 
+Route::get('university-programmes-fees-structure-all', function (Request $request) {
+  $ent = Admin::user()->ent;
+  $programmes = UniversityProgramme::where('enterprise_id', $ent->id)
+    ->orderBy('name')
+    ->get();
+
+  // render blade to HTML
+  $html = view('print.university-programmes-fees-structure-all', [
+    'ent'        => $ent,
+    'programmes' => $programmes,
+  ])->render();
+
+  // generate PDF
+  $pdf = app('dompdf.wrapper');
+  $pdf->loadHTML($html)
+    ->setPaper('a4', 'portrait');
+
+  return $pdf->stream("all-fees-structures.pdf");
+});
+
+
 Route::get('university-programmes-fees-structure', function (Request $request) {
   $id = $request->get('id');
   $programme = UniversityProgramme::findOrFail($id);

@@ -86,8 +86,6 @@ class User extends Administrator implements JWTSubject
 
         //created
         self::created(function ($m) {
-
-
             //check if has parent
             if (strtolower($m->user_type) == 'student') {
                 if ($m->status == 1) {
@@ -101,6 +99,13 @@ class User extends Administrator implements JWTSubject
                     } catch (\Throwable $th) {
                         //throw $th;
                     }
+                }
+            }
+            if ($m->status == 1 && strtolower($m->user_type) == 'student') {
+                try {
+                    $m->bill_university_students();
+                } catch (\Throwable $th) {
+                    Log::error("Error billing university students: " . $th->getMessage());
                 }
             }
         });
@@ -390,7 +395,7 @@ class User extends Administrator implements JWTSubject
             'academic_class_id' => $class->id,
             'enterprise_id' => $this->enterprise_id,
             'due_term_id' => $active_term->id,
-        ])->get(); 
+        ])->get();
 
         $account = $this->account;
         if ($this->account == null) {
@@ -607,12 +612,158 @@ class User extends Administrator implements JWTSubject
         foreach ($merged as $rec) {
             if ($rec->status == 'Imported') {
                 continue; //skip already imported records
-            } 
+            }
             try {
                 $rec->doImport();
             } catch (\Throwable $th) {
                 //log the error
                 Log::error("Error importing school pay record: " . $th->getMessage());
+            }
+        }
+    }
+
+    //bill university students
+    public function bill_university_students()
+    {
+        //if not active user, return
+        if ($this->status != 1) {
+            return;
+        }
+
+        if (strtolower($this->user_type) != 'student') {
+            return;
+        }
+        if ($this->ent->type != 'University') {
+            return;
+        }
+        $ent = $this->ent;
+        if ($ent == null) {
+            throw new \Exception("Enterprise not found for user", 1);
+        }
+        $active_term = $this->ent->active_term();
+        if ($active_term == null) {
+            throw new \Exception("Active term not found for enterprise: " . $ent->name, 1);
+        }
+
+        $current_semester_enrollment = StudentHasSemeter::where([
+            'student_id' => $this->id,
+            'term_id' => $active_term->id,
+        ])->first();
+        if ($current_semester_enrollment == null) {
+            throw new \Exception("Current semester enrollment not found for user: " . $this->name, 1);
+        }
+
+        $current_class = AcademicClass::find($this->current_class_id);
+        if ($current_class == null) {
+            throw new \Exception("Current class not found for user: " . $this->name, 1);
+        }
+
+        $university_programme = $current_class->university_programme;
+        if ($university_programme == null) {
+            throw new \Exception("University programme not found for user: " . $this->name, 1);
+        }
+        $semester_name = abs($current_semester_enrollment->semester_name);
+        $has_semester_key = "has_semester_" . $semester_name;
+
+        if ($university_programme->$has_semester_key != 'Yes') {
+            throw new \Exception("University programme {$university_programme->name} does not have semester $semester_name.", 1);
+        }
+        $bill_key = "semester_" . $semester_name . "_bill";
+
+        $tuition_fee = abs($university_programme->$bill_key);
+        $account = $this->account;
+        if ($account == null) {
+            throw new \Exception("Account not found for user: " . $this->name, 1);
+        }
+
+        if ($tuition_fee >= 500) {
+            $lastTransaction = Transaction::where([
+                'enterprise_id' => $this->enterprise_id,
+                'account_id' => $account->id,
+                'term_id' => $active_term->id,
+                'is_tuition' => 'Yes',
+            ])->orderBy('created_at', 'desc')->first();
+            if ($lastTransaction == null) {
+                $newTransaction = new Transaction();
+                $newTransaction->enterprise_id = $this->enterprise_id;
+                $newTransaction->account_id = $account->id;
+                $newTransaction->amount = (-1) * $tuition_fee;
+                $newTransaction->description = "Tuition fee for semester $semester_name in programme {$university_programme->name}.";
+                $newTransaction->academic_year_id = $active_term->academic_year_id;
+                $newTransaction->term_id = $active_term->id;
+                $newTransaction->school_pay_transporter_id = null;
+                $newTransaction->contra_entry_account_id = null;
+                $newTransaction->contra_entry_transaction_id = null;
+                $newTransaction->payment_date = Carbon::now()->toDateTimeString();
+                $newTransaction->termly_school_fees_balancing_id = null;
+                $newTransaction->created_by_id = $ent->administrator_id;
+                $newTransaction->type = 'FEES_BILL';
+                $newTransaction->source = 'GENERATED';
+                $newTransaction->academic_class_fee_id = $current_class->id;
+                $newTransaction->is_contra_entry = 0;
+                $newTransaction->is_last_term_balance = 'No';
+                $newTransaction->is_tuition = 'Yes';
+                try {
+                    $newTransaction->save();
+                } catch (\Throwable $th) {
+                    throw $th;
+                }
+            }
+        }
+
+        $services = Service::where([
+            'enterprise_id' => $this->enterprise_id,
+        ])->get();
+
+        foreach ($services as $key => $service) {
+            if ($service->is_compulsory != 'Yes') {
+                continue; //skip non compulsory services
+            }
+            if ($service->is_compulsory_to_all_courses != 'Yes') {
+                $applicable_course_ids = [];
+                foreach ($service->applicable_to_courses as $applicable_course) {
+                    $applicable_course_ids[] = abs($applicable_course);
+                }
+                //check if the current university programme is in the applicable courses
+                if (!in_array($university_programme->id, $applicable_course_ids)) {
+                    continue; //skip this service
+                }
+            }
+
+
+            if ($service->is_compulsory_to_all_semesters != 'Yes') {
+                $applicable_semesters = $service->applicable_to_semesters;
+                if (!in_array($semester_name . "", $applicable_semesters)) {
+                    continue; //skip this service
+                }
+            }
+
+            $existingServiceSubscription = ServiceSubscription::where([
+                'administrator_id' => $this->id,
+                'service_id' => $service->id,
+                'due_term_id' => $active_term->id,
+            ])->first();
+            if ($existingServiceSubscription != null) {
+                continue; //skip already existing service subscriptions
+            }
+            $newServiceSubscription = new ServiceSubscription();
+            $newServiceSubscription->enterprise_id = $this->enterprise_id;
+            $newServiceSubscription->service_id = $service->id;
+            $newServiceSubscription->administrator_id = $this->id;
+            $newServiceSubscription->quantity = 1; //default quantity
+            $newServiceSubscription->total = $service->fee; //default total
+            $newServiceSubscription->due_academic_year_id = $active_term->academic_year_id;
+            $newServiceSubscription->due_term_id = $active_term->id;
+            $newServiceSubscription->link_with = 'University Programme';
+            $newServiceSubscription->transport_route_id = null; //default null
+            $newServiceSubscription->trip_type = null; //default null
+            $newServiceSubscription->ref_id = null; //default null
+            $newServiceSubscription->is_processed = 'No'; //default No
+            try {
+                $newServiceSubscription->save();
+            } catch (\Throwable $th) {
+                Log::error("Error saving new service subscription: " . $th->getMessage());
+                continue; //skip this service if there is an error
             }
         }
     }

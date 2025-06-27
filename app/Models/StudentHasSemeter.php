@@ -20,11 +20,36 @@ class StudentHasSemeter extends Model
             // Check if a record with the same student_id, term_id, and academic_year_id already exists
             $existing = self::where('student_id', $m->student_id)
                 ->where('term_id', $m->term_id)
-                ->where('academic_year_id', $m->academic_year_id)
                 ->first();
 
             if ($existing) {
                 throw new \Exception("A record for this student, semester, and academic year already exists. ref #{$existing->id}");
+            }
+
+            // Validate the model before saving
+            try {
+                self::do_validate($m);
+            } catch (\Exception $e) {
+                throw new \Exception("Validation failed: " . $e->getMessage());
+            }
+        });
+
+        //updating avoid duplicate entries
+        self::updating(function ($m) {
+            // Check if a record with the same student_id, term_id, and academic_year_id
+            // already exists, excluding the current record
+            $existing = self::where('student_id', $m->student_id)
+                ->where('term_id', $m->term_id)
+                ->where('id', '!=', $m->id) // Exclude the current record
+                ->first();
+            if ($existing) {
+                throw new \Exception("A record for this student, semester, and academic year already exists. ref #{$existing->id}");
+            }
+            // Validate the model before saving
+            try {
+                self::do_validate($m);
+            } catch (\Exception $e) {
+                throw new \Exception("Validation failed: " . $e->getMessage());
             }
         });
 
@@ -98,6 +123,64 @@ class StudentHasSemeter extends Model
 
 
 
+    public static function do_validate($m)
+    {
+        $student = User::find($m->student_id);
+        if ($student == null) {
+            throw new \Exception("Student account not found for ID: " . $m->student_id);
+        }
+        if ($student->user_type != 'student') {
+            throw new \Exception("User is not a student: " . $student->name);
+        }
+
+        $current_class = AcademicClass::find($student->current_class_id);
+        if ($current_class == null) {
+            throw new \Exception("Current class not found for user: " . $student->name, 1);
+        }
+
+        $university_programme = $current_class->university_programme;
+        if ($university_programme == null) {
+            throw new \Exception("University programme not found for class: " . $current_class->name, 1);
+        }
+
+        $semester_number = abs($m->semester_name);
+        if ($semester_number == 1) {
+            if ($university_programme->has_semester_1 != 'Yes') {
+                throw new \Exception("University programme does not have Semester 1: " . $university_programme->name, 1);
+            }
+        } else if ($semester_number == 2) {
+            if ($university_programme->has_semester_2 != 'Yes') {
+                throw new \Exception("University programme does not have Semester 2: " . $university_programme->name, 1);
+            }
+        } else if ($semester_number == 3) {
+            if ($university_programme->has_semester_3 != 'Yes') {
+                throw new \Exception("University programme does not have Semester 3: " . $university_programme->name, 1);
+            }
+        } else if ($semester_number == 4) {
+            if ($university_programme->has_semester_4 != 'Yes') {
+                throw new \Exception("University programme does not have Semester 4: " . $university_programme->name, 1);
+            }
+        } else if ($semester_number == 5) {
+            if ($university_programme->has_semester_5 != 'Yes') {
+                throw new \Exception("University programme does not have Semester 5: " . $university_programme->name, 1);
+            }
+        } else if ($semester_number == 6) {
+            if ($university_programme->has_semester_6 != 'Yes') {
+                throw new \Exception("University programme does not have Semester 6: " . $university_programme->name, 1);
+            }
+        } else if ($semester_number == 7) {
+            if ($university_programme->has_semester_7 != 'Yes') {
+                throw new \Exception("University programme does not have Semester 7: " . $university_programme->name, 1);
+            }
+        } else if ($semester_number == 8) {
+            if ($university_programme->has_semester_8 != 'Yes') {
+                throw new \Exception("University programme does not have Semester 8: " . $university_programme->name, 1);
+            }
+        } else {
+            throw new \Exception("Invalid semester number: " . $m->semester_name, 1);
+        }
+    }
+
     public static function do_process($m)
     {
         if ($m->is_processed == "Yes") {
@@ -143,7 +226,7 @@ class StudentHasSemeter extends Model
             try {
                 $userAccount->save();
             } catch (\Exception $e) {
-                throw new \Exception("Error updating user account: " . $e->getMessage());
+                Log::error("Error updating user account for student ID {$m->student_id}: " . $e->getMessage());
             }
         }
 
@@ -152,7 +235,7 @@ class StudentHasSemeter extends Model
             try {
                 $userAccount->save();
             } catch (\Exception $e) {
-                throw new \Exception("Error activating user account: " . $e->getMessage());
+                Log::error("Error activating user account for student ID {$m->student_id}: " . $e->getMessage());
             }
         }
 
@@ -162,7 +245,7 @@ class StudentHasSemeter extends Model
             try {
                 $userAccount->save();
             } catch (\Exception $e) {
-                throw new \Exception("Error enrolling user account: " . $e->getMessage());
+                Log::error("Error enrolling user account for student ID {$m->student_id}: " . $e->getMessage());
             }
         }
 
@@ -268,7 +351,13 @@ class StudentHasSemeter extends Model
         try {
             DB::update($sql, [$m->id]);
         } catch (\Exception $e) {
-            throw new \Exception("Error updating student_has_semeters: " . $e->getMessage());
+            Log::error("Error updating student_has_semeters for ID {$m->id}: " . $e->getMessage());
+        }
+
+        try {
+            $userAccount->bill_university_students();
+        } catch (\Exception $e) {
+            Log::error("Error billing university students for student ID {$m->student_id}: " . $e->getMessage());
         }
     }
 

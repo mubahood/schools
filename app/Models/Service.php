@@ -88,6 +88,9 @@ class Service extends Model
 
             $trans->is_contra_entry = false;
             $trans->type = 'FEES_BILL';
+            $trans->is_service = 'Yes';
+            $trans->service_id = $m->id;
+
             $trans->contra_entry_account_id = 0;
             $amount = number_format((int)($trans->amount));
             $trans->description = "Debited UGX $amount for {$m->name} service.";
@@ -150,5 +153,64 @@ class Service extends Model
         }
 
         return $service;
+    }
+
+
+    //applicable_to_courses setter to join courses
+    public function setApplicableToCoursesAttribute($value)
+    {
+        try {
+            if (is_array($value)) {
+                $this->attributes['applicable_to_courses'] = json_encode($value);
+            } else {
+                $this->attributes['applicable_to_courses'] = $value;
+            }
+        } catch (\Exception $e) {
+            // Handle or log the exception as needed
+            $this->attributes['applicable_to_courses'] = null;
+        }
+    }
+
+    //getter for applicable_to_coursesapplicable_to_courses
+    public function getApplicableToCoursesAttribute()
+    {
+        try {
+            if (isset($this->attributes['applicable_to_courses'])) {
+                return json_decode($this->attributes['applicable_to_courses'], true);
+            }
+            return [];
+        } catch (\Exception $e) {
+            // Handle or log the exception as needed
+            return [];
+        }
+    }
+
+    //getter for applicable_to_semesters
+    public function getApplicableToSemestersAttribute()
+    {
+        try {
+            if (isset($this->attributes['applicable_to_semesters'])) {
+                return json_decode($this->attributes['applicable_to_semesters'], true);
+            }
+            return [];
+        } catch (\Exception $e) {
+            // Handle or log the exception as needed
+            return [];
+        }
+    }
+
+    //applicable_to_semesters setter to join semesters
+    public function setApplicableToSemestersAttribute($value)
+    {
+        try {
+            if (is_array($value)) {
+                $this->attributes['applicable_to_semesters'] = json_encode($value);
+            } else {
+                $this->attributes['applicable_to_semesters'] = $value;
+            }
+        } catch (\Exception $e) {
+            // Handle or log the exception as needed
+            $this->attributes['applicable_to_semesters'] = null;
+        }
     }
 }

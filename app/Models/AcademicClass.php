@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Mockery\Matcher\Subset;
 
 class AcademicClass extends Model
@@ -398,6 +399,30 @@ class AcademicClass extends Model
             return;
         }
 
+        //if enterprise is university, return
+        if ($m->ent->type == 'University') {
+            //bill university students
+            try {
+                $user_account = User::where([
+                    'id' => $m->id,
+                ])->first();
+                if ($user_account != null) {
+                    try {
+                        $user_account->bill_university_students();
+                    } catch (\Throwable $th) {
+                        // Log the error message
+                        Log::error("Error billing university students: " . $th->getMessage());
+                        return;
+                    }
+                }
+            } catch (\Throwable $th) {
+                // Log the error message
+                Log::error("Error billing university students: " . $th->getMessage());
+                return;
+            }
+            return;
+        }
+
         $active_term = $m->ent->active_term();
         if ($active_term == null) {
             return;
@@ -733,7 +758,7 @@ class AcademicClass extends Model
     function university_programme()
     {
         return $this->belongsTo(UniversityProgramme::class, 'university_programme_id');
-    } 
+    }
 
 
 
