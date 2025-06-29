@@ -240,7 +240,12 @@ class MainController extends Controller
             if ($phone_column !== null) {
                 $phone = trim((string)($row[$phone_column] ?? ''));
                 if ($phone !== '') {
-                    $phone_column_value = Utils::prepare_phone_number($phone);
+                    if (strlen($phone) > 7) {
+                        //check if $phone us numeric
+                        if (is_numeric($phone)) {
+                            $phone_column_value = Utils::prepare_phone_number($phone);
+                        }
+                    }
                 }
             }
 
