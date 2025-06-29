@@ -107,6 +107,16 @@ class MainController extends Controller
             'parent_phone' => $import->parent_phone_column,
         ];
 
+        $min_count = 0;
+        $max_count = 10000;
+        if (isset($_GET['min_count'])) {
+            $min_count = (int)$_GET['min_count'];
+        }
+
+        if (isset($_GET['max_count'])) {
+            $max_count = (int)$_GET['max_count'];
+        }
+
         // Map letters → indexes
         $idx = [];
         foreach ($needed as $key => $col) {
@@ -134,9 +144,17 @@ class MainController extends Controller
         $middle_name_column = Utils::alphabet_to_index(trim($import->middle_name_column));
         $phone_column = Utils::alphabet_to_index(trim($import->phone_column));
 
+        $my_counter = 0;
         foreach ($rows as $r => $row) {
             $line = $r + 2;  // Excel row number
             $total++;
+            if ($total < $min_count) {
+                continue;  // Skip until we reach min_count
+            }
+
+            if ($total > $max_count) {
+                break;  // Stop after max_count
+            }
 
             // 1) identifier
             $idv = trim((string)($row[$idx['identify']] ?? ''));
