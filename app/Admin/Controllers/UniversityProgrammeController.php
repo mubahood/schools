@@ -161,6 +161,7 @@ class UniversityProgrammeController extends AdminController
                 'No' => 'No',
             ])
             ->required()
+            ->default('No')
             ->rules('required')
             ->when('Yes', function (Form $form) {
                 $form->decimal('semester_1_bill', 'Semester 1 Tuition')
@@ -172,6 +173,7 @@ class UniversityProgrammeController extends AdminController
                 'No' => 'No',
             ])
             ->required()
+            ->default('No')
             ->rules('required')
             ->when('Yes', function (Form $form) {
                 $form->decimal('semester_2_bill', 'Semester 2 Tuition')
@@ -184,6 +186,7 @@ class UniversityProgrammeController extends AdminController
             ])
             ->required()
             ->rules('required')
+            ->default('No')
             ->when('Yes', function (Form $form) {
                 $form->decimal('semester_3_bill', 'Semester 3 Tuition')
                     ->rules('required|numeric|min:0');
@@ -195,6 +198,7 @@ class UniversityProgrammeController extends AdminController
                 'No' => 'No',
             ])
             ->required()
+            ->default('No')
             ->rules('required')
             ->when('Yes', function (Form $form) {
                 $form->decimal('semester_4_bill', 'Semester 4 Tuition')
@@ -207,6 +211,7 @@ class UniversityProgrammeController extends AdminController
             ])
             ->required()
             ->rules('required')
+            ->default('No')
             ->when('Yes', function (Form $form) {
                 $form->decimal('semester_5_bill', 'Semester 5 Tuition')
                     ->rules('required|numeric|min:0');
@@ -218,6 +223,7 @@ class UniversityProgrammeController extends AdminController
             ])
             ->required()
             ->rules('required')
+            ->default('No')
             ->when('Yes', function (Form $form) {
                 $form->decimal('semester_6_bill', 'Semester 6 Tuition')
                     ->rules('required|numeric|min:0');
@@ -229,6 +235,7 @@ class UniversityProgrammeController extends AdminController
             ])
             ->required()
             ->rules('required')
+            ->default('No')
             ->when('Yes', function (Form $form) {
                 $form->decimal('semester_7_bill', 'Semester 7 Tuition')
                     ->rules('required|numeric|min:0');
@@ -240,6 +247,7 @@ class UniversityProgrammeController extends AdminController
             ])
             ->required()
             ->rules('required')
+            ->default('No')
             ->when('Yes', function (Form $form) {
                 $form->decimal('semester_8_bill', 'Semester 8 Tuition')
                     ->rules('required|numeric|min:0');
