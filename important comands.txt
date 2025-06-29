@@ -1,4 +1,4 @@
-php artisan make:migration add_service_to_transactions  --table=transactions
+php artisan make:migration add_has_name_cold_to_student_data_imports  --table=student_data_imports
 ls
          $table->date('check_in_time')->nullable();
             $table->date('check_out_time')->nullable();

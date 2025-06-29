@@ -71,6 +71,21 @@ class Utils  extends Model
         }
         return $dropdown;
     }
+    public static function get_classes_dropdown()
+    {
+        $classes = [];
+        foreach (
+            AcademicClass::where([
+                'enterprise_id' => Admin::user()->enterprise_id,
+            ])
+                ->orderBy('id', 'desc')
+                ->get() as $key => $value
+        ) {
+            $classes[$value->id] = $value->name_text;
+        }
+        return $classes;
+    }
+
     public static function get_word($word)
     {
         if ($word == null) {

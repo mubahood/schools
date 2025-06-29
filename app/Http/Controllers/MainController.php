@@ -56,7 +56,7 @@ class MainController extends Controller
         } catch (\Throwable $th) {
             return "<span style='color:red;'>Error processing student enrollment: " . $th->getMessage() . "</span>";
         }
-        return "<span style='color:green;'>Students enrollment processed successfully.</span>"; 
+        return "<span style='color:green;'>Students enrollment processed successfully.</span>";
     }
     public function student_data_import_do_import(Request $request)
     {
@@ -97,8 +97,6 @@ class MainController extends Controller
             'identify'     => $import->identify_by === 'reg_number'
                 ? $import->reg_number_column
                 : $import->school_pay_column,
-            'name'         => $import->name_column,
-            'class'        => $import->class_column,
             // optional
             'gender'       => $import->gender_column,
             'dob'          => $import->dob_column,
@@ -123,9 +121,18 @@ class MainController extends Controller
             $idx[$key] = $n;
         }
 
+        $classs = AcademicClass::find($import->class_column);
+        if (!$classs) {
+            return "<span style='color:red;'>Class with ID {$import->class_column} not found.</span>";
+        }
+
         // Counters & messages
         $total   = $created = $skipped = $failed = 0;
         $output  = [];
+        $first_name_column = Utils::alphabet_to_index(trim($import->first_name_column));
+        $last_name_column = Utils::alphabet_to_index(trim($import->last_name_column));
+        $middle_name_column = Utils::alphabet_to_index(trim($import->middle_name_column));
+        $phone_column = Utils::alphabet_to_index(trim($import->phone_column));
 
         foreach ($rows as $r => $row) {
             $line = $r + 2;  // Excel row number
@@ -154,28 +161,53 @@ class MainController extends Controller
                 continue;
             }
 
-            // 3) class
-            $clsVal = trim((string)($row[$idx['class']] ?? ''));
-            if ($clsVal === '' || !is_numeric($clsVal)) {
-                $failed++;
-                $output[] = "<span style='color:orange;'>Row {$line}:</span> invalid class '{$clsVal}' &mdash; skipped.";
-                continue;
-            }
-            $klass = AcademicClass::where('enterprise_id', $admin->enterprise_id)
-                ->find($clsVal);
-            if (!$klass) {
-                $failed++;
-                $output[] = "<span style='color:orange;'>Row {$line}:</span> class ID {$clsVal} not found &mdash; skipped.";
-                continue;
+
+
+
+            $fullName = null;
+            if ($import->has_first_and_and_last_name_in_same_column === 'Yes') {
+                // 4) name
+                $fullName = trim((string)($row[$idx['name']] ?? ''));
+                if ($fullName === '') {
+                    $failed++;
+                    $output[] = "<span style='color:orange;'>Row {$line}:</span> empty name &mdash; skipped.";
+                    continue;
+                }
+            } else {
+
+                //check if $idx['first_name_column'] is not set and throw
+                if (!isset($row[$first_name_column]) || $row[$first_name_column] === null) {
+                    $failed++;
+                    $output[] = "<span style='color:orange;'>Row {$line}:</span> missing first name column &mdash; skipped.";
+                    continue;
+                }
+
+                //check last name 
+                if (!isset($row[$last_name_column]) || $row[$last_name_column] === null) {
+                    $failed++;
+                    $output[] = "<span style='color:orange;'>Row {$line}:</span> missing last name column &mdash; skipped.";
+                    continue;
+                }
+
+                $fullName = trim((string)($row[$first_name_column] ?? ''));
+                //check if middle name column is set
+                if ($middle_name_column !== null) {
+                    $middleName = trim((string)($row[$middle_name_column] ?? ''));
+                    if ($middleName !== '') {
+                        $fullName .= ' ' . $middleName;
+                    }
+                }
+
+                //check if last name column is set
+                if ($last_name_column !== null) {
+                    $lastName = trim((string)($row[$last_name_column] ?? ''));
+                    if ($lastName !== '') {
+                        $fullName .= ' ' . $lastName;
+                    }
+                }
             }
 
-            // 4) name
-            $fullName = trim((string)($row[$idx['name']] ?? ''));
-            if ($fullName === '') {
-                $failed++;
-                $output[] = "<span style='color:orange;'>Row {$line}:</span> empty name &mdash; skipped.";
-                continue;
-            }
+
             $parts = preg_split('/\s+/', $fullName, 3);
 
             // 5) normalize gender
@@ -201,24 +233,70 @@ class MainController extends Controller
                 }
             }
 
+
+
+            //$phone_column
+            $phone_column_value = null;
+            if ($phone_column !== null) {
+                $phone = trim((string)($row[$phone_column] ?? ''));
+                if ($phone !== '') {
+                    $phone_column_value = Utils::prepare_phone_number($phone);
+                }
+            }
+
             // 6) build & save
             try {
                 $u = new User();
+
+                if ($import->identify_by === 'reg_number') {
+                    $existing = User::where('user_number', $idv)
+                        ->where('enterprise_id', $admin->enterprise_id)
+                        ->where('user_type', 'student')
+                        ->first();
+                    if ($existing) {
+                        $u = $existing;
+                    }
+                    $u->user_number         = $idv;
+                } else {
+                    $existing = User::where('school_pay_payment_code', $idv)
+                        ->where('enterprise_id', $admin->enterprise_id)
+                        ->where('user_type', 'student')
+                        ->first();
+                    if ($existing) {
+                        $u = $existing;
+                    }
+                    $u->school_pay_payment_code = $idv;
+                }
+
                 $u->enterprise_id           = $admin->enterprise_id;
                 $u->user_type               = 'student';
                 $u->status                  = 2;                   // Pending
-                if ($import->identify_by === 'reg_number') {
-                    $u->user_number         = $idv;
-                } else {
-                    $u->school_pay_payment_code = $idv;
-                }
+
+
+
+
                 $u->username                = $idv;
                 $u->password                = Hash::make('4321');
+
+                if ($phone_column_value !== null) {
+                    $u->phone_number_1      = $phone_column_value;
+                }
 
                 $u->name                    = $fullName;
                 $u->first_name              = $parts[0] ?? null;
                 $u->given_name              = $parts[1] ?? null;
                 $u->last_name               = $parts[2] ?? null;
+
+                if (isset($parts[1]) && isset($parts[2])) {
+                    $u->last_name = $parts[2];
+                    $u->given_name = $parts[1];
+                } elseif (isset($parts[1])) {
+                    $u->last_name = $parts[1];
+                }
+
+                if ($u->last_name == $u->given_name) {
+                    $u->given_name = null;
+                }
 
                 if ($gender) {
                     $u->sex                 = $gender;
@@ -248,7 +326,7 @@ class MainController extends Controller
                     $u->emergency_person_phone = Utils::prepare_phone_number($row[$idx['parent_phone']]);
                 }
 
-                $u->current_class_id       = $klass->id;
+                $u->current_class_id = $classs->id;
                 $u->save();
 
                 $created++;
@@ -264,6 +342,7 @@ class MainController extends Controller
         $import->status  = 'Completed';
         $import->summary = "Total {$total}; Created {$created}; Skipped {$skipped}; Failed {$failed}";
         $import->save();
+
 
         // 8) echo summary + details
         echo "<div style='font-weight:bold;'>{$import->summary}</div><br>";

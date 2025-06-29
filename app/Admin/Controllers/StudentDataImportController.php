@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Admin\Actions\Post\DuplicateStudentDataImports;
+use App\Models\AcademicClass;
 use App\Models\StudentDataImport;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Form;
@@ -44,11 +45,19 @@ class StudentDataImportController extends AdminController
         // columns
         $grid->column('id',     'ID')->sortable();
         $grid->column('title',  'Title')->limit(30);
+
+        //class_column
+        $grid->column('class_column', 'Class Being Imported')->display(function ($classId) {
+            $class = AcademicClass::find($classId);
+            return $class ? $class->name_text : 'N/A';
+        });
+
         $grid->column('file_path', 'Import File')->display(function ($path) {
             return $path
                 ? "<a href='" . url("storage/{$path}") . "' target='_blank'>Download</a>"
                 : '-';
         });
+
         $grid->column('status', 'Status')->dot([
             'Pending'    => 'warning',
             'Processing' => 'info',
@@ -148,13 +157,51 @@ class StudentDataImportController extends AdminController
                     ->rules('required');
             });
 
-        $form->radio('class_column', 'Class Column')
-            ->options($cols)
+        $classes = Utils::get_classes_dropdown();
+
+
+        $form->select('class_column', 'Select Class Being Imported')
+            ->options($classes)
             ->rules('required');
 
-        $form->radio('name_column', 'Name Column')
-            ->options($cols)
-            ->rules('required');
+
+        /* 
+           $table->string('has_first_and_and_last_name_in_same_column')
+                ->default('No');
+            $table->string('first_name_column')
+                ->nullable();
+            $table->string('last_name_column')
+                ->nullable();
+            $table->string('middle_name_column')
+                ->nullable();
+            $table->string('student_phone_column')
+                ->nullable();
+        */
+
+        $form->radio('has_first_and_and_last_name_in_same_column', 'Has First and Last Name in Same Column?')
+            ->options([
+                'Yes' => 'Yes',
+                'No'  => 'No',
+            ])
+            ->rules('required')
+            ->when('No', function (Form $form) use ($cols) {
+                $form->radio('first_name_column', 'First Name Column')
+                    ->options($cols)
+                    ->rules('required');
+
+                $form->radio('last_name_column', 'Last Name Column')
+                    ->options($cols)
+                    ->rules('required');
+
+                $form->radio('middle_name_column', 'Middle Name Column')
+                    ->options($cols)
+                    ->rules('nullable');
+            })->when('Yes', function (Form $form) use ($cols) {
+                $form->radio('name_column', 'Name Column')
+                    ->options($cols)
+                    ->rules('required');
+            });
+
 
         // OPTIONAL columns
         $form->radio('gender_column', 'Gender Column')
@@ -204,7 +251,7 @@ class StudentDataImportController extends AdminController
             ->readOnly();
 
         $form->textarea('summary', 'Summary')->readonly();
- 
+
 
         // Tidy up footer
         $form->disableReset();
