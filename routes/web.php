@@ -315,6 +315,10 @@ Route::get('fees-data-import-do-import', function (Request $request) {
   if ($u == null) {
     return "You are not logged in";
   }
+  //show errors for php
+  ini_set('display_errors', '1');
+  ini_set('display_startup_errors', '1');
+  error_reporting(E_ALL); 
 
   $importedServiceCategory = null;
   try {

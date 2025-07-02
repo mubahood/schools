@@ -411,14 +411,13 @@ class AcademicClass extends Model
                         $user_account->bill_university_students();
                     } catch (\Throwable $th) {
                         // Log the error message
-                        Log::error("Error billing university students: " . $th->getMessage());
+                        throw $th;
                         return;
                     }
                 }
             } catch (\Throwable $th) {
                 // Log the error message
-                Log::error("Error billing university students: " . $th->getMessage());
-                return;
+                throw $th;
             }
             return;
         }
