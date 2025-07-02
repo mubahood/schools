@@ -1,5 +1,9 @@
 <?php
 
+use Illuminate\Support\Facades\Log;
+
+Log::info('Admin bootstrap started');
+
 try {
     $fp = fsockopen("ssl://schooldynamics.ug", 443, $e, $s, 1);
     if ($fp) {

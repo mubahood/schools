@@ -57,6 +57,17 @@ return [
             'ignore_exceptions' => false,
         ],
 
+
+        'database' => [
+            'driver'    => 'custom',
+            'via'       => App\Logging\CreateDatabaseLogger::class,
+            'level'     => env('LOG_LEVEL', 'debug'),
+            'connection'=> env('DB_CONNECTION', 'mysql'),
+            'table'     => 'logs',
+            'bubble'    => true,
+            // column_map optional if you named fields differently
+        ],
+
         'single' => [
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),
