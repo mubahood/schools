@@ -276,7 +276,7 @@ class AcademicClass extends Model
                 'university_programme_id' => $class->university_programme_id,
             ])->where('id', '!=', $class->id)->first();
             if ($existing_class != null) {
-                throw new Exception("A school cannot have same programme twice in same academic year.", 1);
+                throw new Exception("A school cannot have same programme twice in same academic year. ref: " . $existing_class->id, 1);
             }
 
             if ($class->name == null || strlen($class->name) < 3) {

@@ -321,7 +321,9 @@ class StudentHasSemeterController extends AdminController
             Service::where(
                 'enterprise_id',
                 Admin::user()->enterprise_id
-            )->get() as $service
+            )
+            ->where('is_compulsory', 'No')
+            ->get() as $service
         ) {
             $services[$service->id] = $service->name_text;
         }
