@@ -74,7 +74,6 @@ class StockBatchController extends AdminController
         if (!Admin::user()->isRole('admin')) {
             $grid->model()->where([
                 'enterprise_id' => Admin::user()->enterprise_id,
-                'manager' => Admin::user()->id,
             ])
                 ->orderBy('id', 'Desc');
         } else {
