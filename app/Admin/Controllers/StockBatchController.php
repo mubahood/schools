@@ -65,7 +65,7 @@ class StockBatchController extends AdminController
         });
 
         if (!Admin::user()->isRole('admin')) {
-            $grid->disableActions();
+            // $grid->disableActions();
         };
 
 
