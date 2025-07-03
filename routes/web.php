@@ -40,6 +40,7 @@ use App\Models\Session;
 use App\Models\TheologyMarkRecord;
 use App\Models\StudentHasClass;
 use App\Models\StudentHasFee;
+use App\Models\StudentHasSemeter;
 use App\Models\StudentHasTheologyClass;
 use App\Models\StudentReportCard;
 use App\Models\Subject;
@@ -73,6 +74,40 @@ use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 Route::get('student-data-import-do-import', [MainController::class, 'student_data_import_do_import']);
 Route::get('process-students-enrollment', [MainController::class, 'process_students_enrollment']);
 
+Route::get('reset-a-school', function (Request $request) {
+  $school_name = 'NEBBI SCHOOL OF HEALTH SCIENCES (ARUA INTERNATIONAL UNIVERSITY PROJECT)';
+  $ent = Enterprise::where('name', $school_name)->first();
+  if ($ent == null) {
+    throw new \Exception("Enterprise not found: $school_name");
+  }
+
+  // deleteing has fees
+  $StudentHasFeeTable = (new StudentHasFee())->getTable();
+  $DELETED = DB::delete('DELETE FROM ' . $StudentHasFeeTable . ' WHERE enterprise_id = ?', [$ent->id]);
+  echo "Deleted $DELETED records from $StudentHasFeeTable for enterprise: " . $ent->name . "<hr>";
+
+  //deleting service subscriptions
+  $ServiceSubscriptionTable = (new ServiceSubscription())->getTable();
+  $DELETED = DB::delete('DELETE FROM ' . $ServiceSubscriptionTable . ' WHERE enterprise_id = ?', [$ent->id]);
+  echo "Deleted $DELETED records from $ServiceSubscriptionTable for enterprise: " . $ent->name . "<hr>";
+
+  //remove enrolments 
+  $StudentHasSemeterTable = (new StudentHasSemeter())->getTable();
+  $DELETED = DB::delete('DELETE FROM ' . $StudentHasSemeterTable . ' WHERE enterprise_id = ?', [$ent->id]);
+  echo "Deleted $DELETED records from $StudentHasSemeterTable for enterprise: " . $ent->name . "<hr>";
+
+  //set all students for this enrolment to have status of 2
+  $usersTable = (new User())->getTable();
+  $UPDATED = DB::update('UPDATE ' . $usersTable . ' SET is_enrolled = \'No\', status = 2 WHERE user_type = ? AND enterprise_id = ?', ['student', $ent->id]);
+  echo "Updated $UPDATED STUDENT records in $usersTable for enterprise: " . $ent->name . "<hr>";
+
+  //delete all transactions for this enterprise
+  $TransactionTable = (new Transaction())->getTable();
+  $DELETED = DB::delete('DELETE FROM ' . $TransactionTable . ' WHERE enterprise_id = ?', [$ent->id]);
+  echo "Deleted $DELETED records from $TransactionTable for enterprise: " . $ent->name . "<hr>";
+
+  die('done');
+});
 Route::get('import-school-pay-transactions-do-import', function (Request $request) {
   $u = Admin::user();
   if ($u == null) {
@@ -318,7 +353,7 @@ Route::get('fees-data-import-do-import', function (Request $request) {
   //show errors for php
   ini_set('display_errors', '1');
   ini_set('display_startup_errors', '1');
-  error_reporting(E_ALL); 
+  error_reporting(E_ALL);
 
   $importedServiceCategory = null;
   try {
