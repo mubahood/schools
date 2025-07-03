@@ -75,7 +75,7 @@ Route::get('student-data-import-do-import', [MainController::class, 'student_dat
 Route::get('process-students-enrollment', [MainController::class, 'process_students_enrollment']);
 
 Route::get('reset-a-school', function (Request $request) {
-  $school_name = 'NEBBI SCHOOL OF HEALTH SCIENCES (ARUA INTERNATIONAL UNIVERSITY PROJECT)';
+  $school_name = 'KAMPALA INSTITUTE OF HEALTH PROFESSIONALS';
   $ent = Enterprise::where('name', $school_name)->first();
   if ($ent == null) {
     throw new \Exception("Enterprise not found: $school_name");
