@@ -691,6 +691,7 @@ class HomeController extends Controller
             }
 
 
+
             $content->row(function (Row $row) {
                 $row->column(3, function (Column $column) {
                     $column->append(Dashboard::recent_fees_payment());
@@ -751,8 +752,53 @@ class HomeController extends Controller
             });
         } */
 
+
+
+        // STORE‐KEEPER DASH
+        if ($u->isRole('store')) {
+
+            // 1. Totals
+            $totalCategories = StockItemCategory::where('enterprise_id', $ent->id)
+                ->count();
+            $totalBatches    = StockBatch::where('enterprise_id', $ent->id)
+                ->where('is_archived', 'No')
+                ->count();
+            $totalValue      = StockBatch::where('enterprise_id', $ent->id)
+                ->where('is_archived', 'No')
+                ->sum('worth');
+            $totalQty        = StockBatch::where('enterprise_id', $ent->id)
+                ->where('is_archived', 'No')
+                ->sum('current_quantity');
+
+            // 2. Out-of-stock & Low-stock categories
+            $cats = StockItemCategory::where('enterprise_id', $ent->id)->get();
+            $outOfStockCount = $cats->filter(function ($c) {
+                return StockBatch::where('stock_item_category_id', $c->id)
+                    ->where('is_archived', 'No')
+                    ->sum('current_quantity') <= 0;
+            })->count();
+            $lowStockCount   = $cats->filter(function ($c) {
+                $qty = StockBatch::where('stock_item_category_id', $c->id)
+                    ->where('is_archived', 'No')
+                    ->sum('current_quantity');
+                return $qty > 0 && $qty < $c->reorder_level;
+            })->count();
+
+            // 3. Push to a custom widget
+            $content->row(view('widgets.stock-dashboard', compact(
+                'totalCategories',
+                'totalBatches',
+                'totalQty',
+                'totalValue',
+                'outOfStockCount',
+                'lowStockCount'
+            )));
+        }
+
+
         return $content;
     }
+
 
 
     public function stockStats(Content $content)
