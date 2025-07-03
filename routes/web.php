@@ -102,7 +102,10 @@ Route::get('reset-a-school', function (Request $request) {
   echo "Updated $UPDATED STUDENT records in $usersTable for enterprise: " . $ent->name . "<hr>";
 
   //delete all transactions for this enterprise
-
+  $transactionTable = (new Transaction())->getTable();
+  $DELETED = DB::delete('DELETE FROM ' . $transactionTable . ' WHERE enterprise_id = ?', [$ent->id]);
+  echo "Deleted $DELETED records from $transactionTable for enterprise: " . $ent->name . "<hr>"; 
+  
 
   die('done');
 });
