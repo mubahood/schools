@@ -44,8 +44,11 @@ Route::group([
     $router->resource('stock-batches', StockBatchController::class);
     $router->resource('suppliers', SuppliersController::class);
     $router->resource('stock-records', StockRecordController::class);
+    $router->resource('stock-records-archived', StockRecordController::class);
+    $router->resource('stock-batches-archived', StockBatchController::class);
     $router->resource('services', ServiceController::class);
     $router->resource('service-subscriptions', ServiceSubscriptionController::class);
+    $router->get('/stock-stats', 'HomeController@stockStats')->name('stockStats');
     $router->resource('theology-classes', TheologyClassController::class);
     $router->resource('theology-courses', TheologyCourseController::class);
     $router->resource('students-theology-classes', StudentHasTheologyClassController::class);
@@ -140,7 +143,7 @@ Route::group([
     $router->resource('school-reports', SchoolReportController::class);
     $router->resource('fees-data-import', FeesDataImportController::class);
     $router->resource('fees-data-import-records', FeesDataImportRecordController::class);
-    
+
     $router->resource('student-data-imports', StudentDataImportController::class);
     $router->resource('import-school-pay-transactions', ImportSchoolPayTransactionController::class);
     $router->resource('student-has-semeters', StudentHasSemeterController::class);

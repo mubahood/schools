@@ -35,6 +35,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 use App\Models\PassengerRecord;
+use App\Models\StockItemCategory;
+use App\Models\StockRecord;
 use App\Models\StudentHasSemeter;
 use App\Models\TransportSubscription;
 use App\Models\TransportRoute;
@@ -750,5 +752,100 @@ class HomeController extends Controller
         } */
 
         return $content;
+    }
+
+
+    public function stockStats(Content $content)
+    {
+        $eid = Admin::user()->enterprise_id;
+
+        // Only non-archived batches & records
+        $batchesQ = StockBatch::where('enterprise_id', $eid)
+            ->where('is_archived', 'No');
+        $recordsQ = StockRecord::where('enterprise_id', $eid)
+            ->where('is_archived', 'No');
+
+        // 1. Counts & totals
+        $totalCategories    = StockItemCategory::where('enterprise_id', $eid)->count();
+        $totalBatches       = $batchesQ->count();
+        $totalRecords       = $recordsQ->count();
+        $inRecordsCount     = (clone $recordsQ)->where('type', 'IN')->count();
+        $outRecordsCount    = (clone $recordsQ)->where('type', 'OUT')->count();
+
+        $currentValue       = $batchesQ->sum('worth');
+        $currentQuantity    = $batchesQ->sum('current_quantity');
+
+        // 2. Health
+        $outOfStockCats     = StockItemCategory::where('enterprise_id', $eid)
+            ->whereRaw('(SELECT COALESCE(SUM(current_quantity),0)
+                         FROM stock_batches WHERE stock_batches.stock_item_category_id = stock_item_categories.id
+                           AND stock_batches.is_archived = \'No\') = 0')
+            ->count();
+
+        $lowStockCats       = StockItemCategory::where('enterprise_id', $eid)
+            ->whereRaw('(SELECT COALESCE(SUM(current_quantity),0)
+                         FROM stock_batches WHERE stock_batches.stock_item_category_id = stock_item_categories.id
+                           AND stock_batches.is_archived = \'No\') < reorder_level')
+            ->count();
+
+        // 3. Averages
+        $avgValuePerCategory = $totalCategories
+            ? round($currentValue / $totalCategories)
+            : 0;
+
+        // 4. Top 3 categories by value
+        $topCategories = StockItemCategory::select('name')
+            ->selectRaw('(SELECT COALESCE(SUM(worth),0)
+                         FROM stock_batches
+                        WHERE stock_batches.stock_item_category_id = stock_item_categories.id
+                          AND stock_batches.is_archived = \'No\') as total_worth')
+            ->where('enterprise_id', $eid)
+            ->orderByDesc('total_worth')
+            ->limit(3)
+            ->get();
+
+        // 5. Recent 5 stock records
+        $recentRecords = $recordsQ
+            ->orderByDesc('record_date')
+            ->limit(5)
+            ->get(['record_date', 'type', 'stock_batch_id', 'description'])
+            ->load(['batch.cat']);
+
+        // 6. Running-low categories detail
+        $lowCats = StockItemCategory::select('id', 'name', 'reorder_level')
+            ->where('enterprise_id', $eid)
+            ->get()
+            ->map(function ($cat) {
+                $qty = DB::table('stock_batches')
+                    ->where('stock_item_category_id', $cat->id)
+                    ->where('is_archived', 'No')
+                    ->sum('current_quantity');
+                return [
+                    'name'          => $cat->name,
+                    'total_qty'     => $qty,
+                    'reorder_level' => $cat->reorder_level,
+                ];
+            })
+            ->filter(fn($c) => $c['total_qty'] < $c['reorder_level'])
+            ->values();
+
+        return $content
+            ->header('Stock Dashboard')
+            ->description('Key inventory KPIs at a glance')
+            ->view('admin.stock.stats', compact(
+                'totalCategories',
+                'totalBatches',
+                'totalRecords',
+                'inRecordsCount',
+                'outRecordsCount',
+                'currentValue',
+                'currentQuantity',
+                'outOfStockCats',
+                'lowStockCats',
+                'avgValuePerCategory',
+                'topCategories',
+                'recentRecords',
+                'lowCats'
+            ));
     }
 }

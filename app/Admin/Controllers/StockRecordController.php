@@ -50,6 +50,12 @@ class StockRecordController extends AdminController
         $grid = new Grid(new StockRecord());
         // $grid->disableBatchActions();
 
+        //add button to $grid tools for processing stock records
+        $grid->tools(function ($tools) {
+            $url = url('process-stock-records'); //opens in new tab
+            $tools->append('<a href="' . $url . '" target="_blank" class="btn btn-sm btn-primary"><i class="fa fa-refresh"></i> Archive Last Term Stock Records</a>');
+        });
+
 
 
 
@@ -57,7 +63,6 @@ class StockRecordController extends AdminController
             $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
                 ->orderBy('record_date', 'Desc');
         } else {
-            $grid->disableActions();
             $grid->model()->where([
                 'enterprise_id' => Admin::user()->enterprise_id,
                 'created_by' => Admin::user()->id,
@@ -79,8 +84,13 @@ class StockRecordController extends AdminController
                 $active_term = $term->id;
             }
         }
-        if (!isset($_GET['due_term_id'])) {
-            //$grid->model()->where('due_term_id', $active_term);
+
+        $segs = request()->segments();
+        //check if stock-records-archived is in array of segments
+        if (in_array('stock-records-archived', $segs)) {
+            $grid->model()->where('is_archived', 'Yes');
+        } else {
+            $grid->model()->where('is_archived', 'No');
         }
 
 
@@ -228,6 +238,19 @@ class StockRecordController extends AdminController
             return 'Term ' . $t->name;
         })->sortable();
 
+        //is_archived
+        $grid->column('is_archived', __('Is archived'))
+            ->display(function ($x) {
+                if ($x == 'Yes') {
+                    return "<span class='label label-danger'>Yes</span>";
+                } else {
+                    return "<span class='label label-success'>No</span>";
+                }
+            })->sortable()->filter([
+                'Yes' => 'Yes',
+                'No' => 'No',
+            ]);
+
         return $grid;
     }
 
@@ -281,6 +304,7 @@ class StockRecordController extends AdminController
         foreach (
             StockBatch::where([
                 'enterprise_id' => Admin::user()->enterprise_id,
+                'is_archived' => 'No',
             ])
                 ->where('current_quantity', '>', 0)
                 ->get() as $val
@@ -348,6 +372,15 @@ class StockRecordController extends AdminController
             ->ajax($ajax_url)->rules('required');
 
         $form->textarea('description', __('Description'));
+        if ($form->isCreating()) {
+            $form->hidden('is_archived')->default('No');
+        } else {
+            $form->radio('is_archived', __('Is archived'))
+                ->options([
+                    'Yes' => 'Yes',
+                    'No' => 'No',
+                ])->default('No');
+        }
 
         return $form;
     }

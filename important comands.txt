@@ -1,4 +1,4 @@
-php artisan make:migration add_has_name_cold_to_student_data_imports  --table=student_data_imports
+php artisan make:migration add_is_archived_to_stock_batches  --table=stock_batches
 ls
          $table->date('check_in_time')->nullable();
             $table->date('check_out_time')->nullable();

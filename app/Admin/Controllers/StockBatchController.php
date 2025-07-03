@@ -46,10 +46,12 @@ class StockBatchController extends AdminController
             );
 
             $terms = [];
-            foreach (Term::where(
-                'enterprise_id',
-                Admin::user()->enterprise_id
-            )->orderBy('id', 'desc')->get() as $key => $term) {
+            foreach (
+                Term::where(
+                    'enterprise_id',
+                    Admin::user()->enterprise_id
+                )->orderBy('id', 'desc')->get() as $key => $term
+            ) {
                 $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
             }
 
@@ -85,18 +87,27 @@ class StockBatchController extends AdminController
 
         $terms = [];
         $active_term = 0;
-        foreach (Term::where(
-            'enterprise_id',
-            Admin::user()->enterprise_id
-        )->orderBy('id', 'desc')->get() as $key => $term) {
+        foreach (
+            Term::where(
+                'enterprise_id',
+                Admin::user()->enterprise_id
+            )->orderBy('id', 'desc')->get() as $key => $term
+        ) {
             $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
             if ($term->is_active) {
                 $active_term = $term->id;
             }
         }
-        if (!isset($_GET['term_id'])) {
-            //$grid->model()->where('term_id', $active_term);
+
+        //stock-batches-archived
+        $segs = request()->segments();
+        //check if stock-batches-archived is in array of segments
+        if (in_array('stock-batches-archived', $segs)) {
+            $grid->model()->where('is_archived', 'Yes');
+        } else {
+            $grid->model()->where('is_archived', 'No');
         }
+
         // $grid->disableBatchActions();
         $grid->column('id', __('Batch Number'))->sortable();
         $grid->column('stock_item_category_id', __('Item'))->display(function () {
@@ -163,6 +174,17 @@ class StockBatchController extends AdminController
             return "<a target='_blank' href='$add_recordUrl' class='btn btn-xs btn-success'>Add record</a> <a target='_blank' href='$view_recordUrl' class='btn btn-xs btn-primary'>View records</a>";
         });
 
+        $grid->column('is_archived', __('Is archived'))
+            ->display(function ($x) {
+                if ($x == 'Yes') {
+                    return "<span class='label label-danger'>Yes</span>";
+                } else {
+                    return "<span class='label label-success'>No</span>";
+                }
+            })->sortable()->filter([
+                'Yes' => 'Yes',
+                'No' => 'No',
+            ]);
         return $grid;
     }
 
@@ -230,9 +252,11 @@ class StockBatchController extends AdminController
             ->value(Admin::user()->enterprise_id);
 
         $cats = [];
-        foreach (StockItemCategory::where([
-            'enterprise_id' => Admin::user()->enterprise_id,
-        ])->get() as $val) {
+        foreach (
+            StockItemCategory::where([
+                'enterprise_id' => Admin::user()->enterprise_id,
+            ])->get() as $val
+        ) {
             $p = Str::plural($val->measuring_unit);
             $cats[$val->id] = $val->name . " - (in $p)";
         }
@@ -244,10 +268,12 @@ class StockBatchController extends AdminController
 
 
         $ads = [];
-        foreach (Administrator::where([
-            'enterprise_id' => Admin::user()->enterprise_id,
-            'user_type' => 'supplier'
-        ])->get() as $ad) {
+        foreach (
+            Administrator::where([
+                'enterprise_id' => Admin::user()->enterprise_id,
+                'user_type' => 'supplier'
+            ])->get() as $ad
+        ) {
             if ($ad->isRole('supplier')) {
                 $ads[$ad->id] = $ad->name . " - ID #{$ad->id}";
             };
@@ -255,10 +281,12 @@ class StockBatchController extends AdminController
 
 
         $employees = [];
-        foreach (Administrator::where([
-            'enterprise_id' => Admin::user()->enterprise_id,
-            'user_type' => 'employee'
-        ])->get() as $ad) {
+        foreach (
+            Administrator::where([
+                'enterprise_id' => Admin::user()->enterprise_id,
+                'user_type' => 'employee'
+            ])->get() as $ad
+        ) {
             $employees[$ad->id] = $ad->name . " - ID #{$ad->id}";
         }
 
@@ -316,6 +344,16 @@ class StockBatchController extends AdminController
 
         /* $form->select('fund_requisition_id', 'Funds requisition form')
             ->options($forms); */
+
+        if ($form->isCreating()) {
+            $form->hidden('is_archived')->default('No');
+        } else {
+            $form->radio('is_archived', __('Is archived'))
+                ->options([
+                    'Yes' => 'Yes',
+                    'No' => 'No',
+                ])->default('No');
+        }
 
 
 

@@ -37,6 +37,8 @@ use App\Models\Service;
 use App\Models\ServiceCategory;
 use App\Models\ServiceSubscription;
 use App\Models\Session;
+use App\Models\StockBatch;
+use App\Models\StockItemCategory;
 use App\Models\TheologyMarkRecord;
 use App\Models\StudentHasClass;
 use App\Models\StudentHasFee;
@@ -74,8 +76,50 @@ use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 Route::get('student-data-import-do-import', [MainController::class, 'student_data_import_do_import']);
 Route::get('process-students-enrollment', [MainController::class, 'process_students_enrollment']);
 
+Route::get('process-stock-records', function (Request $request) {
+  $u = Admin::user();
+  if ($u == null) {
+    return "You are not logged in";
+  }
+  $enterprise = Enterprise::find($u->enterprise_id);
+  if ($enterprise == null) {
+    return "Enterprise not found";
+  }
+
+  $active_term = $enterprise->active_term();
+  if ($active_term == null) {
+    return "No active term found for this enterprise.";
+  }
+
+
+  //set unlimted time
+  set_time_limit(-1); 
+
+  //sql that sets all stock_records to be archived if they are not from this term
+  $sql = "UPDATE stock_records SET is_archived = 'Yes' WHERE enterprise_id = ? AND due_term_id != ?";
+  $recs = DB::update($sql, [$u->enterprise_id, $active_term->id]);
+  echo "Archived $recs stock records for enterprise: " . $enterprise->name . "<hr>";
+
+  //set stock_batches is_archived be Yes if they are not from this term
+  $sql = "UPDATE stock_batches SET is_archived = 'Yes' WHERE enterprise_id = ? AND term_id != ?";
+  $recs = DB::update($sql, [$u->enterprise_id, $active_term->id]);
+  echo "Archived $recs stock batches for enterprise: " . $enterprise->name . "<hr>";
+
+  $stokCats = StockItemCategory::where('enterprise_id', $u->enterprise_id)
+    ->orderBy('quantity', 'DESC')
+    ->get();
+  foreach ($stokCats as $key => $value) {
+    StockItemCategory::update_category_quantity($value);
+    $cat = StockItemCategory::find($value->id);
+    echo "UPDATED: " . $cat->name . ", QUANTITY: " . number_format($cat->quantity) . "<br>";
+  }
+
+  return "Stock records and batches archived successfully for enterprise: " . $enterprise->name;
+});
+
 Route::get('reset-a-school', function (Request $request) {
-  $school_name = 'KAMPALA INSTITUTE OF HEALTH PROFESSIONALS';
+  return;
+  $school_name = '';
   $ent = Enterprise::where('name', $school_name)->first();
   if ($ent == null) {
     throw new \Exception("Enterprise not found: $school_name");
@@ -104,7 +148,7 @@ Route::get('reset-a-school', function (Request $request) {
   //delete all transactions for this enterprise
   $transactionTable = (new Transaction())->getTable();
   $DELETED = DB::delete('DELETE FROM ' . $transactionTable . ' WHERE enterprise_id = ?', [$ent->id]);
-  echo "Deleted $DELETED records from $transactionTable for enterprise: " . $ent->name . "<hr>"; 
+  echo "Deleted $DELETED records from $transactionTable for enterprise: " . $ent->name . "<hr>";
 
 
   die('done');
