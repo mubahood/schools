@@ -75,7 +75,7 @@ Route::get('student-data-import-do-import', [MainController::class, 'student_dat
 Route::get('process-students-enrollment', [MainController::class, 'process_students_enrollment']);
 
 Route::get('reset-a-school', function (Request $request) {
-  $school_name = 'Vine Paramedical School';
+  $school_name = 'NEBBI SCHOOL OF HEALTH SCIENCES (ARUA INTERNATIONAL UNIVERSITY PROJECT)';
   $ent = Enterprise::where('name', $school_name)->first();
   if ($ent == null) {
     throw new \Exception("Enterprise not found: $school_name");
@@ -105,7 +105,7 @@ Route::get('reset-a-school', function (Request $request) {
   $transactionTable = (new Transaction())->getTable();
   $DELETED = DB::delete('DELETE FROM ' . $transactionTable . ' WHERE enterprise_id = ?', [$ent->id]);
   echo "Deleted $DELETED records from $transactionTable for enterprise: " . $ent->name . "<hr>"; 
-  
+
 
   die('done');
 });
