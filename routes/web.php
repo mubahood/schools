@@ -122,7 +122,7 @@ Route::get('process-stock-records', function (Request $request) {
 
 Route::get('reset-a-school', function (Request $request) {
 
-  $recs = MarkRecord::where([
+  /* $recs = MarkRecord::where([
     'term_id' => 52,
     'termly_report_card_id' => 21
   ])->get();
@@ -131,11 +131,6 @@ Route::get('reset-a-school', function (Request $request) {
   //set unlimited time
   set_time_limit(-1);
   foreach ($recs as $key => $value) {
-    /* ->update([
-      'mot_score' => 0,
-      'remarks' => '',
-      'mot_is_submitted' => 'No',
-    ]); */
     $value->mot_score = 0;
     $value->remarks = '';
     $value->mot_is_submitted = 'No';
@@ -145,8 +140,8 @@ Route::get('reset-a-school', function (Request $request) {
     
   dd("Updated records: " . $recs);
   dd($recs);
-  return;
-  $school_name = '';
+  return; */
+  $school_name = 'SAMI HEALTH SCIENCE INSTITUTE';
   $ent = Enterprise::where('name', $school_name)->first();
   if ($ent == null) {
     throw new \Exception("Enterprise not found: $school_name");
