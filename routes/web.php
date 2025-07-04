@@ -172,6 +172,10 @@ Route::get('reset-a-school', function (Request $request) {
   $DELETED = DB::delete('DELETE FROM ' . $transactionTable . ' WHERE enterprise_id = ?', [$ent->id]);
   echo "Deleted $DELETED records from $transactionTable for enterprise: " . $ent->name . "<hr>";
 
+  //delete bursary subscription
+  $TransportSubscriptionTable = (new TransportSubscription())->getTable();
+  $DELETED = DB::delete('DELETE FROM ' . $TransportSubscriptionTable . ' WHERE enterprise_id = ?', [$ent->id]);
+  echo "Deleted $DELETED records from $TransportSubscriptionTable for enterprise: " . $ent->name . "<hr>";
 
   die('done');
 });
