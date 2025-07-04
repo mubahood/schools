@@ -77,6 +77,9 @@ Route::get('student-data-import-do-import', [MainController::class, 'student_dat
 Route::get('process-students-enrollment', [MainController::class, 'process_students_enrollment']);
 
 Route::get('process-stock-records', function (Request $request) {
+
+
+
   $u = Admin::user();
   if ($u == null) {
     return "You are not logged in";
@@ -93,7 +96,7 @@ Route::get('process-stock-records', function (Request $request) {
 
 
   //set unlimted time
-  set_time_limit(-1); 
+  set_time_limit(-1);
 
   //sql that sets all stock_records to be archived if they are not from this term
   $sql = "UPDATE stock_records SET is_archived = 'Yes' WHERE enterprise_id = ? AND due_term_id != ?";
@@ -118,6 +121,30 @@ Route::get('process-stock-records', function (Request $request) {
 });
 
 Route::get('reset-a-school', function (Request $request) {
+
+  $recs = MarkRecord::where([
+    'term_id' => 52,
+    'termly_report_card_id' => 21
+  ])->get();
+
+
+  //set unlimited time
+  set_time_limit(-1);
+  foreach ($recs as $key => $value) {
+    /* ->update([
+      'mot_score' => 0,
+      'remarks' => '',
+      'mot_is_submitted' => 'No',
+    ]); */
+    $value->mot_score = 0;
+    $value->remarks = '';
+    $value->mot_is_submitted = 'No';
+    $value->save();
+    echo "Updated record: " . $value->id . "<br>";
+  }
+    
+  dd("Updated records: " . $recs);
+  dd($recs);
   return;
   $school_name = '';
   $ent = Enterprise::where('name', $school_name)->first();
