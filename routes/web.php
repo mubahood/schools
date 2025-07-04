@@ -122,6 +122,7 @@ Route::get('process-stock-records', function (Request $request) {
 
 Route::get('reset-a-school', function (Request $request) {
 
+  die("d");
   /* $recs = MarkRecord::where([
     'term_id' => 52,
     'termly_report_card_id' => 21
