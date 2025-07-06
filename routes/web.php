@@ -122,8 +122,7 @@ Route::get('process-stock-records', function (Request $request) {
 
 Route::get('reset-a-school', function (Request $request) {
 
-  die("d");
-  /* $recs = MarkRecord::where([
+  $recs = TheologyMarkRecord::where([
     'term_id' => 52,
     'termly_report_card_id' => 21
   ])->get();
@@ -138,10 +137,10 @@ Route::get('reset-a-school', function (Request $request) {
     $value->save();
     echo "Updated record: " . $value->id . "<br>";
   }
-    
+
   dd("Updated records: " . $recs);
   dd($recs);
-  return; */
+  return;
   $school_name = 'KAMPALA INSTITUTE OF HEALTH PROFESSIONALS';
   $ent = Enterprise::where('name', $school_name)->first();
   if ($ent == null) {
