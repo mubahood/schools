@@ -262,13 +262,25 @@ class StudentHasTheologyClassController extends AdminController
                 ->load('theology_stream_id', $ajax_url);
             $form->select('theology_stream_id', 'Stream');
         } else {
-            $form->select('administrator_id', 'Student')->options(function () {
-                return Administrator::where([
-                    'enterprise_id' => Admin::user()->enterprise_id,
-                    'user_type' => 'student',
-                    'status' => 1
-                ])->get()->pluck('name', 'id');
-            })
+            $u = Admin::user();
+            $ajax_url = url(
+                '/api/ajax-users?'
+                    . 'enterprise_id=' . $u->enterprise_id
+                    . "&search_by_1=name"
+                    . "&search_by_2=id"
+                    . "&user_type=student"
+                    . "&model=User"
+            );
+            $ajax_url = trim($ajax_url);
+
+            $form->select('administrator_id', 'Student')
+                ->options(function ($id) {
+                    $a = User::find($id);
+                    if ($a) {
+                        return [$a->id => $a->name];
+                    }
+                })
+                ->ajax($ajax_url)
                 ->readOnly()
                 ->rules('required');
 
@@ -480,24 +492,7 @@ class StudentHasTheologyClassController extends AdminController
                 if ($TheologyClass == null || $StudentHasTheologyClass == null) {
                     die("Classes not found.");
                 }
-
-                dd($TheologyClass);
-
-                $form->select('administrator_id', 'Student')->options(function () {
-                    return Administrator::where([
-                        'enterprise_id' => Admin::user()->enterprise_id,
-                        'user_type' => 'student',
-                    ])->get()->pluck('name', 'id');
-                })
-                    ->readOnly()
-                    ->rules('required');
-
-                $form->select('theology_class_id', 'Class')->options(function () {
-                    return TheologyClass::where([
-                        'enterprise_id' => Admin::user()->enterprise_id,
-                    ])->get()->pluck('name', 'id');
-                })
-                    ->readOnly();
+ 
             }
         });
 
