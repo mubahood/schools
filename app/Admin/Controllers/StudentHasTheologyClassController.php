@@ -492,7 +492,17 @@ class StudentHasTheologyClassController extends AdminController
                 if ($TheologyClass == null || $StudentHasTheologyClass == null) {
                     die("Classes not found.");
                 }
- 
+
+                dd($TheologyClass);
+
+                 
+
+                $form->select('theology_class_id', 'Class')->options(function () {
+                    return TheologyClass::where([
+                        'enterprise_id' => Admin::user()->enterprise_id,
+                    ])->get()->pluck('name', 'id');
+                })
+                    ->readOnly();
             }
         });
 

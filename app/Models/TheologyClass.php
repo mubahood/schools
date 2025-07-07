@@ -109,6 +109,7 @@ class TheologyClass extends Model
     //getter for students_count
     public function getStudentsCountAttribute()
     {
+        return 0;
         $students = $this->get_active_students();
 
         $count  = [];
