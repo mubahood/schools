@@ -294,8 +294,8 @@ class TheologyMarkRecordController extends AdminController
             })
             ->sortable();
 
-        $grid->column('academic_class_id', __('Class'))
-            ->display(function ($academic_class_id) {
+        $grid->column('theology_class_id', __('Class'))
+            ->display(function ($theology_class_id) {
                 if($this->academicClass == null){
                     $this->delete();
                     return 'deleted';
@@ -303,7 +303,7 @@ class TheologyMarkRecordController extends AdminController
 
                 return $this->academicClass->short_name;
             })
-            ->sortable();
+            ->sortable(); 
 
 
 
@@ -452,7 +452,7 @@ class TheologyMarkRecordController extends AdminController
         $show->field('termly_report_card_id', __('Termly report card id'));
         $show->field('term_id', __('Term id'));
         $show->field('administrator_id', __('Administrator id'));
-        $show->field('academic_class_id', __('Academic class id'));
+        $show->field('theology_class_id', __('Academic class id'));
         $show->field('academic_class_sctream_id', __('Academic class sctream id'));
         $show->field('main_course_id', __('Main course id'));
         $show->field('subject_id', __('Subject id'));
@@ -484,7 +484,7 @@ class TheologyMarkRecordController extends AdminController
         $form->number('termly_report_card_id', __('Termly report card id'));
         $form->number('term_id', __('Term id'));
         $form->number('administrator_id', __('Administrator id'));
-        $form->number('academic_class_id', __('Academic class id'));
+        $form->number('theology_class_id', __('Academic class id'));
         $form->number('academic_class_sctream_id', __('Academic class sctream id'));
         $form->number('main_course_id', __('Main course id'));
         $form->number('subject_id', __('Subject id'));
