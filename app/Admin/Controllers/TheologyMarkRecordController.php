@@ -296,6 +296,10 @@ class TheologyMarkRecordController extends AdminController
 
         $grid->column('academic_class_id', __('Class'))
             ->display(function ($academic_class_id) {
+                if($this->academicClass == null){
+                    $this->delete();
+                    return 'deleted';
+                }
 
                 return $this->academicClass->short_name;
             })
