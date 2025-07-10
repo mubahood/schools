@@ -66,10 +66,12 @@ class SubjectController extends AdminController
             $filter->disableIdFilter();
             $u = Admin::user();
             $teachers = [];
-            foreach (Administrator::where([
-                'enterprise_id' => $u->enterprise_id,
-                'user_type' => 'employee',
-            ])->get() as $key => $a) {
+            foreach (
+                Administrator::where([
+                    'enterprise_id' => $u->enterprise_id,
+                    'user_type' => 'employee',
+                ])->get() as $key => $a
+            ) {
                 if ($a->isRole('teacher')) {
                     $teachers[$a['id']] = $a['name'] . " " . $a['id'];
                 }
@@ -90,9 +92,7 @@ class SubjectController extends AdminController
             ->where('enterprise_id', Admin::user()->enterprise_id);
         $grid->column('id', __('#ID'))->sortable();
         $grid->column('subject_name', __('SUBJECT'))
-            ->display(function ($t) {
-                return $this->course->name;
-            })->sortable();
+            ->sortable();
         $grid->column('academic_class_id', __('Class'))
             ->display(function ($t) {
                 if ($this->academic_class == null) {
@@ -194,10 +194,12 @@ class SubjectController extends AdminController
 
         $u = Admin::user();
         $teachers = [];
-        foreach (Administrator::where([
-            'enterprise_id' => $u->enterprise_id,
-            'user_type' => 'employee',
-        ])->get() as $key => $a) {
+        foreach (
+            Administrator::where([
+                'enterprise_id' => $u->enterprise_id,
+                'user_type' => 'employee',
+            ])->get() as $key => $a
+        ) {
             if ($a->isRole('teacher')) {
                 $teachers[$a['id']] = $a['name'] . "  " . $a['id'];
             }
@@ -261,6 +263,9 @@ class SubjectController extends AdminController
 
 
 
+        if (!$form->isCreating()) {
+            $form->text('subject_name', __('Subject Name'))->rules('required');
+        }
         $form->text('code', __('Subject Code'));
 
         $form->radio('is_optional', 'Subject type')
