@@ -35,6 +35,8 @@ class MarkRecordController extends AdminController
     {
         $grid = new Grid(new MarkRecord());
 
+        $grid->perPages([500, 700, 1000]);
+
         $grid->export(function ($export) {
             $export->filename('School dynamics.csv');
             $export->except(['is_submitted']);
