@@ -531,7 +531,7 @@ dd($theology_termly_report_card); */
                     @endif
                     {{-- <td>{{ (int) $tr->average_aggregates }}</td> --}}
                     {{--                     <td><b>{{ $tr->total_aggregates }}</b></td> --}}
-                    <td colspan="3"></td>
+                    <td colspan="2"></td>
                 </tr>
 
             </table>
@@ -539,7 +539,7 @@ dd($theology_termly_report_card); */
                     comment:</span> <b class="comment" style="font-size: 18px" style="font-size: 18px">
                     {!! $termly_report_card->display_class_teacher_comments == 'Yes'
                         ? $tr->class_teacher_comment
-                        : Utils::get_empty_spaces(150) . '<br>' . Utils::get_empty_spaces(150) !!}
+                        : Utils::get_empty_spaces(140) . '<br>' . Utils::get_empty_spaces(140) !!}
                 </b></p>
             <p class="mt-2 fw-16"><span class="text-uppercase" style="font-size: 18px">Class Teacher's Name:</span>
                 <b style="font-size: 14px" class="text-uppercase comment">&nbsp;{{ $class_teacher_name_1 }}&nbsp;&nbsp;&nbsp;</b>,&nbsp;
