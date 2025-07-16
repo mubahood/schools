@@ -8,7 +8,7 @@ use App\Models\Utils;
             <b>FEES COLLECTION - {{ count($labels) }} DAYS AGO</b>
         </h3>
         <div>
-            <a href="{{ url('/school-fees-payment') }}" class="btn btn-sm btn-primary mt-md-4 mt-4">
+            <a href="{{ url('/transactions') }}" class="btn btn-sm btn-primary mt-md-4 mt-4">
                 View All
             </a>
         </div>

@@ -141,7 +141,7 @@ Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
         }
         if ($u->isRole('bursar')) {
             $links = [
-                'School fees payment' => 'school-fees-payment/create',
+                'School fees payment' => 'transactions/create',
                 'Transaction' => 'transactions/create',
             ];
         }

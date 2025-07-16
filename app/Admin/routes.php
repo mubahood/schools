@@ -34,7 +34,8 @@ Route::group([
     $router->resource('accounts', AccountController::class);
     $router->resource('fees', AcademicClassFeeController::class);
     $router->resource('transactions', TransactionController::class);
-    $router->resource('school-fees-payment', SchoolFeesPaymentController::class);
+    $router->resource('school-fees-payment', TransactionController::class);
+    // $router->resource('school-fees-payment', SchoolFeesPaymentController::class);
     $router->resource('menu-items', MenuItemController::class);
     $router->resource('main-courses', MainCourseController::class);
     $router->resource('user-batch-importers', UserBatchImporterController::class);

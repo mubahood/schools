@@ -122,7 +122,7 @@
                         'icon' => url('/assets/icons/money.png'),
                         'links' => [
                             [
-                                'link' => admin_url('school-fees-payment'),
+                                'link' => admin_url('transactions'),
                                 'text' => 'Fees payment',
                             ],
                             [

@@ -26,7 +26,7 @@ use App\Models\Utils;
             <b>{{ $title }}</b>
         </h3>
         <div>
-            <a href="{{ url('/school-fees-payment') }}" class="btn btn-sm btn-primary mt-md-4 mt-4">
+            <a href="{{ url('/transactions') }}" class="btn btn-sm btn-primary mt-md-4 mt-4">
                 View All
             </a>
         </div>
