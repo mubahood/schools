@@ -54,9 +54,16 @@ class StudentHasSemeterController extends AdminController
         $grid->column('year_name', 'Year of Study')->sortable();
         $grid->column('semester_name', 'Semester of Study')->sortable();
 
-        $grid->column('set_fees_balance_amount', 'Balance')->sortable()
+        $grid->column('set_fees_balance_amount', 'Last Semester Balance')->sortable()
             ->display(function ($amount) {
                 return 'UGX ' . number_format($amount);
+            });
+        $grid->column('current_balance', 'Current Balance')->sortable()
+            ->display(function ($amount) {
+                if($this->student == null){
+                    return 'Student Deleted';
+                }
+                return 'UGX ' . number_format($this->student->balance);
             });
         $grid->column('services', 'Services')->display(function ($ids) {
             if (empty($ids)) {
@@ -65,10 +72,10 @@ class StudentHasSemeterController extends AdminController
             $names = Service::whereIn('id', $ids)->pluck('name')->all();
             return implode(', ', $names);
         });
-        $grid->column('registration_number', 'Reg #')->sortable();
-        $grid->column('schoolpay_code', 'SchoolPay Code')->sortable();
-        $grid->column('pegpay_code', 'PegPay Code')->sortable();
-        $grid->column('enrolled_by.username', 'Enrolled By');
+        $grid->column('registration_number', 'Reg #')->sortable()->hide();
+        $grid->column('schoolpay_code', 'SchoolPay Code')->sortable()->hide();
+        $grid->column('pegpay_code', 'PegPay Code')->sortable()->hide();
+        $grid->column('enrolled_by.username', 'Enrolled By')->hide();
         $grid->column('is_processed', 'Processed')
             ->using(['Yes' => 'Yes', 'No' => 'No'])
             ->label([

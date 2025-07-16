@@ -172,7 +172,7 @@ class Transaction extends Model
                         'school_pay_transporter_id' => $m->school_pay_transporter_id,
                     ])->first();
                     if ($dup != null) {
-                        throw new Exception("Duplicate school_pay_transporter_id #" . $m->school_pay_transporter_i . " ref: " . $m->id, 1);
+                        throw new Exception("Duplicate Transaction #" . $m->school_pay_transporter_id . " ref: " . $m->id, 1);
                     }
                 }
             }
@@ -189,6 +189,53 @@ class Transaction extends Model
                             return false;
                         }
                     }
+                }
+            }
+
+            //MANUAL_ENTRY
+            if ($m->source == 'MANUAL_ENTRY') {
+                if ($m->cash_receipt_number == null || $m->cash_receipt_number == '') {
+                    throw new Exception("Cash receipt number is required for manual entries.", 1);
+                }
+                $existing = Transaction::where([
+                    'source' => 'MANUAL_ENTRY',
+                    'cash_receipt_number' => $m->cash_receipt_number,
+                    'enterprise_id' => $m->enterprise_id,
+                ])->first();
+                if ($existing != null) {
+                    throw new Exception("Cash receipt number already exists.", 1);
+                }
+            }
+
+            //PEG_PAY
+            if ($m->source == 'PEG_PAY') {
+                if ($m->peg_pay_transaction_number == null || $m->peg_pay_transaction_number == '') {
+                    throw new Exception("Peg pay transaction number is required for peg pay entries.", 1);
+                }
+                $existing = Transaction::where([
+                    'source' => 'PEG_PAY',
+                    'peg_pay_transaction_number' => $m->peg_pay_transaction_number,
+                ])->first();
+                if ($existing != null) {
+                    throw new Exception("Peg pay transaction number already exists.", 1);
+                }
+            }
+
+            //BANK
+            if ($m->source == 'BANK') {
+                if ($m->bank_account_id == null || $m->bank_account_id < 1) {
+                    throw new Exception("Bank account is required for bank entries.", 1);
+                }
+                if ($m->bank_transaction_number == null || $m->bank_transaction_number == '') {
+                    throw new Exception("Bank transaction number is required for bank entries.", 1);
+                }
+                $existing = Transaction::where([
+                    'source' => 'BANK',
+                    'bank_account_id' => $m->bank_account_id,
+                    'bank_transaction_number' => $m->bank_transaction_number,
+                ])->first();
+                if ($existing != null) {
+                    throw new Exception("Bank transaction number already exists.", 1);
                 }
             }
 

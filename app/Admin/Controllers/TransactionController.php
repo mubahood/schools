@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Admin\Actions\Post\TransactionChangeDueTerm;
 use App\Models\Account;
+use App\Models\BankAccount;
 use App\Models\StudentHasFee;
 use App\Models\Term;
 use App\Models\TermlySchoolFeesBalancing;
@@ -130,10 +131,12 @@ class TransactionController extends AdminController
                 ->select([
                     "SCHOOL_PAY" => 'SCHOOL_PAY',
                     "GENERATED" => 'GENERATED',
-                    "MANUAL_ENTRY" => 'MANUAL_ENTRY',
+                    "MANUAL_ENTRY" => 'MANUAL_ENTRY (cash)',
+                    "PEG_PAY" => 'PEG_PAY',
+                    "BANK" => 'BANK',
                     "MOBILE_APP" => 'MOBILE_APP',
                 ]);
-
+ 
             $filter->group('amount', function ($group) {
                 $group->gt('greater than');
                 $group->lt('less than');
@@ -210,8 +213,12 @@ class TransactionController extends AdminController
             ->label([
                 "SCHOOL_PAY" => 'success',
                 "GENERATED" => 'info',
+                "BANK" => 'info',
                 "MANUAL_ENTRY" => 'warning',
                 "MOBILE_APP" => 'warning',
+                "MANUAL_ENTRY" => 'primary',
+                "PEG_PAY" => 'warning',
+
             ])
             ->sortable();
 
@@ -263,11 +270,45 @@ class TransactionController extends AdminController
         $show = new Show(Transaction::findOrFail($id));
 
         $show->field('id', __('Id'));
-        $show->field('payment_date', __('Created at'));
-        $show->field('updated_at', __('Updated at'));
-        $show->field('enterprise_id', __('Enterprise id'));
-        $show->field('account_id', __('Account id'));
-        $show->field('amount', __('Amount'));
+        $show->field('payment_date', __('Payment Date'))->as(function ($date) {
+            return \App\Models\Utils::my_date_time($date);
+        });
+        $show->field('updated_at', __('Updated At'))->as(function ($date) {
+            return \App\Models\Utils::my_date_time($date);
+        }); 
+        $show->field('account_id', __('Account'))->as(function ($id) {
+            $acc = \App\Models\Account::find($id);
+            return $acc ? $acc->name : $id;
+        });
+        $show->field('amount', __('Amount'))->as(function ($amount) {
+            return number_format($amount);
+        });
+        $show->field('description', __('Description'));
+        $show->field('type', __('Type'));
+        $show->field('source', __('Source'));
+        $show->field('term_id', __('Due Term'))->as(function ($id) {
+            $term = \App\Models\Term::find($id);
+            return $term ? $term->name_text : $id;
+        });
+      
+        $show->field('created_by_id', __('Created By'))->as(function ($id) {
+            $user = \Encore\Admin\Auth\Database\Administrator::find($id);
+            return $user ? $user->name : $id;
+        });
+        $show->field('is_debit', __('Transaction Type'))->as(function ($val) {
+            return $val == 1 ? 'Debit (+)' : 'Credit (-)';
+        });
+      
+        $show->field('cash_receipt_number', __('Cash Receipt Number'));
+        $show->field('school_pay_transporter_id', __('School Pay Receipt Number'));
+        $show->field('bank_account_id', __('Bank Account'))->as(function ($id) {
+            $bank = \App\Models\BankAccount::find($id);
+            return $bank ? $bank->name : $id;
+        });
+        $show->field('bank_transaction_number', __('Bank Transaction Number'));
+        $show->field('peg_pay_transaction_number', __('Peg Pay Transaction Number'));
+        $show->field('receipt_photo', __('Receipt Photo'))->image();
+        $show->field('platform', __('Platform'));
 
         return $show;
     }
@@ -362,26 +403,51 @@ class TransactionController extends AdminController
         $form->datetime('payment_date', __('Date'))
             ->rules('required');
 
-        $form->textarea('description', __('Description'))->rules('required');
+
 
         $form->radio('source', "Money deposited to")
             ->options([
                 "SCHOOL_PAY" => 'School Pay',
+                "PEG_PAY" => 'Peg Pay',
+                "BANK" => 'Bank',
                 "MANUAL_ENTRY" => 'Manual Entry (Cash)',
             ])
+            ->when('MANUAL_ENTRY', function (Form $form) {
+                $form->text('cash_receipt_number', 'Cash Receipt - number')
+                    ->rules('required');
+            })
             ->when('SCHOOL_PAY', function (Form $form) {
                 $form->text('school_pay_transporter_id', 'School Pay Receipt Number')
                     ->rules('required|numeric');
+            })
+            ->when('BANK', function (Form $form) {
+                $u = Admin::user();
+                $banks = BankAccount::where([
+                    'enterprise_id' => $u->id
+                ])->get()->pluck('name', 'id');
+                $form->select('bank_account_id', 'Bank Account')
+                    ->options($banks)
+                    ->rules('required')->rules('required');
+                $form->text('bank_transaction_number', __('Bank Transaction number'))->rules('required');
+            })
+            ->when('PEG_PAY', function (Form $form) {
+                $form->text('peg_pay_transaction_number', __('Peg pay transaction-number'))->rules('required');
             })->rules('required')
             ->required();
+        $form->divider();
+        $form->file('receipt_photo', __('Receipt Photo'))->uniqueName()
+            ->help('Upload a receipt photo if available.');
 
-        $form->disableCreatingCheck();
+        $form->hidden('platform', __('platform'))->default('WEB')
+            ->rules('required');
+
+        // $form->disableCreatingCheck();
         $form->disableReset();
         $form->disableViewCheck();
 
         $form->hidden('is_contra_entry', __('is_contra_entry'))->default(0)->rules('required');
-        $form->disableEditingCheck();
-
+        // $form->disableEditingCheck();
+        $form->textarea('description', __('Description'))->rules('required');
 
 
 
