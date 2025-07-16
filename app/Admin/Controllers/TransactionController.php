@@ -154,7 +154,7 @@ class TransactionController extends AdminController
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
         ])
-            ->orderBy('updated_at', 'Desc');
+            ->orderBy('id', 'Desc');
 
         /*         $grid->column('id', __('Id'))->sortable(); */
 
@@ -422,11 +422,15 @@ class TransactionController extends AdminController
             })
             ->when('BANK', function (Form $form) {
                 $u = Admin::user();
+                $bank_drop = [];
                 $banks = BankAccount::where([
-                    'enterprise_id' => $u->id
-                ])->get()->pluck('name', 'id');
+                    'enterprise_id' => $u->enterprise_id
+                ])->get();
+                foreach ($banks as $bank) {
+                    $bank_drop[$bank->id] = $bank->name. " - " . $bank->account_number;
+                }
                 $form->select('bank_account_id', 'Bank Account')
-                    ->options($banks)
+                    ->options($bank_drop)
                     ->rules('required')->rules('required');
                 $form->text('bank_transaction_number', __('Bank Transaction number'))->rules('required');
             })
