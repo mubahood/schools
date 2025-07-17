@@ -767,4 +767,9 @@ class User extends Administrator implements JWTSubject
             }
         }
     }
+
+    public function extension()
+    {
+        return $this->hasOne(AdminUserExtension::class, 'user_id');
+    }
 }

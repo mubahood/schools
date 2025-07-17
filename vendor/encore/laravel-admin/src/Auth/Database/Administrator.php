@@ -8,6 +8,7 @@ use App\Models\AcademicYear;
 use App\Models\Account;
 use App\Models\AdminRole;
 use App\Models\AdminRoleUser;
+use App\Models\AdminUserExtension;
 use App\Models\Enterprise;
 use App\Models\ServiceSubscription;
 use App\Models\StudentHasClass;
@@ -1400,5 +1401,10 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                 $student_has_theo_class->save();
             }
         }
+    }
+
+    public function extension()
+    {
+        return $this->hasOne(AdminUserExtension::class, 'user_id');
     }
 }

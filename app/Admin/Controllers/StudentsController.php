@@ -280,6 +280,18 @@ class StudentsController extends AdminController
             }
             $filter->equal('theology_stream_id', 'Filter by Theology Stream')->select($theology_streams);
 
+
+            $filter->equal('extension.student_sourced_by_agent', 'Sourced by Agent?')
+                ->select(['Yes' => 'Yes', 'No' => 'No']);
+
+            $agents = \App\Models\Utils::getUsersByRoleSlug('marketing-agent', $u->enterprise_id);
+            $filter->equal('extension.student_sourced_by_agent_id', 'Agent')->select($agents);
+
+            $filter->between('extension.student_sourced_by_agent_commission', 'Agent Commission');
+
+            $filter->equal('extension.student_sourced_by_agent_commission_paid', 'Commission Paid?')
+                ->select(['Yes' => 'Yes', 'No' => 'No']);
+
             // Remove the default id filter
             $filter->disableIdFilter();
         });
@@ -552,7 +564,36 @@ class StudentsController extends AdminController
                 }
                 return $this->current_theology_class->name_text;
             })->hide()->sortable();
+            
  */
+        $grid->column('extension.student_sourced_by_agent', 'Sourced by Agent?')
+            ->display(function ($value) {
+                return $value === 'Yes' ? 'Yes' : 'No';
+            })
+            ->hide();
+
+        $grid->column('extension.student_sourced_by_agent_id', 'Agent')
+            ->display(function ($value) {
+                if (!$value) {
+                    return '';
+                }
+                $agent = \App\Models\User::find($value);
+                return $agent ? $agent->name : '';
+            })
+            ->hide()
+            ->sortable();
+
+        $grid->column('extension.student_sourced_by_agent_commission', 'Agent Commission')
+            ->display(function ($value) {
+                return $value ? number_format($value) : '';
+            })
+            ->hide();
+
+        $grid->column('extension.student_sourced_by_agent_commission_paid', 'Commission Paid?')
+            ->display(function ($value) {
+                return $value === 'Yes' ? 'Yes' : 'No';
+            })
+            ->hide();
         return $grid;
     }
 
@@ -813,13 +854,28 @@ class StudentsController extends AdminController
                 0 => 'Not active',
             ])
                 ->rules('required')->default(2);
+            $form->radio('extension.student_sourced_by_agent', 'Student sourced by marketing agent?')->options([
+                'Yes' => 'Yes',
+                'No' => 'No',
+            ])->default('No')
+                ->rules('required')
+                ->when('Yes', function (Form $form) {
+                    $u = Admin::user();
+                    $agents = Utils::getUsersByRoleSlug('marketing-agent', $u->enterprise_id);
+                    $form->select('extension.student_sourced_by_agent_id', 'Agent')
+                        ->options($agents)->rules('required');
+                    $form->decimal('extension.student_sourced_by_agent_commission', 'Commission')->default(0)
+                        ->rules('required');
+                    $form->radio('extension.student_sourced_by_agent_commission_paid', 'Commission paid?')
+                        ->options(['Yes' => 'Yes', 'No' => 'No'])->default('No');
+                });;
 
-            /* $states = [
-                'on' => ['value' => 1, 'text' => 'Verified', 'color' => 'success'],
-                'off' => ['value' => 0, 'text' => 'Pending', 'color' => 'danger'],
-            ];
-            $form->switch('verification')->states($states)
-                ->rules('required')->default(0); */
+            /* 
+                        $table->string('')->default('No')->nullable();
+            $table->unsignedBigInteger('student_sourced_by_agent_id')->nullable();
+            $table->integer('student_sourced_by_agent_commission')->nullable();
+            $table->string('student_sourced_by_agent_commission_paid')->default('No')->nullable();
+            */
         });
 
 

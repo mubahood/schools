@@ -14,9 +14,11 @@ class AddBankAccountIdToTransactions extends Migration
      */
     public function up()
     {
-        Schema::table('transactions', function (Blueprint $table) {
-            $table->foreignIdFor(BankAccount::class)->nullable();
-        });
+        if (!Schema::hasColumn('transactions', 'bank_account_id')) {
+            Schema::table('transactions', function (Blueprint $table) {
+                $table->foreignIdFor(BankAccount::class)->nullable();
+            });
+        }
     }
 
     /**

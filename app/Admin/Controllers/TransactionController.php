@@ -256,6 +256,13 @@ class TransactionController extends AdminController
             return  $this->by->name;
         })
             ->sortable();
+
+        $grid->column('print_receipt', 'Print Receipt')->display(function () {
+            $url = url('/print-receipt?id=' . $this->id);
+            return '<a href="' . $url . '" target="_blank" class="btn btn-sm btn-info">
+            <i class="fa fa-print"></i> Print Receipt
+            </a>';
+        })->width(120);
         return $grid;
     }
 
@@ -453,6 +460,7 @@ class TransactionController extends AdminController
         // $form->disableEditingCheck();
         $form->textarea('description', __('Description'))->rules('required');
 
+ 
 
 
 

@@ -218,6 +218,7 @@ return array(
     'App\\Models\\Activity' => $baseDir . '/app/Models/Activity.php',
     'App\\Models\\AdminRole' => $baseDir . '/app/Models/AdminRole.php',
     'App\\Models\\AdminRoleUser' => $baseDir . '/app/Models/AdminRoleUser.php',
+    'App\\Models\\AdminUserExtension' => $baseDir . '/app/Models/AdminUserExtension.php',
     'App\\Models\\AssessmentSheet' => $baseDir . '/app/Models/AssessmentSheet.php',
     'App\\Models\\BankAccount' => $baseDir . '/app/Models/BankAccount.php',
     'App\\Models\\BatchServiceSubscription' => $baseDir . '/app/Models/BatchServiceSubscription.php',

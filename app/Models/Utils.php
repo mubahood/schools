@@ -53,6 +53,18 @@ define('COLORS',  [
 class Utils  extends Model
 {
 
+    public static function getUsersByRoleSlug($role_slug, $enterprise_id)
+    {
+        $role = AdminRole::where('slug', $role_slug)->first();
+        if (!$role) {
+            return collect();
+        }
+        $user_ids = AdminRoleUser::where('role_id', $role->id)->pluck('user_id');
+        return User::whereIn('id', $user_ids)
+            ->where('enterprise_id', $enterprise_id)
+            ->pluck('name', 'id');
+    }
+
     public static function get_dropdown($class, $enterprise_id = null, $var_1, $var_2 = null)
     {
         if ($enterprise_id == null) {
