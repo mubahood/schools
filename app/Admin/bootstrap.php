@@ -5,12 +5,12 @@ use Illuminate\Support\Facades\Log;
 Log::info('Admin bootstrap started');
 
 try {
-    $fp = fsockopen("ssl://schooldynamics.ug", 443, $e, $s, 1);
+/*     $fp = fsockopen("ssl://schooldynamics.ug", 443, $e, $s, 1);
     if ($fp) {
         $final_url = "https://schooldynamics.ug/api/school-pay-reconcile";
         fwrite($fp, "GET /api/school-pay-reconcile HTTP/1.1\r\nHost: schooldynamics.ug\r\nConnection: Close\r\n\r\n");
         fclose($fp);
-    }
+    } */
 } catch (\Exception $e) {
     // Handle exception if needed
     // echo "Error: " . $e->getMessage();
