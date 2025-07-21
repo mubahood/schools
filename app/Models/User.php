@@ -708,6 +708,12 @@ class User extends Administrator implements JWTSubject
                 } catch (\Throwable $th) {
                     throw $th;
                 }
+            } else {
+                //update the amount if the last transaction is less than the tuition fee
+                $lastTransaction->amount = (-1) * $tuition_fee;
+                $lastTransaction->description = "Billed tuition fee for semester $semester_name in programme {$university_programme->name}.";
+                $lastTransaction->save();
+                // echo "Updated last transaction for user: " . $this->name . "<br>";
             }
         }
 
@@ -744,6 +750,16 @@ class User extends Administrator implements JWTSubject
                 'due_term_id' => $active_term->id,
             ])->first();
             if ($existingServiceSubscription != null) {
+                //update the amount
+                $existingServiceSubscription->quantity = 1; //default quantity
+                $existingServiceSubscription->total = $service->fee; //default total
+                try {
+                    $existingServiceSubscription->save();
+                } catch (\Throwable $th) {
+                    Log::error("Error updating service subscription: " . $th->getMessage());
+                }
+                // echo "Updated existing service subscription for user: " . $this->name . "<br>";
+
                 continue; //skip already existing service subscriptions
             }
             $newServiceSubscription = new ServiceSubscription();

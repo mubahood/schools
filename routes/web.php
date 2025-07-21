@@ -122,7 +122,63 @@ Route::get('process-stock-records', function (Request $request) {
 
 Route::get('reset-a-school', function (Request $request) {
 
+  $studentHasSemeters = StudentHasSemeter::where('enterprise_id', 24)
+    ->orderBy('id', 'desc')
+    ->get();
+  $min = 0;
+  $max = 10;
 
+  if ($request->has('min')) {
+    $min = (int)$request->get('min');
+  }
+
+  if ($request->has('max')) {
+    $max = (int)$request->get('max');
+  }
+
+  $i = -1;
+  foreach ($studentHasSemeters as $key => $studentHasSemeter) {
+    $i++;
+    //if not in range continue
+    if ($i < $min || $i > $max) {
+      continue;
+    }
+    if ($studentHasSemeter->student == null) {
+      echo "Student not found for student has semeter: " . $studentHasSemeter->id . "<br>";
+      continue;
+    }
+    echo "<hr>";
+
+    $BALANCE_CHANGED = false;
+    $BAL_1 = $studentHasSemeter->student->balance;
+    echo "BALANCE BEFORE BILLING: " . $studentHasSemeter->student->balance . "<br>";
+    try {
+      $studentHasSemeter->student->bill_university_students();
+    } catch (\Exception $e) {
+      echo "Error billing student: " . $studentHasSemeter->student->name . " for semeter: " . $studentHasSemeter->id . "<br>";
+      continue;
+    }
+    $student = User::find($studentHasSemeter->student->id);
+    $BAL_2 = $student->balance;
+    if ($BAL_1 != $BAL_2) {
+      $BALANCE_CHANGED = true;
+    }
+    echo "BALANCE AFTER... BILLING: " . $studentHasSemeter->student->balance . "<br>";
+    if ($BALANCE_CHANGED) {
+      echo "Balance changed for student: " . $studentHasSemeter->student->name . "<br>";
+    } else {
+      echo "Balance did not change for student: " . $studentHasSemeter->student->name . "<br>";
+    }
+  }
+
+  die('done');
+  dd($studentHasSemeters);
+  $u = User::find(20034);
+  $transactions = Transaction::where('account_id', $u->account->id)
+    ->orderBy('id', 'desc')
+    ->get();
+  $u->bill_university_students();
+  echo "Transactions for user: " . $u->name . "<br>";
   return 'done';
   /* $recs = TheologyMarkRecord::where([
     'term_id' => 52, 
