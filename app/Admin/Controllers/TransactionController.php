@@ -155,7 +155,8 @@ class TransactionController extends AdminController
             });
         });
 
-        $grid->quickSearch('description');
+        $grid->quickSearch('description', 'particulars')
+            ->placeholder('Search by description or particulars');
 
         $grid->batchActions(function ($batch) {
             $batch->disableDelete();
@@ -274,6 +275,10 @@ class TransactionController extends AdminController
             <i class="fa fa-print"></i> Print Receipt
             </a>';
         })->width(120);
+
+        //particulars
+        $grid->column('particulars', __('Particulars'))->sortable();
+
         return $grid;
     }
 
