@@ -8,6 +8,7 @@ use Encore\Admin\Facades\Admin;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Account extends Model
 {
@@ -178,10 +179,7 @@ class Account extends Model
                 }
             }
             self::deleting(function ($m) {
-                Transaction::where('account_id', $m->id)
-                    ->orWhere('contra_entry_account_id', $m->id)
-                    ->orWhere('contra_entry_transaction_id', $m->id)
-                    ->delete();
+                DB::statement("DELETE FROM transactions WHERE account_id = ?", [$m->id]);
             });
         });
     }
