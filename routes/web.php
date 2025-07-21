@@ -123,7 +123,7 @@ Route::get('process-stock-records', function (Request $request) {
 Route::get('reset-a-school', function (Request $request) {
 
 
-  $recs = TheologyMarkRecord::where([
+  /* $recs = TheologyMarkRecord::where([
     'term_id' => 52, 
   ])->get();
 
@@ -140,8 +140,8 @@ Route::get('reset-a-school', function (Request $request) {
 
   dd("Updated records: " . $recs);
   dd($recs);
-  return;
-  $school_name = 'KAMPALA INSTITUTE OF HEALTH PROFESSIONALS';
+  return; */
+  $school_name = 'NEBBI SCHOOL OF HEALTH SCIENCES';
   $ent = Enterprise::where('name', $school_name)->first();
   if ($ent == null) {
     throw new \Exception("Enterprise not found: $school_name");
