@@ -72,9 +72,14 @@ $requirements_total = 0;
             @if ($transaction->source == 'SCHOOL_PAY')
                 through school pay, Transaction ID:
                 <b>{{ $transaction->school_pay_transporter_id }}</b>
-            @endif
-            being payment of school fees.
+            @endif.
         </p>
+
+        @if (!empty($transaction->particulars))
+            <br>
+            <p> {{ $transaction->particulars }}</p>
+        @endif
+
         <p class="mt-3 mb-4">FEES BALANCE: <b>UGX {{ number_format($account->balance) }}</b></p>
 
         <table style="width: 100%;">

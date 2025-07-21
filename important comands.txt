@@ -1,4 +1,4 @@
-php artisan make:migration add_connection_admin_user_extensions  --table=admin_user_extensions
+php artisan make:migration add_particulars_to_transactions_table --table=transactions
 ls
          $table->date('check_in_time')->nullable();
             $table->date('check_out_time')->nullable();

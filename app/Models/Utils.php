@@ -1765,6 +1765,13 @@ class Utils  extends Model
             die("No active term found.");
         }
 
+        if(isset($_GET['ent_id']) && $_GET['ent_id'] > 0) {
+            $my_ent = Enterprise::find($_GET['ent_id']);
+            if ($my_ent == null) {
+                die("Enterprise not found.");
+            }
+            $ent = $my_ent; 
+        }
 
         // 3) Determine rec_date (today or back-fill up to 30 days)
         $lastRec = Reconciler::where('enterprise_id', $ent->id)
@@ -1831,7 +1838,7 @@ class Utils  extends Model
         try {
             $response = $client->get($url, [
                 'verify'  => false,
-                'timeout' => 10,
+                'timeout' => 100,
             ]);
         } catch (\GuzzleHttp\Exception\RequestException $e) {
             $rec->details = "Failed on {$rec_date}: " . $e->getMessage();

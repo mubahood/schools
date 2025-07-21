@@ -36,6 +36,17 @@ class TransactionController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Transaction());
+
+        $grid->tools(function ($tools) {
+            $u = Admin::user();
+            $url = url(
+                'api/school-pay-reconcile?ent_id=' . $u->enterprise_id
+            );
+            $tools->append('<a 
+            target="_blank"
+            href="' . $url . '" class="btn btn-sm btn-primary" style="margin-right:10px;"><i class="fa fa-refresh"></i> Sync School Pay Transactions Now</a>');
+        });
+
         /*  $u = Admin::user();
         StudentHasFee::where('enterprise_id', $u->enterprise_id)
             ->delete(); */
@@ -136,7 +147,7 @@ class TransactionController extends AdminController
                     "BANK" => 'BANK',
                     "MOBILE_APP" => 'MOBILE_APP',
                 ]);
- 
+
             $filter->group('amount', function ($group) {
                 $group->gt('greater than');
                 $group->lt('less than');
@@ -282,7 +293,7 @@ class TransactionController extends AdminController
         });
         $show->field('updated_at', __('Updated At'))->as(function ($date) {
             return \App\Models\Utils::my_date_time($date);
-        }); 
+        });
         $show->field('account_id', __('Account'))->as(function ($id) {
             $acc = \App\Models\Account::find($id);
             return $acc ? $acc->name : $id;
@@ -297,7 +308,7 @@ class TransactionController extends AdminController
             $term = \App\Models\Term::find($id);
             return $term ? $term->name_text : $id;
         });
-      
+
         $show->field('created_by_id', __('Created By'))->as(function ($id) {
             $user = \Encore\Admin\Auth\Database\Administrator::find($id);
             return $user ? $user->name : $id;
@@ -305,7 +316,7 @@ class TransactionController extends AdminController
         $show->field('is_debit', __('Transaction Type'))->as(function ($val) {
             return $val == 1 ? 'Debit (+)' : 'Credit (-)';
         });
-      
+
         $show->field('cash_receipt_number', __('Cash Receipt Number'));
         $show->field('school_pay_transporter_id', __('School Pay Receipt Number'));
         $show->field('bank_account_id', __('Bank Account'))->as(function ($id) {
@@ -434,7 +445,7 @@ class TransactionController extends AdminController
                     'enterprise_id' => $u->enterprise_id
                 ])->get();
                 foreach ($banks as $bank) {
-                    $bank_drop[$bank->id] = $bank->name. " - " . $bank->account_number;
+                    $bank_drop[$bank->id] = $bank->name . " - " . $bank->account_number;
                 }
                 $form->select('bank_account_id', 'Bank Account')
                     ->options($bank_drop)
@@ -458,9 +469,13 @@ class TransactionController extends AdminController
 
         $form->hidden('is_contra_entry', __('is_contra_entry'))->default(0)->rules('required');
         // $form->disableEditingCheck();
-        $form->textarea('description', __('Description'))->rules('required');
+        $form->text('description', __('Description'));
 
- 
+        //particulars
+        $form->text('particulars', __('Particulars'))
+            ->help('Enter any additional details or particulars for this transaction.');
+
+
 
 
 
