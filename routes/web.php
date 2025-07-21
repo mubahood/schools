@@ -123,6 +123,7 @@ Route::get('process-stock-records', function (Request $request) {
 Route::get('reset-a-school', function (Request $request) {
 
 
+  return 'done';
   /* $recs = TheologyMarkRecord::where([
     'term_id' => 52, 
   ])->get();
