@@ -122,6 +122,7 @@ Route::get('process-stock-records', function (Request $request) {
 
 Route::get('reset-a-school', function (Request $request) {
 
+  return 'done 1';
   $studentHasSemeters = StudentHasSemeter::where('enterprise_id', 24)
     ->orderBy('id', 'desc')
     ->get();
