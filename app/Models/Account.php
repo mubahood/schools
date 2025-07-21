@@ -179,6 +179,8 @@ class Account extends Model
                 }
             }
             self::deleting(function ($m) {
+                throw new Exception("Account cannot be deleted.", 1);
+                return false;
                 DB::statement("DELETE FROM transactions WHERE account_id = ?", [$m->id]);
             });
         });
