@@ -3,6 +3,20 @@ use App\Models\AcademicClass;
 use App\Models\SchoolFeesDemand;
 use App\Models\Utils;
 
+$sig_path = null;
+if ($ent->bursar_signature && strlen($ent->bursar_signature) > 3) {
+    $sig_path = public_path('storage/' . $ent->bursar_signature);
+    if (file_exists($sig_path)) {
+        $sig_path = asset('storage/' . $ent->bursar_signature);
+    } else {
+        $sig_path = null;
+    }
+}
+
+/* 
+demand-notice
+*/
+
 ?>
 @include('print.css')
 @foreach ($recs as $index => $rec)
@@ -52,10 +66,16 @@ use App\Models\Utils;
             <h2 class="text-center fs-16 mt-2 fs-18"><u>FEES DEMAND NOTICE</u></h2>
             <div class="text-justify" style="font-size: 14px;">
                 {!! SchoolFeesDemand::get_demand_message($demand, $item) !!}
-            </div> 
-            <p class="text-right"><b>Signature:................................</b></p>
+            </div>
+            @if ($sig_path)
+                <p class="text-right"><b>Bursar's Signature: <img src="{{ $sig_path }}" alt="Signature"
+                            style="width: 160px; height: auto; margin-bottom: -13px;"> </b></p>
+            @else
+                <p class="text-right"><b>Bursar's Signature:................................</b></p>
+            @endif
+
         </div>
-        @php 
+        @php
         @endphp
     @endforeach
     <div style="page-break-after: always;"></div>

@@ -43,8 +43,8 @@ if ($demand->message_4 != null && $demand->message_4 != '') {
 
     {{-- $logo --}}
     <table class="w-100">
-        
-         <tr>
+
+        <tr>
             <td class="text-left p-0 m-0" style="width: 50px; height: 50px;">
                 <img src="{{ $logo }}" alt="logo" style="width: 50px; height: 50px;">
             </td>
@@ -58,10 +58,12 @@ if ($demand->message_4 != null && $demand->message_4 != '') {
             </td>
             <td class="text-left p-0 m-0" style="width: 50px; height: 50px;">
                 @if (isset($demand->include_student_photos) && $demand->include_student_photos == 'Yes')
-                    <div style="width: 50px; height: 50px; background: #fff; display: flex; align-items: center; justify-content: center;
+                    <div
+                        style="width: 50px; height: 50px; background: #fff; display: flex; align-items: center; justify-content: center;
                     vertical-align: middle;  
                     border-radius: 4px; border: 2px solid #000; overflow: hidden;">
-                        <img src="{{ $item->owner->avatar }}" alt="student photo" style="max-width: 100%;   object-fit: contain; display: block; vertical-align: middle; width: 100%;">
+                        <img src="{{ $item->owner->avatar }}" alt="student photo"
+                            style="max-width: 100%;   object-fit: contain; display: block; vertical-align: middle; width: 100%;">
                     </div>
                 @else
                     <div
@@ -70,7 +72,7 @@ if ($demand->message_4 != null && $demand->message_4 != '') {
                     </div>
                 @endif
             </td>
-        </tr> 
+        </tr>
     </table>
 
     <p class="fs-14 text-uppercase mt-1 mb-2 mt-2 " style=" font-size: 12px; line-height: 1.1">
@@ -85,5 +87,25 @@ if ($demand->message_4 != null && $demand->message_4 != '') {
 
         </b> EXIPIRY DATE: <b><u>{{ $demand->message_4 }}</u></b>
     </p>
-    <p class="m-0 mt-2" style="color: {{ $ent->color }}; font-weight: 900;">Signature: __________________________</p>
+
+    @php
+        $sig_path = null;
+        if ($ent->bursar_signature && strlen($ent->bursar_signature) > 3) {
+            $sig_path = public_path('storage/' . $ent->bursar_signature);
+            if (file_exists($sig_path)) {
+                $sig_path = asset('storage/' . $ent->bursar_signature);
+            } else {
+                $sig_path = null;
+            }
+        }
+
+    @endphp
+    @if ($sig_path)
+        <p class="text-right p-0 m-0"><b style="color: {{ $ent->color }};">Signature: <img src="{{ $sig_path }}"
+                    alt="Signature" style="width: 100px; height: 30px; margin-top: -10px;"> </b></p>
+    @else
+        <p class="m-0 mt-2" style="color: {{ $ent->color }}; font-weight: 900;">Signature: __________________________
+        </p>
+    @endif
+
 </div>
