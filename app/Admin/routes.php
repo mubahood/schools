@@ -34,6 +34,7 @@ Route::group([
     $router->resource('accounts', AccountController::class);
     $router->resource('fees', AcademicClassFeeController::class);
     $router->resource('transactions', TransactionController::class);
+    $router->resource('transactions-deleted', DeletedTransactionController::class);
     $router->resource('school-fees-payment', TransactionController::class);
     // $router->resource('school-fees-payment', SchoolFeesPaymentController::class);
     $router->resource('menu-items', MenuItemController::class);

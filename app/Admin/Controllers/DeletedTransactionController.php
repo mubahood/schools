@@ -8,7 +8,7 @@ use App\Models\BankAccount;
 use App\Models\StudentHasFee;
 use App\Models\Term;
 use App\Models\TermlySchoolFeesBalancing;
-use App\Models\Transaction;
+use App\Models\DeletedTransaction;
 use App\Models\Utils;
 use Attribute;
 use Encore\Admin\Controllers\AdminController;
@@ -19,14 +19,14 @@ use Encore\Admin\Show;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-class TransactionController extends AdminController
+class DeletedTransactionController extends AdminController
 {
     /**
      * Title for current resource.
      *
      * @var string
      */
-    protected $title = 'Transactions';
+    protected $title = 'Deleted Transactions';
 
     /** 
      * Make a grid builder.
@@ -35,7 +35,7 @@ class TransactionController extends AdminController
      */
     protected function grid()
     {
-        $grid = new Grid(new Transaction());
+        $grid = new Grid(new DeletedTransaction());
 
         $grid->tools(function ($tools) {
             $u = Admin::user();
@@ -159,6 +159,7 @@ class TransactionController extends AdminController
             ->placeholder('Search by description or particulars');
 
         $grid->batchActions(function ($batch) {
+            $batch->disableDelete();
             $batch->add(new TransactionChangeDueTerm());
         });
 
@@ -277,6 +278,7 @@ class TransactionController extends AdminController
 
         //particulars
         $grid->column('particulars', __('Particulars'))->sortable();
+        $grid->disableActions();
 
         return $grid;
     }
@@ -289,7 +291,7 @@ class TransactionController extends AdminController
      */
     protected function detail($id)
     {
-        $show = new Show(Transaction::findOrFail($id));
+        $show = new Show(DeletedTransaction::findOrFail($id));
 
         $show->field('id', __('Id'));
         $show->field('payment_date', __('Payment Date'))->as(function ($date) {
@@ -342,7 +344,8 @@ class TransactionController extends AdminController
      */
     protected function form()
     {
-        $form = new Form(new Transaction());
+        $form = new Form(new DeletedTransaction());
+        // return $form;
         $u = Admin::user();
         $accs = Account::where([
             'enterprise_id' => $u->enterprise_id,

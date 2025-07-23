@@ -8,6 +8,7 @@ use Encore\Admin\Facades\Admin;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class Transaction extends Model
@@ -101,18 +102,77 @@ class Transaction extends Model
 
 
 
-    public function getCreatedAtAttribute($value)
-    {
-        return Carbon::parse($value)->toDateString() . " - " . Carbon::parse($value)->toTimeString();
-    }
-
 
     public static function boot()
     {
         parent::boot();
         self::deleting(function ($m) {
-            throw new Exception("Transaction cannot be deleted.", 1);
-            return false;
+            $u = Auth::user();
+
+            if ($u == null) {
+                throw new Exception("You must be logged in to delete a transaction.", 1);
+            }
+
+            //if not bursar, then dont delete
+            if (!$u->isRole('bursar')) {
+                throw new Exception("You dont have right role to delete a transaction");
+            }
+            //bursar
+            $del = new DeletedTransaction();
+            $existing = DeletedTransaction::find($m->id);
+            if ($existing != null) {
+                $del = $existing;
+            }
+            $t = null;
+            if ($m->created_at != null ) {
+                try {
+                    $t = Carbon::parse($m->created_at);
+                } catch (\Throwable $th) {
+                    //throw $th;
+                }
+            }
+            if($t != null){
+                $del->created_at = $t;
+            }
+            $del->id = $m->id;
+            $del->created_at = $m->created_at;
+            $del->amount = $m->amount;
+            $del->updated_at = $m->updated_at;
+            $del->enterprise_id = $m->enterprise_id;
+            $del->account_id = $m->account_id;
+            $del->description = $m->description;
+            $del->academic_year_id = $m->academic_year_id;
+            $del->term_id = $m->term_id;
+            $del->school_pay_transporter_id = $m->school_pay_transporter_id;
+            $del->created_by_id = $m->created_by_id;
+            $del->is_contra_entry = $m->is_contra_entry;
+            $del->type = $m->type;
+            $del->contra_entry_account_id = $m->contra_entry_account_id;
+            $del->contra_entry_transaction_id = $m->contra_entry_transaction_id;
+            $del->payment_date = $m->payment_date;
+            $del->termly_school_fees_balancing_id = $m->termly_school_fees_balancing_id;
+            $del->source = $m->source;
+            $del->academic_class_fee_id = $m->academic_class_fee_id;
+            $del->is_last_term_balance = $m->is_last_term_balance;
+            $del->is_tuition = $m->is_tuition;
+            $del->is_service = $m->is_service;
+            $del->service_id = $m->service_id;
+            $del->receipt_photo = $m->receipt_photo;
+            $del->peg_pay_transaction_number = $m->peg_pay_transaction_number;
+            $del->bank_transaction_number = $m->bank_transaction_number;
+            $del->platform = $m->platform;
+            $del->cash_receipt_number = $m->cash_receipt_number;
+            $del->bank_account_id = $m->bank_account_id;
+            $del->particulars = $m->particulars;
+            $del->deleted_by_id = $u->id;
+            $del->deleted_at = Carbon::now(); 
+
+            try {
+                $del->save();
+            } catch (\Throwable $th) {
+                throw $th;
+            }
+            return true;
         });
         self::deleted(function ($m) {
             DB::table('transactions')->where('contra_entry_account_id', $m->id)->delete();
