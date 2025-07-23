@@ -120,10 +120,14 @@ Route::get('process-stock-records', function (Request $request) {
   return "Stock records and batches archived successfully for enterprise: " . $enterprise->name;
 });
 
-Route::get('reset-a-school', function (Request $request) {
+Route::get('bill-afresh', function (Request $request) {
+  $ent_id = $request->get('ent_id', null);
+  $ent = Enterprise::find($ent_id);
+  if ($ent == null) {
+    return "Enterprise not found";
+  }
 
-  return 'done 1';
-  $studentHasSemeters = StudentHasSemeter::where('enterprise_id', 24)
+  $studentHasSemeters = StudentHasSemeter::where('enterprise_id', $ent->id)
     ->orderBy('id', 'desc')
     ->get();
   $min = 0;
@@ -171,16 +175,11 @@ Route::get('reset-a-school', function (Request $request) {
       echo "Balance did not change for student: " . $studentHasSemeter->student->name . "<br>";
     }
   }
+});
+Route::get('reset-a-school', function (Request $request) {
 
-  die('done');
-  dd($studentHasSemeters);
-  $u = User::find(20034);
-  $transactions = Transaction::where('account_id', $u->account->id)
-    ->orderBy('id', 'desc')
-    ->get();
-  $u->bill_university_students();
-  echo "Transactions for user: " . $u->name . "<br>";
-  return 'done';
+
+
   /* $recs = TheologyMarkRecord::where([
     'term_id' => 52, 
   ])->get();
