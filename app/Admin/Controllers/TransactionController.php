@@ -37,6 +37,9 @@ class TransactionController extends AdminController
     {
         $grid = new Grid(new Transaction());
 
+
+        $grid->perPages([30, 50, 100, 300, 500, 1000]);
+
         $grid->tools(function ($tools) {
             $u = Admin::user();
             $url = url(
