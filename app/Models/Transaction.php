@@ -124,14 +124,14 @@ class Transaction extends Model
                 $del = $existing;
             }
             $t = null;
-            if ($m->created_at != null ) {
+            if ($m->created_at != null) {
                 try {
                     $t = Carbon::parse($m->created_at);
                 } catch (\Throwable $th) {
                     //throw $th;
                 }
             }
-            if($t != null){
+            if ($t != null) {
                 $del->created_at = $t;
             }
             $del->id = $m->id;
@@ -165,7 +165,7 @@ class Transaction extends Model
             $del->bank_account_id = $m->bank_account_id;
             $del->particulars = $m->particulars;
             $del->deleted_by_id = $u->id;
-            $del->deleted_at = Carbon::now(); 
+            $del->deleted_at = Carbon::now();
 
             try {
                 $del->save();
@@ -175,11 +175,11 @@ class Transaction extends Model
             return true;
         });
         self::deleted(function ($m) {
-            DB::table('transactions')->where('contra_entry_account_id', $m->id)->delete();
-            DB::table('transactions')->where('contra_entry_transaction_id', $m->id)->delete();
+            // DB::table('transactions')->where('contra_entry_account_id', $m->id)->delete();
+            // DB::table('transactions')->where('contra_entry_transaction_id', $m->id)->delete();
 
-            Transaction::where(['contra_entry_account_id' => $m->id])->delete();
-            Transaction::where(['contra_entry_transaction_id' => $m->id])->delete();
+            // Transaction::where(['contra_entry_account_id' => $m->id])->delete();
+            // Transaction::where(['contra_entry_transaction_id' => $m->id])->delete();
 
             Transaction::my_update($m);
         });
