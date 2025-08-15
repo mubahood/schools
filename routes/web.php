@@ -77,6 +77,7 @@ Route::get('student-data-import-do-import', [MainController::class, 'student_dat
 Route::get('process-students-enrollment', [MainController::class, 'process_students_enrollment']);
 
 Route::get('reset-marks', function (Request $request) {
+  return "done 1";
   $term_id = 52;
   $affected_1 = TheologyMarkRecord::where('term_id', $term_id)
     ->update([
