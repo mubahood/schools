@@ -76,6 +76,26 @@ use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 Route::get('student-data-import-do-import', [MainController::class, 'student_data_import_do_import']);
 Route::get('process-students-enrollment', [MainController::class, 'process_students_enrollment']);
 
+Route::get('reset-marks', function (Request $request) {
+  $term_id = 52;
+  $affected_1 = TheologyMarkRecord::where('term_id', $term_id)
+    ->update([
+      'eot_score' => 0,
+      'total_score_display' => 0,
+      'eot_is_submitted' => 'No',
+      'remarks' => '',
+    ]);
+  //do the same for secular
+  $affected_2 = MarkRecord::where('term_id', $term_id)
+    ->update([
+      'eot_score' => 0,
+      'total_score_display' => 0,
+      'eot_is_submitted' => 'No',
+      'remarks' => '',
+    ]);
+    echo "$affected_1 theology, $affected_2 secular.";
+    die('done');
+});
 Route::get('process-stock-records', function (Request $request) {
 
 
