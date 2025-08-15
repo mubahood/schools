@@ -78,22 +78,34 @@ Route::get('process-students-enrollment', [MainController::class, 'process_stude
 
 Route::get('reset-marks', function (Request $request) {
   $term_id = 52;
-  $affected_1 = TheologyMarkRecord::where('term_id', $term_id)
-    ->update([
-      'eot_score' => 0,
-      'total_score_display' => 0,
-      'eot_is_submitted' => 'No',
-      'remarks' => '',
-    ]);
-  //do the same for secular
-  $affected_2 = MarkRecord::where('term_id', $term_id)
-    ->update([
-      'eot_score' => 0,
-      'total_score_display' => 0,
-      'eot_is_submitted' => 'No',
-      'remarks' => '',
-    ]);
-    echo "$affected_1 theology, $affected_2 secular.";
+  $affected_1 = 0;
+  $affected_2 = 0;
+
+  try {
+    $affected_1 = TheologyMarkRecord::where('term_id', $term_id)
+      ->update([
+        'eot_score' => 0,
+        'total_score_display' => 0,
+        'eot_is_submitted' => 'No',
+        'remarks' => '',
+      ]);
+  } catch (\Throwable $e) {
+    echo "Error resetting theology marks: " . $e->getMessage() . "<br>";
+  }
+
+  try {
+    $affected_2 = MarkRecord::where('term_id', $term_id)
+      ->update([
+        'eot_score' => 0,
+        'total_score_display' => 0,
+        'eot_is_submitted' => 'No',
+        'remarks' => '',
+      ]);
+  } catch (\Throwable $e) {
+    echo "Error resetting secular marks: " . $e->getMessage() . "<br>";
+  }
+
+  echo "$affected_1 theology, $affected_2 secular.";
     die('done');
 });
 Route::get('process-stock-records', function (Request $request) {
