@@ -77,6 +77,7 @@ Route::get('student-data-import-do-import', [MainController::class, 'student_dat
 Route::get('process-students-enrollment', [MainController::class, 'process_students_enrollment']);
 
 Route::get('reset-marks', function (Request $request) {
+  return "This route is deprecated. Please use the new reset-marks route."; 
   $term_id = 52;
   $affected_1 = 0;
   $affected_2 = 0;
