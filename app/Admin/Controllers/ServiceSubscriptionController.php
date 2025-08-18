@@ -87,7 +87,7 @@ class ServiceSubscriptionController extends AdminController
 
 
 
-        $grid->disableBatchActions();
+        // $grid->disableBatchActions();
 
 
         $grid->column('created_at', __('Date'))
