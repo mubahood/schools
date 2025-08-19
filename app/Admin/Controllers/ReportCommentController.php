@@ -159,8 +159,8 @@ class ReportCommentController extends AdminController
             'AGGREGATE' => 'Use aggregates (Grading)',
         ])->default('MARKS')->rules('required')->required();  */
 
-        $form->decimal('min_score', __('Min Score (Percentage)'))->rules('required|numeric|min:0|max:100')->required();
-        $form->decimal('max_score', __('Max Score (Percentage)'))->rules('required|numeric|min:0|max:100|gte:min_score')->required();
+        $form->decimal('min_score', __('Min Score (Aggregates)'))->rules('required|numeric|min:0|max:100')->required();
+        $form->decimal('max_score', __('Max Score (Aggregates)'))->rules('required|numeric|min:0|max:100|gte:min_score')->required();
 
         $key_words = [
             '[NAME]',
