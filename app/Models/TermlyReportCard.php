@@ -859,6 +859,9 @@ class TermlyReportCard extends Model
     }
     public static function get_teachers_remarks($report_card)
     {
+
+        $report_card->generate_comment(true, true);
+        return;
         set_time_limit(-1);
         ini_set('memory_limit', '-1');
 

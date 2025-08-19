@@ -77,6 +77,16 @@ Route::get('student-data-import-do-import', [MainController::class, 'student_dat
 Route::get('process-students-enrollment', [MainController::class, 'process_students_enrollment']);
 
 Route::get('reset-marks', function (Request $request) {
+/*   $report = StudentReportCard::find(14505);
+  TermlyReportCard::get_teachers_remarks($report);
+  $report = StudentReportCard::find(14505);
+  dd($report->class_teacher_comment); */
+  /* 
+      "class_teacher_comment" => "Najib Mugoba's academic achievements are exceptional and set a high standard for his peers."
+    "head_teacher_comment" => null
+    "class_teacher_commented" => 0
+    "head_teacher_commented" => 0
+  */
   return "This route is deprecated. Please use the new reset-marks route."; 
   $term_id = 52;
   $affected_1 = 0;
