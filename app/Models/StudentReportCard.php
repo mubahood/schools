@@ -19,7 +19,7 @@ class StudentReportCard extends Model
             return;
         }
 
-        if($this->total_aggregates < 3){
+        if ($this->total_aggregates < 3) {
             return;
         }
 
@@ -47,17 +47,32 @@ class StudentReportCard extends Model
                 [$owner->name, 'He', 'His', 'Him'],
                 $class_teacher_comment
             );
+            $head_teacher_comment = str_replace(
+                ['[NAME]', '[HE_OR_SHE]', '[HIS_OR_HER]', '[HIM_OR_HER]'],
+                [$owner->name, 'He', 'His', 'Him'],
+                $head_teacher_comment
+            );
         } else if (strtolower(trim($owner->sex)) == 'female') {
             $class_teacher_comment = str_replace(
                 ['[NAME]', '[HE_OR_SHE]', '[HIS_OR_HER]', '[HIM_OR_HER]'],
                 [$owner->name, 'She', 'Her', 'Her'],
                 $class_teacher_comment
             );
+            $head_teacher_comment = str_replace(
+                ['[NAME]', '[HE_OR_SHE]', '[HIS_OR_HER]', '[HIM_OR_HER]'],
+                [$owner->name, 'She', 'Her', 'Her'],
+                $head_teacher_comment
+            );
         } else {
             $class_teacher_comment = str_replace(
                 ['[NAME]', '[HE_OR_SHE]', '[HIS_OR_HER]', '[HIM_OR_HER]'],
                 [$owner->name, 'He/She', 'His/Her', 'Him/Her'],
                 $class_teacher_comment
+            );
+            $head_teacher_comment = str_replace(
+                ['[NAME]', '[HE_OR_SHE]', '[HIS_OR_HER]', '[HIM_OR_HER]'],
+                [$owner->name, 'He/She', 'His/Her', 'Him/Her'],
+                $head_teacher_comment
             );
         }
 
