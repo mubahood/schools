@@ -2,7 +2,14 @@
 
 namespace App\Admin\Controllers;
 
+use App\Models\AcademicClass;
+use App\Models\AcademicClassSctream;
 use App\Models\SecondaryReportCard;
+use App\Models\SecondarySubject;
+use App\Models\SecondaryTermlyReportCard;
+use App\Models\Term;
+use App\Models\TermlySecondaryReportCard;
+use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -27,6 +34,48 @@ class SecondaryReportCardController extends AdminController
     {
         $grid = new Grid(new SecondaryReportCard());
         $u = Admin::user();
+
+        $grid->filter(function ($filter) {
+            $filter->disableIdFilter();
+            $u = Admin::user();
+            $year = $u->ent->active_academic_year();
+
+
+            $ajax_url = url(
+                '/api/ajax-users?'
+                    . 'enterprise_id=' . $u->enterprise_id
+                    . "&search_by_1=name"
+                    . "&search_by_2=id"
+                    . "&user_type=student"
+                    . "&model=User"
+            );
+            $ajax_url = trim($ajax_url);
+            $filter->equal('administrator_id', 'Filter by student')
+                ->select(function ($id) {
+                    $a = Administrator::find($id);
+                    if ($a) {
+                        return [$a->id => $a->name];
+                    }
+                })->ajax($ajax_url);
+
+
+
+            $filter->equal('academic_class_id', 'Filter by Class')
+                ->select(AcademicClass::getAcademicClasses(['enterprise_id' => $u->enterprise_id]));
+
+            $filter->equal('academic_class_sctream_id', 'Filter by Stream')
+                ->select(AcademicClassSctream::getItemsToArray(['enterprise_id' => $u->enterprise_id]));
+
+            $filter->equal('term_id', 'Filter by Term')
+                ->select(Term::getItemsToArray(['enterprise_id' => $u->enterprise_id]));
+
+            /*  $filter->group('average_score', 'Filter by Score', function ($group) {
+                $group->gt('greater than');
+                $group->lt('less than');
+                $group->equal('equal to');
+            }); */
+        });
+
         $grid->model()->where([
             'enterprise_id' => $u->enterprise_id,
         ])->orderBy('id', 'desc');
@@ -65,6 +114,14 @@ class SecondaryReportCardController extends AdminController
             ->display(function ($x) {
                 return "<a href='" . url('/secondary-report-cards-print?secondary_report_card_id=' . $this->id . '') . "' target='_blank'>PRINT</a>";
             });
+        //secondary_termly_report_card_id
+        $grid->column('secondary_termly_report_card_id', __('Termly Report Card'))
+            ->display(function ($x) {
+                if ($this->secondary_termly_report_card == null) {
+                    return 'N/A';
+                }
+                return $this->secondary_termly_report_card->report_title;
+            })->sortable();
 
         return $grid;
     }

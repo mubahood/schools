@@ -57,7 +57,7 @@ class SecondaryReportCard extends Model
     //belongs to secondary_termly_report_card_id relationship
     public function secondary_termly_report_card()
     {
-        return $this->belongsTo(SecondaryTermlyReportCard::class, 'secondary_termly_report_card_id');
+        return $this->belongsTo(TermlySecondaryReportCard::class, 'secondary_termly_report_card_id');
     }
 
 

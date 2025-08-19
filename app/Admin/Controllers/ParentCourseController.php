@@ -42,7 +42,7 @@ class ParentCourseController extends AdminController
         $grid->column('s4_term2_topics')->sortable();
         $grid->column('s4_term3_topics')->sortable();
 
-   
+
         $grid->column('code', __('Code'))->sortable();
 
         $grid->column('papers', __('Papers'))->display(function () {
@@ -107,24 +107,12 @@ class ParentCourseController extends AdminController
 
 
 
-        if ($form->isCreating()) {
-
-            $form->text('name', __('Name'));
-            $form->select('type', __('Type'))->options([
-                'Secondary' => 'Secondary',
-                'Advanced' => 'Advanced',
-            ])
-                ->default('Secondary');
-        } else {
-
-            $form->text('name', __('Name'))->readOnly();
-            $form->select('type', __('Type'))->options([
-                'Secondary' => 'Secondary',
-                'Advanced' => 'Advanced',
-            ])
-                ->readOnly()
-                ->default('Secondary');
-        }
+        $form->text('name', __('Name'));
+        $form->select('type', __('Type'))->options([
+            'Secondary' => 'Secondary',
+            'Advanced' => 'Advanced',
+        ])
+            ->default('Secondary'); 
         $form->text('short_name', __('Short name'));
         $form->text('code', __('Code'));
 
@@ -136,7 +124,7 @@ class ParentCourseController extends AdminController
 
 
         $form->switch('is_verified', __('Is verified'))->default(1);
-        
+
         $form->divider('S.1 Topics');
         $form->textarea('s1_term1_topics');
         $form->textarea('s1_term2_topics');
@@ -149,12 +137,12 @@ class ParentCourseController extends AdminController
         $form->divider('S.3 Topics');
         $form->textarea('s3_term1_topics');
         $form->textarea('s3_term2_topics');
-        $form->textarea('s3_term3_topics'); 
-        
+        $form->textarea('s3_term3_topics');
+
         $form->divider('S.4 Topics');
         $form->textarea('s4_term1_topics');
         $form->textarea('s4_term2_topics');
-        $form->textarea('s4_term3_topics'); 
+        $form->textarea('s4_term3_topics');
 
         /* 
         	 

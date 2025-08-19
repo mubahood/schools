@@ -318,6 +318,18 @@ class StudentHasClassController extends AdminController
         $u = Admin::user();
         $form->hidden('enterprise_id')->default($u->enterprise_id)
             ->value($u->enterprise_id);
+        $record = null;
+        $request = request();
+
+        if($form->isEditing()) {
+            $id = $request->segment(2);
+            $record = StudentHasClass::find($id);
+            if ($record == null) {
+                throw new Exception("Record not found.", 1);
+            }
+        }
+
+
 
         if ($form->isCreating()) {
 
@@ -390,12 +402,14 @@ class StudentHasClassController extends AdminController
                 throw new Exception("Class not found.", 1);
             }
 
+    
             $streams = [];
             $u = Admin::user();
             foreach (
                 AcademicClassSctream::where(
                     [
                         'enterprise_id' => $u->enterprise_id,
+                        'academic_class_id' => $record->academic_class_id,
                     ]
                 )
                     ->orderBy('id', 'desc')
@@ -513,31 +527,9 @@ class StudentHasClassController extends AdminController
 
 
 
-                $id = ((int)(FacadesRequest::segment(2)));
-                if ($id < 1) {
-                    $id = ((int)(FacadesRequest::segment(1)));
-                }
-                if ($id < 1) {
-                    $id = ((int)(FacadesRequest::segment(0)));
-                }
-                if ($id < 1) {
-                    $id = ((int)(FacadesRequest::segment(3)));
-                }
-                if ($id < 1) {
-                    $id = ((int)(FacadesRequest::segment(4)));
-                }
-                if ($id < 1) {
-                    die("Class not found.");
-                }
-                $class = StudentHasClass::find($id);
-
-                if ($class == null) {
-                    die("Class not found..");
-                }
-
-                $academic_class = AcademicClass::find($class->academic_class_id);
+                $academic_class = AcademicClass::find($record->academic_class_id);
                 if ($academic_class == null) {
-                    die("Academic class not found.");
+                    throw new Exception("Academic class not found.", 1);
                 }
 
                 $subs = [];
@@ -548,6 +540,7 @@ class StudentHasClassController extends AdminController
                     }
                     $subs[((int)($s->id))] = $s->subject_name . " - " . $s->code . $class_text;
                 }
+                dd($subs);
 
                 $form->checkbox('new_curriculum_optional_subjects', __('Select Optional Subjects (New Curriculum'))
                     ->options($subs)
