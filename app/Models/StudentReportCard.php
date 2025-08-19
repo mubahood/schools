@@ -19,6 +19,10 @@ class StudentReportCard extends Model
             return;
         }
 
+        if($this->total_aggregates < 3){
+            return;
+        }
+
         //report commentes where min_score is <= $percentage AND  max_score is >= $percentage
         $comments = ReportComment::where('enterprise_id', $this->enterprise_id)
             ->where('min_score', '<=', $this->total_aggregates)

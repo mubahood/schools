@@ -482,22 +482,7 @@ class TheologyTermlyReportCard extends Model
 
         foreach ($m->report_cards as $key => $report) {
 
-            $max_score = 400;
-            $total_marks = $report->total_marks;
-            $percentage = ($total_marks / $max_score) * 100;
-
-            $student = User::find($report->student_id);
-            if ($student == null) {
-                continue;
-            }
-            $comment = Utils::get_autometed_comment(
-                $percentage,
-                $student->name,
-                $student->sex
-            );
-
-            $report->class_teacher_comment = $comment;
-            $report->save();
+            $report->generate_comment(true, true);
             continue;
 
 

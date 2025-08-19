@@ -8,6 +8,60 @@ use Illuminate\Database\Eloquent\Model;
 
 class TheologryStudentReportCard extends Model
 {
+
+    public function generate_comment($for_class_teacher = true, $for_head_teacher = false)
+    {
+        if ($this->owner == null) {
+            return;
+        }
+
+        if ($this->total_aggregates < 3) {
+            return;
+        }
+
+        //report commentes where min_score is <= $percentage AND  max_score is >= $percentage
+        $comments = ReportComment::where('enterprise_id', $this->enterprise_id)
+            ->where('min_score', '<=', $this->total_aggregates)
+            ->where('max_score', '>=', $this->total_aggregates)
+            ->get();
+
+        //if $comments is empty, return
+        if ($comments->isEmpty()) {
+            return;
+        }
+
+        //shuffle $comments and get one
+        $comment = $comments->shuffle()->first();
+
+        $class_teacher_comment = $comment->comment;
+        $head_teacher_comment = $comment->hm_comment;
+        $owner = $this->owner;
+
+        if (strtolower(trim($owner->sex)) == 'male') {
+            $class_teacher_comment = str_replace(
+                ['[NAME]', '[HE_OR_SHE]', '[HIS_OR_HER]', '[HIM_OR_HER]'],
+                [$owner->name, 'He', 'His', 'Him'],
+                $class_teacher_comment
+            );
+        } else if (strtolower(trim($owner->sex)) == 'female') {
+            $class_teacher_comment = str_replace(
+                ['[NAME]', '[HE_OR_SHE]', '[HIS_OR_HER]', '[HIM_OR_HER]'],
+                [$owner->name, 'She', 'Her', 'Her'],
+                $class_teacher_comment
+            );
+        } else {
+            $class_teacher_comment = str_replace(
+                ['[NAME]', '[HE_OR_SHE]', '[HIS_OR_HER]', '[HIM_OR_HER]'],
+                [$owner->name, 'He/She', 'His/Her', 'Him/Her'],
+                $class_teacher_comment
+            );
+        }
+
+        $this->class_teacher_comment = $class_teacher_comment;
+        $this->head_teacher_comment = $head_teacher_comment;
+        $this->save();
+    }
+
     use HasFactory;
     public function termly_report_card()
     {

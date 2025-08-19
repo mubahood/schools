@@ -196,19 +196,10 @@ class TermlyReportCardOld extends Model
             if ($student == null) {
                 continue;
             }
-            $comment = Utils::get_autometed_comment(
-                $percentage,
-                $student->name,
-                $student->sex
-            );
-            $report->class_teacher_comment = $comment;
-            $comment = Utils::get_autometed_comment(
-                $percentage,
-                $student->name,
-                $student->sex
-            );
-            $report->head_teacher_comment = $comment;
-            $report->save();
+ 
+
+            $report->generate_comment(true, true);
+
             continue;
 
 

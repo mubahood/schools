@@ -250,33 +250,7 @@ class TheologryStudentReportCardController extends AdminController
 
 
 
-        $grid->column('class_teacher_comment', __('Class Teacher Remarks'))
-            /* ->display(function ($position) {
-
-                if ($position == null || strlen($position) < 3) {
-
-
-                    $max_score = 400;
-                    $total_marks = $this->total_marks;
-                    $percentage = ($total_marks / $max_score) * 100;
-
-                    $student = User::find($this->student_id);
-                    if ($student == null) {
-                        die("iuser not found");
-                    }
-                    $comment = Utils::get_autometed_comment(
-                        $percentage,
-                        $student->name,
-                        $student->sex
-                    );
-
-                    $this->class_teacher_comment = $comment;
-                    $this->save();
-
-                    return "-";
-                }
-                return $position; 
-            }) */->editable()
+        $grid->column('class_teacher_comment', __('Class Teacher Remarks'))->editable()
             ->sortable();
         $grid->column('head_teacher_comment', __('Head Teacher Remarks'))->hide()->editable()->sortable();
 
