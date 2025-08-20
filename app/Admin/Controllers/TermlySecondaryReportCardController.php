@@ -263,11 +263,11 @@ class TermlySecondaryReportCardController extends AdminController
             ->required();
 
 
-        $form->radio('has_u1', __('Inlude UNIT 1 on report'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('Yes')->required();
-        $form->radio('has_u2', __('Inlude UNIT 2 on report'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('Yes')->required();
-        $form->radio('has_u3', __('Inlude UNIT 3 on report'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('Yes')->required();
-        $form->radio('has_u4', __('Inlude UNIT 4 on report'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('No')->required();
-        $form->radio('has_u5', __('Inlude UNIT 5 on report'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('No')->required();
+        $form->radio('has_u1', __('Include UNIT 1 on report'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('Yes')->required();
+        $form->radio('has_u2', __('Include UNIT 2 on report'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('Yes')->required();
+        $form->radio('has_u3', __('Include UNIT 3 on report'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('Yes')->required();
+        $form->radio('has_u4', __('Include UNIT 4 on report'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('No')->required();
+        $form->radio('has_u5', __('Include UNIT 5 on report'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('No')->required();
 
         $form->divider(strtoupper('Marks Settings'));
 
@@ -297,13 +297,13 @@ class TermlySecondaryReportCardController extends AdminController
         $form->divider(strtoupper('Printed Report Card Settings'));
 
         $form->radio('reports_generate', __('Generate/Re-Generate Reports'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('No')->required();
-        $form->radio('reports_include_u1', __('Inlude UNIT 1 in report cards'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('No')->required();
-        $form->radio('reports_include_u2', __('Inlude UNIT 2 in report cards'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('No')->required();
-        $form->radio('reports_include_u3', __('Inlude UNIT 3 in report cards'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('No')->required();
-        $form->radio('reports_include_u4', __('Inlude UNIT 4 in report cards'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('No')->required();
-        $form->radio('reports_include_u5', __('Inlude UNIT 5 in report cards'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('No')->required();
-        $form->radio('reports_include_exam', __('Inlude Exam in report cards'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('No')->required();
-        $form->radio('reports_include_project', __('Inlude Project in report cards'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('No')->required();
+        $form->radio('reports_include_u1', __('Include UNIT 1 in report cards'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('No')->required();
+        $form->radio('reports_include_u2', __('Include UNIT 2 in report cards'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('No')->required();
+        $form->radio('reports_include_u3', __('Include UNIT 3 in report cards'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('No')->required();
+        $form->radio('reports_include_u4', __('Include UNIT 4 in report cards'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('No')->required();
+        $form->radio('reports_include_u5', __('Include UNIT 5 in report cards'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('No')->required();
+        $form->radio('reports_include_exam', __('Include Exam in report cards'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('No')->required();
+        $form->radio('reports_include_project', __('Include Project in report cards'))->options(['Yes' => 'Yes', 'No' => 'No'])->default('No')->required();
         $form->radioCard('reports_template', __('Seelct Report Card Template'))
             ->options([
                 '1' => 'Template 1',

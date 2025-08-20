@@ -210,6 +210,20 @@ class SecondaryReportCardItem extends Model
             $score_total += $m->score_5;
             $score_count++;
         }
+        if ($report->reports_include_project == "Yes") {
+            $units_count++;
+            // $units_max_score += $report->max_score_5;
+            $score_total += $m->project_score;
+            $score_count++;
+        }
+        if ($report->reports_include_exam == "Yes") {
+            $units_count++;
+            // $units_max_score += $report->max_score_5;
+            $score_total += $m->exam_score;
+            $score_count++;
+        }
+        //overall_score submit_project
+
 
         $studentHasClass = StudentHasClass::where([
             'administrator_id' => $m->administrator_id,
@@ -222,6 +236,7 @@ class SecondaryReportCardItem extends Model
         }
 
         $m->tot_units_score = $score_total;
+
         if ($units_max_score > 0) {
             $m->out_of_10 = ($score_total / $units_max_score) * 10;
             $m->out_of_10 = round($m->out_of_10, 2);
@@ -236,6 +251,9 @@ class SecondaryReportCardItem extends Model
             $m->average_score = null;
         }
 
+        $m->average_score = $score_total;
+        $m->tot_units_score = $score_total;
+
         $gens = GenericSkill::where([
             'enterprise_id' => $m->enterprise_id,
         ])->get();
@@ -247,18 +265,19 @@ class SecondaryReportCardItem extends Model
             }
         }
 
-        if ($units_count > 0) {
-            if ($gen != null) {
-                $m->generic_skills = $gen->identifier;
-                $m->descriptor = $gen->descriptor;
-            } else {
-                $m->generic_skills = 'X';
-                $m->descriptor = 'X';
-            }
+     
+        if ($gen != null) {
+            $m->generic_skills = $gen->identifier;
+            $m->descriptor = $gen->descriptor;
+            $m->grade_name = $gen->descriptor;
         } else {
             $m->generic_skills = null;
             $m->descriptor = null;
+            $m->grade_name = null;
         }
+   
+
+     
 
         if ($units_count > 0) {
             $m->out_of_20 = ($m->project_score + $m->out_of_10);

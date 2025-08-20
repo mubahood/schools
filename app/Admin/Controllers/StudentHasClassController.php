@@ -525,8 +525,6 @@ class StudentHasClassController extends AdminController
                 }); */
 
 
-
-
                 $academic_class = AcademicClass::find($record->academic_class_id);
                 if ($academic_class == null) {
                     throw new Exception("Academic class not found.", 1);
@@ -540,7 +538,6 @@ class StudentHasClassController extends AdminController
                     }
                     $subs[((int)($s->id))] = $s->subject_name . " - " . $s->code . $class_text;
                 }
-                dd($subs);
 
                 $form->checkbox('new_curriculum_optional_subjects', __('Select Optional Subjects (New Curriculum'))
                     ->options($subs)

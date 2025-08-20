@@ -35,6 +35,13 @@ class SecondaryReportCardItemController extends AdminController
         $m->score_1 = 0.89;
         SecondaryReportCardItem::do_prepare($m);
         die("done"); */
+/*         $x = SecondaryReportCardItem::find(8091);
+        $x->project_score += 1;
+        $x->save();
+        dd("TOT: " . $x->tot_units_score);
+        dd($x->getattributes());
+ */
+        /*  */
 
         $u = Admin::user();
         $active_term = $u->ent->active_term();
@@ -150,10 +157,9 @@ class SecondaryReportCardItemController extends AdminController
                 return $this->secondary_subject->subject_name . " - " . $this->secondary_subject->code;
             })
             ->sortable();
-        $grid->column('average_score', __('Score'))->sortable();
-        $grid->column('generic_skills', __('Generic Skills'))->editable();
-        $grid->column('remarks', __('Genral Remarks'))->editable();
-        $grid->column('teacher', __('Teacher'))->editable();
+        $grid->column('average_score', __('Score'))->sortable()->hide();
+
+        $grid->column('teacher', __('Teacher'))->editable()->hide();
 
         if ($report->submit_u1 == 'Yes') {
             $grid->column('score_1', 'U1')->editable()->sortable();
@@ -191,23 +197,12 @@ class SecondaryReportCardItemController extends AdminController
         } else {
             $grid->column('project_score', 'Project Score')->sortable()->hide();
         }
-        /* 
-            $report
-            "submit_u1" => "No"
-            "submit_u2" => "Yes"
-            "submit_u3" => "Yes"
-            "submit_u4" => "No"
-            "submit_u5" => "No"
-            "submit_project" => "No"
-            "submit_exam" => "Yes"
-        */
-        $grid->column('out_of_20', 'Out of 20')->sortable()->hide();
         if ($report->submit_exam == 'Yes') {
             $grid->column('exam_score', 'Exam Score')->editable()->sortable();
         } else {
             $grid->column('exam_score', 'Exam Score')->sortable()->hide();
         }
-        $grid->column('overall_score', 'Overall Score')->editable()->sortable();
+        $grid->column('overall_score', 'Overall Score')->sortable();
         $grid->column('grade_name', 'Grade')->sortable();
         if ($report->submit_project == 'Yes') {
             $grid->column('project_score_submitted', 'Project Submitted')
@@ -394,7 +389,6 @@ class SecondaryReportCardItemController extends AdminController
         $form->number('secondary_subject_id', __('Secondary subject id'));
         $form->number('secondary_report_card_id', __('Secondary report card id'));
         $form->decimal('average_score', __('Average score'))->default(0.00);
-        $form->textarea('generic_skills', __('Generic skills'));
         $form->textarea('remarks', __('Remarks'));
         $form->text('teacher', __('Teacher'));
         $form->number('administrator_id', __('Administrator id'));

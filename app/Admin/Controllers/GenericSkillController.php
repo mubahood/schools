@@ -35,7 +35,7 @@ class GenericSkillController extends AdminController
         $grid->column('max_score', __('Max score'))->sortable()->editable();
         $grid->column('descriptor', __('Descriptor'))->sortable()->editable();
         $grid->column('identifier', __('Identifier'))->sortable()->editable();
-        $grid->column('comments', __('Comments'))->limit(100)->sortable();
+        $grid->column('comments', __('Comments'))->sortable()->editable();
 
         return $grid;
     }
