@@ -46,6 +46,7 @@ class Term extends Model
             if ($_m != null) {
                 $m->is_active = 0;
             }
+            $m->term_name = $m->name;
         });
 
         //updated
@@ -163,9 +164,9 @@ class Term extends Model
 
         if (!empty($enrolledStudentIds)) {
             DB::table($users_table_name)
-            ->where('enterprise_id', $ent->id)
-            ->whereIn('id', $enrolledStudentIds)
-            ->update(['is_enrolled' => 'Yes']);
+                ->where('enterprise_id', $ent->id)
+                ->whereIn('id', $enrolledStudentIds)
+                ->update(['is_enrolled' => 'Yes']);
         }
     }
 }

@@ -187,7 +187,7 @@ $mainReport = $r;
     <div class="text-uppercase">
         CLASS: <b>{{ $r->academic_class->short_name }} {{ $stream_class }}&nbsp;</b>
         {{-- STREAM: <b> {{ $stream_class }}&nbsp;</b> --}}
-        TERM: <b>{{ $r->termly_report_card->term->name }}</b> &nbsp;
+        TERM: <b>{{ $r->termly_report_card->term->term_name }}</b> &nbsp;
         YEAR: <b>{{ $r->termly_report_card->academic_year->name }}</b> &nbsp;
         Aggregate: <b class="text-danger">{{ (int) $r->average_aggregates }}</b> &nbsp;
         DIVISION: <b class="text-danger">{{ $r->grade }}</b> &nbsp;

@@ -56,9 +56,11 @@ class TermController extends AdminController
             ->display(function ($t) {
                 return $this->academic_year->name;
             });
-        $grid->column('name', __('Term'))->display(function ($t) {
+        $grid->column('name', __('Term Position'))->display(function ($t) {
             return "Term $t";
         });
+        //term_name
+        $grid->column('term_name', __('Term Name'))->editable()->sortable();
         $grid->column('starts', __('Starts'));
         $grid->column('ends', __('Ends'));
         $grid->column('details', __('Details'))->hide();
@@ -126,14 +128,16 @@ class TermController extends AdminController
             )->rules('required');
 
 
-        $form->select('name', 'Term')
-            ->options([
-                1 => 'Term 1',
-                2 => 'Term 2',
-                3 => 'Term 3',
-            ])->rules('required');
-
-
+        if ($form->isCreating()) {
+            $form->select('name', 'Term')
+                ->options([
+                    1 => 'Term 1',
+                    2 => 'Term 2',
+                    3 => 'Term 3',
+                ])->rules('required');
+        } else {
+            $form->text('term_name', __('Term Name'));
+        }
 
         $form->date('starts', __('Term Starts'))->default(date('Y-m-d'))->required();
         $form->date('ends', __('Term Ends'))->required();
