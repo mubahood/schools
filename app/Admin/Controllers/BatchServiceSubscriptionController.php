@@ -141,10 +141,12 @@ class BatchServiceSubscriptionController extends AdminController
 
         $terms = [];
         $active_term = 0;
-        foreach (Term::where(
-            'enterprise_id',
-            Admin::user()->enterprise_id
-        )->orderBy('id', 'desc')->get() as $key => $term) {
+        foreach (
+            Term::where(
+                'enterprise_id',
+                Admin::user()->enterprise_id
+            )->orderBy('id', 'desc')->get() as $key => $term
+        ) {
             $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
             if ($term->is_active) {
                 $active_term = $term->id;
@@ -252,6 +254,15 @@ class BatchServiceSubscriptionController extends AdminController
             $table->string('is_processed')->default('No');
             $table->text('processed_notes')->nullable();
         */
+
+        //if is editing , let is_processed be radio
+        if ($form->isEditing()) {
+            $form->radio('is_processed', __('Is Processed'))->options([
+                'Yes' => 'Yes',
+                'No' => 'No',
+            ])->default('No');
+        }
+
         return $form;
     }
 }
