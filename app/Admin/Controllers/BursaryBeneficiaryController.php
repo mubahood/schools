@@ -98,7 +98,7 @@ class BursaryBeneficiaryController extends AdminController
 
 
 
-        $grid->disableBatchActions();
+        // $grid->disableBatchActions();
         //$grid->disableActions();
         $grid->model()
             ->where([
