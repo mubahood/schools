@@ -101,18 +101,19 @@ class SecondarySubject extends Model
     }
 
 
-    public function get_teacher(){
+    public function get_teacher()
+    {
         //check teachers begining from first, if find any not null, return it
-        if($this->teacher1 != null){
+        if ($this->teacher1 != null) {
             return $this->teacher1;
         }
-        if($this->teacher2 != null){
+        if ($this->teacher2 != null) {
             return $this->teacher2;
         }
-        if($this->teacher3 != null){
+        if ($this->teacher3 != null) {
             return $this->teacher3;
         }
-        if($this->teacher4 != null){
+        if ($this->teacher4 != null) {
             return $this->teacher4;
         }
         return null;
@@ -138,9 +139,11 @@ class SecondarySubject extends Model
     public static function get_active_subjects($academic_year_id, $forSelect = false)
     {
         $subjects = [];
-        foreach (AcademicClass::where([
-            'academic_year_id' => $academic_year_id,
-        ])->get() as $key => $class) {
+        foreach (
+            AcademicClass::where([
+                'academic_year_id' => $academic_year_id,
+            ])->get() as $key => $class
+        ) {
             foreach ($class->secondary_subjects as $key => $subject) {
                 if ($forSelect) {
                     $pre = "";
@@ -158,6 +161,8 @@ class SecondarySubject extends Model
     //append for name_text
     public function getNameTextAttribute()
     {
-        return $this->subject_name . " - " . $this->code;
+        return strtoupper($this->subject_name);
+
+        return $this->subject_name; //. " - " . $this->code;
     }
 }
