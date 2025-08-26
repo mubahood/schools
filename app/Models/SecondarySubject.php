@@ -32,7 +32,9 @@ class SecondarySubject extends Model
             if ($subject == null) {
                 throw new Exception("Subject not found.", 1);
             }
-            $m->subject_name = $subject->name;
+            if ($m->subject_name == null || strlen($m->subject_name) < 3) {
+                $m->subject_name = $subject->name;
+            } 
             $m->code = $subject->code;
 
             return $m;
@@ -56,8 +58,11 @@ class SecondarySubject extends Model
             if ($subject == null) {
                 throw new Exception("Subject not found.", 1);
             }
-            $m->subject_name = $subject->name;
+            if ($m->subject_name == null || strlen($m->subject_name) < 3) {
+                $m->subject_name = $subject->name;
+            }
             $m->code = $subject->code;
+            //History and Political Education
 
             return $m;
         });
