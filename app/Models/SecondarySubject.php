@@ -63,7 +63,7 @@ class SecondarySubject extends Model
         });
 
         self::deleting(function ($m) {
-            throw new Exception("You cannot delete this item.", 1);
+            // throw new Exception("You cannot delete this item.", 1);
         });
     }
 
