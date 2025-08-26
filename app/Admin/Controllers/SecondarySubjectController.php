@@ -88,7 +88,7 @@ class SecondarySubjectController extends AdminController
             ->sortable();
 
         $grid->quickSearch('subject_name')->placeholder('Seach by subject');
-        $grid->disableBatchActions();
+        // $grid->disableBatchActions();
 
 
         $grid->column('academic_class_id', __('Class'))
