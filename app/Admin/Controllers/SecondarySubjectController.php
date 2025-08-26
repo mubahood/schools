@@ -100,7 +100,8 @@ class SecondarySubjectController extends AdminController
             })
             ->sortable();
 
-        $grid->column('subject_name', __('Subject'))->sortable();
+        $grid->column('subject_name', __('Subject'))->sortable()
+            ->editable(); 
 
         $grid->column('term_1', __('Term 1 - Activities'))
             ->display(function ($x) {
