@@ -22,7 +22,7 @@ class SecondaryReportCardItemController extends AdminController
      *
      * @var string
      */
-    protected $title = 'Report Card Items';
+    protected $title = 'Marks';
 
     /**
      * Make a grid builder.
@@ -35,7 +35,7 @@ class SecondaryReportCardItemController extends AdminController
         $m->score_1 = 0.89;
         SecondaryReportCardItem::do_prepare($m);
         die("done"); */
-/*         $x = SecondaryReportCardItem::find(8091);
+        /*         $x = SecondaryReportCardItem::find(8091);
         $x->project_score += 1;
         $x->save();
         dd("TOT: " . $x->tot_units_score);
@@ -115,9 +115,64 @@ class SecondaryReportCardItemController extends AdminController
         });
 
 
-        $grid->model()->where([
-            'enterprise_id' => $u->enterprise_id,
-        ]);
+
+        if (!Admin::user()->isRole('dos')) {
+            /*  $my_subjects = SecondarySubject::where([
+                'teacher_1' => Admin::user()->id,
+                'enterprise_id' => $u->enterprise_id,
+            ])->get();
+            dd($my_subjects);
+            
+                    "id" => 787
+        "created_at" => "2025-08-28 01:24:41"
+        "updated_at" => "2025-08-28 01:24:41"
+        "enterprise_id" => 19
+        "academic_class_id" => 195
+        "parent_course_id" => 37
+        "academic_year_id" => 20
+        "teacher_1" => 14228
+        "teacher_2" => null
+        "teacher_3" => null
+        "teacher_4" => null
+        "subject_name" => "Entrepreneurship Skills"
+        "details" => null
+        "code" => "845"
+        "is_optional" => 1
+            */
+
+            $my_subjects_1 = SecondarySubject::where([
+                'teacher_1' => Admin::user()->id,
+                'enterprise_id' => $u->enterprise_id,
+            ])->pluck('id')->toArray();
+
+            $my_subjects_2 = SecondarySubject::where([
+                'teacher_2' => Admin::user()->id,
+                'enterprise_id' => $u->enterprise_id,
+            ])->pluck('id')->toArray();
+
+            $my_subjects_3 = SecondarySubject::where([
+                'teacher_3' => Admin::user()->id,
+                'enterprise_id' => $u->enterprise_id,
+            ])->pluck('id')->toArray();
+
+            $my_subjects_4 = SecondarySubject::where([
+                'teacher_4' => Admin::user()->id,
+                'enterprise_id' => $u->enterprise_id,
+            ])->pluck('id')->toArray();
+
+
+            $my_subjects = array_merge($my_subjects_1, $my_subjects_2, $my_subjects_3, $my_subjects_4);
+
+            $grid->model()->where([
+                'secondary_subject_id' => $my_subjects,
+                'enterprise_id' => $u->enterprise_id,
+            ]);
+        } else {
+            $conds = [
+                'enterprise_id' => $u->enterprise_id,
+            ];
+            $grid->model()->where($conds);
+        }
 
         $grid->model()->orderBy('id', 'desc');
         $grid->column('id', __('Id'))->sortable();
