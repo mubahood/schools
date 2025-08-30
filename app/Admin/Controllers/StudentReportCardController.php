@@ -584,7 +584,7 @@ class StudentReportCardController extends AdminController
                     $msg .= "Dear Parent / Guardian,\n\n";
                     $msg .= "Assalaam alaikum warahmatu-Llaahi wabarakaatuh.\n\n";
                     $msg .= "Sir / Madam, this is {$school}. Please find here below the Report Card ";
-                    $msg .= "(in soft copy form) of your child / pupil *{$child}* for end of {$term} {$year}.\n\n";
+                    $msg .= "(in soft copy form) of your child / pupil *{$child}* for end of Term {$term} - {$year}.\n\n";
                     $msg .= "Kindly click on the link below to download it:\n{$fileUrl}\n\n";
                     $msg .= "Much thanks. Jazaakum Allaahu khairan. Baaraka Allaahu fiikum.\n\n";
                     $msg .= "From Office of the Headteacher.";
