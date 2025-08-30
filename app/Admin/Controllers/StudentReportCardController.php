@@ -566,7 +566,14 @@ class StudentReportCardController extends AdminController
                     $term      = $termly_report_card->term_name;            // e.g. “Term I”
                     $year      = $termly_report_card->year;                 // e.g. “2025”
                     if ($termly_report_card->term != null) {
-                        $term      = $termly_report_card->term->name_text;            // e.g. “Term I”
+                        $term      = $termly_report_card->term->name;
+                        $academic_year = null;
+                        if ($termly_report_card->term->academic_year != null) {
+                            $academic_year = $termly_report_card->term->academic_year;
+                        }
+                        if ($academic_year != null) {
+                            $year = $academic_year->name;
+                        }
                     }
 
                     // Build the message
