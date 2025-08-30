@@ -558,19 +558,22 @@ class StudentReportCardController extends AdminController
                 // ----------------- WhatsApp link -----------------
                 if ($phone && strlen($phone) > 5) {
 
-                    $termly_report_card = $this->term; 
+                    $termly_report_card = $this->term;
                     $recipient = Utils::prepare_phone_number($phone);
                     $date      = now()->format('d. m. Y');                  // e.g. “10. 05. 2025”
                     $school    = $this->ent->name;                          // e.g. “Lukman Primary School”
                     $child     = $this->owner->name;                        // pupil’s name
                     $term      = $termly_report_card->term_name;            // e.g. “Term I”
                     $year      = $termly_report_card->year;                 // e.g. “2025”
+                    if ($termly_report_card->term != null) {
+                        $term      = $termly_report_card->term->name_text;            // e.g. “Term I”
+                    }
 
                     // Build the message
                     $msg  = "{$date},\n\n";
                     $msg .= "Dear Parent / Guardian,\n\n";
                     $msg .= "Assalaam alaikum warahmatu-Llaahi wabarakaatuh.\n\n";
-                    $msg .= "Sir / Madam, this is {$school}. Please find herebelow the Report Card ";
+                    $msg .= "Sir / Madam, this is {$school}. Please find here below the Report Card ";
                     $msg .= "(in soft copy form) of your child / pupil *{$child}* for end of {$term} {$year}.\n\n";
                     $msg .= "Kindly click on the link below to download it:\n{$fileUrl}\n\n";
                     $msg .= "Much thanks. Jazaakum Allaahu khairan. Baaraka Allaahu fiikum.\n\n";
