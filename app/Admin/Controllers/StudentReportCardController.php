@@ -564,7 +564,7 @@ class StudentReportCardController extends AdminController
                     $school    = $this->ent->name;                          // e.g. “Lukman Primary School”
                     $child     = $this->owner->name;                        // pupil’s name
                     $term      = $termly_report_card->term_name;            // e.g. “Term I”
-                    $year      = $termly_report_card->year;                 // e.g. “2025”
+                    $year      = date('Y');                 // e.g. “2025”
                     if ($termly_report_card->term != null) {
                         $term      = $termly_report_card->term->name;
                         $academic_year = null;
@@ -574,6 +574,9 @@ class StudentReportCardController extends AdminController
                         if ($academic_year != null) {
                             $year = $academic_year->name;
                         }
+                    }
+                    if ($year != null || strlen($year) < 3) {
+                        $year = date('Y', strtotime($year));
                     }
 
                     // Build the message
