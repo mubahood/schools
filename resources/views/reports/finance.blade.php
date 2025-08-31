@@ -26,9 +26,9 @@
         </td>
         <td>
             <div class="text-center">
-                <p>
+                {{-- <p>
                     <img style="width: 35%; " src="{{ public_path('assets/bismillah.png') }}">
-                </p>
+                </p> --}}
                 <p class="fs-26 text-center fw-700 mt-2 text-uppercase  " style="color: {{ $ent->color }};">
                     {{ $ent->name }}</p>
                 <p><i>"{{ $ent->motto }}"</i></p>
