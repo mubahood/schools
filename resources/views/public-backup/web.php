@@ -3,7 +3,6 @@
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\DummyDataController;
 use App\Http\Controllers\MainController;
-use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PrintController2;
 use App\Http\Controllers\ReportCardsPrintingController;
 use App\Models\AcademicClass;
@@ -1196,22 +1195,6 @@ Route::get('/', function (Request $request) {
 
 Route::get('/access-system', function () {
   return view('landing.access-system');
-});
-
-Route::get('/about', function () {
-  return view('landing.about');
-});
-
-Route::get('/testimonials', function () {
-  return view('landing.testimonials');
-});
-
-Route::get('/schools', function () {
-  return view('landing.schools');
-});
-
-Route::get('/contact', function () {
-  return view('landing.contact');
 });
 
 Route::get('temp-import', function () {
@@ -2864,28 +2847,4 @@ Route::get('import-transaction', function (Request $request) {
   $link = admin_url('students/' . $trans->account->administrator_id);
   $msg .= ", <a href='$link' >Click here to view account details</a>";
   return "<h1 style='$style'>$msg</h1>";
-});
-
-// Onboarding Routes - Step-by-step school registration wizard
-Route::group(['prefix' => 'onboarding'], function () {
-    Route::get('step1', [OnboardingController::class, 'step1'])->name('onboarding.step1');
-    Route::get('step2', [OnboardingController::class, 'step2'])->name('onboarding.step2');
-    Route::post('step2', [OnboardingController::class, 'processStep2'])->name('onboarding.process2');
-    Route::get('step3', [OnboardingController::class, 'step3'])->name('onboarding.step3');
-    Route::post('step3', [OnboardingController::class, 'processStep3'])->name('onboarding.process3');
-    Route::get('step4', [OnboardingController::class, 'step4'])->name('onboarding.step4');
-    Route::post('step4', [OnboardingController::class, 'processStep4'])->name('onboarding.process4');
-    Route::get('step5', [OnboardingController::class, 'step5'])->name('onboarding.step5');
-    Route::post('complete', [OnboardingController::class, 'complete'])->name('onboarding.complete');
-    
-    // AJAX validation endpoints
-    Route::get('validate-email', [OnboardingController::class, 'validateEmail'])->name('onboarding.validate.email');
-    Route::get('validate-phone', [OnboardingController::class, 'validatePhone'])->name('onboarding.validate.phone');
-    Route::get('validate-school-name', [OnboardingController::class, 'validateSchoolName'])->name('onboarding.validate.school.name');
-    Route::get('validate-school-email', [OnboardingController::class, 'validateSchoolEmail'])->name('onboarding.validate.school.email');
-});
-
-// Update the enterprises/create route to redirect to onboarding
-Route::get('enterprises/create', function () {
-    return redirect('onboarding/step1');
 });

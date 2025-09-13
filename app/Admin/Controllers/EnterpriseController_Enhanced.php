@@ -17,14 +17,14 @@ use Encore\Admin\Grid;
 use Encore\Admin\Show;
 use Encore\Admin\Layout\Content;
 
-class EnterpriseController extends AdminController
+class EnterpriseControllerEnhanced extends AdminController
 {
     /**
      * Title for current resource.
      *
      * @var string
      */
-    protected $title = 'School Management';
+    protected $title = 'School Management - Enhanced';
 
     /**
      * Make a grid builder.
@@ -39,24 +39,25 @@ class EnterpriseController extends AdminController
 
         $grid->model()->orderBy('id', 'DESC');
 
-        $grid->actions(function ($actions) {
-            $actions->disableView();
-        });
-
+        // Access control
         $u = Admin::user();
-        // Check if user is super admin - if not, filter to their enterprise only
         $userRoles = AdminRoleUser::where('user_id', $u->id)->pluck('role_id')->toArray();
         $superAdminRole = AdminRole::where('slug', 'super-admin')->first();
         if ($superAdminRole && !in_array($superAdminRole->id, $userRoles)) {
             $grid->model()->where('id', '=', $u->enterprise_id);
         }
 
+        $grid->actions(function ($actions) {
+            $actions->disableView();
+        });
+
+        // Grid columns
         $grid->column('id', __('ID'))->sortable()->label('primary');
         $grid->column('logo', __('Logo'))->image('', 40, 40);
         
         $grid->column('name', __('School Name'))->sortable()->display(function ($name) {
             $shortName = $this->short_name ?? '';
-            return "<strong>$name</strong><br><small class='text-muted'>$shortName</small>";
+            return "<strong>$name</strong>" . ($shortName ? "<br><small class='text-muted'>$shortName</small>" : "");
         });
         
         $grid->column('type', __('Type'))->label([
@@ -74,10 +75,10 @@ class EnterpriseController extends AdminController
             return "<strong>{$owner->name}</strong><br><small class='text-muted'>{$owner->email}</small>";
         });
         
-        $grid->column('contact_info', __('Contact'))->display(function () {
+        $grid->column('phone_number', __('Contact'))->display(function ($phone) {
             $contact = [];
-            if ($this->phone_number) {
-                $contact[] = "<i class='fa fa-phone'></i> {$this->phone_number}";
+            if ($phone) {
+                $contact[] = "<i class='fa fa-phone'></i> $phone";
             }
             if ($this->email) {
                 $contact[] = "<i class='fa fa-envelope'></i> {$this->email}";
@@ -114,10 +115,11 @@ class EnterpriseController extends AdminController
             
             $isExpired = strtotime($expiry) < time();
             $class = $isExpired ? 'text-danger' : 'text-success';
-            return "<span class='$class'>" . date('M d, Y', strtotime($expiry)) . "</span>";
+            $status = $isExpired ? ' (EXPIRED)' : '';
+            return "<span class='$class'>" . date('M d, Y', strtotime($expiry)) . "$status</span>";
         })->sortable();
 
-        // Filters
+        // Enhanced filtering
         $grid->filter(function($filter) {
             $filter->disableIdFilter();
             
@@ -154,8 +156,8 @@ class EnterpriseController extends AdminController
 
         $show->panel()
             ->style('info')
-            ->title('School Information')
-            ->tools(function ($tools) {
+            ->title('School Management Dashboard')
+            ->tools(function ($tools) use ($id) {
                 $tools->disableList();
                 $tools->disableDelete();
                 $tools->append('<a class="btn btn-sm btn-success" href="'.admin_url('students?enterprise_id='.$id).'"><i class="fa fa-users"></i> Students</a>');
@@ -166,84 +168,36 @@ class EnterpriseController extends AdminController
         // Basic Information
         $show->divider('Basic Information');
         $show->field('id', __('School ID'));
-        $show->field('logo', __('Logo'))->image();
         $show->field('name', __('School Name'));
         $show->field('short_name', __('Short Name'));
-        $show->field('type', __('School Type'))->as(function ($type) {
-            $labels = [
-                'Primary' => 'label-primary',
-                'Secondary' => 'label-info', 
-                'Advanced' => 'label-success',
-                'University' => 'label-warning'
-            ];
-            $class = $labels[$type] ?? 'label-default';
-            return "<span class='label $class'>$type</span>";
-        });
+        $show->field('type', __('School Type'));
         $show->field('motto', __('School Motto'));
-        $show->field('welcome_message', __('Welcome Message'))->unescape();
-
+        $show->field('logo', __('Logo'))->image();
+        
         // Contact Information
         $show->divider('Contact Information');
         $show->field('phone_number', __('Primary Phone'));
         $show->field('phone_number_2', __('Secondary Phone'));
         $show->field('email', __('Email Address'));
-        $show->field('website', __('Website'));
+        $show->field('website', __('Website'))->link();
         $show->field('address', __('Physical Address'));
-
+        
         // Administrative Information
-        $show->divider('Administrative Information');
-        $show->field('administrator_id', __('School Owner'))->as(function ($administrator_id) {
-            $owner = User::find($administrator_id);
-            return $owner ? $owner->name . ' (' . $owner->email . ')' : 'No Owner Assigned';
+        $show->divider('Administrative Details');
+        $show->field('administrator_id', __('School Owner'))->as(function ($value) {
+            $owner = User::find($value);
+            return $owner ? "{$owner->name} ({$owner->email})" : 'No owner assigned';
         });
-        $show->field('hm_name', __('Head Teacher'));
-
-        // Academic Information
+        $show->field('hm_name', __('Head Teacher/Principal'));
+        
+        // Academic & System Information
         $show->divider('Academic Information');
-        $show->field('has_theology', __('Has Theology'))->as(function ($has_theology) {
-            return $has_theology == 'Yes' ? 
-                '<span class="label label-success">Yes</span>' : 
-                '<span class="label label-default">No</span>';
-        });
-
-        // Financial Information
-        $show->divider('Financial Information');
-        $show->field('wallet_balance', __('Wallet Balance'))->as(function ($balance) {
-            return 'UGX ' . number_format($balance ?? 0);
-        });
-
-        // School Pay Integration
-        $show->divider('SchoolPay Integration');
-        $show->field('school_pay_status', __('SchoolPay Status'))->as(function ($status) {
-            return $status == 'Yes' ? 
-                '<span class="label label-success">Enabled</span>' : 
-                '<span class="label label-danger">Disabled</span>';
-        });
-        $show->field('school_pay_import_automatically', __('Auto Import'))->as(function ($auto) {
-            return $auto == 'Yes' ? 
-                '<span class="label label-info">Enabled</span>' : 
-                '<span class="label label-default">Disabled</span>';
-        });
-
-        // License & Expiry
-        $show->divider('License Information');
-        $show->field('has_valid_lisence', __('License Status'))->as(function ($license) {
-            return $license == 'Yes' ? 
-                '<span class="label label-success"><i class="fa fa-check"></i> Valid License</span>' : 
-                '<span class="label label-danger"><i class="fa fa-times"></i> Invalid License</span>';
-        });
-        $show->field('expiry', __('License Expiry'))->as(function ($expiry) {
-            if (!$expiry) return '<span class="text-muted">No expiry date set</span>';
-            
-            $isExpired = strtotime($expiry) < time();
-            $class = $isExpired ? 'text-danger' : 'text-success';
-            $status = $isExpired ? ' (EXPIRED)' : '';
-            return "<span class='$class'>" . date('M d, Y', strtotime($expiry)) . $status . "</span>";
-        });
-
+        $show->field('has_theology', __('Religious Studies'));
+        $show->field('welcome_message', __('Welcome Message'))->unescape();
+        
         // Statistics
         $show->divider('Statistics');
-        $show->field('student_count', __('Total Students'))->as(function () {
+        $show->field('students_count', __('Total Students'))->as(function () {
             return User::where('enterprise_id', $this->id)->where('user_type', 'student')->count();
         });
         $show->field('staff_count', __('Total Staff'))->as(function () {
@@ -252,17 +206,26 @@ class EnterpriseController extends AdminController
         $show->field('academic_years_count', __('Academic Years'))->as(function () {
             return AcademicYear::where('enterprise_id', $this->id)->count();
         });
-
+        
+        // Financial Information
+        $show->divider('Financial & Payment Settings');
+        $show->field('school_pay_status', __('SchoolPay Status'));
+        $show->field('school_pay_code', __('SchoolPay Code'));
+        $show->field('wallet_balance', __('Wallet Balance'))->as(function ($value) {
+            return 'UGX ' . number_format($value ?? 0);
+        });
+        
+        // License & System
+        $show->divider('License & System Information');
+        $show->field('has_valid_lisence', __('License Status'));
+        $show->field('expiry', __('License Expiry Date'));
+        $show->field('subdomain', __('Subdomain'));
+        $show->field('color', __('Primary Color'))->color();
+        $show->field('sec_color', __('Secondary Color'))->color();
+        
         // System Information
         $show->divider('System Information');
-        $show->field('subdomain', __('Subdomain'));
-        $show->field('color', __('Primary Color'))->as(function ($color) {
-            return "<span style='display:inline-block;width:20px;height:20px;background:$color;border:1px solid #ccc;'></span> $color";
-        });
-        $show->field('sec_color', __('Secondary Color'))->as(function ($color) {
-            return "<span style='display:inline-block;width:20px;height:20px;background:$color;border:1px solid #ccc;'></span> $color";
-        });
-        $show->field('created_at', __('Created'));
+        $show->field('created_at', __('Created At'));
         $show->field('updated_at', __('Last Updated'));
         $show->field('details', __('Additional Details'));
 
@@ -270,7 +233,7 @@ class EnterpriseController extends AdminController
     }
 
     /**
-     * Make a form builder.
+     * Make a form builder - Enhanced version with tabbed interface
      *
      * @return Form
      */
@@ -469,7 +432,7 @@ class EnterpriseController extends AdminController
                 ->help('Any additional information about the school');
         });
 
-        // Custom CSS and JavaScript for enhanced UX
+        // JavaScript for enhanced UX
         $form->html('<script>
             $(document).ready(function() {
                 // Auto-generate short name from school name
@@ -494,12 +457,6 @@ class EnterpriseController extends AdminController
                         var subdomain = name.replace(/[^a-z0-9]/g, "").substring(0, 20);
                         $("input[name=subdomain]").val(subdomain);
                     }
-                });
-                
-                // Validate colors
-                $("input[type=color]").on("change", function() {
-                    var color = $(this).val();
-                    $(this).closest(".form-group").find(".help-block").html("Selected: " + color);
                 });
             });
         </script>');

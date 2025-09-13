@@ -1,3 +1,5 @@
+
+Class "Utils" not found (View: /Applications/MAMP/htdocs/schools/resources/views/layouts/onboarding-layout.blade.php)
 AutoFormat.RemoveSpansWithoutAttributes
 TYPE: bool
 VERSION: 4.0.1

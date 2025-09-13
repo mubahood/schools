@@ -223,6 +223,45 @@ class Utils  extends Model
         return $url;
     }
 
+    public static function get_app_tagline()
+    {
+        $tagline_1 = 'Streamline Your School Operations with Smart Technology';
+        $tagline_2 = 'Empowering Educational Excellence Through Innovation';
+        $current_url = url()->current();
+        $domain = 'tusometech.com';
+        if (str_contains($current_url, $domain)) {
+            return $tagline_1;
+        } else {
+            return $tagline_2;
+        }
+    }
+
+    public static function get_company_address()
+    {
+        return 'Eight Tech Corporation Towers, Palm Springs Estates, Kitagobwa, Nangabo, Kasangati Town Council, Wakiso District';
+    }
+
+    public static function get_support_phone()
+    {
+        return '+256 779 490 831';
+    }
+
+    public static function get_support_email()
+    {
+        return 'cto@8technologies.net';
+    }
+
+    public static function get_whatsapp_link()
+    {
+        $message = urlencode("Hello " . self::app_name() . " Team, I'd like to learn more about your school management solution.");
+        return "https://wa.me/256779490831?text=" . $message;
+    }
+
+    public static function get_demo_form_link()
+    {
+        return 'https://forms.gle/NP8RXx7YcpPbfi6b8';
+    }
+
     //get unique text
     static function get_unique_text()
     {

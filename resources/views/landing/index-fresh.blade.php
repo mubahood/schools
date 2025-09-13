@@ -6,12 +6,6 @@ use App\Models\Utils;
 @section('content')
 <!-- Hero Section -->
 <section class="hero-section">
-    <!-- Floating decorative elements -->
-    <div class="floating-element"></div>
-    <div class="floating-element"></div>
-    <div class="floating-element"></div>
-    <div class="floating-element"></div>
-    
     <div class="modern-container">
         <div class="hero-content">
             <div class="hero-text">
@@ -149,116 +143,50 @@ use App\Models\Utils;
             <div class="card">
                 <div class="flex gap-3 mb-4">
                     <div style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">
-                        BF
+                        JS
                     </div>
                     <div>
-                        <h5 style="margin: 0; color: var(--text-dark);">School Bursar</h5>
-                        <small style="color: var(--text-light);">BRIGHT FUTURE SS - Kaliro</small>
+                        <h5 style="margin: 0; color: var(--text-dark);">John Smith</h5>
+                        <small style="color: var(--text-light);">Principal, ABC International School</small>
                     </div>
                 </div>
                 <p class="card-text">
-                    "{{ Utils::app_name() }} has completely transformed our school operations. From admissions to finance, 
-                    everything is automated, saving us time and reducing errors!"
+                    "{{ Utils::app_name() }} has completely transformed how we manage our school operations. 
+                    The interface is intuitive and the features are comprehensive. Our administrative efficiency has improved by 300%."
                 </p>
             </div>
             
             <div class="card">
                 <div class="flex gap-3 mb-4">
                     <div style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">
-                        LK
+                        MJ
                     </div>
                     <div>
-                        <h5 style="margin: 0; color: var(--text-dark);">Head Teacher</h5>
-                        <small style="color: var(--text-light);">LUKMAN PRIMARY SCHOOL</small>
+                        <h5 style="margin: 0; color: var(--text-dark);">Mary Johnson</h5>
+                        <small style="color: var(--text-light);">Administrator, Green Valley Academy</small>
                     </div>
                 </div>
                 <p class="card-text">
-                    "Managing student records and communication used to be a nightmare. With {{ Utils::app_name() }}, 
-                    parents, teachers, and administrators are always in sync!"
+                    "The student management features are outstanding. We can track everything from enrollment to graduation seamlessly. 
+                    The parents love the communication features too."
                 </p>
             </div>
             
             <div class="card">
                 <div class="flex gap-3 mb-4">
                     <div style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">
-                        KJ
+                        RB
                     </div>
                     <div>
-                        <h5 style="margin: 0; color: var(--text-dark);">Finance Manager</h5>
-                        <small style="color: var(--text-light);">Kira Junior School - Kito</small>
+                        <h5 style="margin: 0; color: var(--text-dark);">Robert Brown</h5>
+                        <small style="color: var(--text-light);">Director, Excellence Institute</small>
                     </div>
                 </div>
                 <p class="card-text">
-                    "School fees tracking has never been easier! Our collections have improved significantly since we 
-                    started using {{ Utils::app_name() }}'s automated billing system."
+                    "Excellent support team and regular updates. The financial management module has saved us countless hours 
+                    and significantly improved our accounting accuracy."
                 </p>
             </div>
-        </div>
-        
-        <!-- Additional Testimonials Row -->
-        <div class="grid grid-3" style="margin-top: 2rem;">
-            <div class="card">
-                <div class="flex gap-3 mb-4">
-                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">
-                        BI
-                    </div>
-                    <div>
-                        <h5 style="margin: 0; color: var(--text-dark);">Communications Director</h5>
-                        <small style="color: var(--text-light);">Bilal Islamic Secondary School</small>
-                    </div>
-                </div>
-                <p class="card-text">
-                    "The mobile app is a game-changer! Parents can check student progress, fees, and updates in real time, 
-                    improving engagement and satisfaction."
-                </p>
-            </div>
-            
-            <div class="card">
-                <div class="flex gap-3 mb-4">
-                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">
-                        AN
-                    </div>
-                    <div>
-                        <h5 style="margin: 0; color: var(--text-dark);">School Administrator</h5>
-                        <small style="color: var(--text-light);">ANWAR MUSLIM SECONDARY SCHOOL</small>
-                    </div>
-                </div>
-                <p class="card-text">
-                    "{{ Utils::app_name() }} is a lifesaver! Managing admissions and fees used to take days, now it takes minutes. 
-                    The support team is also incredibly responsive."
-                </p>
-            </div>
-            
-            <div class="card">
-                <div class="flex gap-3 mb-4">
-                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">
-                        QP
-                    </div>
-                    <div>
-                        <h5 style="margin: 0; color: var(--text-dark);">Deputy Head Teacher</h5>
-                        <small style="color: var(--text-light);">QUEEN OF PEACE NOBLE'S SCHOOL</small>
-                    </div>
-                </div>
-                <p class="card-text">
-                    "Communication with parents is so much easier now. Sending updates via SMS and the app keeps everyone 
-                    informed instantly. {{ Utils::app_name() }} really understands school needs."
-                </p>
-            </div>
-        </div>
-        
-        <!-- Call to Action in Testimonials -->
-        <div class="text-center" style="margin-top: 3rem;">
-            <p style="color: var(--text-light); margin-bottom: 2rem; font-size: 1.1rem;">
-                Join 76+ schools across Uganda already using {{ Utils::app_name() }} to transform their operations.
-            </p>
-            <a href="{{ url('/testimonials') }}" class="btn btn-outline" style="border-color: var(--primary-color); color: var(--primary-color); margin-right: 1rem;">
-                <i class='bx bx-message-dots'></i>
-                Read More Testimonials
-            </a>
-            <a href="{{ url('/schools') }}" class="btn btn-outline" style="border-color: var(--accent-color); color: var(--accent-color);">
-                <i class='bx bx-group'></i>
-                See All Our Schools
-            </a>
         </div>
     </div>
 </section>
@@ -278,9 +206,9 @@ use App\Models\Utils;
             <div class="flex-center gap-3">
                 <a href="{{ url('access-system') }}" class="btn" style="background: white; color: var(--primary-color); padding: 1rem 2.5rem; font-size: 1.1rem;">
                     <i class='bx bx-rocket'></i>
-                    Access The System
+                    Start Your Free Trial
                 </a>
-                <a href="{{ url('contact') }}" class="btn btn-outline" style="border-color: white; color: white;">
+                <a href="#" class="btn btn-outline" style="border-color: white; color: white;">
                     <i class='bx bx-phone'></i>
                     Schedule Demo
                 </a>
