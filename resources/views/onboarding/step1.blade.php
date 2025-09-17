@@ -6,7 +6,7 @@ use App\Models\Utils;
 @section('title', 'Welcome to ' . Utils::app_name() . ' - School Registration')
 @section('meta_description', 'Welcome to ' . Utils::app_name() . ' - Start your school management journey today.')
 
-@section('progress-info')
+@section('progress-indicator')
     <div class="progress-step">
         <h2 class="progress-title">Welcome to {{ Utils::app_name() }}</h2>
         <p class="progress-description">
@@ -16,7 +16,7 @@ use App\Models\Utils;
     
     <div class="progress-indicator">
         <div class="progress-step-indicator active">1</div>
-        <span style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem;">Introduction</span>
+        <span>Introduction</span>
     </div>
 @endsection
 

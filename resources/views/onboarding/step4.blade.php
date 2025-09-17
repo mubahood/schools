@@ -6,7 +6,7 @@ use App\Models\Utils;
 @section('title', 'Review Information - ' . Utils::app_name())
 @section('meta_description', 'Review and confirm your registration details before completing the process.')
 
-@section('progress-info')
+@section('progress-indicator')
     <div class="progress-step">
         <h2 class="progress-title">Review & Confirm</h2>
         <p class="progress-description">
@@ -16,7 +16,7 @@ use App\Models\Utils;
     
     <div class="progress-indicator">
         <div class="progress-step-indicator active">4</div>
-        <span style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem;">Confirmation</span>
+        <span>Confirmation</span>
     </div>
 @endsection
 

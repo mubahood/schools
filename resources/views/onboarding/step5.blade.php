@@ -1,12 +1,9 @@
-<?php
-use App\Models\Utils;
-?>
 @extends('layouts.onboarding')
 
-@section('title', 'Welcome to ' . Utils::app_name() . ' - Registration Complete')
+@section('title', 'Welcome to ' . \App\Models\Utils::app_name() . ' - Registration Complete')
 @section('meta_description', 'Registration completed successfully. Welcome to your new school management platform.')
 
-@section('progress-info')
+@section('progress-indicator')
     <div class="progress-step">
         <h2 class="progress-title">Welcome Aboard!</h2>
         <p class="progress-description">
@@ -15,26 +12,26 @@ use App\Models\Utils;
     </div>
     
     <div class="progress-indicator">
-        <div class="progress-step-indicator active" style="background: #10b981; border-color: #10b981;">
-            <i class='bx bx-check' style="font-size: 0.9rem;"></i>
+        <div class="progress-step-indicator active" style="background: var(--accent-color);">
+            <i class='bx bx-check'></i>
         </div>
-        <span style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem;">Complete</span>
+        <span>Complete</span>
     </div>
 @endsection
 
 @section('content')
-    <div style="text-align: center;">
-        <div style="color: #10b981; font-size: 3rem; margin-bottom: 1rem;">
+    <div class="completion-container">
+        <div class="completion-icon">
             <i class='bx bx-check-circle'></i>
         </div>
         
         <div class="content-title">Registration Successful!</div>
         <div class="content-description">
-            Welcome to {{ Utils::app_name() }}, {{ $successData['user_name'] ?? 'Administrator' }}!
+            Welcome to {{ \App\Models\Utils::app_name() }}, {{ $successData['user_name'] ?? 'Administrator' }}!
         </div>
     </div>
     
-    <div style="background: var(--background-light); padding: 1.5rem; border-radius: 8px; margin: 2rem 0; text-align: center;">
+    <div style="background: var(--background-light); padding: 1.5rem; border-radius: 8px; margin: 2rem 0; text-align: center; margin-bottom: 2rem;">
         <h3 style="color: var(--primary-color); margin-bottom: 1rem; font-size: 1.1rem;">
             🎉 {{ $successData['school_name'] ?? 'Your School' }} is now registered!
         </h3>

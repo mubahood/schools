@@ -7,6 +7,7 @@ use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class Enterprise extends Model
 {
@@ -16,6 +17,12 @@ class Enterprise extends Model
     {
         return $this->belongsTo(Administrator::class, 'administrator_id');
     }
+
+    public function onboardingWizard()
+    {
+        return $this->hasOne(OnBoardWizard::class, 'enterprise_id');
+    }
+
     public function getCreatedAtAttribute($value)
     {
         return Carbon::parse($value)->format('d-M-Y');
@@ -41,6 +48,23 @@ class Enterprise extends Model
                     $owner->user_type = 'employee';
                     $owner->status = 1;
                     $owner->save();
+                }
+
+                // Create OnBoardWizard for the new school
+                try {
+                    OnBoardWizard::create([
+                        'administrator_id' => $m->administrator_id,
+                        'enterprise_id' => $m->id,
+                        'current_step' => 'email_verification',
+                        'onboarding_status' => 'in_progress',
+                        'started_at' => now(),
+                        'last_activity_at' => now(),
+                        'preferred_language' => 'en',
+                        'total_progress_percentage' => 0,
+                    ]);
+                } catch (\Exception $e) {
+                    // Log error but don't break enterprise creation
+                    Log::error('Failed to create OnBoardWizard for Enterprise ' . $m->id . ': ' . $e->getMessage());
                 }
             }
 

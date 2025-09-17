@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\DummyDataController;
+use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PrintController2;
@@ -2877,6 +2878,17 @@ Route::group(['prefix' => 'onboarding'], function () {
     Route::post('step4', [OnboardingController::class, 'processStep4'])->name('onboarding.process4');
     Route::get('step5', [OnboardingController::class, 'step5'])->name('onboarding.step5');
     Route::post('complete', [OnboardingController::class, 'complete'])->name('onboarding.complete');
+    
+    // Email Verification Routes for Onboarding
+    Route::get('email-verification', [EmailVerificationController::class, 'show'])->name('onboarding.email.verification');
+    Route::post('email-verification/send', [EmailVerificationController::class, 'send'])->name('onboarding.email.send');
+    Route::post('email-verification/resend', [EmailVerificationController::class, 'resend'])->name('onboarding.email.resend');
+    Route::get('email-verification/verify/{token}', [EmailVerificationController::class, 'verify'])->name('onboarding.email.verify');
+    Route::post('email-verification/complete', [EmailVerificationController::class, 'markCompleted'])->name('onboarding.email.complete');
+    Route::get('email-verification/status', [EmailVerificationController::class, 'checkStatus'])->name('onboarding.email.status');
+    
+    // Session management endpoint for auto-saving progress
+    Route::post('save-session', [OnboardingController::class, 'saveSession'])->name('onboarding.save-session');
     
     // AJAX validation endpoints
     Route::get('validate-email', [OnboardingController::class, 'validateEmail'])->name('onboarding.validate.email');

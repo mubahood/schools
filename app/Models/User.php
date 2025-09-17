@@ -166,6 +166,11 @@ class User extends Administrator implements JWTSubject
         return $this->hasMany(ServiceSubscription::class, 'administrator_id');
     }
 
+    public function onboardingWizard()
+    {
+        return $this->hasOne(OnBoardWizard::class, 'administrator_id');
+    }
+
     public static function createParent($s)
     {
         if (strtolower($s->user_type) != 'student') {

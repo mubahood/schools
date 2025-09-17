@@ -78,53 +78,50 @@ class OnboardingController extends Controller
      */
     public function processStep3(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+                $validator = Validator::make($request->all(), [
             // Basic Information
             'school_name' => 'required|string|max:255|unique:enterprises,name',
-            'school_short_name' => 'required|string|max:20',
+            'school_short_name' => 'required|string|max:50',
+            'founded_year' => 'nullable|integer|min:1800|max:2025',
             'school_type' => 'required|in:Primary,Secondary,Advanced,University',
-            'school_motto' => 'nullable|string|max:255',
-            'welcome_message' => 'nullable|string',
             'has_theology' => 'required|in:Yes,No',
             
             // Contact Information
-            'school_email' => 'required|email|unique:enterprises,email',
+            'school_email' => 'required|email|max:255|unique:enterprises,email',
             'school_phone' => 'required|string|max:20|unique:enterprises,phone_number',
-            'school_phone_2' => 'nullable|string|max:20',
-            'school_website' => 'nullable|url|max:255',
             'school_address' => 'required|string|max:500',
             
             // Administrative
             'hm_name' => 'nullable|string|max:255',
+            'hm_phone' => 'nullable|string|max:20',
             
             // Branding
-            'primary_color' => 'required|string|max:7',
-            'secondary_color' => 'required|string|max:7',
-            'subdomain' => 'nullable|string|max:50|alpha_dash|unique:enterprises,subdomain',
-            
-            // Financial Settings
-            'school_pay_status' => 'required|in:Yes,No',
-            'school_pay_code' => 'required_if:school_pay_status,Yes|nullable|string|max:100',
-            'school_pay_password' => 'required_if:school_pay_status,Yes|nullable|string|max:255',
-            'school_pay_import_automatically' => 'nullable|in:Yes,No',
-            'school_pay_last_accepted_date' => 'nullable|date',
-            
-            // License
-            'has_valid_lisence' => 'required|in:Yes,No',
-            'expiry' => 'nullable|date|after:today',
-            'details' => 'nullable|string',
-            
-            // Logo upload
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'primary_color' => 'required|string|max:7|regex:/^#[0-9A-Fa-f]{6}$/',
         ], [
+            // Basic Information Messages
+            'school_name.required' => 'School name is required.',
             'school_name.unique' => 'A school with this name is already registered.',
+            'school_short_name.required' => 'School short name is required.',
+            'school_type.required' => 'Please select the school level/type.',
+            'school_type.in' => 'Invalid school type selected.',
+            'has_theology.required' => 'Please specify if the school offers Religious Studies/Theology.',
+            'has_theology.in' => 'Invalid selection for Religious Studies/Theology.',
+            
+            // Contact Information Messages
+            'school_email.required' => 'School email address is required.',
+            'school_email.email' => 'Please enter a valid email address.',
             'school_email.unique' => 'This email address is already used by another school.',
+            'school_phone.required' => 'School phone number is required.',
             'school_phone.unique' => 'This phone number is already used by another school.',
-            'subdomain.unique' => 'This subdomain is already taken.',
-            'subdomain.alpha_dash' => 'Subdomain can only contain letters, numbers, and hyphens.',
-            'school_pay_code.required_if' => 'SchoolPay code is required when SchoolPay is enabled.',
-            'school_pay_password.required_if' => 'SchoolPay password is required when SchoolPay is enabled.',
-            'expiry.after' => 'License expiry date must be in the future.',
+            'school_address.required' => 'School address is required.',
+            
+            // Branding Messages
+            'primary_color.required' => 'Please select a primary school color.',
+            'primary_color.regex' => 'Please select a valid color.',
+            
+            // Founded Year Messages
+            'founded_year.min' => 'Founded year must be after 1800.',
+            'founded_year.max' => 'Founded year cannot be in the future.',
         ]);
 
         if ($validator->fails()) {
@@ -132,12 +129,6 @@ class OnboardingController extends Controller
                 'success' => false,
                 'errors' => $validator->errors()
             ]);
-        }
-
-        // Handle logo upload
-        $logoPath = null;
-        if ($request->hasFile('logo')) {
-            $logoPath = $request->file('logo')->store('logos', 'public');
         }
 
         // Auto-generate short name if not provided
@@ -150,31 +141,36 @@ class OnboardingController extends Controller
         }
 
         // Auto-generate subdomain if not provided
-        $subdomain = $request->subdomain;
-        if (empty($subdomain) && $request->school_name) {
+        $subdomain = '';
+        if ($request->school_name) {
             $subdomain = strtolower(preg_replace('/[^a-z0-9]/', '', strtolower($request->school_name)));
             $subdomain = substr($subdomain, 0, 20);
         }
 
-        // Store comprehensive enterprise data in session
+        // Store basic enterprise data in session with defaults for missing fields
         $enterpriseData = $request->only([
-            'school_name', 'school_type', 'school_motto', 'welcome_message', 'has_theology',
-            'school_email', 'school_phone', 'school_phone_2', 'school_website', 'school_address',
-            'hm_name', 'primary_color', 'secondary_color',
-            'school_pay_status', 'school_pay_code', 'school_pay_password', 
-            'school_pay_import_automatically', 'school_pay_last_accepted_date',
-            'has_valid_lisence', 'expiry', 'details'
+            'school_name', 'school_type', 'has_theology',
+            'school_email', 'school_phone', 'school_address',
+            'hm_name', 'hm_phone', 'primary_color', 'founded_year'
         ]);
 
-        // Add generated/processed fields
+        // Add generated/default fields
         $enterpriseData['school_short_name'] = $shortName;
         $enterpriseData['subdomain'] = $subdomain;
-        $enterpriseData['logo_path'] = $logoPath;
+        
+        // Add default values for fields that will be collected in later steps
+        $enterpriseData['secondary_color'] = '#6c757d'; // Default gray
+        $enterpriseData['school_pay_status'] = 'No';
+        $enterpriseData['has_valid_lisence'] = 'Yes';
+        $enterpriseData['school_motto'] = '';
+        $enterpriseData['welcome_message'] = '';
+        $enterpriseData['details'] = '';
 
         session(['onboarding_enterprise_data' => $enterpriseData]);
 
         return response()->json([
             'success' => true,
+            'message' => 'School information saved successfully!',
             'next_step' => url('onboarding/step4')
         ]);
     }
@@ -379,5 +375,48 @@ class OnboardingController extends Controller
             'available' => !$exists,
             'message' => $exists ? 'School email is already taken.' : 'School email is available.'
         ]);
+    }
+
+    /**
+     * Save form data to session for auto-save functionality
+     */
+    public function saveSession(Request $request)
+    {
+        try {
+            $step = $request->input('step');
+            $field = $request->input('field');
+            $value = $request->input('value');
+
+            // Validate inputs
+            if (!$step || !$field) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid parameters'
+                ], 400);
+            }
+
+            // Get current session data for this step
+            $sessionKey = "onboarding.{$step}";
+            $stepData = session($sessionKey, []);
+
+            // Update the specific field
+            $stepData[$field] = $value;
+
+            // Save back to session
+            session([$sessionKey => $stepData]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data saved to session',
+                'field' => $field,
+                'value' => $value
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to save to session: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
