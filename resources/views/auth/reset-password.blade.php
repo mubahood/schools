@@ -31,15 +31,12 @@ $ent = Utils::ent();
     <style>
         :root {
             --primary-color: {{ $ent->color ?? '#007bff' }};
-            --secondary-color: {{ $ent->sec_color ?? '#6c757d' }};
-            --background-light: #f8f9fa;
             --text-dark: #2c3e50;
             --text-light: #6c757d;
             --border-light: #e9ecef;
             --success-color: #28a745;
             --error-color: #dc3545;
-            --shadow-light: 0 2px 10px rgba(0,0,0,0.1);
-            --shadow-medium: 0 4px 20px rgba(0,0,0,0.15);
+            --white: #ffffff;
         }
 
         * {
@@ -50,52 +47,49 @@ $ent = Utils::ent();
 
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            background-color: var(--primary-color);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
 
         .auth-container {
-            background: white;
-            border-radius: 16px;
-            box-shadow: var(--shadow-medium);
-            overflow: hidden;
-            max-width: 500px;
+            background: var(--white);
+            max-width: 450px;
             width: 100%;
-            margin: 20px;
-            padding: 3rem;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
         .auth-header {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
 
         .brand-logo {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
+            width: 50px;
+            height: 50px;
             object-fit: cover;
             margin-bottom: 1rem;
         }
 
         .auth-title {
-            font-size: 1.6rem;
-            font-weight: 700;
+            font-size: 1.4rem;
+            font-weight: 600;
             color: var(--text-dark);
             margin-bottom: 0.5rem;
         }
 
         .auth-subtitle {
             color: var(--text-light);
-            font-size: 0.95rem;
-            line-height: 1.5;
+            font-size: 0.85rem;
+            line-height: 1.4;
         }
 
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             position: relative;
         }
 
@@ -111,7 +105,7 @@ $ent = Utils::ent();
             width: 100%;
             padding: 0.75rem 1rem;
             border: 1px solid var(--border-light);
-            border-radius: 8px;
+            
             font-size: 1rem;
             transition: all 0.3s ease;
             background: white;
@@ -144,7 +138,7 @@ $ent = Utils::ent();
             background: var(--primary-color);
             border: none;
             padding: 0.75rem 1.5rem;
-            border-radius: 8px;
+            
             font-weight: 600;
             font-size: 1rem;
             width: 100%;
@@ -161,7 +155,7 @@ $ent = Utils::ent();
             border: 1px solid var(--border-light);
             color: var(--text-dark);
             padding: 0.75rem 1.5rem;
-            border-radius: 8px;
+            
             font-weight: 500;
             font-size: 1rem;
             width: 100%;
@@ -178,7 +172,7 @@ $ent = Utils::ent();
         }
 
         .alert {
-            border-radius: 8px;
+            
             border: none;
             padding: 0.75rem 1rem;
             margin-bottom: 1rem;
@@ -197,7 +191,7 @@ $ent = Utils::ent();
 
         .password-requirements {
             background: var(--background-light);
-            border-radius: 8px;
+            
             padding: 1rem;
             margin: 1rem 0;
             border-left: 4px solid var(--primary-color);
@@ -227,7 +221,7 @@ $ent = Utils::ent();
 
         .strength-bar {
             height: 4px;
-            border-radius: 2px;
+            
             background: var(--border-light);
             overflow: hidden;
         }
@@ -235,32 +229,13 @@ $ent = Utils::ent();
         .strength-progress {
             height: 100%;
             transition: all 0.3s ease;
-            border-radius: 2px;
+            
         }
 
         .strength-text {
             font-size: 0.8rem;
             margin-top: 0.25rem;
             font-weight: 500;
-        }
-
-        .loading {
-            opacity: 0.7;
-            pointer-events: none;
-        }
-
-        .spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -294,7 +269,7 @@ $ent = Utils::ent();
         @endif
 
         <!-- Reset Form -->
-        <form id="resetForm" action="{{ admin_url('auth/reset-password') }}" method="POST">
+        <form id="resetForm" action="{{ url('auth/reset-password') }}" method="POST">
             @csrf
             <input type="hidden" name="token" value="{{ $token }}">
             
@@ -357,14 +332,45 @@ $ent = Utils::ent();
             </div>
 
             <div class="form-group">
-                <button type="submit" class="btn btn-primary" id="resetBtn">
-                    <span class="btn-text">Reset Password</span>
-                    <span class="spinner d-none"></span>
+                <label class="form-label">Security Code</label>
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                    <img src="{{ url('/auth/captcha') }}" 
+                         alt="CAPTCHA" 
+                         id="captcha-image"
+                         style="border: 2px solid var(--border-light); padding: 5px; background: white;">
+                    <button type="button" 
+                            onclick="refreshCaptcha()" 
+                            style="background: var(--primary-color); color: white; border: none; padding: 8px 12px; cursor: pointer; font-size: 14px;">
+                        <i class='bx bx-refresh'></i> Refresh
+                    </button>
+                </div>
+                <div class="input-group">
+                    <i class='bx bx-shield input-icon'></i>
+                    <input type="text" 
+                           name="captcha" 
+                           class="form-control with-icon @error('captcha') is-invalid @enderror" 
+                           placeholder="Enter the numbers shown above"
+                           autocomplete="off"
+                           required>
+                </div>
+                @error('captcha')
+                    <div class="invalid-feedback" style="color: var(--error-color); font-size: 0.8rem; margin-top: 0.25rem;">
+                        {{ $message }}
+                    </div>
+                @enderror
+                <small style="color: var(--text-light); font-size: 0.8rem;">
+                    Please enter the 4-digit number shown in the image above.
+                </small>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">
+                    Reset Password
                 </button>
             </div>
         </form>
 
-        <a href="{{ admin_url('auth/login') }}" class="btn btn-secondary">
+        <a href="{{ url('auth/login') }}" class="btn btn-secondary">
             <i class='bx bx-arrow-back'></i>
             Back to Sign In
         </a>
@@ -375,108 +381,77 @@ $ent = Utils::ent();
     
     <!-- Bootstrap JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
+    
+    <!-- Simple JavaScript -->
     <script>
-        $(document).ready(function() {
-            // Password strength checker
-            function checkPasswordStrength(password) {
-                let strength = 0;
-                let feedback = '';
-                
-                if (password.length >= 6) strength += 1;
-                if (password.match(/[a-z]/)) strength += 1;
-                if (password.match(/[A-Z]/)) strength += 1;
-                if (password.match(/[0-9]/)) strength += 1;
-                if (password.match(/[^A-Za-z0-9]/)) strength += 1;
-                
-                const $progress = $('#strengthProgress');
-                const $text = $('#strengthText');
-                
-                switch (strength) {
-                    case 0:
-                    case 1:
-                        $progress.css({width: '20%', background: '#dc3545'});
-                        $text.text('Very Weak').css('color', '#dc3545');
-                        break;
-                    case 2:
-                        $progress.css({width: '40%', background: '#fd7e14'});
-                        $text.text('Weak').css('color', '#fd7e14');
-                        break;
-                    case 3:
-                        $progress.css({width: '60%', background: '#ffc107'});
-                        $text.text('Fair').css('color', '#ffc107');
-                        break;
-                    case 4:
-                        $progress.css({width: '80%', background: '#28a745'});
-                        $text.text('Good').css('color', '#28a745');
-                        break;
-                    case 5:
-                        $progress.css({width: '100%', background: '#28a745'});
-                        $text.text('Strong').css('color', '#28a745');
-                        break;
+        // Simple CAPTCHA refresh function
+        function refreshCaptcha() {
+            const captchaImage = document.getElementById('captcha-image');
+            const captchaInput = document.querySelector('input[name="captcha"]');
+            
+            if (captchaImage) {
+                captchaImage.src = '{{ url("auth/captcha") }}?' + new Date().getTime();
+            }
+            
+            if (captchaInput) {
+                captchaInput.value = '';
+                captchaInput.focus();
+            }
+        }
+
+        // Basic password validation
+        document.addEventListener('DOMContentLoaded', function() {
+            const password = document.getElementById('password');
+            const passwordConfirm = document.getElementById('passwordConfirm');
+            
+            // Check if passwords match
+            function validatePasswords() {
+                if (password.value && passwordConfirm.value && password.value !== passwordConfirm.value) {
+                    passwordConfirm.classList.add('is-invalid');
+                } else {
+                    passwordConfirm.classList.remove('is-invalid');
                 }
-                
-                return strength;
             }
 
-            // Password input handling
-            $('#password').on('input', function() {
-                const password = $(this).val();
-                checkPasswordStrength(password);
-                
-                // Check if passwords match
-                const confirmPassword = $('#passwordConfirm').val();
-                if (confirmPassword && password !== confirmPassword) {
-                    $('#passwordConfirm').addClass('is-invalid');
-                } else {
-                    $('#passwordConfirm').removeClass('is-invalid');
-                }
+            if (password) {
+                password.addEventListener('input', validatePasswords);
+            }
+            
+            if (passwordConfirm) {
+                passwordConfirm.addEventListener('input', validatePasswords);
+            }
+
+            // Form submission validation
+            const form = document.getElementById('resetForm');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    if (password.value !== passwordConfirm.value) {
+                        e.preventDefault();
+                        alert('Passwords do not match!');
+                        return false;
+                    }
+                });
+            }
+        });
+
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.transition = 'opacity 0.5s ease';
+                alert.style.opacity = '0';
+                setTimeout(() => {
+                    alert.remove();
+                }, 500);
             });
+        }, 5000);
 
-            // Confirm password handling
-            $('#passwordConfirm').on('input', function() {
-                const password = $('#password').val();
-                const confirmPassword = $(this).val();
-                
-                if (password !== confirmPassword) {
-                    $(this).addClass('is-invalid');
-                } else {
-                    $(this).removeClass('is-invalid');
-                }
-            });
-
-            // Form submission handling
-            $('#resetForm').on('submit', function(e) {
-                const password = $('#password').val();
-                const confirmPassword = $('#passwordConfirm').val();
-                
-                if (password !== confirmPassword) {
-                    e.preventDefault();
-                    alert('Passwords do not match!');
-                    return false;
-                }
-                
-                const $form = $(this);
-                const $btn = $('#resetBtn');
-                const $btnText = $btn.find('.btn-text');
-                const $spinner = $btn.find('.spinner');
-
-                // Show loading state
-                $btn.addClass('loading');
-                $btnText.text('Resetting...');
-                $spinner.removeClass('d-none');
-                
-                // Disable form
-                $form.find('input, button').prop('disabled', true);
-            });
-
-            // Auto-hide alerts after 5 seconds
-            setTimeout(function() {
-                $('.alert').fadeOut();
-            }, 5000);
-
-            // Focus first input
-            $('input[name="email"]').focus();
+        // Focus first input when page loads
+        window.addEventListener('load', function() {
+            const firstInput = document.querySelector('input[name="email"]');
+            if (firstInput) {
+                firstInput.focus();
+            }
         });
     </script>
 </body>

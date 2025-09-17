@@ -1,5 +1,7 @@
 <?php
 
+ob_start(); // Fix for 419 session issues in some hosting environments
+
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 

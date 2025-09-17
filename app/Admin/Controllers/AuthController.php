@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
@@ -40,7 +41,34 @@ class AuthController extends BaseAuthController
      */
     public function postLogin(Request $request)
     {
-        $this->loginValidator($request->all())->validate();
+        // Validate CAPTCHA first
+        $captchaValidator = Validator::make($request->all(), [
+            'captcha' => 'required|string',
+        ]);
+
+        if ($captchaValidator->fails()) {
+            return back()->withErrors($captchaValidator)->withInput($request->except('password'));
+        }
+
+        // Verify CAPTCHA
+        $sessionCaptcha = session('captcha_text');
+        
+        if ((string)session('captcha_text') !== (string)$request->captcha) {
+            return back()->withErrors(['captcha' => 'Invalid security code. Please try again.'])->withInput($request->except('password'));
+        }
+
+        // Clear CAPTCHA from session after verification
+        session()->forget('captcha_text');
+
+        // Validate other login fields
+        $validator = Validator::make($request->all(), [
+            'username' => 'required|string',
+            'password' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput($request->except('password'));
+        }
 
         $identifier = $request->get('username');
         $password = $request->get('password');
@@ -83,11 +111,20 @@ class AuthController extends BaseAuthController
     {
         $validator = Validator::make($request->all(), [
             'identifier' => 'required|string',
+            'captcha' => 'required|string',
         ]);
 
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
+
+        // Verify CAPTCHA
+        if ((string)session('captcha_text') !== (string)$request->captcha) {
+            return back()->withErrors(['captcha' => 'Invalid security code. Please try again.'])->withInput();
+        }
+
+        // Clear CAPTCHA from session after verification
+        session()->forget('captcha_text');
 
         $identifier = $request->get('identifier');
         
@@ -138,11 +175,20 @@ class AuthController extends BaseAuthController
             'token' => 'required',
             'email' => 'required|email',
             'password' => 'required|min:6|confirmed',
+            'captcha' => 'required|string',
         ]);
 
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
+
+        // Verify CAPTCHA
+        if ((string)session('captcha_text') !== (string)$request->captcha) {
+            return back()->withErrors(['captcha' => 'Invalid security code. Please try again.'])->withInput();
+        }
+
+        // Clear CAPTCHA from session after verification
+        session()->forget('captcha_text');
 
         $reset = DB::table('password_resets')->where('email', $request->email)->first();
 

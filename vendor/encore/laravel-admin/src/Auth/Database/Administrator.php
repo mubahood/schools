@@ -256,33 +256,42 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
             }
 
 
-            if (
-                $model->username == null ||
-                $model->email == null ||
-                strlen($model->username) < 3 ||
-                strlen($model->email) < 3
-            ) {
+            // Check and set username and email if missing or too short
+            if ($model->username == null || strlen($model->username) < 3) {
                 $model->username = null;
-                $model->email = null;
 
-                if (
-                    $model->school_pay_payment_code == null ||
-                    strlen($model->school_pay_payment_code) < 4
-                ) {
-                    $model->email = $model->school_pay_payment_code;
+                // Try to use school_pay_payment_code if valid
+                if ($model->school_pay_payment_code != null && strlen($model->school_pay_payment_code) >= 4) {
                     $model->username = $model->school_pay_payment_code;
                 }
 
-
-                if ($model->phone_number_1 != null && (strlen($model->phone_number_1) > 3)) {
+                // Try to use phone_number_1 if valid
+                if ($model->username == null && $model->phone_number_1 != null && strlen($model->phone_number_1) > 3) {
                     $model->username = $model->phone_number_1;
+                }
+
+                // Fallback to generated username
+                if ($model->username == null) {
+                    $model->username = strtolower($model->first_name . $model->last_name) . rand(1000, 10000);
+                }
+            }
+
+            if ($model->email == null || strlen($model->email) < 3) {
+                $model->email = null;
+
+                // Try to use school_pay_payment_code if valid
+                if ($model->school_pay_payment_code != null && strlen($model->school_pay_payment_code) >= 4) {
+                    $model->email = $model->school_pay_payment_code;
+                }
+
+                // Try to use phone_number_1 if valid
+                if ($model->email == null && $model->phone_number_1 != null && strlen($model->phone_number_1) > 3) {
                     $model->email = $model->phone_number_1;
                 }
 
+                // Fallback to generated email
                 if ($model->email == null) {
-                    strtolower($model->first_name . $model->last_name);
-                    $model->email = $model->first_name . $model->last_name . rand(1000, 10000);
-                    $model->username = $model->first_name . $model->last_name . rand(1000, 10000);
+                    $model->email = strtolower($model->first_name . $model->last_name) . rand(1000, 10000);
                 }
             }
 
@@ -385,33 +394,43 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                 die("enterprise is required");
             }
 
-            if (
-                $model->username == null ||
-                $model->email == null ||
-                strlen($model->username) < 3 ||
-                strlen($model->email) < 3
-            ) {
+            // Check and set username if missing or too short
+            if ($model->username == null || strlen($model->username) < 3) {
                 $model->username = null;
-                $model->email = null;
 
-                if (
-                    $model->school_pay_payment_code == null ||
-                    strlen($model->school_pay_payment_code) < 4
-                ) {
-                    $model->email = $model->school_pay_payment_code;
+                // Try to use school_pay_payment_code if valid
+                if ($model->school_pay_payment_code != null && strlen($model->school_pay_payment_code) >= 4) {
                     $model->username = $model->school_pay_payment_code;
                 }
 
-
-                if ($model->phone_number_1 != null && (strlen($model->phone_number_1) > 3)) {
+                // Try to use phone_number_1 if valid
+                if ($model->username == null && $model->phone_number_1 != null && strlen($model->phone_number_1) > 3) {
                     $model->username = $model->phone_number_1;
+                }
+
+                // Fallback to generated username
+                if ($model->username == null) {
+                    $model->username = strtolower($model->first_name . $model->last_name) . rand(1000, 10000);
+                }
+            }
+
+            // Check and set email if missing or too short
+            if ($model->email == null || strlen($model->email) < 3) {
+                $model->email = null;
+
+                // Try to use school_pay_payment_code if valid
+                if ($model->school_pay_payment_code != null && strlen($model->school_pay_payment_code) >= 4) {
+                    $model->email = $model->school_pay_payment_code;
+                }
+
+                // Try to use phone_number_1 if valid
+                if ($model->email == null && $model->phone_number_1 != null && strlen($model->phone_number_1) > 3) {
                     $model->email = $model->phone_number_1;
                 }
 
+                // Fallback to generated email
                 if ($model->email == null) {
-                    strtolower($model->first_name . $model->last_name);
-                    $model->email = $model->first_name . $model->last_name . rand(1000, 10000);
-                    $model->username = $model->first_name . $model->last_name . rand(1000, 10000);
+                    $model->email = strtolower($model->first_name . $model->last_name) . rand(1000, 10000);
                 }
             }
 

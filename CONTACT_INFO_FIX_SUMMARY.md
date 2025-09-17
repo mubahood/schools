@@ -44,7 +44,7 @@ File: `resources/views/landing/access-system-fresh.blade.php`
 
 ### **Real Contact Information Now Displayed**
 
-✅ **Support Phone**: `+256 779 490 831`
+✅ **Support Phone**: `+256 783 204 665`
 ✅ **Support Email**: `cto@8technologies.net`
 ✅ **WhatsApp Support**: Available via Utils::get_whatsapp_link()
 
@@ -65,7 +65,7 @@ The Utils model provides several contact-related methods:
 5. **Easy Updates**: Contact info can be updated in one place (Utils model)
 
 ### **Testing Results**
-✅ **Support Phone**: Working - displays `+256 779 490 831`
+✅ **Support Phone**: Working - displays `+256 783 204 665`
 ✅ **Support Email**: Working - displays `cto@8technologies.net`
 ✅ **View Cache**: Cleared to apply changes
 ✅ **No More Dummy Data**: All placeholder text replaced
@@ -76,7 +76,7 @@ The Utils model provides several contact-related methods:
 
 The contact information sections now display **real, professional contact details** instead of dummy placeholders:
 
-- **Phone Support**: Clickable link to `+256 779 490 831`
+- **Phone Support**: Clickable link to `+256 783 204 665`
 - **Email Support**: Clickable link to `cto@8technologies.net`
 - **Consistent Branding**: Uses proper application name throughout
 - **Centralized Management**: All contact info managed via Utils model

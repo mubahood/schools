@@ -31,15 +31,12 @@ $ent = Utils::ent();
     <style>
         :root {
             --primary-color: {{ $ent->color ?? '#007bff' }};
-            --secondary-color: {{ $ent->sec_color ?? '#6c757d' }};
-            --background-light: #f8f9fa;
             --text-dark: #2c3e50;
             --text-light: #6c757d;
             --border-light: #e9ecef;
             --success-color: #28a745;
             --error-color: #dc3545;
-            --shadow-light: 0 2px 10px rgba(0,0,0,0.1);
-            --shadow-medium: 0 4px 20px rgba(0,0,0,0.15);
+            --white: #ffffff;
         }
 
         * {
@@ -50,77 +47,72 @@ $ent = Utils::ent();
 
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            background-color: var(--primary-color);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
 
         .auth-container {
-            background: white;
-            border-radius: 16px;
-            box-shadow: var(--shadow-medium);
-            overflow: hidden;
-            max-width: 500px;
+            background: var(--white);
+            max-width: 450px;
             width: 100%;
-            margin: 20px;
-            padding: 3rem;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
         .auth-header {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
 
         .brand-logo {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
+            width: 50px;
+            height: 50px;
             object-fit: cover;
             margin-bottom: 1rem;
         }
 
         .auth-title {
-            font-size: 1.6rem;
-            font-weight: 700;
+            font-size: 1.4rem;
+            font-weight: 600;
             color: var(--text-dark);
             margin-bottom: 0.5rem;
         }
 
         .auth-subtitle {
             color: var(--text-light);
-            font-size: 0.95rem;
-            line-height: 1.5;
+            font-size: 0.85rem;
+            line-height: 1.4;
         }
 
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             position: relative;
         }
 
         .form-label {
             display: block;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
             color: var(--text-dark);
             font-weight: 500;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .form-control {
             width: 100%;
-            padding: 0.75rem 1rem;
+            padding: 0.6rem 0.8rem;
             border: 1px solid var(--border-light);
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background: white;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease;
+            background: var(--white);
         }
 
         .form-control:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(var(--primary-color), 0.1);
         }
 
         .input-group {
@@ -129,7 +121,7 @@ $ent = Utils::ent();
 
         .input-icon {
             position: absolute;
-            left: 1rem;
+            left: 0.8rem;
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-light);
@@ -137,70 +129,68 @@ $ent = Utils::ent();
         }
 
         .form-control.with-icon {
-            padding-left: 2.5rem;
+            padding-left: 2.2rem;
         }
 
         .btn-primary {
-            background: var(--primary-color);
+            background-color: var(--primary-color);
             border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 1rem;
+            padding: 0.7rem 1.2rem;
+            font-weight: 500;
+            font-size: 0.9rem;
             width: 100%;
             transition: all 0.3s ease;
+            color: var(--white);
+            cursor: pointer;
         }
 
         .btn-primary:hover {
-            background: var(--secondary-color);
-            transform: translateY(-1px);
+            background-color: var(--primary-color);
+            opacity: 0.9;
         }
 
         .btn-secondary {
             background: transparent;
             border: 1px solid var(--border-light);
             color: var(--text-dark);
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
+            padding: 0.7rem 1.2rem;
             font-weight: 500;
-            font-size: 1rem;
+            font-size: 0.9rem;
             width: 100%;
             text-decoration: none;
             display: inline-block;
             text-align: center;
             transition: all 0.3s ease;
-            margin-top: 1rem;
+            margin-top: 0.8rem;
         }
 
         .btn-secondary:hover {
-            background: var(--background-light);
+            background: #f8f9fa;
             color: var(--text-dark);
         }
 
         .alert {
-            border-radius: 8px;
             border: none;
-            padding: 0.75rem 1rem;
+            padding: 0.6rem 0.8rem;
             margin-bottom: 1rem;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .alert-success {
-            background: #d4edda;
+            background-color: #d4edda;
             color: #155724;
         }
 
         .alert-danger {
-            background: #f8d7da;
+            background-color: #f8d7da;
             color: #721c24;
         }
 
         .info-box {
-            background: var(--background-light);
-            border-radius: 8px;
+            background: #f8f9fa;
             padding: 1rem;
-            margin: 1.5rem 0;
-            border-left: 4px solid var(--primary-color);
+            margin: 1rem 0;
+            border-left: 3px solid var(--primary-color);
         }
 
         .info-box h5 {
@@ -215,25 +205,6 @@ $ent = Utils::ent();
             font-size: 0.8rem;
             margin: 0;
             line-height: 1.4;
-        }
-
-        .loading {
-            opacity: 0.7;
-            pointer-events: none;
-        }
-
-        .spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -267,7 +238,7 @@ $ent = Utils::ent();
         @endif
 
         <!-- Reset Form -->
-        <form id="resetForm" action="{{ admin_url('auth/forgot-password') }}" method="POST">
+        <form id="resetForm" action="{{ url('auth/forgot-password') }}" method="POST">
             @csrf
             
             <div class="form-group">
@@ -285,9 +256,40 @@ $ent = Utils::ent();
             </div>
 
             <div class="form-group">
-                <button type="submit" class="btn btn-primary" id="resetBtn">
-                    <span class="btn-text">Send Reset Link</span>
-                    <span class="spinner d-none"></span>
+                <label class="form-label">Security Code</label>
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                    <img src="{{ url('/auth/captcha') }}" 
+                         alt="CAPTCHA" 
+                         id="captcha-image"
+                         style="border: 2px solid var(--border-light); padding: 5px; background: white;">
+                    <button type="button" 
+                            onclick="refreshCaptcha()" 
+                            style="background: var(--primary-color); color: white; border: none; padding: 8px 12px; cursor: pointer; font-size: 14px;">
+                        <i class='bx bx-refresh'></i> Refresh
+                    </button>
+                </div>
+                <div class="input-group">
+                    <i class='bx bx-shield input-icon'></i>
+                    <input type="text" 
+                           name="captcha" 
+                           class="form-control with-icon @error('captcha') is-invalid @enderror" 
+                           placeholder="Enter the numbers shown above"
+                           autocomplete="off"
+                           required>
+                </div>
+                @error('captcha')
+                    <div class="invalid-feedback" style="color: var(--error-color); font-size: 0.8rem; margin-top: 0.25rem;">
+                        {{ $message }}
+                    </div>
+                @enderror
+                <small style="color: var(--text-light); font-size: 0.8rem;">
+                    Please enter the 4-digit number shown in the image above.
+                </small>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">
+                    Send Reset Link
                 </button>
             </div>
         </form>
@@ -299,7 +301,7 @@ $ent = Utils::ent();
             </p>
         </div>
 
-        <a href="{{ admin_url('auth/login') }}" class="btn btn-secondary">
+        <a href="{{ url('auth/login') }}" class="btn btn-secondary">
             <i class='bx bx-arrow-back'></i>
             Back to Sign In
         </a>
@@ -310,39 +312,42 @@ $ent = Utils::ent();
     
     <!-- Bootstrap JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
+    
+    <!-- Simple JavaScript -->
     <script>
-        $(document).ready(function() {
-            // Form submission handling
-            $('#resetForm').on('submit', function() {
-                const $form = $(this);
-                const $btn = $('#resetBtn');
-                const $btnText = $btn.find('.btn-text');
-                const $spinner = $btn.find('.spinner');
+        // Simple CAPTCHA refresh function
+        function refreshCaptcha() {
+            const captchaImage = document.getElementById('captcha-image');
+            const captchaInput = document.querySelector('input[name="captcha"]');
+            
+            if (captchaImage) {
+                captchaImage.src = '{{ url("auth/captcha") }}?' + new Date().getTime();
+            }
+            
+            if (captchaInput) {
+                captchaInput.value = '';
+                captchaInput.focus();
+            }
+        }
 
-                // Show loading state
-                $btn.addClass('loading');
-                $btnText.text('Sending...');
-                $spinner.removeClass('d-none');
-                
-                // Disable form
-                $form.find('input, button').prop('disabled', true);
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.transition = 'opacity 0.5s ease';
+                alert.style.opacity = '0';
+                setTimeout(() => {
+                    alert.remove();
+                }, 500);
             });
+        }, 5000);
 
-            // Auto-hide alerts after 5 seconds
-            setTimeout(function() {
-                $('.alert').fadeOut();
-            }, 5000);
-
-            // Focus first input
-            $('input[name="identifier"]').focus();
-
-            // Enter key handling
-            $('input').on('keypress', function(e) {
-                if (e.which === 13) {
-                    $('#resetForm').submit();
-                }
-            });
+        // Focus first input when page loads
+        window.addEventListener('load', function() {
+            const firstInput = document.querySelector('input[name="identifier"]');
+            if (firstInput) {
+                firstInput.focus();
+            }
         });
     </script>
 </body>

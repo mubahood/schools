@@ -243,12 +243,22 @@ class Utils  extends Model
 
     public static function get_support_phone()
     {
-        return '+256 779 490 831';
+        return '+256 783 204 665';
     }
 
     public static function get_support_email()
     {
         return 'cto@8technologies.net';
+    }
+
+    public static function phone()
+    {
+        return self::get_support_phone();
+    }
+
+    public static function email()
+    {
+        return self::get_support_email();
     }
 
     public static function get_whatsapp_link()

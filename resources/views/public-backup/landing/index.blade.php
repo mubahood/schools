@@ -862,7 +862,7 @@ use App\Models\Utils;
                         <div>
                             <h5 class="mb-1">Book a Demo</h5>
                             <p class="mb-0">
-                                <a href="tel:+256779490831" class="text-decoration-none">
+                                <a href="tel:+256783204665" class="text-decoration-none">
                                     +256&nbsp;779&nbsp;490&nbsp;831
                                 </a>
                             </p>

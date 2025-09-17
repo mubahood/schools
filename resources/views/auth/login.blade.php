@@ -4,42 +4,42 @@ $ent = Utils::ent();
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $ent->name }} - Sign In</title>
-    
+
     <!-- Meta Tags -->
     <meta name="description" content="Sign in to {{ $ent->name }} school management system">
     <meta name="robots" content="noindex, nofollow">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    
+
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="{{ $ent->logo ? url('storage/' . $ent->logo) : asset('assets/8tech.png') }}">
-    
+    <link rel="icon" type="image/png"
+        href="{{ $ent->logo ? url('storage/' . $ent->logo) : asset('assets/8tech.png') }}">
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Boxicons -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    
+
     <style>
         :root {
             --primary-color: {{ $ent->color ?? '#007bff' }};
-            --secondary-color: {{ $ent->sec_color ?? '#6c757d' }};
-            --background-light: #f8f9fa;
+            --primary-light: {{ $ent->color ?? '#007bff' }}20;
             --text-dark: #2c3e50;
             --text-light: #6c757d;
             --border-light: #e9ecef;
             --success-color: #28a745;
             --error-color: #dc3545;
-            --shadow-light: 0 2px 10px rgba(0,0,0,0.1);
-            --shadow-medium: 0 4px 20px rgba(0,0,0,0.15);
+            --white: #ffffff;
         }
 
         * {
@@ -50,76 +50,54 @@ $ent = Utils::ent();
 
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            background-color: var(--primary-color);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
 
         .auth-container {
-            background: white;
-            border-radius: 16px;
-            box-shadow: var(--shadow-medium);
-            overflow: hidden;
-            max-width: 900px;
+            background: var(--white);
+            max-width: 800px;
             width: 100%;
-            margin: 20px;
-            min-height: 600px;
+            min-height: 500px;
             display: flex;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .auth-left {
             flex: 1;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            padding: 3rem;
+            background-color: var(--primary-color);
+            padding: 2rem;
             display: flex;
             flex-direction: column;
             justify-content: center;
             color: white;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .auth-left::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('{{ asset("assets/pattern.png") }}') repeat;
-            opacity: 0.1;
-            z-index: 1;
-        }
-
-        .auth-left > * {
-            position: relative;
-            z-index: 2;
         }
 
         .brand-section {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
 
         .brand-logo {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
+            width: 60px;
+            height: 60px;
             object-fit: cover;
             margin-bottom: 1rem;
-            border: 3px solid rgba(255,255,255,0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
         }
 
         .brand-name {
-            font-size: 1.8rem;
-            font-weight: 700;
+            font-size: 1.5rem;
+            font-weight: 600;
             margin-bottom: 0.5rem;
         }
 
         .brand-subtitle {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             opacity: 0.9;
         }
 
@@ -128,20 +106,20 @@ $ent = Utils::ent();
         }
 
         .welcome-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 0.75rem;
         }
 
         .welcome-description {
-            font-size: 0.95rem;
-            line-height: 1.6;
-            opacity: 0.9;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            opacity: 0.85;
         }
 
         .auth-right {
             flex: 1;
-            padding: 3rem;
+            padding: 2rem;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -149,48 +127,46 @@ $ent = Utils::ent();
 
         .auth-header {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
 
         .auth-title {
-            font-size: 1.6rem;
-            font-weight: 700;
+            font-size: 1.4rem;
+            font-weight: 600;
             color: var(--text-dark);
             margin-bottom: 0.5rem;
         }
 
         .auth-subtitle {
             color: var(--text-light);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             position: relative;
         }
 
         .form-label {
             display: block;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
             color: var(--text-dark);
             font-weight: 500;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .form-control {
             width: 100%;
-            padding: 0.75rem 1rem;
+            padding: 0.6rem 0.8rem;
             border: 1px solid var(--border-light);
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background: white;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease;
+            background: var(--white);
         }
 
         .form-control:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(var(--primary-color), 0.1);
         }
 
         .input-group {
@@ -199,7 +175,7 @@ $ent = Utils::ent();
 
         .input-icon {
             position: absolute;
-            left: 1rem;
+            left: 0.8rem;
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-light);
@@ -207,35 +183,36 @@ $ent = Utils::ent();
         }
 
         .form-control.with-icon {
-            padding-left: 2.5rem;
+            padding-left: 2.2rem;
         }
 
         .btn-primary {
-            background: var(--primary-color);
+            background-color: var(--primary-color);
             border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 1rem;
+            padding: 0.7rem 1.2rem;
+            font-weight: 500;
+            font-size: 0.9rem;
             width: 100%;
             transition: all 0.3s ease;
+            color: var(--white);
+            cursor: pointer;
         }
 
         .btn-primary:hover {
-            background: var(--secondary-color);
-            transform: translateY(-1px);
+            background-color: var(--primary-color);
+            opacity: 0.9;
         }
 
         .form-footer {
-            margin-top: 1.5rem;
+            margin-top: 1rem;
             text-align: center;
         }
 
         .form-links {
             display: flex;
             justify-content: space-between;
-            margin-top: 1rem;
-            font-size: 0.9rem;
+            margin-top: 0.8rem;
+            font-size: 0.85rem;
         }
 
         .auth-link {
@@ -245,38 +222,37 @@ $ent = Utils::ent();
         }
 
         .auth-link:hover {
-            color: var(--secondary-color);
+            color: var(--text-dark);
         }
 
         .alert {
-            border-radius: 8px;
             border: none;
-            padding: 0.75rem 1rem;
+            padding: 0.6rem 0.8rem;
             margin-bottom: 1rem;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .alert-success {
-            background: #d4edda;
+            background-color: #d4edda;
             color: #155724;
         }
 
         .alert-danger {
-            background: #f8d7da;
+            background-color: #f8d7da;
             color: #721c24;
         }
 
         .support-section {
-            margin-top: 2rem;
-            padding-top: 1.5rem;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
             border-top: 1px solid var(--border-light);
             text-align: center;
         }
 
         .support-title {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: var(--text-dark);
-            margin-bottom: 1rem;
+            margin-bottom: 0.8rem;
         }
 
         .support-contacts {
@@ -289,9 +265,9 @@ $ent = Utils::ent();
         .support-contact {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.4rem;
             color: var(--text-light);
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             text-decoration: none;
             transition: color 0.3s ease;
         }
@@ -300,70 +276,81 @@ $ent = Utils::ent();
             color: var(--primary-color);
         }
 
-        /* Mobile Responsive */
+        .remember-section {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .remember-section input[type="checkbox"] {
+            margin: 0;
+        }
+
+        .remember-section label {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        /* Responsive Design */
         @media (max-width: 768px) {
             .auth-container {
                 flex-direction: column;
-                margin: 10px;
-                min-height: auto;
+                max-width: 400px;
             }
 
             .auth-left {
-                padding: 2rem;
-                text-align: center;
+                padding: 1.5rem;
             }
 
             .auth-right {
-                padding: 2rem;
+                padding: 1.5rem;
             }
 
-            .form-links {
-                flex-direction: column;
-                gap: 0.5rem;
+            .brand-logo {
+                width: 50px;
+                height: 50px;
             }
 
-            .support-contacts {
-                flex-direction: column;
-                gap: 0.5rem;
+            .brand-name {
+                font-size: 1.3rem;
+            }
+
+            .auth-title {
+                font-size: 1.2rem;
             }
         }
 
-        .loading {
-            opacity: 0.7;
-            pointer-events: none;
-        }
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
 
-        .spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+            .auth-left,
+            .auth-right {
+                padding: 1rem;
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="auth-container">
         <!-- Left Side - Branding -->
         <div class="auth-left">
             <div class="brand-section">
-                <img src="{{ $ent->logo ? url('storage/' . $ent->logo) : asset('assets/8tech.png') }}" 
-                     alt="{{ $ent->name }}" 
-                     class="brand-logo">
+                <img src="{{ $ent->logo ? url('storage/' . $ent->logo) : asset('assets/8tech.png') }}"
+                    alt="{{ $ent->name }}" class="brand-logo">
                 <h1 class="brand-name">{{ $ent->name }}</h1>
                 <p class="brand-subtitle">School Management System</p>
             </div>
-            
+
             <div class="welcome-text">
                 <h2 class="welcome-title">Welcome Back!</h2>
                 <p class="welcome-description">
-                    {{ $ent->welcome_message ?: 'Access your school management dashboard and continue managing your educational institution efficiently.' }}
+                    {!! $ent->welcome_message ?:
+                        'Access your school management dashboard and continue managing your educational institution efficiently.' !!}
                 </p>
             </div>
         </div>
@@ -393,20 +380,16 @@ $ent = Utils::ent();
             @endif
 
             <!-- Login Form -->
-            <form id="loginForm" action="{{ admin_url('auth/login') }}" method="POST">
+            <form id="loginForm" action="{{ url('auth/login') }}" method="POST">
                 @csrf
-                
+
                 <div class="form-group">
                     <label class="form-label">Email, Phone, or Username</label>
                     <div class="input-group">
                         <i class='bx bx-user input-icon'></i>
-                        <input type="text" 
-                               name="username" 
-                               class="form-control with-icon" 
-                               placeholder="Enter your email, phone number, or username"
-                               value="{{ old('username') }}"
-                               required
-                               autocomplete="username">
+                        <input type="text" name="username" class="form-control with-icon"
+                            placeholder="Enter your email, phone number, or username" value="{{ old('username') }}"
+                            required autocomplete="username">
                     </div>
                 </div>
 
@@ -414,28 +397,55 @@ $ent = Utils::ent();
                     <label class="form-label">Password</label>
                     <div class="input-group">
                         <i class='bx bx-lock input-icon'></i>
-                        <input type="password" 
-                               name="password" 
-                               class="form-control with-icon" 
-                               placeholder="Enter your password"
-                               required
-                               autocomplete="current-password">
+                        <input type="password" name="password" class="form-control with-icon"
+                            placeholder="Enter your password" required autocomplete="current-password">
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <button type="submit" class="btn btn-primary" id="loginBtn">
-                        <span class="btn-text">Sign In</span>
-                        <span class="spinner d-none"></span>
+                    <label class="form-label">Security Code</label>
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                        <img src="{{ url('/auth/captcha') }}" 
+                             alt="CAPTCHA" 
+                             id="captcha-image"
+                             style="border: 2px solid var(--border-light); padding: 5px; background: white;">
+                        <button type="button" 
+                                onclick="refreshCaptcha()" 
+                                style="background: var(--primary-color); color: white; border: none; padding: 8px 12px; cursor: pointer; font-size: 14px;">
+                            <i class='bx bx-refresh'></i> Refresh
+                        </button>
+                    </div>
+                    <div class="input-group">
+                        <i class='bx bx-shield input-icon'></i>
+                        <input type="text" 
+                               name="captcha" 
+                               class="form-control with-icon @error('captcha') is-invalid @enderror" 
+                               placeholder="Enter the numbers shown above"
+                               autocomplete="off"
+                               required>
+                    </div>
+                    @error('captcha')
+                        <div class="invalid-feedback" style="color: var(--error-color); font-size: 0.8rem; margin-top: 0.25rem;">
+                            {{ $message }}
+                        </div>
+                    @enderror
+                    <small style="color: var(--text-light); font-size: 0.8rem;">
+                        Please enter the 4-digit number shown in the image above.
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">
+                        Sign In
                     </button>
                 </div>
 
                 <div class="form-links">
-                    <a href="{{ admin_url('auth/forgot-password') }}" class="auth-link">
+                    <a href="{{ url('auth/forgot-password') }}" class="auth-link">
                         <i class='bx bx-key'></i>
                         Forgot Password?
                     </a>
-                    <a href="{{ admin_url('auth/support') }}" class="auth-link">
+                    <a href="{{ url('auth/support') }}" class="auth-link">
                         <i class='bx bx-support'></i>
                         Need Help?
                     </a>
@@ -465,43 +475,47 @@ $ent = Utils::ent();
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
+
     <!-- Bootstrap JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
+    
+    <!-- Simple JavaScript -->
     <script>
-        $(document).ready(function() {
-            // Form submission handling
-            $('#loginForm').on('submit', function() {
-                const $form = $(this);
-                const $btn = $('#loginBtn');
-                const $btnText = $btn.find('.btn-text');
-                const $spinner = $btn.find('.spinner');
+        // Simple CAPTCHA refresh function
+        function refreshCaptcha() {
+            const captchaImage = document.getElementById('captcha-image');
+            const captchaInput = document.querySelector('input[name="captcha"]');
+            
+            if (captchaImage) {
+                captchaImage.src = '{{ url("auth/captcha") }}?' + new Date().getTime();
+            }
+            
+            if (captchaInput) {
+                captchaInput.value = '';
+                captchaInput.focus();
+            }
+        }
 
-                // Show loading state
-                $btn.addClass('loading');
-                $btnText.text('Signing In...');
-                $spinner.removeClass('d-none');
-                
-                // Disable form
-                $form.find('input, button').prop('disabled', true);
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.transition = 'opacity 0.5s ease';
+                alert.style.opacity = '0';
+                setTimeout(() => {
+                    alert.remove();
+                }, 500);
             });
+        }, 5000);
 
-            // Auto-hide alerts after 5 seconds
-            setTimeout(function() {
-                $('.alert').fadeOut();
-            }, 5000);
-
-            // Focus first input
-            $('input[name="username"]').focus();
-
-            // Enter key handling
-            $('input').on('keypress', function(e) {
-                if (e.which === 13) {
-                    $('#loginForm').submit();
-                }
-            });
+        // Focus first input when page loads
+        window.addEventListener('load', function() {
+            const firstInput = document.querySelector('input[name="username"]');
+            if (firstInput) {
+                firstInput.focus();
+            }
         });
     </script>
 </body>
+
 </html>

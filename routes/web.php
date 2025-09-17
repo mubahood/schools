@@ -102,11 +102,48 @@ Route::group(['prefix' => config('admin.route.prefix', 'admin')], function () {
     
     // Support routes
     Route::get('auth/support', $authController.'@getSupport')->name('admin.support');
-    Route::post('auth/support', $authController.'@postSupport');
+    Route::post('auth/support', 'App\Http\Controllers\SupportController@submitSupportForm')->name('admin.support.submit');
+    
+    // CAPTCHA route
+    Route::get('auth/captcha', 'App\Http\Controllers\SupportController@generateCaptcha')->name('admin.captcha');
+    
+    // Admin support management routes (require authentication)
+    Route::middleware('admin')->group(function () {
+        Route::get('support/messages', 'App\Http\Controllers\SupportController@adminIndex')->name('admin.support.index');
+        Route::get('support/messages/{id}', 'App\Http\Controllers\SupportController@adminShow')->name('admin.support.show');
+        Route::post('support/messages/{id}/reply', 'App\Http\Controllers\SupportController@adminReply')->name('admin.support.reply');
+    });
     
     // Email verification route
     Route::get('auth/verify-email/{token}', $authController.'@verifyEmail')->name('admin.verify-email');
+    
+    // CSRF Token refresh route (for preventing page expiration)
+    Route::get('csrf-token', function () {
+        return response()->json(['token' => csrf_token()]);
+    })->name('csrf.token');
 });
+
+// Public Authentication Routes (without admin middleware)
+$authController = 'App\Admin\Controllers\AuthController';
+
+Route::get('auth/login', $authController.'@getLogin')->name('public.login');
+Route::post('auth/login', $authController.'@postLogin')->name('public.login.post');
+
+Route::get('auth/forgot-password', $authController.'@getForgotPassword')->name('public.forgot-password');
+Route::post('auth/forgot-password', $authController.'@postForgotPassword')->name('public.forgot-password.post');
+
+Route::get('auth/reset-password/{token}', $authController.'@getResetPassword')->name('public.reset-password');
+Route::post('auth/reset-password', $authController.'@postResetPassword')->name('public.reset-password.post');
+
+Route::get('auth/support', $authController.'@getSupport')->name('public.support');
+Route::post('auth/support', 'App\Http\Controllers\SupportController@submitSupportForm')->name('public.support.submit');
+
+Route::get('auth/captcha', 'App\Http\Controllers\SupportController@generateCaptcha')->name('public.captcha');
+
+// Public CSRF Token refresh route
+Route::get('csrf-token', function () {
+    return response()->json(['token' => csrf_token()]);
+})->name('public.csrf.token');
 
 Route::get('reset-marks', function (Request $request) {
   /*   $report = StudentReportCard::find(14505);
