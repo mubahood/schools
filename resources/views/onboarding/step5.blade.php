@@ -80,11 +80,11 @@
         <div style="display: flex; gap: 1rem; justify-content: center; font-size: 0.8rem;">
             <div style="display: flex; align-items: center; gap: 0.25rem;">
                 <i class='bx bx-phone'></i>
-                <span>+256 XXX XXX XXX</span>
+                <span>{{ \App\Models\Utils::get_support_phone() }}</span>
             </div>
             <div style="display: flex; align-items: center; gap: 0.25rem;">
                 <i class='bx bx-envelope'></i>
-                <span>support@{{ parse_url(config('app.url'), PHP_URL_HOST) ?? 'schooldynamics.com' }}</span>
+                <span>{{ \App\Models\Utils::get_support_email() }}</span>
             </div>
         </div>
     </div>

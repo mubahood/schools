@@ -97,6 +97,7 @@ class OnboardingController extends Controller
             
             // Branding
             'primary_color' => 'required|string|max:7|regex:/^#[0-9A-Fa-f]{6}$/',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ], [
             // Basic Information Messages
             'school_name.required' => 'School name is required.',
@@ -158,6 +159,17 @@ class OnboardingController extends Controller
         $enterpriseData['school_short_name'] = $shortName;
         $enterpriseData['subdomain'] = $subdomain;
         
+        // Handle logo upload if provided
+        $logoPath = null;
+        if ($request->hasFile('logo')) {
+            $logoFile = $request->file('logo');
+            if ($logoFile->isValid()) {
+                $logoName = time() . '_' . $logoFile->getClientOriginalName();
+                $logoPath = $logoFile->storeAs('public/uploads/logos', $logoName);
+                $logoPath = str_replace('public/', 'storage/', $logoPath);
+            }
+        }
+
         // Add default values for fields that will be collected in later steps
         $enterpriseData['secondary_color'] = '#6c757d'; // Default gray
         $enterpriseData['school_pay_status'] = 'No';
@@ -165,6 +177,20 @@ class OnboardingController extends Controller
         $enterpriseData['school_motto'] = '';
         $enterpriseData['welcome_message'] = '';
         $enterpriseData['details'] = '';
+        $enterpriseData['logo_path'] = $logoPath; // Set logo path or null
+        
+        // Add missing contact fields
+        $enterpriseData['school_phone_2'] = '';
+        $enterpriseData['school_website'] = '';
+        
+        // Add missing financial fields
+        $enterpriseData['school_pay_code'] = '';
+        $enterpriseData['school_pay_password'] = '';
+        $enterpriseData['school_pay_import_automatically'] = 'No';
+        $enterpriseData['school_pay_last_accepted_date'] = null;
+        
+        // Add missing system fields
+        $enterpriseData['expiry'] = null;
 
         session(['onboarding_enterprise_data' => $enterpriseData]);
 
@@ -228,16 +254,16 @@ class OnboardingController extends Controller
             $enterprise->name = $enterpriseData['school_name'];
             $enterprise->short_name = $enterpriseData['school_short_name'];
             $enterprise->type = $enterpriseData['school_type'];
-            $enterprise->motto = $enterpriseData['school_motto'];
-            $enterprise->welcome_message = $enterpriseData['welcome_message'];
+            $enterprise->motto = $enterpriseData['school_motto'] ?? '';
+            $enterprise->welcome_message = $enterpriseData['welcome_message'] ?? '';
             $enterprise->has_theology = $enterpriseData['has_theology'];
-            $enterprise->logo = $enterpriseData['logo_path'];
+            $enterprise->logo = $enterpriseData['logo_path'] ?? null;
             
             // Contact Information
             $enterprise->email = $enterpriseData['school_email'];
             $enterprise->phone_number = $enterpriseData['school_phone'];
-            $enterprise->phone_number_2 = $enterpriseData['school_phone_2'];
-            $enterprise->website = $enterpriseData['school_website'];
+            $enterprise->phone_number_2 = $enterpriseData['school_phone_2'] ?? '';
+            $enterprise->website = $enterpriseData['school_website'] ?? '';
             $enterprise->address = $enterpriseData['school_address'];
             
             // Administrative Information
@@ -246,21 +272,22 @@ class OnboardingController extends Controller
             
             // Branding & Appearance
             $enterprise->color = $enterpriseData['primary_color'];
-            $enterprise->sec_color = $enterpriseData['secondary_color'];
+            $enterprise->sec_color = $enterpriseData['secondary_color'] ?? '#6c757d';
             $enterprise->subdomain = $enterpriseData['subdomain'];
             
             // Financial Settings
-            $enterprise->school_pay_status = $enterpriseData['school_pay_status'];
-            $enterprise->school_pay_code = $enterpriseData['school_pay_code'];
-            $enterprise->school_pay_password = $enterpriseData['school_pay_password'];
+            $enterprise->school_pay_status = $enterpriseData['school_pay_status'] ?? 'No';
+            $enterprise->school_pay_code = $enterpriseData['school_pay_code'] ?? '';
+            $enterprise->school_pay_password = $enterpriseData['school_pay_password'] ?? '';
             $enterprise->school_pay_import_automatically = $enterpriseData['school_pay_import_automatically'] ?? 'No';
-            $enterprise->school_pay_last_accepted_date = $enterpriseData['school_pay_last_accepted_date'];
+            $enterprise->school_pay_last_accepted_date = $enterpriseData['school_pay_last_accepted_date'] ?? null;
             $enterprise->wallet_balance = 0; // Default wallet balance
+            $enterprise->can_send_messages = 'Yes'; // Default can send messages
             
             // License & System
-            $enterprise->has_valid_lisence = $enterpriseData['has_valid_lisence'];
-            $enterprise->expiry = $enterpriseData['expiry'];
-            $enterprise->details = $enterpriseData['details'];
+            $enterprise->has_valid_lisence = $enterpriseData['has_valid_lisence'] ?? 'Yes';
+            $enterprise->expiry = $enterpriseData['expiry'] ?? null;
+            $enterprise->details = $enterpriseData['details'] ?? '';
             
             $enterprise->save();
 

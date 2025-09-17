@@ -115,7 +115,7 @@ use App\Models\Utils;
                 </div>
                 <h4 class="card-title">Phone Support</h4>
                 <p class="card-text">Call us for immediate assistance with setup, training, or any technical questions you may have.</p>
-                <a href="tel:+1234567890" class="btn btn-outline mt-3">
+                <a href="tel:{{ \App\Models\Utils::get_support_phone() }}" class="btn btn-outline mt-3">
                     <i class='bx bx-phone'></i>
                     Call Now
                 </a>
@@ -127,7 +127,7 @@ use App\Models\Utils;
                 </div>
                 <h4 class="card-title">Email Support</h4>
                 <p class="card-text">Send us your questions anytime and we'll respond within 24 hours with detailed solutions.</p>
-                <a href="mailto:support@example.com" class="btn btn-outline mt-3">
+                <a href="mailto:{{ \App\Models\Utils::get_support_email() }}" class="btn btn-outline mt-3">
                     <i class='bx bx-envelope'></i>
                     Email Us
                 </a>

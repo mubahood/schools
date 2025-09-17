@@ -78,6 +78,36 @@ use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 Route::get('student-data-import-do-import', [MainController::class, 'student_data_import_do_import']);
 Route::get('process-students-enrollment', [MainController::class, 'process_students_enrollment']);
 
+// Redirect incorrect auth/login to correct admin/auth/login
+Route::get('auth/login', function () {
+    return redirect('/admin/auth/login');
+});
+
+// Enhanced Authentication Routes 
+Route::group(['prefix' => config('admin.route.prefix', 'admin')], function () {
+    $authController = 'App\Admin\Controllers\AuthController';
+    
+    // Basic auth routes (required)
+    Route::get('auth/login', $authController.'@getLogin')->name('admin.login');
+    Route::post('auth/login', $authController.'@postLogin');
+    Route::get('auth/logout', $authController.'@getLogout')->name('admin.logout');
+    
+    // Additional enhanced routes
+    Route::get('auth/forgot-password', $authController.'@getForgotPassword')->name('admin.forgot-password');
+    Route::post('auth/forgot-password', $authController.'@postForgotPassword');
+    
+    // Reset password routes  
+    Route::get('auth/reset-password/{token}', $authController.'@getResetPassword')->name('admin.reset-password');
+    Route::post('auth/reset-password', $authController.'@postResetPassword');
+    
+    // Support routes
+    Route::get('auth/support', $authController.'@getSupport')->name('admin.support');
+    Route::post('auth/support', $authController.'@postSupport');
+    
+    // Email verification route
+    Route::get('auth/verify-email/{token}', $authController.'@verifyEmail')->name('admin.verify-email');
+});
+
 Route::get('reset-marks', function (Request $request) {
   /*   $report = StudentReportCard::find(14505);
   TermlyReportCard::get_teachers_remarks($report);
@@ -1179,7 +1209,7 @@ Route::get('termly-report', function (Request $r) {
 });
 
 Route::get('/', function (Request $request) {
-  return view('landing.index');
+  // return view('landing.index');
   if (isset($_SERVER['HTTP_HOST'])) {
     if (
       $_SERVER['HTTP_HOST'] === 'tusometech.com' ||
