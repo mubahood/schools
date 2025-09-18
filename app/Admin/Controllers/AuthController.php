@@ -163,7 +163,12 @@ class AuthController extends BaseAuthController
     public function getResetPassword(Request $request, $token)
     {
         $ent = Utils::ent();
-        return view('auth.reset-password', compact('token', 'ent'));
+        
+        // Determine if this is admin or public context
+        $isPublic = $request->route()->getName() === 'public.reset-password';
+        $postAction = $isPublic ? route('public.reset-password.post') : url('auth/reset-password');
+        
+        return view('auth.reset-password', compact('token', 'ent', 'isPublic', 'postAction'));
     }
 
     /**
@@ -206,7 +211,13 @@ class AuthController extends BaseAuthController
 
         DB::table('password_resets')->where('email', $request->email)->delete();
 
-        return redirect()->route('admin.login')->with('status', 'Password has been reset successfully!');
+        // Determine redirect route based on current route context
+        $redirectRoute = 'admin.login';
+        if ($request->route()->getName() === 'public.reset-password.post') {
+            $redirectRoute = 'public.login';
+        }
+
+        return redirect()->route($redirectRoute)->with('status', 'Password has been reset successfully!');
     }
 
     /**

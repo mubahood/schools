@@ -171,4 +171,8 @@ Route::group([
     $router->resources([
         'enterprises' => EnterpriseController::class
     ]);
+
+    // Onboarding management routes
+    $router->post('onboarding/skip-step', 'OnboardingController@skipCurrentStep')->name('onboarding.skip-step');
+    $router->post('onboarding/mark-step-completed', 'OnboardingController@markStepCompleted')->name('onboarding.mark-step-completed');
 });

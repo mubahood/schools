@@ -2,7 +2,8 @@
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\DummyDataController;
-use App\Http\Controllers\EmailVerificationController;
+use App\Http\Controllers\Auth\EmailVerificationController;
+use App\Http\Controllers\EmailVerificationController as LegacyEmailVerificationController;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PrintController2;
@@ -75,74 +76,178 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 
+// Email Verification Routes (Public)
+Route::middleware(['web'])->group(function () {
+  Route::get('/email/verify', [EmailVerificationController::class, 'show'])
+    ->name('verification.notice');
+
+  Route::match(['GET', 'POST'], '/email/verification-notification', [EmailVerificationController::class, 'send'])
+    ->name('verification.send');
+
+  Route::get('/email/verify/{id}/{token}', [EmailVerificationController::class, 'verify'])
+    ->name('verification.verify')
+    ->where(['id' => '[0-9]+', 'token' => '[a-zA-Z0-9]+']);
+
+  Route::get('/email/verification-check', [EmailVerificationController::class, 'check'])
+    ->name('verification.check');
+
+  Route::get('/email/verified', [EmailVerificationController::class, 'verified'])
+    ->name('verification.verified');
+
+  Route::match(['GET', 'POST'], '/email/resend', [EmailVerificationController::class, 'resend'])
+    ->name('verification.resend');
+
+  Route::get('/email/handle-verification', [EmailVerificationController::class, 'handleEmailVerification'])
+    ->name('verification.handle');
+});
+
+Route::get('test-mail', function () {
+  $student = Admin::user();
+  if ($student == null) {
+    return "Student not found";
+  }
+  $email = $student->email;
+  //validate email $email
+  if ($email == null || strlen($email) < 5) {
+    throw new Exception("Email not found. $email");
+  }
+
+  //use filter
+  if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    // throw new Exception("Email not valid. $email");
+  }
+  //mail to parent
+  $mail_body =
+    <<<EOD
+        <p>Dear Parent of <b>$student->name</b>,</p>
+        <p>Please find attached the report card for your child.</p>
+        <p>Click on the link below to download the report card.</p>
+        <p><a href="#">Download Report Card</a></p>
+        <p>Best regards,</p>
+        <p>Admin Team.</p>
+        EOD;
+  $data['body'] = $mail_body;
+  $data['data'] = $data['body'];
+  $data['name'] = $student->name;
+  $data['email'] = $email;
+  $data['subject'] = 'Report Card - ' . env('APP_NAME') . ' - ' . date('Y-m-d') . ".";
+
+  try {
+    Utils::mail_sender($data);
+  } catch (\Throwable $th) {
+    throw $th;
+  }
+
+  dd('test');
+});
+
+Route::get('preview-verification-email', function () {
+  $user = Admin::user();
+  if ($user == null) {
+    return "Please log in first";
+  }
+  
+  $verificationUrl = route('verification.verify', [
+    'id' => $user->id,
+    'token' => 'sample-token-for-preview',
+    'hash' => sha1($user->email),
+  ]);
+  
+  $controller = new \App\Http\Controllers\Auth\EmailVerificationController();
+  $reflection = new \ReflectionClass($controller);
+  $method = $reflection->getMethod('getVerificationEmailTemplate');
+  $method->setAccessible(true);
+  $emailContent = $method->invoke($controller, $user, $verificationUrl);
+  
+  return $emailContent;
+});
+
+Route::get('preview-password-reset-email', function () {
+  $user = Admin::user();
+  if ($user == null) {
+    return "Please log in first";
+  }
+  
+  $token = 'sample-token-for-preview';
+  $resetUrl = route('public.reset-password', ['token' => $token]) . '?email=' . urlencode($user->email);
+  
+  $notification = new \App\Notifications\PasswordResetNotification($token);
+  $reflection = new \ReflectionClass($notification);
+  $method = $reflection->getMethod('getPasswordResetEmailTemplate');
+  $method->setAccessible(true);
+  $emailContent = $method->invoke($notification, $user, $resetUrl, \App\Models\Utils::app_name());
+  
+  return $emailContent;
+});
+
 Route::get('student-data-import-do-import', [MainController::class, 'student_data_import_do_import']);
 Route::get('process-students-enrollment', [MainController::class, 'process_students_enrollment']);
 
 // Redirect incorrect auth/login to correct admin/auth/login
 Route::get('auth/login', function () {
-    return redirect('/admin/auth/login');
+  return redirect('/admin/auth/login');
 });
 
 // Enhanced Authentication Routes 
 Route::group(['prefix' => config('admin.route.prefix', 'admin')], function () {
-    $authController = 'App\Admin\Controllers\AuthController';
-    
-    // Basic auth routes (required)
-    Route::get('auth/login', $authController.'@getLogin')->name('admin.login');
-    Route::post('auth/login', $authController.'@postLogin');
-    Route::get('auth/logout', $authController.'@getLogout')->name('admin.logout');
-    
-    // Additional enhanced routes
-    Route::get('auth/forgot-password', $authController.'@getForgotPassword')->name('admin.forgot-password');
-    Route::post('auth/forgot-password', $authController.'@postForgotPassword');
-    
-    // Reset password routes  
-    Route::get('auth/reset-password/{token}', $authController.'@getResetPassword')->name('admin.reset-password');
-    Route::post('auth/reset-password', $authController.'@postResetPassword');
-    
-    // Support routes
-    Route::get('auth/support', $authController.'@getSupport')->name('admin.support');
-    Route::post('auth/support', 'App\Http\Controllers\SupportController@submitSupportForm')->name('admin.support.submit');
-    
-    // CAPTCHA route
-    Route::get('auth/captcha', 'App\Http\Controllers\SupportController@generateCaptcha')->name('admin.captcha');
-    
-    // Admin support management routes (require authentication)
-    Route::middleware('admin')->group(function () {
-        Route::get('support/messages', 'App\Http\Controllers\SupportController@adminIndex')->name('admin.support.index');
-        Route::get('support/messages/{id}', 'App\Http\Controllers\SupportController@adminShow')->name('admin.support.show');
-        Route::post('support/messages/{id}/reply', 'App\Http\Controllers\SupportController@adminReply')->name('admin.support.reply');
-    });
-    
-    // Email verification route
-    Route::get('auth/verify-email/{token}', $authController.'@verifyEmail')->name('admin.verify-email');
-    
-    // CSRF Token refresh route (for preventing page expiration)
-    Route::get('csrf-token', function () {
-        return response()->json(['token' => csrf_token()]);
-    })->name('csrf.token');
+  $authController = 'App\Admin\Controllers\AuthController';
+
+  // Basic auth routes (required)
+  Route::get('auth/login', $authController . '@getLogin')->name('admin.login');
+  Route::post('auth/login', $authController . '@postLogin');
+  Route::get('auth/logout', $authController . '@getLogout')->name('admin.logout');
+
+  // Additional enhanced routes
+  Route::get('auth/forgot-password', $authController . '@getForgotPassword')->name('admin.forgot-password');
+  Route::post('auth/forgot-password', $authController . '@postForgotPassword');
+
+  // Reset password routes  
+  Route::get('auth/reset-password/{token}', $authController . '@getResetPassword')->name('admin.reset-password');
+  Route::post('auth/reset-password', $authController . '@postResetPassword');
+
+  // Support routes
+  Route::get('auth/support', $authController . '@getSupport')->name('admin.support');
+  Route::post('auth/support', 'App\Http\Controllers\SupportController@submitSupportForm')->name('admin.support.submit');
+
+  // CAPTCHA route
+  Route::get('auth/captcha', 'App\Http\Controllers\SupportController@generateCaptcha')->name('admin.captcha');
+
+  // Admin support management routes (require authentication)
+  Route::middleware('admin')->group(function () {
+    Route::get('support/messages', 'App\Http\Controllers\SupportController@adminIndex')->name('admin.support.index');
+    Route::get('support/messages/{id}', 'App\Http\Controllers\SupportController@adminShow')->name('admin.support.show');
+    Route::post('support/messages/{id}/reply', 'App\Http\Controllers\SupportController@adminReply')->name('admin.support.reply');
+  });
+
+  // Email verification route
+  Route::get('auth/verify-email/{token}', $authController . '@verifyEmail')->name('admin.verify-email');
+
+  // CSRF Token refresh route (for preventing page expiration)
+  Route::get('csrf-token', function () {
+    return response()->json(['token' => csrf_token()]);
+  })->name('csrf.token');
 });
 
 // Public Authentication Routes (without admin middleware)
 $authController = 'App\Admin\Controllers\AuthController';
 
-Route::get('auth/login', $authController.'@getLogin')->name('public.login');
-Route::post('auth/login', $authController.'@postLogin')->name('public.login.post');
+Route::get('auth/login', $authController . '@getLogin')->name('public.login');
+Route::post('auth/login', $authController . '@postLogin')->name('public.login.post');
 
-Route::get('auth/forgot-password', $authController.'@getForgotPassword')->name('public.forgot-password');
-Route::post('auth/forgot-password', $authController.'@postForgotPassword')->name('public.forgot-password.post');
+Route::get('auth/forgot-password', $authController . '@getForgotPassword')->name('public.forgot-password');
+Route::post('auth/forgot-password', $authController . '@postForgotPassword')->name('public.forgot-password.post');
 
-Route::get('auth/reset-password/{token}', $authController.'@getResetPassword')->name('public.reset-password');
-Route::post('auth/reset-password', $authController.'@postResetPassword')->name('public.reset-password.post');
+Route::get('auth/reset-password/{token}', $authController . '@getResetPassword')->name('public.reset-password');
+Route::post('auth/reset-password', $authController . '@postResetPassword')->name('public.reset-password.post');
 
-Route::get('auth/support', $authController.'@getSupport')->name('public.support');
+Route::get('auth/support', $authController . '@getSupport')->name('public.support');
 Route::post('auth/support', 'App\Http\Controllers\SupportController@submitSupportForm')->name('public.support.submit');
 
 Route::get('auth/captcha', 'App\Http\Controllers\SupportController@generateCaptcha')->name('public.captcha');
 
 // Public CSRF Token refresh route
 Route::get('csrf-token', function () {
-    return response()->json(['token' => csrf_token()]);
+  return response()->json(['token' => csrf_token()]);
 })->name('public.csrf.token');
 
 Route::get('reset-marks', function (Request $request) {
@@ -1246,19 +1351,24 @@ Route::get('termly-report', function (Request $r) {
 });
 
 Route::get('/', function (Request $request) {
-  // return view('landing.index');
-  if (isset($_SERVER['HTTP_HOST'])) {
-    if (
-      $_SERVER['HTTP_HOST'] === 'tusometech.com' ||
-      $_SERVER['HTTP_HOST'] === 'localhost'
-    ) {
-      return view('landing.index');
-    } else {
-      //redurect to dashboard
-      $dashboard = admin_url('dashboard');
-      header("Location: $dashboard");
+  $admin = Admin::user();
+  if ($admin != null) {
+    if (isset($_SERVER['HTTP_HOST'])) {
+      if (
+        $_SERVER['HTTP_HOST'] === 'tusometech.com' ||
+        $_SERVER['HTTP_HOST'] === 'localhost'
+      ) {
+        return view('landing.index');
+      } else {
+        //redurect to dashboard
+        $dashboard = admin_url('dashboard');
+        header("Location: $dashboard");
+      }
     }
+    return view('landing.index');
   }
+  return view('landing.index');
+
   return view('landing.index');
 });
 
@@ -2936,35 +3046,35 @@ Route::get('import-transaction', function (Request $request) {
 
 // Onboarding Routes - Step-by-step school registration wizard
 Route::group(['prefix' => 'onboarding'], function () {
-    Route::get('step1', [OnboardingController::class, 'step1'])->name('onboarding.step1');
-    Route::get('step2', [OnboardingController::class, 'step2'])->name('onboarding.step2');
-    Route::post('step2', [OnboardingController::class, 'processStep2'])->name('onboarding.process2');
-    Route::get('step3', [OnboardingController::class, 'step3'])->name('onboarding.step3');
-    Route::post('step3', [OnboardingController::class, 'processStep3'])->name('onboarding.process3');
-    Route::get('step4', [OnboardingController::class, 'step4'])->name('onboarding.step4');
-    Route::post('step4', [OnboardingController::class, 'processStep4'])->name('onboarding.process4');
-    Route::get('step5', [OnboardingController::class, 'step5'])->name('onboarding.step5');
-    Route::post('complete', [OnboardingController::class, 'complete'])->name('onboarding.complete');
-    
-    // Email Verification Routes for Onboarding
-    Route::get('email-verification', [EmailVerificationController::class, 'show'])->name('onboarding.email.verification');
-    Route::post('email-verification/send', [EmailVerificationController::class, 'send'])->name('onboarding.email.send');
-    Route::post('email-verification/resend', [EmailVerificationController::class, 'resend'])->name('onboarding.email.resend');
-    Route::get('email-verification/verify/{token}', [EmailVerificationController::class, 'verify'])->name('onboarding.email.verify');
-    Route::post('email-verification/complete', [EmailVerificationController::class, 'markCompleted'])->name('onboarding.email.complete');
-    Route::get('email-verification/status', [EmailVerificationController::class, 'checkStatus'])->name('onboarding.email.status');
-    
-    // Session management endpoint for auto-saving progress
-    Route::post('save-session', [OnboardingController::class, 'saveSession'])->name('onboarding.save-session');
-    
-    // AJAX validation endpoints
-    Route::get('validate-email', [OnboardingController::class, 'validateEmail'])->name('onboarding.validate.email');
-    Route::get('validate-phone', [OnboardingController::class, 'validatePhone'])->name('onboarding.validate.phone');
-    Route::get('validate-school-name', [OnboardingController::class, 'validateSchoolName'])->name('onboarding.validate.school.name');
-    Route::get('validate-school-email', [OnboardingController::class, 'validateSchoolEmail'])->name('onboarding.validate.school.email');
+  Route::get('step1', [OnboardingController::class, 'step1'])->name('onboarding.step1');
+  Route::get('step2', [OnboardingController::class, 'step2'])->name('onboarding.step2');
+  Route::post('step2', [OnboardingController::class, 'processStep2'])->name('onboarding.process2');
+  Route::get('step3', [OnboardingController::class, 'step3'])->name('onboarding.step3');
+  Route::post('step3', [OnboardingController::class, 'processStep3'])->name('onboarding.process3');
+  Route::get('step4', [OnboardingController::class, 'step4'])->name('onboarding.step4');
+  Route::post('step4', [OnboardingController::class, 'processStep4'])->name('onboarding.process4');
+  Route::get('step5', [OnboardingController::class, 'step5'])->name('onboarding.step5');
+  Route::post('complete', [OnboardingController::class, 'complete'])->name('onboarding.complete');
+
+  // Email Verification Routes for Onboarding
+  Route::get('email-verification', [EmailVerificationController::class, 'show'])->name('onboarding.email.verification');
+  Route::post('email-verification/send', [EmailVerificationController::class, 'send'])->name('onboarding.email.send');
+  Route::post('email-verification/resend', [EmailVerificationController::class, 'resend'])->name('onboarding.email.resend');
+  Route::get('email-verification/verify/{token}', [EmailVerificationController::class, 'verify'])->name('onboarding.email.verify');
+  Route::post('email-verification/complete', [EmailVerificationController::class, 'markCompleted'])->name('onboarding.email.complete');
+  Route::get('email-verification/status', [EmailVerificationController::class, 'checkStatus'])->name('onboarding.email.status');
+
+  // Session management endpoint for auto-saving progress
+  Route::post('save-session', [OnboardingController::class, 'saveSession'])->name('onboarding.save-session');
+
+  // AJAX validation endpoints
+  Route::get('validate-email', [OnboardingController::class, 'validateEmail'])->name('onboarding.validate.email');
+  Route::get('validate-phone', [OnboardingController::class, 'validatePhone'])->name('onboarding.validate.phone');
+  Route::get('validate-school-name', [OnboardingController::class, 'validateSchoolName'])->name('onboarding.validate.school.name');
+  Route::get('validate-school-email', [OnboardingController::class, 'validateSchoolEmail'])->name('onboarding.validate.school.email');
 });
 
 // Update the enterprises/create route to redirect to onboarding
 Route::get('enterprises/create', function () {
-    return redirect('onboarding/step1');
+  return redirect('onboarding/step1');
 });

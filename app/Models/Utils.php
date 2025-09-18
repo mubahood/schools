@@ -318,7 +318,7 @@ class Utils  extends Model
                 function ($m) use ($data) {
                     $m->to($data['email'], $data['name'])
                         ->subject($data['subject']);
-                    $m->from(env('MAIL_FROM_ADDRESS'), $data['subject']);
+                    $m->from(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME', env('APP_NAME', 'School Management')));
                 }
             );
         } catch (\Throwable $th) {

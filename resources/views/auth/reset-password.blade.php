@@ -269,7 +269,7 @@ $ent = Utils::ent();
         @endif
 
         <!-- Reset Form -->
-        <form id="resetForm" action="{{ url('auth/reset-password') }}" method="POST">
+        <form id="resetForm" action="{{ $postAction }}" method="POST">
             @csrf
             <input type="hidden" name="token" value="{{ $token }}">
             

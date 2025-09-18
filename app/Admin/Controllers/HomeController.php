@@ -42,6 +42,7 @@ use App\Models\TransportSubscription;
 use App\Models\TransportRoute;
 use App\Models\Trip;
 use App\Models\UniversityProgramme;
+use App\Services\OnboardingProgressService;
 use PDO;
 
 class HomeController extends Controller
@@ -265,8 +266,10 @@ class HomeController extends Controller
 
         $u = Admin::user();
 
-
         $content->header($u->ent->name . ' - Dashboard');
+
+        // Check for onboarding progress (only for enterprise owners)
+        $onboardingData = OnboardingProgressService::getDashboardSummary($u);
 
         $ent = $u->ent;
         if ($ent) {
@@ -460,6 +463,16 @@ class HomeController extends Controller
             });
         }
 
+        // Add onboarding progress widget for enterprise owners
+        if ($onboardingData) {
+            $content->row(function (Row $row) use ($onboardingData) {
+                $row->column(12, function (Column $column) use ($onboardingData) {
+                    $column->append(view('widgets.onboarding-progress', [
+                        'onboardingData' => $onboardingData
+                    ]));
+                });
+            });
+        }
 
         //$warnings = Utils::get_system_warnings($u->ent);
 

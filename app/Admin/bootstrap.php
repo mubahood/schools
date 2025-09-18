@@ -69,6 +69,33 @@ Encore\Admin\Form::forget(['map', 'editor']); */
 
 $u = Auth::user();
 if ($u != null) {
+    // Check email verification first - this is mandatory
+    $wizard = \App\Models\OnBoardWizard::where('administrator_id', $u->id)->first();
+    if (!$wizard || $wizard->email_is_verified != 'Yes') {
+        // Get current route to avoid infinite redirects
+        $currentRoute = request()->route() ? request()->route()->getName() : '';
+        
+        // Allow access to verification routes and logout
+        $allowedRoutes = [
+            'verification.notice',
+            'verification.verify',
+            'verification.send', 
+            'verification.check',
+            'admin.logout'
+        ];
+        
+        if (!in_array($currentRoute, $allowedRoutes)) {
+            // Redirect to email verification page
+            if (request()->ajax()) {
+                response()->json(['redirect' => route('verification.notice')], 302)->send();
+                exit;
+            } else {
+                redirect()->route('verification.notice')->send();
+                exit;
+            }
+        }
+    }
+    
     if ($u->ent != null) {
         if ($u->ent->has_valid_lisence != 'Yes') {
             // die("System under maintenance. New features are being added. Please check back later.");

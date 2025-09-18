@@ -33,6 +33,9 @@ class OnBoardWizard extends Model
         'skip_help_videos',
         'started_at',
         'completed_at',
+        'verification_token',
+        'verification_sent_at',
+        'email_verified_at',
     ];
 
     protected $casts = [
@@ -41,6 +44,8 @@ class OnBoardWizard extends Model
         'last_activity_at' => 'datetime',
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
+        'verification_sent_at' => 'datetime',
+        'email_verified_at' => 'datetime',
         'total_progress_percentage' => 'integer',
         'videos_completed_progress' => 'integer',
     ];
