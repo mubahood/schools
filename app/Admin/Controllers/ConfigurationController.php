@@ -83,7 +83,7 @@ class ConfigurationController extends AdminController
 
         $form->text('name', __('School Name'))->required();
         $form->text('motto', __('School Motto'))->required();
-        $form->image('logo', __('School badge'))->uniqueName();
+        $form->image('logo', __('School badge'))->uniqueName()->required()->required();
         $form->text('address', __('School Address'))->required();
         $form->quill('details', __('School details'));
         $form->text('phone_number', __('Phone number'));
@@ -98,7 +98,7 @@ class ConfigurationController extends AdminController
                 'Yes' => 'Yes',
                 'No' => 'No',
             ])->default('No');
- 
+
 
         $form->radio('school_pay_import_automatically', __('Import SchoolPay to Students Accounts Automatically?'))
             ->options([

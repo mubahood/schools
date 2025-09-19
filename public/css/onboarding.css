@@ -3,13 +3,15 @@
 
 /* ===== CSS VARIABLES ===== */
 :root {
-    /* User-specified colors */
-    --primary-color: #00b4fa;
-    --accent-color: #36ca78;
+    /* Enterprise color scheme */
+    --primary-color: #2c5aa0;
+    --accent-color: #1e3f72;
+    --primary-light: #3a6bb3;
+    --primary-dark: #1e3f72;
     
     /* Bootstrap variable overrides */
     --bs-primary: var(--primary-color);
-    --bs-success: var(--accent-color);
+    --bs-success: var(--primary-color);
     --bs-font-sans-serif: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     --bs-body-font-family: var(--bs-font-sans-serif);
 
@@ -26,8 +28,11 @@
     --gray-700: #343a40;
     --gray-800: #212529;
 
-    /* Status colors */
-    --success: var(--accent-color);
+    /* Status colors - simplified to enterprise theme */
+    --success: var(--primary-color);
+    --error: #dc3545;
+    --warning: #f59e0b;
+    --info: var(--primary-light);
     --error: #dc3545;
     --warning: #ffc107;
     --info: var(--primary-color);
@@ -105,8 +110,8 @@ body {
     background: linear-gradient(
         135deg,
         var(--primary-color) 0%,
-        #0099d6 50%,
-        #0088c7 100%
+        var(--primary-light) 50%,
+        var(--primary-dark) 100%
     );
     color: var(--white);
     padding: var(--spacing-3xl) var(--spacing-2xl);
@@ -661,7 +666,7 @@ input[type="reset"],
 }
 
 .btn-primary:hover {
-    background-color: #0099d6;
+    background-color: var(--primary-dark);
     transform: translateY(-1px);
     box-shadow: var(--shadow-md);
 }
@@ -673,7 +678,7 @@ input[type="reset"],
 }
 
 .btn-success:hover {
-    background-color: #2db069;
+    background-color: var(--primary-dark);
     transform: translateY(-1px);
     box-shadow: var(--shadow-md);
 }
@@ -823,9 +828,9 @@ input[type="reset"],
 }
 
 .alert-success {
-    color: #0d5132;
-    background-color: #d1f7e5;
-    border-color: var(--accent-color);
+    color: var(--primary-dark);
+    background-color: rgba(44, 90, 160, 0.1);
+    border-color: var(--primary-color);
 }
 
 .alert-error {
@@ -835,8 +840,8 @@ input[type="reset"],
 }
 
 .alert-info {
-    color: #055c7a;
-    background-color: #d1ecf6;
+    color: var(--primary-color);
+    background-color: rgba(44, 90, 160, 0.05);
     border-color: var(--primary-color);
 }
 
@@ -1117,12 +1122,12 @@ input[type="reset"],
 }
 
 .access-icon.primary {
-    background: linear-gradient(135deg, var(--primary-color), #0099d6);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
     color: var(--white);
 }
 
 .access-icon.accent {
-    background: linear-gradient(135deg, var(--accent-color), #2db069);
+    background: linear-gradient(135deg, var(--accent-color), var(--primary-dark));
     color: var(--white);
 }
 
@@ -1193,7 +1198,7 @@ input[type="reset"],
 }
 
 .btn-accent:hover {
-    background-color: #2db069;
+    background-color: var(--primary-dark);
     transform: translateY(-1px);
     box-shadow: var(--shadow-md);
 }
@@ -1443,7 +1448,7 @@ body {
 /* Left Sidebar */
 .onboarding-left {
     width: var(--sidebar-width);
-    background: linear-gradient(135deg, var(--primary-color), #0099dc);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
     color: white;
     padding: var(--spacing-8) var(--spacing-6);
     display: flex;
@@ -1753,7 +1758,7 @@ body {
 }
 
 .btn-primary:hover {
-    background-color: #0099dc;
+    background-color: var(--primary-dark);
 }
 
 .btn-secondary {
@@ -2349,8 +2354,8 @@ body {
 }
 
 .btn-primary:hover {
-    background-color: #0099d6;
-    border-color: #0099d6;
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
 }
 
 .btn-success {
@@ -2359,8 +2364,8 @@ body {
 }
 
 .btn-success:hover {
-    background-color: #2db370;
-    border-color: #2db370;
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
 }
 
 /* Custom form sections */

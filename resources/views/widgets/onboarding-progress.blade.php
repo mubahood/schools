@@ -2,12 +2,12 @@
 @if($onboardingData)
 <style>
     .onboarding-widget {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #2c5aa0 0%, #1e3f72 100%);
         border-radius: 16px;
         color: white;
         padding: 0;
         margin-bottom: 20px;
-        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        box-shadow: 0 10px 30px rgba(44, 90, 160, 0.3);
         overflow: hidden;
         position: relative;
     }
@@ -41,7 +41,7 @@
 
     .onboarding-title i {
         font-size: 28px;
-        color: #ffd700;
+        color: #ffffff;
         text-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
 
@@ -66,7 +66,7 @@
     }
 
     .progress-bar {
-        background: linear-gradient(90deg, #ffd700 0%, #ffed4e 100%);
+        background: linear-gradient(90deg, #ffffff 0%, #f8f9fa 100%);
         border-radius: 10px;
         height: 8px;
         transition: width 0.8s ease-in-out;
@@ -101,7 +101,7 @@
     .progress-percentage {
         font-weight: 700;
         font-size: 16px;
-        color: #ffd700;
+        color: #ffffff;
     }
 
     .progress-steps {
@@ -128,7 +128,7 @@
 
     .current-step-title i {
         font-size: 20px;
-        color: #ffd700;
+        color: #ffffff;
         width: 24px;
         text-align: center;
     }
@@ -165,8 +165,8 @@
     }
 
     .btn-onboarding {
-        background: linear-gradient(45deg, #ffd700 0%, #ffed4e 100%);
-        color: #333;
+        background: linear-gradient(45deg, #ffffff 0%, #f8f9fa 100%);
+        color: #2c5aa0;
         border: none;
         padding: 10px 18px;
         border-radius: 8px;
@@ -177,13 +177,13 @@
         align-items: center;
         gap: 8px;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+        box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
     }
 
     .btn-onboarding:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
-        color: #333;
+        box-shadow: 0 6px 20px rgba(255, 255, 255, 0.4);
+        color: #1e3f72;
         text-decoration: none;
     }
 
@@ -238,7 +238,7 @@
     .completion-number {
         font-size: 20px;
         font-weight: 700;
-        color: #ffd700;
+        color: #ffffff;
         margin: 0 0 4px 0;
     }
 
@@ -256,11 +256,11 @@
         padding: 12px;
         font-size: 12px;
         opacity: 0.9;
-        border-left: 3px solid #ffd700;
+        border-left: 3px solid #ffffff;
     }
 
     .next-step-hint strong {
-        color: #ffd700;
+        color: #ffffff;
     }
 
     .dismissible-banner {

@@ -207,6 +207,9 @@ class EmailVerificationController extends Controller
             'verification_token' => null, // Clear the token
         ]);
 
+        // Update progress using new requirements-based calculation
+        \App\Services\OnboardingProgressService::checkAndUpdateMinimumRequirements($user);
+
         // Log the user in if not already authenticated
         if ($user && !Admin::user()) {
             Admin::guard()->login($user);
@@ -321,6 +324,10 @@ class EmailVerificationController extends Controller
             'email_verified_at' => now(),
             'verification_token' => null,
         ]);
+
+        // Update progress percentage after verification
+        $wizard->updateProgressPercentage();
+        $wizard->save();
 
         // Auto-login the user if not authenticated
         $user = \Encore\Admin\Auth\Database\Administrator::find($id);
