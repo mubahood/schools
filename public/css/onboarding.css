@@ -3,15 +3,15 @@
 
 /* ===== CSS VARIABLES ===== */
 :root {
-    /* Enterprise color scheme */
-    --primary-color: #2c5aa0;
-    --accent-color: #1e3f72;
-    --primary-light: #3a6bb3;
-    --primary-dark: #1e3f72;
+    /* Default enterprise color scheme - can be overridden by company branding */
+    --primary-color: #01AEF0;
+    --accent-color: #39CA78;
+    --primary-light: #33B8F3;
+    --primary-dark: #0199D6;
     
     /* Bootstrap variable overrides */
     --bs-primary: var(--primary-color);
-    --bs-success: var(--primary-color);
+    --bs-success: var(--accent-color);
     --bs-font-sans-serif: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     --bs-body-font-family: var(--bs-font-sans-serif);
 
@@ -28,13 +28,17 @@
     --gray-700: #343a40;
     --gray-800: #212529;
 
-    /* Status colors - simplified to enterprise theme */
-    --success: var(--primary-color);
+    /* Text colors */
+    --text-dark: #2d3748;
+    --text-light: #718096;
+    --text-muted: #a0aec0;
+    --background-light: #f7fafc;
+    --border-color: #e2e8f0;
+
+    /* Status colors */
+    --success: var(--accent-color);
     --error: #dc3545;
     --warning: #f59e0b;
-    --info: var(--primary-light);
-    --error: #dc3545;
-    --warning: #ffc107;
     --info: var(--primary-color);
 
     /* Typography */
@@ -60,8 +64,10 @@
 
     /* Border radius (square corners as requested) */
     --radius-none: 0px;
-    --radius-sm: 2px;
-    --radius-base: 3px;
+    --radius-sm: 3px;
+    --radius-base: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
 
     /* Shadows */
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -121,6 +127,21 @@ body {
     position: relative;
     overflow-y: auto;
     min-height: 100vh;
+}
+
+/* Ensure ALL text in sidebar is white */
+.onboarding-left,
+.onboarding-left *,
+.onboarding-left h1,
+.onboarding-left h2,
+.onboarding-left h3,
+.onboarding-left h4,
+.onboarding-left h5,
+.onboarding-left h6,
+.onboarding-left p,
+.onboarding-left span,
+.onboarding-left div {
+    color: var(--white) !important;
 }
 
 .onboarding-left::before {
@@ -205,6 +226,7 @@ body {
     opacity: 0.95;
     letter-spacing: 0.2px;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    color: var(--white);
 }
 
 /* Features Section */
@@ -277,7 +299,7 @@ body {
 .stat-number {
     font-size: var(--font-size-3xl);
     font-weight: 800;
-    color: var(--accent-color);
+    color: var(--white);
     letter-spacing: -0.5px;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     margin-bottom: var(--spacing-xs);
@@ -289,6 +311,7 @@ body {
     font-weight: 600;
     letter-spacing: 0.3px;
     text-transform: uppercase;
+    color: var(--white);
 }
 
 /* ===== RIGHT CONTENT AREA ===== */
@@ -1223,6 +1246,7 @@ input[type="reset"],
     opacity: 0.85;
     line-height: 1.5;
     font-weight: 500;
+    color: var(--white);
 }
 
 .progress-indicator {
@@ -1257,6 +1281,7 @@ input[type="reset"],
     font-size: var(--font-size-lg);
     font-weight: 600;
     opacity: 0.9;
+    color: var(--white);
 }
 
 /* Responsive Design for Access Page */

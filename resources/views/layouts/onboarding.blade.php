@@ -1,22 +1,26 @@
 <?php
 use App\Models\Utils;
+// Ensure company data is available in layout
+if (!isset($company)) {
+    $company = Utils::company();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', config('app.name') . ' | Get Started')</title>
+    <title>@yield('title', (($company->app_name ?? Utils::app_name()) . ' | Get Started'))</title>
     
     <!-- SEO Meta Tags -->
-    <meta name="description" content="@yield('meta_description', 'Get started with ' . config('app.name') . ' - the comprehensive school management system.')">
+    <meta name="description" content="@yield('meta_description', ('Get started with ' . ($company->app_name ?? Utils::app_name()) . ' - the comprehensive school management system.'))">
     <meta name="keywords" content="school management system, education software, school registration, onboarding">
-    <meta name="author" content="{{ Utils::app_name() }}">
+    <meta name="author" content="{{ $company->name ?? Utils::company_name() }}">
     <meta name="robots" content="index, follow">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="{{ asset('assets/8tech.png') }}">
+    <link rel="icon" type="image/png" href="{{ $company && $company->logo ? Utils::img_url($company->logo) : Utils::get_logo() }}">
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -32,6 +36,20 @@ use App\Models\Utils;
     <!-- Onboarding CSS (extends Bootstrap) -->
     <link rel="stylesheet" href="{{ asset('css/onboarding.css') }}">
     
+    @if (isset($company) && $company && $company->primary_color && $company->accent_color)
+        <!-- Dynamic Company Branding Colors -->
+        <style>
+            :root {
+                --primary-color: {{ $company->primary_color }} !important;
+                --accent-color: {{ $company->accent_color }} !important;
+                --primary-light: {{ $company->primary_color }}CC !important;
+                --primary-dark: {{ $company->accent_color }} !important;
+                --bs-primary: {{ $company->primary_color }} !important;
+                --bs-success: {{ $company->primary_color }} !important;
+            }
+        </style>
+    @endif
+    
     @stack('styles')
 </head>
 <body>
@@ -40,10 +58,10 @@ use App\Models\Utils;
         <div class="onboarding-left">
             <!-- Brand Section -->
             <div class="sidebar-brand">
-                <img src="{{ asset('assets/8tech.png') }}" alt="{{ Utils::app_name() }}" class="brand-logo">
+                <img src="{{ $company && $company->logo ? Utils::img_url($company->logo) : Utils::get_logo() }}" alt="{{ $company->name ?? Utils::company_name() }}" class="brand-logo">
                 <div class="brand-info">
-                    <h1 class="brand-name">{{ Utils::app_name() }}</h1>
-                    <span class="brand-subtitle">School Management System</span>
+                    <h1 class="brand-name">{{ $company->name ?? Utils::company_name() }}</h1>
+                    <span class="brand-subtitle">{{ $company->app_name ?? Utils::app_name() }}</span>
                 </div>
             </div>
             
@@ -80,7 +98,7 @@ use App\Models\Utils;
                     <a href="#" class="footer-link">Terms of Service</a>
                 </div>
                 <div class="footer-info">
-                    <span>&copy; {{ date('Y') }} {{ Utils::app_name() }}. All rights reserved.</span>
+                    <span>&copy; {{ date('Y') }} {{ $company->name ?? Utils::company_name() }}. All rights reserved.</span>
                 </div>
             </footer>
         </div>

@@ -1,5 +1,9 @@
 <?php
 use App\Models\Utils;
+// Ensure company data is available
+if (!isset($company)) {
+    $company = Utils::company();
+}
 $ent = Utils::ent();
 ?>
 <!DOCTYPE html>
@@ -8,16 +12,16 @@ $ent = Utils::ent();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $ent->name }} - Sign In</title>
+    <title>{{ $company->name ?? Utils::company_name() }} - Sign In</title>
 
     <!-- Meta Tags -->
-    <meta name="description" content="Sign in to {{ $ent->name }} school management system">
+    <meta name="description" content="Sign in to {{ $company->app_name ?? Utils::app_name() }} school management system">
+    <meta name="keywords" content="login, sign in, {{ $company->name ?? Utils::company_name() }}, school management">
     <meta name="robots" content="noindex, nofollow">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png"
-        href="{{ $ent->logo ? url('storage/' . $ent->logo) : asset('assets/8tech.png') }}">
+    <link rel="icon" type="image/png" href="{{ $company && $company->logo ? Utils::img_url($company->logo) : Utils::get_logo() }}">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -32,14 +36,16 @@ $ent = Utils::ent();
 
     <style>
         :root {
-            --primary-color: {{ $ent->color ?? '#007bff' }};
-            --primary-light: {{ $ent->color ?? '#007bff' }}20;
-            --text-dark: #2c3e50;
-            --text-light: #6c757d;
-            --border-light: #e9ecef;
-            --success-color: #28a745;
+            --primary-color: {{ $company && $company->primary_color ? $company->primary_color : '#01AEF0' }};
+            --accent-color: {{ $company && $company->accent_color ? $company->accent_color : '#39CA78' }};
+            --primary-light: {{ $company && $company->primary_color ? $company->primary_color : '#01AEF0' }}20;
+            --text-dark: #2d3748;
+            --text-light: #718096;
+            --border-light: #e2e8f0;
+            --success-color: var(--accent-color);
             --error-color: #dc3545;
             --white: #ffffff;
+            --background-light: #f7fafc;
         }
 
         * {
@@ -341,17 +347,17 @@ $ent = Utils::ent();
         <!-- Left Side - Branding -->
         <div class="auth-left">
             <div class="brand-section">
-                <img src="{{ Utils::img_url($ent->logo) }}"
-                    alt="{{ $ent->name }}" class="brand-logo">
-                <h1 class="brand-name">{{ $ent->name }}</h1>
-                <p class="brand-subtitle">School Management System</p>
+                <img src="{{ $company && $company->logo ? Utils::img_url($company->logo) : Utils::get_logo() }}"
+                    alt="{{ $company->name ?? Utils::company_name() }}" class="brand-logo">
+                <h1 class="brand-name">{{ $company->name ?? Utils::company_name() }}</h1>
+                <p class="brand-subtitle">{{ $company->app_name ?? Utils::app_name() }}</p>
             </div>
 
             <div class="welcome-text">
                 <h2 class="welcome-title">Welcome Back!</h2>
                 <p class="welcome-description">
-                    {!! $ent->welcome_message ?:
-                        'Access your school management dashboard and continue managing your educational institution efficiently.' !!}
+                    {!! $company && $company->welcome_message ? $company->welcome_message : ($ent->welcome_message ?:
+                        'Access your school management dashboard and continue managing your educational institution efficiently.') !!}
                 </p>
             </div>
         </div>
@@ -457,13 +463,13 @@ $ent = Utils::ent();
             <div class="support-section">
                 <h4 class="support-title">Need assistance? Contact our support team</h4>
                 <div class="support-contacts">
-                    <a href="tel:{{ Utils::get_support_phone() }}" class="support-contact">
+                    <a href="tel:{{ $company && $company->phone ? $company->phone : Utils::get_support_phone() }}" class="support-contact">
                         <i class='bx bx-phone'></i>
-                        <span>{{ Utils::get_support_phone() }}</span>
+                        <span>{{ $company && $company->phone ? $company->phone : Utils::get_support_phone() }}</span>
                     </a>
-                    <a href="mailto:{{ Utils::get_support_email() }}" class="support-contact">
+                    <a href="mailto:{{ $company && $company->email ? $company->email : Utils::get_support_email() }}" class="support-contact">
                         <i class='bx bx-envelope'></i>
-                        <span>{{ Utils::get_support_email() }}</span>
+                        <span>{{ $company && $company->email ? $company->email : Utils::get_support_email() }}</span>
                     </a>
                     <a href="{{ Utils::get_whatsapp_link() }}" target="_blank" class="support-contact">
                         <i class='bx bxl-whatsapp'></i>

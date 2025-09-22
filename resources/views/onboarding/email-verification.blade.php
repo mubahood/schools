@@ -1,6 +1,13 @@
+<?php
+use App\Models\Utils;
+// Ensure company data is available
+if (!isset($company)) {
+    $company = Utils::company();
+}
+?>
 @extends('layouts.onboarding')
 
-@section('title', 'Email Verification - ' . \App\Models\Utils::app_name())
+@section('title', 'Email Verification - ' . ($company->app_name ?? Utils::app_name()))
 
 @section('content')
 <div class="onboarding-container">

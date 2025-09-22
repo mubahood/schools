@@ -1,5 +1,9 @@
 <?php
 use App\Models\Utils;
+// Ensure company data is available
+if (!isset($company)) {
+    $company = Utils::company();
+}
 $ent = Utils::ent();
 ?>
 <!DOCTYPE html>
@@ -7,15 +11,16 @@ $ent = Utils::ent();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $ent->name }} - Contact Support</title>
+    <title>{{ $company->name ?? Utils::company_name() }} - Contact Support</title>
     
     <!-- Meta Tags -->
-    <meta name="description" content="Get help with {{ $ent->name }} school management system">
+    <meta name="description" content="Get help with {{ $company->app_name ?? Utils::app_name() }} school management system">
+    <meta name="keywords" content="support, help, contact, {{ $company->name ?? Utils::company_name() }}, school management">
     <meta name="robots" content="noindex, nofollow">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="{{ $ent->logo ? url('storage/' . $ent->logo) : asset('assets/8tech.png') }}">
+    <link rel="icon" type="image/png" href="{{ $company && $company->logo ? Utils::img_url($company->logo) : Utils::get_logo() }}">
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,20 +35,23 @@ $ent = Utils::ent();
     
     <style>
         :root {
-            --primary-color: {{ $ent->color ?? '#007bff' }};
-            --primary-light: {{ $ent->color ?? '#007bff' }}15;
-            --text-dark: #2c3e50;
-            --text-light: #6c757d;
-            --text-muted: #8b9dc3;
-            --border-light: #e9ecef;
-            --success-color: #28a745;
+            --primary-color: {{ $company && $company->primary_color ? $company->primary_color : '#01AEF0' }};
+            --accent-color: {{ $company && $company->accent_color ? $company->accent_color : '#39CA78' }};
+            --primary-light: {{ $company && $company->primary_color ? $company->primary_color : '#01AEF0' }}15;
+            --text-dark: #2d3748;
+            --text-light: #718096;
+            --text-muted: #a0aec0;
+            --border-light: #e2e8f0;
+            --success-color: var(--accent-color);
             --error-color: #dc3545;
-            --warning-color: #ffc107;
-            --info-color: #17a2b8;
+            --warning-color: #f59e0b;
+            --info-color: var(--primary-color);
             --white: #ffffff;
-            --light-bg: #f8f9fa;
+            --light-bg: #f7fafc;
+            --background-light: #f7fafc;
             --shadow-light: 0 2px 8px rgba(0,0,0,0.08);
             --shadow-medium: 0 4px 12px rgba(0,0,0,0.1);
+            --shadow-large: 0 10px 25px rgba(0,0,0,0.15);
         }
 
         * {
@@ -438,12 +446,12 @@ $ent = Utils::ent();
         <!-- Header Section -->
         <div class="support-header">
             <div class="header-content">
-                <img src="{{ $ent->logo ? url('storage/' . $ent->logo) : asset('assets/8tech.png') }}" 
-                     alt="{{ $ent->name }}" 
+                <img src="{{ $company && $company->logo ? Utils::img_url($company->logo) : Utils::get_logo() }}" 
+                     alt="{{ $company->name ?? Utils::company_name() }}" 
                      class="brand-logo">
                 <h1 class="support-title">How can we help you?</h1>
                 <p class="support-subtitle">
-                    Our support team is here to assist you with any questions or issues you may have with the {{ $ent->name }} school management system.
+                    Our support team is here to assist you with any questions or issues you may have with the {{ $company->app_name ?? Utils::app_name() }} school management system.
                 </p>
             </div>
         </div>
@@ -489,7 +497,7 @@ $ent = Utils::ent();
                         <i class='bx bx-phone contact-icon'></i>
                         <div class="contact-info">
                             <h4>Phone Support</h4>
-                            <p>{{ Utils::phone() ?: '+256 700 000 000' }}</p>
+                            <p>{{ $company && $company->phone ? $company->phone : ($ent->phone ?? '+256 700 000 000') }}</p>
                         </div>
                     </div>
                     
@@ -497,7 +505,7 @@ $ent = Utils::ent();
                         <i class='bx bx-envelope contact-icon'></i>
                         <div class="contact-info">
                             <h4>Email Support</h4>
-                            <p>{{ Utils::email() ?: 'support@' . strtolower(str_replace(' ', '', $ent->name)) . '.com' }}</p>
+                            <p>{{ $company && $company->email ? $company->email : ($ent->email ?? 'support@newlinetech.com') }}</p>
                         </div>
                     </div>
                     

@@ -1,9 +1,13 @@
 <?php
 use App\Models\Utils;
+// Ensure company data is available
+if (!isset($company)) {
+    $company = Utils::company();
+}
 ?>
 @extends('layouts.onboarding')
 
-@section('title', 'Review Information - ' . Utils::app_name())
+@section('title', 'Review Information - ' . ($company->app_name ?? Utils::app_name()))
 @section('meta_description', 'Review and confirm your registration details before completing the process.')
 
 @section('progress-indicator')

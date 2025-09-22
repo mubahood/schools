@@ -1,6 +1,13 @@
+<?php
+use App\Models\Utils;
+// Ensure company data is available
+if (!isset($company)) {
+    $company = Utils::company();
+}
+?>
 @extends('layouts.onboarding')
 
-@section('title', 'Welcome to ' . \App\Models\Utils::app_name() . ' - Registration Complete')
+@section('title', 'Welcome to ' . ($company->app_name ?? Utils::app_name()) . ' - Registration Complete')
 @section('meta_description', 'Registration completed successfully. Welcome to your new school management platform.')
 
 @section('progress-indicator')
@@ -8,6 +15,7 @@
         <h2 class="progress-title">Welcome Aboard!</h2>
         <p class="progress-description">
             Your school registration is now complete.
+        </p>
         </p>
     </div>
     

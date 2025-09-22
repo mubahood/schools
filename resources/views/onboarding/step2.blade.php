@@ -1,9 +1,13 @@
 <?php
 use App\Models\Utils;
+// Ensure company data is available
+if (!isset($company)) {
+    $company = Utils::company();
+}
 ?>
 @extends('layouts.onboarding')
 
-@section('title', 'Personal Information - ' . Utils::app_name())
+@section('title', 'Personal Information - ' . ($company->app_name ?? Utils::app_name()))
 @section('meta_description', 'Provide your personal information to create your administrator account.')
 
 @section('progress-indicator')

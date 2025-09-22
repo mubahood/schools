@@ -14,8 +14,12 @@ class AddVerificationFieldsToOnBoardWizardsTable extends Migration
     public function up()
     {
         Schema::table('on_board_wizards', function (Blueprint $table) {
+            if (!Schema::hasColumn('on_board_wizards', 'verification_token')) {
             $table->string('verification_token')->nullable()->after('completed_at');
+            }
+            if (!Schema::hasColumn('on_board_wizards', 'verification_sent_at')) {
             $table->timestamp('verification_sent_at')->nullable()->after('verification_token');
+            }
         });
     }
 

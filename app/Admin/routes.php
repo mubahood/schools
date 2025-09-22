@@ -175,4 +175,10 @@ Route::group([
     // Onboarding management routes
     $router->post('onboarding/skip-step', 'OnboardingController@skipCurrentStep')->name('onboarding.skip-step');
     $router->post('onboarding/mark-step-completed', 'OnboardingController@markStepCompleted')->name('onboarding.mark-step-completed');
+    
+    // Knowledge Base management routes
+    $router->resource('knowledge-base/categories', 'KnowledgeBaseCategoryController');
+    $router->resource('knowledge-base/articles', 'KnowledgeBaseArticleController');
+    
+    $router->resource('companies', CompanyController::class);
 });

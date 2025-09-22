@@ -1,14 +1,18 @@
 <?php
 use App\Models\Utils;
+// Ensure company data is available
+if (!isset($company)) {
+    $company = Utils::company();
+}
 ?>
 @extends('layouts.onboarding')
 
-@section('title', 'Welcome to ' . Utils::app_name() . ' - School Registration')
-@section('meta_description', 'Welcome to ' . Utils::app_name() . ' - Start your school management journey today.')
+@section('title', 'Welcome to ' . ($company->app_name ?? Utils::app_name()) . ' - School Registration')
+@section('meta_description', 'Welcome to ' . ($company->app_name ?? Utils::app_name()) . ' - Start your school management journey today.')
 
 @section('progress-indicator')
     <div class="progress-step">
-        <h2 class="progress-title">Welcome to {{ Utils::app_name() }}</h2>
+        <h2 class="progress-title">Welcome to {{ $company->app_name ?? Utils::app_name() }}</h2>
         <p class="progress-description">
             Let's get your school registered in just 5 simple steps.
         </p>

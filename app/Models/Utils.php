@@ -263,76 +263,100 @@ class Utils  extends Model
         return $index;
     }
 
+    public static function company()
+    {
+        $current_url = url()->current();
+        $company = null;
+        
+        // Check for specific domains and return appropriate company
+        if (str_contains($current_url, 'tusometech.com') || str_contains($current_url, '8technologies.net')) {
+            // Eight Tech domain - return Eight Tech Consults company
+            $company = Company::find(2);
+        } else {
+            // Default domain or localhost - return Newline Technologies company
+            $company = Company::find(1);
+        }
+        
+        // If company not found, create a default one
+        if ($company == null) {
+            $company = new Company();
+            $company->name = 'Default Company';
+            $company->app_name = 'Default App';
+            $company->email = 'default@example.com';
+            $company->phone = '+256 123 456 789';
+            $company->address = 'Default Address';
+            $company->website = 'https://default.com';
+            $company->logo = 'images/8tech.png'; // Use proper image path format for Utils::img_url()
+            $company->about = 'Default About';
+            $company->color = '#000000';
+            $company->save();
+            $company = Company::find($company->id);
+        }
+        return $company;
+    }
+
+
     public static function company_name()
     {
-        $name_1 = 'Eight Tech Consults Limited';
-        $name_2 = 'Newline Technologies';
-        $current_url = url()->current();
-        //check if the url contains tusometech.com and retuen
-        $domain = 'tusometech.com';
-        if (str_contains($current_url, $domain)) {
-            return $name_1;
-        } else {
-            return $name_2;
-        }
+        $company = self::company();
+        return $company->name ?? 'Default Company';
     }
+    
     public static function app_name()
     {
-        $name_1 = 'Tusome';
-        $name_2 = 'School Dynamics';
-        $current_url = url()->current();
-        //check if the url contains tusometech.com and retuen
-        $domain = 'tusometech.com';
-        if (str_contains($current_url, $domain)) {
-            return $name_1;
-        } else {
-            return $name_2;
-        }
+        $company = self::company();
+        return $company->app_name ?? 'School Dynamics';
     }
 
     public static function app_company_link()
     {
-        $current_url = url()->current();
-        //check if the url contains tusometech.com and retuen 
-        $domain = 'tusometech.com';
-        if (str_contains($current_url, $domain)) {
-            return 'https://8technologies.net';
-        } else {
-            return 'https://8technologies.net';
-        }
+        $company = self::company();
+        return $company->website ?? 'https://8technologies.net';
     }
     public static function get_logo()
     {
-        $url = url('assets/8tech.png');
-        return $url;
+        $company = self::company();
+        if ($company->logo) {
+            // Use Utils::img_url() for consistent image URL handling
+            return self::img_url($company->logo);
+        }
+        // Fallback to default logo
+        return url('assets/8tech.png');
     }
 
     public static function get_app_tagline()
     {
-        $tagline_1 = 'Streamline Your School Operations with Smart Technology';
-        $tagline_2 = 'Empowering Educational Excellence Through Innovation';
+        $company = self::company();
+        // Use company about field as tagline, or fallback to a default based on domain
+        if ($company->about && strlen(trim($company->about)) > 0) {
+            return $company->about;
+        }
+        
+        // Fallback based on company
         $current_url = url()->current();
-        $domain = 'tusometech.com';
-        if (str_contains($current_url, $domain)) {
-            return $tagline_1;
+        if (str_contains($current_url, 'tusometech.com') || str_contains($current_url, '8technologies.net')) {
+            return 'Streamline Your School Operations with Smart Technology';
         } else {
-            return $tagline_2;
+            return 'Empowering Educational Excellence Through Innovation';
         }
     }
 
     public static function get_company_address()
     {
-        return 'Eight Tech Corporation Towers, Palm Springs Estates, Kitagobwa, Nangabo, Kasangati Town Council, Wakiso District';
+        $company = self::company();
+        return $company->address ?? 'Eight Tech Corporation Towers, Palm Springs Estates, Kitagobwa, Nangabo, Kasangati Town Council, Wakiso District';
     }
 
     public static function get_support_phone()
     {
-        return '+256 783 204 665';
+        $company = self::company();
+        return $company->phone ?? '+256 783 204 665';
     }
 
     public static function get_support_email()
     {
-        return 'cto@8technologies.net';
+        $company = self::company();
+        return $company->email ?? 'cto@8technologies.net';
     }
 
     public static function phone()

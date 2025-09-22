@@ -4,6 +4,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\DummyDataController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\EmailVerificationController as LegacyEmailVerificationController;
+use App\Http\Controllers\KnowledgeBaseController;
 use App\Http\Controllers\MainController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PrintController2;
@@ -1352,45 +1353,38 @@ Route::get('termly-report', function (Request $r) {
 
 Route::get('/', function (Request $request) {
   $admin = Admin::user();
+  $company = \App\Models\Utils::company(); // Get company data for dynamic branding
+  
   if ($admin != null) {
     if (isset($_SERVER['HTTP_HOST'])) {
       if (
         $_SERVER['HTTP_HOST'] === 'tusometech.com' ||
         $_SERVER['HTTP_HOST'] === 'localhost'
       ) {
-        return view('landing.index');
+        return view('landing.index', compact('company'));
       } else {
         //redurect to dashboard
         $dashboard = admin_url('dashboard');
         header("Location: $dashboard");
       }
     }
-    return view('landing.index');
+    return view('landing.index', compact('company'));
   }
-  return view('landing.index');
+  return view('landing.index', compact('company'));
 
-  return view('landing.index');
+  return view('landing.index', compact('company'));
 });
 
 Route::get('/access-system', function () {
-  return view('landing.access-system');
+  $company = \App\Models\Utils::company();
+  return view('landing.access-system', compact('company'));
 });
 
-Route::get('/about', function () {
-  return view('landing.about');
-});
-
-Route::get('/testimonials', function () {
-  return view('landing.testimonials');
-});
-
-Route::get('/schools', function () {
-  return view('landing.schools');
-});
-
-Route::get('/contact', function () {
-  return view('landing.contact');
-});
+// Knowledge Base public routes
+Route::get('/knowledge-base', [KnowledgeBaseController::class, 'index'])->name('knowledge-base.index');
+Route::get('/knowledge-base/search', [KnowledgeBaseController::class, 'search'])->name('knowledge-base.search');
+Route::get('/knowledge-base/{categorySlug}', [KnowledgeBaseController::class, 'category'])->name('knowledge-base.category');
+Route::get('/knowledge-base/{categorySlug}/{articleSlug}', [KnowledgeBaseController::class, 'article'])->name('knowledge-base.article');
 
 Route::get('temp-import', function () {
   // set unlimited time & memory

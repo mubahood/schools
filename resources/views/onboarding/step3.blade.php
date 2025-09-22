@@ -1,6 +1,13 @@
+<?php
+use App\Models\Utils;
+// Ensure company data is available
+if (!isset($company)) {
+    $company = Utils::company();
+}
+?>
 @extends('layouts.onboarding')
 
-@section('title', 'School Information')
+@section('title', 'School Information - ' . ($company->app_name ?? Utils::app_name()))
 
 @section('progress-indicator')
     <div class="progress-step">
