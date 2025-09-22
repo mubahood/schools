@@ -1354,30 +1354,15 @@ Route::get('termly-report', function (Request $r) {
 
 Route::get('/', function (Request $request) {
   $admin = Admin::user();
-  //if user aleady logged in, redirect to dashboard
+  $company = \App\Models\Utils::company(); // Get company data for dynamic branding
+  
+  //if user already logged in, redirect to dashboard
   if ($admin != null) {
     $dashboard = admin_url('dashboard');
     return redirect($dashboard);
   }
-  $company = \App\Models\Utils::company(); // Get company data for dynamic branding
   
-  if ($admin != null) {
-    if (isset($_SERVER['HTTP_HOST'])) {
-      if (
-        $_SERVER['HTTP_HOST'] === 'tusometech.com' ||
-        $_SERVER['HTTP_HOST'] === 'localhost'
-      ) {
-        return view('landing.index', compact('company'));
-      } else {
-        //redurect to dashboard
-        $dashboard = admin_url('dashboard');
-        header("Location: $dashboard");
-      }
-    }
-    return view('landing.index', compact('company'));
-  }
-  return view('landing.index', compact('company'));
-
+  // If user is not logged in, show landing page
   return view('landing.index', compact('company'));
 });
 
