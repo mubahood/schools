@@ -170,6 +170,29 @@ if (!isset($company)) {
     </script>
     
     @stack('structured-data')
+
+    <!-- Google Analytics 4 (GA4) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-484716763"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-484716763', {
+            page_title: '{{ $company->app_name ?? Utils::app_name() }}',
+            custom_map: {
+                'dimension1': 'school_name',
+                'dimension2': 'user_type'
+            }
+        });
+
+        // Enhanced ecommerce and custom events
+        gtag('event', 'page_view', {
+            page_title: document.title,
+            page_location: window.location.href,
+            school_name: '{{ $company->name ?? Utils::company_name() }}',
+            app_version: '{{ config("app.version", "1.0") }}'
+        });
+    </script>
 </head>
 
 <body>

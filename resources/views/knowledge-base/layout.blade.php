@@ -280,4 +280,51 @@
     }
 }
 </style>
+
+<!-- Knowledge Base Analytics Tracking -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Track knowledge base interactions
+    if (typeof gtag !== 'undefined') {
+        // Track search form submissions
+        const searchForm = document.querySelector('.kb-search-form');
+        if (searchForm) {
+            searchForm.addEventListener('submit', function(e) {
+                const searchQuery = document.querySelector('input[name="q"]').value;
+                gtag('event', 'search', {
+                    search_term: searchQuery,
+                    event_category: 'knowledge_base',
+                    event_label: 'kb_search'
+                });
+            });
+        }
+
+        // Track category navigation clicks
+        const categoryLinks = document.querySelectorAll('.kb-nav-link');
+        categoryLinks.forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                const categoryName = this.querySelector('span')?.textContent || 'Unknown';
+                gtag('event', 'click', {
+                    event_category: 'knowledge_base',
+                    event_label: 'category_navigation',
+                    category_name: categoryName
+                });
+            });
+        });
+
+        // Track support link clicks
+        const supportLinks = document.querySelectorAll('.support-link');
+        supportLinks.forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                const linkText = this.textContent.trim();
+                gtag('event', 'click', {
+                    event_category: 'support',
+                    event_label: 'kb_support_link',
+                    link_text: linkText
+                });
+            });
+        });
+    }
+});
+</script>
 @endsection

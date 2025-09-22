@@ -410,6 +410,30 @@ $ent = Utils::ent();
             }
         }
     </style>
+
+    <!-- Google Analytics 4 (GA4) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-484716763"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-484716763', {
+            page_title: 'Login - {{ $company->app_name ?? Utils::app_name() }}',
+            page_location: window.location.href,
+            custom_map: {
+                'dimension1': 'school_name',
+                'dimension2': 'user_type'
+            }
+        });
+
+        // Track login page visit
+        gtag('event', 'page_view', {
+            page_title: 'Login Page',
+            page_location: window.location.href,
+            school_name: '{{ $company->name ?? Utils::company_name() }}',
+            page_type: 'authentication'
+        });
+    </script>
 </head>
 
 <body>
@@ -574,21 +598,6 @@ $ent = Utils::ent();
     
     <!-- Simple JavaScript -->
     <script>
-        // Simple CAPTCHA refresh function
-        function refreshCaptcha() {
-            const captchaImage = document.getElementById('captcha-image');
-            const captchaInput = document.querySelector('input[name="captcha"]');
-            
-            if (captchaImage) {
-                captchaImage.src = '{{ url("auth/captcha") }}?' + new Date().getTime();
-            }
-            
-            if (captchaInput) {
-                captchaInput.value = '';
-                captchaInput.focus();
-            }
-        }
-
         // Auto-hide alerts after 5 seconds
         setTimeout(function() {
             const alerts = document.querySelectorAll('.alert');
@@ -601,6 +610,29 @@ $ent = Utils::ent();
             });
         }, 5000);
 
+        // Simple CAPTCHA refresh function with analytics tracking
+        function refreshCaptcha() {
+            const captchaImage = document.getElementById('captcha-image');
+            const captchaInput = document.querySelector('input[name="captcha"]');
+            
+            if (captchaImage) {
+                captchaImage.src = '{{ url("auth/captcha") }}?' + new Date().getTime();
+            }
+            
+            if (captchaInput) {
+                captchaInput.value = '';
+                captchaInput.focus();
+            }
+
+            // Track CAPTCHA refresh
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'captcha_refresh', {
+                    event_category: 'security',
+                    event_label: 'captcha_refresh_click'
+                });
+            }
+        }
+
         // Focus first input when page loads
         window.addEventListener('load', function() {
             const firstInput = document.querySelector('input[name="username"]');
@@ -608,6 +640,21 @@ $ent = Utils::ent();
                 firstInput.focus();
             }
         });
+
+        // Track login form submission
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) {
+            loginForm.addEventListener('submit', function(e) {
+                // Track login attempt
+                if (typeof gtag !== 'undefined') {
+                    gtag('event', 'login_attempt', {
+                        event_category: 'authentication',
+                        event_label: 'login_form_submission',
+                        school_name: '{{ $company->name ?? Utils::company_name() }}'
+                    });
+                }
+            });
+        }
     </script>
 </body>
 
