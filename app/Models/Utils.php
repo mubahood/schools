@@ -53,6 +53,90 @@ define('COLORS',  [
 class Utils  extends Model
 {
 
+
+    static function img_base_path($fileName)
+    {
+        //if empty return null
+        if (empty($fileName) || $fileName == null) {
+            return null;
+        }
+
+        //get last segment after last /
+        $segments = explode('/', $fileName);
+        //if empty return or null return null
+        if (empty($fileName) || $fileName == null) {
+            return null;
+        }
+
+        $lastSegment = $segments[count($segments) - 1];
+        //if last segment is empty return null
+        if (empty($lastSegment) || $lastSegment == null) {
+            return null;
+        }
+
+        $path = self::img_path($fileName);
+        if ($path == null) {
+            $path = base_path() . '/public/storage/images/logo.png';
+        }
+
+        $path = 'storage/images/' . $lastSegment;
+
+        return $path;
+    }
+
+    static function img_path($fileName)
+    {
+        //if empty return null
+        if (empty($fileName) || $fileName == null) {
+            return null;
+        }
+
+        //get last segment after last /
+        $segments = explode('/', $fileName);
+        //if empty return or null return null
+        if (empty($fileName) || $fileName == null) {
+            return null;
+        }
+
+        $lastSegment = $segments[count($segments) - 1];
+        //if last segment is empty return null
+        if (empty($lastSegment) || $lastSegment == null) {
+            return null;
+        }
+
+        $path = base_path() . '/public/storage/images/' . $lastSegment;
+        if (!file_exists($path)) {
+            return null;
+        }
+        return $path;
+    }
+
+    static function img_url($fileName)
+    {
+        //if empty return null
+        if (empty($fileName) || $fileName == null) {
+            return null;
+        }
+
+        //get last segment after last /
+        $segments = explode('/', $fileName);
+        //if empty return or null return null
+        if (empty($fileName) || $fileName == null) {
+            return null;
+        }
+
+
+        $lastSegment = $segments[count($segments) - 1];
+        //if last segment is empty return null
+        if (empty($lastSegment) || $lastSegment == null) {
+            return null;
+        }
+
+        $path = url('storage/images/' . $lastSegment);
+
+        return $path;
+    }
+
     public static function getUsersByRoleSlug($role_slug, $enterprise_id)
     {
         $role = AdminRole::where('slug', $role_slug)->first();
@@ -1814,12 +1898,12 @@ class Utils  extends Model
             die("No active term found.");
         }
 
-        if(isset($_GET['ent_id']) && $_GET['ent_id'] > 0) {
+        if (isset($_GET['ent_id']) && $_GET['ent_id'] > 0) {
             $my_ent = Enterprise::find($_GET['ent_id']);
             if ($my_ent == null) {
                 die("Enterprise not found.");
             }
-            $ent = $my_ent; 
+            $ent = $my_ent;
         }
 
         // 3) Determine rec_date (today or back-fill up to 30 days)
@@ -3168,7 +3252,7 @@ class Utils  extends Model
         }
     }
 
- 
+
 
     public static function capitalizeSentences($text)
     {

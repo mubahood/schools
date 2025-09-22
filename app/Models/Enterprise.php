@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Dflydev\DotAccessData\Util;
 use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -323,5 +324,17 @@ class Enterprise extends Model
     public function universityProgrammes()
     {
         return $this->hasMany(UniversityProgramme::class, 'enterprise_id');
-    } 
+    }
+
+    //getter for logo
+    public function getLogoAttribute($value)
+    {
+        $img_path = Utils::img_path($value);
+        if ($img_path == null) {
+            $base_path = Utils::img_base_path('images/logo.png');
+            return $base_path;
+        }
+        $base_path = Utils::img_base_path($value);
+        return $base_path;
+    }
 }

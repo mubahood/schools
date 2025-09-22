@@ -75,6 +75,7 @@ $ent = Utils::ent();
             flex-direction: column;
             justify-content: center;
             color: white;
+            border: 2px solid var(--white);
         }
 
         .brand-section {
@@ -309,8 +310,8 @@ $ent = Utils::ent();
             }
 
             .brand-logo {
-                width: 50px;
-                height: 50px;
+                width: 60px;
+                height: 60px;
             }
 
             .brand-name {
@@ -340,7 +341,7 @@ $ent = Utils::ent();
         <!-- Left Side - Branding -->
         <div class="auth-left">
             <div class="brand-section">
-                <img src="{{ $ent->logo ? url('storage/' . $ent->logo) : asset('assets/8tech.png') }}"
+                <img src="{{ Utils::img_url($ent->logo) }}"
                     alt="{{ $ent->name }}" class="brand-logo">
                 <h1 class="brand-name">{{ $ent->name }}</h1>
                 <p class="brand-subtitle">School Management System</p>
