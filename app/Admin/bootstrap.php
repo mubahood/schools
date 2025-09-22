@@ -69,8 +69,8 @@ Encore\Admin\Form::forget(['map', 'editor']); */
 
 $u = Auth::user();
 if ($u != null) {
-    // Skip email verification check for existing admin users (enterprise_id > 28)
-    $skipEmailVerification = $u->enterprise_id && $u->enterprise_id > 28;
+    // Skip email verification check for existing admin users (enterprise_id <= 28)
+    $skipEmailVerification = $u->enterprise_id && $u->enterprise_id <= 28;
     
     if (!$skipEmailVerification) {
         // Check email verification first - this is mandatory for new users only

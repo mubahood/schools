@@ -337,7 +337,7 @@ class OnboardingProgressService
 
     /**
      * Get dashboard summary for onboarding progress
-     * Note: Existing admin users (enterprise_id > 28) skip onboarding
+     * Note: Existing admin users (enterprise_id <= 28) skip onboarding
      */
     public static function getDashboardSummary($user = null)
     {
@@ -349,8 +349,8 @@ class OnboardingProgressService
             $user = Admin::user();
         }
 
-        // Skip onboarding for existing admin users (enterprise_id > 28)
-        if ($user && $user->enterprise_id && $user->enterprise_id > 28) {
+        // Skip onboarding for existing admin users (enterprise_id <= 28)
+        if ($user && $user->enterprise_id && $user->enterprise_id <= 28) {
             return null; // No onboarding needed for existing users
         }
 
@@ -522,7 +522,7 @@ class OnboardingProgressService
     /**
      * Check if email verification requirements are met
      * Requirement: Enterprise owner email should be verified
-     * Note: Existing admin users (enterprise_id > 28) are considered pre-verified
+     * Note: Existing admin users (enterprise_id <= 28) are considered pre-verified
      */
     public static function checkEmailVerificationRequirement($user = null)
     {
@@ -534,8 +534,8 @@ class OnboardingProgressService
             return false;
         }
 
-        // Skip email verification for existing admin users (enterprise_id > 28)
-        if ($user->enterprise_id && $user->enterprise_id > 28) {
+        // Skip email verification for existing admin users (enterprise_id <= 28)
+        if ($user->enterprise_id && $user->enterprise_id <= 28) {
             return true; // Consider them already verified
         }
 
