@@ -1,6 +1,6 @@
 <?php
 use App\Models\Utils;
-
+?>
 @extends('layouts.modern-public')
 
 @section('title', ($company ? $company->name : 'Newline Technologies') . ' - School Management System | Complete Education Solution')
