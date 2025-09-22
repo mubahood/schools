@@ -1,5 +1,6 @@
 <?php
 use App\Models\Utils;
+
 // Ensure company data is available in layout
 if (!isset($company)) {
     $company = Utils::company();
@@ -42,7 +43,7 @@ if (!isset($company)) {
     <meta name="twitter:site" content="@{{ $company->twitter_handle ?? Utils::company_name() }}">
     <meta name="twitter:creator" content="@{{ $company->twitter_handle ?? Utils::company_name() }}">
     <meta name="twitter:title" content="@yield('twitter_title', $company->app_name ?? Utils::app_name())">
-    <meta name="twitter:description" content="@yield('twitter_description', ($company->app_name ?? Utils::app_name()) . ' helps schools manage their operations efficiently.')">>
+    <meta name="twitter:description" content="@yield('twitter_description', ($company->app_name ?? Utils::app_name()) . ' helps schools manage their operations efficiently.')">
     <meta name="twitter:image" content="@yield('twitter_image', ($company && $company->logo ? Utils::img_url($company->logo) : Utils::get_logo()))">
     <meta name="twitter:image:alt" content="{{ $company->name ?? Utils::company_name() }} Logo">
     
@@ -135,11 +136,18 @@ if (!isset($company)) {
             "availableLanguage": ["en"]
         },
         "sameAs": [
-            @if($company && $company->facebook_url)"{{ $company->facebook_url }}",@endif
-            @if($company && $company->twitter_url)"{{ $company->twitter_url }}",@endif
-            @if($company && $company->linkedin_url)"{{ $company->linkedin_url }}",@endif
-            @if($company && $company->instagram_url)"{{ $company->instagram_url }}",@endif
-            "{{ url('/knowledge-base') }}"
+            @php
+                $socialUrls = array_filter([
+                    $company && $company->facebook_url ? $company->facebook_url : null,
+                    $company && $company->twitter_url ? $company->twitter_url : null,
+                    $company && $company->linkedin_url ? $company->linkedin_url : null,
+                    $company && $company->instagram_url ? $company->instagram_url : null,
+                    url('/knowledge-base')
+                ]);
+            @endphp
+            @foreach($socialUrls as $index => $url)
+                "{{ $url }}"@if($index < count($socialUrls) - 1),@endif
+            @endforeach
         ],
         "knowsAbout": [
             "School Management System",
