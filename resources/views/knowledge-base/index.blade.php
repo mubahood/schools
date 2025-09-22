@@ -2,10 +2,6 @@
 
 @section('title', 'Knowledge Base | Help Center')
 
-@extends('knowledge-base.layout')
-
-@section('title', 'Knowledge Base | Help Center')
-
 @section('meta_description', 'Comprehensive help center and documentation for the school management system. Find tutorials, guides, and answers to frequently asked questions.')
 @section('meta_keywords', 'knowledge base, help center, tutorials, guides, school management system, support, documentation')
 

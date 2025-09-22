@@ -1,7 +1,5 @@
 @extends('knowledge-base.layout')
 
-@extends('knowledge-base.layout')
-
 @section('title', $article->title . ' | Knowledge Base | Help Center')
 
 @section('meta_description', $article->meta_description ?: $article->excerpt)

@@ -2,10 +2,6 @@
 
 @section('title', $category->name . ' | Knowledge Base | Help Center')
 
-@extends('knowledge-base.layout')
-
-@section('title', $category->name . ' | Knowledge Base | Help Center')
-
 @section('meta_description', $category->meta_description ?: ($category->description ?: ('Browse all articles in ' . $category->name . ' category')))
 @section('meta_keywords', $category->meta_keywords ?: ($category->name . ', help, tutorials, guides'))
 
