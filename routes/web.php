@@ -1354,6 +1354,11 @@ Route::get('termly-report', function (Request $r) {
 
 Route::get('/', function (Request $request) {
   $admin = Admin::user();
+  //if user aleady logged in, redirect to dashboard
+  if ($admin != null) {
+    $dashboard = admin_url('dashboard');
+    return redirect($dashboard);
+  }
   $company = \App\Models\Utils::company(); // Get company data for dynamic branding
   
   if ($admin != null) {
