@@ -1,6 +1,6 @@
 <?php
 use App\Models\Utils;
-?>
+
 @extends('layouts.modern-public')
 
 @section('title', ($company ? $company->name : 'Newline Technologies') . ' - School Management System | Complete Education Solution')
@@ -396,7 +396,7 @@ use App\Models\Utils;
                 </div>
             </div>
             
-            <div class="school-type-card" data-type="religious">
+          {{--   <div class="school-type-card" data-type="religious">
                 <div class="school-type-header">
                     <div class="school-type-icon">
                         <i class="fas fa-mosque"></i>
@@ -427,7 +427,7 @@ use App\Models\Utils;
                         <span>Faith-Based</span>
                     </div>
                 </div>
-            </div>
+            </div> --}}
         </div>
         
         {{-- <div class="school-types-footer">
