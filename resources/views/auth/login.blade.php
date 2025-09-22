@@ -89,6 +89,26 @@ $ent = Utils::ent();
             margin-bottom: 1.5rem;
         }
 
+        .brand-link {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .brand-link:hover {
+            text-decoration: none;
+            color: inherit;
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .brand-link:focus {
+            outline: 2px solid rgba(255, 255, 255, 0.5);
+            outline-offset: 4px;
+        }
+
         .brand-logo {
             width: 60px;
             height: 60px;
@@ -300,6 +320,56 @@ $ent = Utils::ent();
             color: var(--text-light);
         }
 
+        /* Registration Section */
+        .registration-section {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-light);
+            text-align: center;
+        }
+
+        .registration-divider {
+            margin-bottom: 1rem;
+            color: var(--text-light);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .btn-registration {
+            background-color: var(--accent-color);
+            border: none;
+            padding: 0.7rem 1.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            width: 100%;
+            transition: all 0.3s ease;
+            color: var(--white);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+
+        .btn-registration:hover {
+            background-color: var(--accent-color);
+            opacity: 0.9;
+            color: var(--white);
+            text-decoration: none;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .registration-description {
+            margin-top: 0.75rem;
+            font-size: 0.8rem;
+            color: var(--text-light);
+            line-height: 1.4;
+            margin-bottom: 0;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .auth-container {
@@ -347,10 +417,12 @@ $ent = Utils::ent();
         <!-- Left Side - Branding -->
         <div class="auth-left">
             <div class="brand-section">
-                <img src="{{ $company && $company->logo ? Utils::img_url($company->logo) : Utils::get_logo() }}"
-                    alt="{{ $company->name ?? Utils::company_name() }}" class="brand-logo">
-                <h1 class="brand-name">{{ $company->name ?? Utils::company_name() }}</h1>
-                <p class="brand-subtitle">{{ $company->app_name ?? Utils::app_name() }}</p>
+                <a href="{{ url('/') }}" class="brand-link">
+                    <img src="{{ $company && $company->logo ? Utils::img_url($company->logo) : Utils::get_logo() }}"
+                        alt="{{ $company->name ?? Utils::company_name() }}" class="brand-logo">
+                    <h1 class="brand-name">{{ $company->name ?? Utils::company_name() }}</h1>
+                    <p class="brand-subtitle">{{ $company->app_name ?? Utils::app_name() }}</p>
+                </a>
             </div>
 
             <div class="welcome-text">
@@ -458,6 +530,20 @@ $ent = Utils::ent();
                     </a>
                 </div>
             </form>
+
+            <!-- Registration Section -->
+            <div class="registration-section">
+                <div class="registration-divider">
+                    <span>New to our platform?</span>
+                </div>
+                <a href="{{ route('onboarding.step1') }}" class="btn btn-registration">
+                    <i class='bx bx-plus-circle'></i>
+                    Register New School
+                </a>
+                <p class="registration-description">
+                    Start your journey with our comprehensive school management system
+                </p>
+            </div>
 
             <!-- Support Section -->
             <div class="support-section">
