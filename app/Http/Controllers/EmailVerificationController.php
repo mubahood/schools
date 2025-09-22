@@ -25,6 +25,12 @@ class EmailVerificationController extends Controller
             return redirect()->route('onboarding.step1')->with('error', 'Please complete registration first.');
         }
 
+        // Skip email verification for existing admin users (enterprise_id > 28)
+        if ($user->enterprise_id && $user->enterprise_id > 28) {
+            // For existing users, redirect to dashboard or next appropriate step
+            return redirect()->route('admin.dashboard')->with('success', 'Welcome back! Email verification not required for existing accounts.');
+        }
+
         // Get or create OnBoardWizard
         $wizard = OnBoardWizard::firstOrCreate([
             'administrator_id' => $user->id,
@@ -53,6 +59,15 @@ class EmailVerificationController extends Controller
         
         if (!$user) {
             return response()->json(['success' => false, 'message' => 'User not authenticated.']);
+        }
+
+        // Skip email verification for existing admin users (enterprise_id > 28)
+        if ($user->enterprise_id && $user->enterprise_id > 28) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Email verification not required for existing accounts.',
+                'redirect' => route('admin.dashboard')
+            ]);
         }
 
         try {

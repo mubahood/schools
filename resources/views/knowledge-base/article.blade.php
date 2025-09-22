@@ -1,8 +1,108 @@
 @extends('knowledge-base.layout')
 
-@section('title', $article->meta_title . ' | Knowledge Base | Help Center')
+@extends('knowledge-base.layout')
 
-@section('meta_description', $article->meta_description)
+@section('title', $article->title . ' | Knowledge Base | Help Center')
+
+@section('meta_description', $article->meta_description ?: $article->excerpt)
+@section('meta_keywords', $article->meta_keywords ?: ($article->category->name . ', help, tutorial, guide'))
+
+@section('og_type', 'article')
+@section('og_title', $article->title)
+@section('og_description', $article->meta_description ?: $article->excerpt)
+@section('og_image', $article->featured_image ? \App\Models\Utils::img_url($article->featured_image) : ($company && $company->logo ? \App\Models\Utils::img_url($company->logo) : \App\Models\Utils::get_logo()))
+
+@section('twitter_title', $article->title)
+@section('twitter_description', $article->meta_description ?: $article->excerpt)
+
+@push('structured-data')
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "{{ $article->title }}",
+    "description": "{{ $article->meta_description ?: $article->excerpt }}",
+    "image": "{{ $article->featured_image ? \App\Models\Utils::img_url($article->featured_image) : ($company && $company->logo ? \App\Models\Utils::img_url($company->logo) : \App\Models\Utils::get_logo()) }}",
+    "datePublished": "{{ $article->created_at->toISOString() }}",
+    "dateModified": "{{ $article->updated_at->toISOString() }}",
+    "author": {
+        "@type": "Organization",
+        "name": "{{ $company->name ?? \App\Models\Utils::company_name() }}"
+    },
+    "publisher": {
+        "@type": "Organization",
+        "name": "{{ $company->name ?? \App\Models\Utils::company_name() }}",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "{{ $company && $company->logo ? \App\Models\Utils::img_url($company->logo) : \App\Models\Utils::get_logo() }}"
+        }
+    },
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "{{ url()->current() }}"
+    },
+    "articleSection": "{{ $article->category->name }}",
+    "wordCount": "{{ str_word_count(strip_tags($article->content)) }}",
+    "timeRequired": "PT{{ $article->reading_time }}",
+    "url": "{{ url()->current() }}",
+    "isPartOf": {
+        "@type": "Website",
+        "name": "{{ $company->app_name ?? \App\Models\Utils::app_name() }} Knowledge Base",
+        "url": "{{ url('/knowledge-base') }}"
+    },
+    "about": {
+        "@type": "Thing",
+        "name": "{{ $article->category->name }}",
+        "description": "{{ $article->category->description }}"
+    }
+    @if($article->has_youtube_video && $article->youtube_video_id)
+    ,
+    "video": {
+        "@type": "VideoObject",
+        "name": "{{ $article->title }} - Video Tutorial",
+        "description": "{{ $article->meta_description ?: $article->excerpt }}",
+        "thumbnailUrl": "https://img.youtube.com/vi/{{ $article->youtube_video_id }}/maxresdefault.jpg",
+        "uploadDate": "{{ $article->created_at->toISOString() }}",
+        "embedUrl": "{{ $article->youtube_embed_url }}",
+        "duration": "PT10M"
+    }
+    @endif
+}
+</script>
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+        {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "{{ url('/') }}"
+        },
+        {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Knowledge Base",
+            "item": "{{ route('knowledge-base.index') }}"
+        },
+        {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "{{ $article->category->name }}",
+            "item": "{{ route('knowledge-base.category', $article->category->slug) }}"
+        },
+        {
+            "@type": "ListItem",
+            "position": 4,
+            "name": "{{ $article->title }}",
+            "item": "{{ url()->current() }}"
+        }
+    ]
+}
+</script>
+@endpush
 
 @section('kb-content')
 <!-- Article Header -->

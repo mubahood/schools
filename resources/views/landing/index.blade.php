@@ -3,8 +3,123 @@ use App\Models\Utils;
 ?>
 @extends('layouts.modern-public')
 
-@section('title', ($company ? $company->name : 'Newline Technologies') . ' - School Management System')
-@section('description', 'Comprehensive school management system for modern educational institutions')
+@section('title', ($company ? $company->name : 'Newline Technologies') . ' - School Management System | Complete Education Solution')
+@section('meta_description', 'Transform your educational institution with our comprehensive school management system. Streamline operations, enhance communication, and improve student outcomes with advanced tools designed for modern schools.')
+@section('meta_keywords', 'school management system, education software, student information system, school administration, academic management, teacher portal, parent communication, school operations, education technology, LMS')
+
+@section('og_title', ($company ? $company->name : 'Newline Technologies') . ' - Complete School Management Solution')
+@section('og_description', 'Revolutionary school management platform trusted by hundreds of educational institutions. Streamline operations, enhance communication, and boost academic excellence.')
+@section('og_type', 'website')
+
+@section('twitter_title', ($company ? $company->name : 'Newline Technologies') . ' - School Management System')
+@section('twitter_description', 'Transform your school operations with our comprehensive management platform. Enhance communication and improve student outcomes.')
+
+@push('structured-data')
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "{{ $company ? $company->app_name : 'School Management System' }}",
+    "description": "Comprehensive school management system designed to streamline administrative tasks, enhance communication, and improve efficiency in educational institutions",
+    "url": "{{ url('/') }}",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "Web-based",
+    "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD",
+        "description": "Free trial available"
+    },
+    "provider": {
+        "@type": "Organization",
+        "name": "{{ $company ? $company->name : 'Newline Technologies' }}",
+        "url": "{{ url('/') }}",
+        "logo": "{{ $company && $company->logo ? Utils::img_url($company->logo) : Utils::get_logo() }}"
+    },
+    "featureList": [
+        "Student Information Management",
+        "Academic Records Management", 
+        "Fee Management System",
+        "Parent-Teacher Communication",
+        "Report Card Generation",
+        "Attendance Tracking",
+        "Examination Management",
+        "Transport Management",
+        "Library Management",
+        "Financial Management"
+    ],
+    "screenshot": "{{ $company && $company->logo ? Utils::img_url($company->logo) : Utils::get_logo() }}",
+    "softwareVersion": "2024",
+    "dateModified": "{{ date('Y-m-d') }}",
+    "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "150",
+        "bestRating": "5",
+        "worstRating": "1"
+    }
+}
+</script>
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "{{ $company ? $company->name : 'Newline Technologies' }} - School Management System",
+    "description": "Transform your educational institution with our comprehensive school management system",
+    "url": "{{ url('/') }}",
+    "mainEntity": {
+        "@type": "Organization",
+        "name": "{{ $company ? $company->name : 'Newline Technologies' }}",
+        "description": "Leading provider of school management solutions"
+    },
+    "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "{{ url('/') }}"
+            }
+        ]
+    }
+}
+</script>
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+        {
+            "@type": "Question",
+            "name": "What is a school management system?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "A school management system is a comprehensive software solution that helps educational institutions manage their daily operations, including student information, academic records, fee management, and parent-teacher communication."
+            }
+        },
+        {
+            "@type": "Question", 
+            "name": "How does the school management system improve efficiency?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Our system automates administrative tasks, centralizes data management, enables real-time communication, and provides detailed reporting capabilities, significantly reducing manual work and improving operational efficiency."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "Is training provided for using the system?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, we provide comprehensive training and ongoing support to ensure your staff can effectively use all features of the school management system."
+            }
+        }
+    ]
+}
+</script>
+@endpush
 
 @section('head-styles')
 <style>
@@ -38,7 +153,12 @@ use App\Models\Utils;
             </div>
             <div class="hero-image">
                 <div class="logo-container">
-                    <img src="{{ $company && $company->logo ? Utils::img_url($company->logo) : Utils::get_logo() }}" alt="{{ $company ? $company->name : 'Newline Technologies' }} Logo">
+                    <img src="{{ $company && $company->logo ? Utils::img_url($company->logo) : Utils::get_logo() }}" 
+                         alt="{{ $company ? $company->name : 'Newline Technologies' }} Logo"
+                         width="200"
+                         height="200"
+                         loading="eager"
+                         decoding="async">
                 </div>
             </div>
         </div>

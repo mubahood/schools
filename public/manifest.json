@@ -1,26 +1,57 @@
 {
-    "name": "Tusome System",
-    "short_name": "Tusome",
-    "description": "Eliminate your school administrative headaches. - Smoothly manage admissions, academics, finance, communication, and more.",
-    "version": "1.0.0",
+    "name": "School Management System",
+    "short_name": "SchoolMS",
+    "description": "Comprehensive school management system for modern educational institutions. Streamline operations, enhance communication, and improve student outcomes.",
+    "version": "2024.1.0",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",
-    "theme_color": "#0B0F19",
-    "appbar_color": "#0B0F19",
+    "theme_color": "#01AEF0",
+    "appbar_color": "#01AEF0",
+    "scope": "/",
+    "lang": "en",
+    "orientation": "portrait-primary",
     "icons": [
         {
             "src": "/assets/8tech.png",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any maskable"
         },
         {
             "src": "/assets/8tech.png",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any maskable"
         }
     ],
-    "author": "Tusome Development Team",
+    "shortcuts": [
+        {
+            "name": "Access System",
+            "short_name": "Login",
+            "description": "Access your school management dashboard",
+            "url": "/access-system",
+            "icons": [
+                {
+                    "src": "/assets/8tech.png",
+                    "sizes": "96x96"
+                }
+            ]
+        },
+        {
+            "name": "Knowledge Base",
+            "short_name": "Help",
+            "description": "Browse help articles and tutorials", 
+            "url": "/knowledge-base",
+            "icons": [
+                {
+                    "src": "/assets/8tech.png",
+                    "sizes": "96x96"
+                }
+            ]
+        }
+    ],
+    "author": "School Management Development Team",
     "permissions": [
         "internet",
         "notifications"
@@ -28,8 +59,7 @@
     "categories": [
         "education",
         "management",
-        "productivity"
-    ],
-    "lang": "en",
-    "orientation": "portrait"
+        "productivity",
+        "business"
+    ]
 }

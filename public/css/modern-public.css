@@ -1,8 +1,25 @@
-/* Fresh Clean CSS for School Management System */
-* {
+/* Fresh Clean CSS for School Management System - SEO Optimized */
+
+/* Performance Critical CSS */
+*, *::before, *::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+}
+
+/* CSS Containment for better rendering performance */
+.container {
+    contain: layout style;
+}
+
+.hero-section, .section {
+    contain: layout;
+}
+
+/* Reduce paint complexity */
+.btn, .card, .header {
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 :root {
@@ -14,14 +31,25 @@
     --white: #ffffff;
     --light-bg: #f8f9fa;
     --border-color: #e0e0e0;
+    
+    /* Performance optimizations */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.3s ease;
+    --shadow-light: 0 2px 4px rgba(0,0,0,0.1);
+    --shadow-medium: 0 4px 12px rgba(0,0,0,0.15);
 }
 
+/* Optimize font stack for performance */
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     line-height: 1.5;
     color: var(--text-dark);
     background: var(--white);
     font-size: 16px;
+    font-display: swap;
+    text-rendering: optimizeSpeed;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 /* Container */

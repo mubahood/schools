@@ -9,6 +9,7 @@ use App\Http\Controllers\MainController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PrintController2;
 use App\Http\Controllers\ReportCardsPrintingController;
+use App\Http\Controllers\SitemapController;
 use App\Models\AcademicClass;
 use App\Models\AcademicClassFee;
 use App\Models\Account;
@@ -1379,6 +1380,23 @@ Route::get('/access-system', function () {
   $company = \App\Models\Utils::company();
   return view('landing.access-system', compact('company'));
 });
+
+// SEO Routes
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
+
+// SEO Redirects for common issues
+Route::redirect('/home', '/', 301);
+Route::redirect('/index', '/', 301);
+Route::redirect('/index.php', '/', 301);
+Route::redirect('/index.html', '/', 301);
+Route::redirect('/login', '/access-system', 301);
+Route::redirect('/register', '/access-system', 301);
+Route::redirect('/help', '/knowledge-base', 301);
+Route::redirect('/support', '/knowledge-base', 301);
+Route::redirect('/faq', '/knowledge-base', 301);
+Route::redirect('/docs', '/knowledge-base', 301);
+Route::redirect('/documentation', '/knowledge-base', 301);
 
 // Knowledge Base public routes
 Route::get('/knowledge-base', [KnowledgeBaseController::class, 'index'])->name('knowledge-base.index');

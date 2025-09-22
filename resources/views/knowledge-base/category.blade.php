@@ -2,7 +2,80 @@
 
 @section('title', $category->name . ' | Knowledge Base | Help Center')
 
-@section('meta_description', $category->description . ' Browse all articles in the ' . $category->name . ' category to learn more about our school management system.')
+@extends('knowledge-base.layout')
+
+@section('title', $category->name . ' | Knowledge Base | Help Center')
+
+@section('meta_description', $category->meta_description ?: ($category->description ?: ('Browse all articles in ' . $category->name . ' category')))
+@section('meta_keywords', $category->meta_keywords ?: ($category->name . ', help, tutorials, guides'))
+
+@section('og_title', $category->name . ' | Knowledge Base')
+@section('og_description', $category->meta_description ?: ($category->description ?: ('Browse all articles in ' . $category->name . ' category')))
+
+@section('twitter_title', $category->name . ' | Knowledge Base')
+@section('twitter_description', $category->meta_description ?: ($category->description ?: ('Browse all articles in ' . $category->name . ' category')))
+
+@push('structured-data')
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "{{ $category->name }}",
+    "description": "{{ $category->meta_description ?: $category->description }}",
+    "url": "{{ url()->current() }}",
+    "mainEntity": {
+        "@type": "ItemList",
+        "numberOfItems": {{ $articles->total() }},
+        "itemListElement": [
+            @foreach($articles as $index => $article)
+            {
+                "@type": "ListItem",
+                "position": {{ $index + 1 }},
+                "item": {
+                    "@type": "Article",
+                    "headline": "{{ $article->title }}",
+                    "url": "{{ route('knowledge-base.article', [$category->slug, $article->slug]) }}",
+                    "datePublished": "{{ $article->created_at->toISOString() }}",
+                    "author": {
+                        "@type": "Organization",
+                        "name": "{{ $company->name ?? \App\Models\Utils::company_name() }}"
+                    }
+                }
+            }{{ !$loop->last ? ',' : '' }}
+            @endforeach
+        ]
+    },
+    "isPartOf": {
+        "@type": "Website",
+        "name": "{{ $company->app_name ?? \App\Models\Utils::app_name() }} Knowledge Base",
+        "url": "{{ url('/knowledge-base') }}"
+    },
+    "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "{{ url('/') }}"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Knowledge Base",
+                "item": "{{ route('knowledge-base.index') }}"
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "{{ $category->name }}",
+                "item": "{{ url()->current() }}"
+            }
+        ]
+    }
+}
+</script>
+@endpush
 
 @section('kb-content')
 <!-- Category Header -->

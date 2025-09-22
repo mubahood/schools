@@ -2,7 +2,101 @@
 
 @section('title', 'Knowledge Base | Help Center')
 
-@section('meta_description', 'Find answers to common questions and learn how to use our school management system effectively. Browse our comprehensive knowledge base for step-by-step guides and tutorials.')
+@extends('knowledge-base.layout')
+
+@section('title', 'Knowledge Base | Help Center')
+
+@section('meta_description', 'Comprehensive help center and documentation for the school management system. Find tutorials, guides, and answers to frequently asked questions.')
+@section('meta_keywords', 'knowledge base, help center, tutorials, guides, school management system, support, documentation')
+
+@section('og_title', 'Knowledge Base | Help Center')
+@section('og_description', 'Comprehensive help center and documentation for the school management system. Find tutorials, guides, and answers to frequently asked questions.')
+
+@section('twitter_title', 'Knowledge Base | Help Center')
+@section('twitter_description', 'Comprehensive help center and documentation for the school management system.')
+
+@push('structured-data')
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Knowledge Base",
+    "description": "Comprehensive help center and documentation for {{ $company->app_name ?? \App\Models\Utils::app_name() }} school management system",
+    "url": "{{ url()->current() }}",
+    "mainEntity": {
+        "@type": "ItemList",
+        "name": "Knowledge Base Categories",
+        "numberOfItems": {{ $categories->count() }},
+        "itemListElement": [
+            @foreach($categories as $index => $category)
+            {
+                "@type": "ListItem",
+                "position": {{ $index + 1 }},
+                "item": {
+                    "@type": "Thing",
+                    "name": "{{ $category->name }}",
+                    "description": "{{ $category->description }}",
+                    "url": "{{ route('knowledge-base.category', $category->slug) }}"
+                }
+            }{{ !$loop->last ? ',' : '' }}
+            @endforeach
+        ]
+    },
+    "isPartOf": {
+        "@type": "Website",
+        "name": "{{ $company->app_name ?? \App\Models\Utils::app_name() }} Knowledge Base",
+        "url": "{{ url('/knowledge-base') }}"
+    },
+    "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "{{ url('/') }}"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Knowledge Base",
+                "item": "{{ url()->current() }}"
+            }
+        ]
+    }
+}
+</script>
+
+@if($recentArticles->count() > 0)
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Recent Knowledge Base Articles",
+    "description": "Latest articles and tutorials in the knowledge base",
+    "itemListElement": [
+        @foreach($recentArticles as $index => $article)
+        {
+            "@type": "ListItem",
+            "position": {{ $index + 1 }},
+            "item": {
+                "@type": "Article",
+                "headline": "{{ $article->title }}",
+                "url": "{{ route('knowledge-base.article', [$article->category->slug, $article->slug]) }}",
+                "datePublished": "{{ $article->created_at->toISOString() }}",
+                "author": {
+                    "@type": "Organization",
+                    "name": "{{ $company->name ?? \App\Models\Utils::company_name() }}"
+                },
+                "articleSection": "{{ $article->category->name }}"
+            }
+        }{{ !$loop->last ? ',' : '' }}
+        @endforeach
+    ]
+}
+</script>
+@endif
+@endpush
 
 @section('kb-content')
 <!-- Header Section -->

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\KnowledgeBaseCategory;
 use App\Models\KnowledgeBaseArticle;
+use App\Models\Utils;
 use Illuminate\Http\Request;
 
 class KnowledgeBaseController extends Controller
@@ -24,7 +25,10 @@ class KnowledgeBaseController extends Controller
             ->limit(6)
             ->get();
 
-        return view('knowledge-base.index', compact('categories', 'recentArticles'));
+        // Get company data for consistent branding
+        $company = Utils::company();
+
+        return view('knowledge-base.index', compact('categories', 'recentArticles', 'company'));
     }
 
     /**
@@ -46,7 +50,10 @@ class KnowledgeBaseController extends Controller
             ->withCount('articles')
             ->get();
 
-        return view('knowledge-base.category', compact('category', 'articles', 'categories'));
+        // Get company data for consistent branding
+        $company = Utils::company();
+
+        return view('knowledge-base.category', compact('category', 'articles', 'categories', 'company'));
     }
 
     /**
@@ -72,12 +79,16 @@ class KnowledgeBaseController extends Controller
         $previousArticle = $article->getPreviousArticle();
         $nextArticle = $article->getNextArticle();
 
+        // Get company data for consistent branding
+        $company = Utils::company();
+
         return view('knowledge-base.article', compact(
             'article', 
             'category', 
             'categories', 
             'previousArticle', 
-            'nextArticle'
+            'nextArticle',
+            'company'
         ));
     }
 
@@ -112,6 +123,9 @@ class KnowledgeBaseController extends Controller
             ->withCount('articles')
             ->get();
 
-        return view('knowledge-base.search', compact('articles', 'categories', 'query', 'categoryId'));
+        // Get company data for consistent branding
+        $company = Utils::company();
+
+        return view('knowledge-base.search', compact('articles', 'categories', 'query', 'categoryId', 'company'));
     }
 }

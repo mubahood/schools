@@ -1,2 +1,29 @@
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /admin/
+Disallow: /auth/
+Disallow: /api/
+Disallow: /temp-import
+Disallow: /clear
+Disallow: /reset-marks
+Disallow: /process-*
+Disallow: /bill-afresh
+Disallow: /reset-a-school
+Disallow: /import-*
+Disallow: /fees-data-import*
+Disallow: /generate-school-report
+Disallow: /send-report-card
+Disallow: /termly-report
+Disallow: /test-*
+Disallow: /preview-*
+
+# Allow specific public areas
+Allow: /knowledge-base/
+Allow: /access-system
+Allow: /onboarding/
+
+# Sitemap location
+Sitemap: /sitemap.xml
+
+# Crawl delay (optional)
+Crawl-delay: 1

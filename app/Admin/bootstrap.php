@@ -69,29 +69,34 @@ Encore\Admin\Form::forget(['map', 'editor']); */
 
 $u = Auth::user();
 if ($u != null) {
-    // Check email verification first - this is mandatory
-    $wizard = \App\Models\OnBoardWizard::where('administrator_id', $u->id)->first();
-    if (!$wizard || $wizard->email_is_verified != 'Yes') {
-        // Get current route to avoid infinite redirects
-        $currentRoute = request()->route() ? request()->route()->getName() : '';
-        
-        // Allow access to verification routes and logout
-        $allowedRoutes = [
-            'verification.notice',
-            'verification.verify',
-            'verification.send', 
-            'verification.check',
-            'admin.logout'
-        ];
-        
-        if (!in_array($currentRoute, $allowedRoutes)) {
-            // Redirect to email verification page
-            if (request()->ajax()) {
-                response()->json(['redirect' => route('verification.notice')], 302)->send();
-                exit;
-            } else {
-                redirect()->route('verification.notice')->send();
-                exit;
+    // Skip email verification check for existing admin users (enterprise_id > 28)
+    $skipEmailVerification = $u->enterprise_id && $u->enterprise_id > 28;
+    
+    if (!$skipEmailVerification) {
+        // Check email verification first - this is mandatory for new users only
+        $wizard = \App\Models\OnBoardWizard::where('administrator_id', $u->id)->first();
+        if (!$wizard || $wizard->email_is_verified != 'Yes') {
+            // Get current route to avoid infinite redirects
+            $currentRoute = request()->route() ? request()->route()->getName() : '';
+            
+            // Allow access to verification routes and logout
+            $allowedRoutes = [
+                'verification.notice',
+                'verification.verify',
+                'verification.send', 
+                'verification.check',
+                'admin.logout'
+            ];
+            
+            if (!in_array($currentRoute, $allowedRoutes)) {
+                // Redirect to email verification page
+                if (request()->ajax()) {
+                    response()->json(['redirect' => route('verification.notice')], 302)->send();
+                    exit;
+                } else {
+                    redirect()->route('verification.notice')->send();
+                    exit;
+                }
             }
         }
     }
