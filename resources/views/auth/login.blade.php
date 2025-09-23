@@ -434,6 +434,16 @@ $ent = Utils::ent();
             page_type: 'authentication'
         });
     </script>
+
+    <!-- Google tag (gtag.js) - Google Ads Conversion Tracking -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-778308285"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'AW-778308285');
+    </script>
 </head>
 
 <body>

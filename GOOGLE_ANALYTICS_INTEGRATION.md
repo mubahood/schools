@@ -1,7 +1,9 @@
-# Google Analytics 4 Integration Documentation
+# Google Analytics 4 & Google Ads Integration Documentation
 
 ## Overview
-Google Analytics 4 (GA4) has been successfully integrated into the school management system using property ID **G-484716763**.
+Google Analytics 4 (GA4) and Google Ads conversion tracking have been successfully integrated into the school management system using:
+- **GA4 Property ID**: G-484716763
+- **Google Ads ID**: AW-778308285
 
 ## Integration Points
 
@@ -61,6 +63,12 @@ Google Analytics 4 (GA4) has been successfully integrated into the school manage
 - **Property ID**: G-484716763
 - **Measurement Protocol**: GA4
 - **Tracking Method**: gtag.js (Global Site Tag)
+
+## Google Ads Conversion Tracking Details
+- **Conversion ID**: AW-778308285
+- **Tracking Method**: gtag.js (Global Site Tag)
+- **Purpose**: Track conversions for Google Ads campaigns
+- **Integration**: Uses shared dataLayer with Google Analytics
 
 ## Benefits
 1. **User Behavior Analysis**: Track how users navigate through the system

@@ -193,6 +193,16 @@ if (!isset($company)) {
             app_version: '{{ config("app.version", "1.0") }}'
         });
     </script>
+
+    <!-- Google tag (gtag.js) - Google Ads Conversion Tracking -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-778308285"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'AW-778308285');
+    </script>
 </head>
 
 <body>
