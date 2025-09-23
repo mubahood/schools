@@ -259,13 +259,13 @@ class AuthController extends BaseAuthController
         $user = User::where('email_verification_token', $token)->first();
         
         if (!$user) {
-            return redirect()->route('admin.login')->withErrors(['email' => 'Invalid verification token.']);
+            return redirect()->route('public.login')->withErrors(['email' => 'Invalid verification token.']);
         }
 
         $user->email_verified_at = Carbon::now();
         $user->email_verification_token = null;
         $user->save();
 
-        return redirect()->route('admin.login')->with('status', 'Email verified successfully! You can now login.');
+        return redirect()->route('public.login')->with('status', 'Email verified successfully! You can now login.');
     }
 }

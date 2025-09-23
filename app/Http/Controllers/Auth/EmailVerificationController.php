@@ -25,7 +25,7 @@ class EmailVerificationController extends Controller
         $user = Admin::user();
         
         if (!$user) {
-            return redirect()->route('admin.login')
+            return redirect()->route('public.login')
                 ->with('error', 'Please log in to verify your email.');
         }
 
@@ -53,7 +53,7 @@ class EmailVerificationController extends Controller
             if ($request->ajax() || $request->isMethod('GET')) {
                 return response()->json(['message' => 'Unauthorized'], 401);
             }
-            return redirect()->route('admin.login');
+            return redirect()->route('public.login');
         }
 
         // Check if already verified
@@ -263,7 +263,7 @@ class EmailVerificationController extends Controller
         $user = Admin::user();
         
         if (!$user) {
-            return redirect()->route('admin.login');
+            return redirect()->route('public.login');
         }
 
         return view('auth.email-verified');

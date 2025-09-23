@@ -28,7 +28,7 @@ class EmailVerificationController extends Controller
         // Skip email verification for existing admin users (enterprise_id <= 28)
         if ($user->enterprise_id && $user->enterprise_id <= 28) {
             // For existing users, redirect to dashboard or next appropriate step
-            return redirect()->route('admin.dashboard')->with('success', 'Welcome back! Email verification not required for existing accounts.');
+            return redirect(config('admin.route.prefix', ''))->with('success', 'Welcome back! Email verification not required for existing accounts.');
         }
 
         // Get or create OnBoardWizard
@@ -66,7 +66,7 @@ class EmailVerificationController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Email verification not required for existing accounts.',
-                'redirect' => route('admin.dashboard')
+                'redirect' => url(config('admin.route.prefix', ''))
             ]);
         }
 
