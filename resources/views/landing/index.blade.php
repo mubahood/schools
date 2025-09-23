@@ -479,10 +479,10 @@ use App\Models\Utils;
                 </div>
                 <h3 class="document-title">Admission Letter</h3>
                 <p class="document-description">Professional admission letters with school branding</p>
-                <button class="btn btn-outline btn-sm" onclick="previewDocument('admission-letter', 'https://drive.google.com/file/d/1Ehi7UpulNLCuzNnGwNdyGZHvOh_5nkXF/view?usp=drive_link')">
-                    <i class="fas fa-eye"></i>
-                    Preview
-                </button>
+                                <a href="https://drive.google.com/file/d/1Ehi7UpulNLCuzNnGwNdyGZHvOh_5nkXF/view?usp=drive_link" target="_blank" class="btn btn-outline btn-sm">
+                    <i class="fas fa-external-link-alt"></i>
+                    View Sample
+                </a>
             </div>
 
             <div class="document-card" data-category="financial">
@@ -491,10 +491,10 @@ use App\Models\Utils;
                 </div>
                 <h3 class="document-title">Payment Receipt</h3>
                 <p class="document-description">Detailed payment receipts for fees and services</p>
-                <button class="btn btn-outline btn-sm" onclick="previewDocument('receipt', 'https://drive.google.com/file/d/1xYFRcUgf51cDy6LuL0wzmxPuv6qZnC71/view?usp=drive_link')">
-                    <i class="fas fa-eye"></i>
-                    Preview
-                </button>
+                                <a href="https://drive.google.com/file/d/1xYFRcUgf51cDy6LuL0wzmxPuv6qZnC71/view?usp=drive_link" target="_blank" class="btn btn-outline btn-sm">
+                    <i class="fas fa-external-link-alt"></i>
+                    View Sample
+                </a>
             </div>
 
             <div class="document-card" data-category="financial">
@@ -503,10 +503,10 @@ use App\Models\Utils;
                 </div>
                 <h3 class="document-title">Financial Report</h3>
                 <p class="document-description">Comprehensive financial analysis and reports</p>
-                <button class="btn btn-outline btn-sm" onclick="previewDocument('financial-report', 'https://drive.google.com/file/d/1MkUwdecoOY-pYLV428nws7-aG-9OeTVr/view?usp=drive_link')">
-                    <i class="fas fa-eye"></i>
-                    Preview
-                </button>
+                                <a href="https://drive.google.com/file/d/1MkUwdecoOY-pYLV428nws7-aG-9OeTVr/view?usp=drive_link" target="_blank" class="btn btn-outline btn-sm">
+                    <i class="fas fa-external-link-alt"></i>
+                    View Sample
+                </a>
             </div>
 
             <div class="document-card" data-category="financial">
@@ -515,10 +515,10 @@ use App\Models\Utils;
                 </div>
                 <h3 class="document-title">Demand Notice (List)</h3>
                 <p class="document-description">Batch demand notices for outstanding payments</p>
-                <button class="btn btn-outline btn-sm" onclick="previewDocument('demand-notice-list', 'https://drive.google.com/file/d/1h6uL_ULyZKPwqS5sCHp8DlMU1LA3NmAx/view?usp=drive_link')">
-                    <i class="fas fa-eye"></i>
-                    Preview
-                </button>
+                                <a href="https://drive.google.com/file/d/1h6uL_ULyZKPwqS5sCHp8DlMU1LA3NmAx/view?usp=drive_link" target="_blank" class="btn btn-outline btn-sm">
+                    <i class="fas fa-external-link-alt"></i>
+                    View Sample
+                </a>
             </div>
 
             <div class="document-card" data-category="access">
@@ -527,10 +527,10 @@ use App\Models\Utils;
                 </div>
                 <h3 class="document-title">Gate Pass</h3>
                 <p class="document-description">Digital gate passes for visitor and student access</p>
-                <button class="btn btn-outline btn-sm" onclick="previewDocument('gate-pass', 'https://drive.google.com/file/d/1MtMs2cMl0KaQGpWKr0rzzHDOA6wJMNtk/view?usp=drive_link')">
-                    <i class="fas fa-eye"></i>
-                    Preview
-                </button>
+                                <a href="https://drive.google.com/file/d/1MtMs2cMl0KaQGpWKr0rzzHDOA6wJMNtk/view?usp=drive_link" target="_blank" class="btn btn-outline btn-sm">
+                    <i class="fas fa-external-link-alt"></i>
+                    View Sample
+                </a>
             </div>
 
             <div class="document-card" data-category="access">
@@ -539,10 +539,10 @@ use App\Models\Utils;
                 </div>
                 <h3 class="document-title">Meal Cards</h3>
                 <p class="document-description">Digital meal cards for cafeteria services</p>
-                <button class="btn btn-outline btn-sm" onclick="previewDocument('meal-cards', 'https://drive.google.com/file/d/1hAzEH1UomREZ3ongXZoYP-cgMVgmPQ5Q/view?usp=drive_link')">
-                    <i class="fas fa-eye"></i>
-                    Preview
-                </button>
+                                <a href="https://drive.google.com/file/d/1hAzEH1UomREZ3ongXZoYP-cgMVgmPQ5Q/view?usp=drive_link" target="_blank" class="btn btn-outline btn-sm">
+                    <i class="fas fa-external-link-alt"></i>
+                    View Sample
+                </a>
             </div>
 
             <div class="document-card" data-category="financial">
@@ -551,10 +551,10 @@ use App\Models\Utils;
                 </div>
                 <h3 class="document-title">Demand Notice</h3>
                 <p class="document-description">Individual demand notices for fee collection</p>
-                <button class="btn btn-outline btn-sm" onclick="previewDocument('demand-notice', 'https://drive.google.com/file/d/1Fu6x8hb1CeiCPJZvFCPu3GTGClWz20lq/view?usp=drive_link')">
-                    <i class="fas fa-eye"></i>
-                    Preview
-                </button>
+                                <a href="https://drive.google.com/file/d/1Fu6x8hb1CeiCPJZvFCPu3GTGClWz20lq/view?usp=drive_link" target="_blank" class="btn btn-outline btn-sm">
+                    <i class="fas fa-external-link-alt"></i>
+                    View Sample
+                </a>
             </div>
 
             <div class="document-card" data-category="identification">
@@ -563,10 +563,10 @@ use App\Models\Utils;
                 </div>
                 <h3 class="document-title">Student ID Cards</h3>
                 <p class="document-description">Professional student identification cards</p>
-                <button class="btn btn-outline btn-sm" onclick="previewDocument('id-cards', 'https://drive.google.com/file/d/1iN7eg2Qy0yBnOhWce7BcAHZlEB50dJjp/view?usp=drive_link')">
-                    <i class="fas fa-eye"></i>
-                    Preview
-                </button>
+                                <a href="https://drive.google.com/file/d/1iN7eg2Qy0yBnOhWce7BcAHZlEB50dJjp/view?usp=drive_link" target="_blank" class="btn btn-outline btn-sm">
+                    <i class="fas fa-external-link-alt"></i>
+                    View Sample
+                </a>
             </div>
 
             <div class="document-card" data-category="identification">
@@ -575,10 +575,10 @@ use App\Models\Utils;
                 </div>
                 <h3 class="document-title">Employee ID Cards</h3>
                 <p class="document-description">Staff identification and access cards</p>
-                <button class="btn btn-outline btn-sm" onclick="previewDocument('employee-id-cards', 'https://drive.google.com/file/d/1Vg6Nx-a0z3pRN9nsufod4rOP7NqH1yx3/view?usp=drive_link')">
-                    <i class="fas fa-eye"></i>
-                    Preview
-                </button>
+                                <a href="https://drive.google.com/file/d/1Vg6Nx-a0z3pRN9nsufod4rOP7NqH1yx3/view?usp=drive_link" target="_blank" class="btn btn-outline btn-sm">
+                    <i class="fas fa-external-link-alt"></i>
+                    View Sample
+                </a>
             </div>
 
             <div class="document-card" data-category="academic">
@@ -587,10 +587,10 @@ use App\Models\Utils;
                 </div>
                 <h3 class="document-title">Batch Report Cards</h3>
                 <p class="document-description">Comprehensive batch student report cards</p>
-                <button class="btn btn-outline btn-sm" onclick="previewDocument('batch-report-cards', 'https://drive.google.com/file/d/1hfy5kKJJWI_GDPxbIljknfsZbYFErAek/view?usp=drive_link')">
-                    <i class="fas fa-eye"></i>
-                    Preview
-                </button>
+                                <a href="https://drive.google.com/file/d/1hfy5kKJJWI_GDPxbIljknfsZbYFErAek/view?usp=drive_link" target="_blank" class="btn btn-outline btn-sm">
+                    <i class="fas fa-external-link-alt"></i>
+                    View Sample
+                </a>
             </div>
 
             <div class="document-card" data-category="academic">
@@ -599,10 +599,10 @@ use App\Models\Utils;
                 </div>
                 <h3 class="document-title">Theology Report Cards</h3>
                 <p class="document-description">Specialized report cards with theology subjects</p>
-                <button class="btn btn-outline btn-sm" onclick="previewDocument('batch-report-theology', 'https://drive.google.com/file/d/1UbE_dHdC10P9RM6N3B_I602JSD6RNfU6/view?usp=drive_link')">
-                    <i class="fas fa-eye"></i>
-                    Preview
-                </button>
+                                <a href="https://drive.google.com/file/d/1UbE_dHdC10P9RM6N3B_I602JSD6RNfU6/view?usp=drive_link" target="_blank" class="btn btn-outline btn-sm">
+                    <i class="fas fa-external-link-alt"></i>
+                    View Sample
+                </a>
             </div>
 
             <div class="document-card" data-category="academic">
@@ -611,10 +611,10 @@ use App\Models\Utils;
                 </div>
                 <h3 class="document-title">Single Report Card</h3>
                 <p class="document-description">Individual student academic report card</p>
-                <button class="btn btn-outline btn-sm" onclick="previewDocument('single-report-card', 'https://drive.google.com/file/d/1jMNS8Tq8XZQYiebiwPInclyuZ0K0mJWi/view?usp=drive_link')">
-                    <i class="fas fa-eye"></i>
-                    Preview
-                </button>
+                                <a href="https://drive.google.com/file/d/1jMNS8Tq8XZQYiebiwPInclyuZ0K0mJWi/view?usp=drive_link" target="_blank" class="btn btn-outline btn-sm">
+                    <i class="fas fa-external-link-alt"></i>
+                    View Sample
+                </a>
             </div>
 
             <div class="document-card" data-category="academic">
@@ -623,10 +623,10 @@ use App\Models\Utils;
                 </div>
                 <h3 class="document-title">Exam Assessment</h3>
                 <p class="document-description">Detailed examination assessment reports</p>
-                <button class="btn btn-outline btn-sm" onclick="previewDocument('exam-assessment', 'https://drive.google.com/file/d/1km_w1z5oz66aOZGQCNmdtDqYnnWkKLkL/view?usp=drive_link')">
-                    <i class="fas fa-eye"></i>
-                    Preview
-                </button>
+                                <a href="https://drive.google.com/file/d/1km_w1z5oz66aOZGQCNmdtDqYnnWkKLkL/view?usp=drive_link" target="_blank" class="btn btn-outline btn-sm">
+                    <i class="fas fa-external-link-alt"></i>
+                    View Sample
+                </a>
             </div>
         </div>
 
@@ -639,27 +639,7 @@ use App\Models\Utils;
     </div>
 </section>
 
-<!-- Document Preview Modal -->
-<div id="documentModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 id="modalTitle">Document Preview</h3>
-            <button class="modal-close" onclick="closeModal()">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="document-preview">
-                <iframe id="documentFrame" src="" frameborder="0"></iframe>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="closeModal()">Close</button>
-            <a id="viewFullDocument" href="" target="_blank" class="btn btn-primary">
-                <i class="fas fa-external-link-alt"></i>
-                Open Full Document
-            </a>
-        </div>
-    </div>
-</div>
+
 
 <!-- Pricing Section -->
 <section class="section pricing-section">
@@ -844,149 +824,8 @@ function playVideo() {
     }
 }
 
-// Sample Documents Modal System
-function previewDocument(docType, fullUrl) {
-    const modal = document.getElementById('documentModal');
-    const iframe = document.getElementById('documentFrame');
-    const viewFullBtn = document.getElementById('viewFullDocument');
-    const modalTitle = document.getElementById('modalTitle');
-    
-    // Check if elements exist
-    if (!modal || !iframe || !viewFullBtn) {
-        console.error('Modal elements not found');
-        return;
-    }
-    
-    // Set modal title based on document type
-    const titles = {
-        'admission-form': 'Student Admission Form',
-        'admission-letter': 'Admission Letter',
-        'fee-structure': 'Fee Structure',
-        'receipt': 'Payment Receipt',
-        'financial-report': 'Financial Report',
-        'demand-notice-list': 'Demand Notice List',
-        'demand-notice': 'Individual Demand Notice',
-        'student-id-cards': 'Student ID Cards',
-        'employee-id-cards': 'Employee ID Cards',
-        'batch-report-cards': 'Batch Report Cards',
-        'report-card': 'Individual Report Card',
-        'exam-assessment': 'Exam Assessment'
-    };
-    
-    modalTitle.textContent = titles[docType] || 'Document Preview';
-    
-    // Convert Google Drive view URL to embed URL for iframe
-    let embedUrl = fullUrl;
-    if (fullUrl.includes('drive.google.com')) {
-        // Extract file ID from Google Drive URL
-        const fileIdMatch = fullUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
-        if (fileIdMatch) {
-            const fileId = fileIdMatch[1];
-            embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
-        }
-    }
-    
-    // Show modal immediately
-    modal.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-    
-    // Add loading state
-    const modalBody = modal.querySelector('.modal-body');
-    const loadingDiv = document.createElement('div');
-    loadingDiv.className = 'modal-loading';
-    loadingDiv.innerHTML = `
-        <div class="spinner"></div>
-        <p>Loading document preview...</p>
-    `;
-    modalBody.appendChild(loadingDiv);
-    
-    // Set up modal content
-    iframe.src = embedUrl;
-    viewFullBtn.href = fullUrl;
-    
-    // Handle iframe load
-    iframe.onload = function() {
-        // Remove loading state
-        const loading = modalBody.querySelector('.modal-loading');
-        if (loading) {
-            loading.remove();
-        }
-    };
-    
-    // Handle load errors
-    iframe.onerror = function() {
-        const loading = modalBody.querySelector('.modal-loading');
-        if (loading) {
-            loading.innerHTML = `
-                <div style="text-align: center; padding: 40px;">
-                    <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #ffc107; margin-bottom: 20px;"></i>
-                    <h3 style="color: var(--text-dark); margin-bottom: 10px;">Preview Unavailable</h3>
-                    <p style="color: var(--text-light); margin-bottom: 20px;">Unable to load document preview. Please use the button below to view the full document.</p>
-                    <a href="${fullUrl}" target="_blank" class="btn btn-primary">
-                        <i class="fas fa-external-link-alt"></i>
-                        Open Full Document
-                    </a>
-                </div>
-            `;
-        }
-        console.warn('Failed to load document preview');
-    };
-    
-    // Remove loading state after timeout (fallback)
-    setTimeout(() => {
-        const loading = modalBody.querySelector('.modal-loading');
-        if (loading) {
-            loading.remove();
-        }
-    }, 10000);
-}
-
-function closeModal() {
-    const modal = document.getElementById('documentModal');
-    const iframe = document.getElementById('documentFrame');
-    const modalBody = modal?.querySelector('.modal-body');
-    
-    if (modal && iframe) {
-        // Add closing animation
-        modal.style.animation = 'fadeOut 0.3s ease';
-        modal.querySelector('.modal-content').style.animation = 'slideOut 0.3s ease';
-        
-        setTimeout(() => {
-            modal.style.display = 'none';
-            modal.style.animation = '';
-            modal.querySelector('.modal-content').style.animation = '';
-            document.body.style.overflow = 'auto';
-            iframe.src = '';
-            
-            // Remove any loading states
-            const loading = modalBody?.querySelector('.modal-loading');
-            if (loading) {
-                loading.remove();
-            }
-        }, 300);
-    }
-}
-
 // Initialize modal functionality when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    const modal = document.getElementById('documentModal');
-    
-    if (modal) {
-        // Close modal when clicking outside
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                closeModal();
-            }
-        });
-    }
-    
-    // Close modal with Escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && modal && modal.style.display === 'block') {
-            closeModal();
-        }
-    });
-    
     // Animate document cards on scroll (reduced animation for smaller cards)
     const observerOptions = {
         threshold: 0.1,
