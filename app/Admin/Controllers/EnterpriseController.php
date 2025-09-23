@@ -53,19 +53,19 @@ class EnterpriseController extends AdminController
 
         $grid->column('id', __('ID'))->sortable()->label('primary');
         $grid->column('logo', __('Logo'))->image('', 40, 40);
-        
+
         $grid->column('name', __('School Name'))->sortable()->display(function ($name) {
             $shortName = $this->short_name ?? '';
             return "<strong>$name</strong><br><small class='text-muted'>$shortName</small>";
         });
-        
+
         $grid->column('type', __('Type'))->label([
             'Primary' => 'primary',
             'Secondary' => 'info',
             'Advanced' => 'success',
             'University' => 'warning'
         ])->sortable();
-        
+
         $grid->column('administrator_id', __('Owner'))->display(function ($value) {
             $owner = User::find($value);
             if (!$owner) {
@@ -73,7 +73,7 @@ class EnterpriseController extends AdminController
             }
             return "<strong>{$owner->name}</strong><br><small class='text-muted'>{$owner->email}</small>";
         });
-        
+
         $grid->column('contact_info', __('Contact'))->display(function () {
             $contact = [];
             if ($this->phone_number) {
@@ -84,7 +84,7 @@ class EnterpriseController extends AdminController
             }
             return implode('<br>', $contact) ?: '<span class="text-muted">No contact</span>';
         });
-        
+
         $grid->column('has_valid_lisence', __('License'))->display(function ($value) {
             if ($value == 'Yes') {
                 return "<span class='label label-success'><i class='fa fa-check'></i> Valid</span>";
@@ -100,31 +100,31 @@ class EnterpriseController extends AdminController
                 return "<span class='label label-default'><i class='fa fa-ban'></i> Disabled</span>";
             }
         });
-        
+
         $grid->column('wallet_balance', __('Wallet'))->display(function ($value) {
             return 'UGX ' . number_format($value ?? 0);
         })->sortable();
-        
+
         $grid->column('created_at', __('Created'))->display(function ($created_at) {
             return date('M d, Y', strtotime($created_at));
         })->sortable();
-        
+
         $grid->column('expiry', __('Expires'))->display(function ($expiry) {
             if (!$expiry) return '<span class="text-muted">No expiry</span>';
-            
+
             $isExpired = strtotime($expiry) < time();
             $class = $isExpired ? 'text-danger' : 'text-success';
             return "<span class='$class'>" . date('M d, Y', strtotime($expiry)) . "</span>";
         })->sortable();
 
         // Filters
-        $grid->filter(function($filter) {
+        $grid->filter(function ($filter) {
             $filter->disableIdFilter();
-            
+
             $filter->like('name', 'School Name');
             $filter->equal('type', 'School Type')->select([
                 'Primary' => 'Primary',
-                'Secondary' => 'Secondary', 
+                'Secondary' => 'Secondary',
                 'Advanced' => 'Advanced',
                 'University' => 'University'
             ]);
@@ -137,6 +137,16 @@ class EnterpriseController extends AdminController
                 'No' => 'Disabled'
             ]);
             $filter->between('created_at', 'Created Date')->date();
+        });
+
+        //employees count
+        $grid->column('employees_count', __('Employees'))->display(function () {
+            return User::where('enterprise_id', $this->id)->where('user_type', 'employee')->count();
+        });
+
+        //students count
+        $grid->column('students_count', __('Students'))->display(function () {
+            return User::where('enterprise_id', $this->id)->where('user_type', 'student')->count();
         });
 
         return $grid;
@@ -158,9 +168,9 @@ class EnterpriseController extends AdminController
             ->tools(function ($tools) {
                 $tools->disableList();
                 $tools->disableDelete();
-                $tools->append('<a class="btn btn-sm btn-success" href="'.admin_url('students?enterprise_id='.$id).'"><i class="fa fa-users"></i> Students</a>');
-                $tools->append('<a class="btn btn-sm btn-info" href="'.admin_url('employees?enterprise_id='.$id).'"><i class="fa fa-user-tie"></i> Staff</a>');
-                $tools->append('<a class="btn btn-sm btn-warning" href="'.admin_url('academic-years?enterprise_id='.$id).'"><i class="fa fa-calendar"></i> Academic Years</a>');
+                $tools->append('<a class="btn btn-sm btn-success" href="' . admin_url('students?enterprise_id=' . $id) . '"><i class="fa fa-users"></i> Students</a>');
+                $tools->append('<a class="btn btn-sm btn-info" href="' . admin_url('employees?enterprise_id=' . $id) . '"><i class="fa fa-user-tie"></i> Staff</a>');
+                $tools->append('<a class="btn btn-sm btn-warning" href="' . admin_url('academic-years?enterprise_id=' . $id) . '"><i class="fa fa-calendar"></i> Academic Years</a>');
             });
 
         // Basic Information
@@ -172,7 +182,7 @@ class EnterpriseController extends AdminController
         $show->field('type', __('School Type'))->as(function ($type) {
             $labels = [
                 'Primary' => 'label-primary',
-                'Secondary' => 'label-info', 
+                'Secondary' => 'label-info',
                 'Advanced' => 'label-success',
                 'University' => 'label-warning'
             ];
@@ -201,8 +211,8 @@ class EnterpriseController extends AdminController
         // Academic Information
         $show->divider('Academic Information');
         $show->field('has_theology', __('Has Theology'))->as(function ($has_theology) {
-            return $has_theology == 'Yes' ? 
-                '<span class="label label-success">Yes</span>' : 
+            return $has_theology == 'Yes' ?
+                '<span class="label label-success">Yes</span>' :
                 '<span class="label label-default">No</span>';
         });
 
@@ -215,26 +225,26 @@ class EnterpriseController extends AdminController
         // School Pay Integration
         $show->divider('SchoolPay Integration');
         $show->field('school_pay_status', __('SchoolPay Status'))->as(function ($status) {
-            return $status == 'Yes' ? 
-                '<span class="label label-success">Enabled</span>' : 
+            return $status == 'Yes' ?
+                '<span class="label label-success">Enabled</span>' :
                 '<span class="label label-danger">Disabled</span>';
         });
         $show->field('school_pay_import_automatically', __('Auto Import'))->as(function ($auto) {
-            return $auto == 'Yes' ? 
-                '<span class="label label-info">Enabled</span>' : 
+            return $auto == 'Yes' ?
+                '<span class="label label-info">Enabled</span>' :
                 '<span class="label label-default">Disabled</span>';
         });
 
         // License & Expiry
         $show->divider('License Information');
         $show->field('has_valid_lisence', __('License Status'))->as(function ($license) {
-            return $license == 'Yes' ? 
-                '<span class="label label-success"><i class="fa fa-check"></i> Valid License</span>' : 
+            return $license == 'Yes' ?
+                '<span class="label label-success"><i class="fa fa-check"></i> Valid License</span>' :
                 '<span class="label label-danger"><i class="fa fa-times"></i> Invalid License</span>';
         });
         $show->field('expiry', __('License Expiry'))->as(function ($expiry) {
             if (!$expiry) return '<span class="text-muted">No expiry date set</span>';
-            
+
             $isExpired = strtotime($expiry) < time();
             $class = $isExpired ? 'text-danger' : 'text-success';
             $status = $isExpired ? ' (EXPIRED)' : '';
@@ -297,7 +307,7 @@ class EnterpriseController extends AdminController
             // Auto-generate short name if not provided
             if (!$form->short_name && $form->name) {
                 $words = explode(' ', $form->name);
-                $form->short_name = strtoupper(substr(implode('', array_map(function($word) {
+                $form->short_name = strtoupper(substr(implode('', array_map(function ($word) {
                     return substr($word, 0, 1);
                 }, $words)), 0, 5));
             }
@@ -308,11 +318,11 @@ class EnterpriseController extends AdminController
             $form->text('name', __('School Name'))
                 ->rules('required|string|max:255')
                 ->help('Full official name of the school');
-            
+
             $form->text('short_name', __('Short Name/Abbreviation'))
                 ->rules('string|max:20')
                 ->help('e.g., SMS for St. Mary\'s School');
-            
+
             $form->radio('type', __('School Type'))
                 ->options([
                     'Primary' => 'Primary School',
@@ -322,16 +332,16 @@ class EnterpriseController extends AdminController
                 ])
                 ->rules('required')
                 ->help('Select the type of educational institution');
-            
+
             $form->text('motto', __('School Motto'))
                 ->help('School motto or slogan');
-            
+
             $form->quill('welcome_message', __('Welcome Message'))
                 ->help('Message displayed on school dashboard and reports');
-            
+
             $form->image('logo', __('School Logo'))
                 ->help('Upload school logo (recommended: 200x200px, PNG/JPG)');
-            
+
             $form->radio('has_theology', __('Has Religious Studies'))
                 ->options([
                     'Yes' => 'Yes',
@@ -347,19 +357,19 @@ class EnterpriseController extends AdminController
             $form->text('phone_number', __('Primary Phone Number'))
                 ->rules('required|string|max:20')
                 ->help('Main contact number for the school');
-            
+
             $form->text('phone_number_2', __('Secondary Phone Number'))
                 ->rules('string|max:20')
                 ->help('Alternative contact number');
-            
+
             $form->email('email', __('Email Address'))
                 ->rules('required|email|max:255')
                 ->help('Official school email address');
-            
+
             $form->url('website', __('Website URL'))
                 ->rules('url|max:255')
                 ->help('School website URL (e.g., https://school.com)');
-            
+
             $form->textarea('address', __('Physical Address'))
                 ->rows(3)
                 ->rules('required|string|max:500')
@@ -386,7 +396,7 @@ class EnterpriseController extends AdminController
                 })
                 ->rules('required')
                 ->help('The main administrator who owns this school');
-            
+
             $form->text('hm_name', __('Head Teacher/Principal Name'))
                 ->help('Name of the current head teacher or principal');
         });
@@ -397,12 +407,12 @@ class EnterpriseController extends AdminController
                 ->default('#007bff')
                 ->rules('required')
                 ->help('Main brand color used throughout the system');
-            
+
             $form->color('sec_color', __('Secondary Color'))
                 ->default('#6c757d')
                 ->rules('required')
                 ->help('Secondary brand color for accents');
-            
+
             $form->text('subdomain', __('Subdomain'))
                 ->rules('string|max:50|alpha_dash')
                 ->help('Unique subdomain for school (letters, numbers, hyphens only)')
@@ -412,7 +422,7 @@ class EnterpriseController extends AdminController
         // Financial & Payment Settings
         $form->tab('Financial Settings', function ($form) {
             $form->divider('SchoolPay Integration');
-            
+
             $form->radio('school_pay_status', __('SchoolPay Status'))
                 ->options([
                     'Yes' => 'Enabled',
@@ -423,11 +433,11 @@ class EnterpriseController extends AdminController
                     $form->text('school_pay_code', __('SchoolPay Institution Code'))
                         ->rules('required_if:school_pay_status,Yes')
                         ->help('Your SchoolPay institution code');
-                    
+
                     $form->password('school_pay_password', __('SchoolPay API Password'))
                         ->rules('required_if:school_pay_status,Yes')
                         ->help('SchoolPay API access password');
-                    
+
                     $form->radio('school_pay_import_automatically', __('Auto Import Transactions'))
                         ->options([
                             'Yes' => 'Yes - Import automatically',
@@ -435,13 +445,13 @@ class EnterpriseController extends AdminController
                         ])
                         ->default('No')
                         ->help('Automatically import SchoolPay transactions?');
-                    
+
                     $form->date('school_pay_last_accepted_date', __('Import From Date'))
                         ->default(date('Y-01-01'))
                         ->help('Import transactions from this date onwards');
                 })
                 ->help('Enable SchoolPay payment gateway integration');
-            
+
             $form->divider('Wallet Settings');
             $form->currency('wallet_balance', __('Current Wallet Balance'))
                 ->symbol('UGX')
@@ -459,10 +469,10 @@ class EnterpriseController extends AdminController
                 ->default('Yes')
                 ->rules('required')
                 ->help('Current license validity status');
-            
+
             $form->date('expiry', __('License Expiry Date'))
                 ->help('When does the school license expire?');
-            
+
             $form->divider('Additional Information');
             $form->textarea('details', __('Additional Details'))
                 ->rows(4)
