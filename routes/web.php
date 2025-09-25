@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AttendanceDashboardController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\DummyDataController;
 use App\Http\Controllers\Auth\EmailVerificationController;

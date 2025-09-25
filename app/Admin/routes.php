@@ -181,4 +181,8 @@ Route::group([
     $router->resource('knowledge-base/articles', 'KnowledgeBaseArticleController');
     
     $router->resource('companies', CompanyController::class);
+    
+    // Attendance Dashboard Routes
+    $router->get('attendance-dashboard', 'AttendanceDashboardController@index')->name('attendance.dashboard');
+    $router->get('attendance-dashboard/export', 'AttendanceDashboardController@export')->name('attendance.export');
 });
