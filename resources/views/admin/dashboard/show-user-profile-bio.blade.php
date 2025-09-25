@@ -132,31 +132,77 @@ use App\Models\Utils;
 
 
         @if ($u->user_type == 'employee')
-            <hr>
-            <p class="mb-2 mb-md-3 item"><b>Emergency person to contact name:</b> {{ $u->emergency_person_name }}</p>
-            <p class="mb-2 mb-md-3 item"><b>Emergency person to contact phone number:</b>
-                {{ $u->emergency_person_phone }}
-            </p>
-            <p class="mb-2 mb-md-3 item"><b>Spouse's name:</b> {{ $u->spouse_name }} </p>
-            <p class="mb-2 mb-md-3 item"><b>Spouse's phone number:</b> {{ $u->spouse_name }} </p>
-            <hr>
-            <p class="mb-2 mb-md-3 item"><b>Primary school name:</b> {{ $u->primary_school_name }} </p>
-            <p class="mb-2 mb-md-3 item"><b>Primary school year graduated:</b> {{ $u->primary_school_year_graduated }}
-            </p>
-            <p class="mb-2 mb-md-3 item"><b>Seconday school name:</b> {{ $u->seconday_school_name }} </p>
-            <p class="mb-2 mb-md-3 item"><b>Seconday school year graduated:</b>
-                {{ $u->seconday_school_year_graduated }} </p>
-            <p class="mb-2 mb-md-3 item"><b>High school name:</b> {{ $u->high_school_name }} </p>
-            <p class="mb-2 mb-md-3 item"><b>High school name year graduated:</b> {{ $u->high_school_year_graduated }}
-            </p>
-            <p class="mb-2 mb-md-3 item"><b>Degree university name:</b> {{ $u->degree_university_name }} </p>
-            <p class="mb-2 mb-md-3 item"><b>Degree university year graduated:</b>
-                {{ $u->degree_university_year_graduated }} </p>
-            <p class="mb-2 mb-md-3 item"><b>Masters Degree university name:</b> {{ $u->masters_university_name }} </p>
-            <p class="mb-2 mb-md-3 item"><b>Masters Degree graduation year:</b>
-                {{ $u->masters_university_year_graduated }} </p>
-            <p class="mb-2 mb-md-3 item"><b>PHD university name:</b> {{ $u->phd_university_name }} </p>
-            <p class="mb-2 mb-md-3 item"><b>PHD university year:</b> {{ $u->phd_university_year_graduated }} </p>
+            <div class="profile-section">
+                <h5 class="section-header">
+                    <i class="fas fa-user-tie"></i> Employee Information
+                </h5>
+                
+                <div class="employee-section">
+                    <div class="row">
+                        <div class="col-md-6">
+                            @if($u->emergency_person_name)
+                                <p class="item"><b>Emergency Contact:</b> {{ $u->emergency_person_name }}</p>
+                            @endif
+                            @if($u->emergency_person_phone)
+                                <p class="item"><b>Emergency Phone:</b> {{ $u->emergency_person_phone }}</p>
+                            @endif
+                        </div>
+                        <div class="col-md-6">
+                            @if($u->spouse_name)
+                                <p class="item"><b>Spouse Name:</b> {{ $u->spouse_name }}</p>
+                            @endif
+                            @if($u->spouse_phone)
+                                <p class="item"><b>Spouse Phone:</b> {{ $u->spouse_phone }}</p>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-section">
+                <h5 class="section-header">
+                    <i class="fas fa-graduation-cap"></i> Educational Background
+                </h5>
+                
+                <div class="employee-section">
+                    <div class="row">
+                        <div class="col-md-6">
+                            @if($u->primary_school_name)
+                                <p class="item"><b>Primary School:</b> {{ $u->primary_school_name }} 
+                                    @if($u->primary_school_year_graduated) ({{ $u->primary_school_year_graduated }}) @endif
+                                </p>
+                            @endif
+                            @if($u->seconday_school_name)
+                                <p class="item"><b>Secondary School:</b> {{ $u->seconday_school_name }}
+                                    @if($u->seconday_school_year_graduated) ({{ $u->seconday_school_year_graduated }}) @endif
+                                </p>
+                            @endif
+                            @if($u->high_school_name)
+                                <p class="item"><b>High School:</b> {{ $u->high_school_name }}
+                                    @if($u->high_school_year_graduated) ({{ $u->high_school_year_graduated }}) @endif
+                                </p>
+                            @endif
+                        </div>
+                        <div class="col-md-6">
+                            @if($u->degree_university_name)
+                                <p class="item"><b>Degree:</b> {{ $u->degree_university_name }}
+                                    @if($u->degree_university_year_graduated) ({{ $u->degree_university_year_graduated }}) @endif
+                                </p>
+                            @endif
+                            @if($u->masters_university_name)
+                                <p class="item"><b>Master's:</b> {{ $u->masters_university_name }}
+                                    @if($u->masters_university_year_graduated) ({{ $u->masters_university_year_graduated }}) @endif
+                                </p>
+                            @endif
+                            @if($u->phd_university_name)
+                                <p class="item"><b>PhD:</b> {{ $u->phd_university_name }}
+                                    @if($u->phd_university_year_graduated) ({{ $u->phd_university_year_graduated }}) @endif
+                                </p>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
         @endif
 
     </div>

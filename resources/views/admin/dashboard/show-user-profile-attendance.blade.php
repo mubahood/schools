@@ -308,8 +308,8 @@ use App\Models\Utils;
                     </span>
                 </td>
                 <td>
-                    @if($record->academic_class)
-                        {{ $record->academic_class->name ?? 'N/A' }}
+                    @if(isset($record->academic_class_name) && $record->academic_class_name)
+                        {{ $record->academic_class_name }}
                     @else
                         General Session
                     @endif

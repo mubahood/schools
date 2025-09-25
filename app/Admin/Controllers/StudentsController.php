@@ -688,9 +688,10 @@ class StudentsController extends AdminController
             ->where('participants.administrator_id', $student_id)
             ->whereBetween(DB::raw('DATE(participants.created_at)'), [$start_date, $end_date])
             ->leftJoin('academic_classes as ac', 'participants.academic_class_id', '=', 'ac.id')
+            ->leftJoin('theology_classes as tc', 'participants.academic_class_id', '=', 'tc.id')
             ->select([
                 'participants.*',
-                'ac.name as academic_class_name'
+                DB::raw('COALESCE(ac.name, tc.name) as academic_class_name')
             ]);
 
         if ($term_id) {

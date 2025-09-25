@@ -151,14 +151,31 @@ class Participant extends Model
     //belongs to class
     public function academic_class()
     {
-        $clas = AcademicClass::find($this->academic_class_id);
-        if ($clas != null) {
-            return $this->belongsTo(AcademicClass::class, 'academic_class_id');
+        // Default to AcademicClass relationship
+        return $this->belongsTo(AcademicClass::class, 'academic_class_id');
+    }
+    
+    //belongs to theology class
+    public function theology_class()
+    {
+        return $this->belongsTo(TheologyClass::class, 'academic_class_id');
+    }
+    
+    // Helper method to get the actual class (either academic or theology)
+    public function getActualClass()
+    {
+        // First try academic class
+        $academic_class = $this->academic_class;
+        if ($academic_class && $academic_class->exists) {
+            return $academic_class;
         }
-        $theo = TheologyClass::find($this->academic_class_id);
-        if ($theo != null) {
-            return $this->belongsTo(TheologyClass::class, 'academic_class_id');
+        
+        // If not found, try theology class
+        $theology_class = TheologyClass::find($this->academic_class_id);
+        if ($theology_class) {
+            return $theology_class;
         }
+        
         return null;
     }
 
