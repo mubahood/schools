@@ -17,6 +17,7 @@ use App\Models\Subject;
 use App\Models\TheologyClass;
 use App\Models\TheologyStream;
 use App\Models\TheologySubject;
+use App\Models\Participant;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\UserBatchImporter;
@@ -598,6 +599,116 @@ class StudentsController extends AdminController
     }
 
     /**
+     * Get student attendance summary
+     */
+    private function getStudentAttendanceSummary($student_id, $enterprise_id, $term_id = null)
+    {
+        $start_date = request('att_start_date', now()->subMonths(3)->format('Y-m-d'));
+        $end_date = request('att_end_date', now()->format('Y-m-d'));
+
+        $query = Participant::where('participants.enterprise_id', $enterprise_id)
+            ->where('participants.administrator_id', $student_id)
+            ->whereBetween(DB::raw('DATE(participants.created_at)'), [$start_date, $end_date]);
+
+        if ($term_id) {
+            $query->where('participants.term_id', $term_id);
+        }
+
+        // Overall statistics
+        $overall_stats = $query->selectRaw('
+            SUM(CASE WHEN is_present = 1 THEN 1 ELSE 0 END) as total_present,
+            SUM(CASE WHEN is_present = 0 THEN 1 ELSE 0 END) as total_absent,
+            COUNT(*) as total_sessions
+        ')->first();
+
+        $overall_rate = $overall_stats->total_sessions > 0 
+            ? ($overall_stats->total_present / $overall_stats->total_sessions) * 100 
+            : 0;
+
+        // Statistics by type
+        $type_stats = Participant::where('participants.enterprise_id', $enterprise_id)
+            ->where('participants.administrator_id', $student_id)
+            ->whereBetween(DB::raw('DATE(participants.created_at)'), [$start_date, $end_date])
+            ->when($term_id, function($q) use ($term_id) {
+                return $q->where('participants.term_id', $term_id);
+            })
+            ->selectRaw('
+                participants.type,
+                SUM(CASE WHEN is_present = 1 THEN 1 ELSE 0 END) as present_count,
+                SUM(CASE WHEN is_present = 0 THEN 1 ELSE 0 END) as absent_count,
+                COUNT(*) as total_records
+            ')
+            ->groupBy('participants.type')
+            ->get();
+
+        $type_names = [
+            'STUDENT_REPORT' => 'Student Report',
+            'STUDENT_LEAVE' => 'Student Leave',
+            'STUDENT_MEAL' => 'Meal Session',
+            'CLASS_ATTENDANCE' => 'Class Attendance',
+            'THEOLOGY_ATTENDANCE' => 'Theology Classes',
+            'ACTIVITY_ATTENDANCE' => 'Activities',
+        ];
+
+        $by_type = $type_stats->map(function($item) use ($type_names) {
+            $rate = $item->total_records > 0 
+                ? ($item->present_count / $item->total_records) * 100 
+                : 0;
+            
+            return [
+                'type' => $item->type,
+                'type_name' => $type_names[$item->type] ?? $item->type,
+                'present' => $item->present_count,
+                'absent' => $item->absent_count,
+                'total' => $item->total_records,
+                'rate' => round($rate, 1)
+            ];
+        })->toArray();
+
+        return [
+            'total_sessions' => $overall_stats->total_sessions ?? 0,
+            'total_present' => $overall_stats->total_present ?? 0,
+            'total_absent' => $overall_stats->total_absent ?? 0,
+            'overall_rate' => round($overall_rate, 1),
+            'by_type' => $by_type
+        ];
+    }
+
+    /**
+     * Get student attendance records
+     */
+    private function getStudentAttendanceRecords($student_id, $enterprise_id, $term_id = null)
+    {
+        $start_date = request('att_start_date', now()->subMonths(3)->format('Y-m-d'));
+        $end_date = request('att_end_date', now()->format('Y-m-d'));
+        $att_type = request('att_type');
+        $att_status = request('att_status');
+
+        $query = Participant::where('participants.enterprise_id', $enterprise_id)
+            ->where('participants.administrator_id', $student_id)
+            ->whereBetween(DB::raw('DATE(participants.created_at)'), [$start_date, $end_date])
+            ->leftJoin('academic_classes as ac', 'participants.academic_class_id', '=', 'ac.id')
+            ->select([
+                'participants.*',
+                'ac.name as academic_class_name'
+            ]);
+
+        if ($term_id) {
+            $query->where('participants.term_id', $term_id);
+        }
+
+        if ($att_type) {
+            $query->where('participants.type', $att_type);
+        }
+
+        if ($att_status !== null && $att_status !== '') {
+            $query->where('participants.is_present', (int)$att_status);
+        }
+
+        return $query->orderByDesc('participants.created_at')->get();
+    }
+
+    /**
      * Make a show builder.
      *
      * @param mixed $id
@@ -642,10 +753,19 @@ class StudentsController extends AdminController
         //reverse $active_term_transactions
         $active_term_transactions = $active_term_transactions->reverse();
 
+        // Get attendance data for students
+        $attendance_summary = null;
+        $attendance_records = null;
+        if ($u->user_type == 'student') {
+            $attendance_summary = $this->getStudentAttendanceSummary($u->id, $u->enterprise_id, $term->id);
+            $attendance_records = $this->getStudentAttendanceRecords($u->id, $u->enterprise_id, $term->id);
+        }
+
         $tab->add('Bio', view('admin.dashboard.show-user-profile-bio', [
             'u' => $u,
             'active_term_transactions' => $active_term_transactions,
-            'student_data' => $student_data
+            'student_data' => $student_data,
+            'attendance_summary' => $attendance_summary
         ]));
         $tab->add('Classes', view('admin.dashboard.show-user-profile-classes', [
             'u' => $u,
@@ -665,6 +785,17 @@ class StudentsController extends AdminController
             'all_transactions' => $all_transactions,
             'student_data' => $student_data
         ]));
+
+        // Add Attendance tab for students
+        if ($u->user_type == 'student') {
+            $tab->add('Attendance', view('admin.dashboard.show-user-profile-attendance', [
+                'u' => $u,
+                'attendance_summary' => $attendance_summary,
+                'attendance_records' => $attendance_records,
+                'student_data' => $student_data
+            ]));
+        }
+
         return $tab;
     }
 

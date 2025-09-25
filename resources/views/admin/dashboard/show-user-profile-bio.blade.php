@@ -4,44 +4,129 @@ use App\Models\Utils;
 ?>
 <style>
     .item {
-        font-size: 1.5rem;
+        font-size: 1.4rem;
+        line-height: 1.4;
+    }
+    
+    .profile-section {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border: 1px solid #dee2e6;
+    }
+    
+    .section-header {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        padding: 12px 20px;
+        margin: -20px -20px 20px -20px;
+        border-radius: 8px 8px 0 0;
+        font-weight: 600;
+        font-size: 1.1rem;
+        border-bottom: 1px solid #0056b3;
+    }
+    
+    .transaction-item {
+        background: white;
+        border-radius: 6px;
+        padding: 12px 15px;
+        margin-bottom: 8px;
+        border-left: 4px solid;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .transaction-positive {
+        border-left-color: #28a745;
+        background: linear-gradient(90deg, #f8fff9, #ffffff);
+    }
+    
+    .transaction-negative {
+        border-left-color: #dc3545;
+        background: linear-gradient(90deg, #fff8f8, #ffffff);
+    }
+    
+    .transaction-icon {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+    
+    .transaction-content {
+        flex-grow: 1;
+        font-size: 0.95rem;
+        line-height: 1.3;
+    }
+    
+    .employee-section {
+        background: #f8f9fa;
+        border-radius: 6px;
+        padding: 15px;
+        border: 1px solid #e9ecef;
+    }
+    
+    .employee-section .item {
+        font-size: 1.2rem;
+        margin-bottom: 8px;
+    }
+    
+    .no-data {
+        text-align: center;
+        padding: 30px;
+        color: #6c757d;
+        background: #f8f9fa;
+        border-radius: 6px;
+        border: 1px dashed #dee2e6;
+    }
+    
+    .no-data i {
+        font-size: 2rem;
+        margin-bottom: 10px;
+        color: #dee2e6;
     }
 </style>
 
-@include('admin.dashboard.show-user-profile-header', ['u' => $u])
+@include('admin.dashboard.show-user-profile-header', ['u' => $u, 'attendance_summary' => $attendance_summary ?? null])
 <div class="row">
     <div class="col-xs-12 col-md-12">
         @if ($u->user_type == 'student')
-            <p class="bg-primary p-2 m-0" style="font-weight: 800">School Fees Billing & Payement (For This term)</p>
-            <div class="row">
-                <div class="col-md-12">
-                    @if (empty($active_term_transactions))
-                        <div class="alert alert-info">This student no Transactions.</div>
-                    @else
-                        @foreach ($active_term_transactions as $tra)
-                            @php
-                                $color = 'green';
-                                if ($tra->amount < 0) {
-                                    $color = 'red';
-                                }
-                            @endphp
-                            <p>
-                            <div
-                                style="
-                                background-color: {{ $color }}; 
-                                border-radius: 5px; 
-                                margin-right: 3px;
-                                margin-top: -5px;
-                                width: 
-                                10px; 
-                                height: 10px; 
-                                display: inline-block;">
+            <div class="profile-section">
+                <h5 class="section-header">
+                    <i class="fas fa-money-bill-wave"></i> School Fees Billing & Payment (This Term)
+                </h5>
+                
+                @if (empty($active_term_transactions))
+                    <div class="no-data">
+                        <i class="fas fa-receipt"></i>
+                        <h6>No Transactions Found</h6>
+                        <p class="mb-0">This student has no transactions for the current term.</p>
+                    </div>
+                @else
+                    @foreach ($active_term_transactions as $tra)
+                        @php
+                            $is_positive = $tra->amount >= 0;
+                            $icon_color = $is_positive ? '#28a745' : '#dc3545';
+                        @endphp
+                        
+                        <div class="transaction-item {{ $is_positive ? 'transaction-positive' : 'transaction-negative' }}">
+                            <div class="transaction-icon" style="background-color: {{ $icon_color }};"></div>
+                            <div class="transaction-content">
+                                <strong>{{ Utils::my_date($tra->payment_date) }}</strong> - 
+                                <span class="text-{{ $is_positive ? 'success' : 'danger' }}">
+                                    <strong>UGX {{ number_format(abs($tra->amount)) }}</strong>
+                                </span>
+                                {{ $is_positive ? '' : '(Debit)' }}
+                                <br>
+                                <small class="text-muted">{{ $tra->description }}</small>
                             </div>
-                            {{ Utils::my_date($tra->payment_date) }} - <b>UGX. {{ number_format($tra->amount) }}</b> -
-                            {{ $tra->description }}</p>
-                        @endforeach
-                    @endif
-                </div>
+                        </div>
+                    @endforeach
+                @endif
             </div>
         @endif
 

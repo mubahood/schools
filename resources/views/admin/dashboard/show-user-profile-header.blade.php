@@ -121,6 +121,49 @@ $balance = $u->account->balance;
             <p><b>TOTAL PAID FEES:</b> UGX {{ number_format($paid) }}</p>
             <p><b>FEES BALANCE:</b> UGX {{ number_format($balance) }}</p> --}}
         </div>
+        
+        @if ($u->user_type == 'student' && isset($attendance_summary))
+        <div class="border border-1 border-success p-2 mt-3">
+            <h4 class="text-center text-success"><b><u>ATTENDANCE SUMMARY (THIS TERM)</u></b></h4>
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="m-0 p-0" style="line-height: 1.2;"><b>TOTAL SESSIONS:</b> {{ number_format($attendance_summary['total_sessions']) }}</p>
+                    <p class="m-0 p-0" style="line-height: 1.2; color: green;"><b>PRESENT:</b> {{ number_format($attendance_summary['total_present']) }}</p>
+                    <p class="m-0 p-0" style="line-height: 1.2; color: red;"><b>ABSENT:</b> {{ number_format($attendance_summary['total_absent']) }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p class="m-0 p-0" style="line-height: 1.2;"><b>ATTENDANCE RATE:</b> 
+                        <span class="badge badge-{{ $attendance_summary['overall_rate'] >= 80 ? 'success' : ($attendance_summary['overall_rate'] >= 60 ? 'warning' : 'danger') }}">
+                            {{ number_format($attendance_summary['overall_rate'], 1) }}%
+                        </span>
+                    </p>
+                </div>
+            </div>
+            
+            <hr class="border-success" style="margin-top: 8px; margin-bottom: 8px;">
+            <h6 class="text-center"><b>BY TYPE</b></h6>
+            
+            @if(!empty($attendance_summary['by_type']))
+                @foreach($attendance_summary['by_type'] as $type_data)
+                <div class="row" style="font-size: 0.9rem;">
+                    <div class="col-md-6">
+                        <p class="m-0 p-0" style="line-height: 1.1;"><b>{{ $type_data['type_name'] }}:</b></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="m-0 p-0" style="line-height: 1.1;">
+                            <span class="badge badge-{{ $type_data['rate'] >= 80 ? 'success' : ($type_data['rate'] >= 60 ? 'warning' : 'danger') }}">
+                                {{ number_format($type_data['rate'], 1) }}%
+                            </span>
+                            ({{ $type_data['present'] }}/{{ $type_data['total'] }})
+                        </p>
+                    </div>
+                </div>
+                @endforeach
+            @else
+                <p class="text-center text-muted" style="font-size: 0.9rem;">No attendance data available</p>
+            @endif
+        </div>
+        @endif
     </div>
 </div>
 <hr class="border-primary" style="margin-top: 14px; margin-bottom: 8px; ">
