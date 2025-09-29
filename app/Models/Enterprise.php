@@ -329,6 +329,7 @@ class Enterprise extends Model
     //getter for logo
     public function getLogoAttribute($value)
     {
+        return $value; 
         $img_path = Utils::img_path($value);
         if ($img_path == null) {
             $base_path = Utils::img_base_path('images/logo.png');
