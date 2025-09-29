@@ -79,7 +79,8 @@ class Service extends Model
             $trans->created_by_id = $by->id;
 
             $trans->school_pay_transporter_id = '-';
-            $trans->amount = ((-1) * $m->fee);
+            $fee = abs($m->fee);
+            $trans->amount = ((-1) * $fee); 
             $trans->amount = $trans->amount * $s->quantity;
 
 
