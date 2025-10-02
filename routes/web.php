@@ -104,6 +104,88 @@ Route::middleware(['web'])->group(function () {
     ->name('verification.handle');
 });
 
+// Student Application Routes (Public - No Authentication)
+Route::prefix('apply')->name('apply.')->middleware(['web'])->group(function () {
+    
+    // Landing & Introduction
+    Route::get('/', [\App\Http\Controllers\StudentApplicationController::class, 'landing'])
+         ->name('landing');
+    
+    Route::match(['get', 'post'], '/start', [\App\Http\Controllers\StudentApplicationController::class, 'start'])
+         ->name('start');
+    
+    // Step 1: School Selection
+    Route::get('/school-selection', [\App\Http\Controllers\StudentApplicationController::class, 'schoolSelection'])
+         ->name('school-selection')
+         ->middleware('application.session');
+    
+    Route::post('/school-selection', [\App\Http\Controllers\StudentApplicationController::class, 'saveSchoolSelection'])
+         ->name('school-selection.save')
+         ->middleware('application.session');
+    
+    Route::post('/school-selection/confirm', [\App\Http\Controllers\StudentApplicationController::class, 'confirmSchool'])
+         ->name('school-selection.confirm')
+         ->middleware('application.session');
+    
+    // Step 2: Bio Data Form
+    Route::get('/bio-data', [\App\Http\Controllers\StudentApplicationController::class, 'bioDataForm'])
+         ->name('bio-data')
+         ->middleware(['application.session', 'application.step:bio_data']);
+    
+    Route::post('/bio-data', [\App\Http\Controllers\StudentApplicationController::class, 'saveBioData'])
+         ->name('bio-data.save')
+         ->middleware('application.session');
+    
+    // Step 3: Confirmation & Review
+    Route::get('/confirmation', [\App\Http\Controllers\StudentApplicationController::class, 'confirmationForm'])
+         ->name('confirmation')
+         ->middleware(['application.session', 'application.step:confirmation']);
+    
+    Route::post('/confirmation', [\App\Http\Controllers\StudentApplicationController::class, 'submitApplication'])
+         ->name('submit')
+         ->middleware('application.session');
+    
+    // Step 4: Document Upload
+    Route::get('/documents', [\App\Http\Controllers\StudentApplicationController::class, 'documentsForm'])
+         ->name('documents')
+         ->middleware(['application.session', 'application.step:documents']);
+    
+    Route::post('/documents/upload', [\App\Http\Controllers\StudentApplicationController::class, 'uploadDocument'])
+         ->name('documents.upload')
+         ->middleware('application.session');
+    
+    Route::delete('/documents/{documentId}', [\App\Http\Controllers\StudentApplicationController::class, 'deleteDocument'])
+         ->name('documents.delete')
+         ->middleware('application.session');
+    
+    Route::post('/documents/complete', [\App\Http\Controllers\StudentApplicationController::class, 'completeDocuments'])
+         ->name('documents.complete')
+         ->middleware('application.session');
+    
+    // Success & Status
+    Route::get('/success/{applicationNumber}', [\App\Http\Controllers\StudentApplicationController::class, 'success'])
+         ->name('success');
+    
+    Route::match(['get', 'post'], '/status', [\App\Http\Controllers\StudentApplicationController::class, 'statusForm'])
+         ->name('status.form');
+    
+    Route::post('/status/check', [\App\Http\Controllers\StudentApplicationController::class, 'checkStatus'])
+         ->name('status.check');
+    
+    // AJAX Endpoints
+    Route::post('/session/save', [\App\Http\Controllers\StudentApplicationController::class, 'saveSession'])
+         ->name('session.save')
+         ->middleware('application.session');
+    
+    Route::post('/session/heartbeat', [\App\Http\Controllers\StudentApplicationController::class, 'sessionHeartbeat'])
+         ->name('session.heartbeat')
+         ->middleware('application.session');
+    
+    // Resume Application
+    Route::get('/resume/{sessionToken}', [\App\Http\Controllers\StudentApplicationController::class, 'resume'])
+         ->name('resume');
+});
+
 Route::get('test-mail', function () {
   $student = Admin::user();
   if ($student == null) {

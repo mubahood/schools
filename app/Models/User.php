@@ -171,6 +171,22 @@ class User extends Administrator implements JWTSubject
         return $this->hasOne(OnBoardWizard::class, 'administrator_id');
     }
 
+    public function studentApplication()
+    {
+        return $this->hasOne(StudentApplication::class, 'user_id');
+    }
+
+    public function reviewedApplications()
+    {
+        return $this->hasMany(StudentApplication::class, 'reviewed_by');
+    }
+
+    public function scopeApplicants($query)
+    {
+        return $query->where('user_type', 'student')
+                     ->where('status', 3); // Applicant status
+    }
+
     public static function createParent($s)
     {
         if (strtolower($s->user_type) != 'student') {

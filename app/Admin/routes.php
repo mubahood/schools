@@ -185,4 +185,11 @@ Route::group([
     // Attendance Dashboard Routes
     $router->get('attendance-dashboard', 'AttendanceDashboardController@index')->name('attendance.dashboard');
     $router->get('attendance-dashboard/export', 'AttendanceDashboardController@export')->name('attendance.export');
+    
+    // Student Application Management Routes
+    $router->resource('student-applications', StudentApplicationController::class);
+    $router->get('student-applications/{id}/review', 'StudentApplicationController@review')->name('student-applications.review');
+    $router->post('student-applications/{id}/accept', 'StudentApplicationController@accept')->name('student-applications.accept');
+    $router->post('student-applications/{id}/reject', 'StudentApplicationController@reject')->name('student-applications.reject');
+    $router->get('student-applications/{id}/documents/{documentId}/view', 'StudentApplicationController@viewDocument')->name('student-applications.document.view');
 });

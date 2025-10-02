@@ -480,7 +480,32 @@ use App\Models\Utils;
 </head>
 <body>
     <div class="onboarding-container">
-        @yield('content')
+        <div class="onboarding-card">
+            <div class="explainer-side">
+                <div class="explainer-content">
+                    <div class="brand-logo">
+                        <div class="brand-icon">
+                            <i class='bx bx-graduation'></i>
+                        </div>
+                        <div class="brand-text">
+                            <h1>@yield('explainer-title', 'Welcome')</h1>
+                        </div>
+                    </div>
+                    
+                    <p class="explainer-description">
+                        @yield('explainer-description', 'Get started with your journey')
+                    </p>
+                    
+                    <ul class="feature-list">
+                        @yield('features')
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="action-side">
+                @yield('content')
+            </div>
+        </div>
     </div>
     
     <!-- Bootstrap JS -->

@@ -107,6 +107,42 @@ class ConfigurationController extends AdminController
             ])->default('No')
             ->rules('required');
         $form->date('school_pay_last_accepted_date', __('Last SchoolPay Import Date'))->rules('required')->default(date('Y-m-d'));
+        
+        $form->divider('Online Student Application Settings');
+        
+        $form->radio('accepts_online_applications', __('Accept Online Student Applications'))
+            ->options([
+                'Yes' => 'Yes',
+                'No' => 'No',
+                'Custom' => 'Custom Message (Applications Closed)',
+            ])
+            ->default('No')
+            ->help('Enable or disable online student application portal');
+        
+        $form->decimal('application_fee', __('Application Fee'))
+            ->default(0.00)
+            ->help('Fee amount for student application (0 for free)');
+        
+        $form->quill('application_instructions', __('Application Instructions'))
+            ->help('Instructions that will be shown to applicants on the landing page');
+        
+        $form->textarea('required_application_documents', __('Required Documents (JSON)'))
+            ->rows(10)
+            ->default(json_encode([
+                ['name' => 'Birth Certificate', 'required' => true],
+                ['name' => 'Previous School Report', 'required' => true],
+                ['name' => 'Passport Photo', 'required' => true],
+                ['name' => 'Parent/Guardian ID', 'required' => false],
+            ], JSON_PRETTY_PRINT))
+            ->help('JSON array of required documents. Format: [{"name": "Document Name", "required": true/false}]');
+        
+        $form->date('application_deadline', __('Application Deadline'))
+            ->help('Last date to accept applications (optional)');
+        
+        $form->textarea('application_status_message', __('Custom Status Message'))
+            ->rows(3)
+            ->help('Custom message to show when applications are closed (only used when set to "Custom")');
+        
         $form->divider();
         $form->text('hm_name', __('Head Teacher Name'));
         $form->image('hm_signature', __('Head Teacher signature'));

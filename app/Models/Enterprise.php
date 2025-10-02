@@ -24,6 +24,57 @@ class Enterprise extends Model
         return $this->hasOne(OnBoardWizard::class, 'enterprise_id');
     }
 
+    public function studentApplications()
+    {
+        return $this->hasMany(StudentApplication::class, 'selected_enterprise_id');
+    }
+
+    public function pendingApplications()
+    {
+        return $this->hasMany(StudentApplication::class, 'selected_enterprise_id')
+                    ->where('status', 'submitted');
+    }
+
+    public function acceptedApplications()
+    {
+        return $this->hasMany(StudentApplication::class, 'selected_enterprise_id')
+                    ->where('status', 'accepted');
+    }
+
+    /**
+     * Check if enterprise accepts online applications
+     */
+    public function acceptsApplications()
+    {
+        if ($this->accepts_online_applications !== 'Yes') {
+            return false;
+        }
+        
+        if ($this->application_deadline) {
+            return Carbon::parse($this->application_deadline)->isFuture();
+        }
+        
+        return true;
+    }
+
+    /**
+     * Get required documents for applications (decoded)
+     */
+    public function getRequiredDocumentsAttribute()
+    {
+        if (empty($this->attributes['required_application_documents'])) {
+            return [];
+        }
+        
+        $docs = $this->attributes['required_application_documents'];
+        
+        if (is_string($docs)) {
+            $docs = json_decode($docs, true);
+        }
+        
+        return is_array($docs) ? $docs : [];
+    }
+
     public function getCreatedAtAttribute($value)
     {
         return Carbon::parse($value)->format('d-M-Y');

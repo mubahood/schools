@@ -1,0 +1,414 @@
+<?php
+
+namespace App\Admin\Controllers;
+
+use App\Models\StudentApplication;
+use App\Models\Enterprise;
+use App\Models\User;
+use Encore\Admin\Controllers\AdminController;
+use Encore\Admin\Form;
+use Encore\Admin\Grid;
+use Encore\Admin\Show;
+use Encore\Admin\Facades\Admin;
+use Encore\Admin\Layout\Content;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+
+class StudentApplicationController extends AdminController
+{
+    /**
+     * Title for current resource.
+     *
+     * @var string
+     */
+    protected $title = 'Student Applications';
+
+    /**
+     * Make a grid builder.
+     *
+     * @return Grid
+     */
+    protected function grid()
+    {
+        $grid = new Grid(new StudentApplication());
+        
+        // Filter by enterprise
+        $grid->model()->where('selected_enterprise_id', Admin::user()->enterprise_id);
+        
+        // Order by most recent
+        $grid->model()->orderBy('created_at', 'desc');
+        
+        // Disable batch actions
+        $grid->disableBatchActions();
+        
+        // Filters
+        $grid->filter(function($filter) {
+            $filter->disableIdFilter();
+            
+            $filter->like('application_number', 'Application Number');
+            $filter->like('first_name', 'First Name');
+            $filter->like('last_name', 'Last Name');
+            $filter->like('email', 'Email');
+            $filter->equal('status', 'Status')->select([
+                'draft' => 'Draft',
+                'submitted' => 'Submitted',
+                'under_review' => 'Under Review',
+                'accepted' => 'Accepted',
+                'rejected' => 'Rejected'
+            ]);
+            $filter->between('created_at', 'Application Date')->datetime();
+        });
+        
+        // Columns
+        $grid->column('application_number', __('Application #'))
+             ->display(function($number) {
+                 return "<strong>$number</strong>";
+             });
+        
+        $grid->column('full_name', __('Full Name'))
+             ->display(function() {
+                 $name = $this->full_name;
+                 $email = $this->email;
+                 return "$name<br/><small class='text-muted'>$email</small>";
+             });
+        
+        $grid->column('phone_number', __('Phone'));
+        
+        $grid->column('applying_for_class', __('Class'));
+        
+        $grid->column('status', __('Status'))
+             ->display(function($status) {
+                 $colors = [
+                     'draft' => 'secondary',
+                     'submitted' => 'primary',
+                     'under_review' => 'info',
+                     'accepted' => 'success',
+                     'rejected' => 'danger',
+                     'cancelled' => 'warning'
+                 ];
+                 $color = $colors[$status] ?? 'secondary';
+                 $label = ucwords(str_replace('_', ' ', $status));
+                 return "<span class='badge badge-$color'>$label</span>";
+             });
+        
+        $grid->column('progress_percentage', __('Progress'))
+             ->progressBar();
+        
+        $grid->column('submitted_at', __('Submitted'))
+             ->display(function($date) {
+                 return $date ? $date->format('Y-m-d H:i') : '-';
+             });
+        
+        $grid->column('created_at', __('Created'))
+             ->display(function($date) {
+                 return $date->format('Y-m-d');
+             });
+        
+        // Actions
+        $grid->actions(function ($actions) {
+            $actions->disableDelete();
+            $actions->disableEdit();
+            
+            // Add review button for submitted applications
+            if (in_array($this->status, ['submitted', 'under_review'])) {
+                $url = route('admin.student-applications.review', ['id' => $this->id]);
+                $actions->append("<a href='$url' class='btn btn-sm btn-primary'><i class='fa fa-eye'></i> Review</a>");
+            }
+        });
+        
+        return $grid;
+    }
+
+    /**
+     * Make a show builder.
+     *
+     * @param mixed $id
+     * @return Show
+     */
+    protected function detail($id)
+    {
+        $show = new Show(StudentApplication::findOrFail($id));
+        
+        // Application Information
+        $show->panel()
+             ->title('Application Information')
+             ->style('primary');
+        
+        $show->field('application_number', __('Application Number'));
+        $show->field('status', __('Status'))->as(function($status) {
+            return ucwords(str_replace('_', ' ', $status));
+        })->badge();
+        $show->field('progress_percentage', __('Progress'))->progressBar();
+        
+        // Personal Information
+        $show->panel()
+             ->title('Personal Information')
+             ->style('info');
+        
+        $show->field('first_name', __('First Name'));
+        $show->field('middle_name', __('Middle Name'));
+        $show->field('last_name', __('Last Name'));
+        $show->field('date_of_birth', __('Date of Birth'));
+        $show->field('gender', __('Gender'));
+        $show->field('nationality', __('Nationality'));
+        $show->field('religion', __('Religion'));
+        
+        // Contact Information
+        $show->panel()
+             ->title('Contact Information')
+             ->style('success');
+        
+        $show->field('email', __('Email'));
+        $show->field('phone_number', __('Phone Number'));
+        $show->field('phone_number_2', __('Alternative Phone'));
+        $show->field('home_address', __('Home Address'));
+        $show->field('district', __('District'));
+        $show->field('city', __('City'));
+        $show->field('village', __('Village'));
+        
+        // Parent/Guardian Information
+        $show->panel()
+             ->title('Parent/Guardian Information')
+             ->style('warning');
+        
+        $show->field('parent_name', __('Parent Name'));
+        $show->field('parent_relationship', __('Relationship'));
+        $show->field('parent_phone', __('Parent Phone'));
+        $show->field('parent_email', __('Parent Email'));
+        $show->field('parent_address', __('Parent Address'));
+        
+        // Previous School Information
+        $show->panel()
+             ->title('Previous School Information')
+             ->style('secondary');
+        
+        $show->field('previous_school', __('Previous School'));
+        $show->field('previous_class', __('Previous Class'));
+        $show->field('year_completed', __('Year Completed'));
+        
+        // Application Details
+        $show->panel()
+             ->title('Application Details')
+             ->style('primary');
+        
+        $show->field('applying_for_class', __('Applying For Class'));
+        $show->field('special_needs', __('Special Needs'));
+        
+        // Documents
+        $show->field('uploaded_documents', __('Uploaded Documents'))
+             ->as(function($docs) {
+                 if (empty($docs)) {
+                     return 'No documents uploaded';
+                 }
+                 $html = '<ul>';
+                 foreach ($docs as $doc) {
+                     $name = $doc['document_name'];
+                     $size = $doc['file_size_formatted'];
+                     $date = $doc['uploaded_at'];
+                     $html .= "<li><strong>$name</strong> ($size) - Uploaded: $date</li>";
+                 }
+                 $html .= '</ul>';
+                 return $html;
+             });
+        
+        // Timestamps
+        $show->panel()
+             ->title('Timeline')
+             ->style('default');
+        
+        $show->field('started_at', __('Started At'));
+        $show->field('submitted_at', __('Submitted At'));
+        $show->field('reviewed_at', __('Reviewed At'));
+        $show->field('completed_at', __('Completed At'));
+        
+        // Admin Review
+        if ($this->reviewed_by) {
+            $show->panel()
+                 ->title('Admin Review')
+                 ->style('info');
+            
+            $show->field('reviewer.name', __('Reviewed By'));
+            $show->field('admin_notes', __('Admin Notes'));
+            $show->field('rejection_reason', __('Rejection Reason'));
+        }
+        
+        return $show;
+    }
+
+    /**
+     * Review an application (custom page)
+     */
+    public function review($id, Content $content)
+    {
+        $application = StudentApplication::findOrFail($id);
+        
+        // Verify it belongs to this enterprise
+        if ($application->selected_enterprise_id != Admin::user()->enterprise_id) {
+            return redirect()
+                ->back()
+                ->with('error', 'You do not have permission to review this application.');
+        }
+        
+        return $content
+            ->title('Review Application')
+            ->description($application->application_number)
+            ->body(view('admin.student-application-review', [
+                'application' => $application
+            ]));
+    }
+
+    /**
+     * Accept an application
+     */
+    public function accept($id, Request $request)
+    {
+        $application = StudentApplication::findOrFail($id);
+        
+        // Verify it belongs to this enterprise
+        if ($application->selected_enterprise_id != Admin::user()->enterprise_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You do not have permission to accept this application.'
+            ], 403);
+        }
+        
+        // Verify it can be accepted
+        if (!$application->canReview()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This application cannot be accepted in its current status.'
+            ], 422);
+        }
+        
+        try {
+            $notes = $request->input('notes');
+            $application->accept(Admin::user()->id, $notes);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Application accepted successfully! Student account has been created.'
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to accept application: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Reject an application
+     */
+    public function reject($id, Request $request)
+    {
+        $application = StudentApplication::findOrFail($id);
+        
+        // Verify it belongs to this enterprise
+        if ($application->selected_enterprise_id != Admin::user()->enterprise_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You do not have permission to reject this application.'
+            ], 403);
+        }
+        
+        // Verify it can be rejected
+        if (!$application->canReview()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This application cannot be rejected in its current status.'
+            ], 422);
+        }
+        
+        // Validate reason
+        if (empty($request->input('reason'))) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please provide a reason for rejection.'
+            ], 422);
+        }
+        
+        try {
+            $reason = $request->input('reason');
+            $notes = $request->input('notes');
+            
+            $application->reject($reason, Admin::user()->id, $notes);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Application rejected successfully.'
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to reject application: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * View a document
+     */
+    public function viewDocument($id, $documentId)
+    {
+        $application = StudentApplication::findOrFail($id);
+        
+        // Verify it belongs to this enterprise
+        if ($application->selected_enterprise_id != Admin::user()->enterprise_id) {
+            abort(403, 'You do not have permission to view this document.');
+        }
+        
+        $uploadedDocuments = $application->uploaded_documents ?? [];
+        
+        $document = collect($uploadedDocuments)->firstWhere('document_id', $documentId);
+        
+        if (!$document) {
+            abort(404, 'Document not found.');
+        }
+        
+        $filePath = $document['file_path'];
+        
+        if (!Storage::disk('public')->exists($filePath)) {
+            abort(404, 'File not found on storage.');
+        }
+        
+        return Storage::disk('public')->response($filePath);
+    }
+
+    /**
+     * Make a form builder.
+     * Note: We disable creating/editing via form as applications come from public portal
+     *
+     * @return Form
+     */
+    protected function form()
+    {
+        $form = new Form(new StudentApplication());
+        
+        $form->display('application_number', __('Application Number'));
+        $form->text('first_name', __('First Name'))->readonly();
+        $form->text('last_name', __('Last Name'))->readonly();
+        $form->email('email', __('Email'))->readonly();
+        
+        $form->select('status', __('Status'))
+             ->options([
+                 'submitted' => 'Submitted',
+                 'under_review' => 'Under Review',
+                 'accepted' => 'Accepted',
+                 'rejected' => 'Rejected'
+             ])
+             ->required();
+        
+        $form->textarea('admin_notes', __('Admin Notes'));
+        $form->textarea('rejection_reason', __('Rejection Reason'));
+        
+        $form->display('created_at', __('Created At'));
+        $form->display('submitted_at', __('Submitted At'));
+        
+        $form->disableCreatingCheck();
+        $form->disableViewCheck();
+        
+        return $form;
+    }
+}
