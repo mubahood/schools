@@ -140,6 +140,43 @@
 </div>
 @endif
 
+<!-- Attachments -->
+@if($application->attachments && count($application->attachments) > 0)
+<div class="review-section mb-4">
+    <h5 class="fw-semibold mb-3 pb-2 border-bottom">
+        <i class='bx bx-paperclip'></i> Supporting Documents
+    </h5>
+    <div class="attachments-list">
+        @foreach($application->attachments as $index => $attachment)
+        <div class="attachment-item-review">
+            <div class="attachment-info-review">
+                @if(str_contains($attachment['type'], 'pdf'))
+                    <i class='bx bxs-file-pdf'></i>
+                @elseif(str_contains($attachment['type'], 'image'))
+                    <i class='bx bxs-file-image'></i>
+                @elseif(str_contains($attachment['type'], 'word') || str_contains($attachment['type'], 'doc'))
+                    <i class='bx bxs-file-doc'></i>
+                @else
+                    <i class='bx bxs-file'></i>
+                @endif
+                <div class="attachment-details-review">
+                    <div class="attachment-name-review">{{ $attachment['name'] }}</div>
+                    <div class="attachment-meta">
+                        <span class="attachment-size-review">{{ number_format($attachment['size'] / 1024, 2) }} KB</span>
+                        <span class="mx-2">•</span>
+                        <span class="attachment-date">{{ \Carbon\Carbon::parse($attachment['uploaded_at'])->format('M d, Y') }}</span>
+                    </div>
+                </div>
+            </div>
+            <a href="{{ asset('storage/' . $attachment['path']) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                <i class='bx bx-download'></i> View
+            </a>
+        </div>
+        @endforeach
+    </div>
+</div>
+@endif
+
 <!-- Application Details -->
 <div class="review-section mb-4">
     <h5 class="fw-semibold mb-3 pb-2 border-bottom">Application Details</h5>
@@ -205,6 +242,100 @@
     .form-check-label {
         margin-left: 0.5rem;
         cursor: pointer;
+    }
+    
+    /* Attachments Review Styling */
+    .attachments-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .attachment-item-review {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+    
+    .attachment-item-review:hover {
+        background: #e9ecef;
+        border-color: #adb5bd;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .attachment-info-review {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .attachment-info-review > i {
+        font-size: 2rem;
+        flex-shrink: 0;
+    }
+    
+    .attachment-info-review .bxs-file-pdf {
+        color: #dc3545;
+    }
+    
+    .attachment-info-review .bxs-file-image {
+        color: #198754;
+    }
+    
+    .attachment-info-review .bxs-file-doc {
+        color: #0d6efd;
+    }
+    
+    .attachment-info-review .bxs-file {
+        color: #6c757d;
+    }
+    
+    .attachment-details-review {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .attachment-name-review {
+        font-weight: 500;
+        color: #212529;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 0.25rem;
+    }
+    
+    .attachment-meta {
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+    
+    .attachment-size-review,
+    .attachment-date {
+        display: inline;
+    }
+    
+    /* Mobile Responsive */
+    @media (max-width: 480px) {
+        .attachment-item-review {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+        
+        .attachment-info-review {
+            width: 100%;
+        }
+        
+        .attachment-item-review .btn {
+            width: 100%;
+        }
     }
 </style>
 @endpush

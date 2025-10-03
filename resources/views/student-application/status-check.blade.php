@@ -99,11 +99,27 @@
                 <p>Your application is currently being reviewed by the admissions team. You will receive an email notification once the review is complete.</p>
             @elseif($application->status == 'accepted')
                 <div class="well" style="background: #d4edda; border: 2px solid #28a745;">
-                    <h4 style="color: #155724; margin-top: 0;">Congratulations!</h4>
+                    <h4 style="color: #155724; margin-top: 0;">🎉 Congratulations!</h4>
                     <p style="color: #155724;">Your application has been accepted! You will receive further instructions via email.</p>
                     @if($application->admin_notes)
                         <p style="color: #155724;"><strong>Note:</strong> {{ $application->admin_notes }}</p>
                     @endif
+                    
+                    <!-- Download Temporary Admission Letter Button -->
+                    <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #c3e6cb;">
+                        <a href="{{ url('apply/admission-letter/' . $application->application_number) }}" 
+                           target="_blank"
+                           class="btn btn-success btn-lg" 
+                           style="background: #28a745; border: none; padding: 15px 30px; font-size: 18px; font-weight: bold; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: all 0.3s ease; text-decoration: none; display: inline-block;">
+                            <i class='bx bxs-download' style="font-size: 20px; vertical-align: middle;"></i>
+                            Download Temporary Admission Letter
+                        </a>
+                        <p style="margin-top: 15px; font-size: 13px; color: #155724;">
+                            <i class='bx bx-info-circle'></i> 
+                            <strong>Important:</strong> Please download and print this temporary admission letter. 
+                            Bring it with you when visiting the school for official registration.
+                        </p>
+                    </div>
                 </div>
             @elseif($application->status == 'rejected')
                 <div class="well" style="background: #f8d7da; border: 2px solid #dc3545;">
@@ -182,6 +198,22 @@
     .well {
         padding: 20px;
         border-radius: 8px;
+    }
+    
+    /* Download Button Hover Effect */
+    .btn-success:hover {
+        background: #218838 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15) !important;
+    }
+    
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .btn-success {
+            width: 100%;
+            font-size: 16px !important;
+            padding: 12px 20px !important;
+        }
     }
 </style>
 @endpush

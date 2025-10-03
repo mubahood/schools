@@ -23,7 +23,7 @@ class StudentApplication extends Model
         'home_address', 'district', 'city', 'village',
         'parent_name', 'parent_phone', 'parent_email', 'parent_relationship',
         'parent_address', 'previous_school', 'previous_class', 'year_completed',
-        'applying_for_class', 'special_needs', 'data_confirmed_at',
+        'applying_for_class', 'special_needs', 'attachments', 'data_confirmed_at',
         'submitted_at', 'uploaded_documents', 'documents_complete',
         'documents_submitted_at', 'step_data_backup', 'progress_percentage',
         'last_activity_at', 'reviewed_by', 'reviewed_at', 'admin_notes',
@@ -34,6 +34,7 @@ class StudentApplication extends Model
     protected $casts = [
         'uploaded_documents' => 'array',
         'step_data_backup' => 'array',
+        'attachments' => 'array',
         'date_of_birth' => 'date',
         'enterprise_selected_at' => 'datetime',
         'data_confirmed_at' => 'datetime',

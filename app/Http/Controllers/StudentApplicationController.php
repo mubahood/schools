@@ -7,7 +7,9 @@ use App\Models\Enterprise;
 use App\Models\StudentApplication;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -52,7 +54,7 @@ class StudentApplicationController extends Controller
         try {
             $acceptsApplications = $enterprise->acceptsApplications();
         } catch (\Exception $e) {
-            \Log::error('Error checking acceptsApplications: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Error checking acceptsApplications: ' . $e->getMessage());
         }
         
         // Get required documents
@@ -66,7 +68,7 @@ class StudentApplicationController extends Controller
                 $requiredDocuments = is_array($docs) ? $docs : [];
             }
         } catch (\Exception $e) {
-            \Log::error('Error parsing required documents: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Error parsing required documents: ' . $e->getMessage());
         }
         
         return view('student-application.landing', [
@@ -253,7 +255,8 @@ class StudentApplicationController extends Controller
             'previous_class' => 'nullable|string|max:100',
             'year_completed' => 'nullable|integer|min:1900|max:' . date('Y'),
             'applying_for_class' => 'required|string|max:100',
-            'special_needs' => 'nullable|string'
+            'special_needs' => 'nullable|string',
+            'attachments.*' => 'nullable|file|max:5120|mimes:pdf,jpg,jpeg,png,doc,docx'
         ]);
         
         if ($validator->fails()) {
@@ -262,6 +265,60 @@ class StudentApplicationController extends Controller
                 ->withErrors($validator)
                 ->withInput()
                 ->with('error', 'Please correct the errors below.');
+        }
+        
+        // Handle file uploads
+        $attachments = [];
+        if ($request->hasFile('attachments')) {
+            $files = $request->file('attachments');
+            
+            // Limit to 20 files
+            if (count($files) > 20) {
+                return redirect()
+                    ->back()
+                    ->withInput()
+                    ->with('error', 'Maximum of 20 attachments allowed.');
+            }
+            
+            // Create directory for this application if not exists
+            $applicationDir = 'applications/' . ($application->application_number ?: 'temp_' . $application->id);
+            
+            foreach ($files as $file) {
+                try {
+                    // Generate unique filename
+                    $originalName = $file->getClientOriginalName();
+                    $extension = $file->getClientOriginalExtension();
+                    $storedName = time() . '_' . uniqid() . '.' . $extension;
+                    
+                    // Store file
+                    $path = $file->storeAs($applicationDir, $storedName, 'public');
+                    
+                    // Save file metadata
+                    $attachments[] = [
+                        'name' => $originalName,
+                        'stored_name' => $storedName,
+                        'path' => $path,
+                        'size' => $file->getSize(),
+                        'type' => $file->getMimeType(),
+                        'uploaded_at' => now()->toDateTimeString()
+                    ];
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('File upload error: ' . $e->getMessage());
+                    return redirect()
+                        ->back()
+                        ->withInput()
+                        ->with('error', 'Error uploading file: ' . $originalName);
+                }
+            }
+            
+            // Merge with existing attachments if any
+            $existingAttachments = $application->attachments ?? [];
+            $attachments = array_merge($existingAttachments, $attachments);
+        }
+        
+        // Save attachments to application
+        if (!empty($attachments)) {
+            $application->attachments = $attachments;
         }
         
         // Check if email already exists for this school
@@ -718,5 +775,125 @@ class StudentApplicationController extends Controller
         }
         
         return round($bytes, $precision) . ' ' . $units[$i];
+    }
+    
+    /**
+     * Download Temporary Admission Letter (PDF)
+     */
+    public function downloadAdmissionLetter($applicationNumber)
+    {
+        try {
+            // Find the application by application number
+            $application = StudentApplication::where('application_number', $applicationNumber)
+                                            ->whereNotNull('submitted_at')
+                                            ->first();
+            
+            if (!$application) {
+                return redirect()
+                    ->route('apply.status.form')
+                    ->with('error', 'Application not found. Please check your application number.');
+            }
+            
+            // Check if application is accepted
+            if ($application->status !== 'accepted') {
+                return redirect()
+                    ->route('apply.status.form')
+                    ->with('error', 'Admission letter is only available for accepted applications. Your current status is: ' . ucwords(str_replace('_', ' ', $application->status)));
+            }
+            
+            // Get the school/enterprise
+            $school = $application->selectedEnterprise;
+            
+            if (!$school) {
+                throw new \Exception('School information not found for this application.');
+            }
+            
+            // Prepare logo path
+            $logoPath = null;
+            if ($school->logo) {
+                $logoPath = public_path('storage/' . $school->logo);
+                // Check if file exists, if not use a fallback
+                if (!file_exists($logoPath)) {
+                    $logoPath = public_path('storage/images/default-logo.png');
+                }
+            }
+            
+            // Parse required documents from school configuration
+            $requiredDocuments = [];
+            if ($school->required_application_documents) {
+                $docs = json_decode($school->required_application_documents, true);
+                if (is_array($docs)) {
+                    $requiredDocuments = $docs;
+                }
+            }
+            
+            // Prepare fee structure (if available)
+            $feeStructure = [];
+            
+            // Try to get class-specific fees if applying_for_class is set
+            if ($application->applying_for_class) {
+                try {
+                    // Get academic class by name
+                    $academicClass = \App\Models\AcademicClass::where('enterprise_id', $school->id)
+                                                               ->where('name', $application->applying_for_class)
+                                                               ->first();
+                    
+                    if ($academicClass) {
+                        $activeTerm = $school->active_term();
+                        
+                        if ($activeTerm) {
+                            // Get class fees for active term
+                            foreach ($academicClass->academic_class_fees as $fee) {
+                                if ($fee->due_term_id == $activeTerm->id) {
+                                    $feeStructure[] = [
+                                        'name' => $fee->name ?? 'School Fee',
+                                        'amount' => $fee->amount ?? 0
+                                    ];
+                                }
+                            }
+                        }
+                    }
+                } catch (\Exception $e) {
+                    // If we can't get class fees, continue without them
+                    Log::warning('Could not fetch class fees: ' . $e->getMessage());
+                }
+            }
+            
+            // If no fees found, add some generic estimated fees
+            if (empty($feeStructure)) {
+                $feeStructure = [
+                    ['name' => 'Tuition Fee', 'amount' => 0],
+                    ['name' => 'Registration Fee', 'amount' => 0],
+                ];
+            }
+            
+            // Prepare data for the view
+            $data = [
+                'application' => $application,
+                'school' => $school,
+                'logoPath' => $logoPath,
+                'requiredDocuments' => $requiredDocuments,
+                'feeStructure' => $feeStructure,
+            ];
+            
+            // Generate PDF using DomPDF
+            $pdf = App::make('dompdf.wrapper');
+            $pdf->loadView('student-application.temporary-admission-letter', $data);
+            $pdf->setPaper('a4', 'portrait');
+            
+            // Generate filename
+            $fileName = 'Temporary-Admission-Letter-' . $application->application_number . '.pdf';
+            
+            // Stream the PDF to browser
+            return $pdf->stream($fileName);
+            
+        } catch (\Exception $e) {
+            Log::error('Error generating admission letter: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            
+            return redirect()
+                ->route('apply.status.form')
+                ->with('error', 'An error occurred while generating your admission letter. Please contact the admissions office. Error: ' . $e->getMessage());
+        }
     }
 }

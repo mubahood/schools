@@ -172,6 +172,10 @@ Route::prefix('apply')->name('apply.')->middleware(['web'])->group(function () {
     Route::post('/status/check', [\App\Http\Controllers\StudentApplicationController::class, 'checkStatus'])
          ->name('status.check');
     
+    // Temporary Admission Letter Download
+    Route::get('/admission-letter/{applicationNumber}', [\App\Http\Controllers\StudentApplicationController::class, 'downloadAdmissionLetter'])
+         ->name('admission.letter');
+    
     // AJAX Endpoints
     Route::post('/session/save', [\App\Http\Controllers\StudentApplicationController::class, 'saveSession'])
          ->name('session.save')

@@ -308,6 +308,75 @@
         </div>
     </div>
     
+    <!-- Attachments Section -->
+    <div class="form-section mb-4">
+        <h5 class="fw-semibold mb-3 pb-2 border-bottom">
+            <i class='bx bx-paperclip'></i> Supporting Documents
+        </h5>
+        <p class="text-muted mb-3">Upload supporting documents (e.g., birth certificate, previous report cards, photos). Max 20 files, 5MB each.</p>
+        
+        <div id="attachmentsContainer">
+            @if(old('attachments') || ($application->attachments && count($application->attachments) > 0))
+                @php
+                    $attachments = old('attachments', $application->attachments ?? []);
+                @endphp
+                @foreach($attachments as $index => $attachment)
+                    <div class="attachment-item mb-3" data-index="{{ $index }}">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-md-5">
+                                <input type="text" name="attachment_labels[]" class="form-control" placeholder="Document name (e.g., Birth Certificate)" value="{{ is_array($attachment) ? ($attachment['label'] ?? '') : '' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <div class="file-input-wrapper">
+                                    <input type="file" name="attachment_files[]" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                                    @if(is_array($attachment) && isset($attachment['path']))
+                                        <small class="text-success d-block mt-1">
+                                            <i class='bx bx-check-circle'></i> {{ basename($attachment['path']) }}
+                                        </small>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="col-md-1 text-end">
+                                <button type="button" class="btn btn-sm btn-outline-danger remove-attachment" title="Remove">
+                                    <i class='bx bx-trash'></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            @else
+                <div class="attachment-item mb-3" data-index="0">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-md-5">
+                            <input type="text" name="attachment_labels[]" class="form-control" placeholder="Document name (e.g., Birth Certificate)">
+                        </div>
+                        <div class="col-md-6">
+                            <input type="file" name="attachment_files[]" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                        </div>
+                        <div class="col-md-1 text-end">
+                            <button type="button" class="btn btn-sm btn-outline-danger remove-attachment" title="Remove">
+                                <i class='bx bx-trash'></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            @endif
+        </div>
+        
+        <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="addAttachmentBtn">
+            <i class='bx bx-plus'></i> Add Another Document
+        </button>
+        
+        <div class="alert alert-info mt-3">
+            <i class='bx bx-info-circle'></i>
+            <small>
+                <strong>Accepted formats:</strong> PDF, JPG, PNG, DOC, DOCX<br>
+                <strong>Maximum file size:</strong> 5MB per file<br>
+                <strong>Maximum files:</strong> 20 documents
+            </small>
+        </div>
+    </div>
+    
     <!-- Form Actions -->
     <div class="row g-3 mt-4">
         <div class="col-md-6">
@@ -336,6 +405,107 @@
         padding: 1.5rem;
         border-radius: var(--border-radius);
         box-shadow: var(--shadow-sm);
+    }
+    
+    /* Attachment Items Styling */
+    .attachment-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.875rem 1rem;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        margin-bottom: 0.75rem;
+        transition: all 0.2s ease;
+    }
+    
+    .attachment-item:hover {
+        background: #e9ecef;
+        border-color: #adb5bd;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .attachment-info {
+        display: flex;
+        align-items: center;
+        gap: 0.875rem;
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .attachment-info > i {
+        font-size: 1.75rem;
+        color: #6c757d;
+        flex-shrink: 0;
+    }
+    
+    .attachment-info .bxs-file-pdf {
+        color: #dc3545;
+    }
+    
+    .attachment-info .bxs-file-image {
+        color: #198754;
+    }
+    
+    .attachment-info .bxs-file-doc {
+        color: #0d6efd;
+    }
+    
+    .attachment-details {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .attachment-name {
+        font-weight: 500;
+        color: #212529;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 0.125rem;
+    }
+    
+    .attachment-size {
+        font-size: 0.813rem;
+        color: #6c757d;
+    }
+    
+    .remove-attachment {
+        flex-shrink: 0;
+        padding: 0.375rem 0.625rem;
+    }
+    
+    #addAttachmentBtn:disabled {
+        cursor: not-allowed;
+        opacity: 0.65;
+    }
+    
+    /* Mobile Responsive */
+    @media (max-width: 480px) {
+        .attachment-item {
+            padding: 0.75rem;
+        }
+        
+        .attachment-info {
+            gap: 0.625rem;
+        }
+        
+        .attachment-info > i {
+            font-size: 1.5rem;
+        }
+        
+        .attachment-name {
+            font-size: 0.875rem;
+        }
+        
+        .attachment-size {
+            font-size: 0.75rem;
+        }
+        
+        .remove-attachment {
+            padding: 0.25rem 0.5rem;
+        }
     }
 </style>
 @endpush
@@ -388,6 +558,143 @@
         .catch(error => {
             statusEl.style.display = 'none';
         });
+    }
+    
+    // Dynamic Attachments Handler
+    let attachmentCount = 0;
+    const MAX_ATTACHMENTS = 20;
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+    const ALLOWED_TYPES = {
+        'application/pdf': '.pdf',
+        'image/jpeg': '.jpg/.jpeg',
+        'image/png': '.png',
+        'application/msword': '.doc',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx'
+    };
+    
+    document.getElementById('addAttachmentBtn').addEventListener('click', function() {
+        if (attachmentCount >= MAX_ATTACHMENTS) {
+            alert('Maximum of ' + MAX_ATTACHMENTS + ' documents allowed.');
+            return;
+        }
+        
+        // Create hidden file input
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.name = 'attachments[]';
+        fileInput.accept = '.pdf,.jpg,.jpeg,.png,.doc,.docx';
+        fileInput.style.display = 'none';
+        
+        // Trigger file selection
+        fileInput.click();
+        
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // Validate file type
+            if (!Object.keys(ALLOWED_TYPES).includes(file.type)) {
+                alert('Invalid file type. Please upload PDF, JPG, PNG, DOC, or DOCX files only.');
+                return;
+            }
+            
+            // Validate file size
+            if (file.size > MAX_FILE_SIZE) {
+                alert('File size exceeds 5MB limit. Please choose a smaller file.');
+                return;
+            }
+            
+            // Add file to list
+            addAttachmentToList(file, fileInput);
+            attachmentCount++;
+            
+            // Update button state
+            updateAddButtonState();
+        });
+    });
+    
+    function addAttachmentToList(file, fileInput) {
+        const attachmentsList = document.getElementById('attachmentsList');
+        const attachmentId = 'attachment_' + Date.now();
+        
+        // Format file size
+        const fileSize = formatFileSize(file.size);
+        
+        // Get file icon based on type
+        const fileIcon = getFileIcon(file.type);
+        
+        // Create attachment item
+        const attachmentItem = document.createElement('div');
+        attachmentItem.className = 'attachment-item';
+        attachmentItem.id = attachmentId;
+        attachmentItem.innerHTML = `
+            <div class="attachment-info">
+                <i class='bx ${fileIcon}'></i>
+                <div class="attachment-details">
+                    <div class="attachment-name">${escapeHtml(file.name)}</div>
+                    <div class="attachment-size">${fileSize}</div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-danger remove-attachment" data-id="${attachmentId}">
+                <i class='bx bx-trash'></i>
+            </button>
+        `;
+        
+        // Store file input reference
+        attachmentItem.appendChild(fileInput);
+        
+        // Add to list
+        attachmentsList.appendChild(attachmentItem);
+        
+        // Add remove event listener
+        attachmentItem.querySelector('.remove-attachment').addEventListener('click', function() {
+            removeAttachment(attachmentId);
+        });
+    }
+    
+    function removeAttachment(attachmentId) {
+        const attachmentItem = document.getElementById(attachmentId);
+        if (attachmentItem) {
+            attachmentItem.remove();
+            attachmentCount--;
+            updateAddButtonState();
+        }
+    }
+    
+    function updateAddButtonState() {
+        const addBtn = document.getElementById('addAttachmentBtn');
+        if (attachmentCount >= MAX_ATTACHMENTS) {
+            addBtn.disabled = true;
+            addBtn.innerHTML = '<i class="bx bx-check"></i> Maximum files reached';
+        } else {
+            addBtn.disabled = false;
+            addBtn.innerHTML = `<i class='bx bx-plus'></i> Add Another Document (${attachmentCount}/${MAX_ATTACHMENTS})`;
+        }
+    }
+    
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    }
+    
+    function getFileIcon(fileType) {
+        const iconMap = {
+            'application/pdf': 'bxs-file-pdf',
+            'image/jpeg': 'bxs-file-image',
+            'image/png': 'bxs-file-image',
+            'application/msword': 'bxs-file-doc',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'bxs-file-doc'
+        };
+        return iconMap[fileType] || 'bxs-file';
+    }
+    
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 </script>
 @endpush
