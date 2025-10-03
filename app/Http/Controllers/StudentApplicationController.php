@@ -21,11 +21,11 @@ class StudentApplicationController extends Controller
      */
     public function landing()
     {
-        // Get a sample enterprise for branding (first one that accepts applications)
+        // Get ANY enterprise for branding (prioritize ones with applications enabled)
         $enterprise = Enterprise::where('accepts_online_applications', 'Yes')->first();
         
         if (!$enterprise) {
-            // Try to get any enterprise for branding
+            // If no school has applications enabled, still show ANY school for branding
             $enterprise = Enterprise::first();
         }
         
@@ -49,13 +49,8 @@ class StudentApplicationController extends Controller
             ]);
         }
         
-        // Check if this enterprise accepts applications
-        $acceptsApplications = false;
-        try {
-            $acceptsApplications = $enterprise->acceptsApplications();
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Error checking acceptsApplications: ' . $e->getMessage());
-        }
+        // RELAXED: Accept applications if enabled, ignore all other restrictions
+        $acceptsApplications = ($enterprise->accepts_online_applications === 'Yes');
         
         // Get required documents
         $requiredDocuments = [];
@@ -122,12 +117,10 @@ class StudentApplicationController extends Controller
     {
         $application = $request->attributes->get('application');
         
-        // Get all enterprises that accept applications
+        // Get all enterprises that accept applications (relaxed - no deadline restrictions)
         $schools = Enterprise::where('accepts_online_applications', 'Yes')
-                            ->get()
-                            ->filter(function($school) {
-                                return $school->acceptsApplications();
-                            });
+                            ->orderBy('name', 'asc')
+                            ->get();
         
         return view('student-application.school-selection', [
             'application' => $application,
@@ -156,8 +149,8 @@ class StudentApplicationController extends Controller
         
         $enterprise = Enterprise::find($request->enterprise_id);
         
-        // Verify school accepts applications
-        if (!$enterprise->acceptsApplications()) {
+        // Verify school exists and accepts applications
+        if (!$enterprise || $enterprise->accepts_online_applications !== 'Yes') {
             return response()->json([
                 'success' => false,
                 'message' => 'This school is not currently accepting applications.'

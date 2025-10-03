@@ -43,18 +43,12 @@ class Enterprise extends Model
 
     /**
      * Check if enterprise accepts online applications
+     * Relaxed restrictions - only checks if enabled, ignores deadline
      */
     public function acceptsApplications()
     {
-        if ($this->accepts_online_applications !== 'Yes') {
-            return false;
-        }
-        
-        if ($this->application_deadline) {
-            return Carbon::parse($this->application_deadline)->isFuture();
-        }
-        
-        return true;
+        // Simply check if applications are enabled
+        return $this->accepts_online_applications === 'Yes';
     }
 
     /**
