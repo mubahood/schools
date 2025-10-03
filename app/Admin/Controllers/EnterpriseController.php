@@ -443,273 +443,268 @@ class EnterpriseController extends AdminController
         });
 
         // Basic School Information
-        $form->tab('Basic Information', function ($form) use ($u) {
-            $form->text('name', __('School Name'))
-                ->rules('required|string|max:255')
-                ->help('Full official name of the school');
+        $form->divider('Basic Information');
+        
+        $form->text('name', __('School Name'))
+            ->rules('required|string|max:255')
+            ->help('Full official name of the school');
 
-            $form->text('short_name', __('Short Name/Abbreviation'))
-                ->rules('string|max:20')
-                ->help('e.g., SMS for St. Mary\'s School');
+        $form->text('short_name', __('Short Name/Abbreviation'))
+            ->rules('string|max:20')
+            ->help('e.g., SMS for St. Mary\'s School');
 
-            $form->radio('type', __('School Type'))
-                ->options([
-                    'Primary' => 'Primary School',
-                    'Secondary' => 'Secondary School (O\'Level)',
-                    'Advanced' => 'Advanced School (O\'Level + A\'Level)',
-                    'University' => 'University/Tertiary Institution',
-                ])
-                ->rules('required')
-                ->help('Select the type of educational institution');
+        $form->radio('type', __('School Type'))
+            ->options([
+                'Primary' => 'Primary School',
+                'Secondary' => 'Secondary School (O\'Level)',
+                'Advanced' => 'Advanced School (O\'Level + A\'Level)',
+                'University' => 'University/Tertiary Institution',
+            ])
+            ->rules('required')
+            ->default('Primary')
+            ->help('Select the type of educational institution');
 
-            $form->text('motto', __('School Motto'))
-                ->help('School motto or slogan');
+        $form->text('motto', __('School Motto'))
+            ->help('School motto or slogan');
 
-            $form->quill('welcome_message', __('Welcome Message'))
-                ->help('Message displayed on school dashboard and reports');
+        $form->quill('welcome_message', __('Welcome Message'))
+            ->help('Message displayed on school dashboard and reports');
 
-            $form->image('logo', __('School Logo'))
-                ->help('Upload school logo (recommended: 200x200px, PNG/JPG)');
+        $form->image('logo', __('School Logo'))
+            ->help('Upload school logo (recommended: 200x200px, PNG/JPG)');
 
-            $form->radio('has_theology', __('Has Religious Studies'))
-                ->options([
-                    'Yes' => 'Yes',
-                    'No' => 'No',
-                ])
-                ->default('No')
-                ->rules('required')
-                ->help('Does the school offer religious/theology subjects?');
-        });
+        $form->radio('has_theology', __('Has Religious Studies'))
+            ->options([
+                'Yes' => 'Yes',
+                'No' => 'No',
+            ])
+            ->default('No')
+            ->help('Does the school offer religious/theology subjects?');
 
         // Contact & Location Information
-        $form->tab('Contact Information', function ($form) {
-            $form->text('phone_number', __('Primary Phone Number'))
-                ->rules('required|string|max:20')
-                ->help('Main contact number for the school');
+        $form->divider('Contact Information');
+        
+        $form->text('phone_number', __('Primary Phone Number'))
+            ->rules('required|string|max:20')
+            ->help('Main contact number for the school');
 
-            $form->text('phone_number_2', __('Secondary Phone Number'))
-                ->rules('string|max:20')
-                ->help('Alternative contact number');
+        $form->text('phone_number_2', __('Secondary Phone Number'))
+            ->rules('string|max:20')
+            ->help('Alternative contact number');
 
-            $form->email('email', __('Email Address'))
-                ->rules('required|email|max:255')
-                ->help('Official school email address');
+        $form->email('email', __('Email Address'))
+            ->rules('required|email|max:255')
+            ->help('Official school email address');
 
-            $form->url('website', __('Website URL'))
-                ->rules('url|max:255')
-                ->help('School website URL (e.g., https://school.com)');
+        $form->url('website', __('Website URL'))
+            ->rules('nullable|url|max:255')
+            ->help('School website URL (e.g., https://school.com)');
 
-            $form->textarea('address', __('Physical Address'))
-                ->rows(3)
-                ->rules('required|string|max:500')
-                ->help('Complete physical address of the school');
-        });
+        $form->textarea('address', __('Physical Address'))
+            ->rows(3)
+            ->rules('nullable|string|max:500')
+            ->help('Complete physical address of the school');
 
         // Administrative Information
-        $form->tab('Administration', function ($form) use ($u) {
-            $ajax_url = url(
-                '/api/ajax?'
-                    . 'enterprise_id=' . $u->enterprise_id
-                    . "&search_by_1=name"
-                    . "&search_by_2=email"
-                    . "&model=User"
-            );
+        $form->divider('Administration');
+        
+        $ajax_url = url(
+            '/api/ajax?'
+                . 'enterprise_id=' . $u->enterprise_id
+                . "&search_by_1=name"
+                . "&search_by_2=email"
+                . "&model=User"
+        );
 
-            $form->select('administrator_id', __('School Owner/Administrator'))
-                ->ajax($ajax_url)
-                ->options(function ($id) {
-                    $admin = User::find($id);
-                    if ($admin) {
-                        return [$admin->id => "#{$admin->id} - {$admin->name} ({$admin->email})"];
-                    }
-                })
-                ->rules('required')
-                ->help('The main administrator who owns this school');
+        $form->select('administrator_id', __('School Owner/Administrator'))
+            ->ajax($ajax_url)
+            ->options(function ($id) {
+                $admin = User::find($id);
+                if ($admin) {
+                    return [$admin->id => "#{$admin->id} - {$admin->name} ({$admin->email})"];
+                }
+            })
+            ->rules('nullable')
+            ->help('The main administrator who owns this school');
 
-            $form->text('hm_name', __('Head Teacher/Principal Name'))
-                ->help('Name of the current head teacher or principal');
-        });
+        $form->text('hm_name', __('Head Teacher/Principal Name'))
+            ->help('Name of the current head teacher or principal');
 
         // Visual & Branding
-        $form->tab('Branding & Appearance', function ($form) {
-            $form->color('color', __('Primary Color'))
-                ->default('#007bff')
-                ->rules('required')
-                ->help('Main brand color used throughout the system');
+        $form->divider('Branding & Appearance');
+        
+        $form->color('color', __('Primary Color'))
+            ->default('#007bff')
+            ->help('Main brand color used throughout the system');
 
-            $form->color('sec_color', __('Secondary Color'))
-                ->default('#6c757d')
-                ->rules('required')
-                ->help('Secondary brand color for accents');
+        $form->color('sec_color', __('Secondary Color'))
+            ->default('#6c757d')
+            ->help('Secondary brand color for accents');
 
-            $form->text('subdomain', __('Subdomain'))
-                ->rules('string|max:50|alpha_dash')
-                ->help('Unique subdomain for school (letters, numbers, hyphens only)')
-                ->placeholder('e.g., myschool');
-        });
+        $form->text('subdomain', __('Subdomain'))
+            ->rules('nullable|string|max:50|alpha_dash')
+            ->help('Unique subdomain for school (letters, numbers, hyphens only)')
+            ->placeholder('e.g., myschool');
 
         // Financial & Payment Settings
-        $form->tab('Financial Settings', function ($form) {
-            $form->divider('SchoolPay Integration');
+        $form->divider('SchoolPay Integration');
 
-            $form->radio('school_pay_status', __('SchoolPay Status'))
-                ->options([
-                    'Yes' => 'Enabled',
-                    'No' => 'Disabled',
-                ])
-                ->default('No')
-                ->when('Yes', function ($form) {
-                    $form->text('school_pay_code', __('SchoolPay Institution Code'))
-                        ->rules('required_if:school_pay_status,Yes')
-                        ->help('Your SchoolPay institution code');
+        $form->radio('school_pay_status', __('SchoolPay Status'))
+            ->options([
+                'Yes' => 'Enabled',
+                'No' => 'Disabled',
+            ])
+            ->default('No')
+            ->when('Yes', function ($form) {
+                $form->text('school_pay_code', __('SchoolPay Institution Code'))
+                    ->rules('required_if:school_pay_status,Yes')
+                    ->help('Your SchoolPay institution code');
 
-                    $form->password('school_pay_password', __('SchoolPay API Password'))
-                        ->rules('required_if:school_pay_status,Yes')
-                        ->help('SchoolPay API access password');
+                $form->password('school_pay_password', __('SchoolPay API Password'))
+                    ->rules('required_if:school_pay_status,Yes')
+                    ->help('SchoolPay API access password');
 
-                    $form->radio('school_pay_import_automatically', __('Auto Import Transactions'))
-                        ->options([
-                            'Yes' => 'Yes - Import automatically',
-                            'No' => 'No - Manual import only',
-                        ])
-                        ->default('No')
-                        ->help('Automatically import SchoolPay transactions?');
+                $form->radio('school_pay_import_automatically', __('Auto Import Transactions'))
+                    ->options([
+                        'Yes' => 'Yes - Import automatically',
+                        'No' => 'No - Manual import only',
+                    ])
+                    ->default('No')
+                    ->help('Automatically import SchoolPay transactions?');
 
-                    $form->date('school_pay_last_accepted_date', __('Import From Date'))
-                        ->default(date('Y-01-01'))
-                        ->help('Import transactions from this date onwards');
-                })
-                ->help('Enable SchoolPay payment gateway integration');
+                $form->date('school_pay_last_accepted_date', __('Import From Date'))
+                    ->default(date('Y-01-01'))
+                    ->help('Import transactions from this date onwards');
+            })
+            ->help('Enable SchoolPay payment gateway integration');
 
-            $form->divider('Wallet Settings');
-            $form->currency('wallet_balance', __('Current Wallet Balance'))
-                ->symbol('UGX')
-                ->readonly()
-                ->help('Current school wallet balance (managed automatically)');
-        });
+        $form->divider('Wallet Settings');
+        
+        $form->currency('wallet_balance', __('Current Wallet Balance'))
+            ->symbol('UGX')
+            ->readonly()
+            ->help('Current school wallet balance (managed automatically)');
 
         // Online Admissions Settings
-        $form->tab('Online Admissions', function ($form) {
-            $form->divider('Online Application Portal Settings');
-            
-            $form->radio('accepts_online_applications', __('Accept Online Applications'))
-                ->options([
-                    'Yes' => 'Yes - Enable online application portal',
-                    'No' => 'No - Disable online applications',
-                ])
-                ->default('No')
-                ->help('Allow prospective students to apply online through the application portal')
-                ->when('Yes', function ($form) {
-                    
-                    $form->text('application_deadline', __('Application Deadline'))
-                        ->placeholder('e.g., December 31, 2025')
-                        ->help('Display text for application deadline (optional)');
-                    
-                    $form->currency('application_fee', __('Application Fee'))
-                        ->symbol('UGX')
-                        ->default(0)
-                        ->help('Fee charged for submitting application (0 for free)');
-                    
-                    $form->textarea('application_instructions', __('Application Instructions'))
-                        ->rows(4)
-                        ->placeholder('Provide instructions for applicants...')
-                        ->help('Instructions displayed on the application landing page');
-                    
-                    $form->quill('custom_application_message', __('Custom Welcome Message'))
-                        ->help('Custom message for applicants (optional)');
-                });
-            
-            $form->divider('Required Documents Configuration');
-            
-            $form->html('<div class="alert alert-info">
-                <i class="fa fa-info-circle"></i> <strong>Configure Required Documents</strong><br>
-                Select which documents applicants must submit with their application.
-            </div>');
-            
-            // Standard Documents with checkboxes
-            $form->checkbox('req_doc_birth_certificate', __('Birth Certificate'))
-                ->options([
-                    'required' => 'Required',
-                    'optional' => 'Optional'
-                ])
-                ->help('Birth certificate document');
-            
-            $form->checkbox('req_doc_previous_school_report', __('Previous School Report'))
-                ->options([
-                    'required' => 'Required',
-                    'optional' => 'Optional'
-                ])
-                ->help('Report card from previous school');
-            
-            $form->checkbox('req_doc_passport_photo', __('Passport Photo'))
-                ->options([
-                    'required' => 'Required',
-                    'optional' => 'Optional'
-                ])
-                ->help('Recent passport-sized photograph');
-            
-            $form->checkbox('req_doc_parent_id', __('Parent/Guardian ID'))
-                ->options([
-                    'required' => 'Required',
-                    'optional' => 'Optional'
-                ])
-                ->help('Parent or guardian identification document');
-            
-            $form->checkbox('req_doc_immunization', __('Immunization Records'))
-                ->options([
-                    'required' => 'Required',
-                    'optional' => 'Optional'
-                ])
-                ->help('Medical immunization records');
-            
-            $form->checkbox('req_doc_recommendation', __('Recommendation Letter'))
-                ->options([
-                    'required' => 'Required',
-                    'optional' => 'Optional'
-                ])
-                ->help('Letter of recommendation');
-            
-            $form->checkbox('req_doc_leaving_certificate', __('School Leaving Certificate'))
-                ->options([
-                    'required' => 'Required',
-                    'optional' => 'Optional'
-                ])
-                ->help('Certificate from previous school');
-            
-            $form->checkbox('req_doc_medical_report', __('Medical Report'))
-                ->options([
-                    'required' => 'Required',
-                    'optional' => 'Optional'
-                ])
-                ->help('Recent medical examination report');
-            
-            $form->divider('Additional Custom Documents');
-            
-            $form->textarea('custom_required_documents', __('Custom Documents (One Per Line)'))
-                ->rows(5)
-                ->placeholder("Transfer Certificate|required\nCharacter Certificate|optional\nFee Clearance|required")
-                ->help('Add school-specific documents. Format: "Document Name|required" or "Document Name|optional"');
-        });
+        $form->divider('Online Application Portal Settings');
+        
+        $form->radio('accepts_online_applications', __('Accept Online Applications'))
+            ->options([
+                'Yes' => 'Yes - Enable online application portal',
+                'No' => 'No - Disable online applications',
+            ])
+            ->default('No')
+            ->help('Allow prospective students to apply online through the application portal')
+            ->when('Yes', function ($form) {
+                
+                $form->text('application_deadline', __('Application Deadline'))
+                    ->placeholder('e.g., December 31, 2025')
+                    ->help('Display text for application deadline (optional)');
+                
+                $form->currency('application_fee', __('Application Fee'))
+                    ->symbol('UGX')
+                    ->default(0)
+                    ->help('Fee charged for submitting application (0 for free)');
+                
+                $form->textarea('application_instructions', __('Application Instructions'))
+                    ->rows(4)
+                    ->placeholder('Provide instructions for applicants...')
+                    ->help('Instructions displayed on the application landing page');
+                
+                $form->quill('custom_application_message', __('Custom Welcome Message'))
+                    ->help('Custom message for applicants (optional)');
+            });
+        
+        $form->divider('Required Documents Configuration');
+        
+        $form->html('<div class="alert alert-info">
+            <i class="fa fa-info-circle"></i> <strong>Configure Required Documents</strong><br>
+            Select which documents applicants must submit with their application.
+        </div>');
+        
+        // Standard Documents with checkboxes
+        $form->checkbox('req_doc_birth_certificate', __('Birth Certificate'))
+            ->options([
+                'required' => 'Required',
+                'optional' => 'Optional'
+            ])
+            ->help('Birth certificate document');
+        
+        $form->checkbox('req_doc_previous_school_report', __('Previous School Report'))
+            ->options([
+                'required' => 'Required',
+                'optional' => 'Optional'
+            ])
+            ->help('Report card from previous school');
+        
+        $form->checkbox('req_doc_passport_photo', __('Passport Photo'))
+            ->options([
+                'required' => 'Required',
+                'optional' => 'Optional'
+            ])
+            ->help('Recent passport-sized photograph');
+        
+        $form->checkbox('req_doc_parent_id', __('Parent/Guardian ID'))
+            ->options([
+                'required' => 'Required',
+                'optional' => 'Optional'
+            ])
+            ->help('Parent or guardian identification document');
+        
+        $form->checkbox('req_doc_immunization', __('Immunization Records'))
+            ->options([
+                'required' => 'Required',
+                'optional' => 'Optional'
+            ])
+            ->help('Medical immunization records');
+        
+        $form->checkbox('req_doc_recommendation', __('Recommendation Letter'))
+            ->options([
+                'required' => 'Required',
+                'optional' => 'Optional'
+            ])
+            ->help('Letter of recommendation');
+        
+        $form->checkbox('req_doc_leaving_certificate', __('School Leaving Certificate'))
+            ->options([
+                'required' => 'Required',
+                'optional' => 'Optional'
+            ])
+            ->help('Certificate from previous school');
+        
+        $form->checkbox('req_doc_medical_report', __('Medical Report'))
+            ->options([
+                'required' => 'Required',
+                'optional' => 'Optional'
+            ])
+            ->help('Recent medical examination report');
+        
+        $form->divider('Additional Custom Documents');
+        
+        $form->textarea('custom_required_documents', __('Custom Documents (One Per Line)'))
+            ->rows(5)
+            ->placeholder("Transfer Certificate|required\nCharacter Certificate|optional\nFee Clearance|required")
+            ->help('Add school-specific documents. Format: "Document Name|required" or "Document Name|optional"');
         
         // License & System Settings
-        $form->tab('License & System', function ($form) {
-            $form->radio('has_valid_lisence', __('License Status'))
-                ->options([
-                    'Yes' => 'Valid License',
-                    'No' => 'Invalid/Expired License',
-                ])
-                ->default('Yes')
-                ->rules('required')
-                ->help('Current license validity status');
+        $form->divider('License & System Information');
+        
+        $form->radio('has_valid_lisence', __('License Status'))
+            ->options([
+                'Yes' => 'Valid License',
+                'No' => 'Invalid/Expired License',
+            ])
+            ->default('Yes')
+            ->help('Current license validity status');
 
-            $form->date('expiry', __('License Expiry Date'))
-                ->help('When does the school license expire?');
+        $form->date('expiry', __('License Expiry Date'))
+            ->help('When does the school license expire?');
 
-            $form->divider('Additional Information');
-            $form->textarea('details', __('Additional Details'))
-                ->rows(4)
-                ->help('Any additional information about the school');
-        });
+        $form->divider('Additional Information');
+        
+        $form->textarea('details', __('Additional Details'))
+            ->rows(4)
+            ->help('Any additional information about the school');
 
         // Custom CSS and JavaScript for enhanced UX
         $form->html('<script>
