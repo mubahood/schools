@@ -235,6 +235,40 @@ class EnterpriseController extends AdminController
                 '<span class="label label-default">Disabled</span>';
         });
 
+        // Online Admissions Configuration
+        $show->divider('Online Admissions Settings');
+        $show->field('accepts_online_applications', __('Accepts Online Applications'))->as(function ($status) {
+            return $status == 'Yes' ?
+                '<span class="label label-success"><i class="fa fa-check"></i> Enabled</span>' :
+                '<span class="label label-default"><i class="fa fa-times"></i> Disabled</span>';
+        });
+        $show->field('application_fee', __('Application Fee'))->as(function ($fee) {
+            if (!$fee || $fee == 0) return '<span class="text-success">Free Application</span>';
+            return 'UGX ' . number_format($fee);
+        });
+        $show->field('application_deadline', __('Application Deadline'));
+        $show->field('application_instructions', __('Application Instructions'))->unescape();
+        $show->field('required_application_documents', __('Required Documents'))->as(function ($docs) {
+            if (!$docs) return '<span class="text-muted">No documents configured</span>';
+            
+            $documents = json_decode($docs, true);
+            if (!is_array($documents) || empty($documents)) {
+                return '<span class="text-muted">No documents configured</span>';
+            }
+            
+            $html = '<ul class="list-unstyled" style="margin: 0;">';
+            foreach ($documents as $doc) {
+                $name = $doc['name'] ?? 'Unknown';
+                $required = $doc['required'] ?? false;
+                $badge = $required ? 
+                    '<span class="label label-danger">Required</span>' : 
+                    '<span class="label label-info">Optional</span>';
+                $html .= "<li style='padding: 5px 0;'><i class='fa fa-file-text'></i> {$name} {$badge}</li>";
+            }
+            $html .= '</ul>';
+            return $html;
+        });
+        
         // License & Expiry
         $show->divider('License Information');
         $show->field('has_valid_lisence', __('License Status'))->as(function ($license) {
@@ -310,6 +344,101 @@ class EnterpriseController extends AdminController
                 $form->short_name = strtoupper(substr(implode('', array_map(function ($word) {
                     return substr($word, 0, 1);
                 }, $words)), 0, 5));
+            }
+            
+            // Compile required documents from checkboxes to JSON
+            $documents = [];
+            
+            // Standard documents mapping
+            $standardDocs = [
+                'req_doc_birth_certificate' => 'Birth Certificate',
+                'req_doc_previous_school_report' => 'Previous School Report',
+                'req_doc_passport_photo' => 'Passport Photo',
+                'req_doc_parent_id' => 'Parent/Guardian ID',
+                'req_doc_immunization' => 'Immunization Records',
+                'req_doc_recommendation' => 'Recommendation Letter',
+                'req_doc_leaving_certificate' => 'School Leaving Certificate',
+                'req_doc_medical_report' => 'Medical Report',
+            ];
+            
+            // Process standard document checkboxes
+            foreach ($standardDocs as $field => $name) {
+                $value = $form->input($field);
+                if (!empty($value) && is_array($value)) {
+                    $isRequired = in_array('required', $value);
+                    $documents[] = [
+                        'name' => $name,
+                        'required' => $isRequired
+                    ];
+                }
+            }
+            
+            // Process custom documents from textarea
+            $customDocs = $form->input('custom_required_documents');
+            if (!empty($customDocs)) {
+                $lines = explode("\n", $customDocs);
+                foreach ($lines as $line) {
+                    $line = trim($line);
+                    if (empty($line)) continue;
+                    
+                    $parts = explode('|', $line);
+                    $docName = trim($parts[0]);
+                    $docType = isset($parts[1]) ? strtolower(trim($parts[1])) : 'optional';
+                    
+                    if (!empty($docName)) {
+                        $documents[] = [
+                            'name' => $docName,
+                            'required' => ($docType === 'required')
+                        ];
+                    }
+                }
+            }
+            
+            // Save as JSON
+            $form->required_application_documents = json_encode($documents);
+        });
+        
+        // Editing - populate checkboxes from JSON
+        $form->editing(function (Form $form) {
+            $model = $form->model();
+            if ($model && $model->required_application_documents) {
+                $documents = json_decode($model->required_application_documents, true);
+                
+                if (is_array($documents)) {
+                    // Standard documents mapping (reverse)
+                    $fieldMapping = [
+                        'Birth Certificate' => 'req_doc_birth_certificate',
+                        'Previous School Report' => 'req_doc_previous_school_report',
+                        'Passport Photo' => 'req_doc_passport_photo',
+                        'Parent/Guardian ID' => 'req_doc_parent_id',
+                        'Immunization Records' => 'req_doc_immunization',
+                        'Recommendation Letter' => 'req_doc_recommendation',
+                        'School Leaving Certificate' => 'req_doc_leaving_certificate',
+                        'Medical Report' => 'req_doc_medical_report',
+                    ];
+                    
+                    $customDocs = [];
+                    
+                    foreach ($documents as $doc) {
+                        $docName = $doc['name'] ?? '';
+                        $isRequired = $doc['required'] ?? false;
+                        
+                        // Check if it's a standard document
+                        if (isset($fieldMapping[$docName])) {
+                            $fieldName = $fieldMapping[$docName];
+                            $value = $isRequired ? ['required'] : ['optional'];
+                            $model->setAttribute($fieldName, $value);
+                        } else {
+                            // It's a custom document
+                            $customDocs[] = $docName . '|' . ($isRequired ? 'required' : 'optional');
+                        }
+                    }
+                    
+                    // Set custom documents textarea
+                    if (!empty($customDocs)) {
+                        $model->setAttribute('custom_required_documents', implode("\n", $customDocs));
+                    }
+                }
             }
         });
 
@@ -459,6 +588,109 @@ class EnterpriseController extends AdminController
                 ->help('Current school wallet balance (managed automatically)');
         });
 
+        // Online Admissions Settings
+        $form->tab('Online Admissions', function ($form) {
+            $form->divider('Online Application Portal Settings');
+            
+            $form->radio('accepts_online_applications', __('Accept Online Applications'))
+                ->options([
+                    'Yes' => 'Yes - Enable online application portal',
+                    'No' => 'No - Disable online applications',
+                ])
+                ->default('No')
+                ->help('Allow prospective students to apply online through the application portal')
+                ->when('Yes', function ($form) {
+                    
+                    $form->text('application_deadline', __('Application Deadline'))
+                        ->placeholder('e.g., December 31, 2025')
+                        ->help('Display text for application deadline (optional)');
+                    
+                    $form->currency('application_fee', __('Application Fee'))
+                        ->symbol('UGX')
+                        ->default(0)
+                        ->help('Fee charged for submitting application (0 for free)');
+                    
+                    $form->textarea('application_instructions', __('Application Instructions'))
+                        ->rows(4)
+                        ->placeholder('Provide instructions for applicants...')
+                        ->help('Instructions displayed on the application landing page');
+                    
+                    $form->quill('custom_application_message', __('Custom Welcome Message'))
+                        ->help('Custom message for applicants (optional)');
+                });
+            
+            $form->divider('Required Documents Configuration');
+            
+            $form->html('<div class="alert alert-info">
+                <i class="fa fa-info-circle"></i> <strong>Configure Required Documents</strong><br>
+                Select which documents applicants must submit with their application.
+            </div>');
+            
+            // Standard Documents with checkboxes
+            $form->checkbox('req_doc_birth_certificate', __('Birth Certificate'))
+                ->options([
+                    'required' => 'Required',
+                    'optional' => 'Optional'
+                ])
+                ->help('Birth certificate document');
+            
+            $form->checkbox('req_doc_previous_school_report', __('Previous School Report'))
+                ->options([
+                    'required' => 'Required',
+                    'optional' => 'Optional'
+                ])
+                ->help('Report card from previous school');
+            
+            $form->checkbox('req_doc_passport_photo', __('Passport Photo'))
+                ->options([
+                    'required' => 'Required',
+                    'optional' => 'Optional'
+                ])
+                ->help('Recent passport-sized photograph');
+            
+            $form->checkbox('req_doc_parent_id', __('Parent/Guardian ID'))
+                ->options([
+                    'required' => 'Required',
+                    'optional' => 'Optional'
+                ])
+                ->help('Parent or guardian identification document');
+            
+            $form->checkbox('req_doc_immunization', __('Immunization Records'))
+                ->options([
+                    'required' => 'Required',
+                    'optional' => 'Optional'
+                ])
+                ->help('Medical immunization records');
+            
+            $form->checkbox('req_doc_recommendation', __('Recommendation Letter'))
+                ->options([
+                    'required' => 'Required',
+                    'optional' => 'Optional'
+                ])
+                ->help('Letter of recommendation');
+            
+            $form->checkbox('req_doc_leaving_certificate', __('School Leaving Certificate'))
+                ->options([
+                    'required' => 'Required',
+                    'optional' => 'Optional'
+                ])
+                ->help('Certificate from previous school');
+            
+            $form->checkbox('req_doc_medical_report', __('Medical Report'))
+                ->options([
+                    'required' => 'Required',
+                    'optional' => 'Optional'
+                ])
+                ->help('Recent medical examination report');
+            
+            $form->divider('Additional Custom Documents');
+            
+            $form->textarea('custom_required_documents', __('Custom Documents (One Per Line)'))
+                ->rows(5)
+                ->placeholder("Transfer Certificate|required\nCharacter Certificate|optional\nFee Clearance|required")
+                ->help('Add school-specific documents. Format: "Document Name|required" or "Document Name|optional"');
+        });
+        
         // License & System Settings
         $form->tab('License & System', function ($form) {
             $form->radio('has_valid_lisence', __('License Status'))
@@ -478,224 +710,6 @@ class EnterpriseController extends AdminController
                 ->rows(4)
                 ->help('Any additional information about the school');
         });
-
-
-        $form->divider('Online Student Application Settings');
-
-        $form->radio('accepts_online_applications', __('Accept Online Student Applications'))
-            ->options([
-                'Yes' => 'Yes',
-                'No' => 'No',
-                'Custom' => 'Custom Message (Applications Closed)',
-            ])
-            ->default('No')
-            ->help('Enable or disable online student application portal');
-
-        $form->decimal('application_fee', __('Application Fee'))
-            ->default(0.00)
-            ->help('Fee amount for student application (0 for free)');
-
-        $form->quill('application_instructions', __('Application Instructions'))
-            ->help('Instructions that will be shown to applicants on the landing page');
-
-        // Required Documents Section
-        $form->divider('Required Documents Configuration');
-
-        $form->html('<div class="alert alert-info">
-            <i class="fa fa-info-circle"></i> 
-            <strong>Select Required Documents:</strong> Check the documents you want to require from applicants. 
-            You can mark documents as optional or required.
-        </div>');
-
-        // Common documents with checkboxes
-        $form->checkbox('req_doc_birth_certificate', __('Birth Certificate'))
-            ->options([
-                'required' => 'Required',
-                'optional' => 'Optional'
-            ])
-            ->help('Birth certificate document');
-
-        $form->checkbox('req_doc_previous_school_report', __('Previous School Report'))
-            ->options([
-                'required' => 'Required',
-                'optional' => 'Optional'
-            ])
-            ->help('Report card from previous school');
-
-        $form->checkbox('req_doc_passport_photo', __('Passport Photo'))
-            ->options([
-                'required' => 'Required',
-                'optional' => 'Optional'
-            ])
-            ->help('Recent passport-sized photograph');
-
-        $form->checkbox('req_doc_parent_id', __('Parent/Guardian ID'))
-            ->options([
-                'required' => 'Required',
-                'optional' => 'Optional'
-            ])
-            ->help('Parent or guardian identification document');
-
-        $form->checkbox('req_doc_immunization', __('Immunization Records'))
-            ->options([
-                'required' => 'Required',
-                'optional' => 'Optional'
-            ])
-            ->help('Student immunization/vaccination records');
-
-        $form->checkbox('req_doc_recommendation', __('Recommendation Letter'))
-            ->options([
-                'required' => 'Required',
-                'optional' => 'Optional'
-            ])
-            ->help('Letter of recommendation from previous school');
-
-        $form->checkbox('req_doc_leaving_certificate', __('School Leaving Certificate'))
-            ->options([
-                'required' => 'Required',
-                'optional' => 'Optional'
-            ])
-            ->help('Certificate from previous school');
-
-        $form->checkbox('req_doc_medical_report', __('Medical Report'))
-            ->options([
-                'required' => 'Required',
-                'optional' => 'Optional'
-            ])
-            ->help('Recent medical examination report');
-
-        // Custom documents
-        $form->html('<div class="alert alert-success" style="margin-top: 20px;">
-            <i class="fa fa-plus-circle"></i> 
-            <strong>Additional Custom Documents:</strong> Add any other documents specific to your school below (one per line).
-        </div>');
-
-        $form->textarea('custom_required_documents', __('Custom Documents (One Per Line)'))
-            ->rows(5)
-            ->placeholder("Enter custom documents, one per line. Example:\nTransfer Certificate\nCharacter Certificate\nFee Clearance")
-            ->help('Add any additional documents not listed above. Format: "Document Name|required" or "Document Name|optional"');
-
-        // Hidden field to store the compiled JSON (will be populated on save)
-        $form->hidden('required_application_documents');
-
-        // Save hook to compile checkbox selections into JSON
-        $form->saving(function (Form $form) {
-            $documents = [];
-
-            // Process standard documents
-            $standardDocs = [
-                'req_doc_birth_certificate' => 'Birth Certificate',
-                'req_doc_previous_school_report' => 'Previous School Report',
-                'req_doc_passport_photo' => 'Passport Photo',
-                'req_doc_parent_id' => 'Parent/Guardian ID',
-                'req_doc_immunization' => 'Immunization Records',
-                'req_doc_recommendation' => 'Recommendation Letter',
-                'req_doc_leaving_certificate' => 'School Leaving Certificate',
-                'req_doc_medical_report' => 'Medical Report',
-            ];
-
-            foreach ($standardDocs as $field => $name) {
-                $value = $form->input($field);
-                if (!empty($value)) {
-                    $isRequired = in_array('required', $value);
-                    $isOptional = in_array('optional', $value);
-
-                    if ($isRequired || $isOptional) {
-                        $documents[] = [
-                            'name' => $name,
-                            'required' => $isRequired
-                        ];
-                    }
-                }
-            }
-
-            // Process custom documents
-            $customDocs = $form->input('custom_required_documents');
-            if (!empty($customDocs)) {
-                $lines = explode("\n", $customDocs);
-                foreach ($lines as $line) {
-                    $line = trim($line);
-                    if (empty($line)) continue;
-
-                    // Check if line has |required or |optional
-                    if (strpos($line, '|') !== false) {
-                        list($docName, $reqType) = explode('|', $line, 2);
-                        $docName = trim($docName);
-                        $reqType = trim(strtolower($reqType));
-
-                        if (!empty($docName)) {
-                            $documents[] = [
-                                'name' => $docName,
-                                'required' => ($reqType === 'required')
-                            ];
-                        }
-                    } else {
-                        // No requirement specified, default to optional
-                        $documents[] = [
-                            'name' => $line,
-                            'required' => false
-                        ];
-                    }
-                }
-            }
-
-            // Store as JSON
-            $form->required_application_documents = json_encode($documents);
-        });
-
-        // Load existing JSON data into checkbox fields when editing
-        $form->editing(function (Form $form) {
-            $jsonData = $form->model()->required_application_documents;
-
-            if (!empty($jsonData)) {
-                $documents = json_decode($jsonData, true);
-
-                if (is_array($documents)) {
-                    // Map document names to field names
-                    $fieldMapping = [
-                        'Birth Certificate' => 'req_doc_birth_certificate',
-                        'Previous School Report' => 'req_doc_previous_school_report',
-                        'Passport Photo' => 'req_doc_passport_photo',
-                        'Parent/Guardian ID' => 'req_doc_parent_id',
-                        'Immunization Records' => 'req_doc_immunization',
-                        'Recommendation Letter' => 'req_doc_recommendation',
-                        'School Leaving Certificate' => 'req_doc_leaving_certificate',
-                        'Medical Report' => 'req_doc_medical_report',
-                    ];
-
-                    $customDocs = [];
-
-                    foreach ($documents as $doc) {
-                        $docName = $doc['name'] ?? '';
-                        $isRequired = $doc['required'] ?? false;
-
-                        // Check if it's a standard document
-                        if (isset($fieldMapping[$docName])) {
-                            $fieldName = $fieldMapping[$docName];
-                            $form->model()->{$fieldName} = [$isRequired ? 'required' : 'optional'];
-                        } else {
-                            // It's a custom document
-                            $reqType = $isRequired ? 'required' : 'optional';
-                            $customDocs[] = $docName . '|' . $reqType;
-                        }
-                    }
-
-                    // Set custom documents field
-                    if (!empty($customDocs)) {
-                        $form->model()->custom_required_documents = implode("\n", $customDocs);
-                    }
-                }
-            }
-        });
-
-        $form->date('application_deadline', __('Application Deadline'))
-            ->help('Last date to accept applications (optional)');
-
-        $form->textarea('application_status_message', __('Custom Status Message'))
-            ->rows(3)
-            ->help('Custom message to show when applications are closed (only used when set to "Custom")');
-
-
 
         // Custom CSS and JavaScript for enhanced UX
         $form->html('<script>
