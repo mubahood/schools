@@ -129,11 +129,7 @@ class StudentFinancialAccountController extends AdminController
                 ]
             );*/
 
-            $filter->group('balance', function ($group) {
-                $group->gt('greater than');
-                $group->lt('less than');
-                $group->equal('equal to');
-            });
+             $filter->between('balance', 'Balance');
         });
 
 

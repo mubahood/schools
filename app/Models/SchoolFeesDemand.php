@@ -85,7 +85,7 @@ class SchoolFeesDemand extends Model
                 ->whereIn('administrator_id', $ids)
                 ->where('balance', $this->direction, $balance)
                 ->orderBy('balance', 'desc')
-                
+
                 ->get();
             $recs[$class] = $accounts;
         }
@@ -110,7 +110,9 @@ class SchoolFeesDemand extends Model
             throw new \Exception('Invalid target type');
         }
 
+        $all_ids = [];
         $recs = [];
+        $done_ids = [];
         foreach ($this->classes as $key => $class) {
             $conds['current_class_id'] = $class;
 
@@ -125,6 +127,11 @@ class SchoolFeesDemand extends Model
                     ->pluck('id')
                     ->toArray();
             }
+            //check if ids are already in $done_ids and remove them
+            $ids = array_diff($ids, $done_ids);
+            //$done_ids
+            $done_ids = array_merge($done_ids, $ids);
+
 
             $accounts = Account::where([
                 'enterprise_id' => $this->enterprise_id,
@@ -132,11 +139,22 @@ class SchoolFeesDemand extends Model
                 ->whereIn('administrator_id', $ids)
                 ->where('balance', $this->direction, $balance)
                 ->orderBy('balance', 'desc')
-                 
                 ->get();
             $recs[$class] = $accounts;
+            $all_ids = array_merge($all_ids, $ids);
         }
 
+        $dup_ids = [];
+        $unique_ids = [];
+        foreach ($all_ids as $key => $value) {
+            if (in_array($value, $unique_ids)) {
+                $dup_ids[] = $value;
+            } else {
+                $unique_ids[] = $value;
+            }
+        }
+        //
+        // dd($all_ids);
         /* implement  */
         return $recs;
     }
