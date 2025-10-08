@@ -2184,6 +2184,7 @@ Route::get('meal-cards', function (Request $r) {
   $ent = Enterprise::find($idCard->enterprise_id);
   $recs = $idCard->get_meal_card_records();
 
+
   $IS_GATE_PASS = false;
   if (isset($r->type) && $r->type == 'GATE_PASS') {
     $IS_GATE_PASS = true;

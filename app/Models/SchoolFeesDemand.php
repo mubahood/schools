@@ -133,7 +133,7 @@ class SchoolFeesDemand extends Model
             $done_ids = array_merge($done_ids, $ids);
 
 
-            $accounts = Account::where([
+        $accounts = Account::where([
                 'enterprise_id' => $this->enterprise_id,
             ])
                 ->whereIn('administrator_id', $ids)
