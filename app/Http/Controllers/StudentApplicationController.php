@@ -22,7 +22,7 @@ class StudentApplicationController extends Controller
     public function landing()
     {
         // Get ANY enterprise for branding (prioritize ones with applications enabled)
-        $enterprise = Enterprise::where('accepts_online_applications', 'Yes')->first();
+        $enterprise = Enterprise::where([])->first();
         
         if (!$enterprise) {
             // If no school has applications enabled, still show ANY school for branding
@@ -50,7 +50,7 @@ class StudentApplicationController extends Controller
         }
         
         // RELAXED: Accept applications if enabled, ignore all other restrictions
-        $acceptsApplications = ($enterprise->accepts_online_applications === 'Yes');
+        $acceptsApplications = true;
         
         // Get required documents
         $requiredDocuments = [];
@@ -118,7 +118,7 @@ class StudentApplicationController extends Controller
         $application = $request->attributes->get('application');
         
         // Get all enterprises that accept applications (relaxed - no deadline restrictions)
-        $schools = Enterprise::where('accepts_online_applications', 'Yes')
+        $schools = Enterprise::where([])
                             ->orderBy('name', 'asc')
                             ->get();
         
@@ -150,7 +150,7 @@ class StudentApplicationController extends Controller
         $enterprise = Enterprise::find($request->enterprise_id);
         
         // Verify school exists and accepts applications
-        if (!$enterprise || $enterprise->accepts_online_applications !== 'Yes') {
+        if (!$enterprise) {
             return response()->json([
                 'success' => false,
                 'message' => 'This school is not currently accepting applications.'
