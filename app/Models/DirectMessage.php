@@ -129,7 +129,7 @@ class DirectMessage extends Model
                 $wallet_rec->save();
             } else {
                 $m->status = 'Failed';
-                $m->error_message_message = "Failed to send message. Response: $response";
+                $m->error_message_message = "Failed to send message. Response: $response. URL: $url";
                 $m->save();
                 return $m->error_message_message;
             }
