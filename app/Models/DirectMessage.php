@@ -5,6 +5,8 @@ namespace App\Models;
 use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 
 class DirectMessage extends Model
 {
@@ -88,32 +90,19 @@ class DirectMessage extends Model
         $receiver_number = str_replace('+', '', trim($m->receiver_number));
         $url = "https://www.socnetsolutions.com/projects/bulk/amfphp/services/blast.php?spname=$username&sppass=Mub4r4k4@2025&type=json&numbers=$receiver_number&msg=$msg";
 
-
-
         try {
-            $ch = curl_init();
-            // $url;
-
-            curl_setopt_array($ch, [
-                CURLOPT_URL            => $url,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_SSL_VERIFYPEER => false,
-                CURLOPT_SSL_VERIFYHOST => false,
-                CURLOPT_TIMEOUT        => 30,
+            // Initialize Guzzle HTTP client
+            $client = new Client([
+                'verify' => false, // Equivalent to CURLOPT_SSL_VERIFYPEER => false
+                'timeout' => 30,   // Equivalent to CURLOPT_TIMEOUT => 30
+                'allow_redirects' => true, // Equivalent to CURLOPT_FOLLOWLOCATION => true
             ]);
 
-            $response = curl_exec($ch);
-            try {
-                curl_errno($ch);
-            } catch (\Throwable $th) {
-                $m->status = 'Failed';
-                $m->error_message_message = 'cURL Error: ' . curl_error($ch)." URL: $url";
-                $m->save();
-                throw new \Exception('cURL Error: ' . curl_error($ch)." URL: $url");
-            }
-
-            curl_close($ch);
+            // Make the GET request
+            $guzzleResponse = $client->get($url);
+            
+            // Get response body as string
+            $response = $guzzleResponse->getBody()->getContents();
 
             $m->response = $response;
 
@@ -134,6 +123,11 @@ class DirectMessage extends Model
                 $m->save();
                 return $m->error_message_message;
             }
+        } catch (GuzzleException $e) {
+            $m->status = 'Failed';
+            $m->error_message_message = 'HTTP Error: ' . $e->getMessage() . " URL: $url";
+            $m->save();
+            return $m->error_message_message;
         } catch (\Throwable $th) {
             $m->status = 'Failed';
             $m->error_message_message = "Error: {$th->getMessage()}, URL: $url";
