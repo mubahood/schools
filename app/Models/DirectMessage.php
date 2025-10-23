@@ -135,7 +135,7 @@ class DirectMessage extends Model
             }
 
 
-            if (!isset($json['socnetblast'])) {
+            if (!isset($json['socnetblast']) || !is_array($json['socnetblast'])) {
                 $m->status = 'Failed';
                 $m->error_message_message = "Unexpected API response format. URL: $url Response: $response";
                 $m->save();
@@ -143,9 +143,9 @@ class DirectMessage extends Model
             }
             $parsedResponse = $json['socnetblast'];
 
-            if (!isset($parsedResponse['status'])) {
+            if (!isset($parsedResponse['status']) || !is_string($parsedResponse['status'])) {
                 $m->status = 'Failed';
-                $m->error_message_message = "Missing status in API response. URL: $url Response: $response";
+                $m->error_message_message = "Missing or invalid status in API response. URL: $url Response: $response";
                 $m->save();
                 return $m->error_message_message;
             }
@@ -160,7 +160,7 @@ class DirectMessage extends Model
                 return $m->error_message_message;
             }
 
-            $info = $parsedResponse['info'] ?? '';
+            $info = isset($parsedResponse['info']) && is_string($parsedResponse['info']) ? $parsedResponse['info'] : '';
             $infoSlipcs = explode(" ", $info);
             //if $infoSlipcs does not contain ok
             if (in_array('ok:', $infoSlipcs) === false) {
@@ -173,10 +173,10 @@ class DirectMessage extends Model
 
             // Store enhanced response with parsed information
             $responseInfo = "Response: $response";
-            if (!empty($parsedResponse['messageId'])) {
+            if (isset($parsedResponse['messageId']) && is_scalar($parsedResponse['messageId']) && !empty($parsedResponse['messageId'])) {
                 $responseInfo .= " | API Message ID: " . $parsedResponse['messageId'];
             }
-            if (!empty($parsedResponse['credit'])) {
+            if (isset($parsedResponse['credit']) && is_scalar($parsedResponse['credit']) && !empty($parsedResponse['credit'])) {
                 $responseInfo .= " | Credit Remaining: " . $parsedResponse['credit'];
             }
             $m->response = $responseInfo;
@@ -186,7 +186,8 @@ class DirectMessage extends Model
             $wallet_rec = new WalletRecord();
             $wallet_rec->enterprise_id = $m->enterprise_id;
             $wallet_rec->amount = $no_of_messages * -50;
-            $wallet_rec->details = "Sent $no_of_messages messages to $m->receiver_number. ref: $m->id, API Message ID: " . ($parsedResponse['messageId'] ?? 'N/A');
+            $messageId = isset($parsedResponse['messageId']) && is_scalar($parsedResponse['messageId']) ? $parsedResponse['messageId'] : 'N/A';
+            $wallet_rec->details = "Sent $no_of_messages messages to $m->receiver_number. ref: $m->id, API Message ID: " . $messageId;
             $wallet_rec->save();
             return 'success';
         } catch (GuzzleException $e) {
