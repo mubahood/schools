@@ -78,19 +78,26 @@ class DirectMessage extends Model
             return $m->error_message_message;
         }
     
+        $username='mubaraka';
+        $password='Mub4r4k4@2025'; //password changes
+        $msg = trim($m->message_body);
+        //encode message
+        $msg = urlencode($msg);
+        $numbers = $m->receiver_number;
+
         // Construct API URL
-        $url = "https://www.socnetsolutions.com/projects/bulk/amfphp/services/blast.php";
-        $params = [
-            'username' => 'mubaraka',
-            'passwd'   => 'Mub4r4k4@2025', //password changes
-            'msg'      => trim($m->message_body),
-            'numbers'  => $m->receiver_number
-        ];
-    
+        $url = "https://www.socnetsolutions.com/projects/bulk/amfphp/services/blast.php?spname=$username&sppass=$password&type=json&numbers=$numbers&msg=$msg";
+        // $params = [
+        //     // 'username' => $username,
+        //     // 'passwd'   => $password,
+        //     'msg'      => trim($m->message_body),
+        //     'numbers'  => $m->receiver_number
+        // ];
+    //https://www.socnetsolutions.com/projects/bulk/amfphp/services/blast.php?spname=mubaraka&sppass=Mub4r4k4@2025&type=json&numbers=256774715632&msg=Test+msg
         // Send request using cURL
         try {
             $ch = curl_init();
-            $url .= '?' . http_build_query($params);
+            // $url
     
             curl_setopt_array($ch, [
                 CURLOPT_URL            => $url,
