@@ -37,7 +37,7 @@ class DirectMessage extends Model
         if ($m->status !== 'Pending') {
             return "Message status is not 'Pending'. Current status: {$m->status}";
         }
-    
+
         // Validate phone number
         if (!Utils::validateUgandanPhoneNumber($m->receiver_number)) {
             $m->status = 'Failed';
@@ -53,7 +53,7 @@ class DirectMessage extends Model
             $m->save();
             return $m->error_message_message;
         }
-    
+
         // Check wallet balance
         if ($ent->wallet_balance < 50) {
             $m->status = 'Failed';
@@ -61,7 +61,7 @@ class DirectMessage extends Model
             $m->save();
             return $m->error_message_message;
         }
-    
+
         // Validate message body
         if (empty(trim($m->message_body))) {
             $m->status = 'Failed';
@@ -69,7 +69,7 @@ class DirectMessage extends Model
             $m->save();
             return $m->error_message_message;
         }
-    
+
         // Check if messaging is enabled
         if ($ent->can_send_messages !== 'Yes') {
             $m->status = 'Failed';
@@ -77,22 +77,22 @@ class DirectMessage extends Model
             $m->save();
             return $m->error_message_message;
         }
-    
-        $username='mubaraka';
+
+        $username = 'mubaraka';
         // Construct API URL
         $url = "https://www.socnetsolutions.com/projects/bulk/amfphp/services/blast.php";
- 
+
         $m->message_body = "this is a simple messge";
         $msg = htmlspecialchars(trim($m->message_body));
         $msg = urlencode($msg);
         $url = "https://www.socnetsolutions.com/projects/bulk/amfphp/services/blast.php?spname=$username&sppass=Mub4r4k4@2025&type=json&numbers={$m->receiver_number}&msg=$msg";
- 
-        
+
+
 
         try {
             $ch = curl_init();
             // $url;
-    
+
             curl_setopt_array($ch, [
                 CURLOPT_URL            => $url,
                 CURLOPT_RETURNTRANSFER => true,
@@ -101,21 +101,25 @@ class DirectMessage extends Model
                 CURLOPT_SSL_VERIFYHOST => false,
                 CURLOPT_TIMEOUT        => 30,
             ]);
-    
+
             $response = curl_exec($ch);
-            
-            if (curl_errno($ch)) {
-                throw new \Exception('cURL Error: ' . curl_error($ch));
+            try {
+                curl_errno($ch);
+            } catch (\Throwable $th) {
+                $m->status = 'Failed';
+                $m->error_message_message = 'cURL Error: ' . curl_error($ch)." URL: $url";
+                $m->save();
+                throw new \Exception('cURL Error: ' . curl_error($ch)." URL: $url");
             }
-    
+
             curl_close($ch);
-    
+
             $m->response = $response;
-    
+
             // Extract useful information from response
             if (self::isMessageSent($response)) {
                 $m->status = 'Sent';
-    
+
                 // Deduct wallet balance based on message length
                 $no_of_messages = max(1, ceil(strlen($m->message_body) / 160));
                 $wallet_rec = new WalletRecord();
@@ -135,10 +139,10 @@ class DirectMessage extends Model
             $m->save();
             return $m->error_message_message;
         }
-    
+
         return $m->status;
     }
-    
+
     /**
      * Parses the response to determine if the message was successfully sent.
      */
@@ -148,8 +152,8 @@ class DirectMessage extends Model
         return preg_match('/Send ok:/', $response);
     }
 
-    
-    
+
+
     public function bulk_message()
     {
         return $this->belongsTo(BulkMessage::class);
