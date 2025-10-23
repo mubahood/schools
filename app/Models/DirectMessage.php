@@ -82,7 +82,7 @@ class DirectMessage extends Model
         $url = "https://www.socnetsolutions.com/projects/bulk/amfphp/services/blast.php";
         $params = [
             'username' => 'mubaraka',
-            'passwd'   => 'muh1nd0@2023',
+            'passwd'   => 'Mub4r4k4@2025',
             'msg'      => trim($m->message_body),
             'numbers'  => $m->receiver_number
         ];
