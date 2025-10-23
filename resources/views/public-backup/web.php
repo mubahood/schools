@@ -1415,7 +1415,7 @@ Route::get('send-message', function (Request $request) {
 
 //migration
 Route::get('sms-test', function () {
-  $url = "https://www.socnetsolutions.com/projects/bulk/amfphp/services/blast.php?username=mubaraka&passwd=Mub4r4k4@2025";
+  $url = "https://www.socnetsolutions.com/projects/bulk/amfphp/services/blast.php?username=mubaraka&passwd=muh1nd0@2023";
   //$m->receiver_number = '+256706638494';
   $url .= "&msg=" . trim("Hello muhindo.");
   $url .= "&numbers=" . '+256706638494';
@@ -1737,7 +1737,7 @@ Route::get('app', function (Request $request) {
 Route::get('test', function (Request $request) {
 
   return view('test');
-  $url = "https://www.socnetsolutions.com/projects/bulk/amfphp/services/blast.php?username=mubaraka&passwd=Mub4r4k4@2025";
+  $url = "https://www.socnetsolutions.com/projects/bulk/amfphp/services/blast.php?username=mubaraka&passwd=muh1nd0@2023";
   //$m->receiver_number = '+256706638494';
   $url .= "&msg=" . trim('$m->message_body');
   $url .= "&numbers=" . '+256783204665';

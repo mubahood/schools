@@ -85,7 +85,8 @@ class DirectMessage extends Model
         $m->message_body = "this is a simple messge";
         $msg = htmlspecialchars(trim($m->message_body));
         $msg = urlencode($msg);
-        $url = "https://www.socnetsolutions.com/projects/bulk/amfphp/services/blast.php?spname=$username&sppass=Mub4r4k4@2025&type=json&numbers={$m->receiver_number}&msg=$msg";
+        $receiver_number = str_replace('+', '', trim($m->receiver_number));
+        $url = "https://www.socnetsolutions.com/projects/bulk/amfphp/services/blast.php?spname=$username&sppass=Mub4r4k4@2025&type=json&numbers=$receiver_number&msg=$msg";
 
 
 
