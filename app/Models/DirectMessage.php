@@ -41,12 +41,12 @@ class DirectMessage extends Model
         }
 
         // Validate phone number
-        if (!Utils::validateUgandanPhoneNumber($m->receiver_number)) {
-            $m->status = 'Failed';
-            $m->error_message_message = 'Invalid phone number - ' . $m->receiver_number;
-            $m->save();
-            return $m->error_message_message;
-        }
+        // if (!Utils::validateUgandanPhoneNumber($m->receiver_number)) {
+        //     $m->status = 'Failed';
+        //     $m->error_message_message = 'Invalid phone number - ' . $m->receiver_number;
+        //     $m->save();
+        //     return $m->error_message_message;
+        // }
         // Validate enterprise
         $ent = Enterprise::find($m->enterprise_id);
         if ($ent === null) {
