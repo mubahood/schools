@@ -91,6 +91,7 @@ class DirectMessage extends Model
         $url = "https://www.socnetsolutions.com/projects/bulk/amfphp/services/blast.php?spname=$username&sppass=Mub4r4k4@2025&type=json&numbers=$receiver_number&msg=$msg";
 
         try {
+
             // Initialize Guzzle HTTP client
             $client = new Client([
                 'verify' => false, // Equivalent to CURLOPT_SSL_VERIFYPEER => false
@@ -100,29 +101,94 @@ class DirectMessage extends Model
 
             // Make the GET request
             $guzzleResponse = $client->get($url);
-            
-            // Get response body as string
-            $response = $guzzleResponse->getBody()->getContents();
 
-            $m->response = $response;
+            $response = null;
+            $body = null;
+            if ($guzzleResponse) {
+                $body = $guzzleResponse->getBody();
+            }
 
-            // Extract useful information from response
-            if (self::isMessageSent($response)) {
-                $m->status = 'Sent';
-
-                // Deduct wallet balance based on message length
-                $no_of_messages = max(1, ceil(strlen($m->message_body) / 160));
-                $wallet_rec = new WalletRecord();
-                $wallet_rec->enterprise_id = $m->enterprise_id;
-                $wallet_rec->amount = $no_of_messages * -50;
-                $wallet_rec->details = "Sent $no_of_messages messages to $m->receiver_number. ref: $m->id";
-                $wallet_rec->save();
-            } else {
+            if ($body == null) {
                 $m->status = 'Failed';
-                $m->error_message_message = "Failed to send message. Response: $response. URL: $url";
+                $m->error_message_message = "Empty response body from API. URL: $url";
                 $m->save();
                 return $m->error_message_message;
             }
+            // Get response body as string
+            try {
+                $response = $body->getContents();
+            } catch (\Throwable $th) {
+                $m->status = 'Failed';
+                $m->error_message_message = "Error reading response body: {$th->getMessage()} URL: $url";
+                $m->save();
+                return $m->error_message_message;
+            }
+
+            $json = null;
+            try {
+                $json = json_decode($response, true);
+            } catch (\Throwable $th) {
+                $m->status = 'Failed';
+                $m->error_message_message = "Error decoding JSON response: {$th->getMessage()} URL: $url Response: $response";
+                $m->save();
+                return $m->error_message_message;
+            }
+
+
+            if (!isset($json['socnetblast'])) {
+                $m->status = 'Failed';
+                $m->error_message_message = "Unexpected API response format. URL: $url Response: $response";
+                $m->save();
+                return $m->error_message_message;
+            }
+            $parsedResponse = $json['socnetblast'];
+
+            if (!isset($parsedResponse['status'])) {
+                $m->status = 'Failed';
+                $m->error_message_message = "Missing status in API response. URL: $url Response: $response";
+                $m->save();
+                return $m->error_message_message;
+            }
+
+            //Login ok
+            $statusSlipcs = explode(" ", $parsedResponse['status']);
+            //if $statusSlipcs does not contain ok
+            if (in_array('ok', $statusSlipcs) === false) {
+                $m->status = 'Failed';
+                $m->error_message_message = "Login failed. Status: " . $parsedResponse['status'] . " URL: $url Response: $response";
+                $m->save();
+                return $m->error_message_message;
+            }
+
+            $info = $parsedResponse['info'] ?? '';
+            $infoSlipcs = explode(" ", $info);
+            //if $infoSlipcs does not contain ok
+            if (in_array('ok:', $infoSlipcs) === false) {
+                $m->status = 'Failed';
+                $m->error_message_message = "Message sending failed. Info: " . $info . " URL: $url Response: $response";
+                $m->save();
+                return $m->error_message_message;
+            }
+            $m->status = 'Sent';
+
+            // Store enhanced response with parsed information
+            $responseInfo = "Response: $response";
+            if (!empty($parsedResponse['messageId'])) {
+                $responseInfo .= " | API Message ID: " . $parsedResponse['messageId'];
+            }
+            if (!empty($parsedResponse['credit'])) {
+                $responseInfo .= " | Credit Remaining: " . $parsedResponse['credit'];
+            }
+            $m->response = $responseInfo;
+
+            // Deduct wallet balance based on message length
+            $no_of_messages = max(1, ceil(strlen($m->message_body) / 160));
+            $wallet_rec = new WalletRecord();
+            $wallet_rec->enterprise_id = $m->enterprise_id;
+            $wallet_rec->amount = $no_of_messages * -50;
+            $wallet_rec->details = "Sent $no_of_messages messages to $m->receiver_number. ref: $m->id, API Message ID: " . ($parsedResponse['messageId'] ?? 'N/A');
+            $wallet_rec->save();
+            return 'success';
         } catch (GuzzleException $e) {
             $m->status = 'Failed';
             $m->error_message_message = 'HTTP Error: ' . $e->getMessage() . " URL: $url";
@@ -139,12 +205,72 @@ class DirectMessage extends Model
     }
 
     /**
-     * Parses the response to determine if the message was successfully sent.
+     * Parses the API response to extract status, messageId, info, and credit.
+     * 
+     * @param string $response The raw API response
+     * @return array Parsed response with keys: success, status, messageId, info, credit, error
      */
-    private static function isMessageSent($response)
+    private static function parseApiResponse($response)
     {
-        // Check if response contains "Send ok"
-        return preg_match('/Send ok:/', $response);
+        $result = [
+            'success' => false,
+            'status' => null,
+            'messageId' => null,
+            'info' => null,
+            'credit' => null,
+            'error' => null
+        ];
+
+        try {
+            // Decode JSON response
+            $decoded = json_decode($response, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                // If JSON parsing fails, try legacy string matching
+                if (preg_match('/Send ok:/', $response)) {
+                    $result['success'] = true;
+                    $result['info'] = 'Send ok (legacy format)';
+                    return $result;
+                }
+
+                $result['error'] = 'Invalid JSON response: ' . json_last_error_msg();
+                return $result;
+            }
+
+            // Check if response has the expected structure
+            if (isset($decoded['socnetblast'])) {
+                $data = $decoded['socnetblast'];
+
+                // Extract status
+                $result['status'] = $data['status'] ?? null;
+
+                // Extract messageId
+                $result['messageId'] = $data['messageId'] ?? null;
+
+                // Extract info
+                $result['info'] = $data['info'] ?? null;
+
+                // Extract credit
+                $result['credit'] = $data['credit'] ?? null;
+
+                // Determine success based on status and info
+                if (!empty($result['status']) && stripos($result['status'], 'Login ok') !== false) {
+                    if (!empty($result['info']) && stripos($result['info'], 'Send ok') !== false) {
+                        $result['success'] = true;
+                    } else {
+                        $result['error'] = $result['info'] ?? 'Message sending failed';
+                    }
+                } else {
+                    $result['error'] = $result['status'] ?? 'Login failed';
+                }
+            } else {
+                $result['error'] = 'Unexpected response format';
+            }
+        } catch (\Throwable $e) {
+            $result['error'] = 'Error parsing response: ' . $e->getMessage();
+        }
+
+        return $result;
     }
 
 

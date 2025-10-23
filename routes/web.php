@@ -1685,7 +1685,8 @@ Route::get('send-message', function (Request $request) {
   }
 
   $directMessage = DirectMessage::find($request->id);
-  echo <<<EOF
+
+  return <<<EOF
   <div style="font-family: Arial, sans-serif; margin: 20px;">
     <h2>Message Status</h2>
     <p><strong>Status:</strong> {$directMessage->status}</p>
@@ -1695,6 +1696,7 @@ Route::get('send-message', function (Request $request) {
     <p><strong>ID:</strong> {$directMessage->id}</p>
   </div>
   EOF;
+
 });
 
 //migration
