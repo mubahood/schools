@@ -84,7 +84,6 @@ class DirectMessage extends Model
         // Construct API URL
         $url = "https://www.socnetsolutions.com/projects/bulk/amfphp/services/blast.php";
 
-        $m->message_body = "this is a simple messge";
         $msg = htmlspecialchars(trim($m->message_body));
         $msg = urlencode($msg);
         $receiver_number = str_replace('+', '', trim($m->receiver_number));
