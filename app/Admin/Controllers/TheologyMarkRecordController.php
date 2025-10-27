@@ -59,6 +59,18 @@ class TheologyMarkRecordController extends AdminController
         if ($dpYear == null) {
             die("Display year not found.");
         }
+
+        $isClassTeacher = false;
+        $currentClassesIds = TheologyClass::where([
+            'class_teahcer_id' => Admin::user()->id,
+            'enterprise_id' => Admin::user()->enterprise_id,
+        ])->get()->pluck('id')->toArray();
+
+        //if not empty
+        if (!empty($currentClassesIds)) {
+            $isClassTeacher = true;
+        }
+
         if (Admin::user()->isRole('dos')) {
             foreach (
                 TheologySubject::where([
@@ -119,13 +131,20 @@ class TheologyMarkRecordController extends AdminController
                 (!isset($_GET['theology_subject_id'])) ||
                 (((int)($_GET['theology_subject_id'])) < 1))
         ) {
-            admin_success(
-                'Alert',
-                'Select class, exam and subject and press "search button" to enter marks.'
-            );
-            $grid->model()->where([
-                'enterprise_id' => 0,
-            ])->orderBy('id', 'DESC');
+
+            if (!$isClassTeacher) {
+                admin_success(
+                    'Alert',
+                    'Select class, exam and subject and press "search button" to enter marks.'
+                );
+                $grid->model()->where([
+                    'enterprise_id' => 0,
+                ])->orderBy('id', 'DESC');
+            } else {
+
+                $grid->model()->whereIn('theology_class_id', $currentClassesIds) 
+                    ->orderBy('id', 'DESC');
+            }
         }
 
         $grid->filter(function ($filter) {
@@ -296,14 +315,14 @@ class TheologyMarkRecordController extends AdminController
 
         $grid->column('theology_class_id', __('Class'))
             ->display(function ($theology_class_id) {
-                if($this->academicClass == null){
+                if ($this->academicClass == null) {
                     $this->delete();
                     return 'deleted';
                 }
 
                 return $this->academicClass->short_name;
             })
-            ->sortable(); 
+            ->sortable();
 
 
 

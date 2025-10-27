@@ -56,6 +56,16 @@ class MarkRecordController extends AdminController
         $grid->disableCreateButton();
         $grid->disableActions();
 
+        $isClassTeacher = false;
+        $currentClassesIds = AcademicClass::where([
+            'class_teahcer_id' => Admin::user()->id,
+            'enterprise_id' => Admin::user()->enterprise_id,
+        ])->get()->pluck('id')->toArray();
+        //if not empty
+        if (!empty($currentClassesIds)) {
+            $isClassTeacher = true;
+        }
+
 
         if (
             (!Admin::user()->isRole('dos')) &&
@@ -63,13 +73,18 @@ class MarkRecordController extends AdminController
                 (!isset($_GET['subject_id']))
             )
         ) {
-            admin_success(
-                'Alert',
-                'Select class, exam and subject and press "search button" to enter marks.'
-            );
-            $grid->model()->where([
-                'enterprise_id' => 0,
-            ])->orderBy('id', 'DESC');
+            if (!$isClassTeacher) {
+                admin_success(
+                    'Alert',
+                    'Select class, exam and subject and press "search button" to enter marks.'
+                );
+                $grid->model()->where([
+                    'enterprise_id' => 0,
+                ])->orderBy('id', 'DESC');
+            } else {
+                //where subject class in $currentClassesIds
+                $grid->model()->whereIn('academic_class_id', $currentClassesIds);
+            }
         }
 
         $grid->filter(function ($filter) {

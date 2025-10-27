@@ -347,8 +347,15 @@ class StockRecordController extends AdminController
         }
 
 
-        $form->datetime('record_date', __('Date'))->rules('required')
-            ->default($record_date);
+        if (!$form->isCreating()) {
+            $form->datetime('record_date', __('Record date')) 
+                ->rules('required');
+        } else {
+            $now = date('Y-m-d H:i:s');
+            $form->datetime('record_date', __('Record date')) 
+                ->rules('required')
+                ->default($now);
+        }
 
 
         $u = Admin::user();
