@@ -142,11 +142,11 @@ class TheologyMarkRecordController extends AdminController
                 ])->orderBy('id', 'DESC');
             } else {
 
-                $grid->model()->whereIn('theology_class_id', $currentClassesIds) 
+                $grid->model()->whereIn('theology_class_id', $currentClassesIds)
                     ->orderBy('id', 'DESC');
             }
         }
-
+        $grid->perPages([300, 500, 700, 1000]);
         $grid->filter(function ($filter) {
             if (
                 (!Admin::user()->isRole('dos')) &&
