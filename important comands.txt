@@ -10,10 +10,10 @@ php artisan make:migration slot
 
 
 
-php artisan make:model Company --migration
+php artisan make:model SessionReport --migration
 
-php artisan admin:make CompanyController --model=App\\Models\\Company
-php artisan admin:make CompanyController --model=App\Models\Company
+php artisan admin:make SessionReportController --model=App\\Models\\SessionReport
+php artisan admin:make SessionReportController --model=App\Models\SessionReport
 
 17-35-P.1_Theology_-_Term_2_-_2024-0200.pdf
 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

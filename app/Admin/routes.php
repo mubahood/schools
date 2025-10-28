@@ -175,24 +175,25 @@ Route::group([
     // Onboarding management routes
     $router->post('onboarding/skip-step', 'OnboardingController@skipCurrentStep')->name('onboarding.skip-step');
     $router->post('onboarding/mark-step-completed', 'OnboardingController@markStepCompleted')->name('onboarding.mark-step-completed');
-    
+
     // Knowledge Base management routes
     $router->resource('knowledge-base/categories', 'KnowledgeBaseCategoryController');
     $router->resource('knowledge-base/articles', 'KnowledgeBaseArticleController');
-    
+
     $router->resource('companies', CompanyController::class);
-    
+
     // Attendance Dashboard Routes
     $router->get('attendance-dashboard', 'AttendanceDashboardController@index')->name('attendance.dashboard');
     $router->get('attendance-dashboard/export', 'AttendanceDashboardController@export')->name('attendance.export');
-    
+
     // Student Application Management Routes
     // IMPORTANT: Specific routes MUST come BEFORE resource route to avoid 404 errors
     $router->get('student-applications/{id}/review', 'StudentApplicationController@review')->name('student-applications.review');
     $router->post('student-applications/{id}/accept', 'StudentApplicationController@accept')->name('student-applications.accept');
     $router->post('student-applications/{id}/reject', 'StudentApplicationController@reject')->name('student-applications.reject');
     $router->get('student-applications/{id}/documents/{documentId}/view', 'StudentApplicationController@viewDocument')->name('student-applications.document.view');
-    
+
     // Resource route comes AFTER specific routes
     $router->resource('student-applications', StudentApplicationController::class);
+    $router->resource('session-reports', SessionReportController::class);
 });

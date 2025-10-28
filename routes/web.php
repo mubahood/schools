@@ -43,6 +43,7 @@ use App\Models\Service;
 use App\Models\ServiceCategory;
 use App\Models\ServiceSubscription;
 use App\Models\Session;
+use App\Models\SessionReport;
 use App\Models\StockBatch;
 use App\Models\StockItemCategory;
 use App\Models\TheologyMarkRecord;
@@ -76,9 +77,96 @@ use Faker\Factory as Faker;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 
+Route::get('attendance-report', function (Request $request) {
+  $id = $request->get('id', null);
+  $regenerate = $request->get('regenerate', 0); // Check if hard regenerate is requested
+  
+  $report = SessionReport::find($id);
+  if ($report == null) {
+    return "Report not found";
+  }
+  
+  // If hard regenerate is requested, force regeneration
+  if ($regenerate == 1) {
+    try {
+      // Reset PDF status to force regeneration
+      $report->pdf_processed = 'No';
+      $report->pdf_path = null;
+      $report->save();
+      
+      // Process and generate new PDF
+      $report->do_process();
+      
+      return redirect('/session-report-pdf/' . $report->id);
+    } catch (\Exception $e) {
+      return "Error regenerating report: " . $e->getMessage();
+    }
+  }
+  
+  // Normal generation: If PDF is already generated, redirect to view it
+  if ($report->pdf_processed == 'Yes' && $report->pdf_path) {
+    return redirect('/session-report-pdf/' . $report->id);
+  }
+  
+  // Process report and generate PDF
+  try {
+    $report->do_process();
+    return redirect('/session-report-pdf/' . $report->id);
+  } catch (\Exception $e) {
+    return "Error generating report: " . $e->getMessage();
+  }
+});
+
+// Session Report PDF Download/View Route
+Route::get('session-report-pdf/{id}', function ($id) {
+  $report = SessionReport::find($id);
+  
+  if (!$report) {
+    abort(404, 'Report not found');
+  }
+  
+  // Check if user has access to this report
+  $user = Auth::user();
+  if ($user && $user->enterprise_id != $report->enterprise_id) {
+    abort(403, 'Unauthorized access');
+  }
+  
+  // If PDF exists, serve it
+  if ($report->pdf_path && Storage::disk('public')->exists($report->pdf_path)) {
+    $pdfPath = Storage::disk('public')->path($report->pdf_path);
+    return response()->file($pdfPath, [
+      'Content-Type' => 'application/pdf',
+      'Content-Disposition' => 'inline; filename="' . basename($report->pdf_path) . '"'
+    ]);
+  }
+  
+  // If PDF doesn't exist, generate it
+  try {
+    if ($report->pdf_processed != 'Yes') {
+      $report->do_process();
+    } else {
+      $report->generatePDF();
+    }
+    
+    // Serve the newly generated PDF
+    if ($report->pdf_path && Storage::disk('public')->exists($report->pdf_path)) {
+      $pdfPath = Storage::disk('public')->path($report->pdf_path);
+      return response()->file($pdfPath, [
+        'Content-Type' => 'application/pdf',
+        'Content-Disposition' => 'inline; filename="' . basename($report->pdf_path) . '"'
+      ]);
+    }
+    
+    return "PDF generation failed. No file was created.";
+  } catch (\Exception $e) {
+    return "Error generating PDF: " . $e->getMessage();
+  }
+})->name('session-report.pdf');
 // Email Verification Routes (Public)
 Route::middleware(['web'])->group(function () {
   Route::get('/email/verify', [EmailVerificationController::class, 'show'])
@@ -1696,7 +1784,6 @@ Route::get('send-message', function (Request $request) {
     <p><strong>ID:</strong> {$directMessage->id}</p>
   </div>
   EOF;
-
 });
 
 //migration
