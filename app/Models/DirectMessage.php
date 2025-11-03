@@ -22,20 +22,36 @@ class DirectMessage extends Model
             }
         });
         self::creating(function ($m) {
-            if (strlen($m->receiver_number) < 7) {
-                $u = Administrator::find($m->administrator_id);
-                $m->receiver_number = $u->phone_number_1;
-                if (strlen($m->receiver_number) < 7) {
-                    $m->receiver_number = $u->phone_number_2;
+            // Only fetch from user if receiver_number is not set or too short
+            if (empty($m->receiver_number) || strlen(trim($m->receiver_number)) < 7) {
+                if (!empty($m->administrator_id)) {
+                    $u = Administrator::find($m->administrator_id);
+                    if ($u) {
+                        // Try phone_number_1 first
+                        if (!empty($u->phone_number_1) && strlen(trim($u->phone_number_1)) >= 7) {
+                            $m->receiver_number = $u->phone_number_1;
+                        } 
+                        // If phone_number_1 is not valid, try phone_number_2
+                        elseif (!empty($u->phone_number_2) && strlen(trim($u->phone_number_2)) >= 7) {
+                            $m->receiver_number = $u->phone_number_2;
+                        }
+                    }
                 }
             }
-            $m->receiver_number = Utils::prepareUgandanPhoneNumber($m->receiver_number);
+            
+            // Standardize phone number format (handles 07..., 256..., +256...)
+            if (!empty($m->receiver_number)) {
+                $m->receiver_number = Utils::prepareUgandanPhoneNumber($m->receiver_number);
+            }
+            
             return $m;
         });
     }
 
     public static function send_message($m)
     {
+        //use send_message_1
+        return self::send_message_1($m);
         if ($m->status !== 'Pending') {
             return "Message status is not 'Pending'. Current status: {$m->status}";
         }
@@ -271,6 +287,236 @@ class DirectMessage extends Model
         }
 
         return $result;
+    }
+
+    /**
+     * Send SMS via EUROSATGROUP InstantSMS API
+     * @param DirectMessage $m The message model instance
+     * @return string Status message ('success' or error description)
+     */
+    public static function send_message_1($m)
+    {
+        // Clear error message at the start
+        $m->error_message_message = null;
+        
+        if ($m->status !== 'Pending') {
+            return "Message status is not 'Pending'. Current status: {$m->status}";
+        }
+
+        // Prepare and validate phone number
+        // If receiver_number is set and valid, use it; otherwise get from user
+        if (empty($m->receiver_number) || strlen(trim($m->receiver_number)) < 7) {
+            // Get phone from administrator
+            if (!empty($m->administrator_id)) {
+                $user = Administrator::find($m->administrator_id);
+                if ($user) {
+                    // Try phone_number_1 first
+                    if (!empty($user->phone_number_1) && strlen(trim($user->phone_number_1)) >= 7) {
+                        $m->receiver_number = $user->phone_number_1;
+                    } 
+                    // If phone_number_1 is invalid, try phone_number_2
+                    elseif (!empty($user->phone_number_2) && strlen(trim($user->phone_number_2)) >= 7) {
+                        $m->receiver_number = $user->phone_number_2;
+                    }
+                }
+            }
+        }
+
+        // Standardize phone number format (handles 07..., 256..., +256...)
+        $m->receiver_number = Utils::prepareUgandanPhoneNumber($m->receiver_number);
+
+        // Validate phone number after preparation
+        if (!Utils::validateUgandanPhoneNumber($m->receiver_number)) {
+            $m->status = 'Failed';
+            $m->error_message_message = 'Invalid phone number: ' . $m->receiver_number;
+            $m->save();
+            return $m->error_message_message;
+        }
+
+        // Validate enterprise
+        $ent = Enterprise::find($m->enterprise_id);
+        if ($ent === null) {
+            $m->status = 'Failed';
+            $m->error_message_message = 'Enterprise is not active.';
+            $m->save();
+            return $m->error_message_message;
+        }
+
+        // Check wallet balance
+        if ($ent->wallet_balance < 50) {
+            $m->status = 'Failed';
+            $m->error_message_message = 'Insufficient funds.';
+            $m->save();
+            return $m->error_message_message;
+        }
+
+        // Validate message body
+        if (empty(trim($m->message_body))) {
+            $m->status = 'Failed';
+            $m->error_message_message = 'Message body is empty.';
+            $m->save();
+            return $m->error_message_message;
+        }
+
+        // Check if messaging is enabled
+        if ($ent->can_send_messages !== 'Yes') {
+            $m->status = 'Failed';
+            $m->error_message_message = 'Messages are not enabled.';
+            $m->save();
+            return $m->error_message_message;
+        }
+
+        // Check message length (150 characters max for EUROSATGROUP)
+        if (strlen(trim($m->message_body)) > 150) {
+            $m->status = 'Failed';
+            $m->error_message_message = 'Message too long. Maximum 150 characters allowed.';
+            $m->save();
+            return $m->error_message_message;
+        }
+
+        // Get credentials from environment
+        $username = env('EUROSATGROUP_USERNAME');
+        $password = env('EUROSATGROUP_PASSWORD');
+
+        if (empty($username) || empty($password)) {
+            $m->status = 'Failed';
+            $m->error_message_message = 'EUROSATGROUP credentials not configured.';
+            $m->save();
+            return $m->error_message_message;
+        }
+
+        // Prepare message and phone number for API
+        $msg = htmlspecialchars(trim($m->message_body));
+        $msg = urlencode($msg);
+        
+        // Remove + prefix for API (phone is already standardized to +256...)
+        $receiver_number = str_replace('+', '', trim($m->receiver_number));
+
+        // Construct API URL
+        $url = "https://instantsms.eurosatgroup.com/api/smsjsonapi.aspx?unm=" . urlencode($username)
+            . "&ps=" . urlencode($password)
+            . "&message=" . $msg
+            . "&receipients=" . $receiver_number;
+
+        try {
+            // Initialize Guzzle HTTP client
+            $client = new Client([
+                'verify' => false, // Equivalent to CURLOPT_SSL_VERIFYPEER => false
+                'timeout' => 30,   // Equivalent to CURLOPT_TIMEOUT => 30
+                'allow_redirects' => true, // Equivalent to CURLOPT_FOLLOWLOCATION => true
+            ]);
+
+            // Make the GET request
+            $guzzleResponse = $client->get($url);
+
+            $response = null;
+            $body = null;
+            if ($guzzleResponse) {
+                $body = $guzzleResponse->getBody();
+            }
+
+            if ($body == null) {
+                $m->status = 'Failed';
+                $m->error_message_message = "Empty response body from EUROSATGROUP API.";
+                $m->save();
+                return $m->error_message_message;
+            }
+
+            // Get response body as string
+            try {
+                $response = $body->getContents();
+            } catch (\Throwable $th) {
+                $m->status = 'Failed';
+                $m->error_message_message = "Error reading response body: {$th->getMessage()}";
+                $m->save();
+                return $m->error_message_message;
+            }
+
+            // Parse JSON response
+            $json = null;
+            try {
+                $json = json_decode($response, true);
+            } catch (\Throwable $th) {
+                $m->status = 'Failed';
+                $m->error_message_message = "Error decoding JSON response: {$th->getMessage()} Response: $response";
+                $m->save();
+                return $m->error_message_message;
+            }
+
+            if (!is_array($json)) {
+                $m->status = 'Failed';
+                $m->error_message_message = "Unexpected API response format. Response: $response";
+                $m->save();
+                return $m->error_message_message;
+            }
+
+            // Check response code
+            $code = isset($json['code']) ? $json['code'] : null;
+            $status = isset($json['status']) ? $json['status'] : null;
+            $messageID = isset($json['messageID']) ? $json['messageID'] : null;
+            $contacts = isset($json['contacts']) ? $json['contacts'] : null;
+
+            // Successful response: code 200 and status Delivered
+            if ($code == '200' && $status == 'Delivered') {
+                $m->status = 'Sent';
+                $m->error_message_message = null; // Clear any previous error
+
+                // Store enhanced response with parsed information
+                $responseInfo = "Response: $response";
+                if (!empty($messageID)) {
+                    $responseInfo .= " | API Message ID: " . $messageID;
+                }
+                if (!empty($contacts)) {
+                    $responseInfo .= " | Contacts: " . $contacts;
+                }
+                $m->response = $responseInfo;
+
+                // Deduct wallet balance based on message length
+                $no_of_messages = max(1, ceil(strlen($m->message_body) / 150));
+                $wallet_rec = new WalletRecord();
+                $wallet_rec->enterprise_id = $m->enterprise_id;
+                $wallet_rec->amount = $no_of_messages * -50;
+                $wallet_rec->details = "Sent $no_of_messages messages to $m->receiver_number via EUROSATGROUP. ref: $m->id, API Message ID: " . ($messageID ?? 'N/A');
+                $wallet_rec->save();
+
+                $m->save();
+                return 'success';
+            } else {
+                // Handle error responses
+                $m->status = 'Failed';
+
+                // Extract error message
+                $errorMessage = '';
+                if (isset($json['message'])) {
+                    $errorMessage = $json['message'];
+                } elseif (isset($json['Message'])) {
+                    $errorMessage = $json['Message'];
+                } else {
+                    $errorMessage = $status ?? 'Unknown error';
+                }
+
+                // Add code information
+                if (!empty($code)) {
+                    $errorMessage = "Code $code: " . $errorMessage;
+                }
+
+                $m->error_message_message = "EUROSATGROUP API Error - " . $errorMessage . " Response: $response";
+                $m->save();
+                return $m->error_message_message;
+            }
+        } catch (GuzzleException $e) {
+            $m->status = 'Failed';
+            $m->error_message_message = 'HTTP Error (EUROSATGROUP): ' . $e->getMessage();
+            $m->save();
+            return $m->error_message_message;
+        } catch (\Throwable $th) {
+            $m->status = 'Failed';
+            $m->error_message_message = "Error (EUROSATGROUP): {$th->getMessage()}";
+            $m->save();
+            return $m->error_message_message;
+        }
+
+        return $m->status;
     }
 
 

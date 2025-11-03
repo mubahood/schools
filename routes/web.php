@@ -85,12 +85,12 @@ use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 Route::get('attendance-report', function (Request $request) {
   $id = $request->get('id', null);
   $regenerate = $request->get('regenerate', 0); // Check if hard regenerate is requested
-  
+
   $report = SessionReport::find($id);
   if ($report == null) {
     return "Report not found";
   }
-  
+
   // If hard regenerate is requested, force regeneration
   if ($regenerate == 1) {
     try {
@@ -98,21 +98,21 @@ Route::get('attendance-report', function (Request $request) {
       $report->pdf_processed = 'No';
       $report->pdf_path = null;
       $report->save();
-      
+
       // Process and generate new PDF
       $report->do_process();
-      
+
       return redirect('/session-report-pdf/' . $report->id);
     } catch (\Exception $e) {
       return "Error regenerating report: " . $e->getMessage();
     }
   }
-  
+
   // Normal generation: If PDF is already generated, redirect to view it
   if ($report->pdf_processed == 'Yes' && $report->pdf_path) {
     return redirect('/session-report-pdf/' . $report->id);
   }
-  
+
   // Process report and generate PDF
   try {
     $report->do_process();
@@ -125,17 +125,17 @@ Route::get('attendance-report', function (Request $request) {
 // Session Report PDF Download/View Route
 Route::get('session-report-pdf/{id}', function ($id) {
   $report = SessionReport::find($id);
-  
+
   if (!$report) {
     abort(404, 'Report not found');
   }
-  
+
   // Check if user has access to this report
   $user = Auth::user();
   if ($user && $user->enterprise_id != $report->enterprise_id) {
     abort(403, 'Unauthorized access');
   }
-  
+
   // If PDF exists, serve it
   if ($report->pdf_path && Storage::disk('public')->exists($report->pdf_path)) {
     $pdfPath = Storage::disk('public')->path($report->pdf_path);
@@ -144,7 +144,7 @@ Route::get('session-report-pdf/{id}', function ($id) {
       'Content-Disposition' => 'inline; filename="' . basename($report->pdf_path) . '"'
     ]);
   }
-  
+
   // If PDF doesn't exist, generate it
   try {
     if ($report->pdf_processed != 'Yes') {
@@ -152,7 +152,7 @@ Route::get('session-report-pdf/{id}', function ($id) {
     } else {
       $report->generatePDF();
     }
-    
+
     // Serve the newly generated PDF
     if ($report->pdf_path && Storage::disk('public')->exists($report->pdf_path)) {
       $pdfPath = Storage::disk('public')->path($report->pdf_path);
@@ -161,7 +161,7 @@ Route::get('session-report-pdf/{id}', function ($id) {
         'Content-Disposition' => 'inline; filename="' . basename($report->pdf_path) . '"'
       ]);
     }
-    
+
     return "PDF generation failed. No file was created.";
   } catch (\Exception $e) {
     return "Error generating PDF: " . $e->getMessage();
@@ -1788,6 +1788,38 @@ Route::get('send-message', function (Request $request) {
 
 //migration
 Route::get('sms-test', function () {
+
+  $lastDirectMessage = DirectMessage::where([])->orderBy('id', 'desc')->first();
+  $lastDirectMessage->status = 'Pending';
+  DirectMessage::send_message($lastDirectMessage);
+  die("done");
+  dd($lastDirectMessage);
+  /* 
+      "id" => 19552
+    "created_at" => "2025-10-25 00:36:50"
+    "updated_at" => "2025-10-25 00:37:44"
+    "enterprise_id" => 19
+    "bulk_message_id" => 84
+    "administrator_id" => 15437
+    "receiver_number" => ""
+    "message_body" => """
+      BRIGHT FUTURE SS KALIRO.
+      Dear Parent, you are invited to attend the ACADEMIC VISITATION on sat 25/10/25. this will be deadline for fees clearance.
+      Admin. 0781917795
+      """
+    "status" => "Failed"
+    "is_scheduled" => "No"
+    "delivery_time" => "2025-10-24 16:36:50"
+    "error_message_message" => "Message sending failed. Info:  URL: https://www.socnetsolutions.com/projects/bulk/amfphp/services/blast.php?spname=mubaraka&sppass=Mub4r4k4@2025&type=json&numbe ▶"
+    "response" => null
+    "balance" => 0
+    "STUDENT_NAME" => "CHEPTOEK SHAKUWA"
+    "PARENT_NAME" => "Parent NAMULEMO"
+    "STUDENT_CLASS" => null
+    "TEACHER_NAME" => "CHEPTOEK SHAKUWA"
+  ]
+  */
+
   $url = "https://www.socnetsolutions.com/projects/bulk/amfphp/services/blast.php?username=mubaraka&passwd=Mub4r4k4@2025";
   //$m->receiver_number = '+256706638494';
   $url .= "&msg=" . trim("Hello muhindo.");
