@@ -14,6 +14,21 @@ use Illuminate\Support\Facades\DB;
 class Transaction extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'enterprise_id',
+        'academic_year_id',
+        'term_id',
+        'account_id',
+        'amount',
+        'description',
+        'type',
+        'service_subscription_id',
+        'source',
+        'payment_date',
+        'is_contra_entry',
+    ];
+
     public static function my_create($data)
     {
 

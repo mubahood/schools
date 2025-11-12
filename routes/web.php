@@ -78,6 +78,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
@@ -866,7 +867,304 @@ array:12 [▼
   }
 });
 
+// ==================== OPTIMIZED FEES DATA IMPORT ROUTES ====================
 
+/**
+ * Validate Fees Data Import - Uses Optimized Service
+ */
+Route::get('fees-data-import-validate', function (Request $request) {
+  $u = Admin::user();
+  if ($u == null) {
+    return "You are not logged in";
+  }
+
+  $import = FeesDataImport::find($request->id);
+  if ($import == null) {
+    return "Fees Data Import not found";
+  }
+
+  if ($import->enterprise_id != $u->enterprise_id) {
+    return "Access denied. This import belongs to a different enterprise.";
+  }
+
+  try {
+
+    $service = new \App\Services\FeesImportServiceOptimized();
+    $validation = $service->validateImport($import);
+    dd($validation);
+
+    echo "<div style='font-family: Arial, sans-serif; padding: 20px; max-width: 900px;'>";
+    echo "<h2>Import Validation Results</h2>";
+    echo "<h3>Import: " . htmlspecialchars($import->title) . "</h3>";
+
+    if ($validation['valid']) {
+      echo "<div style='background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; border-radius: 5px; margin: 15px 0;'>";
+      echo "<strong>✓ Validation Passed!</strong><br>";
+      echo "The import file is ready to be processed.";
+      echo "</div>";
+    } else {
+      echo "<div style='background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 15px; border-radius: 5px; margin: 15px 0;'>";
+      echo "<strong>✗ Validation Failed</strong><br>";
+      echo "Please fix the errors below before processing the import.";
+      echo "</div>";
+    }
+
+    // Show statistics
+    if (!empty($validation['stats'])) {
+      echo "<h4>File Statistics</h4>";
+      echo "<table style='border-collapse: collapse; width: 100%; margin: 15px 0;'>";
+      foreach ($validation['stats'] as $key => $value) {
+        $key = ucwords(str_replace('_', ' ', $key));
+        echo "<tr style='border-bottom: 1px solid #ddd;'>";
+        echo "<td style='padding: 8px; font-weight: bold;'>{$key}:</td>";
+        echo "<td style='padding: 8px;'>" . htmlspecialchars($value) . "</td>";
+        echo "</tr>";
+      }
+      echo "</table>";
+    }
+
+    // Show errors
+    if (!empty($validation['errors'])) {
+      echo "<h4 style='color: #dc3545;'>Errors (" . count($validation['errors']) . ")</h4>";
+      echo "<ul style='background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px 15px 15px 35px; margin: 15px 0;'>";
+      foreach ($validation['errors'] as $error) {
+        echo "<li style='margin: 5px 0;'>" . htmlspecialchars($error) . "</li>";
+      }
+      echo "</ul>";
+    }
+
+    // Show warnings
+    if (!empty($validation['warnings'])) {
+      echo "<h4 style='color: #ff6b35;'>Warnings (" . count($validation['warnings']) . ")</h4>";
+      echo "<ul style='background: #fff3cd; border-left: 4px solid #ff9800; padding: 15px 15px 15px 35px; margin: 15px 0;'>";
+      foreach ($validation['warnings'] as $warning) {
+        echo "<li style='margin: 5px 0;'>" . htmlspecialchars($warning) . "</li>";
+      }
+      echo "</ul>";
+    }
+
+    if ($validation['valid']) {
+      $importUrl = url("fees-data-import-do-import-optimized?id={$import->id}");
+      echo "<div style='margin-top: 25px;'>";
+      echo "<a href='{$importUrl}' class='btn btn-primary' style='background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block;'>";
+      echo "Proceed with Import</a>";
+      echo " <a href='javascript:history.back()' style='margin-left: 10px; padding: 10px 20px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; display: inline-block;'>Go Back</a>";
+      echo "</div>";
+    } else {
+      echo "<div style='margin-top: 25px;'>";
+      echo "<a href='javascript:history.back()' style='padding: 10px 20px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; display: inline-block;'>Go Back</a>";
+      echo "</div>";
+    }
+
+    echo "</div>";
+  } catch (\Exception $e) {
+    echo "<div style='background: #f8d7da; color: #721c24; padding: 20px; border-radius: 5px;'>";
+    echo "<strong>Validation Error:</strong><br>";
+    echo htmlspecialchars($e->getMessage());
+    echo "</div>";
+    Log::error('Fees import validation failed', [
+      'import_id' => $import->id,
+      'error' => $e->getMessage(),
+      'trace' => $e->getTraceAsString()
+    ]);
+  }
+});
+
+/**
+ * Process Fees Data Import - Uses Optimized Service
+ */
+Route::get('fees-data-import-do-import-optimized', function (Request $request) {
+  $u = Admin::user();
+  if ($u == null) {
+    return "You are not logged in";
+  }
+
+  $import = FeesDataImport::find($request->id);
+  if ($import == null) {
+    return "Fees Data Import not found";
+  }
+
+  if ($import->enterprise_id != $u->enterprise_id) {
+    return "Access denied. This import belongs to a different enterprise.";
+  }
+
+  // Set execution limits for large imports
+  set_time_limit(-1);
+  ini_set('memory_limit', '512M');
+
+  echo "<div style='font-family: Arial, sans-serif; padding: 20px; max-width: 900px;'>";
+  echo "<h2>Processing Import: " . htmlspecialchars($import->title) . "</h2>";
+  echo "<p>Please wait while the import is being processed...</p>";
+  echo "<div style='background: #e9ecef; padding: 15px; border-radius: 5px; margin: 15px 0;'>";
+  echo "<div id='progress-info'>Starting import...</div>";
+  echo "</div>";
+
+  // Flush output so user sees the above immediately
+  if (ob_get_level() > 0) {
+    ob_flush();
+  }
+  flush();
+
+  try {
+    $service = new \App\Services\FeesImportServiceOptimized();
+    $result = $service->processImport($import, $u);
+
+    if ($result['success']) {
+      echo "<div style='background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; border-radius: 5px; margin: 15px 0;'>";
+      echo "<strong>✓ Import Completed Successfully!</strong>";
+      echo "</div>";
+
+      echo "<h4>Import Summary</h4>";
+      echo "<pre style='background: #f8f9fa; padding: 15px; border-radius: 5px; white-space: pre-wrap;'>";
+      echo htmlspecialchars($result['message']);
+      echo "</pre>";
+
+      if (!empty($result['stats'])) {
+        echo "<h4>Detailed Statistics</h4>";
+        echo "<table style='border-collapse: collapse; width: 100%; margin: 15px 0; border: 1px solid #ddd;'>";
+        echo "<tr style='background: #f8f9fa;'><th style='padding: 10px; text-align: left; border: 1px solid #ddd;'>Metric</th><th style='padding: 10px; text-align: right; border: 1px solid #ddd;'>Count</th></tr>";
+        foreach ($result['stats'] as $key => $value) {
+          $displayKey = ucwords(str_replace('_', ' ', $key));
+          if ($key == 'errors') continue; // Skip errors array
+          echo "<tr style='border-bottom: 1px solid #ddd;'>";
+          echo "<td style='padding: 8px; border: 1px solid #ddd;'>{$displayKey}</td>";
+          echo "<td style='padding: 8px; text-align: right; border: 1px solid #ddd;'><strong>" . htmlspecialchars($value) . "</strong></td>";
+          echo "</tr>";
+        }
+        echo "</table>";
+      }
+
+      $recordsUrl = url("admin/fees-data-import-records?fees_data_import_id={$import->id}");
+      echo "<div style='margin-top: 25px;'>";
+      echo "<a href='{$recordsUrl}' class='btn btn-success' style='background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block;'>";
+      echo "View Import Records</a>";
+      echo " <a href='" . url('admin/fees-data-import') . "' style='margin-left: 10px; padding: 10px 20px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; display: inline-block;'>Back to Imports</a>";
+      echo "</div>";
+    } else {
+      echo "<div style='background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 15px; border-radius: 5px; margin: 15px 0;'>";
+      echo "<strong>✗ Import Failed</strong><br>";
+      echo htmlspecialchars($result['message']);
+      echo "</div>";
+
+      echo "<div style='margin-top: 25px;'>";
+      echo "<a href='javascript:history.back()' style='padding: 10px 20px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; display: inline-block;'>Go Back</a>";
+      echo "</div>";
+    }
+  } catch (\Exception $e) {
+    echo "<div style='background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 15px; border-radius: 5px; margin: 15px 0;'>";
+    echo "<strong>Processing Error:</strong><br>";
+    echo htmlspecialchars($e->getMessage());
+    echo "</div>";
+
+    Log::error('Fees import processing failed', [
+      'import_id' => $import->id,
+      'user_id' => $u->id,
+      'error' => $e->getMessage(),
+      'trace' => $e->getTraceAsString()
+    ]);
+  }
+
+  echo "</div>";
+});
+
+/**
+ * Retry Failed Records - Uses Optimized Service
+ */
+Route::get('fees-data-import-retry', function (Request $request) {
+  $u = Admin::user();
+  if ($u == null) {
+    return "You are not logged in";
+  }
+
+  $import = FeesDataImport::find($request->id);
+  if ($import == null) {
+    return "Fees Data Import not found";
+  }
+
+  if ($import->enterprise_id != $u->enterprise_id) {
+    return "Access denied. This import belongs to a different enterprise.";
+  }
+
+  set_time_limit(-1);
+  ini_set('memory_limit', '512M');
+
+  echo "<div style='font-family: Arial, sans-serif; padding: 20px; max-width: 900px;'>";
+  echo "<h2>Retrying Failed Records</h2>";
+  echo "<h3>Import: " . htmlspecialchars($import->title) . "</h3>";
+  echo "<p>Attempting to retry failed records...</p>";
+
+  try {
+    $service = new \App\Services\FeesImportServiceOptimized();
+    $result = $service->retryFailedRecords($import);
+
+    if ($result['success']) {
+      echo "<div style='background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; border-radius: 5px; margin: 15px 0;'>";
+      echo "<strong>✓ Retry Completed</strong><br>";
+      echo htmlspecialchars($result['message']);
+      echo "</div>";
+
+      if (!empty($result['stats'])) {
+        echo "<h4>Retry Statistics</h4>";
+        echo "<table style='border-collapse: collapse; width: 100%; margin: 15px 0;'>";
+        foreach ($result['stats'] as $key => $value) {
+          $key = ucwords(str_replace('_', ' ', $key));
+          echo "<tr style='border-bottom: 1px solid #ddd;'>";
+          echo "<td style='padding: 8px; font-weight: bold;'>{$key}:</td>";
+          echo "<td style='padding: 8px;'>" . htmlspecialchars($value) . "</td>";
+          echo "</tr>";
+        }
+        echo "</table>";
+      }
+    } else {
+      echo "<div style='background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 15px; border-radius: 5px; margin: 15px 0;'>";
+      echo "<strong>✗ Retry Failed</strong><br>";
+      echo htmlspecialchars($result['message']);
+      echo "</div>";
+    }
+
+    $recordsUrl = url("admin/fees-data-import-records?fees_data_import_id={$import->id}");
+    echo "<div style='margin-top: 25px;'>";
+    echo "<a href='{$recordsUrl}' class='btn btn-primary' style='background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block;'>";
+    echo "View All Records</a>";
+    echo " <a href='" . url('admin/fees-data-import') . "' style='margin-left: 10px; padding: 10px 20px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; display: inline-block;'>Back to Imports</a>";
+    echo "</div>";
+  } catch (\Exception $e) {
+    echo "<div style='background: #f8d7da; color: #721c24; padding: 20px; border-radius: 5px;'>";
+    echo "<strong>Retry Error:</strong><br>";
+    echo htmlspecialchars($e->getMessage());
+    echo "</div>";
+
+    Log::error('Fees import retry failed', [
+      'import_id' => $import->id,
+      'user_id' => $u->id,
+      'error' => $e->getMessage()
+    ]);
+  }
+
+  echo "</div>";
+});
+
+// ==================== END OPTIMIZED ROUTES ====================
+
+/*
+ * ==================== DEPRECATED ROUTE ====================
+ * The route below has been deprecated in favor of 'fees-data-import-do-import-optimized'
+ * which uses the FeesImportServiceOptimized class with:
+ * - Duplicate file/row prevention (file_hash, row_hash)
+ * - Batch processing with transactions (50 rows per transaction)
+ * - Comprehensive validation before processing
+ * - Better error handling and retry mechanism
+ * - Progress tracking and locking
+ * - Automatic cache management
+ * 
+ * This old route is kept temporarily for reference but should NOT be used.
+ * To remove it completely, delete from line 1151 to line 1551.
+ * Date deprecated: 2025-01-12
+ * ==================== DEPRECATED ROUTE ====================
+ */
+
+// DEPRECATED - DO NOT USE - Use 'fees-data-import-do-import-optimized' instead
+/* 
 Route::get('fees-data-import-do-import', function (Request $request) {
   $u = Admin::user();
   if ($u == null) {
@@ -1267,6 +1565,8 @@ Route::get('fees-data-import-do-import', function (Request $request) {
   }
   return '';
 });
+*/
+// ==================== END DEPRECATED ROUTE ====================
 
 
 Route::get('generate-school-report', function (Request $request) {

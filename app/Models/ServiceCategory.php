@@ -10,6 +10,14 @@ class ServiceCategory extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'enterprise_id',
+        'name',
+        'description',
+        'want_to_transfer',
+        'transfer_keyword'
+    ];
+
     public function income()
     {
         $ent = Enterprise::find($this->enterprise_id);
