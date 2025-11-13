@@ -1943,7 +1943,7 @@ class Utils  extends Model
         if ($lastRec) {
             $lastDay = Carbon::createFromTimestamp($lastRec->last_update);
             if ($lastDay->isToday()) {
-                $back = min(($lastRec->back_day ?? 0) + 2, 30);
+                $back = min(($lastRec->back_day ?? 2) + 2, 30);
                 $rec->back_day      = $back;
                 $rec_date           = date('Y-m-d', strtotime("-{$back} days"));
                 $rec->last_update   = date('Y-m-d H:i:s', strtotime("-{$back} days"));
