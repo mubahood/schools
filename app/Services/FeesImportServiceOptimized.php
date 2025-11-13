@@ -23,7 +23,7 @@ class FeesImportServiceOptimized
 {
     protected FeesDataImport $import;
     protected Enterprise $enterprise;
-    protected User $user;
+    protected $user; // Can be User or Administrator
     protected Spreadsheet $spreadsheet;
     protected array $headers = [];
     protected ServiceCategory $serviceCategory;
@@ -33,7 +33,8 @@ class FeesImportServiceOptimized
     protected array $serviceCache = [];
 
     /**
-     * Comprehensive validation before import
+     * Smart validation - only checks critical issues, not cosmetic ones
+     * Philosophy: If a row has a valid student identifier OR valid balance data, process it!
      * 
      * @param FeesDataImport $import
      * @return array ['valid' => bool, 'errors' => array, 'warnings' => array, 'stats' => array]
@@ -45,22 +46,22 @@ class FeesImportServiceOptimized
         $stats = [];
 
         try {
-            // Check if file exists
+            // CRITICAL CHECK 1: File must exist
             $filePath = $this->resolveFilePath($import->file_path);
             if (!file_exists($filePath)) {
                 $errors[] = "Import file not found at: {$filePath}";
                 return $this->validationResponse(false, $errors, $warnings, $stats);
             }
 
-            // Check file size (limit to 50MB)
+            // Info only - not an error
             $fileSize = filesize($filePath);
             if ($fileSize > 50 * 1024 * 1024) {
-                $errors[] = "File size exceeds 50MB limit. Current size: " . round($fileSize / 1024 / 1024, 2) . "MB";
+                $warnings[] = "Large file detected: " . round($fileSize / 1024 / 1024, 2) . "MB. Processing may take longer.";
             }
             $stats['file_size_mb'] = round($fileSize / 1024 / 1024, 2);
 
 
-            // Generate and check file hash for duplicates
+            // Info only - duplicate check is warning not error (user might want to re-import)
             $fileHash = $this->generateFileHash($filePath);
             if (FeesDataImport::isDuplicateFile($fileHash, $import->enterprise_id, $import->id)) {
                 $duplicate = FeesDataImport::where('file_hash', $fileHash)
@@ -68,155 +69,173 @@ class FeesImportServiceOptimized
                     ->where('status', FeesDataImport::STATUS_COMPLETED)
                     ->where('id', '!=', $import->id)
                     ->first();
-                $errors[] = "This file has already been imported successfully (Import ID: {$duplicate->id}, Title: '{$duplicate->title}', Date: {$duplicate->created_at})";
+                $warnings[] = "Note: This file was previously imported (Import ID: {$duplicate->id}, '{$duplicate->title}', {$duplicate->created_at}). Duplicate transactions will be skipped automatically.";
             }
-            dd($fileHash);
 
-            // Load spreadsheet
+            // CRITICAL CHECK 2: Load spreadsheet with optimized settings
             try {
-                $spreadsheet = IOFactory::load($filePath);
+                $startTime = microtime(true);
+                
+                // Use read-only mode with minimal memory and no formatting
+                $reader = IOFactory::createReaderForFile($filePath);
+                $reader->setReadDataOnly(true); // Skip styles, formatting, etc.
+                
+                // For large files, only read specific columns if possible
+                // $reader->setReadFilter(new MyReadFilter()); // Optional: implement if needed
+                
+                $spreadsheet = $reader->load($filePath);
+                
+                $endTime = microtime(true);
+                $loadTime = $endTime - $startTime;
+                Log::info("Spreadsheet loaded in {$loadTime} seconds", [
+                    'import_id' => $import->id,
+                    'file_path' => $filePath,
+                    'load_time_seconds' => $loadTime,
+                    'read_data_only' => true
+                ]);
                 $sheet = $spreadsheet->getActiveSheet();
                 $highestRow = $sheet->getHighestRow();
                 $highestColumn = $sheet->getHighestColumn();
+                
+                // Calculate ACTUAL highest column with data (not formatting)
+                $actualHighestColumn = 'A';
+                $firstRowData = $sheet->rangeToArray('A1:' . $highestColumn . '1')[0];
+                for ($i = count($firstRowData) - 1; $i >= 0; $i--) {
+                    if (!empty($firstRowData[$i])) {
+                        $actualHighestColumn = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i + 1);
+                        break;
+                    }
+                }
+                
+                // Use actual column for memory efficiency
+                $workingHighestColumn = $actualHighestColumn;
+                
                 $stats['total_rows'] = $highestRow - 1; // Exclude header
                 $stats['total_columns'] = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($highestColumn);
+                $stats['actual_columns'] = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($actualHighestColumn);
                 
-                // Check if file is empty
+                Log::info("Column optimization", [
+                    'formatted_highest_column' => $highestColumn,
+                    'actual_highest_column' => $actualHighestColumn,
+                    'memory_saved' => ($stats['total_columns'] - $stats['actual_columns']) . ' columns'
+                ]);
+
+                // CRITICAL CHECK 3: File must have data rows
                 if ($highestRow <= 1) {
                     $errors[] = "File is empty or contains only header row";
                     return $this->validationResponse(false, $errors, $warnings, $stats);
                 }
 
-                // Validate column mappings
-                $firstRow = $sheet->rangeToArray('A1:' . $highestColumn . '1')[0];
+                // Get headers for reference (use actual column range)
+                $firstRow = $sheet->rangeToArray('A1:' . $workingHighestColumn . '1')[0];
                 $this->headers = $firstRow;
-                
-                // Check identifier column
-                if ($import->identify_by == 'school_pay_account_id') {
-                    if (empty($import->school_pay_column)) {
-                        $errors[] = "School Pay column not configured";
-                    } else {
-                        $colIndex = Utils::alphabet_to_index($import->school_pay_column);
-                        if (!isset($firstRow[$colIndex]) || empty(trim($firstRow[$colIndex]))) {
-                            $warnings[] = "School Pay column '{$import->school_pay_column}' appears empty in header row";
-                        }
-                    }
-                } elseif ($import->identify_by == 'reg_number') {
-                    if (empty($import->reg_number_column)) {
-                        $errors[] = "Registration Number column not configured";
-                    } else {
-                        $colIndex = Utils::alphabet_to_index($import->reg_number_column);
-                        if (!isset($firstRow[$colIndex]) || empty(trim($firstRow[$colIndex]))) {
-                            $warnings[] = "Registration Number column '{$import->reg_number_column}' appears empty in header row";
-                        }
-                    }
-                } else {
-                    $errors[] = "Invalid identification method: {$import->identify_by}. Must be 'school_pay_account_id' or 'reg_number'";
+
+                // CRITICAL CHECK 4: Identifier configuration must be set
+                if ($import->identify_by == 'school_pay_account_id' && empty($import->school_pay_column)) {
+                    $errors[] = "School Pay column not configured. Please set the identifier column.";
+                } elseif ($import->identify_by == 'reg_number' && empty($import->reg_number_column)) {
+                    $errors[] = "Registration Number column not configured. Please set the identifier column.";
+                } elseif ($import->identify_by == 'name' && empty($import->reg_number_column)) {
+                    $errors[] = "Student Name column not configured. Please set the identifier column.";
+                } elseif (!in_array($import->identify_by, ['school_pay_account_id', 'reg_number', 'name'])) {
+                    $errors[] = "Invalid identification method: {$import->identify_by}. Must be 'school_pay_account_id', 'reg_number', or 'name'";
                 }
 
-                // Validate balance columns if configured
-                if (!empty($import->current_balance_column)) {
-                    $colIndex = Utils::alphabet_to_index($import->current_balance_column);
-                    if (!isset($firstRow[$colIndex])) {
-                        $warnings[] = "Current balance column '{$import->current_balance_column}' not found in file";
-                    }
-                }
+                // Info about configured columns - NOT validation errors
+                $stats['services_count'] = is_array($import->services_columns) ? count($import->services_columns) : 0;
+                $stats['has_current_balance'] = !empty($import->current_balance_column);
+                $stats['has_previous_balance'] = !empty($import->previous_fees_term_balance_column);
+                $stats['has_services'] = $stats['services_count'] > 0;
 
-                if (!empty($import->previous_fees_term_balance_column)) {
-                    $colIndex = Utils::alphabet_to_index($import->previous_fees_term_balance_column);
-                    if (!isset($firstRow[$colIndex])) {
-                        $warnings[] = "Previous term balance column '{$import->previous_fees_term_balance_column}' not found in file";
-                    }
-                }
-
-                // Validate service columns
-                $servicesColumns = $import->services_columns;
-                if (!empty($servicesColumns) && is_array($servicesColumns)) {
-                    foreach ($servicesColumns as $col) {
-                        $colIndex = Utils::alphabet_to_index($col);
-                        if (!isset($firstRow[$colIndex])) {
-                            $warnings[] = "Service column '{$col}' not found in file";
-                        }
-                    }
-                    $stats['services_count'] = count($servicesColumns);
-                } else {
-                    $warnings[] = "No service columns configured. Only balances will be imported.";
-                    $stats['services_count'] = 0;
-                }
-
-                // Sample validation - check first 10 rows for common issues
+                // SMART SAMPLING: Check first 10 rows to give helpful info (NOT to block import)
                 $sampleSize = min(10, $highestRow - 1);
-                $identifierIssues = 0;
+                $validRows = 0;
                 $emptyRows = 0;
                 $sampleIdentifiers = [];
+                $rowsWithData = 0;
 
                 for ($row = 2; $row <= $sampleSize + 1; $row++) {
-                    $rowData = $sheet->rangeToArray("A{$row}:{$highestColumn}{$row}")[0];
-                    
+                    $rowData = $sheet->rangeToArray("A{$row}:{$workingHighestColumn}{$row}")[0];
+
                     // Check if row is completely empty
                     $isEmpty = true;
+                    $hasAnyData = false;
                     foreach ($rowData as $cell) {
                         if (!empty(trim($cell))) {
                             $isEmpty = false;
+                            $hasAnyData = true;
                             break;
                         }
                     }
-                    
+
                     if ($isEmpty) {
                         $emptyRows++;
                         continue;
                     }
 
-                    // Check identifier
-                    $identifierCol = $import->identify_by == 'school_pay_account_id' 
-                        ? $import->school_pay_column 
-                        : $import->reg_number_column;
+                    $rowsWithData++;
+
+                    // Try to get identifier
+                    $identifierCol = $import->identify_by == 'school_pay_account_id' ? $import->school_pay_column : $import->reg_number_column;
                     
+                    $hasIdentifier = false;
                     if (!empty($identifierCol)) {
                         $colIndex = Utils::alphabet_to_index($identifierCol);
                         $identifierValue = $rowData[$colIndex] ?? null;
-                        if (empty(trim($identifierValue))) {
-                            $identifierIssues++;
-                        } else {
+                        if (!empty(trim($identifierValue))) {
                             $sampleIdentifiers[] = trim($identifierValue);
+                            $hasIdentifier = true;
                         }
+                    }
+
+                    // Row is valid if it has identifier OR any numeric data (fees/balances)
+                    if ($hasIdentifier || $hasAnyData) {
+                        $validRows++;
                     }
                 }
 
+                // Info messages - not errors
                 if ($emptyRows > 0) {
-                    $warnings[] = "Found {$emptyRows} empty rows in sample (first {$sampleSize} rows checked)";
+                    $warnings[] = "Found {$emptyRows} empty rows in sample. These will be automatically skipped during import.";
                 }
 
-                if ($identifierIssues > 0) {
-                    $warnings[] = "Found {$identifierIssues} rows with missing identifiers in sample (first {$sampleSize} rows checked)";
-                }
+                $stats['sample_valid_rows'] = $validRows;
+                $stats['sample_rows_with_data'] = $rowsWithData;
 
-                // Check if sample identifiers exist in database
+                // CRITICAL CHECK 5: At least SOME students must be findable (but not all!)
                 if (!empty($sampleIdentifiers)) {
                     $foundCount = 0;
                     if ($import->identify_by == 'school_pay_account_id') {
                         $foundCount = User::where('enterprise_id', $import->enterprise_id)
                             ->whereIn('school_pay_payment_code', $sampleIdentifiers)
                             ->count();
+                    } elseif ($import->identify_by == 'name') {
+                        $foundCount = User::where('enterprise_id', $import->enterprise_id)
+                            ->whereIn('name', $sampleIdentifiers)
+                            ->count();
                     } else {
                         $foundCount = User::where('enterprise_id', $import->enterprise_id)
                             ->whereIn('user_number', $sampleIdentifiers)
                             ->count();
                     }
-                    
+
                     $stats['sample_found_students'] = $foundCount;
                     $stats['sample_total_checked'] = count($sampleIdentifiers);
-                    
-                    if ($foundCount == 0) {
-                        $errors[] = "None of the sampled identifiers were found in the database. Please verify the identifier column is correct.";
-                    } elseif ($foundCount < count($sampleIdentifiers) / 2) {
-                        $warnings[] = "Only {$foundCount} out of " . count($sampleIdentifiers) . " sampled identifiers were found. This may indicate data quality issues.";
+                    $stats['sample_match_rate'] = count($sampleIdentifiers) > 0 ? round(($foundCount / count($sampleIdentifiers)) * 100, 1) : 0;
+
+                    // Only fail if literally NO students can be found (very likely wrong column)
+                    if ($foundCount == 0 && count($sampleIdentifiers) > 0) {
+                        $errors[] = "Unable to match any students in sample. Please verify:\n- Identifier column is correct (currently: {$identifierCol})\n- Identifier type matches your data (currently: {$import->identify_by})\n- Students exist in the system";
+                    } elseif ($foundCount < count($sampleIdentifiers)) {
+                        $notFound = count($sampleIdentifiers) - $foundCount;
+                        $warnings[] = "{$notFound} out of " . count($sampleIdentifiers) . " sampled identifiers not found. These rows will be skipped. Match rate: {$stats['sample_match_rate']}%";
                     }
+                } else {
+                    $warnings[] = "No identifiers found in sample. Rows without valid identifiers will be skipped during import.";
                 }
 
                 $stats['sample_size'] = $sampleSize;
                 $stats['estimated_duration'] = $this->estimateProcessingTime($stats['total_rows']);
-
             } catch (Exception $e) {
                 $errors[] = "Failed to read file: " . $e->getMessage();
                 Log::error("Failed to load spreadsheet for validation", [
@@ -225,7 +244,6 @@ class FeesImportServiceOptimized
                     'file_path' => $filePath
                 ]);
             }
-
         } catch (Exception $e) {
             $errors[] = "Validation error: " . $e->getMessage();
             Log::error("Fees import validation failed", [
@@ -242,22 +260,41 @@ class FeesImportServiceOptimized
      * Process the import with comprehensive error handling and atomic transactions
      * 
      * @param FeesDataImport $import
-     * @param User $user
+     * @param User|\Encore\Admin\Auth\Database\Administrator $user
      * @return array ['success' => bool, 'message' => string, 'stats' => array]
      */
-    public function processImport(FeesDataImport $import, User $user): array
+    public function processImport(FeesDataImport $import, $user): array
     {
+        // Set aggressive limits for large file processing
+        set_time_limit(0); // Unlimited
+        ini_set('max_execution_time', '0');
+        ini_set('memory_limit', '2048M');
+        
         $this->import = $import;
         $this->user = $user;
-        
+
         try {
-            // Check if can be processed
-            if (!$import->canBeProcessed()) {
+            // Check if can be processed (only blocks if actively processing or locked)
+            if ($import->status === 'Processing') {
                 return [
                     'success' => false,
-                    'message' => "Import cannot be processed. Current status: {$import->status}",
+                    'message' => "Import is currently being processed by another request. Please wait.",
                     'stats' => []
                 ];
+            }
+            
+            if ($import->isLocked()) {
+                $lockedBy = $import->lockedBy ? $import->lockedBy->name : 'another user';
+                return [
+                    'success' => false,
+                    'message' => "Import is currently locked by {$lockedBy}. Please try again later.",
+                    'stats' => []
+                ];
+            }
+            
+            // Allow reprocessing of completed imports (user may want to re-run)
+            if ($import->status === 'Completed') {
+                Log::info("Reprocessing completed import", ['import_id' => $import->id]);
             }
 
             // Try to lock the import
@@ -272,7 +309,7 @@ class FeesImportServiceOptimized
 
             // Load enterprise
             $this->enterprise = Enterprise::findOrFail($import->enterprise_id);
-            
+
             // Load current term
             $this->currentTerm = $this->enterprise->active_term();
             if (!$this->currentTerm) {
@@ -284,25 +321,41 @@ class FeesImportServiceOptimized
                 ];
             }
 
-            // Validate before processing
-            $validation = $this->validateImport($import);
-            if (!$validation['valid']) {
-                $import->validation_errors = $validation['errors'];
-                $import->status = FeesDataImport::STATUS_FAILED;
-                $import->unlock();
-                $import->save();
+            // Skip validation if import was already validated successfully
+            // (avoid loading huge file twice which causes timeouts)
+            if (empty($import->validation_errors) && !empty($import->total_rows)) {
+                Log::info("Skipping re-validation - import already validated", [
+                    'import_id' => $import->id,
+                    'total_rows' => $import->total_rows
+                ]);
+                echo "<script>document.getElementById('progress-info').innerHTML = 'Skipping validation (already done)...';</script>";
+                echo str_repeat(' ', 1024); // Keepalive padding
+                flush();
+            } else {
+                // Validate before processing
+                echo "<script>document.getElementById('progress-info').innerHTML = 'Validating import file...';</script>";
+                echo str_repeat(' ', 1024); // Keepalive padding
+                flush();
                 
-                return [
-                    'success' => false,
-                    'message' => 'Validation failed: ' . implode(', ', $validation['errors']),
-                    'stats' => $validation['stats']
-                ];
+                $validation = $this->validateImport($import);
+                if (!$validation['valid']) {
+                    $import->validation_errors = $validation['errors'];
+                    $import->status = FeesDataImport::STATUS_FAILED;
+                    $import->unlock();
+                    $import->save();
+
+                    return [
+                        'success' => false,
+                        'message' => 'Validation failed: ' . implode(', ', $validation['errors']),
+                        'stats' => $validation['stats']
+                    ];
+                }
             }
 
             // Generate and store file hash for duplicate prevention
             $filePath = $this->resolveFilePath($import->file_path);
             $fileHash = $this->generateFileHash($filePath);
-            
+
             // Update import status
             $import->file_hash = $fileHash;
             $import->term_id = $this->currentTerm->id;
@@ -315,12 +368,44 @@ class FeesImportServiceOptimized
             $import->skipped_count = 0;
             $import->save();
 
-            // Load spreadsheet
-            $this->spreadsheet = IOFactory::load($filePath);
+            // Load spreadsheet with optimized settings (read-only, no formatting)
+            echo "<script>document.getElementById('progress-info').innerHTML = 'Loading Excel file (this may take 10-20 seconds for large files)...';</script>";
+            echo str_repeat(' ', 1024); // Keepalive padding
+            flush();
+            
+            $loadStart = microtime(true);
+            $reader = IOFactory::createReaderForFile($filePath);
+            $reader->setReadDataOnly(true); // Skip styles, formatting, etc. - MUCH faster
+            $this->spreadsheet = $reader->load($filePath);
+            $loadTime = round(microtime(true) - $loadStart, 2);
+            
+            echo "<script>document.getElementById('progress-info').innerHTML = 'File loaded in {$loadTime}s. Analyzing structure...';</script>";
+            echo str_repeat(' ', 1024); // Keepalive padding
+            flush();
+            
             $sheet = $this->spreadsheet->getActiveSheet();
             $highestRow = $sheet->getHighestRow();
             $highestColumn = $sheet->getHighestColumn();
             
+            // Calculate ACTUAL highest column with data (not formatting)
+            $actualHighestColumn = 'A';
+            $firstRowData = $sheet->rangeToArray('A1:' . $highestColumn . '1')[0];
+            for ($i = count($firstRowData) - 1; $i >= 0; $i--) {
+                if (!empty($firstRowData[$i])) {
+                    $actualHighestColumn = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i + 1);
+                    break;
+                }
+            }
+            
+            // Use actual column for memory efficiency
+            $workingHighestColumn = $actualHighestColumn;
+            
+            Log::info("Import processing column optimization", [
+                'import_id' => $import->id,
+                'formatted_highest_column' => $highestColumn,
+                'actual_highest_column' => $actualHighestColumn
+            ]);
+
             // Get or create service category
             $this->serviceCategory = ServiceCategory::firstOrCreate([
                 'enterprise_id' => $this->enterprise->id,
@@ -329,9 +414,9 @@ class FeesImportServiceOptimized
                 'description' => 'Services imported from fees data',
             ]);
 
-            // Parse headers
-            $this->headers = $sheet->rangeToArray('A1:' . $highestColumn . '1')[0];
-            
+            // Parse headers (use actual column range)
+            $this->headers = $sheet->rangeToArray('A1:' . $workingHighestColumn . '1')[0];
+
             // Parse service columns configuration
             $servicesColumns = $import->services_columns ?? [];
 
@@ -344,35 +429,51 @@ class FeesImportServiceOptimized
                 'errors' => [],
                 'duplicates' => 0,
             ];
+            
+            echo "<script>document.getElementById('progress-info').innerHTML = 'Starting to process " . ($highestRow - 1) . " rows...';</script>";
+            echo str_repeat(' ', 1024); // Keepalive padding
+            flush();
 
             $batchSize = 50; // Process 50 rows per transaction
             $currentBatch = [];
-            
+            $lastProgressUpdate = 0;
+
             for ($row = 2; $row <= $highestRow; $row++) {
-                $rowData = $sheet->rangeToArray("A{$row}:{$highestColumn}{$row}")[0];
+                $rowData = $sheet->rangeToArray("A{$row}:{$workingHighestColumn}{$row}")[0];
                 $currentBatch[] = ['row' => $row, 'data' => $rowData];
                 
+                // Update progress every 50 rows
+                if ($row - $lastProgressUpdate >= 50 || $row == $highestRow) {
+                    $processed = $row - 1;
+                    $total = $highestRow - 1;
+                    $percent = round(($processed / $total) * 100, 1);
+                    echo "<script>document.getElementById('progress-info').innerHTML = 'Processing row {$processed}/{$total} ({$percent}%) - Success: {$stats['success']}, Failed: {$stats['failed']}, Skipped: {$stats['skipped']}';</script>";
+                    echo str_repeat(' ', 512); // Keepalive padding
+                    flush();
+                    $lastProgressUpdate = $row;
+                }
+
                 // Process batch when it reaches batch size or last row
                 if (count($currentBatch) >= $batchSize || $row == $highestRow) {
                     $batchResult = $this->processBatch($currentBatch, $servicesColumns);
-                    
+
                     $stats['total'] += $batchResult['total'];
                     $stats['success'] += $batchResult['success'];
                     $stats['failed'] += $batchResult['failed'];
                     $stats['skipped'] += $batchResult['skipped'];
                     $stats['duplicates'] += $batchResult['duplicates'];
                     $stats['errors'] = array_merge($stats['errors'], $batchResult['errors']);
-                    
+
                     // Update progress
                     $import->processed_rows = $stats['total'];
                     $import->success_count = $stats['success'];
                     $import->failed_count = $stats['failed'];
                     $import->skipped_count = $stats['skipped'];
                     $import->save();
-                    
+
                     // Clear batch
                     $currentBatch = [];
-                    
+
                     // Clear caches periodically
                     if ($row % 200 == 0) {
                         $this->clearCaches();
@@ -387,7 +488,7 @@ class FeesImportServiceOptimized
             $import->success_count = $stats['success'];
             $import->failed_count = $stats['failed'];
             $import->skipped_count = $stats['skipped'];
-            
+
             $summaryText = $this->generateSummaryText($stats);
             $import->summary = $summaryText;
             $import->unlock();
@@ -401,7 +502,6 @@ class FeesImportServiceOptimized
                 'message' => $summaryText,
                 'stats' => $stats
             ];
-
         } catch (Exception $e) {
             // Rollback and unlock
             $import->status = FeesDataImport::STATUS_FAILED;
@@ -439,38 +539,37 @@ class FeesImportServiceOptimized
         ];
 
         DB::beginTransaction();
-        
+
         try {
             foreach ($batch as $item) {
                 $rowNumber = $item['row'];
                 $rowData = $item['data'];
-                
+
                 $result = $this->processRow($rowNumber, $rowData, $servicesColumns);
-                
+
                 $stats['total']++;
                 $stats[$result['status']]++;
-                
+
                 if ($result['status'] == 'failed') {
                     $stats['errors'][] = "Row {$rowNumber}: {$result['message']}";
                 }
-                
+
                 if (isset($result['duplicate']) && $result['duplicate']) {
                     $stats['duplicates']++;
                 }
             }
-            
+
             DB::commit();
-            
         } catch (Exception $e) {
             DB::rollBack();
-            
+
             // Mark all batch items as failed
             foreach ($batch as $item) {
                 $stats['total']++;
                 $stats['failed']++;
                 $stats['errors'][] = "Row {$item['row']}: Batch processing failed - " . $e->getMessage();
             }
-            
+
             Log::error("Batch processing failed", [
                 'import_id' => $this->import->id,
                 'batch_size' => count($batch),
@@ -495,39 +594,39 @@ class FeesImportServiceOptimized
                     break;
                 }
             }
-            
+
             if ($isEmpty) {
                 return ['status' => 'skipped', 'message' => 'Empty row'];
             }
 
             // Get identifier
             $identifyBy = $this->import->identify_by;
-            $identifierCol = $identifyBy == 'school_pay_account_id' 
-                ? $this->import->school_pay_column 
+            $identifierCol = $identifyBy == 'school_pay_account_id'
+                ? $this->import->school_pay_column
                 : $this->import->reg_number_column;
-            
+
             if (empty($identifierCol)) {
                 return ['status' => 'failed', 'message' => 'No identifier column configured'];
             }
 
             $colIndex = Utils::alphabet_to_index($identifierCol);
             $identifierValue = isset($rowData[$colIndex]) ? trim($rowData[$colIndex]) : null;
-            
+
             if (empty($identifierValue)) {
                 return ['status' => 'skipped', 'message' => 'Missing identifier'];
             }
 
             // Generate row hash for duplicate detection
             $rowHash = FeesDataImportRecord::generateRowHash($this->import->id, $rowData, $identifierValue);
-            
+
             // Check if this exact row was already processed in this import
             $existingRecord = FeesDataImportRecord::where('fees_data_import_id', $this->import->id)
                 ->where('row_hash', $rowHash)
                 ->first();
-            
+
             if ($existingRecord && $existingRecord->isSuccessful()) {
                 return [
-                    'status' => 'skipped', 
+                    'status' => 'skipped',
                     'message' => 'Duplicate row already processed successfully',
                     'duplicate' => true
                 ];
@@ -550,7 +649,7 @@ class FeesImportServiceOptimized
                     'data' => $rowData,
                     'row_hash' => $rowHash,
                 ]);
-                
+
                 return ['status' => 'failed', 'message' => "Student not found: {$identifierValue}"];
             }
 
@@ -560,13 +659,13 @@ class FeesImportServiceOptimized
             // Get balances
             $currentBalance = 0;
             $previousBalance = 0;
-            
+
             if (!empty($this->import->current_balance_column)) {
                 $balanceColIndex = Utils::alphabet_to_index($this->import->current_balance_column);
                 $balanceValue = $rowData[$balanceColIndex] ?? 0;
                 $currentBalance = $this->parseAmount($balanceValue);
             }
-            
+
             if (!empty($this->import->previous_fees_term_balance_column)) {
                 $prevBalanceColIndex = Utils::alphabet_to_index($this->import->previous_fees_term_balance_column);
                 $prevBalanceValue = $rowData[$prevBalanceColIndex] ?? 0;
@@ -602,7 +701,7 @@ class FeesImportServiceOptimized
             // Process services
             $servicesData = [];
             $totalAmount = 0;
-            
+
             foreach ($servicesColumns as $col) {
                 $serviceResult = $this->processService($col, $rowData, $student, $account);
                 if ($serviceResult) {
@@ -614,7 +713,7 @@ class FeesImportServiceOptimized
             // Recalculate account balance
             $newBalance = Transaction::where('account_id', $account->id)
                 ->sum('amount');
-            
+
             $account->balance = $newBalance;
             $account->save();
 
@@ -628,12 +727,11 @@ class FeesImportServiceOptimized
             $record->save();
 
             return ['status' => 'success', 'message' => 'Row processed successfully'];
-
         } catch (Exception $e) {
             // Create or update failed record
             try {
                 $rowHash = $rowHash ?? FeesDataImportRecord::generateRowHash($this->import->id, $rowData, 'unknown');
-                
+
                 FeesDataImportRecord::updateOrCreate(
                     [
                         'fees_data_import_id' => $this->import->id,
@@ -655,7 +753,7 @@ class FeesImportServiceOptimized
                     'error' => $recordException->getMessage()
                 ]);
             }
-            
+
             return ['status' => 'failed', 'message' => $e->getMessage()];
         }
     }
@@ -666,13 +764,13 @@ class FeesImportServiceOptimized
     protected function findStudent(string $identifyBy, string $identifier): ?User
     {
         $cacheKey = $identifyBy . ':' . $identifier;
-        
+
         if (isset($this->studentCache[$cacheKey])) {
             return $this->studentCache[$cacheKey];
         }
 
         $student = null;
-        
+
         if ($identifyBy == 'school_pay_account_id') {
             $student = User::where('school_pay_payment_code', $identifier)
                 ->where('enterprise_id', $this->enterprise->id)
@@ -759,13 +857,13 @@ class FeesImportServiceOptimized
     {
         try {
             $colIndex = Utils::alphabet_to_index($column);
-            
+
             if (!isset($rowData[$colIndex])) {
                 return null;
             }
 
             $amount = $this->parseAmount($rowData[$colIndex]);
-            
+
             if ($amount <= 0) {
                 return null;
             }
@@ -810,8 +908,8 @@ class FeesImportServiceOptimized
 
             // Create transaction for the service (with duplicate check)
             $transactionHash = FeesDataImportRecord::generateTransactionHash(
-                $student->id, 
-                $this->import->id, 
+                $student->id,
+                $this->import->id,
                 ['service' => $serviceName, 'amount' => $amount]
             );
 
@@ -842,7 +940,6 @@ class FeesImportServiceOptimized
                 'amount' => $amount,
                 'column' => $column,
             ];
-
         } catch (Exception $e) {
             Log::warning("Failed to process service", [
                 'import_id' => $this->import->id,
@@ -860,7 +957,7 @@ class FeesImportServiceOptimized
     protected function getOrCreateService(string $name, float $amount): Service
     {
         $cacheKey = strtolower(trim($name));
-        
+
         if (isset($this->serviceCache[$cacheKey])) {
             return $this->serviceCache[$cacheKey];
         }
@@ -891,7 +988,7 @@ class FeesImportServiceOptimized
 
         // Remove currency symbols, commas, and other non-numeric characters except decimal point and minus
         $cleaned = preg_replace('/[^0-9.-]/', '', $value);
-        
+
         return floatval($cleaned);
     }
 
@@ -910,7 +1007,7 @@ class FeesImportServiceOptimized
     {
         $secondsPerRow = 0.3; // Optimized to 0.3 seconds per row
         $totalSeconds = $rows * $secondsPerRow;
-        
+
         if ($totalSeconds < 60) {
             return round($totalSeconds) . " seconds";
         } elseif ($totalSeconds < 3600) {
@@ -952,7 +1049,7 @@ class FeesImportServiceOptimized
         $text .= "✓ Successful: {$stats['success']}\n";
         $text .= "✗ Failed: {$stats['failed']}\n";
         $text .= "⊘ Skipped: {$stats['skipped']}\n";
-        
+
         if ($stats['duplicates'] > 0) {
             $text .= "⚠ Duplicates Detected: {$stats['duplicates']}\n";
         }
@@ -963,7 +1060,7 @@ class FeesImportServiceOptimized
             foreach ($errorList as $error) {
                 $text .= "• " . $error . "\n";
             }
-            
+
             if (count($stats['errors']) > 10) {
                 $remaining = count($stats['errors']) - 10;
                 $text .= "... and {$remaining} more errors\n";
@@ -1017,7 +1114,7 @@ class FeesImportServiceOptimized
         $this->enterprise = Enterprise::findOrFail($import->enterprise_id);
         $this->currentTerm = $this->enterprise->active_term();
         $this->user = User::find($import->created_by_id) ?? User::where('enterprise_id', $import->enterprise_id)->first();
-        
+
         $servicesColumns = $import->services_columns ?? [];
 
         $stats = [
@@ -1036,23 +1133,22 @@ class FeesImportServiceOptimized
 
         foreach ($failedRecords as $record) {
             DB::beginTransaction();
-            
+
             try {
                 $rowData = $record->data;
                 $result = $this->processRow($record->index, $rowData, $servicesColumns);
-                
+
                 if ($result['status'] == 'success') {
                     $stats['success']++;
                 } else {
                     $stats['failed']++;
                 }
-                
+
                 DB::commit();
-                
             } catch (Exception $e) {
                 DB::rollBack();
                 $stats['failed']++;
-                
+
                 Log::error("Retry failed for record", [
                     'record_id' => $record->id,
                     'error' => $e->getMessage()
@@ -1137,7 +1233,7 @@ class FeesImportServiceOptimized
 
                 if ($result['success']) {
                     DB::commit();
-                    
+
                     // Update import statistics
                     $import->success_count++;
                     $import->failed_count--;

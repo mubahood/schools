@@ -222,8 +222,9 @@ class FeesDataImport extends Model
 
     /**
      * Lock the import
+     * @param User|\Encore\Admin\Auth\Database\Administrator $user
      */
-    public function lock(User $user): bool
+    public function lock($user): bool
     {
         if ($this->isLocked() && $this->locked_by_id !== $user->id) {
             return false;
@@ -250,11 +251,12 @@ class FeesDataImport extends Model
 
     /**
      * Check if import can be processed
+     * Made less strict - allows reprocessing of completed imports
      */
     public function canBeProcessed(): bool
     {
-        return in_array($this->status, [self::STATUS_PENDING, self::STATUS_FAILED]) 
-            && !$this->isLocked();
+        // Only block if currently processing or locked by another user
+        return $this->status !== self::STATUS_PROCESSING && !$this->isLocked();
     }
 
     /**

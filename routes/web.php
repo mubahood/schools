@@ -867,10 +867,14 @@ array:12 [▼
   }
 });
 
-// ==================== OPTIMIZED FEES DATA IMPORT ROUTES ====================
+// ==================== DEPRECATED FEES DATA IMPORT ROUTES ====================
+// NOTE: These routes are DEPRECATED and will be removed in a future version.
+// They have been moved to app/Admin/Controllers/FeesDataImportController.php
+// Please use the new routes under /admin prefix instead.
+// ==================== DO NOT USE - USE /admin ROUTES INSTEAD ====================
 
 /**
- * Validate Fees Data Import - Uses Optimized Service
+ * @deprecated Use /admin/fees-data-import-validate instead
  */
 Route::get('fees-data-import-validate', function (Request $request) {
   $u = Admin::user();
@@ -1144,7 +1148,85 @@ Route::get('fees-data-import-retry', function (Request $request) {
   echo "</div>";
 });
 
-// ==================== END OPTIMIZED ROUTES ====================
+/**
+ * Duplicate Import - Creates a copy with reset status
+ */
+Route::get('fees-data-import-duplicate', function (Request $request) {
+  $u = Admin::user();
+  if ($u == null) {
+    admin_error('Authentication Required', 'You are not logged in');
+    return redirect('admin/auth/login');
+  }
+
+  $import = FeesDataImport::find($request->id);
+  if ($import == null) {
+    admin_error('Not Found', 'Fees Data Import not found');
+    return redirect('admin/fees-data-imports');
+  }
+
+  if ($import->enterprise_id != $u->enterprise_id) {
+    admin_error('Access Denied', 'This import belongs to a different enterprise.');
+    return redirect('admin/fees-data-imports');
+  }
+
+  try {
+    // Create a duplicate with reset status
+    $duplicate = $import->replicate();
+    
+    // Reset fields that should not be copied
+    $duplicate->status = 'Pending';
+    $duplicate->batch_identifier = null; // Will be auto-generated
+    $duplicate->file_hash = null; // Will be recalculated on processing
+    $duplicate->total_rows = 0;
+    $duplicate->processed_rows = 0;
+    $duplicate->success_count = 0;
+    $duplicate->failed_count = 0;
+    $duplicate->skipped_count = 0;
+    $duplicate->started_at = null;
+    $duplicate->completed_at = null;
+    $duplicate->processed_at = null;
+    $duplicate->summary = null;
+    $duplicate->validation_errors = null;
+    $duplicate->validation_warnings = null;
+    $duplicate->is_locked = false;
+    $duplicate->locked_by = null;
+    $duplicate->locked_at = null;
+    
+    // Update metadata
+    $duplicate->created_by_id = $u->id;
+    $duplicate->title = $import->title . ' (Copy)';
+    $duplicate->created_at = now();
+    $duplicate->updated_at = now();
+    
+    // Keep the same file path (don't duplicate the file)
+    // Keep the same configuration settings:
+    // - identify_by
+    // - reg_number_column / school_pay_column
+    // - services_columns
+    // - current_balance_column
+    // - previous_fees_term_balance_column
+    // - cater_for_balance
+    // - term_id
+    // - enterprise_id
+    
+    $duplicate->save();
+
+    admin_success('Success', 'Import duplicated successfully! You can now modify settings and process this import.');
+    return redirect('admin/fees-data-imports/' . $duplicate->id . '/edit');
+
+  } catch (\Exception $e) {
+    Log::error('Failed to duplicate fees import', [
+      'import_id' => $import->id,
+      'user_id' => $u->id,
+      'error' => $e->getMessage()
+    ]);
+
+    admin_error('Duplication Failed', 'Failed to duplicate import: ' . $e->getMessage());
+    return redirect('admin/fees-data-import');
+  }
+});
+
+// ==================== END DEPRECATED ROUTES ====================
 
 /*
  * ==================== DEPRECATED ROUTE ====================

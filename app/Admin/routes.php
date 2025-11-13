@@ -145,6 +145,12 @@ Route::group([
     $router->resource('school-reports', SchoolReportController::class);
     $router->resource('fees-data-import', FeesDataImportController::class);
     $router->resource('fees-data-import-records', FeesDataImportRecordController::class);
+    
+    // Custom fees-data-import action routes (must come after resource registration)
+    $router->get('fees-data-import-validate', 'FeesDataImportController@validate');
+    $router->get('fees-data-import-do-import-optimized', 'FeesDataImportController@doImportOptimized');
+    $router->get('fees-data-import-retry', 'FeesDataImportController@retry');
+    $router->get('fees-data-import-duplicate', 'FeesDataImportController@duplicate');
 
     $router->resource('student-data-imports', StudentDataImportController::class);
     $router->resource('import-school-pay-transactions', ImportSchoolPayTransactionController::class);

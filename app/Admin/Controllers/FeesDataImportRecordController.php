@@ -194,26 +194,32 @@ class FeesDataImportRecordController extends AdminController
             return '<span class="text-muted">-</span>';
         })->sortable()->hide();
         
-        $grid->column('services_data', 'Services')->display(function ($json) {
-            if (empty($json)) return '<span class="text-muted">-</span>';
+        $grid->column('services_data', 'Services')->display(function ($data) {
+            if (empty($data)) return '<span class="text-muted">-</span>';
+ 
+            // Handle both array and JSON string
+            $services = is_array($data) ? $data : json_decode($data, true);
             
-            $services = json_decode($json, true);
             if (!is_array($services) || empty($services)) {
                 return '<span class="text-muted">No services</span>';
             }
-            
+ 
             $html = '<ul style="margin:0;padding-left:15px;">';
             foreach ($services as $service) {
-                $name = $service['service_name'] ?? 'Unknown';
-                $amount = number_format($service['service_amount'] ?? 0, 0);
-                $html .= "<li><strong>{$name}</strong>: UGX {$amount}</li>";
+                // If it's an action log string, just display it
+                if (is_string($service)) {
+                    $html .= "<li>" . e($service) . "</li>";
+                } else {
+                    // If it's a structured service object
+                    $name = $service['service_name'] ?? 'Unknown';
+                    $amount = number_format($service['service_amount'] ?? 0, 0);
+                    $html .= "<li><strong>{$name}</strong>: UGX {$amount}</li>";
+                }
             }
             $html .= '</ul>';
-            
+ 
             return $html;
-        })->hide();
-
-        // Batch Actions for Failed Records
+        })->hide();        // Batch Actions for Failed Records
         $grid->batchActions(function ($batch) {
             $batch->add(new \App\Admin\Actions\BatchRetryFailedRecords());
         });
@@ -321,14 +327,27 @@ class FeesDataImportRecordController extends AdminController
         
         // Services Details
         $show->divider('Services Details');
-        $show->field('services_data', 'Services Applied')->as(function ($json) {
-            if (empty($json)) return '<em>No services</em>';
+        $show->field('services_data', 'Services Applied')->as(function ($data) {
+            if (empty($data)) return '<em>No services</em>';
             
-            $services = json_decode($json, true);
+            // Handle both array and JSON string
+            $services = is_array($data) ? $data : json_decode($data, true);
+            
             if (!is_array($services) || empty($services)) {
                 return '<em>No services</em>';
             }
             
+            // If it's an action log (array of strings), display as list
+            if (isset($services[0]) && is_string($services[0])) {
+                $html = '<ul class="list-unstyled" style="margin:0;">';
+                foreach ($services as $action) {
+                    $html .= "<li style='padding:5px 0;border-bottom:1px solid #eee;'>" . e($action) . "</li>";
+                }
+                $html .= '</ul>';
+                return $html;
+            }
+            
+            // If it's structured service data, display as table
             $html = '<table class="table table-bordered table-striped">';
             $html .= '<thead><tr><th>Service Name</th><th>Amount</th><th>Status</th></tr></thead>';
             $html .= '<tbody>';
@@ -384,10 +403,12 @@ class FeesDataImportRecordController extends AdminController
         
         // Raw Data (collapsed by default)
         $show->divider('Raw Data (Technical)');
-        $show->field('data', 'Raw Row Data')->as(function ($json) {
-            if (empty($json)) return '<em>No data</em>';
+        $show->field('data', 'Raw Row Data')->as(function ($data) {
+            if (empty($data)) return '<em>No data</em>';
+            // If it's already an array, just encode it; if it's a string, decode then encode
+            $arrayData = is_array($data) ? $data : json_decode($data, true);
             return "<pre style='max-height:300px;overflow:auto;background:#f5f5f5;padding:10px;'>" . 
-                   e(json_encode(json_decode($json), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) . 
+                   e(json_encode($arrayData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) . 
                    "</pre>";
         })->unescape();
 

@@ -8,12 +8,13 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
+use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use App\Models\Utils;
 
 class FeesDataImportRecordsExporter extends AbstractExporter implements FromCollection, WithHeadings, WithMapping, WithStyles, WithTitle
 {
-    protected $fileName = 'Fees Import Records';
+    protected $fileName = 'Fees_Import_Records';
     protected $columns = [
         'id' => 'Record ID',
         'import_batch' => 'Import Batch',
@@ -95,5 +96,13 @@ class FeesDataImportRecordsExporter extends AbstractExporter implements FromColl
         }
 
         return 'UGX 0.00';
+    }
+
+    /**
+     * Export data to Excel file
+     */
+    public function export()
+    {
+        return Excel::download($this, $this->fileName . '_' . date('Y-m-d_His') . '.xlsx');
     }
 }
