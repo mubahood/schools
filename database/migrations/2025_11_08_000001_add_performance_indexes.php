@@ -13,7 +13,7 @@ return new class extends Migration
     {
         // Direct Messages - frequently queried fields
         Schema::table('direct_messages', function (Blueprint $table) {
-            $table->index('status', 'idx_direct_messages_status');
+            // $table->index('status', 'idx_direct_messages_status');
             $table->index('enterprise_id', 'idx_direct_messages_enterprise');
             $table->index(['enterprise_id', 'status'], 'idx_direct_messages_ent_status');
             $table->index('created_at', 'idx_direct_messages_created');
