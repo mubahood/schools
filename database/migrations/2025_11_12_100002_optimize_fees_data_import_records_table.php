@@ -77,16 +77,16 @@ return new class extends Migration
         
         // Add indexes
         Schema::table('fees_data_import_records', function (Blueprint $table) {
-            $table->index('user_id');
-            $table->index('account_id');
-            $table->index('transaction_hash');
-            $table->index(['fees_data_import_id', 'status']);
-            $table->index(['fees_data_import_id', 'user_id']);
-            $table->index(['enterprise_id', 'status']);
-            $table->index(['row_hash', 'fees_data_import_id']);
+            // $table->index('user_id');
+            // $table->index('account_id');
+            // $table->index('transaction_hash');
+            // $table->index(['fees_data_import_id', 'status']);
+            // $table->index(['fees_data_import_id', 'user_id']);
+            // $table->index(['enterprise_id', 'status']);
+            // $table->index(['row_hash', 'fees_data_import_id']);
             
             // Add unique constraint to prevent exact duplicates
-            $table->unique(['fees_data_import_id', 'row_hash'], 'unique_import_row');
+            // $table->unique(['fees_data_import_id', 'row_hash'], 'unique_import_row');
         });
     }
 
