@@ -361,9 +361,9 @@ Route::get('preview-password-reset-email', function () {
 Route::get('student-data-import-do-import', [MainController::class, 'student_data_import_do_import']);
 Route::get('process-students-enrollment', [MainController::class, 'process_students_enrollment']);
 
-// Redirect incorrect auth/login to correct admin/auth/login
+// Redirect incorrect auth/login to correct auth/login
 Route::get('auth/login', function () {
-  return redirect('/admin/auth/login');
+  return redirect('/auth/login');
 });
 
 // Enhanced Authentication Routes 
@@ -869,12 +869,12 @@ array:12 [▼
 
 // ==================== DEPRECATED FEES DATA IMPORT ROUTES ====================
 // NOTE: These routes are DEPRECATED and will be removed in a future version.
-// They have been moved to app/Admin/Controllers/FeesDataImportController.php
+// They have been moved to app/Controllers/FeesDataImportController.php
 // Please use the new routes under /admin prefix instead.
 // ==================== DO NOT USE - USE /admin ROUTES INSTEAD ====================
 
 /**
- * @deprecated Use /admin/fees-data-import-validate instead
+ * @deprecated Use /fees-data-import-validate instead
  */
 Route::get('fees-data-import-validate', function (Request $request) {
   $u = Admin::user();
@@ -1146,11 +1146,11 @@ Route::get('fees-data-import-do-import-optimized', function (Request $request) {
         echo "</table>";
       }
 
-      $recordsUrl = url("admin/fees-data-import-records?fees_data_import_id={$import->id}");
+      $recordsUrl = url("fees-data-import-records?fees_data_import_id={$import->id}");
       echo "<div style='margin-top: 25px;'>";
       echo "<a href='{$recordsUrl}' class='btn btn-success' style='background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block;'>";
       echo "View Import Records</a>";
-      echo " <a href='" . url('admin/fees-data-import') . "' style='margin-left: 10px; padding: 10px 20px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; display: inline-block;'>Back to Imports</a>";
+      echo " <a href='" . url('fees-data-import') . "' style='margin-left: 10px; padding: 10px 20px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; display: inline-block;'>Back to Imports</a>";
       echo "</div>";
     } else {
       echo "<div style='background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 15px; border-radius: 5px; margin: 15px 0;'>";
@@ -1254,10 +1254,10 @@ Route::get('fees-data-import-do-import-v2', function (Request $request) {
         echo "</table>";
       }
 
-      $recordsUrl = url("admin/fees-data-import-records?fees_data_import_id={$import->id}");
+      $recordsUrl = url("fees-data-import-records?fees_data_import_id={$import->id}");
       echo "<div style='margin-top: 25px;'>";
       echo " <a href='{$recordsUrl}' style='padding: 10px 20px; background: #28a745; color: white; text-decoration: none; border-radius: 4px; display: inline-block;'>View Import Records</a>";
-      echo " <a href='" . url('admin/fees-data-imports') . "' style='margin-left: 10px; padding: 10px 20px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; display: inline-block;'>Back to Imports</a>";
+      echo " <a href='" . url('fees-data-imports') . "' style='margin-left: 10px; padding: 10px 20px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; display: inline-block;'>Back to Imports</a>";
       echo "</div>";
     } else {
       echo "<div style='background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 15px; border-radius: 5px; margin: 15px 0;'>";
@@ -1266,8 +1266,8 @@ Route::get('fees-data-import-do-import-v2', function (Request $request) {
       echo "</div>";
 
       echo "<div style='margin-top: 25px;'>";
-      echo " <a href='" . url('admin/fees-data-imports/' . $import->id . '/edit') . "' style='padding: 10px 20px; background: #ffc107; color: black; text-decoration: none; border-radius: 4px; display: inline-block;'>Edit Import Settings</a>";
-      echo " <a href='" . url('admin/fees-data-imports') . "' style='margin-left: 10px; padding: 10px 20px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; display: inline-block;'>Back to Imports</a>";
+      echo " <a href='" . url('fees-data-imports/' . $import->id . '/edit') . "' style='padding: 10px 20px; background: #ffc107; color: black; text-decoration: none; border-radius: 4px; display: inline-block;'>Edit Import Settings</a>";
+      echo " <a href='" . url('fees-data-imports') . "' style='margin-left: 10px; padding: 10px 20px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; display: inline-block;'>Back to Imports</a>";
       echo "</div>";
     }
   } catch (\Exception $e) {
@@ -1276,8 +1276,8 @@ Route::get('fees-data-import-do-import-v2', function (Request $request) {
     echo "</div>";
 
     echo "<div style='margin-top: 25px;'>";
-    echo " <a href='" . url('admin/fees-data-imports/' . $import->id . '/edit') . "' style='padding: 10px 20px; background: #ffc107; color: black; text-decoration: none; border-radius: 4px; display: inline-block;'>Edit Import Settings</a>";
-    echo " <a href='" . url('admin/fees-data-imports') . "' style='margin-left: 10px; padding: 10px 20px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; display: inline-block;'>Back to Imports</a>";
+    echo " <a href='" . url('fees-data-imports/' . $import->id . '/edit') . "' style='padding: 10px 20px; background: #ffc107; color: black; text-decoration: none; border-radius: 4px; display: inline-block;'>Edit Import Settings</a>";
+    echo " <a href='" . url('fees-data-imports') . "' style='margin-left: 10px; padding: 10px 20px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; display: inline-block;'>Back to Imports</a>";
     echo "</div>";
   }
 
@@ -1340,11 +1340,11 @@ Route::get('fees-data-import-retry', function (Request $request) {
       echo "</div>";
     }
 
-    $recordsUrl = url("admin/fees-data-import-records?fees_data_import_id={$import->id}");
+    $recordsUrl = url("fees-data-import-records?fees_data_import_id={$import->id}");
     echo "<div style='margin-top: 25px;'>";
     echo "<a href='{$recordsUrl}' class='btn btn-primary' style='background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block;'>";
     echo "View All Records</a>";
-    echo " <a href='" . url('admin/fees-data-import') . "' style='margin-left: 10px; padding: 10px 20px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; display: inline-block;'>Back to Imports</a>";
+    echo " <a href='" . url('fees-data-import') . "' style='margin-left: 10px; padding: 10px 20px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; display: inline-block;'>Back to Imports</a>";
     echo "</div>";
   } catch (\Exception $e) {
     echo "<div style='background: #f8d7da; color: #721c24; padding: 20px; border-radius: 5px;'>";
@@ -1369,18 +1369,18 @@ Route::get('fees-data-import-duplicate', function (Request $request) {
   $u = Admin::user();
   if ($u == null) {
     admin_error('Authentication Required', 'You are not logged in');
-    return redirect('admin/auth/login');
+    return redirect('auth/login');
   }
 
   $import = FeesDataImport::find($request->id);
   if ($import == null) {
     admin_error('Not Found', 'Fees Data Import not found');
-    return redirect('admin/fees-data-imports');
+    return redirect('fees-data-imports');
   }
 
   if ($import->enterprise_id != $u->enterprise_id) {
     admin_error('Access Denied', 'This import belongs to a different enterprise.');
-    return redirect('admin/fees-data-imports');
+    return redirect('fees-data-imports');
   }
 
   try {
@@ -1426,7 +1426,7 @@ Route::get('fees-data-import-duplicate', function (Request $request) {
     $duplicate->save();
 
     admin_success('Success', 'Import duplicated successfully! You can now modify settings and process this import.');
-    return redirect('admin/fees-data-imports/' . $duplicate->id . '/edit');
+    return redirect('fees-data-imports/' . $duplicate->id . '/edit');
 
   } catch (\Exception $e) {
     Log::error('Failed to duplicate fees import', [
@@ -1436,7 +1436,7 @@ Route::get('fees-data-import-duplicate', function (Request $request) {
     ]);
 
     admin_error('Duplication Failed', 'Failed to duplicate import: ' . $e->getMessage());
-    return redirect('admin/fees-data-import');
+    return redirect('fees-data-import');
   }
 });
 
