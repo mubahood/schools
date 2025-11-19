@@ -46,6 +46,11 @@ class FeesImportServiceV2
     protected $term;
     protected $user;
     
+    // Caching for performance
+    protected $studentCache = [];
+    protected $serviceCache = [];
+    protected $accountCache = [];
+
     // Statistics
     protected $stats = [
         'total' => 0,
@@ -72,6 +77,10 @@ class FeesImportServiceV2
         // Disable mass assignment protection for this import
         \Illuminate\Database\Eloquent\Model::unguard();
         
+        // Increase memory and time limits
+        ini_set('memory_limit', '2048M');
+        set_time_limit(0);
+        
         try {
             // Update status
             $import->update(['status' => 'Processing']);
@@ -85,19 +94,35 @@ class FeesImportServiceV2
                 'total_rows' => $this->stats['total']
             ]);
             
-            // Process each row
-            foreach ($rows as $index => $rowData) {
-                $this->processRow($import, $rowData, $index + 1);
+            // Process rows in batches for better performance
+            $batchSize = 50;
+            $totalBatches = ceil(count($rows) / $batchSize);
+            
+            for ($batchNum = 0; $batchNum < $totalBatches; $batchNum++) {
+                $batchStart = $batchNum * $batchSize;
+                $batchRows = array_slice($rows, $batchStart, $batchSize);
                 
-                // Update progress every 50 rows
-                if (($index + 1) % 50 == 0) {
-                    $import->update([
-                        'processed_rows' => $index + 1,
-                        'success_count' => $this->stats['success'],
-                        'failed_count' => $this->stats['failed'],
-                        'skipped_count' => $this->stats['skipped'],
-                    ]);
+                foreach ($batchRows as $index => $rowData) {
+                    $actualIndex = $batchStart + $index;
+                    $this->processRow($import, $rowData, $actualIndex + 1);
                 }
+                
+                // Update progress after each batch
+                $processedCount = min(($batchNum + 1) * $batchSize, count($rows));
+                $import->update([
+                    'processed_rows' => $processedCount,
+                    'success_count' => $this->stats['success'],
+                    'failed_count' => $this->stats['failed'],
+                    'skipped_count' => $this->stats['skipped'],
+                ]);
+                
+                // Clear query log and free memory every batch
+                DB::connection()->disableQueryLog();
+                gc_collect_cycles();
+                
+                // Clear query cache and free memory
+                DB::connection()->disableQueryLog();
+                gc_collect_cycles();
             }
             
             // Final update
@@ -356,7 +381,13 @@ class FeesImportServiceV2
      */
     protected function calculateCurrentBalance(Account $account): float
     {
-        return (float) Transaction::where('account_id', $account->id)->sum('amount');
+        // Use raw query for better performance
+        $result = DB::selectOne(
+            'SELECT COALESCE(SUM(amount), 0) as balance FROM transactions WHERE account_id = ?',
+            [$account->id]
+        );
+        
+        return (float) ($result->balance ?? 0);
     }
 
     /**
@@ -364,27 +395,35 @@ class FeesImportServiceV2
      */
     protected function findStudent(array $parsed): ?User
     {
+        $cacheKey = $parsed['school_pay'] ?? $parsed['reg_number'] ?? '';
+        
+        // Check cache first
+        if (isset($this->studentCache[$cacheKey])) {
+            return $this->studentCache[$cacheKey];
+        }
+        
+        $student = null;
+        
         // Try by school_pay first
         if (!empty($parsed['school_pay'])) {
             $student = User::where('school_pay_payment_code', $parsed['school_pay'])
                 ->where('enterprise_id', $this->enterprise->id)
+                ->select(['id', 'name', 'school_pay_payment_code', 'reg_number', 'enterprise_id'])
                 ->first();
-            if ($student) {
-                return $student;
-            }
         }
         
         // Try by registration number if available
-        if (!empty($parsed['reg_number'])) {
+        if (!$student && !empty($parsed['reg_number'])) {
             $student = User::where('reg_number', $parsed['reg_number'])
                 ->where('enterprise_id', $this->enterprise->id)
+                ->select(['id', 'name', 'school_pay_payment_code', 'reg_number', 'enterprise_id'])
                 ->first();
-            if ($student) {
-                return $student;
-            }
         }
         
-        return null;
+        // Cache the result (even if null)
+        $this->studentCache[$cacheKey] = $student;
+        
+        return $student;
     }
 
     /**
@@ -392,7 +431,13 @@ class FeesImportServiceV2
      */
     protected function getOrCreateAccount(User $student): Account
     {
+        // Check cache first
+        if (isset($this->accountCache[$student->id])) {
+            return $this->accountCache[$student->id];
+        }
+        
         $account = Account::where('administrator_id', $student->id)
+            ->select(['id', 'administrator_id', 'enterprise_id', 'balance', 'name'])
             ->first();
         
         if (!$account) {
@@ -405,6 +450,9 @@ class FeesImportServiceV2
             ]);
         }
         
+        // Cache for reuse
+        $this->accountCache[$student->id] = $account;
+        
         return $account;
     }
 
@@ -416,15 +464,25 @@ class FeesImportServiceV2
         $actions = [];
         
         foreach ($services as $serviceData) {
-            // Find or create service
-            $service = Service::firstOrCreate([
-                'enterprise_id' => $this->enterprise->id,
-                'name' => $serviceData['name'],
-            ], [
-                'description' => $serviceData['name'],
-                'fee' => $serviceData['amount'],
-                'is_compulsory' => 0,
-            ]);
+            $serviceCacheKey = $this->enterprise->id . '_' . $serviceData['name'];
+            
+            // Check cache first
+            if (isset($this->serviceCache[$serviceCacheKey])) {
+                $service = $this->serviceCache[$serviceCacheKey];
+            } else {
+                // Find or create service
+                $service = Service::firstOrCreate([
+                    'enterprise_id' => $this->enterprise->id,
+                    'name' => $serviceData['name'],
+                ], [
+                    'description' => $serviceData['name'],
+                    'fee' => $serviceData['amount'],
+                    'is_compulsory' => 0,
+                ]);
+                
+                // Cache it
+                $this->serviceCache[$serviceCacheKey] = $service;
+            }
             
             // Create subscription (check for duplicates)
             $existing = ServiceSubscription::where('service_id', $service->id)
@@ -442,18 +500,17 @@ class FeesImportServiceV2
                     'total' => $serviceData['amount'],
                 ]);
                 
-                // Create billing transaction (DEBIT - negative amount)
+                // Create billing transaction (DEBIT - negative amount) with minimal fields
                 $transaction = Transaction::create([
                     'enterprise_id' => $this->enterprise->id,
                     'account_id' => $account->id,
                     'amount' => -1 * $serviceData['amount'], // NEGATIVE = DEBIT
                     'type' => 'FEES_BILL',
-                    'description' => "Charged {$serviceData['name']}: UGX " . number_format($serviceData['amount']),
+                    'description' => "Charged {$serviceData['name']}",
                     'source' => 'IMPORTED_V2',
                     'term_id' => $this->term->id,
                     'academic_year_id' => $this->term->academic_year_id,
                     'created_by_id' => $this->user->id,
-                    'payment_date' => now(),
                 ]);
                 
                 $actions[] = [
@@ -478,12 +535,11 @@ class FeesImportServiceV2
             'account_id' => $account->id,
             'amount' => -1 * $amount, // NEGATIVE = DEBIT
             'type' => 'FEES_BILL',
-            'description' => "Previous term balance: UGX " . number_format($amount),
+            'description' => "Previous term balance: {$amount}",
             'source' => 'IMPORTED_V2',
             'term_id' => $this->term->id,
             'academic_year_id' => $this->term->academic_year_id,
             'created_by_id' => $this->user->id,
-            'payment_date' => now(),
         ]);
         
         return [
@@ -506,26 +562,20 @@ class FeesImportServiceV2
             'account_id' => $account->id,
             'amount' => $difference,
             'type' => 'BALANCE_ADJUSTMENT',
-            'description' => sprintf(
-                "Balance adjustment: From UGX %s to UGX %s (diff: UGX %s)",
-                number_format($currentBalance),
-                number_format($desiredBalance),
-                number_format(abs($difference))
-            ),
+            'description' => "Balance adjustment: {$currentBalance} to {$desiredBalance}",
             'source' => 'IMPORTED_V2',
             'term_id' => $this->term->id,
             'academic_year_id' => $this->term->academic_year_id,
             'created_by_id' => $this->user->id,
-            'payment_date' => now(),
         ]);
         
-        Log::info("Balance adjustment created", [
-            'account_id' => $account->id,
-            'from' => $currentBalance,
-            'to' => $desiredBalance,
-            'difference' => $difference,
-            'transaction_id' => $transaction->id
-        ]);
+        // Only log significant adjustments (over 1M) to reduce I/O
+        if (abs($difference) > 1000000) {
+            Log::info("Large balance adjustment", [
+                'account_id' => $account->id,
+                'difference' => $difference
+            ]);
+        }
         
         return [
             'from' => $currentBalance,
