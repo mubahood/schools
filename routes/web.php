@@ -893,9 +893,8 @@ Route::get('fees-data-import-validate', function (Request $request) {
 
   try {
 
-    $service = new \App\Services\FeesImportServiceOptimized();
+    $service = new \App\Services\FeesImportServiceCSV();
     $validation = $service->validateImport($import);
-    dd($validation);
 
     echo "<div style='font-family: Arial, sans-serif; padding: 20px; max-width: 900px;'>";
     echo "<h2>Import Validation Results</h2>";
