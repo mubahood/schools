@@ -1000,13 +1000,18 @@ class FeesImportServiceCSV
 
     /**
      * Parse amount from CSV - handles comma-separated numbers
-     * Examples: "1,000,000" -> 1000000, "1000" -> 1000, "1,000.50" -> 1000.50
+     * Examples: "1,000,000" -> 1000000, "1000" -> 1000, "1,000.50" -> 1000.50, "-" or "--" -> 0
      */
     protected function parseAmount($value)
     {
         if (empty($value)) return 0;
         
         $value = trim($value);
+        
+        // Handle dash/hyphen as zero (common convention in spreadsheets)
+        if ($value == '-' || $value == '--' || $value == '—') {
+            return 0;
+        }
         
         // Remove any currency symbols, spaces, and non-numeric characters except dots, commas, and minus
         $value = preg_replace('/[^0-9.,\-]/', '', $value);
