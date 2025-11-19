@@ -873,19 +873,35 @@ class FeesImportServiceCSV
      */
     protected function adjustAccountBalance($account, $student, $expectedBalance): string
     {
-        // Make expected balance negative (debt)
+        // Make expected balance negative (debt) - in our system debts are negative
         $expectedBalance = abs($expectedBalance) * -1;
         
-        // Calculate current balance
+        // Calculate current balance from all transactions
         $currentBalance = $account->balance();
         
-        // Check if balance matches (within 1 UGX tolerance for rounding)
-        if (abs($currentBalance - $expectedBalance) <= 1) {
-            return "Current balance matches expected balance (UGX " . number_format($currentBalance) . ") - no adjustment needed";
+        Log::info('Balance adjustment check', [
+            'student_id' => $student->id,
+            'account_id' => $account->id,
+            'current_balance' => $currentBalance,
+            'expected_balance' => $expectedBalance,
+            'difference' => abs($currentBalance - $expectedBalance)
+        ]);
+        
+        // If balances match exactly, skip (but log it)
+        if ($currentBalance == $expectedBalance) {
+            return "Balance already correct at UGX " . number_format($currentBalance) . " - no adjustment needed";
         }
-
+        
         // Calculate adjustment amount
         $adjustmentAmount = $expectedBalance - $currentBalance;
+        
+        Log::info('Creating balance adjustment transaction', [
+            'student_id' => $student->id,
+            'account_id' => $account->id,
+            'adjustment_amount' => $adjustmentAmount,
+            'from' => $currentBalance,
+            'to' => $expectedBalance
+        ]);
 
         // Create balance adjustment transaction (same logic as Account model)
         $transaction = new Transaction();
@@ -911,8 +927,15 @@ class FeesImportServiceCSV
 
         // Update account balance
         $this->updateAccountBalance($account);
+        
+        Log::info('Balance adjustment completed', [
+            'transaction_id' => $transaction->id,
+            'student_id' => $student->id,
+            'account_id' => $account->id,
+            'new_balance' => $account->balance
+        ]);
 
-        return "Adjusted balance from UGX " . number_format($currentBalance) . " to UGX " . number_format($expectedBalance) . " (adjustment: UGX " . number_format($adjustmentAmount) . ")";
+        return "✓ Adjusted balance from UGX " . number_format($currentBalance) . " to UGX " . number_format($expectedBalance) . " (adjustment: UGX " . number_format($adjustmentAmount) . ")";
     }
 
     // Helper methods (same as optimized service)
@@ -1046,8 +1069,14 @@ class FeesImportServiceCSV
     }
 
     /**
-     * Parse amount from CSV - handles comma-separated numbers
-     * Examples: "1,000,000" -> 1000000, "1000" -> 1000, "1,000.50" -> 1000.50, "-" or "--" -> 0
+     * Parse amount from CSV - handles comma-separated numbers and accounting notation
+     * Examples: 
+     * "1,000,000" -> 1000000
+     * "1000" -> 1000
+     * "1,000.50" -> 1000.50
+     * "-" or "--" -> 0
+     * "(60,000)" -> 60000 (parentheses = positive debt in accounting)
+     * " (60,000)" -> 60000
      */
     protected function parseAmount($value)
     {
@@ -1060,6 +1089,15 @@ class FeesImportServiceCSV
             return 0;
         }
         
+        // CRITICAL: Handle parentheses notation for negative numbers in accounting
+        // Example: "(60,000)" or " (60,000)" means -60,000 BUT in our system debts are POSITIVE
+        // So we treat parentheses as POSITIVE numbers (debts)
+        $isInParentheses = false;
+        if (preg_match('/^\s*\((.+)\)\s*$/', $value, $matches)) {
+            $isInParentheses = true;
+            $value = $matches[1]; // Extract value inside parentheses
+        }
+        
         // Remove any currency symbols, spaces, and non-numeric characters except dots, commas, and minus
         $value = preg_replace('/[^0-9.,\-]/', '', $value);
         
@@ -1067,7 +1105,11 @@ class FeesImportServiceCSV
         $value = str_replace(',', '', $value);
         
         // Convert to float
-        return floatval($value);
+        $amount = floatval($value);
+        
+        // If it was in parentheses, it's a debt (positive in our system)
+        // No need to negate since debts are stored as positive
+        return abs($amount);
     }
 
     /**
