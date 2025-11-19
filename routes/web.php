@@ -917,13 +917,63 @@ Route::get('fees-data-import-validate', function (Request $request) {
       echo "<h4>File Statistics</h4>";
       echo "<table style='border-collapse: collapse; width: 100%; margin: 15px 0;'>";
       foreach ($validation['stats'] as $key => $value) {
-        $key = ucwords(str_replace('_', ' ', $key));
+        // Skip complex arrays like student_list - we'll show them separately
+        if ($key == 'student_list') continue;
+        
+        $displayKey = ucwords(str_replace('_', ' ', $key));
         echo "<tr style='border-bottom: 1px solid #ddd;'>";
-        echo "<td style='padding: 8px; font-weight: bold;'>{$key}:</td>";
-        echo "<td style='padding: 8px;'>" . htmlspecialchars($value) . "</td>";
+        echo "<td style='padding: 8px; font-weight: bold;'>{$displayKey}:</td>";
+        echo "<td style='padding: 8px;'>";
+        
+        if (is_array($value)) {
+          echo htmlspecialchars(json_encode($value));
+        } else {
+          echo htmlspecialchars($value);
+        }
+        
+        echo "</td>";
         echo "</tr>";
       }
       echo "</table>";
+      
+      // Show student match list if available
+      if (!empty($validation['stats']['student_list'])) {
+        $studentList = $validation['stats']['student_list'];
+        echo "<h4>Student Match Details (" . count($studentList) . " students checked)</h4>";
+        echo "<div style='max-height: 400px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px;'>";
+        echo "<table style='border-collapse: collapse; width: 100%;'>";
+        echo "<thead style='position: sticky; top: 0; background: #f8f9fa;'>";
+        echo "<tr>";
+        echo "<th style='padding: 10px; text-align: left; border-bottom: 2px solid #ddd;'>Row</th>";
+        echo "<th style='padding: 10px; text-align: left; border-bottom: 2px solid #ddd;'>CSV Name</th>";
+        echo "<th style='padding: 10px; text-align: left; border-bottom: 2px solid #ddd;'>Identifier</th>";
+        echo "<th style='padding: 10px; text-align: left; border-bottom: 2px solid #ddd;'>Status</th>";
+        echo "<th style='padding: 10px; text-align: left; border-bottom: 2px solid #ddd;'>System Name</th>";
+        echo "<th style='padding: 10px; text-align: right; border-bottom: 2px solid #ddd;'>Balance</th>";
+        echo "</tr>";
+        echo "</thead>";
+        echo "<tbody>";
+        
+        foreach ($studentList as $student) {
+          $rowStyle = $student['found'] ? '' : 'background: #fff3cd;';
+          $statusBadge = $student['found'] 
+            ? "<span style='color: #28a745; font-weight: bold;'>✓ Found</span>" 
+            : "<span style='color: #dc3545; font-weight: bold;'>✗ Not Found</span>";
+          
+          echo "<tr style='{$rowStyle} border-bottom: 1px solid #eee;'>";
+          echo "<td style='padding: 8px;'>{$student['row']}</td>";
+          echo "<td style='padding: 8px;'>" . htmlspecialchars($student['name']) . "</td>";
+          echo "<td style='padding: 8px;'><code>" . htmlspecialchars($student['identifier']) . "</code></td>";
+          echo "<td style='padding: 8px;'>{$statusBadge}</td>";
+          echo "<td style='padding: 8px;'>" . ($student['db_name'] ? htmlspecialchars($student['db_name']) : '-') . "</td>";
+          echo "<td style='padding: 8px; text-align: right;'>" . htmlspecialchars($student['current_balance']) . "</td>";
+          echo "</tr>";
+        }
+        
+        echo "</tbody>";
+        echo "</table>";
+        echo "</div>";
+      }
     }
 
     // Show errors
