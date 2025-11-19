@@ -963,9 +963,20 @@ Route::get('fees-data-import-validate', function (Request $request) {
       // Show student match list if available
       if (!empty($validation['stats']['student_list'])) {
         $studentList = $validation['stats']['student_list'];
+        $foundCount = count(array_filter($studentList, function($s) { return $s['found']; }));
+        $notFoundCount = count($studentList) - $foundCount;
+        
         echo "<h4>Student Match Details (" . count($studentList) . " students checked)</h4>";
+        
+        // Filter buttons
+        echo "<div style='margin: 15px 0;'>";
+        echo "<button onclick='filterRows(\"all\")' class='filter-btn' style='padding: 8px 16px; margin-right: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;'>All (" . count($studentList) . ")</button>";
+        echo "<button onclick='filterRows(\"found\")' class='filter-btn' style='padding: 8px 16px; margin-right: 5px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;'>✓ Found (" . $foundCount . ")</button>";
+        echo "<button onclick='filterRows(\"not-found\")' class='filter-btn' style='padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;'>✗ Not Found (" . $notFoundCount . ")</button>";
+        echo "</div>";
+        
         echo "<div style='max-height: 400px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px;'>";
-        echo "<table style='border-collapse: collapse; width: 100%;'>";
+        echo "<table id='student-table' style='border-collapse: collapse; width: 100%;'>";
         echo "<thead style='position: sticky; top: 0; background: #f8f9fa;'>";
         echo "<tr>";
         echo "<th style='padding: 10px; text-align: left; border-bottom: 2px solid #ddd;'>Row</th>";
@@ -979,12 +990,13 @@ Route::get('fees-data-import-validate', function (Request $request) {
         echo "<tbody>";
         
         foreach ($studentList as $student) {
+          $rowClass = $student['found'] ? 'row-found' : 'row-not-found';
           $rowStyle = $student['found'] ? '' : 'background: #fff3cd;';
           $statusBadge = $student['found'] 
             ? "<span style='color: #28a745; font-weight: bold;'>✓ Found</span>" 
             : "<span style='color: #dc3545; font-weight: bold;'>✗ Not Found</span>";
           
-          echo "<tr style='{$rowStyle} border-bottom: 1px solid #eee;'>";
+          echo "<tr class='{$rowClass}' style='{$rowStyle} border-bottom: 1px solid #eee;'>";
           echo "<td style='padding: 8px;'>{$student['row']}</td>";
           echo "<td style='padding: 8px;'>" . htmlspecialchars($student['name']) . "</td>";
           echo "<td style='padding: 8px;'><code>" . htmlspecialchars($student['identifier']) . "</code></td>";
@@ -997,6 +1009,29 @@ Route::get('fees-data-import-validate', function (Request $request) {
         echo "</tbody>";
         echo "</table>";
         echo "</div>";
+        
+        // JavaScript for filtering
+        echo "<script>
+        function filterRows(filter) {
+          const rows = document.querySelectorAll('#student-table tbody tr');
+          
+          rows.forEach(row => {
+            if (filter === 'all') {
+              row.style.display = '';
+            } else if (filter === 'found') {
+              row.style.display = row.classList.contains('row-found') ? '' : 'none';
+            } else if (filter === 'not-found') {
+              row.style.display = row.classList.contains('row-not-found') ? '' : 'none';
+            }
+          });
+          
+          // Update button styles
+          document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.style.opacity = '0.7';
+          });
+          event.target.style.opacity = '1';
+        }
+        </script>";
       }
     }
 
