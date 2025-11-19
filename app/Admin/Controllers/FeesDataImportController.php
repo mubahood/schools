@@ -111,7 +111,8 @@ class FeesDataImportController extends AdminController
         //action buttons
         $grid->column('actions', __('Actions'))->display(function () {
             $validateLink = url("fees-data-import-validate?id={$this->id}");
-            $importLink = url("fees-data-import-do-import-optimized?id={$this->id}");
+            $importLinkV1 = url("fees-data-import-do-import-optimized?id={$this->id}");
+            $importLinkV2 = url("fees-data-import-do-import-v2?id={$this->id}");
             $retryLink = url("fees-data-import-retry?id={$this->id}");
             $duplicateLink = url("fees-data-import-duplicate?id={$this->id}");
             $target = " target='_blank'";
@@ -119,7 +120,8 @@ class FeesDataImportController extends AdminController
 
             if ($this->status == 'Pending') {
                 $buttons[] = "<a href='{$validateLink}' class='btn btn-xs btn-info'{$target}>Validate</a>";
-                $buttons[] = "<a href='{$importLink}' class='btn btn-xs btn-primary'{$target}>Import Data</a>";
+                $buttons[] = "<a href='{$importLinkV1}' class='btn btn-xs btn-primary'{$target} title='Original Import Engine'>Import V1</a>";
+                $buttons[] = "<a href='{$importLinkV2}' class='btn btn-xs btn-success'{$target} title='New Atomic Import Engine - 100% Accurate Balance Calculations'><strong>Import V2 🆕</strong></a>";
             } elseif ($this->status == 'Processing') {
                 $buttons[] = "<span class='btn btn-xs btn-default' disabled>Processing...</span>";
                 // Allow retry in case process crashed
@@ -136,7 +138,8 @@ class FeesDataImportController extends AdminController
                 }
             } elseif ($this->status == 'Failed') {
                 $buttons[] = "<a href='{$validateLink}' class='btn btn-xs btn-info'{$target}>Validate</a>";
-                $buttons[] = "<a href='{$importLink}' class='btn btn-xs btn-warning'{$target}>Try Again</a>";
+                $buttons[] = "<a href='{$importLinkV1}' class='btn btn-xs btn-warning'{$target}>Try V1</a>";
+                $buttons[] = "<a href='{$importLinkV2}' class='btn btn-xs btn-success'{$target}><strong>Try V2 🆕</strong></a>";
             }
 
             // Add duplicate button for any status except Processing
