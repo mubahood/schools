@@ -116,8 +116,15 @@ class FeesDataImportRecordController extends AdminController
         
         $grid->column('account_id', 'Account')->display(function($accountId) {
             if ($this->account) {
-                $balance = number_format($this->account->balance ?? 0, 0);
-                return "<span title='Current Account Balance'><strong>UGX {$balance}</strong></span>";
+                $balance = $this->account->balance ?? 0;
+                $formatted = number_format(abs($balance), 0);
+                if ($balance < 0) {
+                    return "<span title='Debt (Student Owes)' class='text-danger'><strong>-UGX {$formatted}</strong></span>";
+                } elseif ($balance > 0) {
+                    return "<span title='Credit (Overpayment)' class='text-success'><strong>+UGX {$formatted}</strong></span>";
+                } else {
+                    return "<span title='Balanced'><strong>UGX 0</strong></span>";
+                }
             }
             return '<span class="text-muted">N/A</span>';
         });
