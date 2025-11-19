@@ -108,10 +108,17 @@ class FeesImportServiceCSV
             
             // Build services summary with column letters and titles
             $servicesSummary = [];
+            $hasAtLeastOneServiceTitle = false;
+            
             if (is_array($import->services_columns)) {
                 foreach ($import->services_columns as $column) {
                     $colIndex = $this->columnLetterToIndex($column);
                     $title = isset($this->headers[$colIndex]) ? trim($this->headers[$colIndex]) : '';
+                    
+                    // Check if at least one service column has a title
+                    if (!empty($title)) {
+                        $hasAtLeastOneServiceTitle = true;
+                    }
                     
                     // Handle empty titles creatively
                     if (empty($title)) {
@@ -125,6 +132,12 @@ class FeesImportServiceCSV
                 }
             }
             $stats['services_summary'] = $servicesSummary;
+
+            // CRITICAL CHECK 4: At least ONE service column must have a title in header row
+            if (is_array($import->services_columns) && !empty($import->services_columns) && !$hasAtLeastOneServiceTitle) {
+                $errors[] = "Service columns are configured (" . implode(', ', $import->services_columns) . ") but NONE of them have titles in the header row. At least one service column must have a title/name in the top row.";
+                return $this->validationResponse(false, $errors, $warnings, $stats);
+            }
 
             // Sample first 10 rows to check data quality
             $handle = fopen($filePath, 'r');
@@ -152,7 +165,7 @@ class FeesImportServiceCSV
             $stats['sample_size'] = $sampleSize;
             $stats['valid_sample_rows'] = $validRows;
 
-            // CRITICAL CHECK 4: At least some rows must have identifiers
+            // CRITICAL CHECK 5: At least some rows must have identifiers
             if ($validRows == 0) {
                 $errors[] = "No valid student identifiers found in sample rows";
                 return $this->validationResponse(false, $errors, $warnings, $stats);
@@ -183,6 +196,11 @@ class FeesImportServiceCSV
                 $rowNumber++;
                 
                 $identifier = isset($row[$colIndex]) ? trim($row[$colIndex]) : '';
+                // Clean identifier if it's school pay (numeric only)
+                if ($import->identify_by == 'school_pay_account_id' && !empty($identifier)) {
+                    $identifier = preg_replace('/[^0-9]/', '', $identifier);
+                }
+                
                 $studentName = isset($row[$nameColIndex]) ? trim($row[$nameColIndex]) : '';
                 $currentBalance = ($balanceColIndex !== null && isset($row[$balanceColIndex])) 
                     ? trim($row[$balanceColIndex]) 
@@ -234,7 +252,7 @@ class FeesImportServiceCSV
             $stats['match_rate'] = count($studentList) > 0 ? round(($matchedCount / count($studentList)) * 100, 1) . '%' : '0%';
             $stats['student_list'] = $studentList; // Pass detailed list
 
-            // CRITICAL CHECK 5: At least SOME students must match
+            // CRITICAL CHECK 6: At least SOME students must match
             if ($matchedCount == 0) {
                 $errors[] = "None of the students were found in the system. Please check if the identifier column is correct and matches database records.";
                 return $this->validationResponse(false, $errors, $warnings, $stats);
@@ -491,6 +509,18 @@ class FeesImportServiceCSV
                 }
 
                 $identifier = trim($rowData[$colIndex]);
+                
+                // CRITICAL: Clean identifier based on type
+                if ($this->import->identify_by == 'school_pay_account_id') {
+                    // School pay code must be numeric only - remove any non-numeric characters
+                    $identifier = preg_replace('/[^0-9]/', '', $identifier);
+                    if (empty($identifier)) {
+                        $this->createImportRecord($rowNumber, null, null, 'Skipped', "Invalid school pay code (not numeric) in column {$identifierCol}");
+                        $stats['skipped']++;
+                        DB::commit();
+                        continue;
+                    }
+                }
 
                 // STEP 1: Find student
                 $student = $this->findStudent($identifier, $this->import->identify_by, $this->enterprise);
@@ -938,10 +968,24 @@ class FeesImportServiceCSV
         }
     }
 
+    /**
+     * Parse amount from CSV - handles comma-separated numbers
+     * Examples: "1,000,000" -> 1000000, "1000" -> 1000, "1,000.50" -> 1000.50
+     */
     protected function parseAmount($value)
     {
-        $cleaned = preg_replace('/[^0-9.-]/', '', trim($value));
-        return floatval($cleaned);
+        if (empty($value)) return 0;
+        
+        $value = trim($value);
+        
+        // Remove any currency symbols, spaces, and non-numeric characters except dots, commas, and minus
+        $value = preg_replace('/[^0-9.,\-]/', '', $value);
+        
+        // Remove commas (thousands separator)
+        $value = str_replace(',', '', $value);
+        
+        // Convert to float
+        return floatval($value);
     }
 
     protected function resolveFilePath($path)

@@ -144,6 +144,7 @@ Route::group([
     $router->resource('school-pay-hooks', SchoolPayHookController::class);
     $router->resource('school-reports', SchoolReportController::class);
     $router->resource('fees-data-import', FeesDataImportController::class);
+    $router->resource('fees-data-imports', FeesDataImportController::class);
     $router->resource('fees-data-import-records', FeesDataImportRecordController::class);
     
     // Custom fees-data-import action routes (must come after resource registration)

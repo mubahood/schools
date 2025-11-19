@@ -162,7 +162,13 @@ class FeesDataImportController extends AdminController
         $show->field('identify_by', __('Identify By'));
         $show->field('school_pay_column', __('School Pay Column'));
         $show->field('reg_number_column', __('Reg Number Column'));
-        $show->field('services_columns', __('Services Columns'));
+        $show->field('services_columns', __('Services Columns'))->as(function ($columns) {
+            if (empty($columns)) return '<span class="text-muted">None</span>';
+            if (is_array($columns)) {
+                return '<span class="label label-success">' . implode('</span> <span class="label label-success">', $columns) . '</span>';
+            }
+            return $columns;
+        })->unescape();
         $show->field('current_balance_column', __('Current Balance Column'));
         $show->field('previous_fees_term_balance_column', __('Previous Term Balance Column'));
         $show->field('file_path', __('Import File'))->as(function ($path) {
