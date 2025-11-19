@@ -122,10 +122,17 @@ class FeesDataImportController extends AdminController
                 $buttons[] = "<a href='{$importLink}' class='btn btn-xs btn-primary'{$target}>Import Data</a>";
             } elseif ($this->status == 'Processing') {
                 $buttons[] = "<span class='btn btn-xs btn-default' disabled>Processing...</span>";
+                // Allow retry in case process crashed
+                if ($this->failed_count > 0 || $this->skipped_count > 0) {
+                    $failedSkipped = $this->failed_count + $this->skipped_count;
+                    $buttons[] = "<a href='{$retryLink}' class='btn btn-xs btn-warning'{$target} onclick='return confirm(\"Process may have crashed. Retry {$failedSkipped} failed/skipped records?\")'><i class='fa fa-refresh'></i> Retry ({$failedSkipped})</a>";
+                }
             } elseif ($this->status == 'Completed') {
                 $buttons[] = "<a target='_blank' href='" . url("admin/fees-data-import-records?fees_data_import_id={$this->id}") . "' class='btn btn-xs btn-success'>View Records</a>";
-                if ($this->failed_count > 0) {
-                    $buttons[] = "<a href='{$retryLink}' class='btn btn-xs btn-warning'{$target}>Retry Failed ({$this->failed_count})</a>";
+                // Show retry if there are failed or skipped records
+                $failedSkipped = $this->failed_count + $this->skipped_count;
+                if ($failedSkipped > 0) {
+                    $buttons[] = "<a href='{$retryLink}' class='btn btn-xs btn-warning'{$target}><i class='fa fa-refresh'></i> Retry Failed/Skipped ({$failedSkipped})</a>";
                 }
             } elseif ($this->status == 'Failed') {
                 $buttons[] = "<a href='{$validateLink}' class='btn btn-xs btn-info'{$target}>Validate</a>";

@@ -696,6 +696,9 @@ class FeesImportServiceCSV
             $existingTransaction->description = "Previous term balance for {$student->name} - Updated from import";
             $existingTransaction->save();
             
+            // Update account balance
+            $this->updateAccountBalance($account);
+            
             return "Updated previous term balance from UGX " . number_format($oldAmount) . " to UGX " . number_format($balance);
         } else {
             // Create new transaction
@@ -713,6 +716,9 @@ class FeesImportServiceCSV
             $transaction->source = 'IMPORTED';
             $transaction->school_pay_transporter_id = '-';
             $transaction->save();
+            
+            // Update account balance
+            $this->updateAccountBalance($account);
             
             return "Created previous term balance: UGX " . number_format($balance);
         }
@@ -787,6 +793,27 @@ class FeesImportServiceCSV
         $subscription->is_processed = 'No';
         $subscription->save();
 
+        // Create transaction for the service subscription
+        $account = Account::where('administrator_id', $student->id)->first();
+        if ($account) {
+            $transaction = new Transaction();
+            $transaction->enterprise_id = $this->enterprise->id;
+            $transaction->account_id = $account->id;
+            $transaction->created_by_id = $this->user->id;
+            $transaction->amount = $amount;
+            $transaction->description = "Service subscription: {$service->name} (from import)";
+            $transaction->type = 'FEES_BILL';
+            $transaction->academic_year_id = $this->currentTerm->academic_year_id;
+            $transaction->term_id = $this->currentTerm->id;
+            $transaction->payment_date = now();
+            $transaction->source = 'IMPORTED';
+            $transaction->school_pay_transporter_id = '-';
+            $transaction->save();
+
+            // Update account balance
+            $this->updateAccountBalance($account);
+        }
+
         return [
             'success' => true,
             'message' => "Service '{$service->name}' (UGX " . number_format($amount) . ") - {$matchType} - Subscribed successfully"
@@ -834,6 +861,9 @@ class FeesImportServiceCSV
         $transaction->payment_date = now();
         $transaction->source = 'IMPORTED';
         $transaction->save();
+
+        // Update account balance
+        $this->updateAccountBalance($account);
 
         return "Adjusted balance from UGX " . number_format($currentBalance) . " to UGX " . number_format($expectedBalance) . " (adjustment: UGX " . number_format($adjustmentAmount) . ")";
     }
@@ -988,6 +1018,28 @@ class FeesImportServiceCSV
         return floatval($value);
     }
 
+    /**
+     * Update account balance by summing all transactions
+     */
+    protected function updateAccountBalance($account)
+    {
+        try {
+            $totalBalance = Transaction::where('account_id', $account->id)->sum('amount');
+            $account->balance = $totalBalance;
+            $account->save();
+            
+            Log::info('Account balance updated', [
+                'account_id' => $account->id,
+                'new_balance' => $totalBalance
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to update account balance', [
+                'account_id' => $account->id,
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
     protected function resolveFilePath($path)
     {
         // Remove leading slashes
@@ -1040,8 +1092,301 @@ class FeesImportServiceCSV
         ];
     }
 
+    /**
+     * Retry failed and skipped records
+     * Successfully imported records are skipped
+     */
     public function retryFailedRecords(FeesDataImport $import): array
     {
-        return ['success' => false, 'message' => 'Retry not yet implemented for CSV'];
+        set_time_limit(0);
+        ini_set('max_execution_time', '0');
+        ini_set('memory_limit', '512M');
+
+        $this->import = $import;
+        $this->user = \Encore\Admin\Facades\Admin::user();
+
+        try {
+            // Load enterprise
+            $this->enterprise = Enterprise::findOrFail($import->enterprise_id);
+
+            // Load current term
+            $this->currentTerm = $this->enterprise->active_term();
+            if (!$this->currentTerm) {
+                return [
+                    'success' => false,
+                    'message' => 'No active term found for this enterprise',
+                    'stats' => []
+                ];
+            }
+
+            // Get failed and skipped records only
+            $recordsToRetry = \App\Models\FeesDataImportRecord::where('fees_data_import_id', $import->id)
+                ->whereIn('status', ['Failed', 'Skipped'])
+                ->get();
+
+            if ($recordsToRetry->isEmpty()) {
+                return [
+                    'success' => true,
+                    'message' => 'No failed or skipped records to retry. All records were processed successfully.',
+                    'stats' => [
+                        'records_to_retry' => 0,
+                        'retried' => 0,
+                        'success' => 0,
+                        'still_failed' => 0,
+                    ]
+                ];
+            }
+
+            // Get file path
+            $filePath = $this->resolveFilePath($import->file_path);
+            if (!file_exists($filePath)) {
+                return [
+                    'success' => false,
+                    'message' => 'Import file not found: ' . $filePath,
+                    'stats' => []
+                ];
+            }
+
+            // Get service category
+            $this->serviceCategory = \App\Models\ServiceCategory::firstOrCreate([
+                'enterprise_id' => $this->enterprise->id,
+                'name' => 'Imported Fees',
+            ], [
+                'description' => 'Services imported from fees data',
+            ]);
+
+            // Open CSV and read headers
+            $handle = fopen($filePath, 'r');
+            if (!$handle) {
+                return [
+                    'success' => false,
+                    'message' => 'Cannot open CSV file',
+                    'stats' => []
+                ];
+            }
+
+            $this->headers = fgetcsv($handle);
+
+            // Build index of CSV rows by row number
+            $csvRows = [];
+            $rowNum = 1;
+            while (($row = fgetcsv($handle)) !== false) {
+                $rowNum++;
+                $csvRows[$rowNum] = $row;
+            }
+            fclose($handle);
+
+            // Process retry
+            $stats = [
+                'records_to_retry' => $recordsToRetry->count(),
+                'retried' => 0,
+                'success' => 0,
+                'still_failed' => 0,
+                'still_skipped' => 0,
+            ];
+
+            $servicesColumns = $import->services_columns ?? [];
+
+            foreach ($recordsToRetry as $record) {
+                $rowNumber = $record->index;
+                
+                // Skip if row doesn't exist in CSV
+                if (!isset($csvRows[$rowNumber])) {
+                    continue;
+                }
+
+                $rowData = $csvRows[$rowNumber];
+                $stats['retried']++;
+
+                // Delete old record and create new one
+                $oldRecordId = $record->id;
+                $record->delete();
+
+                // Process this row using same logic as main import
+                DB::beginTransaction();
+                
+                try {
+                    $actionLog = [];
+                    
+                    // Get identifier
+                    $identifierCol = $import->identify_by == 'school_pay_account_id' 
+                        ? $import->school_pay_column 
+                        : $import->reg_number_column;
+                    $colIndex = $this->columnLetterToIndex($identifierCol);
+
+                    if (!isset($rowData[$colIndex]) || empty(trim($rowData[$colIndex]))) {
+                        $this->createImportRecord($rowNumber, null, null, 'Skipped', "Empty identifier in column {$identifierCol}");
+                        $stats['still_skipped']++;
+                        DB::commit();
+                        continue;
+                    }
+
+                    $identifier = trim($rowData[$colIndex]);
+                    
+                    // Clean identifier based on type
+                    if ($import->identify_by == 'school_pay_account_id') {
+                        $identifier = preg_replace('/[^0-9]/', '', $identifier);
+                        if (empty($identifier)) {
+                            $this->createImportRecord($rowNumber, null, null, 'Skipped', "Invalid school pay code (not numeric) in column {$identifierCol}");
+                            $stats['still_skipped']++;
+                            DB::commit();
+                            continue;
+                        }
+                    }
+
+                    // Find student
+                    $student = $this->findStudent($identifier, $import->identify_by, $this->enterprise);
+                    if (!$student) {
+                        $recordData = ['identify_by' => $import->identify_by];
+                        if ($import->identify_by == 'school_pay_account_id') {
+                            $recordData['school_pay'] = $identifier;
+                        } else {
+                            $recordData['reg_number'] = $identifier;
+                        }
+                        $this->createImportRecord($rowNumber, null, null, 'Failed', "Student not found with {$import->identify_by}: {$identifier}", $recordData);
+                        $stats['still_failed']++;
+                        DB::commit();
+                        continue;
+                    }
+
+                    $actionLog[] = "RETRY: Found student: {$student->name} (ID: {$student->id})";
+
+                    // Get or create account
+                    $account = $this->getOrCreateAccount($student);
+                    $actionLog[] = "Student account: {$account->name} (ID: {$account->id})";
+
+                    // Process previous term balance
+                    if (!empty($import->previous_fees_term_balance_column)) {
+                        $prevBalanceCol = $this->columnLetterToIndex($import->previous_fees_term_balance_column);
+                        if (isset($rowData[$prevBalanceCol])) {
+                            $previousBalance = $this->parseAmount($rowData[$prevBalanceCol]);
+                            if ($previousBalance != 0) {
+                                $balanceResult = $this->processPreviousTermBalance($account, $student, $previousBalance);
+                                $actionLog[] = $balanceResult;
+                            }
+                        }
+                    }
+
+                    // Process services
+                    $processedServices = 0;
+                    $skippedServices = 0;
+                    foreach ($servicesColumns as $column) {
+                        $colIndex = $this->columnLetterToIndex($column);
+                        if (!isset($rowData[$colIndex])) {
+                            $skippedServices++;
+                            continue;
+                        }
+
+                        $cellValue = trim($rowData[$colIndex]);
+                        if (empty($cellValue) || $cellValue == '-' || $cellValue == '--') {
+                            $skippedServices++;
+                            continue;
+                        }
+
+                        $amount = $this->parseAmount($cellValue);
+                        if ($amount <= 0) {
+                            $skippedServices++;
+                            continue;
+                        }
+
+                        $serviceName = isset($this->headers[$colIndex]) ? trim($this->headers[$colIndex]) : "Service-Column-{$column}";
+
+                        $serviceResult = $this->processServiceSubscription($student, $serviceName, $amount, $column);
+                        $actionLog[] = $serviceResult['message'];
+                        if ($serviceResult['success']) {
+                            $processedServices++;
+                        }
+                    }
+
+                    if ($processedServices == 0 && $skippedServices == count($servicesColumns)) {
+                        $actionLog[] = "No services to process (all columns empty/dash) - continuing";
+                    }
+
+                    // Handle current balance adjustment
+                    if (!empty($import->current_balance_column)) {
+                        $currentBalanceCol = $this->columnLetterToIndex($import->current_balance_column);
+                        if (isset($rowData[$currentBalanceCol])) {
+                            $expectedBalance = $this->parseAmount($rowData[$currentBalanceCol]);
+                            if ($expectedBalance != 0) {
+                                $balanceResult = $this->adjustAccountBalance($account, $student, $expectedBalance);
+                                $actionLog[] = $balanceResult;
+                            }
+                        }
+                    }
+
+                    // Prepare record data
+                    $recordData = [
+                        'identify_by' => $import->identify_by,
+                        'services_data' => $actionLog,
+                    ];
+                    
+                    if ($import->identify_by == 'school_pay_account_id') {
+                        $recordData['school_pay'] = $identifier;
+                    } else {
+                        $recordData['reg_number'] = $identifier;
+                    }
+                    
+                    if (!empty($import->current_balance_column)) {
+                        $currentBalanceCol = $this->columnLetterToIndex($import->current_balance_column);
+                        if (isset($rowData[$currentBalanceCol])) {
+                            $recordData['current_balance'] = $this->parseAmount($rowData[$currentBalanceCol]);
+                        }
+                    }
+                    if (!empty($import->previous_fees_term_balance_column)) {
+                        $prevBalanceCol = $this->columnLetterToIndex($import->previous_fees_term_balance_column);
+                        if (isset($rowData[$prevBalanceCol])) {
+                            $recordData['previous_fees_term_balance'] = $this->parseAmount($rowData[$prevBalanceCol]);
+                        }
+                    }
+
+                    $this->createImportRecord($rowNumber, $student->id, $account->id, 'Completed', 
+                        "RETRY SUCCESS: Processed {$processedServices} services. Actions:\n" . implode("\n", $actionLog),
+                        $recordData);
+                    $stats['success']++;
+                    
+                    DB::commit();
+
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    Log::error('Retry row processing failed', [
+                        'row' => $rowNumber,
+                        'error' => $e->getMessage()
+                    ]);
+                    
+                    $this->createImportRecord($rowNumber, null, null, 'Failed', 
+                        "RETRY FAILED: " . $e->getMessage());
+                    $stats['still_failed']++;
+                }
+            }
+
+            // Update import statistics
+            $import->refresh();
+            $import->success_count = \App\Models\FeesDataImportRecord::where('fees_data_import_id', $import->id)
+                ->where('status', 'Completed')->count();
+            $import->failed_count = \App\Models\FeesDataImportRecord::where('fees_data_import_id', $import->id)
+                ->where('status', 'Failed')->count();
+            $import->skipped_count = \App\Models\FeesDataImportRecord::where('fees_data_import_id', $import->id)
+                ->where('status', 'Skipped')->count();
+            $import->save();
+
+            return [
+                'success' => true,
+                'message' => "Retry completed. {$stats['success']} records succeeded, {$stats['still_failed']} still failed, {$stats['still_skipped']} still skipped.",
+                'stats' => $stats
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('Retry failed records error', [
+                'import_id' => $import->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'Retry failed: ' . $e->getMessage(),
+                'stats' => []
+            ];
+        }
     }
 }

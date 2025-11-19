@@ -1098,7 +1098,8 @@ Route::get('fees-data-import-retry', function (Request $request) {
   echo "<p>Attempting to retry failed records...</p>";
 
   try {
-    $service = new \App\Services\FeesImportServiceOptimized();
+    // Use CSV service for retry (same as main import)
+    $service = new \App\Services\FeesImportServiceCSV();
     $result = $service->retryFailedRecords($import);
 
     if ($result['success']) {
