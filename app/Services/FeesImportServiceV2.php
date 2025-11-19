@@ -195,7 +195,7 @@ class FeesImportServiceV2
             $account = $this->getOrCreateAccount($student);
             
             // Step 4: Calculate what the final balance SHOULD be
-            $desiredBalance = $this->calculateDesiredBalance($parsed);
+            $desiredBalance = $this->calculateDesiredBalance($parsed, $import);
             
             // Step 5: Get current balance from transactions
             $currentBalance = $this->calculateCurrentBalance($account);
@@ -209,7 +209,7 @@ class FeesImportServiceV2
             // Step 7: Handle previous balance if exists
             $previousBalanceAction = null;
             if ($parsed['previous_balance'] != 0) {
-                $previousBalanceAction = $this->processPreviousBalance($account, $student, $parsed['previous_balance']);
+                $previousBalanceAction = $this->processPreviousBalance($account, $student, $parsed['previous_balance'], $import);
             }
             
             // Step 8: Recalculate current balance after services and previous balance
@@ -359,20 +359,28 @@ class FeesImportServiceV2
      * - If CSV shows 0 or "-" → student owes nothing → return 0
      * - If CSV shows -60,000 (already negative) → student has credit → return +60,000
      */
-    protected function calculateDesiredBalance(array $parsed): float
+    protected function calculateDesiredBalance(array $parsed, FeesDataImport $import): float
     {
         $csvBalance = $parsed['current_balance'];
         
-        // If CSV shows positive number, it's a debt → make it negative
-        // If CSV shows 0, return 0
-        // If CSV somehow has negative (credit), keep as positive
+        // Check import settings for how to handle balance signs
+        // "Yes" = CSV already has correct negative signs (use as-is)
+        // "No" = CSV has positive numbers for debts (multiply by -1)
         
-        if ($csvBalance > 0) {
-            return -1 * $csvBalance; // Debt
-        } elseif ($csvBalance < 0) {
-            return abs($csvBalance); // Credit (rare)
+        $csvHasNegativeSigns = ($import->cater_for_balance === 'Yes');
+        
+        if ($csvHasNegativeSigns) {
+            // CSV already has the correct sign - use value exactly as-is
+            return (float) $csvBalance;
         } else {
-            return 0; // Balanced
+            // CSV has positive numbers for debts - convert to negative
+            if ($csvBalance > 0) {
+                return -1 * $csvBalance; // Debt
+            } elseif ($csvBalance < 0) {
+                return abs($csvBalance); // Credit (rare, double negative becomes positive)
+            } else {
+                return 0; // Balanced
+            }
         }
     }
 
@@ -391,11 +399,12 @@ class FeesImportServiceV2
     }
 
     /**
-     * Find student by school_pay or reg_number
+     * Find student by school_pay_payment_code only
+     * (admin_users table doesn't have reg_number column)
      */
     protected function findStudent(array $parsed): ?User
     {
-        $cacheKey = $parsed['school_pay'] ?? $parsed['reg_number'] ?? '';
+        $cacheKey = $parsed['school_pay'] ?? '';
         
         // Check cache first
         if (isset($this->studentCache[$cacheKey])) {
@@ -404,19 +413,11 @@ class FeesImportServiceV2
         
         $student = null;
         
-        // Try by school_pay first
+        // Lookup by school_pay_payment_code only (verified column exists)
         if (!empty($parsed['school_pay'])) {
             $student = User::where('school_pay_payment_code', $parsed['school_pay'])
                 ->where('enterprise_id', $this->enterprise->id)
-                ->select(['id', 'name', 'school_pay_payment_code', 'reg_number', 'enterprise_id'])
-                ->first();
-        }
-        
-        // Try by registration number if available
-        if (!$student && !empty($parsed['reg_number'])) {
-            $student = User::where('reg_number', $parsed['reg_number'])
-                ->where('enterprise_id', $this->enterprise->id)
-                ->select(['id', 'name', 'school_pay_payment_code', 'reg_number', 'enterprise_id'])
+                ->select(['id', 'name', 'school_pay_payment_code', 'enterprise_id'])
                 ->first();
         }
         
@@ -527,13 +528,24 @@ class FeesImportServiceV2
     /**
      * Process previous balance
      */
-    protected function processPreviousBalance(Account $account, User $student, float $amount): array
+    protected function processPreviousBalance(Account $account, User $student, float $amount, FeesDataImport $import): array
     {
-        // Previous balance is a DEBT carried forward → DEBIT (negative)
+        // Check if CSV already has negative signs
+        $csvHasNegativeSigns = ($import->cater_for_balance === 'Yes');
+        
+        // Determine the transaction amount
+        if ($csvHasNegativeSigns) {
+            // CSV already has correct sign - use as-is
+            $transactionAmount = $amount;
+        } else {
+            // CSV has positive numbers for debts - convert to negative
+            $transactionAmount = -1 * abs($amount);
+        }
+        
         $transaction = Transaction::create([
             'enterprise_id' => $this->enterprise->id,
             'account_id' => $account->id,
-            'amount' => -1 * $amount, // NEGATIVE = DEBIT
+            'amount' => $transactionAmount,
             'type' => 'FEES_BILL',
             'description' => "Previous term balance: {$amount}",
             'source' => 'IMPORTED_V2',
