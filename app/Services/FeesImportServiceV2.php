@@ -342,11 +342,11 @@ class FeesImportServiceV2
             $value = $matches[1];
         }
         
-        // Remove currency symbols, commas, spaces
+        // Remove currency symbols, commas, spaces (but keep minus sign and decimal point)
         $value = preg_replace('/[^0-9.-]/', '', $value);
         
-        // Convert to float and return absolute value
-        return abs((float) $value);
+        // Convert to float - PRESERVE THE SIGN (don't use abs())
+        return (float) $value;
     }
 
     /**
