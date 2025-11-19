@@ -917,8 +917,8 @@ Route::get('fees-data-import-validate', function (Request $request) {
       echo "<h4>File Statistics</h4>";
       echo "<table style='border-collapse: collapse; width: 100%; margin: 15px 0;'>";
       foreach ($validation['stats'] as $key => $value) {
-        // Skip complex arrays like student_list - we'll show them separately
-        if ($key == 'student_list') continue;
+        // Skip complex arrays - we'll show them separately
+        if (in_array($key, ['student_list', 'services_summary'])) continue;
         
         $displayKey = ucwords(str_replace('_', ' ', $key));
         echo "<tr style='border-bottom: 1px solid #ddd;'>";
@@ -928,13 +928,37 @@ Route::get('fees-data-import-validate', function (Request $request) {
         if (is_array($value)) {
           echo htmlspecialchars(json_encode($value));
         } else {
-          echo htmlspecialchars($value);
+          echo htmlspecialchars(is_string($value) ? $value : strval($value));
         }
         
         echo "</td>";
         echo "</tr>";
       }
       echo "</table>";
+      
+      // Show services summary if available
+      if (!empty($validation['stats']['services_summary'])) {
+        $servicesSummary = $validation['stats']['services_summary'];
+        echo "<h4>Services Configuration (" . count($servicesSummary) . " service columns)</h4>";
+        echo "<table style='border-collapse: collapse; width: 100%; margin: 15px 0; border: 1px solid #ddd;'>";
+        echo "<thead style='background: #f8f9fa;'>";
+        echo "<tr>";
+        echo "<th style='padding: 10px; text-align: left; border: 1px solid #ddd;'>Column</th>";
+        echo "<th style='padding: 10px; text-align: left; border: 1px solid #ddd;'>Service Title</th>";
+        echo "</tr>";
+        echo "</thead>";
+        echo "<tbody>";
+        
+        foreach ($servicesSummary as $service) {
+          echo "<tr style='border-bottom: 1px solid #ddd;'>";
+          echo "<td style='padding: 8px; border: 1px solid #ddd; text-align: center;'><strong>" . htmlspecialchars($service['column']) . "</strong></td>";
+          echo "<td style='padding: 8px; border: 1px solid #ddd;'>" . htmlspecialchars($service['title']) . "</td>";
+          echo "</tr>";
+        }
+        
+        echo "</tbody>";
+        echo "</table>";
+      }
       
       // Show student match list if available
       if (!empty($validation['stats']['student_list'])) {

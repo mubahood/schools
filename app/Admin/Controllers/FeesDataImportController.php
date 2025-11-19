@@ -393,7 +393,7 @@ class FeesDataImportController extends AdminController
                     <div class="form-group">
                         <label class="col-sm-2 control-label"></label>
                         <div class="col-sm-8">
-                            <a href="' . url('admin/fees-data-import-retry?id=' . $model->id) . '" 
+                            <a href="' . url('fees-data-import-retry?id=' . $model->id) . '" 
                                class="btn btn-warning" target="_blank">
                                 <i class="fa fa-refresh"></i> Retry Failed Records (' . $model->failed_count . ')
                             </a>
@@ -423,7 +423,7 @@ class FeesDataImportController extends AdminController
                     <div class="form-group">
                         <label class="col-sm-2 control-label"></label>
                         <div class="col-sm-8">
-                            <a href="' . url('admin/fees-data-import-duplicate?id=' . $model->id) . '" 
+                            <a href="' . url('fees-data-import-duplicate?id=' . $model->id) . '" 
                                class="btn btn-default" 
                                onclick="return confirm(\'Duplicate this import?\\n\\nA new import will be created with:\\n• Same file\\n• Same configuration settings\\n• Reset status (Pending)\\n• All counters reset to zero\\n\\nYou can then modify settings before processing.\')">
                                 <i class="fa fa-copy"></i> Duplicate This Import
@@ -806,7 +806,7 @@ class FeesDataImportController extends AdminController
                 echo "<div style='margin-top: 25px;'>";
                 echo "<a href='{$recordsUrl}' class='btn btn-success' style='background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block;'>";
                 echo "View Import Records</a>";
-                echo " <a href='" . url('admin/fees-data-import') . "' style='margin-left: 10px; padding: 10px 20px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; display: inline-block;'>Back to Imports</a>";
+                echo " <a href='" . url('fees-data-import') . "' style='margin-left: 10px; padding: 10px 20px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; display: inline-block;'>Back to Imports</a>";
                 echo "</div>";
             } else {
                 echo "<div style='background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 15px; border-radius: 5px; margin: 15px 0;'>";
@@ -898,7 +898,7 @@ class FeesDataImportController extends AdminController
             echo "<div style='margin-top: 25px;'>";
             echo "<a href='{$recordsUrl}' class='btn btn-primary' style='background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block;'>";
             echo "View All Records</a>";
-            echo " <a href='" . url('admin/fees-data-import') . "' style='margin-left: 10px; padding: 10px 20px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; display: inline-block;'>Back to Imports</a>";
+            echo " <a href='" . url('fees-data-import') . "' style='margin-left: 10px; padding: 10px 20px; text-decoration: none; border: 1px solid #ccc; border-radius: 4px; display: inline-block;'>Back to Imports</a>";
             echo "</div>";
         } catch (\Exception $e) {
             echo "<div style='background: #f8d7da; color: #721c24; padding: 20px; border-radius: 5px;'>";
@@ -924,18 +924,18 @@ class FeesDataImportController extends AdminController
         $u = Admin::user();
         if ($u == null) {
             admin_error('Authentication Required', 'You are not logged in');
-            return redirect('admin/auth/login');
+            return redirect('auth/login');
         }
 
         $import = FeesDataImport::find(request('id'));
         if ($import == null) {
             admin_error('Not Found', 'Fees Data Import not found');
-            return redirect('admin/fees-data-import');
+            return redirect('fees-data-import');
         }
 
         if ($import->enterprise_id != $u->enterprise_id) {
             admin_error('Access Denied', 'This import belongs to a different enterprise.');
-            return redirect('admin/fees-data-import');
+            return redirect('fees-data-import');
         }
 
         try {
@@ -968,7 +968,7 @@ class FeesDataImportController extends AdminController
             $duplicate->save();
 
             admin_success('Success', 'Import duplicated successfully! You can now modify settings and process this import.');
-            return redirect('admin/fees-data-import/' . $duplicate->id . '/edit');
+            return redirect('fees-data-import/' . $duplicate->id . '/edit');
         } catch (\Exception $e) {
             Log::error('Failed to duplicate fees import', [
                 'import_id' => $import->id,
@@ -977,7 +977,7 @@ class FeesDataImportController extends AdminController
             ]);
 
             admin_error('Duplication Failed', 'Failed to duplicate import: ' . $e->getMessage());
-            return redirect('admin/fees-data-import');
+            return redirect('fees-data-import');
         }
     }
 }
