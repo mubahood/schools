@@ -613,12 +613,14 @@ class FeesImportServiceCSV
                 if (!empty($this->import->current_balance_column)) {
                     $currentBalanceCol = $this->columnLetterToIndex($this->import->current_balance_column);
                     if (isset($rowData[$currentBalanceCol])) {
-                        $expectedBalance = $this->parseAmount($rowData[$currentBalanceCol]);
-                        
-                        // Consider - or 0 as null balance (0 balance)
-                        if ($expectedBalance == 0) {
-                            $actionLog[] = "Current balance is zero - no adjustment needed";
+                        $rawBalanceCell = trim($rowData[$currentBalanceCol]);
+
+                        // If the CSV cell is present but empty (no data), skip adjustment
+                        if ($rawBalanceCell === '') {
+                            $actionLog[] = "Current balance column present but empty - skipped";
                         } else {
+                            // Treat '-', '--' and similar as explicit zero => we MUST reset account to 0
+                            $expectedBalance = $this->parseAmount($rawBalanceCell);
                             $balanceResult = $this->adjustAccountBalance($account, $student, $expectedBalance);
                             $actionLog[] = $balanceResult;
                         }
@@ -1316,11 +1318,14 @@ class FeesImportServiceCSV
                     if (!empty($import->current_balance_column)) {
                         $currentBalanceCol = $this->columnLetterToIndex($import->current_balance_column);
                         if (isset($rowData[$currentBalanceCol])) {
-                            $expectedBalance = $this->parseAmount($rowData[$currentBalanceCol]);
-                            if ($expectedBalance != 0) {
-                                $balanceResult = $this->adjustAccountBalance($account, $student, $expectedBalance);
-                                $actionLog[] = $balanceResult;
-                            }
+                                $rawBalance = trim($rowData[$currentBalanceCol]);
+                                if ($rawBalance === '') {
+                                    $actionLog[] = "Current balance column present but empty - skipped";
+                                } else {
+                                    $expectedBalance = $this->parseAmount($rawBalance);
+                                    $balanceResult = $this->adjustAccountBalance($account, $student, $expectedBalance);
+                                    $actionLog[] = $balanceResult;
+                                }
                         }
                     }
 
