@@ -202,9 +202,14 @@ class FeesImportServiceCSV
                 }
                 
                 $studentName = isset($row[$nameColIndex]) ? trim($row[$nameColIndex]) : '';
-                $currentBalance = ($balanceColIndex !== null && isset($row[$balanceColIndex])) 
+                $currentBalanceRaw = ($balanceColIndex !== null && isset($row[$balanceColIndex])) 
                     ? trim($row[$balanceColIndex]) 
                     : '';
+                
+                // Display balance: if it's a dash, show "0", otherwise show as-is
+                $currentBalance = ($currentBalanceRaw == '-' || $currentBalanceRaw == '--' || $currentBalanceRaw == '—') 
+                    ? '0' 
+                    : $currentBalanceRaw;
                 
                 if (empty($identifier)) {
                     $studentList[] = [
