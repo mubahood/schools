@@ -286,10 +286,11 @@ class FeesImportServiceCSV
      */
     public function processImport(FeesDataImport $import, $user): array
     {
-        // Set aggressive limits
+        // Set aggressive limits for large imports
         set_time_limit(0);
         ini_set('max_execution_time', '0');
-        ini_set('memory_limit', '512M'); // CSV needs much less memory!
+        ini_set('memory_limit', '2048M'); // 2GB for large imports with many students
+        ini_set('max_input_time', '0');
 
         $this->import = $import;
         $this->user = $user;
@@ -550,57 +551,77 @@ class FeesImportServiceCSV
                 $account = $this->getOrCreateAccount($student);
                 $actionLog[] = "Student account: {$account->name} (ID: {$account->id})";
 
-                // STEP 2: Handle previous term balance (CRITICAL)
+                // STEP 2: Handle previous term balance (CRITICAL) - wrapped in try-catch
                 if (!empty($this->import->previous_fees_term_balance_column)) {
-                    $prevBalanceCol = $this->columnLetterToIndex($this->import->previous_fees_term_balance_column);
-                    if (isset($rowData[$prevBalanceCol])) {
-                        $previousBalance = $this->parseAmount($rowData[$prevBalanceCol]);
-                        
-                        // Only process if balance is not zero (ignore 0 and -)
-                        if ($previousBalance != 0) {
-                            $balanceResult = $this->processPreviousTermBalance($account, $student, $previousBalance);
-                            $actionLog[] = $balanceResult;
-                        } else {
-                            $actionLog[] = "Previous balance is zero - skipped";
+                    try {
+                        $prevBalanceCol = $this->columnLetterToIndex($this->import->previous_fees_term_balance_column);
+                        if (isset($rowData[$prevBalanceCol])) {
+                            $previousBalance = $this->parseAmount($rowData[$prevBalanceCol]);
+                            
+                            // Only process if balance is not zero (ignore 0 and -)
+                            if ($previousBalance != 0) {
+                                $balanceResult = $this->processPreviousTermBalance($account, $student, $previousBalance);
+                                $actionLog[] = $balanceResult;
+                            } else {
+                                $actionLog[] = "Previous balance is zero - skipped";
+                            }
                         }
+                    } catch (Exception $prevBalEx) {
+                        $actionLog[] = "⚠ Previous balance failed: " . $prevBalEx->getMessage();
+                        Log::warning('Previous balance failed, continuing', [
+                            'row' => $rowNumber,
+                            'student' => $student->id,
+                            'error' => $prevBalEx->getMessage()
+                        ]);
                     }
                 }
 
-                // STEP 3: Process services
+                // STEP 3: Process services - each service wrapped in try-catch
                 $processedServices = 0;
                 $skippedServices = 0;
                 foreach ($servicesColumns as $column) {
-                    $colIndex = $this->columnLetterToIndex($column);
-                    if (!isset($rowData[$colIndex])) {
+                    try {
+                        $colIndex = $this->columnLetterToIndex($column);
+                        if (!isset($rowData[$colIndex])) {
+                            $skippedServices++;
+                            continue;
+                        }
+
+                        $cellValue = trim($rowData[$colIndex]);
+                        
+                        // Skip if empty or just a dash (means not subscribed)
+                        if (empty($cellValue) || $cellValue == '-' || $cellValue == '--') {
+                            $skippedServices++;
+                            continue;
+                        }
+
+                        $amount = $this->parseAmount($cellValue);
+                        if ($amount <= 0) {
+                            $skippedServices++;
+                            continue;
+                        }
+
+                        $serviceName = isset($this->headers[$colIndex]) ? trim($this->headers[$colIndex]) : '';
+                        
+                        if (empty($serviceName)) {
+                            $serviceName = "Service-Column-{$column}";
+                        }
+
+                        // Service matching logic
+                        $serviceResult = $this->processServiceSubscription($student, $serviceName, $amount, $column);
+                        $actionLog[] = $serviceResult['message'];
+                        if ($serviceResult['success']) {
+                            $processedServices++;
+                        }
+                    } catch (Exception $svcEx) {
+                        $actionLog[] = "⚠ Service {$column} failed: " . $svcEx->getMessage();
+                        Log::warning('Service failed, continuing', [
+                            'row' => $rowNumber,
+                            'student' => $student->id,
+                            'column' => $column,
+                            'error' => $svcEx->getMessage()
+                        ]);
                         $skippedServices++;
-                        continue;
-                    }
-
-                    $cellValue = trim($rowData[$colIndex]);
-                    
-                    // Skip if empty or just a dash (means not subscribed)
-                    if (empty($cellValue) || $cellValue == '-' || $cellValue == '--') {
-                        $skippedServices++;
-                        continue;
-                    }
-
-                    $amount = $this->parseAmount($cellValue);
-                    if ($amount <= 0) {
-                        $skippedServices++;
-                        continue;
-                    }
-
-                    $serviceName = isset($this->headers[$colIndex]) ? trim($this->headers[$colIndex]) : '';
-                    
-                    if (empty($serviceName)) {
-                        $serviceName = "Service-Column-{$column}";
-                    }
-
-                    // Service matching logic
-                    $serviceResult = $this->processServiceSubscription($student, $serviceName, $amount, $column);
-                    $actionLog[] = $serviceResult['message'];
-                    if ($serviceResult['success']) {
-                        $processedServices++;
                     }
                 }
 
@@ -609,21 +630,40 @@ class FeesImportServiceCSV
                     $actionLog[] = "No services to process (all columns empty/dash) - continuing to next student";
                 }
 
-                // STEP 4: Handle current balance adjustment
+                // STEP 4: Handle current balance adjustment - CRITICAL, NEVER SKIP
                 if (!empty($this->import->current_balance_column)) {
-                    $currentBalanceCol = $this->columnLetterToIndex($this->import->current_balance_column);
-                    if (isset($rowData[$currentBalanceCol])) {
-                        $rawBalanceCell = trim($rowData[$currentBalanceCol]);
+                    try {
+                        $currentBalanceCol = $this->columnLetterToIndex($this->import->current_balance_column);
+                        if (isset($rowData[$currentBalanceCol])) {
+                            $rawBalanceCell = trim($rowData[$currentBalanceCol]);
 
-                        // If the CSV cell is present but empty (no data), skip adjustment
-                        if ($rawBalanceCell === '') {
-                            $actionLog[] = "Current balance column present but empty - skipped";
-                        } else {
-                            // Treat '-', '--' and similar as explicit zero => we MUST reset account to 0
-                            $expectedBalance = $this->parseAmount($rawBalanceCell);
-                            $balanceResult = $this->adjustAccountBalance($account, $student, $expectedBalance);
-                            $actionLog[] = $balanceResult;
+                            // If the CSV cell is present but empty (no data), skip adjustment
+                            if ($rawBalanceCell === '') {
+                                $actionLog[] = "Current balance column present but empty - skipped";
+                            } else {
+                                // Treat '-', '--' and similar as explicit zero => we MUST reset account to 0
+                                $expectedBalance = $this->parseAmount($rawBalanceCell);
+                                Log::info('Processing balance adjustment', [
+                                    'row' => $rowNumber,
+                                    'student_id' => $student->id,
+                                    'raw_csv' => $rawBalanceCell,
+                                    'parsed' => $expectedBalance
+                                ]);
+                                $balanceResult = $this->adjustAccountBalance($account, $student, $expectedBalance);
+                                $actionLog[] = "✓ " . $balanceResult;
+                            }
                         }
+                    } catch (Exception $balEx) {
+                        $errorMsg = "🔴 CRITICAL: Balance adjustment FAILED: " . $balEx->getMessage();
+                        $actionLog[] = $errorMsg;
+                        Log::error('Balance adjustment FAILED - CRITICAL', [
+                            'row' => $rowNumber,
+                            'student_id' => $student->id,
+                            'account_id' => $account->id,
+                            'error' => $balEx->getMessage(),
+                            'trace' => $balEx->getTraceAsString()
+                        ]);
+                        // Continue processing - don't throw
                     }
                 }
 
@@ -1267,46 +1307,57 @@ class FeesImportServiceCSV
                     $account = $this->getOrCreateAccount($student);
                     $actionLog[] = "Student account: {$account->name} (ID: {$account->id})";
 
-                    // Process previous term balance
+                    // Process previous term balance - with try-catch
                     if (!empty($import->previous_fees_term_balance_column)) {
-                        $prevBalanceCol = $this->columnLetterToIndex($import->previous_fees_term_balance_column);
-                        if (isset($rowData[$prevBalanceCol])) {
-                            $previousBalance = $this->parseAmount($rowData[$prevBalanceCol]);
-                            if ($previousBalance != 0) {
-                                $balanceResult = $this->processPreviousTermBalance($account, $student, $previousBalance);
-                                $actionLog[] = $balanceResult;
+                        try {
+                            $prevBalanceCol = $this->columnLetterToIndex($import->previous_fees_term_balance_column);
+                            if (isset($rowData[$prevBalanceCol])) {
+                                $previousBalance = $this->parseAmount($rowData[$prevBalanceCol]);
+                                if ($previousBalance != 0) {
+                                    $balanceResult = $this->processPreviousTermBalance($account, $student, $previousBalance);
+                                    $actionLog[] = $balanceResult;
+                                }
                             }
+                        } catch (Exception $ex) {
+                            $actionLog[] = "⚠ RETRY: Previous balance failed: " . $ex->getMessage();
+                            Log::warning('Retry: Previous balance failed', ['row' => $rowNumber, 'error' => $ex->getMessage()]);
                         }
                     }
 
-                    // Process services
+                    // Process services - with try-catch per service
                     $processedServices = 0;
                     $skippedServices = 0;
                     foreach ($servicesColumns as $column) {
-                        $colIndex = $this->columnLetterToIndex($column);
-                        if (!isset($rowData[$colIndex])) {
+                        try {
+                            $colIndex = $this->columnLetterToIndex($column);
+                            if (!isset($rowData[$colIndex])) {
+                                $skippedServices++;
+                                continue;
+                            }
+
+                            $cellValue = trim($rowData[$colIndex]);
+                            if (empty($cellValue) || $cellValue == '-' || $cellValue == '--') {
+                                $skippedServices++;
+                                continue;
+                            }
+
+                            $amount = $this->parseAmount($cellValue);
+                            if ($amount <= 0) {
+                                $skippedServices++;
+                                continue;
+                            }
+
+                            $serviceName = isset($this->headers[$colIndex]) ? trim($this->headers[$colIndex]) : "Service-Column-{$column}";
+
+                            $serviceResult = $this->processServiceSubscription($student, $serviceName, $amount, $column);
+                            $actionLog[] = $serviceResult['message'];
+                            if ($serviceResult['success']) {
+                                $processedServices++;
+                            }
+                        } catch (Exception $ex) {
+                            $actionLog[] = "⚠ RETRY: Service {$column} failed: " . $ex->getMessage();
+                            Log::warning('Retry: Service failed', ['row' => $rowNumber, 'column' => $column, 'error' => $ex->getMessage()]);
                             $skippedServices++;
-                            continue;
-                        }
-
-                        $cellValue = trim($rowData[$colIndex]);
-                        if (empty($cellValue) || $cellValue == '-' || $cellValue == '--') {
-                            $skippedServices++;
-                            continue;
-                        }
-
-                        $amount = $this->parseAmount($cellValue);
-                        if ($amount <= 0) {
-                            $skippedServices++;
-                            continue;
-                        }
-
-                        $serviceName = isset($this->headers[$colIndex]) ? trim($this->headers[$colIndex]) : "Service-Column-{$column}";
-
-                        $serviceResult = $this->processServiceSubscription($student, $serviceName, $amount, $column);
-                        $actionLog[] = $serviceResult['message'];
-                        if ($serviceResult['success']) {
-                            $processedServices++;
                         }
                     }
 
@@ -1314,22 +1365,26 @@ class FeesImportServiceCSV
                         $actionLog[] = "No services to process (all columns empty/dash) - continuing";
                     }
 
-                    // Handle current balance adjustment
+                    // Handle current balance adjustment - CRITICAL, with try-catch
                     if (!empty($import->current_balance_column)) {
-                        $currentBalanceCol = $this->columnLetterToIndex($import->current_balance_column);
-                        if (isset($rowData[$currentBalanceCol])) {
+                        try {
+                            $currentBalanceCol = $this->columnLetterToIndex($import->current_balance_column);
+                            if (isset($rowData[$currentBalanceCol])) {
                                 $rawBalance = trim($rowData[$currentBalanceCol]);
                                 if ($rawBalance === '') {
                                     $actionLog[] = "Current balance column present but empty - skipped";
                                 } else {
                                     $expectedBalance = $this->parseAmount($rawBalance);
+                                    Log::info('RETRY: Processing balance', ['row' => $rowNumber, 'student' => $student->id, 'raw' => $rawBalance, 'parsed' => $expectedBalance]);
                                     $balanceResult = $this->adjustAccountBalance($account, $student, $expectedBalance);
-                                    $actionLog[] = $balanceResult;
+                                    $actionLog[] = "✓ RETRY: " . $balanceResult;
                                 }
+                            }
+                        } catch (Exception $ex) {
+                            $actionLog[] = "🔴 RETRY: Balance adjustment FAILED: " . $ex->getMessage();
+                            Log::error('RETRY: Balance adjustment failed', ['row' => $rowNumber, 'student' => $student->id, 'error' => $ex->getMessage()]);
                         }
-                    }
-
-                    // Prepare record data
+                    }                    // Prepare record data
                     $recordData = [
                         'identify_by' => $import->identify_by,
                         'services_data' => $actionLog,
