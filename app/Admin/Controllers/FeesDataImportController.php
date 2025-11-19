@@ -110,10 +110,10 @@ class FeesDataImportController extends AdminController
 
         //action buttons
         $grid->column('actions', __('Actions'))->display(function () {
-            $validateLink = admin_url("fees-data-import-validate?id={$this->id}");
-            $importLink = admin_url("fees-data-import-do-import-optimized?id={$this->id}");
-            $retryLink = admin_url("fees-data-import-retry?id={$this->id}");
-            $duplicateLink = admin_url("fees-data-import-duplicate?id={$this->id}");
+            $validateLink = url("fees-data-import-validate?id={$this->id}");
+            $importLink = url("fees-data-import-do-import-optimized?id={$this->id}");
+            $retryLink = url("fees-data-import-retry?id={$this->id}");
+            $duplicateLink = url("fees-data-import-duplicate?id={$this->id}");
             $target = " target='_blank'";
             $buttons = [];
 
@@ -128,7 +128,7 @@ class FeesDataImportController extends AdminController
                     $buttons[] = "<a href='{$retryLink}' class='btn btn-xs btn-warning'{$target} onclick='return confirm(\"Process may have crashed. Retry {$failedSkipped} failed/skipped records?\")'><i class='fa fa-refresh'></i> Retry ({$failedSkipped})</a>";
                 }
             } elseif ($this->status == 'Completed') {
-                $buttons[] = "<a target='_blank' href='" . admin_url("fees-data-import-records?fees_data_import_id={$this->id}") . "' class='btn btn-xs btn-success'>View Records</a>";
+                $buttons[] = "<a target='_blank' href='" . url("fees-data-import-records?fees_data_import_id={$this->id}") . "' class='btn btn-xs btn-success'>View Records</a>";
                 // Show retry if there are failed or skipped records
                 $failedSkipped = $this->failed_count + $this->skipped_count;
                 if ($failedSkipped > 0) {
@@ -697,7 +697,7 @@ class FeesDataImportController extends AdminController
             }
 
             if ($validation['valid']) {
-                $importUrl = admin_url("fees-data-import-do-import-optimized?id={$import->id}");
+                $importUrl = url("fees-data-import-do-import-optimized?id={$import->id}");
                 echo "<div style='margin-top: 25px;'>";
                 echo "<a href='{$importUrl}' class='btn btn-primary' style='background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block;'>";
                 echo "Proceed with Import</a>";
@@ -802,7 +802,7 @@ class FeesDataImportController extends AdminController
                     echo "</table>";
                 }
 
-                $recordsUrl = admin_url("fees-data-import-records?fees_data_import_id={$import->id}");
+                $recordsUrl = url("fees-data-import-records?fees_data_import_id={$import->id}");
                 echo "<div style='margin-top: 25px;'>";
                 echo "<a href='{$recordsUrl}' class='btn btn-success' style='background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block;'>";
                 echo "View Import Records</a>";
@@ -894,7 +894,7 @@ class FeesDataImportController extends AdminController
                 echo "</div>";
             }
 
-            $recordsUrl = admin_url("fees-data-import-records?fees_data_import_id={$import->id}");
+            $recordsUrl = url("fees-data-import-records?fees_data_import_id={$import->id}");
             echo "<div style='margin-top: 25px;'>";
             echo "<a href='{$recordsUrl}' class='btn btn-primary' style='background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block;'>";
             echo "View All Records</a>";
