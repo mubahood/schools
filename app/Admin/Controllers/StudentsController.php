@@ -873,7 +873,7 @@ class StudentsController extends AdminController
             foreach (
                 AcademicClass::where([
                     'enterprise_id' => $u->enterprise_id,
-                    'academic_year_id' => $active_academic_year->id,
+                    // 'academic_year_id' => $active_academic_year->id,
                 ])->get() as $class
             ) {
                 if (((int)($class->academic_year->is_active)) != 1) {
