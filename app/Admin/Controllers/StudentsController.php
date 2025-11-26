@@ -877,7 +877,7 @@ class StudentsController extends AdminController
                 ])->get() as $class
             ) {
                 if (((int)($class->academic_year->is_active)) != 1) {
-                    continue;
+                    // continue; 
                 }
                 $classes[$class->id] = $class->name_text;
             }
