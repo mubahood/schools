@@ -14,6 +14,15 @@ class Service extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'enterprise_id',
+        'name',
+        'fee',
+        'description',
+        'is_compulsory',
+        'service_category_id',
+    ];
+
     public function service_category()
     {
         return $this->belongsTo(ServiceCategory::class);

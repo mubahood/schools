@@ -215,6 +215,55 @@ class ServiceSubscriptionController extends AdminController
             return $this->link_with;
         })->sortable();
 
+        $grid->column('to_be_managed_by_inventory', 'Inventory Mgmt')->display(function ($value) {
+            if ($value === 'Yes') {
+                return '<span class="label label-info">Yes</span>';
+            }
+            return '<span class="label label-default" style="background-color: #cececeff;">No</span>';
+        })->sortable();
+
+        $grid->column('is_service_offered', 'Inventory Status')->display(function ($value) {
+            if ($this->to_be_managed_by_inventory !== 'Yes') {
+                return '<span class="label label-default" style="background-color: #cececeff;">N/A</span>';
+            }
+            
+            switch ($value) {
+                case 'Yes':
+                    return '<span class="label label-success">Offered</span>';
+                case 'Pending':
+                    return '<span class="label label-warning">Pending</span>';
+                case 'Cancelled':
+                    return '<span class="label label-danger">Cancelled</span>';
+                default:
+                    return '<span class="label label-default" style="background-color: #cbcbcbff;">Not Offered</span>';
+            }
+        })->sortable();
+
+        $grid->column('is_completed', 'Completed')->display(function ($value) {
+            if ($value === 'Yes') {
+                return '<span class="label label-success">Yes</span>';
+            }
+            return '<span class="label label-warning">No</span>';
+        })->sortable();
+
+        $grid->column('stock_batch_id', 'Stock Batch')->display(function ($value) {
+            if ($this->to_be_managed_by_inventory !== 'Yes' || !$value) {
+                return '<span class="text-muted">N/A</span>';
+            }
+            $batch = \App\Models\StockBatch::find($value);
+            if (!$batch) {
+                return '<span class="text-danger">Batch Not Found</span>';
+            }
+            return $batch->cat->name . ' <small>(Batch #' . $batch->id . ')</small>';
+        })->sortable();
+
+        $grid->column('provided_quantity', 'Provided Qty')->display(function ($value) {
+            if ($this->to_be_managed_by_inventory !== 'Yes' || !$value) {
+                return '<span class="text-muted">N/A</span>';
+            }
+            return number_format($value, 2);
+        })->sortable();
+
         return $grid;
     }
 
@@ -306,8 +355,7 @@ class ServiceSubscriptionController extends AdminController
             $form->text('quantity', __('Quantity'))
                 ->rules('required|int')
                 ->attribute('type', 'number')
-                ->default(1)
-                ->help("How much/many units of this service was subscribed for?");
+                ->default(1);
         } else {
             $form->display('due_term_id', 'Due term')->with(function ($v) {
                 return "Term " . Term::find($v)->name_text;
@@ -324,6 +372,97 @@ class ServiceSubscriptionController extends AdminController
             });
             $form->display('quantity', __('Quantity'));
         }
+
+        $form->divider('Inventory Management');
+        
+        $form->radio('to_be_managed_by_inventory', 'Manage by Inventory?')
+            ->options([
+                'Yes' => 'Yes - This service requires inventory/stock tracking',
+                'No' => 'No - This is a regular service subscription'
+            ])
+            ->default('No')
+            ->when('Yes', function (Form $form) {
+                if ($form->isEditing()) {
+                    $form->radio('is_service_offered', 'Inventory Status')
+                        ->options([
+                            'No' => 'Not Offered - Inventory not yet provided',
+                            'Pending' => 'Pending - Awaiting inventory fulfillment',
+                            'Yes' => 'Offered - Inventory has been provided to student',
+                            'Cancelled' => 'Cancelled - Service subscription cancelled'
+                        ])
+                        ->default('No')
+                        ->when('Yes', function (Form $form) {
+                            // Build stock batch options
+                            $u = Admin::user();
+                            $stockBatches = [];
+                            foreach (
+                                \App\Models\StockBatch::where([
+                                    'enterprise_id' => $u->enterprise_id,
+                                    'is_archived' => 'No',
+                                ])
+                                    ->where('current_quantity', '>', 0)
+                                    ->get() as $batch
+                            ) {
+                                $p = \Illuminate\Support\Str::plural($batch->cat->measuring_unit);
+                                $stockBatches[$batch->id] = $batch->cat->name . " - " . number_format($batch->current_quantity) . " $p available - Batch ID #{$batch->id}";
+                            }
+                            
+                            $form->select('stock_batch_id', 'Select Stock Batch')
+                                ->options($stockBatches)
+                                ->rules('required_if:is_service_offered,Yes');
+                            
+                            $form->decimal('provided_quantity', 'Quantity to Provide')
+                                ->rules('required_if:is_service_offered,Yes|numeric|min:0.01')
+                                ->default(function ($form) {
+                                    return $form->model()->quantity ?? 1;
+                                });
+                                
+                            $form->display('stock_record_id', 'Stock Record ID')
+                                ->with(function ($value) {
+                                    if ($value) {
+                                        return "<a href='" . admin_url('stock-records/' . $value) . "' target='_blank'><strong>View Stock Record #{$value}</strong></a>";
+                                    }
+                                    return '<span class="text-muted">Will be created automatically when you save</span>';
+                                });
+                            $form->display('inventory_provided_date', 'Date Provided')->with(function ($value) {
+                                return $value ? \App\Models\Utils::my_date_time($value) : 'N/A';
+                            });
+                            $form->display('inventory_provided_by_id', 'Provided By')
+                                ->with(function ($value) {
+                                    if ($value) {
+                                        $user = Administrator::find($value);
+                                        return $user ? $user->name : 'N/A';
+                                    }
+                                    return 'N/A';
+                                });
+                        })
+                        ->when('Pending', function (Form $form) {
+                            $form->html('<div class="alert alert-info">
+                                <i class="fa fa-info-circle"></i> 
+                                <strong>Pending Status:</strong> Mark as "Offered" once inventory is ready to be provided to the student.
+                            </div>');
+                        })
+                        ->when('Cancelled', function (Form $form) {
+                            $form->html('<div class="alert alert-warning">
+                                <i class="fa fa-exclamation-triangle"></i> 
+                                <strong>Cancelled:</strong> This subscription is cancelled. No stock record will be created.
+                            </div>');
+                        });
+                    
+                    $form->display('is_completed', 'Completion Status')
+                        ->with(function ($value) {
+                            if ($value === 'Yes') {
+                                return '<span class="label label-success">Completed</span>';
+                            }
+                            return '<span class="label label-warning">Pending</span>';
+                        });
+                } else {
+                    $form->html('<div class="alert alert-info">
+                        <i class="fa fa-info-circle"></i> 
+                        <strong>Note:</strong> After creating this subscription, you can edit it to mark inventory as provided.
+                    </div>');
+                }
+            });
 
         $form->radioCard('link_with', 'Link this subscription with?')->options([
             'Transport' => 'Transport',

@@ -196,6 +196,16 @@ class BatchServiceSubscriptionController extends AdminController
             $form->display('quantity', __('Quantity'));
         }
 
+        $form->divider('Inventory Management');
+        
+        $form->radio('to_be_managed_by_inventory', 'Manage by Inventory?')
+            ->options([
+                'Yes' => 'Yes - This service requires inventory/stock tracking',
+                'No' => 'No - This is a regular service subscription'
+            ])
+            ->default('No')
+            ->help('Select "Yes" if this service requires physical inventory to be provided to students. This setting will apply to all subscriptions created from this batch.');
+
         $form->radioCard('link_with', 'Link this subscription with?')->options([
             'Transport' => 'Transport',
             'Hostel' => 'Hostel',

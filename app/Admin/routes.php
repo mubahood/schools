@@ -50,6 +50,7 @@ Route::group([
     $router->resource('stock-batches-archived', StockBatchController::class);
     $router->resource('services', ServiceController::class);
     $router->resource('service-subscriptions', ServiceSubscriptionController::class);
+    $router->resource('inventory-subscriptions', InventorySubscriptionController::class);
     $router->get('/stock-stats', 'HomeController@stockStats')->name('stockStats');
     $router->resource('theology-classes', TheologyClassController::class);
     $router->resource('theology-courses', TheologyCourseController::class);
@@ -203,4 +204,5 @@ Route::group([
     // Resource route comes AFTER specific routes
     $router->resource('student-applications', StudentApplicationController::class);
     $router->resource('session-reports', SessionReportController::class);
+    $router->resource('inventory-subscriptions', InventorySubscriptionController::class);
 });

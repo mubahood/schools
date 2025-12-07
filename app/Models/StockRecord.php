@@ -89,4 +89,20 @@ class StockRecord extends Model
     {
         return $this->belongsTo(StockItemCategory::class, 'stock_item_category_id');
     }
+
+    /**
+     * Relationship to service subscription
+     */
+    public function serviceSubscription()
+    {
+        return $this->belongsTo(ServiceSubscription::class, 'service_subscription_id');
+    }
+
+    /**
+     * Scope for stock records linked to service subscriptions
+     */
+    public function scopeFromServiceSubscription($query)
+    {
+        return $query->whereNotNull('service_subscription_id');
+    }
 }

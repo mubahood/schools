@@ -2861,6 +2861,9 @@ Route::get('process-batch-service-subscriptions', function (Request $request) {
     $sub->link_with = $rep->link_with;
     $sub->transport_route_id = $rep->transport_route_id;
     $sub->trip_type = $rep->trip_type;
+    $sub->to_be_managed_by_inventory = $rep->to_be_managed_by_inventory ?? 'No';
+    $sub->is_service_offered = 'No';
+    $sub->is_completed = 'No';
     $error_text = null;
     try {
       $sub->save();

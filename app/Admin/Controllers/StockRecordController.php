@@ -229,7 +229,7 @@ class StockRecordController extends AdminController
             })->sortable();
 
 
-        $grid->column('description', __('Description'))->hide();
+        $grid->column('description', __('Description'))->sortable();
         $grid->column('due_term_id', __('Due term'))->display(function ($x) {
             $t = Term::find($x);
             if ($t == null) {

@@ -15,6 +15,32 @@ class ServiceSubscription extends Model
     use HasFactory;
 
 
+    protected $fillable = [
+        'enterprise_id',
+        'service_id',
+        'administrator_id',
+        'quantity',
+        'total',
+        'due_academic_year_id',
+        'due_term_id',
+        'link_with',
+        'transport_route_id',
+        'trip_type',
+        'ref_id',
+        'is_processed',
+        'processed_at',
+        'processed_count',
+        'failed_count',
+        'to_be_managed_by_inventory',
+        'is_service_offered',
+        'is_completed',
+        'stock_record_id',
+        'stock_batch_id',
+        'provided_quantity',
+        'inventory_provided_date',
+        'inventory_provided_by_id',
+    ];
+
     public static function boot()
     {
         parent::boot();
@@ -22,6 +48,12 @@ class ServiceSubscription extends Model
             self::my_update($m);
             Service::update_fees($m->service);
         });
+        
+        self::updating(function ($m) {
+            // Handle inventory changes BEFORE the update is saved
+            self::handleInventoryStatusChange($m);
+        });
+        
         self::updated(function ($m) {
             self::my_update($m);
             Service::update_fees($m->service);
@@ -247,5 +279,202 @@ class ServiceSubscription extends Model
         } catch (\Throwable $th) {
             //throw $th;
         }
+    }
+
+    /**
+     * Handle inventory status changes and create/link stock records
+     */
+    public static function handleInventoryStatusChange($subscription)
+    {
+        // Only process if managed by inventory
+        if ($subscription->to_be_managed_by_inventory !== 'Yes') {
+            return;
+        }
+
+        $oldStatus = $subscription->getOriginal('is_service_offered');
+        $newStatus = $subscription->is_service_offered;
+        
+        $needsSave = false;
+
+        // If status changed to 'Yes' (Service Offered), create stock record
+        if ($oldStatus !== 'Yes' && $newStatus === 'Yes') {
+            // Validate required fields before creating stock record
+            if (!$subscription->stock_batch_id) {
+                throw new Exception("Stock batch must be selected before marking service as offered.");
+            }
+            if (!isset($subscription->provided_quantity) || $subscription->provided_quantity === null || $subscription->provided_quantity <= 0) {
+                throw new Exception("Provided quantity must be greater than zero before marking service as offered.");
+            }
+            
+            // Create stock record and update subscription fields
+            $stockRecord = self::createStockOutRecord($subscription);
+            $subscription->is_completed = 'Yes';
+            $subscription->inventory_provided_date = now();
+            $subscription->stock_record_id = $stockRecord->id; // Ensure stock_record_id is set
+            
+            $user = Auth::user() ?? Admin::user();
+            if ($user) {
+                $subscription->inventory_provided_by_id = $user->id;
+            }
+            // No need to save - changes will be saved by the ongoing update operation
+        }
+        // If status changed to 'Cancelled', mark as completed (no stock record needed)
+        elseif ($newStatus === 'Cancelled') {
+            $subscription->is_completed = 'Yes';
+        }
+        // If status is 'Pending' or 'No', mark as not completed
+        elseif ($newStatus === 'Pending' || $newStatus === 'No') {
+            $subscription->is_completed = 'No';
+        }
+    }
+
+    /**
+     * Create a stock-out record when inventory is provided to student
+     */
+    protected static function createStockOutRecord($subscription)
+    {
+        // Prevent duplicate stock records
+        if ($subscription->stock_record_id) {
+            $existingRecord = StockRecord::find($subscription->stock_record_id);
+            if ($existingRecord) {
+                return $existingRecord;
+            }
+        }
+
+        // Check if stock record already exists for this subscription
+        $existingRecord = StockRecord::where('service_subscription_id', $subscription->id)->first();
+        if ($existingRecord) {
+            $subscription->stock_record_id = $existingRecord->id;
+            return $existingRecord;
+        }
+
+        $service = Service::find($subscription->service_id);
+        if (!$service) {
+            throw new Exception("Service not found for subscription ID: {$subscription->id}");
+        }
+
+        $student = Administrator::find($subscription->administrator_id);
+        if (!$student) {
+            throw new Exception("Student not found for subscription ID: {$subscription->id}");
+        }
+
+        // Use the user-selected stock batch
+        $stockBatch = StockBatch::find($subscription->stock_batch_id);
+        
+        if (!$stockBatch) {
+            throw new Exception("Stock batch ID {$subscription->stock_batch_id} not found. Cannot fulfill inventory request.");
+        }
+        
+        // Verify the batch is not archived and belongs to the same enterprise
+        if ($stockBatch->is_archived === 'Yes') {
+            throw new Exception("Stock batch ID {$stockBatch->id} is archived and cannot be used.");
+        }
+        
+        if ($stockBatch->enterprise_id != $subscription->enterprise_id) {
+            throw new Exception("Stock batch does not belong to the same enterprise.");
+        }
+
+        // Use the provided_quantity field (actual quantity to be issued)
+        $quantityToIssue = $subscription->provided_quantity;
+        
+        // Verify sufficient quantity in the batch
+        if ($stockBatch->current_quantity < $quantityToIssue) {
+            throw new Exception("Insufficient stock quantity in batch. Required: {$quantityToIssue}, Available: {$stockBatch->current_quantity}");
+        }
+
+        $user = Auth::user() ?? Admin::user();
+        
+        // Create stock-out record
+        $stockRecord = new StockRecord();
+        $stockRecord->enterprise_id = $subscription->enterprise_id;
+        $stockRecord->stock_batch_id = $stockBatch->id;
+        $stockRecord->stock_item_category_id = $stockBatch->stock_item_category_id;
+        $stockRecord->service_subscription_id = $subscription->id;
+        $stockRecord->created_by = $user ? $user->id : null;
+        $stockRecord->received_by = $subscription->administrator_id; // Student receives the inventory
+        $stockRecord->quanity = $quantityToIssue; // Use the provided quantity
+        $stockRecord->type = 'OUT';
+        $stockRecord->record_date = now();
+        $stockRecord->due_term_id = $subscription->due_term_id;
+        $stockRecord->description = "Stock issued for service subscription: {$service->name} (ID: {$subscription->id}) - Student: {$student->name} - Quantity: {$quantityToIssue} from Batch #{$stockBatch->id}";
+        $stockRecord->save();
+
+        // Link the stock record back to subscription
+        $subscription->stock_record_id = $stockRecord->id;
+
+        return $stockRecord;
+    }
+
+    /**
+     * Find available stock batch for the service
+     * This can be customized based on your inventory management logic
+     */
+    protected static function findAvailableStockBatch($subscription)
+    {
+        $service = $subscription->service;
+        
+        // Strategy 1: Look for stock batch with matching service name in description or category
+        $stockBatch = \DB::table('stock_batches')
+            ->join('stock_item_categories', 'stock_batches.stock_item_category_id', '=', 'stock_item_categories.id')
+            ->where('stock_batches.enterprise_id', $subscription->enterprise_id)
+            ->where('stock_batches.current_quantity', '>', 0)
+            ->where(function($query) use ($service) {
+                $query->where('stock_item_categories.name', 'LIKE', '%' . $service->name . '%')
+                      ->orWhere('stock_batches.description', 'LIKE', '%' . $service->name . '%');
+            })
+            ->select('stock_batches.*')
+            ->orderBy('stock_batches.created_at', 'asc') // FIFO
+            ->first();
+
+        if ($stockBatch) {
+            return StockBatch::find($stockBatch->id);
+        }
+
+        // Strategy 2: If service has a specific stock_batch_id field (you may need to add this)
+        // This would require linking services to specific stock batches in advance
+        
+        return null;
+    }
+
+    /**
+     * Relationship to stock record
+     */
+    public function stockRecord()
+    {
+        return $this->belongsTo(StockRecord::class, 'stock_record_id');
+    }
+
+    /**
+     * Relationship to user who provided inventory
+     */
+    public function inventoryProvidedBy()
+    {
+        return $this->belongsTo(Administrator::class, 'inventory_provided_by_id');
+    }
+
+    /**
+     * Scope for subscriptions managed by inventory
+     */
+    public function scopeManagedByInventory($query)
+    {
+        return $query->where('to_be_managed_by_inventory', 'Yes');
+    }
+
+    /**
+     * Scope for pending inventory fulfillment
+     */
+    public function scopePendingInventory($query)
+    {
+        return $query->where('to_be_managed_by_inventory', 'Yes')
+                    ->whereIn('is_service_offered', ['No', 'Pending']);
+    }
+
+    /**
+     * Scope for completed inventory fulfillment
+     */
+    public function scopeInventoryCompleted($query)
+    {
+        return $query->where('to_be_managed_by_inventory', 'Yes')
+                    ->where('is_completed', 'Yes');
     }
 }
