@@ -213,6 +213,217 @@
     </div>
 </div>
 
+{{-- SERVICE SUBSCRIPTION INVENTORY SECTION --}}
+<div style="margin-top: 30px; margin-bottom: 20px;">
+    <h3 style="color: {{ Admin::user()->ent->color }}; border-bottom: 3px solid {{ Admin::user()->ent->color }}; padding-bottom: 10px; display: inline-block; margin-bottom: 20px;">
+        <i class="fa fa-cubes"></i> Service Subscription Inventory
+    </h3>
+</div>
+
+{{-- Subscription Summary Cards --}}
+<div class="dashboard-summary">
+    {{-- Subscription Overview --}}
+    <div class="summary-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <h4><i class="fa fa-clipboard"></i> Subscription Overview</h4>
+        <ul>
+            <li>
+                <span>Total Managed</span>
+                <strong>{{ fmt($totalInventorySubscriptions) }}</strong>
+            </li>
+            <li>
+                <span>Completed</span>
+                <strong style="color: #10b981;">{{ fmt($inventoryCompleted) }}</strong>
+            </li>
+            <li>
+                <span>Incomplete</span>
+                <strong style="color: #f59e0b;">{{ fmt($inventoryIncomplete) }}</strong>
+            </li>
+            @if($totalInventorySubscriptions > 0)
+            <li style="border-top: 1px solid rgba(255,255,255,0.2); margin-top: 8px; padding-top: 8px;">
+                <span>Completion Rate</span>
+                <strong>{{ number_format(($inventoryCompleted / $totalInventorySubscriptions) * 100, 1) }}%</strong>
+            </li>
+            @endif
+        </ul>
+    </div>
+
+    {{-- Service Status --}}
+    <div class="summary-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+        <h4><i class="fa fa-tasks"></i> Service Status</h4>
+        <ul>
+            <li>
+                <span><i class="fa fa-check-circle text-success"></i> Offered</span>
+                <strong>{{ fmt($inventoryOffered) }}</strong>
+            </li>
+            <li>
+                <span><i class="fa fa-clock-o text-warning"></i> Pending</span>
+                <strong>{{ fmt($inventoryPending) }}</strong>
+            </li>
+            <li>
+                <span><i class="fa fa-times-circle text-danger"></i> Cancelled</span>
+                <strong>{{ fmt($inventoryCancelled) }}</strong>
+            </li>
+        </ul>
+    </div>
+
+    {{-- Quantity Allocated --}}
+    <div class="summary-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+        <h4><i class="fa fa-box"></i> Quantity Metrics</h4>
+        <ul>
+            <li>
+                <span>Total Allocated</span>
+                <strong>{{ fmt($totalAllocatedQuantity) }}</strong>
+            </li>
+            <li>
+                <span>Services Pending</span>
+                <strong>{{ $pendingServices->count() }}</strong>
+            </li>
+            @if($pendingServices->count() > 0)
+            <li>
+                <span>Items Needed</span>
+                <strong>{{ fmt($pendingServices->sum('quantity_needed')) }}</strong>
+            </li>
+            @endif
+        </ul>
+    </div>
+
+    {{-- Quick Stats --}}
+    <div class="summary-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+        <h4><i class="fa fa-bolt"></i> Quick Stats</h4>
+        <ul>
+            <li>
+                <span>Avg. Items/Subscription</span>
+                <strong>{{ $totalInventorySubscriptions > 0 ? number_format($totalAllocatedQuantity / ($inventoryOffered ?: 1), 1) : '0' }}</strong>
+            </li>
+            <li>
+                <span>Stock Utilization</span>
+                <strong>{{ $currentQuantity > 0 ? number_format(($totalAllocatedQuantity / $currentQuantity) * 100, 1) : '0' }}%</strong>
+            </li>
+            <li>
+                <span>Active Requests</span>
+                <strong style="color: #ef4444;">{{ fmt($inventoryIncomplete) }}</strong>
+            </li>
+        </ul>
+    </div>
+</div>
+
+{{-- Subscription Data Panels --}}
+<div class="data-panels">
+    {{-- Services Pending Inventory --}}
+    @if($pendingServices->count() > 0)
+    <div class="table-panel">
+        <h5 style="display: flex; justify-content: space-between; align-items: center;">
+            <span><i class="fa fa-bell"></i> Services Pending Inventory</span>
+            <span class="label label-warning">{{ $pendingServices->count() }} Service(s)</span>
+        </h5>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Service Name</th>
+                    <th>Pending Count</th>
+                    <th>Quantity Needed</th>
+                    <th>Available Stock</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($pendingServices as $index => $pending)
+                <tr>
+                    <td>{{ $index + 1 }}</td>
+                    <td>
+                        <strong>{{ $pending['service_name'] }}</strong>
+                    </td>
+                    <td>
+                        <span style="display:inline-block;padding:4px 10px;border-radius:12px;background:#e3f2fd;color:#1976d2;font-weight:600;">
+                            {{ fmt($pending['pending_count']) }}
+                        </span>
+                    </td>
+                    <td>{{ fmt($pending['quantity_needed']) }}</td>
+                    <td>
+                        <span style="color: {{ $pending['available_stock'] > 0 ? '#10b981' : '#ef4444' }}; font-weight: bold;">
+                            {{ fmt($pending['available_stock']) }}
+                        </span>
+                    </td>
+                    <td>
+                        @if($pending['status'] === 'sufficient')
+                            <span style="display:inline-block;padding:2px 10px;border-radius:12px;background:#e6f9f0;color:#1bbf7a;font-weight:600;">
+                                <i class="fa fa-check-circle"></i> Sufficient
+                            </span>
+                        @else
+                            <span style="display:inline-block;padding:2px 10px;border-radius:12px;background:#fff3f3;color:#e74c3c;font-weight:600;">
+                                <i class="fa fa-exclamation-triangle"></i> Insufficient
+                            </span>
+                        @endif
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+    @endif
+
+    {{-- Latest Incomplete Subscriptions --}}
+    @if($latestInventorySubscriptions->count() > 0)
+    <div class="table-panel">
+        <h5 style="display: flex; justify-content: space-between; align-items: center;">
+            <span><i class="fa fa-hourglass-half"></i> Latest Incomplete Subscriptions</span>
+            <span class="label label-warning">{{ $latestInventorySubscriptions->count() }} Pending</span>
+        </h5>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Student</th>
+                    <th>Service</th>
+                    <th>Term</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($latestInventorySubscriptions as $sub)
+                <tr>
+                    <td>
+                        <small>{{ \App\Models\Utils::my_date_time($sub->created_at) }}</small>
+                    </td>
+                    <td>
+                        <strong>{{ $sub->sub->name ?? 'N/A' }}</strong>
+                    </td>
+                    <td>{{ $sub->service->name ?? 'N/A' }}</td>
+                    <td>
+                        <small>{{ $sub->due_term->name_text ?? 'N/A' }}</small>
+                    </td>
+                    <td>
+                        @if($sub->is_service_offered === 'Pending')
+                            <span style="display:inline-block;padding:2px 10px;border-radius:12px;background:#fff4e6;color:#f59e0b;font-weight:600;">
+                                <i class="fa fa-clock-o"></i> Pending
+                            </span>
+                        @elseif($sub->is_service_offered === 'No')
+                            <span style="display:inline-block;padding:2px 10px;border-radius:12px;background:#f3f4f6;color:#6b7280;font-weight:600;">
+                                <i class="fa fa-minus-circle"></i> Not Offered
+                            </span>
+                        @else
+                            <span style="display:inline-block;padding:2px 10px;border-radius:12px;background:#e3f2fd;color:#1976d2;font-weight:600;">
+                                {{ $sub->is_service_offered }}
+                            </span>
+                        @endif
+                    </td>
+                    <td>
+                        <a href="{{ admin_url('inventory-subscriptions/' . $sub->id . '/edit') }}" 
+                           style="display:inline-block;padding:4px 12px;background:{{ Admin::user()->ent->color }};color:#fff;border-radius:4px;text-decoration:none;font-size:0.9em;"
+                           title="Manage Inventory">
+                            <i class="fa fa-edit"></i> Manage
+                        </a>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+    @endif
+</div>
+
 <div class="data-panels">
     {{-- Recent Records --}}
     <div class="table-panel">

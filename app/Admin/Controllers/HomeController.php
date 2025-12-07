@@ -888,6 +888,70 @@ class HomeController extends Controller
             ->filter(fn($c) => $c['total_qty'] < $c['reorder_level'])
             ->values();
 
+        // ==================== SERVICE SUBSCRIPTION INVENTORY STATS ====================
+        
+        // 7. Service Subscription Inventory Stats
+        $inventorySubscriptionsQ = \App\Models\ServiceSubscription::where('enterprise_id', $eid)
+            ->where('to_be_managed_by_inventory', 'Yes');
+        
+        $totalInventorySubscriptions = (clone $inventorySubscriptionsQ)->count();
+        $inventoryOffered = (clone $inventorySubscriptionsQ)->where('is_service_offered', 'Yes')->count();
+        $inventoryPending = (clone $inventorySubscriptionsQ)->where('is_service_offered', 'Pending')->count();
+        $inventoryCancelled = (clone $inventorySubscriptionsQ)->where('is_service_offered', 'Cancelled')->count();
+        $inventoryCompleted = (clone $inventorySubscriptionsQ)->where('is_completed', 'Yes')->count();
+        $inventoryIncomplete = (clone $inventorySubscriptionsQ)->where('is_completed', 'No')->count();
+        
+        // Total quantity allocated to service subscriptions
+        $totalAllocatedQuantity = (clone $inventorySubscriptionsQ)
+            ->where('is_service_offered', 'Yes')
+            ->sum('provided_quantity');
+        
+        // 8. Services with pending inventory (not yet offered)
+        $pendingServices = DB::table('service_subscriptions')
+            ->join('services', 'service_subscriptions.service_id', '=', 'services.id')
+            ->where('service_subscriptions.enterprise_id', $eid)
+            ->where('service_subscriptions.to_be_managed_by_inventory', 'Yes')
+            ->whereIn('service_subscriptions.is_service_offered', ['No', 'Pending'])
+            ->select(
+                'services.name as service_name',
+                'services.id as service_id',
+                DB::raw('COUNT(service_subscriptions.id) as pending_count'),
+                DB::raw('SUM(service_subscriptions.quantity) as total_quantity_needed')
+            )
+            ->groupBy('services.id', 'services.name')
+            ->orderByDesc('pending_count')
+            ->limit(10)
+            ->get()
+            ->map(function ($item) use ($eid) {
+                // Get available stock for this service (match by service name)
+                $availableStock = DB::table('stock_batches')
+                    ->join('stock_item_categories', 'stock_batches.stock_item_category_id', '=', 'stock_item_categories.id')
+                    ->where('stock_batches.enterprise_id', $eid)
+                    ->where('stock_batches.is_archived', 'No')
+                    ->where(function($query) use ($item) {
+                        $query->where('stock_item_categories.name', 'LIKE', '%' . $item->service_name . '%')
+                              ->orWhere('stock_batches.description', 'LIKE', '%' . $item->service_name . '%');
+                    })
+                    ->sum('stock_batches.current_quantity');
+                
+                return [
+                    'service_name' => $item->service_name,
+                    'pending_count' => $item->pending_count,
+                    'quantity_needed' => $item->total_quantity_needed,
+                    'available_stock' => $availableStock,
+                    'status' => $availableStock >= $item->total_quantity_needed ? 'sufficient' : 'insufficient'
+                ];
+            });
+        
+        // 9. Latest 10 incomplete inventory-managed subscriptions
+        $latestInventorySubscriptions = \App\Models\ServiceSubscription::where('enterprise_id', $eid)
+            ->where('to_be_managed_by_inventory', 'Yes')
+            ->where('is_completed', 'No')
+            ->with(['sub', 'service', 'due_term'])
+            ->orderByDesc('created_at')
+            ->limit(10)
+            ->get();
+
         return $content
             ->header('Stock Dashboard')
             ->description('Key inventory KPIs at a glance')
@@ -904,7 +968,17 @@ class HomeController extends Controller
                 'avgValuePerCategory',
                 'topCategories',
                 'recentRecords',
-                'lowCats'
+                'lowCats',
+                // Service subscription inventory stats
+                'totalInventorySubscriptions',
+                'inventoryOffered',
+                'inventoryPending',
+                'inventoryCancelled',
+                'inventoryCompleted',
+                'inventoryIncomplete',
+                'totalAllocatedQuantity',
+                'pendingServices',
+                'latestInventorySubscriptions'
             ));
     }
 }
