@@ -223,7 +223,7 @@
 {{-- Subscription Summary Cards --}}
 <div class="dashboard-summary">
     {{-- Subscription Overview --}}
-    <div class="summary-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="summary-card">
         <h4><i class="fa fa-clipboard"></i> Subscription Overview</h4>
         <ul>
             <li>
@@ -232,14 +232,14 @@
             </li>
             <li>
                 <span>Completed</span>
-                <strong style="color: #10b981;">{{ fmt($inventoryCompleted) }}</strong>
+                <strong>{{ fmt($inventoryCompleted) }}</strong>
             </li>
             <li>
                 <span>Incomplete</span>
-                <strong style="color: #f59e0b;">{{ fmt($inventoryIncomplete) }}</strong>
+                <strong>{{ fmt($inventoryIncomplete) }}</strong>
             </li>
             @if($totalInventorySubscriptions > 0)
-            <li style="border-top: 1px solid rgba(255,255,255,0.2); margin-top: 8px; padding-top: 8px;">
+            <li style="border-top: 1px solid #e5e9f2; margin-top: 8px; padding-top: 8px;">
                 <span>Completion Rate</span>
                 <strong>{{ number_format(($inventoryCompleted / $totalInventorySubscriptions) * 100, 1) }}%</strong>
             </li>
@@ -248,26 +248,26 @@
     </div>
 
     {{-- Service Status --}}
-    <div class="summary-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+    <div class="summary-card">
         <h4><i class="fa fa-tasks"></i> Service Status</h4>
         <ul>
             <li>
-                <span><i class="fa fa-check-circle text-success"></i> Offered</span>
+                <span>Offered</span>
                 <strong>{{ fmt($inventoryOffered) }}</strong>
             </li>
             <li>
-                <span><i class="fa fa-clock-o text-warning"></i> Pending</span>
+                <span>Pending</span>
                 <strong>{{ fmt($inventoryPending) }}</strong>
             </li>
             <li>
-                <span><i class="fa fa-times-circle text-danger"></i> Cancelled</span>
+                <span>Cancelled</span>
                 <strong>{{ fmt($inventoryCancelled) }}</strong>
             </li>
         </ul>
     </div>
 
     {{-- Quantity Allocated --}}
-    <div class="summary-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+    <div class="summary-card">
         <h4><i class="fa fa-box"></i> Quantity Metrics</h4>
         <ul>
             <li>
@@ -288,7 +288,7 @@
     </div>
 
     {{-- Quick Stats --}}
-    <div class="summary-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+    <div class="summary-card">
         <h4><i class="fa fa-bolt"></i> Quick Stats</h4>
         <ul>
             <li>
@@ -301,7 +301,7 @@
             </li>
             <li>
                 <span>Active Requests</span>
-                <strong style="color: #ef4444;">{{ fmt($inventoryIncomplete) }}</strong>
+                <strong>{{ fmt($inventoryIncomplete) }}</strong>
             </li>
         </ul>
     </div>
@@ -335,15 +335,11 @@
                         <strong>{{ $pending['service_name'] }}</strong>
                     </td>
                     <td>
-                        <span style="display:inline-block;padding:4px 10px;border-radius:12px;background:#e3f2fd;color:#1976d2;font-weight:600;">
-                            {{ fmt($pending['pending_count']) }}
-                        </span>
+                        <strong>{{ fmt($pending['pending_count']) }}</strong>
                     </td>
                     <td>{{ fmt($pending['quantity_needed']) }}</td>
                     <td>
-                        <span style="color: {{ $pending['available_stock'] > 0 ? '#10b981' : '#ef4444' }}; font-weight: bold;">
-                            {{ fmt($pending['available_stock']) }}
-                        </span>
+                        <strong>{{ fmt($pending['available_stock']) }}</strong>
                     </td>
                     <td>
                         @if($pending['status'] === 'sufficient')
@@ -397,11 +393,11 @@
                     <td>
                         @if($sub->is_service_offered === 'Pending')
                             <span style="display:inline-block;padding:2px 10px;border-radius:12px;background:#fff4e6;color:#f59e0b;font-weight:600;">
-                                <i class="fa fa-clock-o"></i> Pending
+                                Pending
                             </span>
                         @elseif($sub->is_service_offered === 'No')
                             <span style="display:inline-block;padding:2px 10px;border-radius:12px;background:#f3f4f6;color:#6b7280;font-weight:600;">
-                                <i class="fa fa-minus-circle"></i> Not Offered
+                                Not Offered
                             </span>
                         @else
                             <span style="display:inline-block;padding:2px 10px;border-radius:12px;background:#e3f2fd;color:#1976d2;font-weight:600;">
@@ -411,7 +407,7 @@
                     </td>
                     <td>
                         <a href="{{ admin_url('inventory-subscriptions/' . $sub->id . '/edit') }}" 
-                           style="display:inline-block;padding:4px 12px;background:{{ Admin::user()->ent->color }};color:#fff;border-radius:4px;text-decoration:none;font-size:0.9em;"
+                           class="btn btn-xs btn-primary"
                            title="Manage Inventory">
                             <i class="fa fa-edit"></i> Manage
                         </a>
