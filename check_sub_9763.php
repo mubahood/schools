@@ -1,0 +1,29 @@
+<?php
+require __DIR__ . '/vendor/autoload.php';
+$app = require_once __DIR__ . '/bootstrap/app.php';
+$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+$kernel->bootstrap();
+
+$sub = App\Models\ServiceSubscription::find(9763);
+if (!$sub) {
+    echo "✗ Subscription 9763 not found\n";
+    exit(1);
+}
+
+echo "Subscription #9763:\n";
+echo "  Inventory Managed: " . ($sub->to_be_managed_by_inventory ?? 'NULL') . "\n";
+echo "  Items to Offer: " . json_encode($sub->items_to_be_offered) . "\n";
+
+$count = App\Models\ServiceItemToBeOffered::where('service_subscription_id', 9763)->count();
+echo "  Tracking Records: $count\n\n";
+
+if ($count > 0) {
+    echo "✓ AUTO-GENERATION WORKED!\n";
+    $items = App\Models\ServiceItemToBeOffered::where('service_subscription_id', 9763)->get();
+    foreach ($items as $item) {
+        echo "  - Item: {$item->stockItemCategory->name} (Qty: {$item->quantity})\n";
+    }
+} else {
+    echo "✗ AUTO-GENERATION FAILED\n";
+    echo "  (No tracking records created)\n";
+}

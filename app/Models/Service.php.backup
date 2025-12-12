@@ -223,34 +223,4 @@ class Service extends Model
             $this->attributes['applicable_to_semesters'] = null;
         }
     }
-
-    // items_to_be_offered getter to decode JSON
-    public function getItemsToBeOfferedAttribute($value)
-    {
-        try {
-            if (!empty($value)) {
-                $decoded = json_decode($value, true);
-                return is_array($decoded) ? $decoded : [];
-            }
-            return [];
-        } catch (\Exception $e) {
-            return [];
-        }
-    }
-
-    // items_to_be_offered setter to encode array as JSON
-    public function setItemsToBeOfferedAttribute($value)
-    {
-        try {
-            if (is_array($value)) {
-                $this->attributes['items_to_be_offered'] = json_encode($value);
-            } elseif (is_string($value) && !empty($value)) {
-                $this->attributes['items_to_be_offered'] = $value;
-            } else {
-                $this->attributes['items_to_be_offered'] = null;
-            }
-        } catch (\Exception $e) {
-            $this->attributes['items_to_be_offered'] = null;
-        }
-    }
 }

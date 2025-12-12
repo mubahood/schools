@@ -5,6 +5,7 @@ namespace App\Admin\Controllers;
 use App\Models\Account;
 use App\Models\Service;
 use App\Models\ServiceSubscription;
+use App\Models\StockItemCategory;
 use App\Models\Term;
 use App\Models\User;
 use App\Models\Utils;
@@ -371,6 +372,68 @@ class ServiceSubscriptionController extends AdminController
                 return Service::find($v)->name_text;
             });
             $form->display('quantity', __('Quantity'));
+            
+            // Display items to be offered (inherited from Service)
+            $service = Service::find($form->model()->service_id);
+            if ($service && $service->to_be_managed_by_inventory === 'Yes' && !empty($service->items_to_be_offered)) {
+                $itemNames = [];
+                foreach ($service->items_to_be_offered as $itemId) {
+                    $category = StockItemCategory::find($itemId);
+                    if ($category) {
+                        $itemNames[] = $category->name;
+                    }
+                }
+                
+                if (!empty($itemNames)) {
+                    $form->display('items_to_be_offered_display', 'Items to be Offered')
+                        ->with(function () use ($itemNames) {
+                            return '<span class="label label-info" style="margin-right: 5px; margin-bottom: 5px; display: inline-block;">' 
+                                . implode('</span> <span class="label label-info" style="margin-right: 5px; margin-bottom: 5px; display: inline-block;">', $itemNames) 
+                                . '</span>';
+                        });
+                }
+            }
+        }
+
+        $form->divider('Inventory Items Management');
+        
+        // Check if this subscription has items to be offered
+        if ($form->isEditing()) {
+            $subscription = $form->model();
+            $service = Service::find($subscription->service_id);
+            
+            if ($service && $service->to_be_managed_by_inventory === 'Yes' && !empty($service->items_to_be_offered)) {
+                $u = Admin::user();
+                $stockCategories = [];
+                foreach ($service->items_to_be_offered as $itemId) {
+                    $category = StockItemCategory::find($itemId);
+                    if ($category) {
+                        $stockCategories[$itemId] = $category->name;
+                    }
+                }
+                
+                $form->checkboxButton('items_have_been_offered', 'Mark Items as Provided')
+                    ->options($stockCategories)
+                    ->help('Check the items that have been provided to the student');
+                    
+                // Display status summary
+                if (!empty($subscription->items_have_been_offered)) {
+                    $providedCount = count($subscription->items_have_been_offered);
+                    $totalCount = count($service->items_to_be_offered);
+                    $pending = $totalCount - $providedCount;
+                    
+                    $form->html("<div class='alert alert-info'>
+                        <i class='fa fa-info-circle'></i> 
+                        <strong>Status:</strong> {$providedCount} of {$totalCount} items provided. 
+                        " . ($pending > 0 ? "{$pending} items pending." : "All items provided!") . "
+                    </div>");
+                }
+            } else {
+                $form->html('<div class="alert alert-default">
+                    <i class="fa fa-info-circle"></i> 
+                    This service does not require item tracking.
+                </div>');
+            }
         }
 
         $form->divider('Inventory Management');

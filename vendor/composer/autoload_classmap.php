@@ -85,6 +85,7 @@ return array(
     'App\\Admin\\Controllers\\HomeController' => $baseDir . '/app/Admin/Controllers/HomeController.php',
     'App\\Admin\\Controllers\\IdentificationCardController' => $baseDir . '/app/Admin/Controllers/IdentificationCardController.php',
     'App\\Admin\\Controllers\\ImportSchoolPayTransactionController' => $baseDir . '/app/Admin/Controllers/ImportSchoolPayTransactionController.php',
+    'App\\Admin\\Controllers\\InventorySubscriptionController' => $baseDir . '/app/Admin/Controllers/InventorySubscriptionController.php',
     'App\\Admin\\Controllers\\KnowledgeBaseArticleController' => $baseDir . '/app/Admin/Controllers/KnowledgeBaseArticleController.php',
     'App\\Admin\\Controllers\\KnowledgeBaseCategoryController' => $baseDir . '/app/Admin/Controllers/KnowledgeBaseCategoryController.php',
     'App\\Admin\\Controllers\\MainCourseController' => $baseDir . '/app/Admin/Controllers/MainCourseController.php',

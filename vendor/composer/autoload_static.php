@@ -790,6 +790,7 @@ class ComposerStaticInit639dbf05c48ac73280c80f3691363d96
         'App\\Admin\\Controllers\\HomeController' => __DIR__ . '/../..' . '/app/Admin/Controllers/HomeController.php',
         'App\\Admin\\Controllers\\IdentificationCardController' => __DIR__ . '/../..' . '/app/Admin/Controllers/IdentificationCardController.php',
         'App\\Admin\\Controllers\\ImportSchoolPayTransactionController' => __DIR__ . '/../..' . '/app/Admin/Controllers/ImportSchoolPayTransactionController.php',
+        'App\\Admin\\Controllers\\InventorySubscriptionController' => __DIR__ . '/../..' . '/app/Admin/Controllers/InventorySubscriptionController.php',
         'App\\Admin\\Controllers\\KnowledgeBaseArticleController' => __DIR__ . '/../..' . '/app/Admin/Controllers/KnowledgeBaseArticleController.php',
         'App\\Admin\\Controllers\\KnowledgeBaseCategoryController' => __DIR__ . '/../..' . '/app/Admin/Controllers/KnowledgeBaseCategoryController.php',
         'App\\Admin\\Controllers\\MainCourseController' => __DIR__ . '/../..' . '/app/Admin/Controllers/MainCourseController.php',

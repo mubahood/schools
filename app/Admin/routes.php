@@ -147,7 +147,7 @@ Route::group([
     $router->resource('fees-data-import', FeesDataImportController::class);
     $router->resource('fees-data-imports', FeesDataImportController::class);
     $router->resource('fees-data-import-records', FeesDataImportRecordController::class);
-    
+
     // Custom fees-data-import action routes (must come after resource registration)
     $router->get('fees-data-import-validate', 'FeesDataImportController@validate');
     $router->get('fees-data-import-do-import-optimized', 'FeesDataImportController@doImportOptimized');
@@ -205,4 +205,5 @@ Route::group([
     $router->resource('student-applications', StudentApplicationController::class);
     $router->resource('session-reports', SessionReportController::class);
     $router->resource('inventory-subscriptions', InventorySubscriptionController::class);
+    $router->resource('service-item-to-be-offereds', ServiceItemToBeOfferedController::class);
 });

@@ -87,6 +87,15 @@ class ServiceSubscription extends Model
                 $m->quantity = $quantity;
             }
             $m->total = $service->fee * $m->quantity;
+            
+            // Auto-copy inventory fields from Service
+            if (empty($m->to_be_managed_by_inventory) || $m->to_be_managed_by_inventory === 'No') {
+                $m->to_be_managed_by_inventory = $service->to_be_managed_by_inventory ?? 'No';
+            }
+            if (empty($m->items_to_be_offered) && !empty($service->items_to_be_offered)) {
+                $m->items_to_be_offered = $service->items_to_be_offered;
+            }
+            
             return $m;
         });
 
@@ -156,6 +165,13 @@ class ServiceSubscription extends Model
     {
         return $this->belongsTo(Administrator::class, 'administrator_id');
     }
+
+    // Alias for subscriber (used in tracking system)
+    public function subscriber()
+    {
+        return $this->belongsTo(Administrator::class, 'administrator_id');
+    }
+
     public function getServiceTextAttribute()
     {
         $s = Service::find($this->service_id);
@@ -231,6 +247,107 @@ class ServiceSubscription extends Model
     {
         return $this->hasMany(ServiceSubscriptionItem::class, 'service_subscription_id');
     }
+    // Relationship to ServiceItemToBeOffered tracking records
+    public function itemsToBeOffered()
+    {
+        return $this->hasMany(ServiceItemToBeOffered::class, 'service_subscription_id');
+    }
+
+    /**
+     * Generate ServiceItemToBeOffered records for each stock item in items_to_be_offered
+     * Called automatically when subscription is created or inventory is enabled
+     */
+    public function generateItemsToBeOffered()
+    {
+        // Only generate if inventory management is enabled
+        if ($this->to_be_managed_by_inventory !== 'Yes') {
+            return;
+        }
+
+        // Get items_to_be_offered array
+        $itemIds = $this->items_to_be_offered;
+        if (empty($itemIds) || !is_array($itemIds)) {
+            return;
+        }
+
+        // Create a tracking record for each item
+        foreach ($itemIds as $itemId) {
+            // Check if already exists
+            $exists = ServiceItemToBeOffered::where('service_subscription_id', $this->id)
+                ->where('stock_item_category_id', $itemId)
+                ->exists();
+
+            if (!$exists) {
+                ServiceItemToBeOffered::create([
+                    'service_subscription_id' => $this->id,
+                    'stock_item_category_id' => $itemId,
+                    'quantity' => 1, // Default quantity
+                    'is_service_offered' => 'No',
+                    'user_id' => $this->user_id,
+                    'enterprise_id' => $this->enterprise_id,
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Regenerate ServiceItemToBeOffered records when items_to_be_offered changes
+     * Adds new items and removes old ones (that haven't been offered yet)
+     */
+    public function regenerateItemsToBeOffered()
+    {
+        if ($this->to_be_managed_by_inventory !== 'Yes') {
+            return;
+        }
+
+        $newItemIds = $this->items_to_be_offered ?? [];
+        if (!is_array($newItemIds)) {
+            return;
+        }
+
+        // Get existing tracking records
+        $existingRecords = ServiceItemToBeOffered::where('service_subscription_id', $this->id)->get();
+        $existingItemIds = $existingRecords->pluck('stock_item_category_id')->toArray();
+
+        // Add new items
+        $itemsToAdd = array_diff($newItemIds, $existingItemIds);
+        foreach ($itemsToAdd as $itemId) {
+            ServiceItemToBeOffered::create([
+                'service_subscription_id' => $this->id,
+                'stock_item_category_id' => $itemId,
+                'quantity' => 1,
+                'is_service_offered' => 'No',
+                'user_id' => $this->user_id,
+                'enterprise_id' => $this->enterprise_id,
+            ]);
+        }
+
+        // Remove items that are no longer in the list (only if not yet offered)
+        $itemsToRemove = array_diff($existingItemIds, $newItemIds);
+        if (!empty($itemsToRemove)) {
+            ServiceItemToBeOffered::where('service_subscription_id', $this->id)
+                ->whereIn('stock_item_category_id', $itemsToRemove)
+                ->where('is_service_offered', 'No') // Only remove if not yet offered
+                ->delete();
+        }
+    }
+
+    /**
+     * Check if all items have been offered and update completion status
+     * Called from ServiceItemToBeOffered::updated() event
+     */
+    public function checkAndUpdateCompletionStatus()
+    {
+        $totalItems = $this->itemsToBeOffered()->count();
+        $offeredItems = $this->itemsToBeOffered()->where('is_service_offered', 'Yes')->count();
+
+        if ($totalItems > 0 && $totalItems === $offeredItems) {
+            // All items have been offered - mark subscription as completed
+            $this->is_service_offered = 'Yes';
+            $this->saveQuietly(); // Prevent triggering updated event again
+        }
+    }
+
 
     function do_process()
     {
@@ -476,5 +593,65 @@ class ServiceSubscription extends Model
     {
         return $query->where('to_be_managed_by_inventory', 'Yes')
                     ->where('is_completed', 'Yes');
+    }
+
+    // items_to_be_offered getter to decode JSON
+    public function getItemsToBeOfferedAttribute($value)
+    {
+        try {
+            if (isset($value) && !empty($value)) {
+                $decoded = json_decode($value, true);
+                return is_array($decoded) ? $decoded : [];
+            }
+            return [];
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    // items_to_be_offered setter to encode array as JSON
+    public function setItemsToBeOfferedAttribute($value)
+    {
+        try {
+            if (is_array($value)) {
+                $this->attributes['items_to_be_offered'] = json_encode($value);
+            } elseif (is_string($value) && !empty($value)) {
+                $this->attributes['items_to_be_offered'] = $value;
+            } else {
+                $this->attributes['items_to_be_offered'] = null;
+            }
+        } catch (\Exception $e) {
+            $this->attributes['items_to_be_offered'] = null;
+        }
+    }
+
+    // items_have_been_offered getter to decode JSON
+    public function getItemsHaveBeenOfferedAttribute($value)
+    {
+        try {
+            if (isset($value) && !empty($value)) {
+                $decoded = json_decode($value, true);
+                return is_array($decoded) ? $decoded : [];
+            }
+            return [];
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    // items_have_been_offered setter to encode array as JSON
+    public function setItemsHaveBeenOfferedAttribute($value)
+    {
+        try {
+            if (is_array($value)) {
+                $this->attributes['items_have_been_offered'] = json_encode($value);
+            } elseif (is_string($value) && !empty($value)) {
+                $this->attributes['items_have_been_offered'] = $value;
+            } else {
+                $this->attributes['items_have_been_offered'] = null;
+            }
+        } catch (\Exception $e) {
+            $this->attributes['items_have_been_offered'] = null;
+        }
     }
 }

@@ -118,29 +118,10 @@ class ServiceController extends AdminController
             ])
             ->sortable();
 
-        // Stock Items to be Offered
-        $grid->column('items_to_be_offered', 'Stock Items')
-            ->display(function ($items) {
-                if ($this->to_be_managed_by_inventory !== 'Yes' || empty($items)) {
-                    return '<span class="label label-default">N/A</span>';
-                }
-                
-                $itemNames = [];
-                foreach ($items as $itemId) {
-                    $category = StockItemCategory::find($itemId);
-                    if ($category) {
-                        $itemNames[] = $category->name;
-                    }
-                }
-                
-                if (empty($itemNames)) {
-                    return '<span class="label label-default">None</span>';
-                }
-                
-                return '<span class="label label-info" style="margin: 2px;">' 
-                    . implode('</span> <span class="label label-info" style="margin: 2px;">', $itemNames) 
-                    . '</span>';
-            });
+        // Creation time
+        $grid->column('created_at', 'Created')
+            ->display(fn($d) => Utils::my_date_3($d))
+            ->sortable();
 
         return $grid;
     }
