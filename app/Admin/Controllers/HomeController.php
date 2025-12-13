@@ -888,69 +888,105 @@ class HomeController extends Controller
             ->filter(fn($c) => $c['total_qty'] < $c['reorder_level'])
             ->values();
 
-        // ==================== SERVICE SUBSCRIPTION INVENTORY STATS ====================
+        // ==================== SERVICE ITEMS TRACKING STATS ====================
         
-        // 7. Service Subscription Inventory Stats
+        // 7. Service Item Tracking Stats (New Approach)
+        $serviceItemsQ = \App\Models\ServiceItemToBeOffered::where('enterprise_id', $eid);
+        
+        $totalServiceItems = (clone $serviceItemsQ)->count();
+        $itemsOffered = (clone $serviceItemsQ)->where('is_service_offered', 'Yes')->count();
+        $itemsPending = (clone $serviceItemsQ)->where('is_service_offered', 'No')->count();
+        
+        // Total quantity allocated (offered items)
+        $totalAllocatedQuantity = (clone $serviceItemsQ)
+            ->where('is_service_offered', 'Yes')
+            ->sum('quantity');
+        
+        // Service Subscription Stats (Parent subscriptions)
         $inventorySubscriptionsQ = \App\Models\ServiceSubscription::where('enterprise_id', $eid)
             ->where('to_be_managed_by_inventory', 'Yes');
         
         $totalInventorySubscriptions = (clone $inventorySubscriptionsQ)->count();
-        $inventoryOffered = (clone $inventorySubscriptionsQ)->where('is_service_offered', 'Yes')->count();
-        $inventoryPending = (clone $inventorySubscriptionsQ)->where('is_service_offered', 'Pending')->count();
-        $inventoryCancelled = (clone $inventorySubscriptionsQ)->where('is_service_offered', 'Cancelled')->count();
-        $inventoryCompleted = (clone $inventorySubscriptionsQ)->where('is_completed', 'Yes')->count();
-        $inventoryIncomplete = (clone $inventorySubscriptionsQ)->where('is_completed', 'No')->count();
+        $subscriptionsCompleted = (clone $inventorySubscriptionsQ)->where('is_completed', 'Yes')->count();
+        $subscriptionsIncomplete = (clone $inventorySubscriptionsQ)->where('is_completed', 'No')->count();
         
-        // Total quantity allocated to service subscriptions
-        $totalAllocatedQuantity = (clone $inventorySubscriptionsQ)
-            ->where('is_service_offered', 'Yes')
-            ->sum('provided_quantity');
-        
-        // 8. Services with pending inventory (not yet offered)
-        $pendingServices = DB::table('service_subscriptions')
-            ->join('services', 'service_subscriptions.service_id', '=', 'services.id')
-            ->where('service_subscriptions.enterprise_id', $eid)
-            ->where('service_subscriptions.to_be_managed_by_inventory', 'Yes')
-            ->whereIn('service_subscriptions.is_service_offered', ['No', 'Pending'])
+        // 8. Items pending by category (shows what stock items are needed most)
+        $pendingItemsByCategory = DB::table('service_items_to_be_offered')
+            ->join('stock_item_categories', 'service_items_to_be_offered.stock_item_category_id', '=', 'stock_item_categories.id')
+            ->where('service_items_to_be_offered.enterprise_id', $eid)
+            ->where('service_items_to_be_offered.is_service_offered', 'No')
             ->select(
-                'services.name as service_name',
-                'services.id as service_id',
-                DB::raw('COUNT(service_subscriptions.id) as pending_count'),
-                DB::raw('SUM(service_subscriptions.quantity) as total_quantity_needed')
+                'stock_item_categories.name as item_name',
+                'stock_item_categories.id as category_id',
+                DB::raw('COUNT(service_items_to_be_offered.id) as pending_items_count'),
+                DB::raw('SUM(service_items_to_be_offered.quantity) as total_quantity_needed')
             )
-            ->groupBy('services.id', 'services.name')
-            ->orderByDesc('pending_count')
+            ->groupBy('stock_item_categories.id', 'stock_item_categories.name')
+            ->orderByDesc('pending_items_count')
             ->limit(10)
             ->get()
             ->map(function ($item) use ($eid) {
-                // Get available stock for this service (match by service name)
+                // Get available stock for this category
                 $availableStock = DB::table('stock_batches')
-                    ->join('stock_item_categories', 'stock_batches.stock_item_category_id', '=', 'stock_item_categories.id')
-                    ->where('stock_batches.enterprise_id', $eid)
-                    ->where('stock_batches.is_archived', 'No')
-                    ->where(function($query) use ($item) {
-                        $query->where('stock_item_categories.name', 'LIKE', '%' . $item->service_name . '%')
-                              ->orWhere('stock_batches.description', 'LIKE', '%' . $item->service_name . '%');
-                    })
-                    ->sum('stock_batches.current_quantity');
+                    ->where('stock_item_category_id', $item->category_id)
+                    ->where('enterprise_id', $eid)
+                    ->where('is_archived', 'No')
+                    ->sum('current_quantity');
                 
                 return [
-                    'service_name' => $item->service_name,
-                    'pending_count' => $item->pending_count,
-                    'quantity_needed' => $item->total_quantity_needed,
+                    'item_name' => $item->item_name,
+                    'pending_count' => $item->pending_items_count,
+                    'quantity_needed' => $item->total_quantity_needed ?? 0,
                     'available_stock' => $availableStock,
-                    'status' => $availableStock >= $item->total_quantity_needed ? 'sufficient' : 'insufficient'
+                    'status' => $availableStock >= ($item->total_quantity_needed ?? 0) ? 'sufficient' : 'insufficient'
                 ];
             });
         
-        // 9. Latest 10 incomplete inventory-managed subscriptions
+        // 9. Latest 10 incomplete service subscriptions with tracking items
         $latestInventorySubscriptions = \App\Models\ServiceSubscription::where('enterprise_id', $eid)
             ->where('to_be_managed_by_inventory', 'Yes')
             ->where('is_completed', 'No')
-            ->with(['sub', 'service', 'due_term'])
+            ->with(['sub', 'service', 'due_term', 'itemsToBeOffered.stockItemCategory'])
             ->orderByDesc('created_at')
             ->limit(10)
-            ->get();
+            ->get()
+            ->map(function ($sub) {
+                // Ensure itemsToBeOffered is a collection
+                $items = collect($sub->itemsToBeOffered ?? []);
+                $totalItems = $items->count();
+                $offeredItems = $items->where('is_service_offered', 'Yes')->count();
+                
+                return [
+                    'id' => $sub->id,
+                    'student_name' => optional($sub->sub)->name ?? 'N/A',
+                    'service_name' => optional($sub->service)->name ?? 'N/A',
+                    'term_name' => optional($sub->due_term)->name_text ?? 'N/A',
+                    'total_items' => $totalItems,
+                    'offered_items' => $offeredItems,
+                    'pending_items' => $totalItems - $offeredItems,
+                    'progress_percent' => $totalItems > 0 ? round(($offeredItems / $totalItems) * 100) : 0,
+                    'created_at' => $sub->created_at
+                ];
+            });
+        
+        // 10. Recently offered items (last 10)
+        $recentlyOfferedItems = \App\Models\ServiceItemToBeOffered::where('enterprise_id', $eid)
+            ->where('is_service_offered', 'Yes')
+            ->whereNotNull('offered_at')
+            ->with(['stockItemCategory', 'serviceSubscription.subscriber', 'offeredBy'])
+            ->orderByDesc('offered_at')
+            ->limit(10)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'item_name' => optional($item->stockItemCategory)->name ?? 'N/A',
+                    'student_name' => optional(optional($item->serviceSubscription)->subscriber)->name ?? 'N/A',
+                    'quantity' => $item->quantity ?? 0,
+                    'offered_by' => optional($item->offeredBy)->name ?? 'System',
+                    'offered_at' => $item->offered_at ?? now()
+                ];
+            });
 
         return $content
             ->header('Stock Dashboard')
@@ -969,16 +1005,21 @@ class HomeController extends Controller
                 'topCategories',
                 'recentRecords',
                 'lowCats',
-                // Service subscription inventory stats
-                'totalInventorySubscriptions',
-                'inventoryOffered',
-                'inventoryPending',
-                'inventoryCancelled',
-                'inventoryCompleted',
-                'inventoryIncomplete',
+                // Service Items Tracking Stats (New)
+                'totalServiceItems',
+                'itemsOffered',
+                'itemsPending',
                 'totalAllocatedQuantity',
-                'pendingServices',
-                'latestInventorySubscriptions'
+                
+                // Service Subscriptions (Parent)
+                'totalInventorySubscriptions',
+                'subscriptionsCompleted',
+                'subscriptionsIncomplete',
+                
+                // Detailed breakdowns
+                'pendingItemsByCategory',
+                'latestInventorySubscriptions',
+                'recentlyOfferedItems'
             ));
     }
 }

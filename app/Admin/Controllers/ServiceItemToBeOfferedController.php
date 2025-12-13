@@ -42,33 +42,39 @@ class ServiceItemToBeOfferedController extends AdminController
         $grid->model()->orderBy('id', 'desc');
 
         // Eager load relationships for performance
-        $grid->model()->with(['serviceSubscription.service', 'serviceSubscription.subscriber', 
-            'stockItemCategory', 'stockBatch', 'user', 'offeredBy']);
+        $grid->model()->with([
+            'serviceSubscription.service',
+            'serviceSubscription.subscriber',
+            'stockItemCategory',
+            'stockBatch',
+            'user',
+            'offeredBy'
+        ]);
 
         // Filters
         $grid->filter(function ($filter) {
             $filter->disableIdFilter();
-            
+
             $filter->equal('service_subscription_id', 'Subscription ID')->integer();
-            
+
             $filter->equal('stock_item_category_id', 'Stock Item')->select(function () {
                 $u = Auth::user();
                 return StockItemCategory::where('enterprise_id', $u->enterprise_id)
                     ->pluck('name', 'id');
             });
-            
+
             $filter->equal('is_service_offered', 'Offered Status')->select([
                 'Yes' => 'Offered',
                 'No' => 'Not Offered'
             ]);
-            
+
             $filter->between('created_at', 'Created Date')->date();
             $filter->between('offered_at', 'Offered Date')->date();
         });
 
         // Grid columns
         $grid->column('id', 'ID')->sortable()->width(80);
-        
+
         $grid->column('created_at', 'Date')->display(function ($date) {
             return date('M d, Y', strtotime($date));
         })->sortable()->width(120);
@@ -196,7 +202,7 @@ class ServiceItemToBeOfferedController extends AdminController
         $show->divider();
 
         $show->field('quantity', 'Quantity');
-        
+
         $show->field('is_service_offered', 'Offered Status')->using([
             'Yes' => 'Offered',
             'No' => 'Not Offered'
@@ -250,15 +256,6 @@ class ServiceItemToBeOfferedController extends AdminController
 
         $u = Auth::user();
 
-        // Warning message for manual creation
-        if (!$form->isEditing()) {
-            $form->html('<div class="alert alert-warning">
-                <i class="fa fa-exclamation-triangle"></i> 
-                <strong>Note:</strong> Service items are normally auto-generated when subscriptions are created. 
-                Manual creation should only be used for special cases.
-            </div>');
-        }
-
         // Service Subscription - with AJAX search
         $form->select('service_subscription_id', 'Service Subscription')->options(function ($id) use ($u) {
             if ($id) {
@@ -271,8 +268,7 @@ class ServiceItemToBeOfferedController extends AdminController
             }
             return [];
         })->ajax('/admin/api/service-subscriptions', 'id', 'subscriber.name')
-            ->rules('required')
-            ->help('Select the service subscription this item belongs to');
+            ->rules('required');
 
         // Stock Item Category
         $form->select('stock_item_category_id', 'Stock Item')->options(function ($id) use ($u) {
@@ -282,17 +278,9 @@ class ServiceItemToBeOfferedController extends AdminController
             }
             return StockItemCategory::where('enterprise_id', $u->enterprise_id)
                 ->pluck('name', 'id');
-        })->rules('required')
-            ->help('Select the stock item to be offered');
+        })->rules('required');
 
-        // Quantity
-        $form->number('quantity', 'Quantity')
-            ->default(1)
-            ->min(1)
-            ->rules('required|integer|min:1')
-            ->help('Number of items to be offered');
-
-        // Offered Status
+        // Offered Status - this controls visibility of Stock Batch and Quantity
         $form->radio('is_service_offered', 'Offered Status')
             ->options([
                 'No' => 'Not Offered',
@@ -300,24 +288,36 @@ class ServiceItemToBeOfferedController extends AdminController
             ])
             ->default('No')
             ->rules('required')
-            ->help('Has this item been offered to the student?');
+            ->when('Yes', function (Form $form) use ($u) {
+                // Stock Batch - dropdown with batches filtered by item category
+                $form->select('stock_batch_id', 'Stock Batch')->options(function ($id) use ($u, $form) {
+                    $itemCategoryId = $form->model()->stock_item_category_id ?? request('stock_item_category_id');
 
-        // Stock Batch - with validation
-        $form->select('stock_batch_id', 'Stock Batch')->options(function ($id) use ($u) {
-            if ($id) {
-                $batch = StockRecord::find($id);
-                if ($batch) {
-                    return [$id => "Batch #{$id} - {$batch->stockItemCategory->name} (Qty: {$batch->current_quantity})"];
-                }
-            }
-            return [];
-        })->ajax('/admin/api/stock-records', 'id', 'stockItemCategory.name')
-            ->help('Select the stock batch used to fulfill this item');
+                    if (!$itemCategoryId) {
+                        return [];
+                    }
+
+                    // Get stock batches for this item category
+                    $batches = \App\Models\StockBatch::where('enterprise_id', $u->enterprise_id)
+                        ->where('stock_item_category_id', $itemCategoryId)
+                        ->where('current_quantity', '>', 0)
+                        ->where('is_archived', '!=', 'Yes')
+                        ->get()
+                        ->mapWithKeys(function ($batch) {
+                            return [$batch->id => "Batch #{$batch->id} - Qty: {$batch->current_quantity} - {$batch->description}"];
+                        });
+
+                    return $batches->toArray();
+                })->rules('required');
+
+                // Quantity - decimal type
+                $form->decimal('quantity', 'Quantity')
+                    ->default(1)
+                    ->rules('required');
+            });
 
         // Remarks
-        $form->textarea('remarks', 'Remarks')
-            ->rows(3)
-            ->help('Any additional notes about this item delivery');
+        $form->textarea('remarks', 'Remarks')->rows(3);
 
         // Auto-set fields on save
         $form->saving(function (Form $form) use ($u) {
@@ -327,24 +327,33 @@ class ServiceItemToBeOfferedController extends AdminController
                 $form->user_id = $u->id;
             }
 
-            // Validate stock batch matches item category
-            if ($form->stock_batch_id) {
-                $batch = StockRecord::find($form->stock_batch_id);
-                $itemCategory = StockItemCategory::find($form->stock_item_category_id);
-                
-                if ($batch && $itemCategory && $batch->stock_item_category_id != $itemCategory->id) {
+            // Validate stock batch when status is "Offered"
+            if ($form->is_service_offered === 'Yes') {
+                if (!$form->stock_batch_id) {
+                    admin_error('Error', 'Stock batch is required when marking item as offered!');
+                    return back()->withInput();
+                }
+
+                $batch = \App\Models\StockBatch::find($form->stock_batch_id);
+
+                if (!$batch) {
+                    admin_error('Error', 'Invalid stock batch selected!');
+                    return back()->withInput();
+                }
+
+                // Validate batch matches item category
+                if ($batch->stock_item_category_id != $form->stock_item_category_id) {
                     admin_error('Error', 'Stock batch does not match the selected item category!');
                     return back()->withInput();
                 }
 
                 // Check if batch has enough quantity
-                if ($batch && $batch->current_quantity < $form->quantity) {
-                    admin_warning('Warning', "Stock batch only has {$batch->current_quantity} items available, but you're trying to assign {$form->quantity}!");
+                if ($batch->current_quantity < $form->quantity) {
+                    admin_error('Error', "Insufficient stock! Batch only has {$batch->current_quantity} items available.");
+                    return back()->withInput();
                 }
-            }
 
-            // Auto-set offered_at and offered_by_id when marking as offered
-            if ($form->is_service_offered === 'Yes') {
+                // Auto-set offered_at and offered_by_id
                 if (!$form->model()->offered_at) {
                     $form->offered_at = now();
                 }
@@ -361,12 +370,21 @@ class ServiceItemToBeOfferedController extends AdminController
             }
         });
 
+        // Disable form tools
+        $form->tools(function (Form\Tools $tools) {
+            $tools->disableView();
+        });
+
+        $form->footer(function ($footer) {
+            $footer->disableReset();
+            $footer->disableViewCheck();
+            $footer->disableEditingCheck();
+            $footer->disableCreatingCheck();
+        });
+
         // Hide unnecessary fields
         $form->hidden('enterprise_id');
         $form->hidden('user_id');
-
-        return $form;
-
 
         return $form;
     }

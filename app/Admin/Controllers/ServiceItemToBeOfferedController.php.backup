@@ -365,12 +365,8 @@ class ServiceItemToBeOfferedController extends AdminController
         $form->hidden('enterprise_id');
         $form->hidden('user_id');
 
-        // Conditional delete protection
-        $form->tools(function (Form\Tools $tools) {
-            if ($tools->model->is_service_offered === 'Yes') {
-                $tools->disableDelete();
-            }
-        });
+        return $form;
+
 
         return $form;
     }

@@ -47,6 +47,11 @@ class ServiceSubscription extends Model
         self::created(function ($m) {
             self::my_update($m);
             Service::update_fees($m->service);
+            
+            // Auto-generate tracking items if inventory is enabled
+            if ($m->to_be_managed_by_inventory === 'Yes' && !empty($m->items_to_be_offered)) {
+                $m->generateItemsToBeOffered();
+            }
         });
         
         self::updating(function ($m) {
@@ -338,13 +343,34 @@ class ServiceSubscription extends Model
      */
     public function checkAndUpdateCompletionStatus()
     {
+        // Only check for subscriptions managed by inventory
+        if ($this->to_be_managed_by_inventory !== 'Yes') {
+            return;
+        }
+
         $totalItems = $this->itemsToBeOffered()->count();
+        
+        // If no tracking items exist, don't mark as offered
+        if ($totalItems === 0) {
+            return;
+        }
+        
         $offeredItems = $this->itemsToBeOffered()->where('is_service_offered', 'Yes')->count();
 
-        if ($totalItems > 0 && $totalItems === $offeredItems) {
+        if ($totalItems === $offeredItems) {
             // All items have been offered - mark subscription as completed
-            $this->is_service_offered = 'Yes';
-            $this->saveQuietly(); // Prevent triggering updated event again
+            if ($this->is_service_offered !== 'Yes') {
+                $this->is_service_offered = 'Yes';
+                $this->is_completed = 'Yes';
+                $this->saveQuietly(); // Prevent triggering updated event again
+            }
+        } else {
+            // Not all items offered - ensure subscription is not marked as offered
+            if ($this->is_service_offered === 'Yes' && $this->to_be_managed_by_inventory === 'Yes') {
+                $this->is_service_offered = 'No';
+                $this->is_completed = 'No';
+                $this->saveQuietly();
+            }
         }
     }
 
