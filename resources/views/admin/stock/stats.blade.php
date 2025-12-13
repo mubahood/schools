@@ -232,36 +232,36 @@
             </li>
             <li>
                 <span>Completed</span>
-                <strong>{{ fmt($inventoryCompleted) }}</strong>
+                <strong>{{ fmt($subscriptionsCompleted) }}</strong>
             </li>
             <li>
                 <span>Incomplete</span>
-                <strong>{{ fmt($inventoryIncomplete) }}</strong>
+                <strong>{{ fmt($subscriptionsIncomplete) }}</strong>
             </li>
             @if($totalInventorySubscriptions > 0)
             <li style="border-top: 1px solid #e5e9f2; margin-top: 8px; padding-top: 8px;">
                 <span>Completion Rate</span>
-                <strong>{{ number_format(($inventoryCompleted / $totalInventorySubscriptions) * 100, 1) }}%</strong>
+                <strong>{{ number_format(($subscriptionsCompleted / $totalInventorySubscriptions) * 100, 1) }}%</strong>
             </li>
             @endif
         </ul>
     </div>
 
-    {{-- Service Status --}}
+    {{-- Service Items Status --}}
     <div class="summary-card">
-        <h4><i class="fa fa-tasks"></i> Service Status</h4>
+        <h4><i class="fa fa-tasks"></i> Service Items Status</h4>
         <ul>
             <li>
                 <span>Offered</span>
-                <strong>{{ fmt($inventoryOffered) }}</strong>
+                <strong>{{ fmt($itemsOffered) }}</strong>
             </li>
             <li>
                 <span>Pending</span>
-                <strong>{{ fmt($inventoryPending) }}</strong>
+                <strong>{{ fmt($itemsPending) }}</strong>
             </li>
             <li>
                 <span>Cancelled</span>
-                <strong>{{ fmt($inventoryCancelled) }}</strong>
+                <strong>{{ fmt($itemsPending) }}</strong>
             </li>
         </ul>
     </div>
@@ -275,13 +275,13 @@
                 <strong>{{ fmt($totalAllocatedQuantity) }}</strong>
             </li>
             <li>
-                <span>Services Pending</span>
-                <strong>{{ $pendingServices->count() }}</strong>
+                <span>Pending Categories</span>
+                <strong>{{ $pendingItemsByCategory->count() }}</strong>
             </li>
-            @if($pendingServices->count() > 0)
+            @if($pendingItemsByCategory->count() > 0)
             <li>
                 <span>Items Needed</span>
-                <strong>{{ fmt($pendingServices->sum('quantity_needed')) }}</strong>
+                <strong>{{ fmt($pendingItemsByCategory->sum('quantity_needed')) }}</strong>
             </li>
             @endif
         </ul>
@@ -293,7 +293,7 @@
         <ul>
             <li>
                 <span>Avg. Items/Subscription</span>
-                <strong>{{ $totalInventorySubscriptions > 0 ? number_format($totalAllocatedQuantity / ($inventoryOffered ?: 1), 1) : '0' }}</strong>
+                <strong>{{ $totalInventorySubscriptions > 0 ? number_format($totalServiceItems / $totalInventorySubscriptions, 1) : '0' }}</strong>
             </li>
             <li>
                 <span>Stock Utilization</span>
@@ -301,7 +301,7 @@
             </li>
             <li>
                 <span>Active Requests</span>
-                <strong>{{ fmt($inventoryIncomplete) }}</strong>
+                <strong>{{ fmt($subscriptionsIncomplete) }}</strong>
             </li>
         </ul>
     </div>
@@ -309,18 +309,18 @@
 
 {{-- Subscription Data Panels --}}
 <div class="data-panels">
-    {{-- Services Pending Inventory --}}
-    @if($pendingServices->count() > 0)
+    {{-- Items Pending by Category --}}
+    @if($pendingItemsByCategory->count() > 0)
     <div class="table-panel">
         <h5 style="display: flex; justify-content: space-between; align-items: center;">
-            <span><i class="fa fa-bell"></i> Services Pending Inventory</span>
-            <span class="label label-warning">{{ $pendingServices->count() }} Service(s)</span>
+            <span><i class="fa fa-bell"></i> Items Pending by Category</span>
+            <span class="label label-warning">{{ $pendingItemsByCategory->count() }} Category(ies)</span>
         </h5>
         <table>
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Service Name</th>
+                    <th>Item Category</th>
                     <th>Pending Count</th>
                     <th>Quantity Needed</th>
                     <th>Available Stock</th>
@@ -328,11 +328,11 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($pendingServices as $index => $pending)
+                @foreach($pendingItemsByCategory as $index => $pending)
                 <tr>
                     <td>{{ $index + 1 }}</td>
                     <td>
-                        <strong>{{ $pending['service_name'] }}</strong>
+                        <strong>{{ $pending['item_name'] }}</strong>
                     </td>
                     <td>
                         <strong>{{ fmt($pending['pending_count']) }}</strong>
@@ -360,11 +360,11 @@
     @endif
 
     {{-- Latest Incomplete Subscriptions --}}
-    @if($latestInventorySubscriptions->count() > 0)
+    @if(count($latestInventorySubscriptions) > 0)
     <div class="table-panel">
         <h5 style="display: flex; justify-content: space-between; align-items: center;">
             <span><i class="fa fa-hourglass-half"></i> Latest Incomplete Subscriptions</span>
-            <span class="label label-warning">{{ $latestInventorySubscriptions->count() }} Pending</span>
+            <span class="label label-warning">{{ count($latestInventorySubscriptions) }} Pending</span>
         </h5>
         <table>
             <thead>
@@ -373,7 +373,7 @@
                     <th>Student</th>
                     <th>Service</th>
                     <th>Term</th>
-                    <th>Status</th>
+                    <th>Progress</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -381,35 +381,30 @@
                 @foreach($latestInventorySubscriptions as $sub)
                 <tr>
                     <td>
-                        <small>{{ \App\Models\Utils::my_date_time($sub->created_at) }}</small>
+                        <small>{{ \App\Models\Utils::my_date_time($sub['created_at']) }}</small>
                     </td>
                     <td>
-                        <strong>{{ $sub->sub->name ?? 'N/A' }}</strong>
+                        <strong>{{ $sub['student_name'] }}</strong>
                     </td>
-                    <td>{{ $sub->service->name ?? 'N/A' }}</td>
+                    <td>{{ $sub['service_name'] }}</td>
                     <td>
-                        <small>{{ $sub->due_term->name_text ?? 'N/A' }}</small>
+                        <small>{{ $sub['term_name'] }}</small>
                     </td>
                     <td>
-                        @if($sub->is_service_offered === 'Pending')
-                            <span style="display:inline-block;padding:2px 10px;border-radius:12px;background:#fff4e6;color:#f59e0b;font-weight:600;">
-                                Pending
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div style="flex: 1; background: #f3f4f6; border-radius: 8px; height: 20px; overflow: hidden;">
+                                <div style="width: {{ $sub['progress_percent'] }}%; background: {{ $sub['progress_percent'] == 100 ? '#1bbf7a' : '#f59e0b' }}; height: 100%; transition: width 0.3s;"></div>
+                            </div>
+                            <span style="font-weight: 600; color: {{ $sub['progress_percent'] == 100 ? '#1bbf7a' : '#6b7280' }}; min-width: 80px;">
+                                {{ $sub['offered_items'] }}/{{ $sub['total_items'] }} ({{ $sub['progress_percent'] }}%)
                             </span>
-                        @elseif($sub->is_service_offered === 'No')
-                            <span style="display:inline-block;padding:2px 10px;border-radius:12px;background:#f3f4f6;color:#6b7280;font-weight:600;">
-                                Not Offered
-                            </span>
-                        @else
-                            <span style="display:inline-block;padding:2px 10px;border-radius:12px;background:#e3f2fd;color:#1976d2;font-weight:600;">
-                                {{ $sub->is_service_offered }}
-                            </span>
-                        @endif
+                        </div>
                     </td>
                     <td>
-                        <a href="{{ admin_url('inventory-subscriptions/' . $sub->id . '/edit') }}" 
+                        <a href="{{ admin_url('service-subscriptions/' . $sub['id'] . '/edit') }}" 
                            class="btn btn-xs btn-primary"
-                           title="Manage Inventory">
-                            <i class="fa fa-edit"></i> Manage
+                           title="View Details">
+                            <i class="fa fa-eye"></i> View
                         </a>
                     </td>
                 </tr>
