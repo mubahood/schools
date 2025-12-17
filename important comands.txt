@@ -1,4 +1,4 @@
-php artisan make:migration add_custom_required_documents_to_enterprises --table=enterprises
+php artisan make:migration add_school_pay_issues_to_to_admin_users --table=admin_users
 ls
          $table->date('check_in_time')->nullable();
             $table->date('check_out_time')->nullable();

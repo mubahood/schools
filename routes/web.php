@@ -83,6 +83,106 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 
+Route::get('process-school-issues', function (Request $request) {
+  $enterprise_id = $request->get('enterprise_id', null);
+  
+  // Check enterprise exists using raw query
+  $ent = DB::selectOne("SELECT id, name FROM enterprises WHERE id = ?", [$enterprise_id]);
+  if ($ent == null) {
+    return "Enterprise not found";
+  }
+
+  // Get all active students with their payment codes in one query
+  $active_students = DB::select("
+    SELECT id, name, school_pay_payment_code
+    FROM admin_users 
+    WHERE enterprise_id = ? 
+      AND user_type = 'student' 
+      AND status = 1
+  ", [$ent->id]);
+
+  // Find duplicates using a single query
+  $duplicates = DB::select("
+    SELECT school_pay_payment_code, COUNT(*) as count, GROUP_CONCAT(CONCAT(name, ' (ID: ', id, ')') SEPARATOR '<br>- ') as students
+    FROM admin_users
+    WHERE enterprise_id = ?
+      AND user_type = 'student'
+      AND status = 1
+      AND school_pay_payment_code IS NOT NULL
+      AND LENGTH(school_pay_payment_code) >= 3
+    GROUP BY school_pay_payment_code
+    HAVING COUNT(*) > 1
+  ", [$ent->id]);
+
+  // Create lookup map for duplicates
+  $duplicate_codes = [];
+  foreach ($duplicates as $dup) {
+    $duplicate_codes[$dup->school_pay_payment_code] = $dup->students;
+  }
+
+  $issue_count = 0;
+  $updates = [
+    'missing' => [],
+    'duplicate' => [],
+    'ok' => []
+  ];
+
+  // Process students and categorize
+  foreach ($active_students as $student) {
+    // Check for missing or short codes
+    if ($student->school_pay_payment_code == null || strlen($student->school_pay_payment_code) < 3) {
+      $issue_count++;
+      $updates['missing'][] = $student->id;
+      echo $issue_count . ". Missing School Pay Code: " . $student->name . " (ID: " . $student->id . ")<br>";
+      continue;
+    }
+
+    // Check if this code is in duplicates
+    if (isset($duplicate_codes[$student->school_pay_payment_code])) {
+      $issue_count++;
+      $message = "Duplicate School Pay Code ({$student->school_pay_payment_code}): {$student->name} (ID: {$student->id}) conflicts with:<br>- {$duplicate_codes[$student->school_pay_payment_code]}";
+      $updates['duplicate'][$student->id] = $message;
+      echo $issue_count . ". " . $message . "<br>";
+      continue;
+    }
+
+    // No issues
+    $updates['ok'][] = $student->id;
+  }
+
+  // Batch update using raw queries for performance
+  if (!empty($updates['missing'])) {
+    DB::update("
+      UPDATE admin_users 
+      SET masters_university_year_graduated = 'ISSUE',
+          phd_university_name = 'Missing School Pay Code'
+      WHERE id IN (" . implode(',', $updates['missing']) . ")
+    ");
+  }
+
+  if (!empty($updates['duplicate'])) {
+    foreach ($updates['duplicate'] as $id => $message) {
+      DB::update("
+        UPDATE admin_users 
+        SET masters_university_year_graduated = 'ISSUE',
+            phd_university_name = ?
+        WHERE id = ?
+      ", [$message, $id]);
+    }
+  }
+
+  if (!empty($updates['ok'])) {
+    DB::update("
+      UPDATE admin_users 
+      SET masters_university_year_graduated = 'OK',
+          phd_university_name = NULL
+      WHERE id IN (" . implode(',', $updates['ok']) . ")
+    ");
+  }
+
+  die("Done processing school issues for enterprise: " . $ent->name); 
+});
+
 Route::get('attendance-report', function (Request $request) {
   $id = $request->get('id', null);
   $regenerate = $request->get('regenerate', 0); // Check if hard regenerate is requested
@@ -919,23 +1019,23 @@ Route::get('fees-data-import-validate', function (Request $request) {
       foreach ($validation['stats'] as $key => $value) {
         // Skip complex arrays - we'll show them separately
         if (in_array($key, ['student_list', 'services_summary'])) continue;
-        
+
         $displayKey = ucwords(str_replace('_', ' ', $key));
         echo "<tr style='border-bottom: 1px solid #ddd;'>";
         echo "<td style='padding: 8px; font-weight: bold;'>{$displayKey}:</td>";
         echo "<td style='padding: 8px;'>";
-        
+
         if (is_array($value)) {
           echo htmlspecialchars(json_encode($value));
         } else {
           echo htmlspecialchars(is_string($value) ? $value : strval($value));
         }
-        
+
         echo "</td>";
         echo "</tr>";
       }
       echo "</table>";
-      
+
       // Show services summary if available
       if (!empty($validation['stats']['services_summary'])) {
         $servicesSummary = $validation['stats']['services_summary'];
@@ -948,33 +1048,35 @@ Route::get('fees-data-import-validate', function (Request $request) {
         echo "</tr>";
         echo "</thead>";
         echo "<tbody>";
-        
+
         foreach ($servicesSummary as $service) {
           echo "<tr style='border-bottom: 1px solid #ddd;'>";
           echo "<td style='padding: 8px; border: 1px solid #ddd; text-align: center;'><strong>" . htmlspecialchars($service['column']) . "</strong></td>";
           echo "<td style='padding: 8px; border: 1px solid #ddd;'>" . htmlspecialchars($service['title']) . "</td>";
           echo "</tr>";
         }
-        
+
         echo "</tbody>";
         echo "</table>";
       }
-      
+
       // Show student match list if available
       if (!empty($validation['stats']['student_list'])) {
         $studentList = $validation['stats']['student_list'];
-        $foundCount = count(array_filter($studentList, function($s) { return $s['found']; }));
+        $foundCount = count(array_filter($studentList, function ($s) {
+          return $s['found'];
+        }));
         $notFoundCount = count($studentList) - $foundCount;
-        
+
         echo "<h4>Student Match Details (" . count($studentList) . " students checked)</h4>";
-        
+
         // Filter buttons
         echo "<div style='margin: 15px 0;'>";
         echo "<button onclick='filterRows(\"all\")' class='filter-btn' style='padding: 8px 16px; margin-right: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;'>All (" . count($studentList) . ")</button>";
         echo "<button onclick='filterRows(\"found\")' class='filter-btn' style='padding: 8px 16px; margin-right: 5px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;'>✓ Found (" . $foundCount . ")</button>";
         echo "<button onclick='filterRows(\"not-found\")' class='filter-btn' style='padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;'>✗ Not Found (" . $notFoundCount . ")</button>";
         echo "</div>";
-        
+
         echo "<div style='max-height: 400px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px;'>";
         echo "<table id='student-table' style='border-collapse: collapse; width: 100%;'>";
         echo "<thead style='position: sticky; top: 0; background: #f8f9fa;'>";
@@ -988,14 +1090,14 @@ Route::get('fees-data-import-validate', function (Request $request) {
         echo "</tr>";
         echo "</thead>";
         echo "<tbody>";
-        
+
         foreach ($studentList as $student) {
           $rowClass = $student['found'] ? 'row-found' : 'row-not-found';
           $rowStyle = $student['found'] ? '' : 'background: #fff3cd;';
-          $statusBadge = $student['found'] 
-            ? "<span style='color: #28a745; font-weight: bold;'>✓ Found</span>" 
+          $statusBadge = $student['found']
+            ? "<span style='color: #28a745; font-weight: bold;'>✓ Found</span>"
             : "<span style='color: #dc3545; font-weight: bold;'>✗ Not Found</span>";
-          
+
           echo "<tr class='{$rowClass}' style='{$rowStyle} border-bottom: 1px solid #eee;'>";
           echo "<td style='padding: 8px;'>{$student['row']}</td>";
           echo "<td style='padding: 8px;'>" . htmlspecialchars($student['name']) . "</td>";
@@ -1005,11 +1107,11 @@ Route::get('fees-data-import-validate', function (Request $request) {
           echo "<td style='padding: 8px; text-align: right;'>" . htmlspecialchars($student['current_balance']) . "</td>";
           echo "</tr>";
         }
-        
+
         echo "</tbody>";
         echo "</table>";
         echo "</div>";
-        
+
         // JavaScript for filtering
         echo "<script>
         function filterRows(filter) {
@@ -1386,7 +1488,7 @@ Route::get('fees-data-import-duplicate', function (Request $request) {
   try {
     // Create a duplicate with reset status
     $duplicate = $import->replicate();
-    
+
     // Reset fields that should not be copied
     $duplicate->status = 'Pending';
     $duplicate->batch_identifier = null; // Will be auto-generated
@@ -1405,13 +1507,13 @@ Route::get('fees-data-import-duplicate', function (Request $request) {
     $duplicate->is_locked = false;
     $duplicate->locked_by = null;
     $duplicate->locked_at = null;
-    
+
     // Update metadata
     $duplicate->created_by_id = $u->id;
     $duplicate->title = $import->title . ' (Copy)';
     $duplicate->created_at = now();
     $duplicate->updated_at = now();
-    
+
     // Keep the same file path (don't duplicate the file)
     // Keep the same configuration settings:
     // - identify_by
@@ -1422,12 +1524,11 @@ Route::get('fees-data-import-duplicate', function (Request $request) {
     // - cater_for_balance
     // - term_id
     // - enterprise_id
-    
+
     $duplicate->save();
 
     admin_success('Success', 'Import duplicated successfully! You can now modify settings and process this import.');
     return redirect('fees-data-imports/' . $duplicate->id . '/edit');
-
   } catch (\Exception $e) {
     Log::error('Failed to duplicate fees import', [
       'import_id' => $import->id,

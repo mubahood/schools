@@ -46,6 +46,25 @@ class StudentsController extends AdminController
      */
     protected $title = 'Students';
 
+    //title
+    public function title()
+    {
+        $segments = request()->segments();
+        if (in_array('students', $segments)) {
+            return 'Active Students';
+        } else 
+        if (in_array('pending-students', $segments)) {
+            return 'Pending Students';
+        } else 
+        if (in_array('not-active-students', $segments)) {
+            return 'Not Active Students';
+        } else 
+        if (in_array('school-pay-issues', $segments)) {
+            return 'Students with School Pay Issues';
+        }
+        return $this->title;
+    }
+
     /**
      * Make a grid builder.
      *
@@ -79,6 +98,8 @@ class StudentsController extends AdminController
             $status = 2;
         } else if (in_array('not-active-students', $segments)) {
             $status = 0;
+        } else if (in_array('school-pay-issues', $segments)) {
+            $status = 1;
         }
         $u = Admin::user();
         $ent = $u->ent;
@@ -342,11 +363,25 @@ class StudentsController extends AdminController
             ->sortable()
             ->hide();
 
-        $grid->model()->where([
+        $conds = [
             'enterprise_id' => Admin::user()->enterprise_id,
             'user_type' => 'student',
             'status' => $status
-        ]);
+        ];
+
+        //if school-pay-issues
+        if (in_array('school-pay-issues', $segments)) {
+            $conds['masters_university_year_graduated'] = 'ISSUE';
+            $conds['enterprise_id'] = Admin::user()->enterprise_id;
+
+            //on top of grid, add button tp process issues and redirets to process-school-issues
+            $grid->tools(function ($tools) {
+                $tools->append('<a target="_blank" href="' . url('process-school-issues?enterprise_id=' . Admin::user()->enterprise_id) . '" class="btn btn-sm btn-danger" style="margin-left: 10px;">
+                <i class="fa fa-cog"></i>&nbsp; Process School Pay Issues</a>');
+            });
+        }
+
+        $grid->model()->where($conds);
 
 
         /*  if (Admin::user()->isRole('dos')) {
@@ -396,13 +431,15 @@ class StudentsController extends AdminController
                 })->sortable()
                 ->hide();
         } else {
-            $grid->column('stream_id', __('Stream'))
-                ->display(function () {
-                    if ($this->stream == null) {
-                        return 'No Stream';
-                    }
-                    return $this->stream->name;
-                })->sortable();
+            if (!in_array('school-pay-issues', $segments)) {
+                $grid->column('stream_id', __('Stream'))
+                    ->display(function () {
+                        if ($this->stream == null) {
+                            return 'No Stream';
+                        }
+                        return $this->stream->name;
+                    })->sortable();
+            }
         }
 
 
@@ -429,44 +466,68 @@ class StudentsController extends AdminController
 
 
 
-        $grid->column('sex', __('Gender'))
-            ->sortable()
-            ->filter(['Male' => 'Male', 'Female' => 'Female'])
-            ->editable('select', ['Male' => 'Male', 'Female' => 'Female']);
+        if (!in_array('school-pay-issues', $segments)) {
+            $grid->column('sex', __('Gender'))
+                ->sortable()
+                ->filter(['Male' => 'Male', 'Female' => 'Female'])
+                ->editable('select', ['Male' => 'Male', 'Female' => 'Female']);
+        }
 
-        if ($isUniversity) {
-            $grid->column('emergency_person_name', __('Guardian'))
-                ->hide()
+        if (!in_array('school-pay-issues', $segments)) {
+            if ($isUniversity) {
+                $grid->column('emergency_person_name', __('Guardian'))
+                    ->hide()
+                    ->sortable()
+                    ->editable();
+                $grid->column('emergency_person_phone', __('Guardian Phone'))->sortable()
+                    ->editable()->filter('like')
+                    ->hide();
+                //is_enrolled
+                $grid->column('is_enrolled', __('Enrolled'))
+                    ->filter([
+                        'Yes' => 'Enrolled',
+                        'No' => 'Not enrolled',
+                    ])
+                    ->sortable()
+                    ->display(function ($value) {
+                        $url = null;
+                        if ($value != 'Yes') {
+                            $url = '<a target="_blank" href="' . admin_url('student-has-semeters/create?student_id=' . $this->getKey() . '') . '" title="Enroll Now"><i class="fa fa-edit"></i>  Enroll Now</a>';
+                        }
+                        if ($value == 'Yes') {
+                            return '<span class="badge bg-success">Enrolled</span> <br> ';
+                        } else {
+                            return '<span class="badge bg-danger">Not enrolled</span> <br> ' . $url . '';
+                        }
+                    });
+            } else {
+                $grid->column('emergency_person_name', __('Guardian'))
+                    ->sortable()
+                    ->editable()
+                    ->filter('like');
+                $grid->column('emergency_person_phone', __('Guardian Phone'))->sortable()
+                    ->editable()
+                    ->filter('like');
+            }
+        } {
+
+            //masters_university_year_graduated
+            $grid->column('masters_university_year_graduated', __('School Pay Issues'))
                 ->sortable()
-                ->editable();
-            $grid->column('emergency_person_phone', __('Guardian Phone'))->sortable()
-                ->editable()->filter('like')
-                ->hide();
-            //is_enrolled
-            $grid->column('is_enrolled', __('Enrolled'))
                 ->filter([
-                    'Yes' => 'Enrolled',
-                    'No' => 'Not enrolled',
+                    'ISSUE' => 'Has Issues',
                 ])
+                ->using([
+                    'ISSUE' => 'Has Issues',
+                ])
+                ->width(150)
+                ->label([
+                    'ISSUE' => 'danger',
+                ]);
+            //phd_university_name
+            $grid->column('phd_university_name', __('Issues Details'))
                 ->sortable()
-                ->display(function ($value) {
-                    $url = null;
-                    if ($value != 'Yes') {
-                        $url = '<a target="_blank" href="' . admin_url('student-has-semeters/create?student_id=' . $this->getKey() . '') . '" title="Enroll Now"><i class="fa fa-edit"></i>  Enroll Now</a>';
-                    }
-                    if ($value == 'Yes') {
-                        return '<span class="badge bg-success">Enrolled</span> <br> ';
-                    } else {
-                        return '<span class="badge bg-danger">Not enrolled</span> <br> ' . $url . '';
-                    }
-                });
-        } else {
-            $grid->column('emergency_person_name', __('Guardian'))
-                ->sortable()
-                ->editable()
-                ->filter('like');
-            $grid->column('emergency_person_phone', __('Guardian Phone'))->sortable()
-                ->editable()
+                ->label('danger')
                 ->filter('like');
         }
 
@@ -485,21 +546,33 @@ class StudentsController extends AdminController
         $grid->column('home_address', __('Home address'))->hide();
 
         if ($ent->type != 'University') {
-            $grid->column('lin', __('LIN'))->sortable()->editable()
+            if (!in_array('school-pay-issues', $segments)) {
+                $grid->column('lin', __('LIN'))->sortable()->editable()
+                    ->filter('like');
+            }
+        } else {
+            if (!in_array('school-pay-issues', $segments)) {
+                $grid->column('lin', __('LIN'))->sortable()->editable()
+                    ->filter('like')->hide();
+                //has_account_info
+                $grid->column('has_account_info', ('Has ShoolPay'))
+                    ->filter([
+                        'Yes' => 'Yes',
+                        'No' => 'No',
+                    ])
+                    ->sortable();
+            }
+        }
+
+        //if school-pay-issues make if editable
+        if (!in_array('school-pay-issues', $segments)) {
+            $grid->column('school_pay_payment_code', ('SchoolPay code'))->sortable()
                 ->filter('like');
         } else {
-            $grid->column('lin', __('LIN'))->sortable()->editable()
-                ->filter('like')->hide();
-            //has_account_info
-            $grid->column('has_account_info', ('Has ShoolPay'))
-                ->filter([
-                    'Yes' => 'Yes',
-                    'No' => 'No',
-                ])
-                ->sortable();
+            $grid->column('school_pay_payment_code', ('SchoolPay code'))->sortable()
+                ->filter('like')
+                ->editable();
         }
-        $grid->column('school_pay_payment_code', ('SchoolPay code'))->sortable()
-            ->filter('like');
 
         $grid->column('parent_id', __('Parent'))
             ->display(function ($x) {
@@ -529,12 +602,13 @@ class StudentsController extends AdminController
             })
             ->sortable()
             ->hide();
-        $grid->column('documents', __('Print Documents'))
-            ->display(function () {
-                $admission_letter = url('print-admission-letter?id=' . $this->id);
-                return '<a title="Print admission letter" href="' . $admission_letter . '" target="_blank">Admission letter</a>';
-            });
-
+        if (!in_array('school-pay-issues', $segments)) {
+            $grid->column('documents', __('Print Documents'))
+                ->display(function () {
+                    $admission_letter = url('print-admission-letter?id=' . $this->id);
+                    return '<a title="Print admission letter" href="' . $admission_letter . '" target="_blank">Admission letter</a>';
+                });
+        }
 
 
 
@@ -621,15 +695,15 @@ class StudentsController extends AdminController
             COUNT(*) as total_sessions
         ')->first();
 
-        $overall_rate = $overall_stats->total_sessions > 0 
-            ? ($overall_stats->total_present / $overall_stats->total_sessions) * 100 
+        $overall_rate = $overall_stats->total_sessions > 0
+            ? ($overall_stats->total_present / $overall_stats->total_sessions) * 100
             : 0;
 
         // Statistics by type
         $type_stats = Participant::where('participants.enterprise_id', $enterprise_id)
             ->where('participants.administrator_id', $student_id)
             ->whereBetween(DB::raw('DATE(participants.created_at)'), [$start_date, $end_date])
-            ->when($term_id, function($q) use ($term_id) {
+            ->when($term_id, function ($q) use ($term_id) {
                 return $q->where('participants.term_id', $term_id);
             })
             ->selectRaw('
@@ -650,11 +724,11 @@ class StudentsController extends AdminController
             'ACTIVITY_ATTENDANCE' => 'Activities',
         ];
 
-        $by_type = $type_stats->map(function($item) use ($type_names) {
-            $rate = $item->total_records > 0 
-                ? ($item->present_count / $item->total_records) * 100 
+        $by_type = $type_stats->map(function ($item) use ($type_names) {
+            $rate = $item->total_records > 0
+                ? ($item->present_count / $item->total_records) * 100
                 : 0;
-            
+
             return [
                 'type' => $item->type,
                 'type_name' => $type_names[$item->type] ?? $item->type,
@@ -875,8 +949,8 @@ class StudentsController extends AdminController
                     'enterprise_id' => $u->enterprise_id,
                     // 'academic_year_id' => $active_academic_year->id,
                 ])
-                ->orderBy('id', 'desc')
-                ->get() as $class
+                    ->orderBy('id', 'desc')
+                    ->get() as $class
             ) {
                 if (((int)($class->academic_year->is_active)) != 1) {
                     // continue; 

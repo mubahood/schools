@@ -18,6 +18,7 @@ Route::group([
     $router->resource('book-authors', BookAuthorController::class);
     $router->resource('books', BookController::class);
     $router->resource('students', StudentsController::class);
+    $router->resource('school-pay-issues', StudentsController::class);
     $router->resource('book-borrows', BookBorrowController::class);
     $router->resource('academic-years', AcademicYearController::class);
     $router->resource('terms', TermController::class);
