@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Enterprise;
 use App\Models\StudentApplication;
 use App\Models\User;
+use App\Models\Utils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
@@ -117,15 +118,80 @@ class StudentApplicationController extends Controller
     {
         $application = $request->attributes->get('application');
         
-        // Get all enterprises that accept applications (relaxed - no deadline restrictions)
-        $schools = Enterprise::where([])
-                            ->orderBy('name', 'asc')
-                            ->get();
+        // Determine subdomain from current URL
+        $subdomain = $this->getSubdomainFromRequest($request);
+        
+        // If subdomain exists, show only that school; otherwise show all schools
+        if ($subdomain) {
+            // Find the specific enterprise by subdomain
+            $schools = Enterprise::where('subdomain', $subdomain)
+                                ->orderBy('name', 'asc')
+                                ->get();
+            
+            // If no school found for subdomain, fall back to all schools
+            if ($schools->isEmpty()) {
+                $schools = Enterprise::where([])
+                                    ->orderBy('name', 'asc')
+                                    ->get();
+            }
+        } else {
+            // No subdomain, show all schools
+            $schools = Enterprise::where([])
+                                ->orderBy('name', 'asc')
+                                ->get();
+        }
         
         return view('student-application.school-selection', [
             'application' => $application,
-            'schools' => $schools
+            'schools' => $schools,
+            'subdomain' => $subdomain
         ]);
+    }
+    
+    /**
+     * Extract subdomain from current request URL
+     * Returns null if no subdomain (main domain) or localhost
+     * 
+     * @param Request $request
+     * @return string|null
+     */
+    private function getSubdomainFromRequest(Request $request)
+    {
+        // Get the full host from request
+        $host = $request->getHost();
+        
+        // Handle localhost/IP addresses - no subdomain
+        if (in_array($host, ['localhost', '127.0.0.1', '::1']) || filter_var($host, FILTER_VALIDATE_IP)) {
+            return null;
+        }
+        
+        // Get the base domain from config
+        $appUrl = config('app.url');
+        $baseDomain = parse_url($appUrl, PHP_URL_HOST);
+        
+        // If host matches base domain exactly, no subdomain
+        if ($host === $baseDomain) {
+            return null;
+        }
+        
+        // Extract subdomain by removing base domain
+        if (str_ends_with($host, '.' . $baseDomain)) {
+            $subdomain = str_replace('.' . $baseDomain, '', $host);
+            
+            // Handle multi-level subdomains (e.g., dev.school1.domain.com)
+            // We want the first part only
+            $parts = explode('.', $subdomain);
+            return !empty($parts[0]) ? $parts[0] : null;
+        }
+        
+        // Fallback: treat first part of host as subdomain if host has multiple parts
+        $parts = explode('.', $host);
+        if (count($parts) >= 2) {
+            // First part is subdomain
+            return !empty($parts[0]) ? $parts[0] : null;
+        }
+        
+        return null;
     }
     
     /**
