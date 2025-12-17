@@ -170,13 +170,18 @@ class StudentApplicationController extends AdminController
         // Actions
         $grid->actions(function ($actions) {
             $actions->disableDelete();
-            // Enable edit button
-            $actions->disableEdit(false);
+            $actions->disableEdit();
+            
+            // Add prominent "View Details" button
+            $viewUrl = admin_url("student-applications/{$actions->getKey()}");
+            $actions->append("<a href='$viewUrl' class='btn btn-sm btn-info' title='View Full Details' style='margin-right: 5px;'>
+                <i class='fa fa-eye'></i> View Details
+            </a>");
             
             // Add review button for submitted/under_review applications
             if (in_array($actions->row->status, ['submitted', 'under_review'])) {
                 $reviewUrl = admin_url("student-applications/{$actions->getKey()}/review");
-                $actions->append("<a href='$reviewUrl' class='btn btn-sm btn-primary' title='Review Application'>
+                $actions->append("<a href='$reviewUrl' class='btn btn-sm btn-primary' title='Review Application' style='margin-right: 5px;'>
                     <i class='fa fa-check-circle'></i> Review
                 </a>");
             }
@@ -187,7 +192,8 @@ class StudentApplicationController extends AdminController
                     <a href='javascript:void(0);' 
                        class='btn btn-sm btn-success accept-application' 
                        data-id='{$actions->getKey()}'
-                       title='Accept Application'>
+                       title='Accept Application'
+                       style='margin-right: 3px;'>
                         <i class='fa fa-check'></i>
                     </a>
                     <a href='javascript:void(0);' 
@@ -241,130 +247,234 @@ class StudentApplicationController extends AdminController
     {
         $show = new Show(StudentApplication::findOrFail($id));
         
-        // Application Information
+        // Disable edit/delete buttons in show view
+        $show->panel()->tools(function ($tools) {
+            $tools->disableEdit();
+            $tools->disableDelete();
+        });
+        
+        // ========== APPLICATION INFORMATION ==========
         $show->panel()
-             ->title('Application Information')
+             ->title('<i class="fa fa-file-text"></i> Application Information')
              ->style('primary');
         
-        $show->field('application_number', __('Application Number'));
-        $show->field('status', __('Status'))->as(function($status) {
-            return ucwords(str_replace('_', ' ', $status));
-        })->badge();
-        $show->field('progress_percentage', __('Progress'))->progressBar();
+        $show->field('application_number', __('Application Number'))
+             ->as(function($number) {
+                 return "<span style='font-size: 18px; font-weight: bold; color: #0d6efd;'>$number</span>";
+             });
         
-        // Personal Information
+        $show->field('status', __('Status'))->as(function($status) {
+            $badges = [
+                'draft' => ['secondary', 'Draft', 'clock'],
+                'submitted' => ['primary', 'Submitted', 'paper-plane'],
+                'under_review' => ['info', 'Under Review', 'search'],
+                'accepted' => ['success', 'Accepted', 'check-circle'],
+                'rejected' => ['danger', 'Rejected', 'times-circle'],
+                'cancelled' => ['warning', 'Cancelled', 'ban']
+            ];
+            $badge = $badges[$status] ?? ['secondary', ucwords(str_replace('_', ' ', $status)), 'circle'];
+            return "<span class='badge badge-{$badge[0]}' style='font-size: 14px; padding: 8px 12px;'>
+                        <i class='fa fa-{$badge[2]}'></i> {$badge[1]}
+                    </span>";
+        });
+        
+        $show->field('progress_percentage', __('Completion Progress'))
+             ->as(function($progress) {
+                 $color = $progress < 30 ? 'danger' : ($progress < 70 ? 'warning' : 'success');
+                 return "<div class='progress' style='height: 25px;'>
+                     <div class='progress-bar bg-$color progress-bar-striped' role='progressbar' 
+                          style='width: {$progress}%' 
+                          aria-valuenow='$progress' aria-valuemin='0' aria-valuemax='100'>
+                         <strong>{$progress}%</strong>
+                     </div>
+                 </div>";
+             });
+        
+        $show->field('selectedEnterprise.name', __('Selected School'))
+             ->as(function($name) {
+                 return $name ? "<strong style='color: #198754;'>$name</strong>" : '<em class="text-muted">Not selected</em>';
+             });
+        
+        $show->field('applying_for_class', __('Applying For Class'))
+             ->as(function($class) {
+                 return $class ? "<span class='badge badge-info' style='font-size: 13px; padding: 6px 10px;'>$class</span>" : '-';
+             });
+        
+        // ========== PERSONAL INFORMATION ==========
         $show->panel()
-             ->title('Personal Information')
+             ->title('<i class="fa fa-user"></i> Personal Information')
              ->style('info');
         
-        $show->field('first_name', __('First Name'));
-        $show->field('middle_name', __('Middle Name'));
-        $show->field('last_name', __('Last Name'));
-        $show->field('date_of_birth', __('Date of Birth'));
-        $show->field('gender', __('Gender'));
+        $show->field('full_name', __('Full Name'))
+             ->as(function() {
+                 $fullName = trim($this->first_name . ' ' . ($this->middle_name ?? '') . ' ' . $this->last_name);
+                 return "<strong style='font-size: 16px;'>$fullName</strong>";
+             });
+        
+        $show->field('date_of_birth', __('Date of Birth'))
+             ->as(function($dob) {
+                 if (!$dob) return '-';
+                 $age = Carbon::parse($dob)->age;
+                 return Carbon::parse($dob)->format('F d, Y') . " <span class='badge badge-secondary'>Age: $age years</span>";
+             });
+        
+        $show->field('gender', __('Gender'))
+             ->as(function($gender) {
+                 if (!$gender) return '-';
+                 $icon = strtolower($gender) === 'male' ? 'male' : 'female';
+                 $color = strtolower($gender) === 'male' ? '#0d6efd' : '#d63384';
+                 return "<i class='fa fa-$icon' style='color: $color; font-size: 18px;'></i> <strong>" . ucfirst(strtolower($gender)) . "</strong>";
+             });
+        
         $show->field('nationality', __('Nationality'));
         $show->field('religion', __('Religion'));
         
-        // Contact Information
+        // ========== CONTACT INFORMATION ==========
         $show->panel()
-             ->title('Contact Information')
+             ->title('<i class="fa fa-phone"></i> Contact Information')
              ->style('success');
         
-        $show->field('email', __('Email'));
-        $show->field('phone_number', __('Phone Number'));
-        $show->field('phone_number_2', __('Alternative Phone'));
-        $show->field('home_address', __('Home Address'));
+        $show->field('email', __('Email Address'))
+             ->as(function($email) {
+                 return $email ? "<a href='mailto:$email' style='font-size: 14px;'><i class='fa fa-envelope'></i> $email</a>" : '-';
+             });
+        
+        $show->field('phone_number', __('Primary Phone'))
+             ->as(function($phone) {
+                 return $phone ? "<a href='tel:$phone'><i class='fa fa-phone'></i> $phone</a>" : '-';
+             });
+        
+        $show->field('phone_number_2', __('Alternative Phone'))
+             ->as(function($phone) {
+                 return $phone ? "<a href='tel:$phone'><i class='fa fa-phone'></i> $phone</a>" : '-';
+             });
+        
+        $show->field('home_address', __('Home Address'))
+             ->as(function($address) {
+                 return $address ? nl2br(htmlspecialchars($address)) : '-';
+             });
+        
         $show->field('district', __('District'));
         $show->field('city', __('City'));
         $show->field('village', __('Village'));
         
-        // Parent/Guardian Information
+        // ========== PARENT/GUARDIAN INFORMATION ==========
         $show->panel()
-             ->title('Parent/Guardian Information')
+             ->title('<i class="fa fa-users"></i> Parent/Guardian Information')
              ->style('warning');
         
-        $show->field('parent_name', __('Parent Name'));
-        $show->field('parent_relationship', __('Relationship'));
-        $show->field('parent_phone', __('Parent Phone'));
-        $show->field('parent_email', __('Parent Email'));
-        $show->field('parent_address', __('Parent Address'));
+        $show->field('parent_name', __('Parent/Guardian Name'))
+             ->as(function($name) {
+                 return $name ? "<strong>$name</strong>" : '-';
+             });
         
-        // Previous School Information
+        $show->field('parent_relationship', __('Relationship'));
+        
+        $show->field('parent_phone', __('Parent Phone'))
+             ->as(function($phone) {
+                 return $phone ? "<a href='tel:$phone'><i class='fa fa-phone'></i> $phone</a>" : '-';
+             });
+        
+        $show->field('parent_email', __('Parent Email'))
+             ->as(function($email) {
+                 return $email ? "<a href='mailto:$email'><i class='fa fa-envelope'></i> $email</a>" : '-';
+             });
+        
+        $show->field('parent_address', __('Parent Address'))
+             ->as(function($address) {
+                 return $address ? nl2br(htmlspecialchars($address)) : '-';
+             });
+        
+        // ========== PREVIOUS EDUCATION ==========
         $show->panel()
-             ->title('Previous School Information')
+             ->title('<i class="fa fa-graduation-cap"></i> Previous Education')
              ->style('secondary');
         
         $show->field('previous_school', __('Previous School'));
         $show->field('previous_class', __('Previous Class'));
         $show->field('year_completed', __('Year Completed'));
         
-        // Application Details
+        // ========== ADDITIONAL INFORMATION ==========
         $show->panel()
-             ->title('Application Details')
-             ->style('primary');
+             ->title('<i class="fa fa-info-circle"></i> Additional Information')
+             ->style('default');
         
-        $show->field('applying_for_class', __('Applying For Class'));
-        $show->field('selectedEnterprise.name', __('Selected School'));
-        $show->field('special_needs', __('Special Needs/Requirements'));
+        $show->field('special_needs', __('Special Needs/Requirements'))
+             ->as(function($needs) {
+                 return $needs ? nl2br(htmlspecialchars($needs)) : '<em class="text-muted">None specified</em>';
+             });
         
         $show->divider();
         
-        // Attachments Section
+        // ========== SUPPORTING DOCUMENTS ==========
         $show->field('attachments', __('Supporting Documents'))
              ->as(function($attachments) {
                  if (empty($attachments) || !is_array($attachments)) {
-                     return '<p class="text-muted">No documents attached</p>';
+                     return '<div class="alert alert-info">
+                         <i class="fa fa-info-circle"></i> No documents have been attached to this application.
+                     </div>';
                  }
                  
-                 $html = '<div class="table-responsive">
-                     <table class="table table-bordered table-hover">
-                         <thead class="bg-light">
+                 $html = '<div class="table-responsive" style="margin-top: 10px;">
+                     <table class="table table-bordered table-hover table-striped">
+                         <thead style="background-color: #f8f9fa;">
                              <tr>
-                                 <th width="40">#</th>
-                                 <th>Document Name</th>
-                                 <th width="100">Size</th>
-                                 <th width="150">Uploaded Date</th>
-                                 <th width="100">Actions</th>
+                                 <th width="40" class="text-center">#</th>
+                                 <th><i class="fa fa-file"></i> Document Name</th>
+                                 <th width="100"><i class="fa fa-hdd-o"></i> Size</th>
+                                 <th width="150"><i class="fa fa-calendar"></i> Uploaded</th>
+                                 <th width="120" class="text-center"><i class="fa fa-cog"></i> Actions</th>
                              </tr>
                          </thead>
                          <tbody>';
                  
                  foreach ($attachments as $index => $doc) {
                      $num = $index + 1;
-                     $name = htmlspecialchars($doc['name'] ?? 'Unknown');
+                     $name = htmlspecialchars($doc['name'] ?? 'Unknown Document');
                      $size = number_format(($doc['size'] ?? 0) / 1024, 2) . ' KB';
                      $date = isset($doc['uploaded_at']) ? Carbon::parse($doc['uploaded_at'])->format('M d, Y H:i') : '-';
                      $path = $doc['path'] ?? '';
                      $url = $path ? asset('storage/' . $path) : '#';
                      
-                     // Get file icon based on type
+                     // Get file icon and color based on type
                      $type = $doc['type'] ?? '';
-                     $icon = 'file';
+                     $icon = 'file-o';
                      $iconColor = '#6c757d';
+                     $badge = 'secondary';
                      
                      if (str_contains($type, 'pdf')) {
                          $icon = 'file-pdf-o';
                          $iconColor = '#dc3545';
+                         $badge = 'danger';
                      } elseif (str_contains($type, 'image')) {
                          $icon = 'file-image-o';
                          $iconColor = '#198754';
+                         $badge = 'success';
                      } elseif (str_contains($type, 'word') || str_contains($type, 'doc')) {
                          $icon = 'file-word-o';
                          $iconColor = '#0d6efd';
+                         $badge = 'primary';
+                     } elseif (str_contains($type, 'excel') || str_contains($type, 'sheet')) {
+                         $icon = 'file-excel-o';
+                         $iconColor = '#198754';
+                         $badge = 'success';
                      }
                      
                      $html .= "
                          <tr>
-                             <td class='text-center'>$num</td>
+                             <td class='text-center'><strong>$num</strong></td>
                              <td>
-                                 <i class='fa fa-$icon' style='color: $iconColor;'></i> 
-                                 $name
+                                 <i class='fa fa-$icon' style='color: $iconColor; font-size: 16px;'></i> 
+                                 <strong>$name</strong>
                              </td>
-                             <td>$size</td>
-                             <td>$date</td>
-                             <td>
-                                 <a href='$url' target='_blank' class='btn btn-sm btn-primary'>
-                                     <i class='fa fa-download'></i> View
+                             <td><span class='badge badge-$badge'>$size</span></td>
+                             <td><small><i class='fa fa-clock-o'></i> $date</small></td>
+                             <td class='text-center'>
+                                 <a href='$url' target='_blank' class='btn btn-sm btn-primary' title='View/Download'>
+                                     <i class='fa fa-eye'></i> View
+                                 </a>
+                                 <a href='$url' download class='btn btn-sm btn-success' title='Download'>
+                                     <i class='fa fa-download'></i>
                                  </a>
                              </td>
                          </tr>
@@ -372,58 +482,70 @@ class StudentApplicationController extends AdminController
                  }
                  
                  $html .= '</tbody></table></div>';
+                 $html .= '<p class="text-muted" style="margin-top: 10px;"><i class="fa fa-paperclip"></i> Total Documents: <strong>' . count($attachments) . '</strong></p>';
                  return $html;
              });
         
         $show->divider();
         
-        // Timestamps
+        // ========== APPLICATION TIMELINE ==========
         $show->panel()
-             ->title('Application Timeline')
+             ->title('<i class="fa fa-clock-o"></i> Application Timeline')
              ->style('default');
         
-        $show->field('started_at', __('Started At'))
+        $show->field('created_at', __('Application Started'))
              ->as(function($date) {
-                 return $date ? Carbon::parse($date)->format('F d, Y H:i:s') : '-';
+                 return "<i class='fa fa-calendar'></i> " . Carbon::parse($date)->format('F d, Y') . 
+                        " <small class='text-muted'>at " . Carbon::parse($date)->format('h:i A') . "</small>";
              });
         
-        $show->field('submitted_at', __('Submitted At'))
+        $show->field('submitted_at', __('Submitted'))
              ->as(function($date) {
-                 return $date ? Carbon::parse($date)->format('F d, Y H:i:s') : '-';
+                 if (!$date) return '<em class="text-muted">Not yet submitted</em>';
+                 return "<i class='fa fa-paper-plane'></i> " . Carbon::parse($date)->format('F d, Y') . 
+                        " <small class='text-muted'>at " . Carbon::parse($date)->format('h:i A') . "</small>";
              });
         
-        $show->field('reviewed_at', __('Reviewed At'))
+        $show->field('reviewed_at', __('Reviewed'))
              ->as(function($date) {
-                 return $date ? Carbon::parse($date)->format('F d, Y H:i:s') : '-';
+                 if (!$date) return '<em class="text-muted">Not yet reviewed</em>';
+                 return "<i class='fa fa-search'></i> " . Carbon::parse($date)->format('F d, Y') . 
+                        " <small class='text-muted'>at " . Carbon::parse($date)->format('h:i A') . "</small>";
              });
         
-        $show->field('completed_at', __('Completed At'))
+        $show->field('completed_at', __('Completed'))
              ->as(function($date) {
-                 return $date ? Carbon::parse($date)->format('F d, Y H:i:s') : '-';
+                 if (!$date) return '<em class="text-muted">Not yet completed</em>';
+                 return "<i class='fa fa-check-circle'></i> " . Carbon::parse($date)->format('F d, Y') . 
+                        " <small class='text-muted'>at " . Carbon::parse($date)->format('h:i A') . "</small>";
              });
         
-        $show->field('created_at', __('Record Created'))
-             ->as(function($date) {
-                 return Carbon::parse($date)->format('F d, Y H:i:s');
-             });
-        
-        $show->field('updated_at', __('Last Updated'))
-             ->as(function($date) {
-                 return Carbon::parse($date)->format('F d, Y H:i:s');
-             });
-        
-        // Admin Review Section (if reviewed)
+        // ========== ADMIN REVIEW SECTION ==========
         $application = StudentApplication::find($id);
-        if ($application && $application->reviewed_by) {
+        if ($application && ($application->reviewed_by || $application->admin_notes || $application->rejection_reason)) {
             $show->divider();
             
             $show->panel()
-                 ->title('Administrative Review')
+                 ->title('<i class="fa fa-user-secret"></i> Administrative Review')
                  ->style('info');
             
-            $show->field('reviewer.name', __('Reviewed By'));
-            $show->field('admin_notes', __('Admin Notes'));
-            $show->field('rejection_reason', __('Rejection Reason'));
+            if ($application->reviewed_by) {
+                $show->field('reviewer.name', __('Reviewed By'))
+                     ->as(function($name) {
+                         return $name ? "<strong style='color: #0d6efd;'>$name</strong>" : '-';
+                     });
+            }
+            
+            $show->field('admin_notes', __('Admin Notes'))
+                 ->as(function($notes) {
+                     return $notes ? nl2br(htmlspecialchars($notes)) : '<em class="text-muted">No notes</em>';
+                 });
+            
+            $show->field('rejection_reason', __('Rejection Reason'))
+                 ->as(function($reason) {
+                     if (!$reason) return '<em class="text-muted">N/A</em>';
+                     return '<div class="alert alert-danger"><i class="fa fa-exclamation-triangle"></i> ' . nl2br(htmlspecialchars($reason)) . '</div>';
+                 });
         }
         
         return $show;
@@ -684,7 +806,7 @@ SCRIPT;
 
     /**
      * Make a form builder.
-     * Note: Allows editing of application details and status
+     * Note: Only allows editing status and admin notes
      *
      * @return Form
      */
@@ -692,158 +814,140 @@ SCRIPT;
     {
         $form = new Form(new StudentApplication());
         
-        // Disable form operations
+        // Configure form tools
         $form->tools(function (Form\Tools $tools) {
             $tools->disableDelete();
             $tools->disableView();
         });
         
-        // Filter by enterprise
+        $form->footer(function ($footer) {
+            $footer->disableReset();
+            $footer->disableViewCheck();
+            $footer->disableEditingCheck();
+            $footer->disableCreatingCheck();
+        });
+        
+        // Applications come from public portal - disable creation
         if ($form->isCreating()) {
-            $form->hidden('selected_enterprise_id')->default(Admin::user()->enterprise_id);
+            return redirect()
+                ->back()
+                ->with('error', 'Student applications cannot be created from admin panel. They must be submitted through the public application portal.');
         }
         
-        // Application Information
-        $form->divider('Application Information');
+        // ========== APPLICATION OVERVIEW (Display Only) ==========
+        $form->html('<div class="alert alert-info">
+            <i class="fa fa-info-circle"></i> <strong>Note:</strong> Most application fields are read-only and can only be edited by the applicant. 
+            You can update the status and add administrative notes below.
+        </div>');
         
-        $form->display('application_number', __('Application Number'));
+        $form->divider('<i class="fa fa-file-text"></i> Application Overview');
+        
+        $form->display('application_number', __('Application Number'))
+             ->with(function ($value) {
+                 return "<strong style='color: #0d6efd; font-size: 16px;'>$value</strong>";
+             });
+        
+        $form->display('full_name', __('Applicant Name'))
+             ->with(function () {
+                 $fullName = trim($this->first_name . ' ' . ($this->middle_name ?? '') . ' ' . $this->last_name);
+                 return "<strong>$fullName</strong>";
+             });
+        
+        $form->display('email', __('Email'))
+             ->with(function ($value) {
+                 return $value ? "<a href='mailto:$value'>$value</a>" : '-';
+             });
+        
+        $form->display('phone_number', __('Phone'))
+             ->with(function ($value) {
+                 return $value ? "<a href='tel:$value'>$value</a>" : '-';
+             });
+        
+        $form->display('applying_for_class', __('Applying For Class'))
+             ->with(function ($value) {
+                 return $value ? "<span class='badge badge-info' style='font-size: 13px; padding: 6px 12px;'>$value</span>" : '-';
+             });
+        
+        $form->display('progress_percentage', __('Application Progress'))
+             ->with(function ($value) {
+                 $color = $value < 30 ? 'danger' : ($value < 70 ? 'warning' : 'success');
+                 return "<div class='progress' style='height: 25px;'>
+                     <div class='progress-bar bg-$color' role='progressbar' style='width: {$value}%'>
+                         <strong>{$value}%</strong>
+                     </div>
+                 </div>";
+             });
+        
+        // ========== STATUS MANAGEMENT (Editable) ==========
+        $form->divider('<i class="fa fa-cog"></i> Status Management');
         
         $form->select('status', __('Application Status'))
              ->options([
-                 'draft' => 'Draft',
-                 'submitted' => 'Submitted',
-                 'under_review' => 'Under Review',
-                 'accepted' => 'Accepted',
-                 'rejected' => 'Rejected',
-                 'cancelled' => 'Cancelled'
+                 'draft' => '📝 Draft',
+                 'submitted' => '📤 Submitted',
+                 'under_review' => '🔍 Under Review',
+                 'accepted' => '✅ Accepted',
+                 'rejected' => '❌ Rejected',
+                 'cancelled' => '🚫 Cancelled'
              ])
              ->required()
-             ->rules('required')
-             ->help('Change application status');
+             ->rules('required|in:draft,submitted,under_review,accepted,rejected,cancelled')
+             ->help('Update the application status. Changing to "Accepted" will create a student account.')
+             ->default('submitted');
         
-        // Personal Information
-        $form->divider('Personal Information');
+        // ========== ADMINISTRATIVE NOTES (Editable) ==========
+        $form->divider('<i class="fa fa-sticky-note"></i> Administrative Notes');
         
-        $form->text('first_name', __('First Name'))
-             ->required()
-             ->rules('required|string|max:100');
-        
-        $form->text('middle_name', __('Middle Name'))
-             ->rules('nullable|string|max:100');
-        
-        $form->text('last_name', __('Last Name'))
-             ->required()
-             ->rules('required|string|max:100');
-        
-        $form->date('date_of_birth', __('Date of Birth'))
-             ->format('YYYY-MM-DD')
-             ->rules('required|date');
-        
-        $form->select('gender', __('Gender'))
-             ->options([
-                 'male' => 'Male',
-                 'female' => 'Female'
-             ])
-             ->required()
-             ->rules('required|in:male,female');
-        
-        $form->text('nationality', __('Nationality'))
-             ->rules('nullable|string|max:100');
-        
-        $form->text('religion', __('Religion'))
-             ->rules('nullable|string|max:100');
-        
-        // Contact Information
-        $form->divider('Contact Information');
-        
-        $form->email('email', __('Email Address'))
-             ->rules('required|email|max:255');
-        
-        $form->text('phone_number', __('Phone Number'))
-             ->rules('required|string|max:20');
-        
-        $form->text('phone_number_2', __('Alternative Phone'))
-             ->rules('nullable|string|max:20');
-        
-        $form->textarea('home_address', __('Home Address'))
-             ->rows(3)
-             ->rules('nullable|string|max:500');
-        
-        $form->text('district', __('District'))
-             ->rules('nullable|string|max:100');
-        
-        $form->text('city', __('City'))
-             ->rules('nullable|string|max:100');
-        
-        $form->text('village', __('Village'))
-             ->rules('nullable|string|max:100');
-        
-        // Parent/Guardian Information
-        $form->divider('Parent/Guardian Information');
-        
-        $form->text('parent_name', __('Parent/Guardian Name'))
-             ->rules('nullable|string|max:200');
-        
-        $form->text('parent_relationship', __('Relationship'))
-             ->rules('nullable|string|max:50');
-        
-        $form->text('parent_phone', __('Parent Phone'))
-             ->rules('nullable|string|max:20');
-        
-        $form->email('parent_email', __('Parent Email'))
-             ->rules('nullable|email|max:255');
-        
-        $form->textarea('parent_address', __('Parent Address'))
-             ->rows(3)
-             ->rules('nullable|string|max:500');
-        
-        // Previous Education
-        $form->divider('Previous Education');
-        
-        $form->text('previous_school', __('Previous School'))
-             ->rules('nullable|string|max:200');
-        
-        $form->text('previous_class', __('Previous Class'))
-             ->rules('nullable|string|max:50');
-        
-        $form->text('year_completed', __('Year Completed'))
-             ->rules('nullable|string|max:4');
-        
-        // Application Details
-        $form->divider('Application Details');
-        
-        $form->text('applying_for_class', __('Applying For Class'))
-             ->required()
-             ->rules('required|string|max:100');
-        
-        $form->textarea('special_needs', __('Special Needs/Requirements'))
-             ->rows(3)
-             ->rules('nullable|string|max:1000');
-        
-        // Admin Review
-        $form->divider('Administrative Review');
-        
-        $form->textarea('admin_notes', __('Admin Notes'))
-             ->rows(4)
+        $form->textarea('admin_notes', __('Internal Notes'))
+             ->rows(5)
              ->rules('nullable|string|max:2000')
-             ->help('Internal notes about this application');
+             ->help('Add internal notes about this application. These notes are not visible to the applicant.')
+             ->placeholder('Enter any internal notes, observations, or comments about this application...');
         
         $form->textarea('rejection_reason', __('Rejection Reason'))
              ->rows(4)
              ->rules('nullable|string|max:1000')
-             ->help('Required when rejecting an application');
+             ->help('⚠️ Required when status is "Rejected". This message will be sent to the applicant.')
+             ->placeholder('Clearly explain why this application was rejected...');
         
-        // Timestamps (display only)
-        $form->divider('Timeline');
+        // ========== TIMELINE (Display Only) ==========
+        $form->divider('<i class="fa fa-clock-o"></i> Application Timeline');
         
-        $form->display('created_at', __('Created At'));
-        $form->display('submitted_at', __('Submitted At'));
-        $form->display('reviewed_at', __('Reviewed At'));
-        $form->display('completed_at', __('Completed At'));
+        $form->display('created_at', __('Started'))
+             ->with(function ($value) {
+                 return $value ? Carbon::parse($value)->format('F d, Y h:i A') : '-';
+             });
         
-        $form->disableCreatingCheck();
-        $form->disableViewCheck();
-        $form->disableReset();
+        $form->display('submitted_at', __('Submitted'))
+             ->with(function ($value) {
+                 return $value ? Carbon::parse($value)->format('F d, Y h:i A') : '<em class="text-muted">Not yet submitted</em>';
+             });
+        
+        $form->display('reviewed_at', __('Reviewed'))
+             ->with(function ($value) {
+                 return $value ? Carbon::parse($value)->format('F d, Y h:i A') : '<em class="text-muted">Not yet reviewed</em>';
+             });
+        
+        $form->display('updated_at', __('Last Updated'))
+             ->with(function ($value) {
+                 return Carbon::parse($value)->format('F d, Y h:i A');
+             });
+        
+        // Validation on save
+        $form->saving(function (Form $form) {
+            // If status is rejected, require rejection_reason
+            if ($form->status === 'rejected' && empty($form->rejection_reason)) {
+                return back()->withErrors(['rejection_reason' => 'Rejection reason is required when rejecting an application.']);
+            }
+            
+            // Set reviewed_at when status changes to under_review, accepted, or rejected
+            if (in_array($form->status, ['under_review', 'accepted', 'rejected'])) {
+                if (!$form->model()->reviewed_at) {
+                    $form->reviewed_at = now();
+                    $form->reviewed_by = Admin::user()->id;
+                }
+            }
+        });
         
         return $form;
     }
