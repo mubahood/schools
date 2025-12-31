@@ -433,12 +433,31 @@ class AcademicClass extends Model
                 'administrator_id' => $m->id,
             ])->get() as $key => $val
         ) {
-            if ($val != null) {
+
+            try {
+                $user_account = User::where([
+                    'id' => $m->id,
+                ])->first();
+                if ($user_account != null) {
+                    try {
+                        $user_account->update_fees();
+                    } catch (\Throwable $th) {
+                        // Log the error message
+                        throw $th;
+                        return;
+                    }
+                }
+            } catch (\Throwable $th) {
+                // Log the error message
+                throw $th;
+            }
+
+
+            //update_fees
+            /* if ($val != null) {
                 if ($val->class != null) {
                     if ($val->class->academic_class_fees != null) {
-                        foreach ($val->class->academic_class_fees as $fee) {
-                            /*  dd($fee->due_term_id);
-                            dd($active_term->id . "<==>" . $fee->due_term_id); */
+                        foreach ($val->class->academic_class_fees as $fee) { 
                             if ($fee != null) {
                                 if ($active_term->id != $fee->due_term_id) {
                                     continue;
@@ -468,7 +487,7 @@ class AcademicClass extends Model
                         }
                     }
                 }
-            }
+            } */
         }
 
 
