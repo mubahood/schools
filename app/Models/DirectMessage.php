@@ -456,8 +456,9 @@ class DirectMessage extends Model
         
         // Store original message in parent
         $parentMessage->original_message = $parentMessage->message_body;
+        $parentMessage->original_message_length = mb_strlen($parentMessage->message_body, 'UTF-8');
         $parentMessage->total_parts = $totalParts;
-        $parentMessage->part_number = null; // Parent has no part number
+        // Don't set part_number for parent - leave it null
         $parentMessage->message_body = "[Parent message split into {$totalParts} parts]";
         $parentMessage->status = 'Sent'; // Mark parent as sent
         $parentMessage->save();
@@ -496,6 +497,11 @@ class DirectMessage extends Model
             } else {
                 $failedCount++;
                 $errors[] = "Part {$partNumber}: " . $result;
+            }
+            
+            // Add small delay between API calls to avoid rate limiting
+            if ($index < count($messageParts) - 1) {
+                sleep(1); // 1 second delay between messages
             }
         }
 
@@ -540,7 +546,7 @@ class DirectMessage extends Model
         }
 
         // Prepare message and phone number for API
-        $msg = htmlspecialchars(trim($messageText));
+        $msg = trim($messageText);
         $msg = urlencode($msg);
         
         // Remove + prefix for API (phone is already standardized to +256...)
@@ -590,6 +596,15 @@ class DirectMessage extends Model
             $json = null;
             try {
                 $json = json_decode($response, true);
+                
+                // If json_decode returns null, it means the response is not valid JSON
+                if ($json === null && $response !== 'null') {
+                    $m->status = 'Failed';
+                    $responsePreview = substr($response, 0, 300);
+                    $m->error_message_message = "JSON decode failed. Response is not valid JSON: " . $responsePreview;
+                    $m->save();
+                    return $m->error_message_message;
+                }
             } catch (\Throwable $th) {
                 $m->status = 'Failed';
                 $m->error_message_message = "Error decoding JSON response: {$th->getMessage()} Response: $response";
@@ -599,7 +614,8 @@ class DirectMessage extends Model
 
             if (!is_array($json)) {
                 $m->status = 'Failed';
-                $m->error_message_message = "Unexpected API response format. Response: $response";
+                $responsePreview = substr($response, 0, 200); // Show first 200 chars
+                $m->error_message_message = "Unexpected API response format. Response: " . $responsePreview;
                 $m->save();
                 return $m->error_message_message;
             }
