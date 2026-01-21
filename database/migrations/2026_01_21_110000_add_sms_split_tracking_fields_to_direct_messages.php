@@ -33,6 +33,11 @@ class AddSmsSplitTrackingFieldsToDirectMessages extends Migration
             if (!Schema::hasColumn('direct_messages', 'original_message_length')) {
                 $table->integer('original_message_length')->nullable()->after('total_parts');
             }
+            
+            // Store original message before splitting (only in parent)
+            if (!Schema::hasColumn('direct_messages', 'original_message')) {
+                $table->text('original_message')->nullable()->after('original_message_length');
+            }
         });
     }
 
@@ -55,6 +60,9 @@ class AddSmsSplitTrackingFieldsToDirectMessages extends Migration
             }
             if (Schema::hasColumn('direct_messages', 'original_message_length')) {
                 $table->dropColumn('original_message_length');
+            }
+            if (Schema::hasColumn('direct_messages', 'original_message')) {
+                $table->dropColumn('original_message');
             }
         });
     }

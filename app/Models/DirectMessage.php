@@ -290,7 +290,7 @@ class DirectMessage extends Model
     }
 
     /**
-     * Send SMS via EUROSATGROUP InstantSMS API
+     * Send SMS via EUROSATGROUP InstantSMS API with automatic message splitting
      * @param DirectMessage $m The message model instance
      * @return string Status message ('success' or error description)
      */
@@ -342,14 +342,6 @@ class DirectMessage extends Model
             return $m->error_message_message;
         }
 
-        // Check wallet balance
-        if ($ent->wallet_balance < 50) {
-            $m->status = 'Failed';
-            $m->error_message_message = 'Insufficient funds.';
-            $m->save();
-            return $m->error_message_message;
-        }
-
         // Validate message body
         if (empty(trim($m->message_body))) {
             $m->status = 'Failed';
@@ -366,14 +358,176 @@ class DirectMessage extends Model
             return $m->error_message_message;
         }
 
-        // Check message length (150 characters max for EUROSATGROUP)
-        if (strlen(trim($m->message_body)) > 150) {
+        // Calculate message parts and check wallet balance
+        $originalMessage = trim($m->message_body);
+        $messageParts = self::splitMessage($originalMessage, 160);
+        $totalParts = count($messageParts);
+        $totalCost = $totalParts * 50;
+
+        // Check wallet balance for all parts
+        if ($ent->wallet_balance < $totalCost) {
             $m->status = 'Failed';
-            $m->error_message_message = 'Message too long. Maximum 150 characters allowed.';
+            $m->error_message_message = "Insufficient funds. Message requires {$totalParts} parts (UGX {$totalCost}). Current balance: UGX {$ent->wallet_balance}";
             $m->save();
             return $m->error_message_message;
         }
 
+        // If message needs splitting (more than 160 chars), handle multi-part sending
+        if ($totalParts > 1) {
+            return self::sendSplitMessage($m, $messageParts, $ent);
+        }
+
+        // Single message - send directly
+        return self::sendSingleMessage($m, $originalMessage, $ent);
+    }
+
+    /**
+     * Split message into parts based on character limit
+     * Handles special characters and ensures smart splitting
+     * 
+     * @param string $message The message to split
+     * @param int $maxLength Maximum length per part (default 160)
+     * @return array Array of message parts
+     */
+    private static function splitMessage($message, $maxLength = 160)
+    {
+        $message = trim($message);
+        $length = mb_strlen($message, 'UTF-8');
+        
+        // If message fits in one part, return as is
+        if ($length <= $maxLength) {
+            return [$message];
+        }
+
+        $parts = [];
+        $remainingMessage = $message;
+        $partNumber = 1;
+        
+        // Calculate total parts needed (for header like "1/3:")
+        $estimatedParts = ceil($length / $maxLength);
+        $headerLength = strlen("$estimatedParts/$estimatedParts: ");
+        $usableLength = $maxLength - $headerLength;
+
+        while (mb_strlen($remainingMessage, 'UTF-8') > 0) {
+            if (mb_strlen($remainingMessage, 'UTF-8') <= $usableLength) {
+                // Last part
+                $parts[] = $remainingMessage;
+                break;
+            }
+
+            // Try to split at word boundary
+            $splitPos = $usableLength;
+            $chunk = mb_substr($remainingMessage, 0, $usableLength, 'UTF-8');
+            
+            // Look for last space or punctuation before limit
+            $lastSpace = max(
+                mb_strrpos($chunk, ' ', 0, 'UTF-8'),
+                mb_strrpos($chunk, '.', 0, 'UTF-8'),
+                mb_strrpos($chunk, ',', 0, 'UTF-8'),
+                mb_strrpos($chunk, '!', 0, 'UTF-8'),
+                mb_strrpos($chunk, '?', 0, 'UTF-8')
+            );
+
+            // If we found a good break point and it's not too close to the beginning
+            if ($lastSpace !== false && $lastSpace > $usableLength * 0.6) {
+                $splitPos = $lastSpace + 1;
+            }
+
+            $parts[] = trim(mb_substr($remainingMessage, 0, $splitPos, 'UTF-8'));
+            $remainingMessage = trim(mb_substr($remainingMessage, $splitPos, null, 'UTF-8'));
+            $partNumber++;
+        }
+
+        return $parts;
+    }
+
+    /**
+     * Send a split message (multiple parts)
+     * Creates child messages and sends each part
+     * 
+     * @param DirectMessage $parentMessage The parent message
+     * @param array $messageParts Array of message parts
+     * @param Enterprise $ent The enterprise
+     * @return string Status message
+     */
+    private static function sendSplitMessage($parentMessage, $messageParts, $ent)
+    {
+        $totalParts = count($messageParts);
+        
+        // Store original message in parent
+        $parentMessage->original_message = $parentMessage->message_body;
+        $parentMessage->total_parts = $totalParts;
+        $parentMessage->part_number = null; // Parent has no part number
+        $parentMessage->message_body = "[Parent message split into {$totalParts} parts]";
+        $parentMessage->status = 'Sent'; // Mark parent as sent
+        $parentMessage->save();
+
+        $successCount = 0;
+        $failedCount = 0;
+        $allMessageIds = [];
+        $errors = [];
+
+        // Send each part
+        foreach ($messageParts as $index => $partContent) {
+            $partNumber = $index + 1;
+            $partMessage = "{$partNumber}/{$totalParts}: {$partContent}";
+
+            // Create child message for this part
+            $childMessage = new DirectMessage();
+            $childMessage->enterprise_id = $parentMessage->enterprise_id;
+            $childMessage->bulk_message_id = $parentMessage->bulk_message_id;
+            $childMessage->administrator_id = $parentMessage->administrator_id;
+            $childMessage->receiver_number = $parentMessage->receiver_number;
+            $childMessage->message_body = $partMessage;
+            $childMessage->status = 'Pending';
+            $childMessage->delivery_time = $parentMessage->delivery_time;
+            $childMessage->is_scheduled = $parentMessage->is_scheduled;
+            $childMessage->parent_message_id = $parentMessage->id;
+            $childMessage->part_number = $partNumber;
+            $childMessage->total_parts = $totalParts;
+            $childMessage->save();
+
+            // Send this part
+            $result = self::sendSingleMessage($childMessage, $partMessage, $ent);
+            
+            if ($result === 'success') {
+                $successCount++;
+                $allMessageIds[] = $childMessage->id;
+            } else {
+                $failedCount++;
+                $errors[] = "Part {$partNumber}: " . $result;
+            }
+        }
+
+        // Update parent with summary
+        if ($successCount === $totalParts) {
+            $parentMessage->response = "All {$totalParts} parts sent successfully. Child message IDs: " . implode(', ', $allMessageIds);
+            $parentMessage->save();
+            return 'success';
+        } elseif ($successCount > 0) {
+            $parentMessage->status = 'Partial';
+            $parentMessage->response = "Sent {$successCount}/{$totalParts} parts. Child IDs: " . implode(', ', $allMessageIds);
+            $parentMessage->error_message_message = "Failed parts: " . implode('; ', $errors);
+            $parentMessage->save();
+            return "Partial success: {$successCount}/{$totalParts} parts sent";
+        } else {
+            $parentMessage->status = 'Failed';
+            $parentMessage->error_message_message = "All parts failed: " . implode('; ', $errors);
+            $parentMessage->save();
+            return "All parts failed: " . implode('; ', $errors);
+        }
+    }
+
+    /**
+     * Send a single SMS message (non-split)
+     * 
+     * @param DirectMessage $m The message model instance
+     * @param string $messageText The message text to send
+     * @param Enterprise $ent The enterprise
+     * @return string Status message
+     */
+    private static function sendSingleMessage($m, $messageText, $ent)
+    {
         // Get credentials from environment
         $username = env('EUROSATGROUP_USERNAME');
         $password = env('EUROSATGROUP_PASSWORD');
@@ -386,7 +540,7 @@ class DirectMessage extends Model
         }
 
         // Prepare message and phone number for API
-        $msg = htmlspecialchars(trim($m->message_body));
+        $msg = htmlspecialchars(trim($messageText));
         $msg = urlencode($msg);
         
         // Remove + prefix for API (phone is already standardized to +256...)
@@ -471,12 +625,17 @@ class DirectMessage extends Model
                 }
                 $m->response = $responseInfo;
 
-                // Deduct wallet balance based on message length
-                $no_of_messages = max(1, ceil(strlen($m->message_body) / 150));
+                // Deduct wallet balance - SINGLE SMS PART = 50 UGX
                 $wallet_rec = new WalletRecord();
                 $wallet_rec->enterprise_id = $m->enterprise_id;
-                $wallet_rec->amount = $no_of_messages * -50;
-                $wallet_rec->details = "Sent $no_of_messages messages to $m->receiver_number via EUROSATGROUP. ref: $m->id, API Message ID: " . ($messageID ?? 'N/A');
+                $wallet_rec->amount = -50; // Each part costs 50 UGX
+                
+                // Create detailed wallet description
+                if ($m->parent_message_id) {
+                    $wallet_rec->details = "SMS Part {$m->part_number}/{$m->total_parts} to {$m->receiver_number} via EUROSATGROUP. Parent: #{$m->parent_message_id}, Child: #{$m->id}, API ID: " . ($messageID ?? 'N/A');
+                } else {
+                    $wallet_rec->details = "SMS to {$m->receiver_number} via EUROSATGROUP. Msg ID: #{$m->id}, API ID: " . ($messageID ?? 'N/A');
+                }
                 $wallet_rec->save();
 
                 $m->save();
