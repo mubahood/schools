@@ -547,6 +547,15 @@ class DirectMessage extends Model
 
         // Prepare message and phone number for API
         $msg = trim($messageText);
+        
+        // Sanitize special characters that cause issues with EUROSATGROUP API
+        // Replace curly/smart quotes and apostrophes with alternatives
+        $msg = str_replace(
+            ["\xe2\x80\x98", "\xe2\x80\x99", "\xe2\x80\x9c", "\xe2\x80\x9d", "'", "`"],
+            ["", "", '"', '"', "", ""],
+            $msg
+        );
+        
         $msg = urlencode($msg);
         
         // Remove + prefix for API (phone is already standardized to +256...)
