@@ -13,6 +13,7 @@ use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
+use Illuminate\Support\Str;
 
 class SchemWorkItemController extends AdminController
 {
@@ -39,6 +40,35 @@ class SchemWorkItemController extends AdminController
         ])->first();
 
         $grid = new Grid(new SchemWorkItem());
+
+        // Get enterprise primary color
+        $primaryColor = $u->ent->colour ?? '#337ab7';
+        
+        // Add custom CSS with dynamic enterprise colors
+        Admin::css('/css/scheme-work-custom.css');
+        Admin::style("
+            :root {
+                --enterprise-primary: {$primaryColor};
+                --enterprise-dark: {$primaryColor}dd;
+                --enterprise-light: {$primaryColor}99;
+                --enterprise-lighter: {$primaryColor}66;
+            }
+            .enterprise-badge-primary, .enterprise-label-primary {
+                background-color: {$primaryColor} !important;
+            }
+            .enterprise-badge-dark, .enterprise-label-dark {
+                background-color: {$primaryColor}dd !important;
+            }
+            .enterprise-badge-light, .enterprise-label-light {
+                background-color: {$primaryColor}99 !important;
+            }
+            .enterprise-label-lighter {
+                background-color: {$primaryColor}66 !important;
+            }
+            .text-primary {
+                color: {$primaryColor} !important;
+            }
+        ");
 
         // Add batch actions
         $grid->batchActions(function ($batch) {
@@ -148,8 +178,10 @@ class SchemWorkItemController extends AdminController
                 }
                 $class = AcademicClass::find($this->subject->academic_class_id);
                 $className = $class ? $class->name : 'N/A';
-                return '<strong>' . $this->subject->subject_name . '</strong><br>
-                        <small class="text-muted"><i class="fa fa-graduation-cap"></i> ' . $className . '</small>';
+                return '<div style="line-height: 1.6;">
+                        <strong style="font-size: 14px;">' . $this->subject->subject_name . '</strong><br>
+                        <small class="text-primary"><i class="fa fa-graduation-cap"></i> Class: ' . $className . '</small>
+                        </div>';
             })->sortable();
 
         $grid->column('week', __('Week'))->sortable()->editable('select', [
@@ -159,14 +191,14 @@ class SchemWorkItemController extends AdminController
             13 => 'Week 13', 14 => 'Week 14', 15 => 'Week 15', 16 => 'Week 16',
             17 => 'Week 17', 18 => 'Week 18'
         ])->width(80)->display(function ($week) {
-            return '<span class="badge bg-blue">W' . $week . '</span>';
+            return '<span class="badge enterprise-badge-primary">W' . $week . '</span>';
         });
 
         $grid->column('period', __('Periods'))->sortable()->editable('select', [
             1 => '1 Period', 2 => '2 Periods', 3 => '3 Periods', 4 => '4 Periods',
             5 => '5 Periods', 6 => '6 Periods', 7 => '7 Periods', 8 => '8 Periods'
         ])->width(80)->display(function ($period) {
-            return '<span class="badge bg-purple">' . $period . 'P</span>';
+            return '<span class="badge enterprise-badge-dark">' . $period . 'P</span>';
         });
 
         $grid->column('topic', __('Topic'))
@@ -181,7 +213,7 @@ class SchemWorkItemController extends AdminController
                 if (!$competence || strlen($competence) < 3) {
                     return '<span class="text-muted">-</span>';
                 }
-                return str_limit($competence, 50);
+                return Str::limit($competence, 50);
             })->hide();
 
         $grid->column('methods', __('Teaching Methods'))
@@ -190,7 +222,7 @@ class SchemWorkItemController extends AdminController
                 if (!$methods || strlen($methods) < 3) {
                     return '<span class="text-muted">-</span>';
                 }
-                return str_limit($methods, 50);
+                return Str::limit($methods, 50);
             })->hide();
 
         $grid->column('skills', __('Skills'))
@@ -199,7 +231,7 @@ class SchemWorkItemController extends AdminController
                 if (!$skills || strlen($skills) < 3) {
                     return '<span class="text-muted">-</span>';
                 }
-                return str_limit($skills, 50);
+                return Str::limit($skills, 50);
             })->hide();
 
         $grid->column('suggested_activity', __('Suggested Activity'))
@@ -208,7 +240,7 @@ class SchemWorkItemController extends AdminController
                 if (!$activity || strlen($activity) < 3) {
                     return '<span class="text-muted">-</span>';
                 }
-                return str_limit($activity, 50);
+                return Str::limit($activity, 50);
             })->hide();
 
         $grid->column('instructional_material', __('Materials'))
@@ -217,7 +249,7 @@ class SchemWorkItemController extends AdminController
                 if (!$material || strlen($material) < 3) {
                     return '<span class="text-muted">-</span>';
                 }
-                return str_limit($material, 50);
+                return Str::limit($material, 50);
             })->hide();
 
         $grid->column('references', __('References'))
@@ -226,7 +258,7 @@ class SchemWorkItemController extends AdminController
                 if (!$references || strlen($references) < 3) {
                     return '<span class="text-muted">-</span>';
                 }
-                return str_limit($references, 50);
+                return Str::limit($references, 50);
             })->hide();
 
         $grid->column('teacher_id', __('Teacher'))
@@ -240,9 +272,9 @@ class SchemWorkItemController extends AdminController
         $grid->column('teacher_status', __('Status'))
             ->display(function ($status) {
                 $badges = [
-                    'Pending' => '<span class="label label-warning"><i class="fa fa-clock-o"></i> Pending</span>',
-                    'Conducted' => '<span class="label label-success"><i class="fa fa-check"></i> Conducted</span>',
-                    'Skipped' => '<span class="label label-danger"><i class="fa fa-times"></i> Skipped</span>',
+                    'Pending' => '<span class="label enterprise-label-light"><i class="fa fa-clock-o"></i> Pending</span>',
+                    'Conducted' => '<span class="label enterprise-label-dark"><i class="fa fa-check"></i> Conducted</span>',
+                    'Skipped' => '<span class="label enterprise-label-lighter"><i class="fa fa-times"></i> Skipped</span>',
                 ];
                 return $badges[$status] ?? $status;
             })
@@ -258,7 +290,7 @@ class SchemWorkItemController extends AdminController
                 if (!$comment || strlen($comment) < 3) {
                     return '<span class="text-muted">-</span>';
                 }
-                return str_limit($comment, 60);
+                return Str::limit($comment, 60);
             });
 
         $grid->column('supervisor_comment', __('Content/Notes'))
@@ -267,7 +299,7 @@ class SchemWorkItemController extends AdminController
                 if (!$comment || strlen($comment) < 3) {
                     return '<span class="text-muted">-</span>';
                 }
-                return str_limit($comment, 60);
+                return Str::limit($comment, 60);
             })->hide();
 
         $grid->column('supervisor_id', __('Supervisor'))
@@ -414,13 +446,16 @@ class SchemWorkItemController extends AdminController
         foreach ($userModel->my_subjects() as $value) {
             $class = AcademicClass::find($value->academic_class_id);
             $className = $class ? $class->name : 'N/A';
-            $subs[$value->id] = $value->subject_name . ' (' . $className . ')';
+            $subs[$value->id] = $value->subject_name . ' - Class: ' . $className;
         }
 
         if (empty($subs)) {
             admin_warning('Warning', 'You have no assigned subjects. Please contact administrator to assign subjects to you.');
         }
 
+        // Check if subject_id is passed in URL
+        $preSelectedSubject = request()->get('subject_id');
+        
         // Display current term
         $form->display('current_term', 'Current Term')->default($active_term->name_text);
 
@@ -436,10 +471,16 @@ class SchemWorkItemController extends AdminController
         $form->divider('Lesson Planning Details');
 
         // Subject selection
-        $form->select('subject_id', __('Select Subject'))
+        $subjectField = $form->select('subject_id', __('Select Subject'))
             ->options($subs)
             ->rules('required')
             ->help('Select the subject for this scheme work item');
+        
+        // Pre-select subject if passed in URL
+        if ($form->isCreating() && $preSelectedSubject && isset($subs[$preSelectedSubject])) {
+            $subjectField->default($preSelectedSubject);
+            $form->html('<div class="alert alert-info"><i class="fa fa-info-circle"></i> Subject pre-selected: <strong>' . $subs[$preSelectedSubject] . '</strong></div>');
+        }
 
         // Week number
         $form->select('week', __('Week Number'))

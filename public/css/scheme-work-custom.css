@@ -1,0 +1,231 @@
+/* Scheme Work Custom Styles - Square UI with Enterprise Primary Color Scheme */
+
+/* CSS Variables - Will be overridden by dynamic colors from enterprise */
+:root {
+    --enterprise-primary: #337ab7;
+    --enterprise-dark: #337ab7dd;
+    --enterprise-light: #337ab799;
+    --enterprise-lighter: #337ab766;
+    --enterprise-pale: #337ab733;
+}
+
+/* Remove all rounded corners - Square UI */
+.btn, .badge, .label, .alert, .panel, .box, 
+.form-control, .input-group-addon, .pagination > li > a,
+.table, .modal-content, .dropdown-menu, .nav-tabs > li > a {
+    border-radius: 0 !important;
+}
+
+/* Scheme Work Grid - Square buttons with enterprise colors */
+.scheme-work-actions .btn {
+    border-radius: 0 !important;
+    margin-right: 3px;
+}
+
+.scheme-work-actions .btn-add {
+    background-color: var(--enterprise-primary) !important;
+    border-color: var(--enterprise-primary) !important;
+    color: #fff !important;
+}
+
+.scheme-work-actions .btn-add:hover {
+    background-color: var(--enterprise-dark) !important;
+    border-color: var(--enterprise-dark) !important;
+}
+
+.scheme-work-actions .btn-view {
+    background-color: var(--enterprise-dark) !important;
+    border-color: var(--enterprise-dark) !important;
+    color: #fff !important;
+}
+
+.scheme-work-actions .btn-view:hover {
+    background-color: var(--enterprise-primary) !important;
+}
+
+.scheme-work-actions .btn-print {
+    background-color: var(--enterprise-light) !important;
+    border-color: var(--enterprise-light) !important;
+    color: #fff !important;
+}
+
+.scheme-work-actions .btn-print:hover {
+    background-color: var(--enterprise-dark) !important;
+}
+
+/* Status badges - Simple and consistent with enterprise colors */
+.scheme-status-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    margin-right: 3px;
+    border-radius: 0 !important;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.badge-total {
+    background-color: var(--enterprise-primary) !important;
+    color: #fff !important;
+}
+
+.badge-done {
+    background-color: var(--enterprise-dark) !important;
+    color: #fff !important;
+}
+
+.badge-pending {
+    background-color: var(--enterprise-light) !important;
+    color: #fff !important;
+}
+
+.badge-skipped {
+    background-color: var(--enterprise-lighter) !important;
+    color: #fff !important;
+}
+
+/* Class badges - Enterprise primary color */
+.class-badge {
+    background-color: var(--enterprise-primary) !important;
+    color: #fff !important;
+    border-radius: 0 !important;
+    padding: 4px 10px;
+    font-size: 12px;
+}
+
+/* Week and period badges - Square with enterprise color */
+.badge.bg-blue, .badge.bg-purple {
+    border-radius: 0 !important;
+    background-color: var(--enterprise-primary) !important;
+}
+
+/* Enterprise-themed badge variations */
+.enterprise-badge-primary {
+    background-color: var(--enterprise-primary) !important;
+    color: #fff !important;
+    border-radius: 0 !important;
+}
+
+.enterprise-badge-dark {
+    background-color: var(--enterprise-dark) !important;
+    color: #fff !important;
+    border-radius: 0 !important;
+}
+
+.enterprise-badge-light {
+    background-color: var(--enterprise-light) !important;
+    color: #fff !important;
+    border-radius: 0 !important;
+}
+
+/* Enterprise-themed label variations */
+.enterprise-label-primary {
+    background-color: var(--enterprise-primary) !important;
+    color: #fff !important;
+    border-radius: 0 !important;
+}
+
+.enterprise-label-dark {
+    background-color: var(--enterprise-dark) !important;
+    color: #fff !important;
+    border-radius: 0 !important;
+}
+
+.enterprise-label-light {
+    background-color: var(--enterprise-light) !important;
+    color: #fff !important;
+    border-radius: 0 !important;
+}
+
+.enterprise-label-lighter {
+    background-color: var(--enterprise-lighter) !important;
+    color: #fff !important;
+    border-radius: 0 !important;
+}
+
+/* Alert boxes - Square */
+.alert {
+    border-radius: 0 !important;
+}
+
+.alert-info {
+    background-color: var(--enterprise-pale) !important;
+    border-color: var(--enterprise-primary) !important;
+    color: #31708f !important;
+}
+
+/* Form elements - Square */
+.form-control, .select2-container--default .select2-selection--single {
+    border-radius: 0 !important;
+}
+
+/* Labels - Square and enterprise colored */
+.label-info {
+    background-color: var(--enterprise-primary) !important;
+    border-radius: 0 !important;
+}
+
+.label-warning, .label-default, .label-success, .label-danger {
+    border-radius: 0 !important;
+}
+
+/* Grid action column buttons */
+td .btn {
+    border-radius: 0 !important;
+}
+
+/* Teacher status labels - Enterprise color variations */
+.label-warning {
+    background-color: var(--enterprise-light) !important;
+}
+
+.label-success {
+    background-color: var(--enterprise-dark) !important;
+}
+
+.label-danger {
+    background-color: var(--enterprise-lighter) !important;
+}
+
+/* Progress percentage - Enterprise primary color */
+.text-primary {
+    color: var(--enterprise-primary) !important;
+}
+
+/* Remove rounded corners from all scheme work related elements */
+[class*="scheme-"] {
+    border-radius: 0 !important;
+}
+
+/* Square corners for pagination */
+.pagination > li:first-child > a,
+.pagination > li:first-child > span,
+.pagination > li:last-child > a,
+.pagination > li:last-child > span {
+    border-radius: 0 !important;
+}
+
+/* Square corners for modals */
+.modal-header, .modal-footer {
+    border-radius: 0 !important;
+}
+
+/* Consistent button styles across the app with enterprise colors */
+.btn-primary {
+    background-color: var(--enterprise-primary) !important;
+    border-color: var(--enterprise-primary) !important;
+}
+
+.btn-primary:hover {
+    background-color: var(--enterprise-dark) !important;
+    border-color: var(--enterprise-dark) !important;
+}
+
+.btn-success, .btn-info {
+    background-color: var(--enterprise-primary) !important;
+    border-color: var(--enterprise-primary) !important;
+}
+
+.btn-success:hover, .btn-info:hover {
+    background-color: var(--enterprise-dark) !important;
+    border-color: var(--enterprise-dark) !important;
+}
