@@ -2,8 +2,12 @@
 
 namespace App\Admin\Controllers;
 
+use App\Models\AcademicClass;
+use App\Models\AcademicYear;
+use App\Models\SchemWorkItem;
 use App\Models\Subject;
 use App\Models\Term;
+use App\Models\User;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -17,7 +21,7 @@ class SchemeWorkController extends AdminController
      *
      * @var string
      */
-    protected $title = 'Scheme of Work';
+    protected $title = 'Scheme of Work Management';
 
     /**
      * Make a grid builder.
@@ -27,97 +31,191 @@ class SchemeWorkController extends AdminController
     protected function grid()
     {
         $u = Admin::user();
-        $active_year = \App\Models\AcademicYear::where([
+        
+        // Get active academic year
+        $active_year = AcademicYear::where([
             'enterprise_id' => $u->enterprise_id,
             'is_active' => 1
         ])->first();
+
+        if (!$active_year) {
+            admin_error('Error', 'No active academic year found. Please activate an academic year first.');
+            return redirect(admin_url('academic-years'));
+        }
+
+        // Get active term
+        $active_term = Term::where([
+            'enterprise_id' => $u->enterprise_id,
+            'is_active' => 1
+        ])->first();
+
+        $grid = new Grid(new Subject());
+        
+        // Disable batch actions
+        $grid->disableBatchActions();
+        $grid->disableExport();
+        
+        // Custom create button that goes to scheme items
+        $grid->disableCreateButton();
+        $grid->tools(function ($tools) {
+            $tools->append('<a href="' . admin_url('schems-work-items/create') . '" class="btn btn-sm btn-success">
+                <i class="fa fa-plus"></i> Create New Scheme Item
+            </a>');
+        });
+        
+        // Header with active term information
+        if ($active_term) {
+            $grid->header(function () use ($active_term) {
+                return '<div class="alert alert-info">
+                    <i class="fa fa-info-circle"></i> 
+                    <strong>Active Term:</strong> ' . $active_term->name_text . ' | 
+                    <strong>Academic Year:</strong> ' . $active_term->academic_year->name . '
+                </div>';
+            });
+        }
+
+        // Filter configuration
+        $grid->filter(function ($filter) use ($u, $active_year, $active_term) {
+            $filter->disableIdFilter();
+            
+            // Filter by class
+            $filter->equal('academic_class_id', 'Class')
+                ->select(AcademicClass::where([
+                    'enterprise_id' => $u->enterprise_id,
+                    'academic_year_id' => $active_year->id
+                ])->orderBy('name')->pluck('name', 'id'));
+
+            // Filter by teacher
+            $filter->equal('subject_teacher', 'Main Teacher')
+                ->select(User::where([
+                    'enterprise_id' => $u->enterprise_id,
+                    'user_type' => 'employee'
+                ])->orderBy('first_name')->get()->pluck('name', 'id'));
+
+            // Filter by completion status
+            $filter->where(function ($query) use ($active_term) {
+                if (!$active_term) {
+                    return; // Skip filter if no active term
+                }
+                $status = $this->input;
+                if ($status == 'completed') {
+                    $query->whereHas('scheme_work_items', function ($q) use ($active_term) {
+                        $q->where('term_id', $active_term->id)
+                          ->where('teacher_status', 'Conducted');
+                    });
+                } elseif ($status == 'pending') {
+                    $query->whereHas('scheme_work_items', function ($q) use ($active_term) {
+                        $q->where('term_id', $active_term->id)
+                          ->where('teacher_status', 'Pending');
+                    });
+                }
+            }, 'Completion Status')->select([
+                'completed' => 'Has Completed Items',
+                'pending' => 'Has Pending Items'
+            ]);
+        });
+
+        // Quick search
+        $grid->quickSearch('subject_name', 'code')->placeholder('Search by subject name or code');
+
+        // Model query
         $conds = [
             'enterprise_id' => $u->enterprise_id,
             'academic_year_id' => $active_year->id
         ];
-        $grid = new Grid(new Subject());
-        $grid->disableBatchActions();
-        $grid->quickSearch('subject_name', 'code')->placeholder('Quick search subject or code');
-        $grid
-            ->model()
+
+        $grid->model()
             ->where($conds)
-            ->orderBy('id', 'desc');
-        $grid->column('subject_name', __('Subject'))->sortable();
-        $grid->column('id', __('Id'))->sortable()->hide();
+            ->orderBy('academic_class_id', 'asc')
+            ->orderBy('subject_name', 'asc');
+
+        // Grid columns
+        $grid->column('id', __('ID'))->sortable()->hide();
+        
         $grid->column('academic_class_id', __('Class'))
-            ->display(function ($class) {
-                $c = \App\Models\AcademicClass::find($class);
-                if ($c == null) {
-                    return 'N/A';
-                }
-                return $c->name_text;
-            })->sortable();
-        $grid->column('subject_teacher', __('Teacher'))
-            ->display(function ($teacher) {
-                $t = \App\Models\User::find($teacher);
-                if ($t == null) {
-                    return 'N/A';
-                }
-                return $t->name;
+            ->display(function ($class_id) {
+                $c = AcademicClass::find($class_id);
+                if ($c == null) return '<span class="label label-default">N/A</span>';
+                return '<span class="label label-primary">' . $c->name_text . '</span>';
             })->sortable();
 
-        $grid->column('code', __('Code'))->sortable()->hide();
-        $grid->column('teacher_1', __('Teacher 1'))
-            ->display(function ($teacher) {
-                $t = \App\Models\User::find($teacher);
-                if ($t == null) {
-                    return 'N/A';
-                }
-                return $t->name;
-            })->sortable()
-            ->hide();
-        $grid->column('teacher_2', __('Teacher 2'))
-            ->display(function ($teacher) {
-                $t = \App\Models\User::find($teacher);
-                if ($t == null) {
-                    return 'N/A';
-                }
-                return $t->name;
-            })->sortable()
-            ->hide();
-        $grid->column('teacher_3', __('Teacher 3'))
-            ->display(function ($teacher) {
-                $t = \App\Models\User::find($teacher);
-                if ($t == null) {
-                    return 'N/A';
-                }
-                return $t->name;
-            })->sortable()->hide();
+        $grid->column('subject_name', __('Subject'))
+            ->display(function ($name) {
+                return '<strong>' . $name . '</strong>';
+            })->sortable();
 
-        $grid->disableBatchActions();
-        $grid->column('primary', __('Primary'))
-            ->display(function () {
-                $link = url('scheme-of-work-print?id=' . $this->id);
-                return "<a href='$link' target='_blank'>Print</a>";
-            })->hide();
-        //number of items
-        $grid->column('items', __('Scheme Items'))
-            ->display(function () {
-                $u = Admin::user();
-                $active = Term::where([
-                    'enterprise_id' => $u->enterprise_id,
-                    'is_active' => 1
-                ])->first();
-                if ($active == null) return "Active term not found";
+        $grid->column('code', __('Code'))
+            ->display(function ($code) {
+                return $code ?: '<span class="text-muted">-</span>';
+            })->sortable();
 
-                $items = \App\Models\SchemWorkItem::where([
+        $grid->column('subject_teacher', __('Main Teacher'))
+            ->display(function ($teacher_id) {
+                $t = User::find($teacher_id);
+                if ($t == null) return '<span class="text-muted">Not Assigned</span>';
+                return '<i class="fa fa-user"></i> ' . $t->name;
+            })->sortable();
+
+        // Scheme work statistics
+        $grid->column('statistics', __('Scheme Work Statistics'))
+            ->display(function () use ($active_term) {
+                if (!$active_term) {
+                    return '<span class="text-muted">No active term</span>';
+                }
+
+                $total = SchemWorkItem::where([
                     'subject_id' => $this->id,
-                    'term_id' => $active->id
+                    'term_id' => $active_term->id
                 ])->count();
-                return $items;
+
+                $conducted = SchemWorkItem::where([
+                    'subject_id' => $this->id,
+                    'term_id' => $active_term->id,
+                    'teacher_status' => 'Conducted'
+                ])->count();
+
+                $pending = SchemWorkItem::where([
+                    'subject_id' => $this->id,
+                    'term_id' => $active_term->id,
+                    'teacher_status' => 'Pending'
+                ])->count();
+
+                $skipped = SchemWorkItem::where([
+                    'subject_id' => $this->id,
+                    'term_id' => $active_term->id,
+                    'teacher_status' => 'Skipped'
+                ])->count();
+
+                $percentage = $total > 0 ? round(($conducted / $total) * 100, 1) : 0;
+
+                return '
+                    <div style="font-size: 11px;">
+                        <span class="badge" style="background: #3c8dbc;">' . $total . ' Total</span>
+                        <span class="badge" style="background: #00a65a;">' . $conducted . ' Done</span>
+                        <span class="badge" style="background: #f39c12;">' . $pending . ' Pending</span>
+                        <span class="badge" style="background: #dd4b39;">' . $skipped . ' Skipped</span>
+                        <br><small class="text-primary"><strong>' . $percentage . '% Completed</strong></small>
+                    </div>
+                ';
             });
 
-        //print
-        $grid->column('print', __('Print'))
+        // Actions
+        $grid->column('actions', __('Actions'))
             ->display(function () {
-                $link = url('scheme-of-work-print?id=' . $this->id);
-                return "<a href='$link' target='_blank'>Print</a>";
+                $viewUrl = admin_url('schems-work-items?subject_id=' . $this->id);
+                $printUrl = url('scheme-of-work-print?id=' . $this->id);
+                
+                return '
+                    <a href="' . $viewUrl . '" class="btn btn-sm btn-primary" title="View Items">
+                        <i class="fa fa-list"></i> View Items
+                    </a>
+                    <a href="' . $printUrl . '" target="_blank" class="btn btn-sm btn-success" title="Print">
+                        <i class="fa fa-print"></i> Print
+                    </a>
+                ';
             });
+
+        $grid->disableActions();
 
         return $grid;
     }
@@ -131,25 +229,80 @@ class SchemeWorkController extends AdminController
     protected function detail($id)
     {
         $show = new Show(Subject::findOrFail($id));
+        
+        $u = Admin::user();
+        $active_term = Term::where([
+            'enterprise_id' => $u->enterprise_id,
+            'is_active' => 1
+        ])->first();
 
-        $show->field('id', __('Id'));
-        $show->field('created_at', __('Created at'));
-        $show->field('updated_at', __('Updated at'));
-        $show->field('enterprise_id', __('Enterprise id'));
-        $show->field('academic_class_id', __('Academic class id'));
-        $show->field('subject_teacher', __('Subject teacher'));
+        $show->panel()->tools(function ($tools) use ($id) {
+            $tools->append('<a href="' . url('scheme-of-work-print?id=' . $id) . '" target="_blank" class="btn btn-sm btn-success"><i class="fa fa-print"></i> Print Scheme</a>');
+        });
+
+        $show->field('subject_name', __('Subject Name'));
         $show->field('code', __('Code'));
+        
+        $show->field('academic_class_id', __('Class'))->as(function ($class_id) {
+            $c = AcademicClass::find($class_id);
+            return $c ? $c->name_text : 'N/A';
+        });
+
+        $show->field('subject_teacher', __('Main Teacher'))->as(function ($teacher_id) {
+            $t = User::find($teacher_id);
+            return $t ? $t->name : 'Not Assigned';
+        });
+
+        $show->field('teacher_1', __('Additional Teacher 1'))->as(function ($teacher_id) {
+            $t = User::find($teacher_id);
+            return $t ? $t->name : 'Not Assigned';
+        });
+
+        $show->field('teacher_2', __('Additional Teacher 2'))->as(function ($teacher_id) {
+            $t = User::find($teacher_id);
+            return $t ? $t->name : 'Not Assigned';
+        });
+
+        if ($active_term) {
+            $show->divider();
+            $show->field('scheme_statistics', __('Scheme Work Statistics (Current Term)'))->unescape()->as(function () use ($active_term) {
+                $total = SchemWorkItem::where([
+                    'subject_id' => $this->id,
+                    'term_id' => $active_term->id
+                ])->count();
+
+                $conducted = SchemWorkItem::where([
+                    'subject_id' => $this->id,
+                    'term_id' => $active_term->id,
+                    'teacher_status' => 'Conducted'
+                ])->count();
+
+                $pending = SchemWorkItem::where([
+                    'subject_id' => $this->id,
+                    'term_id' => $active_term->id,
+                    'teacher_status' => 'Pending'
+                ])->count();
+
+                $skipped = SchemWorkItem::where([
+                    'subject_id' => $this->id,
+                    'term_id' => $active_term->id,
+                    'teacher_status' => 'Skipped'
+                ])->count();
+
+                return "
+                    <table class='table table-bordered'>
+                        <tr><th>Total Items</th><td>$total</td></tr>
+                        <tr><th>Conducted</th><td><span class='label label-success'>$conducted</span></td></tr>
+                        <tr><th>Pending</th><td><span class='label label-warning'>$pending</span></td></tr>
+                        <tr><th>Skipped</th><td><span class='label label-danger'>$skipped</span></td></tr>
+                    </table>
+                ";
+            });
+        }
+
         $show->field('details', __('Details'));
-        $show->field('course_id', __('Course id'));
-        $show->field('subject_name', __('Subject name'));
-        $show->field('demo_id', __('Demo id'));
-        $show->field('is_optional', __('Is optional'));
-        $show->field('main_course_id', __('Main course id'));
-        $show->field('teacher_1', __('Teacher 1'));
-        $show->field('teacher_2', __('Teacher 2'));
-        $show->field('teacher_3', __('Teacher 3'));
-        $show->field('parent_course_id', __('Parent course id'));
-        $show->field('academic_year_id', __('Academic year id'));
+        $show->field('created_at', __('Created At'));
+        $show->field('updated_at', __('Updated At'));
 
         return $show;
     }
@@ -161,24 +314,9 @@ class SchemeWorkController extends AdminController
      */
     protected function form()
     {
-        $form = new Form(new Subject());
-
-        $form->number('enterprise_id', __('Enterprise id'));
-        $form->number('academic_class_id', __('Academic class id'));
-        $form->number('subject_teacher', __('Subject teacher'));
-        $form->textarea('code', __('Code'));
-        $form->textarea('details', __('Details'));
-        $form->number('course_id', __('Course id'));
-        $form->textarea('subject_name', __('Subject name'));
-        $form->number('demo_id', __('Demo id'));
-        $form->switch('is_optional', __('Is optional'))->default(1);
-        $form->number('main_course_id', __('Main course id'))->default(1);
-        $form->number('teacher_1', __('Teacher 1'));
-        $form->number('teacher_2', __('Teacher 2'));
-        $form->number('teacher_3', __('Teacher 3'));
-        $form->number('parent_course_id', __('Parent course id'));
-        $form->number('academic_year_id', __('Academic year id'));
-
-        return $form;
+        // This controller is read-only. Subjects are managed in the Subjects section.
+        // Redirect to the subjects management page.
+        admin_warning('Information', 'Subjects are managed in the Subjects section. This is a read-only view for scheme work management.');
+        return redirect(admin_url('subjects'));
     }
 }

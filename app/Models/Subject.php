@@ -111,6 +111,7 @@ class Subject extends Model
     {
         return $this->belongsTo(ParentCourse::class, 'parent_course_id');
     }
+    
     function teacher()
     {
         $admin  = Administrator::find(((int)($this->subject_teacher)));
@@ -123,6 +124,12 @@ class Subject extends Model
             DB::update("UPDATE subjects SET subject_teacher = $ent->administrator_id WHERE id = $this->id");
         }
         return $this->belongsTo(Administrator::class, 'subject_teacher');
+    }
+
+    // Relationship to scheme work items
+    function scheme_work_items()
+    {
+        return $this->hasMany(SchemWorkItem::class, 'subject_id');
     }
 
     function getNameAttribute()
