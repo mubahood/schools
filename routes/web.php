@@ -3769,9 +3769,10 @@ Route::get('scheme-of-work-print', function (Request $request) {
   $items = SchemWorkItem::where([
     'subject_id' => $sub->id,
     'term_id' => $active->id
-  ])->get();
+  ])->orderBy('week', 'asc')->orderBy('period', 'asc')->get();
   $pdf = App::make('dompdf.wrapper');
   $class = AcademicClass::find($sub->academic_class_id);
+  $pdf->setPaper('A4', 'landscape');
   $pdf->loadHTML(view('print.scheme-of-work-print', [
     'term' => $active,
     'ent' => $active->enterprise,

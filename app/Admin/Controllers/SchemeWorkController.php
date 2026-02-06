@@ -52,7 +52,7 @@ class SchemeWorkController extends AdminController
         $grid = new Grid(new Subject());
         
         // Get enterprise primary color
-        $primaryColor = $u->ent->colour ?? '#337ab7';
+        $primaryColor = $u->ent->color ?? '#337ab7';
         
         // Add custom CSS with dynamic enterprise colors
         Admin::css('/css/scheme-work-custom.css');

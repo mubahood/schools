@@ -17,307 +17,157 @@ use Illuminate\Support\Str;
 
 class SchemWorkItemController extends AdminController
 {
-    /**
-     * Title for current resource.
-     *
-     * @var string
-     */
-    protected $title = 'Scheme Work Items (Records)';
+    protected $title = 'Scheme Work Items';
 
-    /**
-     * Make a grid builder.
-     *
-     * @return Grid
-     */
     protected function grid()
     {
         $u = Admin::user();
-        
-        // Get active term
-        $active_term = Term::where([
-            'enterprise_id' => $u->enterprise_id,
-            'is_active' => 1
-        ])->first();
+        $ent = $u->ent;
+        $active_term = Term::where(['enterprise_id' => $u->enterprise_id, 'is_active' => 1])->first();
+        $primaryColor = $ent->color ?? '#337ab7';
 
         $grid = new Grid(new SchemWorkItem());
 
-        // Get enterprise primary color
-        $primaryColor = $u->ent->colour ?? '#337ab7';
-        
-        // Add custom CSS with dynamic enterprise colors
+        // Enterprise color CSS
         Admin::css('/css/scheme-work-custom.css');
         Admin::style("
-            :root {
-                --enterprise-primary: {$primaryColor};
-                --enterprise-dark: {$primaryColor}dd;
-                --enterprise-light: {$primaryColor}99;
-                --enterprise-lighter: {$primaryColor}66;
-            }
-            .enterprise-badge-primary, .enterprise-label-primary {
-                background-color: {$primaryColor} !important;
-            }
-            .enterprise-badge-dark, .enterprise-label-dark {
-                background-color: {$primaryColor}dd !important;
-            }
-            .enterprise-badge-light, .enterprise-label-light {
-                background-color: {$primaryColor}99 !important;
-            }
-            .enterprise-label-lighter {
-                background-color: {$primaryColor}66 !important;
-            }
-            .text-primary {
-                color: {$primaryColor} !important;
-            }
+            .ent-primary { background:{$primaryColor}; color:#fff; border-radius:0; padding:2px 8px; font-size:11px; }
+            .ent-dark { background:{$primaryColor}dd; color:#fff; border-radius:0; padding:2px 8px; font-size:11px; }
+            .ent-light { background:{$primaryColor}99; color:#fff; border-radius:0; padding:2px 8px; font-size:11px; }
+            .ent-muted { background:{$primaryColor}55; color:#fff; border-radius:0; padding:2px 8px; font-size:11px; }
         ");
 
-        // Add batch actions
+        // Batch actions
         $grid->batchActions(function ($batch) {
             $batch->add(new ChangeSchemeWorkTopic());
         });
 
-        // Header with helpful information
-        if ($active_term) {
-            $grid->header(function () use ($active_term) {
-                return '<div class="alert alert-info">
-                    <i class="fa fa-info-circle"></i> 
-                    <strong>Active Term:</strong> ' . $active_term->name_text . ' | 
-                    <strong>Academic Year:</strong> ' . $active_term->academic_year->name . '
-                </div>';
-            });
-        }
-
-        // Enhanced filter
+        // Filters
         $grid->filter(function ($filter) use ($u, $active_term) {
             $filter->disableIdFilter();
-            
-            // Filter by term
-            $filter->equal('term_id', __('Term'))
-                ->select(Term::where([
-                    'enterprise_id' => $u->enterprise_id,
-                ])->orderBy('id', 'desc')->get()->pluck('name_text', 'id'))
-                ->default($active_term ? $active_term->id : null);
-            
-            // Filter by subject
-            $filter->equal('subject_id', __('Subject'))
-                ->select(Subject::where([
-                    'enterprise_id' => $u->enterprise_id,
-                ])->orderBy('subject_name')->get()->pluck('subject_name', 'id'));
-            
-            // Filter by class
-            $filter->where(function ($query) {
-                $classId = $this->input;
-                if ($classId) {
-                    $query->whereHas('subject', function ($q) use ($classId) {
-                        $q->where('academic_class_id', $classId);
-                    });
-                }
-            }, 'Class')->select(AcademicClass::where([
-                'enterprise_id' => $u->enterprise_id
-            ])->orderBy('name')->get()->pluck('name', 'id'));
-            
-            // Filter by teacher
-            $filter->equal('teacher_id', __('Teacher'))
-                ->select(User::where([
-                    'enterprise_id' => $u->enterprise_id,
-                    'user_type' => 'employee'
-                ])->orderBy('first_name', 'asc')->get()->pluck('name', 'id'));
 
-            // Filter by teacher status
-            $filter->equal('teacher_status', __('Lesson Status'))
-                ->select([
-                    'Pending' => 'Pending (Not Yet Taught)',
-                    'Conducted' => 'Conducted (Successfully Taught)',
-                    'Skipped' => 'Skipped'
-                ]);
+            $filter->equal('term_id', 'Term')
+                ->select(
+                    Term::where('enterprise_id', $u->enterprise_id)
+                        ->orderBy('id', 'desc')
+                        ->get()
+                        ->pluck('name_text', 'id')
+                )->default($active_term ? $active_term->id : null);
 
-            // Filter by week
-            $filter->between('week', 'Week Range');
+            $filter->equal('subject_id', 'Subject')
+                ->select(
+                    Subject::where('enterprise_id', $u->enterprise_id)
+                        ->orderBy('subject_name')
+                        ->get()
+                        ->mapWithKeys(function ($s) {
+                            $c = AcademicClass::find($s->academic_class_id);
+                            return [$s->id => $s->subject_name . ' - ' . ($c ? $c->name : '')];
+                        })
+                );
 
-            // Date range filter
-            $filter->between('created_at', __('Date Created'))->date();
+            $filter->equal('teacher_id', 'Teacher')
+                ->select(
+                    User::where(['enterprise_id' => $u->enterprise_id, 'user_type' => 'employee'])
+                        ->orderBy('first_name')
+                        ->get()
+                        ->pluck('name', 'id')
+                );
+
+            $filter->equal('teacher_status', 'Status')
+                ->select(['Pending' => 'Pending', 'Conducted' => 'Conducted', 'Skipped' => 'Skipped']);
+
+            $filter->equal('week', 'Week')
+                ->select(array_combine(range(1, 18), array_map(function ($i) { return "Week $i"; }, range(1, 18))));
         });
 
-        // Set query conditions
+        // Query scope
         $conds = ['enterprise_id' => $u->enterprise_id];
-
-        // Non-DOS users only see their own items
         if (!$u->isRole('dos')) {
             $conds['teacher_id'] = $u->id;
         }
 
-        // Quick search
-        $grid->quickSearch(['topic', 'competence', 'methods'])->placeholder('Search by topic, competence, or methods');
+        $grid->model()->where($conds)->orderBy('term_id', 'desc')->orderBy('week', 'asc');
+        $grid->quickSearch('topic', 'competence', 'methods')->placeholder('Search topic, competence...');
 
-        // Model query with proper ordering
-        $grid->model()
-            ->where($conds)
-            ->orderBy('term_id', 'desc')
-            ->orderBy('week', 'asc')
-            ->orderBy('created_at', 'desc');
+        // Columns
+        $grid->column('id', 'ID')->sortable()->hide();
 
-        // Grid columns
-        $grid->column('id', __('ID'))->sortable()->hide();
-        
-        $grid->column('created_at', __('Date Created'))
-            ->display(function ($created_at) {
-                return '<small>' . date('d M Y', strtotime($created_at)) . '</small>';
-            })->sortable()->width(100);
+        $grid->column('term_id', 'Term')->display(function () {
+            return $this->term ? $this->term->name_text : '-';
+        })->sortable();
 
-        $grid->column('term_id', __('Term'))
-            ->display(function ($term_id) {
-                if ($this->term == null) {
-                    return '<span class="label label-default">Not Set</span>';
-                }
-                return '<span class="label label-info">Term ' . $this->term->name_text . '</span>';
-            })->sortable()->width(100);
+        $grid->column('subject_id', 'Subject')->display(function () {
+            if (!$this->subject) return '-';
+            $c = AcademicClass::find($this->subject->academic_class_id);
+            return $this->subject->subject_name . ($c ? ' — ' . $c->name : '');
+        })->sortable();
 
-        $grid->column('subject_id', __('Subject & Class'))
-            ->display(function ($subject_id) {
-                if ($this->subject == null) {
-                    return '<span class="text-muted">Not Set</span>';
-                }
-                $class = AcademicClass::find($this->subject->academic_class_id);
-                $className = $class ? $class->name : 'N/A';
-                return '<div style="line-height: 1.6;">
-                        <strong style="font-size: 14px;">' . $this->subject->subject_name . '</strong><br>
-                        <small class="text-primary"><i class="fa fa-graduation-cap"></i> Class: ' . $className . '</small>
-                        </div>';
-            })->sortable();
+        $grid->column('week', 'Week')->display(function ($v) {
+            return "<span class='ent-primary'>W{$v}</span>";
+        })->sortable();
 
-        $grid->column('week', __('Week'))->sortable()->editable('select', [
-            1 => 'Week 1', 2 => 'Week 2', 3 => 'Week 3', 4 => 'Week 4', 
-            5 => 'Week 5', 6 => 'Week 6', 7 => 'Week 7', 8 => 'Week 8',
-            9 => 'Week 9', 10 => 'Week 10', 11 => 'Week 11', 12 => 'Week 12',
-            13 => 'Week 13', 14 => 'Week 14', 15 => 'Week 15', 16 => 'Week 16',
-            17 => 'Week 17', 18 => 'Week 18'
-        ])->width(80)->display(function ($week) {
-            return '<span class="badge enterprise-badge-primary">W' . $week . '</span>';
+        $grid->column('period', 'Periods')->display(function ($v) {
+            return "<span class='ent-dark'>{$v}P</span>";
+        })->sortable();
+
+        $grid->column('topic', 'Topic')->display(function ($v) {
+            return $v ? '<strong>' . Str::limit($v, 40) . '</strong>' : '<span class="text-muted">—</span>';
         });
 
-        $grid->column('period', __('Periods'))->sortable()->editable('select', [
-            1 => '1 Period', 2 => '2 Periods', 3 => '3 Periods', 4 => '4 Periods',
-            5 => '5 Periods', 6 => '6 Periods', 7 => '7 Periods', 8 => '8 Periods'
-        ])->width(80)->display(function ($period) {
-            return '<span class="badge enterprise-badge-dark">' . $period . 'P</span>';
+        $grid->column('teacher_id', 'Teacher')->display(function () {
+            return $this->teacher ? $this->teacher->name : '-';
+        })->sortable();
+
+        $grid->column('teacher_status', 'Status')->display(function ($v) {
+            $map = [
+                'Pending'   => 'ent-light',
+                'Conducted' => 'ent-primary',
+                'Skipped'   => 'ent-muted',
+            ];
+            $cls = $map[$v] ?? 'ent-light';
+            return "<span class='{$cls}'>{$v}</span>";
+        })->sortable();
+
+        $grid->column('teacher_comment', 'Remarks')->display(function ($v) {
+            return ($v && strlen($v) > 2) ? Str::limit($v, 50) : '<span class="text-muted">—</span>';
         });
 
-        $grid->column('topic', __('Topic'))
-            ->editable()
-            ->display(function ($topic) {
-                return '<strong>' . ($topic ?: '<span class="text-muted">No topic</span>') . '</strong>';
-            });
+        // Hidden columns (available via column selector)
+        $grid->column('competence', 'Competence')->display(function ($v) {
+            return ($v && strlen($v) > 2) ? Str::limit($v, 50) : '—';
+        })->hide();
 
-        $grid->column('competence', __('Competence'))
-            ->editable('textarea')
-            ->display(function ($competence) {
-                if (!$competence || strlen($competence) < 3) {
-                    return '<span class="text-muted">-</span>';
-                }
-                return Str::limit($competence, 50);
-            })->hide();
+        $grid->column('methods', 'Methods')->display(function ($v) {
+            return ($v && strlen($v) > 2) ? Str::limit($v, 50) : '—';
+        })->hide();
 
-        $grid->column('methods', __('Teaching Methods'))
-            ->editable('textarea')
-            ->display(function ($methods) {
-                if (!$methods || strlen($methods) < 3) {
-                    return '<span class="text-muted">-</span>';
-                }
-                return Str::limit($methods, 50);
-            })->hide();
+        $grid->column('skills', 'Skills')->display(function ($v) {
+            return ($v && strlen($v) > 2) ? Str::limit($v, 50) : '—';
+        })->hide();
 
-        $grid->column('skills', __('Skills'))
-            ->editable('textarea')
-            ->display(function ($skills) {
-                if (!$skills || strlen($skills) < 3) {
-                    return '<span class="text-muted">-</span>';
-                }
-                return Str::limit($skills, 50);
-            })->hide();
+        $grid->column('suggested_activity', 'Activities')->display(function ($v) {
+            return ($v && strlen($v) > 2) ? Str::limit($v, 50) : '—';
+        })->hide();
 
-        $grid->column('suggested_activity', __('Suggested Activity'))
-            ->editable('textarea')
-            ->display(function ($activity) {
-                if (!$activity || strlen($activity) < 3) {
-                    return '<span class="text-muted">-</span>';
-                }
-                return Str::limit($activity, 50);
-            })->hide();
+        $grid->column('instructional_material', 'Materials')->display(function ($v) {
+            return ($v && strlen($v) > 2) ? Str::limit($v, 50) : '—';
+        })->hide();
 
-        $grid->column('instructional_material', __('Materials'))
-            ->editable('textarea')
-            ->display(function ($material) {
-                if (!$material || strlen($material) < 3) {
-                    return '<span class="text-muted">-</span>';
-                }
-                return Str::limit($material, 50);
-            })->hide();
+        $grid->column('references', 'References')->display(function ($v) {
+            return ($v && strlen($v) > 2) ? Str::limit($v, 50) : '—';
+        })->hide();
 
-        $grid->column('references', __('References'))
-            ->editable('textarea')
-            ->display(function ($references) {
-                if (!$references || strlen($references) < 3) {
-                    return '<span class="text-muted">-</span>';
-                }
-                return Str::limit($references, 50);
-            })->hide();
+        $grid->column('supervisor_status', 'Approval')->display(function ($v) {
+            $map = [
+                'Pending'  => 'ent-light',
+                'Approved' => 'ent-primary',
+                'Rejected' => 'ent-muted',
+            ];
+            $cls = $map[$v] ?? 'ent-light';
+            return "<span class='{$cls}'>{$v}</span>";
+        })->hide();
 
-        $grid->column('teacher_id', __('Teacher'))
-            ->display(function ($teacher_id) {
-                if ($this->teacher == null) {
-                    return '<span class="text-muted">Not assigned</span>';
-                }
-                return '<i class="fa fa-user"></i> ' . $this->teacher->name;
-            })->sortable();
-
-        $grid->column('teacher_status', __('Status'))
-            ->display(function ($status) {
-                $badges = [
-                    'Pending' => '<span class="label enterprise-label-light"><i class="fa fa-clock-o"></i> Pending</span>',
-                    'Conducted' => '<span class="label enterprise-label-dark"><i class="fa fa-check"></i> Conducted</span>',
-                    'Skipped' => '<span class="label enterprise-label-lighter"><i class="fa fa-times"></i> Skipped</span>',
-                ];
-                return $badges[$status] ?? $status;
-            })
-            ->filter([
-                'Pending' => 'Pending',
-                'Conducted' => 'Conducted',
-                'Skipped' => 'Skipped'
-            ])->sortable();
-
-        $grid->column('teacher_comment', __('Teacher\'s Remarks'))
-            ->editable('textarea')
-            ->display(function ($comment) {
-                if (!$comment || strlen($comment) < 3) {
-                    return '<span class="text-muted">-</span>';
-                }
-                return Str::limit($comment, 60);
-            });
-
-        $grid->column('supervisor_comment', __('Content/Notes'))
-            ->editable('textarea')
-            ->display(function ($comment) {
-                if (!$comment || strlen($comment) < 3) {
-                    return '<span class="text-muted">-</span>';
-                }
-                return Str::limit($comment, 60);
-            })->hide();
-
-        $grid->column('supervisor_id', __('Supervisor'))
-            ->display(function ($supervisor_id) {
-                if ($this->supervisor == null) {
-                    return '<span class="text-muted">Not assigned</span>';
-                }
-                return '<i class="fa fa-user-secret"></i> ' . $this->supervisor->name;
-            })->sortable()->hide();
-
-        $grid->column('supervisor_status', __('Supervisor Status'))
-            ->label([
-                'Pending' => 'warning',
-                'Approved' => 'success',
-                'Rejected' => 'danger'
-            ])->hide();
-
-        // Enable export
+        // Export
         $grid->export(function ($export) {
             $export->filename('Scheme_Work_Items_' . date('Y-m-d'));
             $export->except(['actions']);
@@ -326,12 +176,6 @@ class SchemWorkItemController extends AdminController
         return $grid;
     }
 
-    /**
-     * Make a show builder.
-     *
-     * @param mixed $id
-     * @return Show
-     */
     protected function detail($id)
     {
         $show = new Show(SchemWorkItem::findOrFail($id));
@@ -340,283 +184,166 @@ class SchemWorkItemController extends AdminController
             $tools->disableDelete();
         });
 
-        $show->field('id', __('ID'));
-        
-        $show->divider();
-        $show->field('term_id', __('Term'))->as(function ($term_id) {
-            return $this->term ? $this->term->name_text : 'Not Set';
+        $show->field('id', 'ID');
+
+        $show->divider('Term & Subject');
+        $show->field('term_id', 'Term')->as(function () {
+            return $this->term ? $this->term->name_text : '-';
         });
-        
-        $show->field('subject_id', __('Subject'))->as(function ($subject_id) {
-            if (!$this->subject) return 'Not Set';
-            $class = AcademicClass::find($this->subject->academic_class_id);
-            return $this->subject->subject_name . ' (' . ($class ? $class->name : 'N/A') . ')';
+        $show->field('subject_id', 'Subject')->as(function () {
+            if (!$this->subject) return '-';
+            $c = AcademicClass::find($this->subject->academic_class_id);
+            return $this->subject->subject_name . ' (' . ($c ? $c->name : '') . ')';
+        });
+        $show->field('teacher_id', 'Teacher')->as(function () {
+            return $this->teacher ? $this->teacher->name : '-';
+        });
+        $show->field('supervisor_id', 'Supervisor')->as(function () {
+            return $this->supervisor ? $this->supervisor->name : '-';
         });
 
-        $show->field('teacher_id', __('Teacher'))->as(function ($teacher_id) {
-            return $this->teacher ? $this->teacher->name : 'Not Assigned';
-        });
+        $show->divider('Lesson Plan');
+        $show->field('week', 'Week');
+        $show->field('period', 'Periods');
+        $show->field('topic', 'Topic');
+        $show->field('supervisor_comment', 'Content / Notes')->unescape()->as(function ($v) { return nl2br($v ?: '-'); });
+        $show->field('competence', 'Competence')->unescape()->as(function ($v) { return nl2br($v ?: '-'); });
+        $show->field('methods', 'Teaching Methods')->unescape()->as(function ($v) { return nl2br($v ?: '-'); });
+        $show->field('skills', 'Skills')->unescape()->as(function ($v) { return nl2br($v ?: '-'); });
+        $show->field('suggested_activity', 'Activities')->unescape()->as(function ($v) { return nl2br($v ?: '-'); });
+        $show->field('instructional_material', 'Materials')->unescape()->as(function ($v) { return nl2br($v ?: '-'); });
+        $show->field('references', 'References')->unescape()->as(function ($v) { return nl2br($v ?: '-'); });
 
-        $show->field('supervisor_id', __('Supervisor'))->as(function ($supervisor_id) {
-            return $this->supervisor ? $this->supervisor->name : 'Not Assigned';
-        });
+        $show->divider('Status');
+        $show->field('teacher_status', 'Lesson Status');
+        $show->field('teacher_comment', 'Teacher Remarks')->unescape()->as(function ($v) { return nl2br($v ?: '-'); });
+        $show->field('supervisor_status', 'Supervisor Status');
 
-        $show->divider();
-        $show->field('week', __('Week Number'));
-        $show->field('period', __('Number of Periods'));
-        $show->field('topic', __('Lesson Topic'));
-        
-        $show->divider();
-        $show->field('supervisor_comment', __('Content/Learning Content'))->unescape()->as(function ($content) {
-            return nl2br($content ?: '-');
-        });
-        
-        $show->field('competence', __('Competence/Learning Objectives'))->unescape()->as(function ($comp) {
-            return nl2br($comp ?: '-');
-        });
-        
-        $show->field('methods', __('Teaching Methods'))->unescape()->as(function ($methods) {
-            return nl2br($methods ?: '-');
-        });
-        
-        $show->field('skills', __('Skills to Develop'))->unescape()->as(function ($skills) {
-            return nl2br($skills ?: '-');
-        });
-        
-        $show->field('suggested_activity', __('Suggested Learning Activities'))->unescape()->as(function ($activity) {
-            return nl2br($activity ?: '-');
-        });
-        
-        $show->field('instructional_material', __('Instructional Materials/Resources'))->unescape()->as(function ($material) {
-            return nl2br($material ?: '-');
-        });
-        
-        $show->field('references', __('References'))->unescape()->as(function ($refs) {
-            return nl2br($refs ?: '-');
-        });
-
-        $show->divider();
-        $show->field('teacher_status', __('Lesson Status'))->badge([
-            'Pending' => 'warning',
-            'Conducted' => 'success',
-            'Skipped' => 'danger'
-        ]);
-        
-        $show->field('teacher_comment', __('Teacher\'s Remarks'))->unescape()->as(function ($comment) {
-            return nl2br($comment ?: '-');
-        });
-
-        $show->field('supervisor_status', __('Supervisor Approval Status'))->badge([
-            'Pending' => 'warning',
-            'Approved' => 'success',
-            'Rejected' => 'danger'
-        ]);
-
-        $show->divider();
-        $show->field('created_at', __('Created At'));
-        $show->field('updated_at', __('Last Updated'));
+        $show->divider('Timestamps');
+        $show->field('created_at', 'Created');
+        $show->field('updated_at', 'Updated');
 
         return $show;
     }
 
-    /**
-     * Make a form builder.
-     *
-     * @return Form
-     */
     protected function form()
     {
         $form = new Form(new SchemWorkItem());
         $u = Admin::user();
-        
-        // Hidden fields
-        $form->hidden('enterprise_id')->value($u->enterprise_id);
 
-        // Get active term
+        // Enterprise & term
+        $form->hidden('enterprise_id')->value($u->enterprise_id);
         $active_term = $u->ent->active_term();
-        
+
         if (!$active_term) {
             admin_error('Error', 'No active term found. Please activate a term first.');
-            return redirect(admin_url('terms'));
+            return $form;
         }
 
-        // Get user's subjects
+        // Build subject options for this teacher
         $userModel = User::find($u->id);
-        $subs = [];
-        foreach ($userModel->my_subjects() as $value) {
-            $class = AcademicClass::find($value->academic_class_id);
-            $className = $class ? $class->name : 'N/A';
-            $subs[$value->id] = $value->subject_name . ' - Class: ' . $className;
+        $subjects = [];
+        foreach ($userModel->my_subjects() as $s) {
+            $c = AcademicClass::find($s->academic_class_id);
+            $subjects[$s->id] = $s->subject_name . ' — ' . ($c ? $c->name : 'N/A');
         }
 
-        if (empty($subs)) {
-            admin_warning('Warning', 'You have no assigned subjects. Please contact administrator to assign subjects to you.');
-        }
+        $preSelected = request()->get('subject_id');
 
-        // Check if subject_id is passed in URL
-        $preSelectedSubject = request()->get('subject_id');
-        
-        // Display current term
-        $form->display('current_term', 'Current Term')->default($active_term->name_text);
-
-        // Hidden term field
+        // === Section: Term & Subject ===
+        $form->display('_term', 'Term')->default($active_term->name_text);
         $form->hidden('term_id')->value($active_term->id);
 
-        // Auto-assign teacher and supervisor on creation
         if ($form->isCreating()) {
             $form->hidden('teacher_id')->value($u->id);
             $form->hidden('supervisor_id')->value($userModel->supervisor_id ?? $u->id);
         }
 
-        $form->divider('Lesson Planning Details');
+        $subjectField = $form->select('subject_id', 'Subject')
+            ->options($subjects)
+            ->rules('required');
 
-        // Subject selection
-        $subjectField = $form->select('subject_id', __('Select Subject'))
-            ->options($subs)
-            ->rules('required')
-            ->help('Select the subject for this scheme work item');
-        
-        // Pre-select subject if passed in URL
-        if ($form->isCreating() && $preSelectedSubject && isset($subs[$preSelectedSubject])) {
-            $subjectField->default($preSelectedSubject);
-            $form->html('<div class="alert alert-info"><i class="fa fa-info-circle"></i> Subject pre-selected: <strong>' . $subs[$preSelectedSubject] . '</strong></div>');
+        if ($form->isCreating() && $preSelected && isset($subjects[$preSelected])) {
+            $subjectField->default($preSelected);
         }
 
-        // Week number
-        $form->select('week', __('Week Number'))
-            ->options(array_combine(range(1, 18), array_map(function($i) { return "Week $i"; }, range(1, 18))))
+        $form->select('week', 'Week')
+            ->options(array_combine(range(1, 18), array_map(function ($i) { return "Week $i"; }, range(1, 18))))
             ->rules('required')
-            ->default(1)
-            ->help('Select the week number for this lesson');
+            ->default(1);
 
-        // Number of periods
-        $form->select('period', __('Number of Periods'))
-            ->options(array_combine(range(1, 10), array_map(function($i) { return "$i Period" . ($i > 1 ? 's' : ''); }, range(1, 10))))
+        $form->select('period', 'Periods')
+            ->options(array_combine(range(1, 10), array_map(function ($i) { return "$i Period" . ($i > 1 ? 's' : ''); }, range(1, 10))))
             ->rules('required')
-            ->default(1)
-            ->help('How many periods will this lesson take?');
+            ->default(1);
 
-        // Topic
-        $form->text('topic', __('Lesson Topic'))
+        // === Section: Lesson Details ===
+        $form->divider('Lesson Details');
+
+        $form->text('topic', 'Topic')
             ->rules('required|min:3')
-            ->help('Enter the main topic/title of the lesson')
-            ->placeholder('E.g., Introduction to Algebra, Photosynthesis, etc.');
+            ->placeholder('e.g. Introduction to Algebra');
 
-        $form->divider('Learning Content & Objectives');
+        $form->textarea('supervisor_comment', 'Content / Notes')
+            ->rows(3)
+            ->placeholder('Key points to cover in this lesson...');
 
-        // Content (stored in supervisor_comment field)
-        $form->textarea('supervisor_comment', __('Learning Content/Description'))
-            ->rows(4)
-            ->help('Describe what students will learn in this lesson')
-            ->placeholder('Enter the main content and key points to be covered...');
-
-        // Competence
-        $form->textarea('competence', __('Competence/Learning Objectives'))
-            ->rows(4)
-            ->help('What competencies or learning objectives should students achieve?')
+        $form->textarea('competence', 'Competence / Objectives')
+            ->rows(3)
             ->placeholder('By the end of this lesson, students should be able to...');
 
-        $form->divider('Teaching Approach');
-
-        // Methods
-        $form->textarea('methods', __('Teaching Methods'))
-            ->rows(4)
-            ->help('List the teaching methods you will use')
-            ->placeholder('E.g., Explanation, Discussion, Demonstration, Group Work, etc.');
-
-        // Skills
-        $form->textarea('skills', __('Skills to Develop'))
-            ->rows(4)
-            ->help('What skills will students develop?')
-            ->placeholder('E.g., Critical thinking, Problem solving, Communication, etc.');
-
-        // Suggested activities
-        $form->textarea('suggested_activity', __('Suggested Learning Activities'))
-            ->rows(4)
-            ->help('What activities will students do?')
-            ->placeholder('E.g., Class discussions, practical exercises, homework assignments, etc.');
-
-        $form->divider('Resources & References');
-
-        // Instructional materials
-        $form->textarea('instructional_material', __('Instructional Materials/Resources'))
+        $form->textarea('methods', 'Teaching Methods')
             ->rows(3)
-            ->help('What materials or resources are needed?')
-            ->placeholder('E.g., Textbooks, charts, models, laboratory equipment, etc.');
+            ->placeholder('e.g. Discussion, Demonstration, Group Work...');
 
-        // References
-        $form->textarea('references', __('References'))
+        $form->textarea('skills', 'Skills')
             ->rows(3)
-            ->help('List reference materials')
-            ->placeholder('E.g., Textbook pages, websites, articles, etc.');
+            ->placeholder('e.g. Critical thinking, Problem solving...');
 
+        $form->textarea('suggested_activity', 'Activities')
+            ->rows(3)
+            ->placeholder('e.g. Class discussion, practical exercises...');
+
+        $form->textarea('instructional_material', 'Materials')
+            ->rows(2)
+            ->placeholder('e.g. Textbooks, charts, lab equipment...');
+
+        $form->textarea('references', 'References')
+            ->rows(2)
+            ->placeholder('e.g. Textbook pages, websites...');
+
+        // === Section: Status ===
         $form->divider('Lesson Status');
 
-        // Teacher status
-        $form->radio('teacher_status', __('Lesson Status'))
+        $form->radio('teacher_status', 'Status')
             ->options([
-                'Pending' => 'Pending (Not Yet Taught)',
-                'Conducted' => 'Conducted (Successfully Taught)',
-                'Skipped' => 'Skipped (Will Not Teach)'
+                'Pending'   => 'Pending',
+                'Conducted' => 'Conducted',
+                'Skipped'   => 'Skipped',
             ])
             ->default('Pending')
             ->rules('required')
             ->when('Conducted', function (Form $form) {
-                $form->textarea('teacher_comment', __('Teacher\'s Remarks'))
-                    ->rules('required|min:10')
-                    ->rows(3)
-                    ->help('Provide feedback on how the lesson went')
-                    ->placeholder('Describe how the lesson went, challenges faced, student responses, etc.');
+                $form->textarea('teacher_comment', 'Remarks')
+                    ->rows(2)
+                    ->rules('required|min:5')
+                    ->placeholder('How did the lesson go?');
             })
             ->when('Skipped', function (Form $form) {
-                $form->textarea('teacher_comment', __('Reason for Skipping'))
-                    ->rules('required|min:5')
+                $form->textarea('teacher_comment', 'Reason')
                     ->rows(2)
-                    ->help('Explain why this lesson was skipped')
-                    ->placeholder('Enter reason...');
-            })
-            ->help('Select the current status of this lesson');
+                    ->rules('required|min:3')
+                    ->placeholder('Why was this lesson skipped?');
+            });
 
-        // Hidden supervisor fields (auto-set by model)
         if ($form->isCreating()) {
             $form->hidden('supervisor_status')->value('Pending');
             $form->hidden('status')->value('Pending');
         }
 
-        // Saving hooks
-        $form->saving(function (Form $form) {
-            $u = Admin::user();
-            
-            // Soft check for duplicate (warning only, not blocking)
-            if ($form->isCreating()) {
-                $duplicate = SchemWorkItem::where([
-                    'enterprise_id' => $u->enterprise_id,
-                    'term_id' => $form->term_id,
-                    'subject_id' => $form->subject_id,
-                    'teacher_id' => $form->teacher_id ?? $u->id,
-                    'week' => $form->week,
-                ])->first();
-                
-                if ($duplicate) {
-                    $subject = Subject::find($form->subject_id);
-                    $subjectName = $subject ? $subject->subject_name : 'this subject';
-                    
-                    admin_warning(
-                        'Notice', 
-                        "You already have a scheme work item for <strong>{$subjectName}</strong> in <strong>Week {$form->week}</strong>. " .
-                        "<a href='" . admin_url("schems-work-items/{$duplicate->id}/edit") . "'>View existing item</a>"
-                    );
-                }
-            }
-            
-            // Ensure references are properly set
-            if ($form->references) {
-                $form->model()->references = $form->references;
-            }
-        });
-
+        // Save callback
         $form->saved(function (Form $form) {
-            admin_success('Success', 'Scheme work item saved successfully!');
+            admin_success('Saved', 'Scheme work item saved.');
             return redirect(admin_url('schems-work-items'));
         });
 

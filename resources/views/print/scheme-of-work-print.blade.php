@@ -1,120 +1,208 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="{{ public_path('/assets/styles.css') }}">
-    <link rel="stylesheet" href="{{ public_path('css/bootstrap-print.css') }}">
     <style>
         @page {
-            size: A4;
-            margin: 24px;
+            size: A4 landscape;
+            margin: 15mm 15mm 12mm 15mm;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 9px;
+            line-height: 1.2;
+            color: #222;
+            padding: 15px 25px 12px 25px;
         }
 
-        @media print {
-            body {
-                margin: 0;
-                padding: 0;
-            }
-
-            .no-print,
-            .no-print * {
-                display: none !important;
-            }
+        /* === HEADER === */
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2px;
         }
-
-        /* set orientation horizontal */
-        @page {
-            size: landscape;
+        .header-table td {
+            vertical-align: middle;
+            padding: 0;
         }
-
-        tbody {
-            page-break-inside: avoid;
+        .logo-cell {
+            width: 40px;
+            text-align: center;
         }
-
-        table tbody tr td {
-            page-break-inside: avoid;
-            page-break-after: auto;
-            font-size: 12px;
-            font-weight: 400;
+        .logo-cell img {
+            width: 38px;
+            height: auto;
         }
-
-        table thead tr th {
-            font-size: 12px;
-            font-weight: 800;
-            /* text tansformation */
+        .info-cell {
+            text-align: center;
+            padding: 0 4px;
+        }
+        .school-name {
+            font-size: 15px;
+            font-weight: 700;
             text-transform: uppercase;
-            padding: 2px;
+            color: {{ $ent->color ?? '#337ab7' }};
+            margin: 0;
+            padding: 0;
+            line-height: 1.1;
+        }
+        .motto {
+            font-size: 8px;
+            font-style: italic;
+            margin: 1px 0;
+            color: #555;
+        }
+        .contacts {
+            font-size: 7.5px;
+            color: #444;
+            margin: 0;
+        }
+        .header-line {
+            height: 3px;
+            background: {{ $ent->color ?? '#337ab7' }};
+            border: none;
+            margin: 3px 0 4px 0;
+        }
+        .doc-title {
+            text-align: center;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin: 0 0 4px 0;
+            padding: 0;
+            text-decoration: underline;
+            letter-spacing: 0.3px;
         }
 
-        /* @media print */
+        /* === DATA TABLE === */
+        .scheme-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 8.5px;
+            line-height: 1.2;
+        }
+        .scheme-table thead th {
+            background: {{ $ent->color ?? '#337ab7' }};
+            color: #fff;
+            font-size: 7.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            text-align: center;
+            padding: 3px 2px;
+            border: 1px solid {{ $ent->color ?? '#337ab7' }};
+            white-space: nowrap;
+            letter-spacing: 0.2px;
+        }
+        .scheme-table tbody td {
+            padding: 2px 3px;
+            border: 1px solid #ccc;
+            vertical-align: top;
+            font-size: 8.5px;
+            word-wrap: break-word;
+            page-break-inside: avoid;
+        }
+        .scheme-table tbody tr:nth-child(even) {
+            background: #f8f8f8;
+        }
+        .scheme-table tbody tr:hover {
+            background: #eef4fb;
+        }
+
+        /* Column widths - optimised for landscape A4 */
+        .col-wk    { width: 3%; text-align: center; }
+        .col-pd    { width: 3%; text-align: center; }
+        .col-topic { width: 14%; }
+        .col-comp  { width: 13%; }
+        .col-meth  { width: 10%; }
+        .col-skill { width: 10%; }
+        .col-act   { width: 12%; }
+        .col-mat   { width: 10%; }
+        .col-cont  { width: 10%; }
+        .col-ref   { width: 8%; }
+        .col-rem   { width: 7%; }
+
+        .text-c { text-align: center; }
+        .text-l { text-align: left; }
+        .text-muted { color: #999; }
+
+        /* Footer */
+        .footer {
+            margin-top: 6px;
+            font-size: 7px;
+            color: #888;
+            text-align: right;
+        }
     </style>
 </head>
-
 <body>
 
-
-    <table class="w-100">
+    {{-- ===== HEADER ===== --}}
+    <table class="header-table">
         <tr>
-            <td style="width: 5%">
-                <img style="width: 100%; " src="{{ public_path('storage/' . $ent->logo) }}">
+            <td class="logo-cell">
+                <img src="{{ public_path('storage/' . $ent->logo) }}">
             </td>
-            <td>
-                <div class="text-center">
-                    <p class="fs-26 text-center fw-700 mt-2 text-uppercase  " style="color: {{ $ent->color }};">
-                        {{ $ent->name }}</p>
-                    <p><i>"{{ $ent->motto }}"</i></p>
-                    <p class="fs-14 lh-6 mt-0">TEL: {{ $ent->phone_number }},&nbsp;{{ $ent->phone_number_2 }}, EMAIL:
-                        {{ $ent->email }}, WEBSITE: {{ $ent->website }}, {{ $ent->p_o_box }}</p>
-                </div>
+            <td class="info-cell">
+                <div class="school-name">{{ $ent->name }}</div>
+                @if($ent->motto)<div class="motto">"{{ $ent->motto }}"</div>@endif
+                <div class="contacts">Tel: {{ $ent->phone_number }}@if($ent->phone_number_2), {{ $ent->phone_number_2 }}@endif &nbsp;|&nbsp; {{ $ent->email }} &nbsp;|&nbsp; {{ $ent->website }} &nbsp;|&nbsp; {{ $ent->p_o_box }}</div>
             </td>
-            <td style="width: 5%">
-            </td>
+            <td style="width: 40px;"></td>
         </tr>
     </table>
 
+    <div class="header-line"></div>
 
-    <hr style="height: 5px; background-color:  {{ $ent->color }};" class=" my-1 mb-3">
-    <p class="fs-20 text-center fw-200 mt-1 text-uppercase black mb-3"><u>
-            SCHEME OF WORK FOR {{ $class->name }}, {{ $sub->name }}, Term {{ $term->name_text }} </u></p>
+    <div class="doc-title">Scheme of Work &mdash; {{ $class->name ?? '' }} &mdash; {{ $sub->subject_name ?? $sub->name ?? '' }} &mdash; {{ $term->name_text ?? '' }}</div>
 
-    <table class="mt-1 w-100 table table-bordered">
+    {{-- ===== DATA TABLE ===== --}}
+    <table class="scheme-table">
         <thead>
-            <tr style=" border-bottom: 1px black solid;">
-                <th class="text-center  p-1" style="width: 5px;">WK</th>
-                <th class="text-center  p-1" style="width: 5px;">PDs</th>
-                <th class="text-left p-1" style="">Topic</th>
-                <th class="text-left p-1" style="">Competence</th>
-                <th class="text-center">Methods</th>
-                <th class="text-center">Skills</th>
-                <th class="text-center">Suggested Activities</th>
-                <th class="text-center">Instructional Materials</th>
-                <th class="text-center">Content</th>
-                <th class="text-center">References</th>
-                <th class="text-center">Remarks</th>
+            <tr>
+                <th class="col-wk">Wk</th>
+                <th class="col-pd">Pd</th>
+                <th class="col-topic">Topic</th>
+                <th class="col-comp">Competence</th>
+                <th class="col-meth">Methods</th>
+                <th class="col-skill">Skills</th>
+                <th class="col-act">Activities</th>
+                <th class="col-mat">Materials</th>
+                <th class="col-cont">Content</th>
+                <th class="col-ref">References</th>
+                <th class="col-rem">Remarks</th>
             </tr>
         </thead>
         <tbody>
-            @foreach ($items as $item)
+            @forelse ($items->sortBy('week') as $item)
                 <tr>
-                    <td class="text-center p-1">{{ $item->week }}</td>
-                    <td class="text-center p-1">{{ $item->period }}</td>
-                    <td class="text-left p-1">{{ $item->topic }}</td>
-                    <td class="text-left p-1">{{ $item->competence }}</td>
-                    <td class="text-left p-1">{{ $item->methods }}</td>
-                    <td class="text-left p-1">{{ $item->skills }}</td>
-                    <td class="text-left p-1">{{ $item->suggested_activity }}</td>
-                    <td class="text-left p-1">{{ $item->instructional_material }}</td>
-                    <td class="text-left p-1">{{ $item->supervisor_comment }}</td>
-                    <td class="text-left p-1">{{ $item->references }}</td>
-                    <td class="text-left p-1">{{ $item->teacher_comment }}</td>
+                    <td class="col-wk text-c">{{ $item->week }}</td>
+                    <td class="col-pd text-c">{{ $item->period }}</td>
+                    <td class="col-topic text-l">{!! nl2br(e($item->topic ?? '—')) !!}</td>
+                    <td class="col-comp text-l">{!! nl2br(e($item->competence ?? '—')) !!}</td>
+                    <td class="col-meth text-l">{!! nl2br(e($item->methods ?? '—')) !!}</td>
+                    <td class="col-skill text-l">{!! nl2br(e($item->skills ?? '—')) !!}</td>
+                    <td class="col-act text-l">{!! nl2br(e($item->suggested_activity ?? '—')) !!}</td>
+                    <td class="col-mat text-l">{!! nl2br(e($item->instructional_material ?? '—')) !!}</td>
+                    <td class="col-cont text-l">{!! nl2br(e($item->supervisor_comment ?? '—')) !!}</td>
+                    <td class="col-ref text-l">{!! nl2br(e($item->references ?? '—')) !!}</td>
+                    <td class="col-rem text-l">{!! nl2br(e($item->teacher_comment ?? '—')) !!}</td>
                 </tr>
-            @endforeach
+            @empty
+                <tr>
+                    <td colspan="11" class="text-c" style="padding: 8px; color: #999;">No scheme work items found for this subject and term.</td>
+                </tr>
+            @endforelse
         </tbody>
     </table>
 
+    <div class="footer">
+        Printed on {{ date('d M Y') }} &nbsp;|&nbsp; {{ $ent->name }}
+    </div>
 
 </body>
-
 </html>
