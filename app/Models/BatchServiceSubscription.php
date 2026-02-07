@@ -60,6 +60,31 @@ class BatchServiceSubscription extends Model
         return json_decode($value);
     }
 
+    // items_to_be_offered getter - decode JSON to array
+    public function getItemsToBeOfferedAttribute($value)
+    {
+        if ($value == null || $value == '') {
+            return [];
+        }
+        if (is_array($value)) {
+            return $value;
+        }
+        $decoded = json_decode($value, true);
+        return is_array($decoded) ? $decoded : [];
+    }
+
+    // items_to_be_offered setter - encode array as JSON
+    public function setItemsToBeOfferedAttribute($value)
+    {
+        if (is_array($value)) {
+            $this->attributes['items_to_be_offered'] = json_encode($value);
+        } elseif (is_string($value) && json_decode($value) !== null) {
+            $this->attributes['items_to_be_offered'] = $value;
+        } else {
+            $this->attributes['items_to_be_offered'] = null;
+        }
+    }
+
     public static function boot()
     {
         parent::boot();
@@ -88,10 +113,20 @@ class BatchServiceSubscription extends Model
 
 
         self::deleting(function ($m) {
+            // Delete child items
+            $m->batchItems()->delete();
             //service_subscription_id delete transport_subscription
             TransportSubscription::where([
                 'service_subscription_id' => $m->id,
             ])->delete();
         }); 
+    }
+
+    /**
+     * Items to be offered (hasMany relationship for the form)
+     */
+    public function batchItems()
+    {
+        return $this->hasMany(BatchServiceSubscriptionItem::class);
     }
 }

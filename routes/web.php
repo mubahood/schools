@@ -2962,12 +2962,45 @@ Route::get('process-batch-service-subscriptions', function (Request $request) {
     $sub->link_with = $rep->link_with;
     $sub->transport_route_id = $rep->transport_route_id;
     $sub->trip_type = $rep->trip_type;
-    $sub->to_be_managed_by_inventory = $rep->to_be_managed_by_inventory ?? 'No';
+
+    // Handle inventory management
+    $inventoryMode = $rep->to_be_managed_by_inventory ?? 'No';
+    if ($inventoryMode === 'Yes') {
+      $sub->to_be_managed_by_inventory = 'Yes';
+      // Don't set items_to_be_offered here — we'll create tracking records manually after save
+    } else {
+      $sub->to_be_managed_by_inventory = 'No';
+    }
+
     $sub->is_service_offered = 'No';
     $sub->is_completed = 'No';
     $error_text = null;
     try {
       $sub->save();
+      
+      // Create ServiceItemToBeOffered records from batch items (hasMany relationship)
+      if ($inventoryMode === 'Yes') {
+        $batchItems = $rep->batchItems;
+        if ($batchItems && $batchItems->count() > 0) {
+          foreach ($batchItems as $batchItem) {
+            if (empty($batchItem->stock_item_category_id)) continue;
+            $exists = \App\Models\ServiceItemToBeOffered::where('service_subscription_id', $sub->id)
+              ->where('stock_item_category_id', $batchItem->stock_item_category_id)
+              ->exists();
+            if (!$exists) {
+              \App\Models\ServiceItemToBeOffered::create([
+                'service_subscription_id' => $sub->id,
+                'stock_item_category_id' => $batchItem->stock_item_category_id,
+                'quantity' => $batchItem->quantity ?? 1,
+                'is_service_offered' => 'No',
+                'user_id' => $user->id,
+                'enterprise_id' => $rep->enterprise_id,
+              ]);
+            }
+          }
+        }
+      }
+      
       echo 'SUCCESS: ' . $user->name . "<br>";
     } catch (\Exception $e) {
       $error_text = $e->getMessage();

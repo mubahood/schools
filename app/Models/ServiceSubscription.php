@@ -93,7 +93,7 @@ class ServiceSubscription extends Model
             }
             $m->total = $service->fee * $m->quantity;
             
-            // Auto-copy inventory fields from Service
+            // Auto-copy inventory fields from Service (only if not explicitly set by form)
             if (empty($m->to_be_managed_by_inventory) || $m->to_be_managed_by_inventory === 'No') {
                 $m->to_be_managed_by_inventory = $service->to_be_managed_by_inventory ?? 'No';
             }
@@ -260,24 +260,35 @@ class ServiceSubscription extends Model
 
     /**
      * Generate ServiceItemToBeOffered records for each stock item in items_to_be_offered
-     * Called automatically when subscription is created or inventory is enabled
+     * Called automatically when subscription is created or inventory is enabled.
+     * Handles two formats:
+     *   - Array of objects: [{stock_item_category_id: X, quantity: Y}, ...]  (from table() field)
+     *   - Flat array of IDs: [1, 2, 3, ...]  (legacy / from Service auto-copy)
      */
     public function generateItemsToBeOffered()
     {
-        // Only generate if inventory management is enabled
         if ($this->to_be_managed_by_inventory !== 'Yes') {
             return;
         }
 
-        // Get items_to_be_offered array
-        $itemIds = $this->items_to_be_offered;
-        if (empty($itemIds) || !is_array($itemIds)) {
+        $items = $this->items_to_be_offered;
+        if (empty($items) || !is_array($items)) {
             return;
         }
 
-        // Create a tracking record for each item
-        foreach ($itemIds as $itemId) {
-            // Check if already exists
+        foreach ($items as $entry) {
+            // Determine stock_item_category_id and quantity based on format
+            if (is_array($entry) && isset($entry['stock_item_category_id'])) {
+                $itemId = $entry['stock_item_category_id'];
+                $qty = $entry['quantity'] ?? 1;
+            } else {
+                // Legacy flat ID format
+                $itemId = $entry;
+                $qty = 1;
+            }
+
+            if (empty($itemId)) continue;
+
             $exists = ServiceItemToBeOffered::where('service_subscription_id', $this->id)
                 ->where('stock_item_category_id', $itemId)
                 ->exists();
@@ -286,7 +297,7 @@ class ServiceSubscription extends Model
                 ServiceItemToBeOffered::create([
                     'service_subscription_id' => $this->id,
                     'stock_item_category_id' => $itemId,
-                    'quantity' => 1, // Default quantity
+                    'quantity' => $qty,
                     'is_service_offered' => 'No',
                     'user_id' => $this->user_id,
                     'enterprise_id' => $this->enterprise_id,
@@ -305,10 +316,21 @@ class ServiceSubscription extends Model
             return;
         }
 
-        $newItemIds = $this->items_to_be_offered ?? [];
-        if (!is_array($newItemIds)) {
+        $items = $this->items_to_be_offered ?? [];
+        if (!is_array($items)) {
             return;
         }
+
+        // Normalize to associative: stock_item_category_id => quantity
+        $newItemMap = [];
+        foreach ($items as $entry) {
+            if (is_array($entry) && isset($entry['stock_item_category_id'])) {
+                $newItemMap[$entry['stock_item_category_id']] = $entry['quantity'] ?? 1;
+            } else {
+                $newItemMap[$entry] = 1;
+            }
+        }
+        $newItemIds = array_keys($newItemMap);
 
         // Get existing tracking records
         $existingRecords = ServiceItemToBeOffered::where('service_subscription_id', $this->id)->get();
@@ -320,11 +342,19 @@ class ServiceSubscription extends Model
             ServiceItemToBeOffered::create([
                 'service_subscription_id' => $this->id,
                 'stock_item_category_id' => $itemId,
-                'quantity' => 1,
+                'quantity' => $newItemMap[$itemId] ?? 1,
                 'is_service_offered' => 'No',
                 'user_id' => $this->user_id,
                 'enterprise_id' => $this->enterprise_id,
             ]);
+        }
+
+        // Update quantities for existing items that haven't been offered yet
+        foreach ($existingRecords as $record) {
+            if (isset($newItemMap[$record->stock_item_category_id]) && $record->is_service_offered === 'No') {
+                $record->quantity = $newItemMap[$record->stock_item_category_id];
+                $record->save();
+            }
         }
 
         // Remove items that are no longer in the list (only if not yet offered)
@@ -332,7 +362,7 @@ class ServiceSubscription extends Model
         if (!empty($itemsToRemove)) {
             ServiceItemToBeOffered::where('service_subscription_id', $this->id)
                 ->whereIn('stock_item_category_id', $itemsToRemove)
-                ->where('is_service_offered', 'No') // Only remove if not yet offered
+                ->where('is_service_offered', 'No')
                 ->delete();
         }
     }

@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Models\BatchServiceSubscription;
 use App\Models\Service;
+use App\Models\StockItemCategory;
 use App\Models\Term;
 use App\Models\User;
 use Encore\Admin\Auth\Database\Administrator;
@@ -197,14 +198,27 @@ class BatchServiceSubscriptionController extends AdminController
         }
 
         $form->divider('Inventory Management');
-        
+
+        $u = Admin::user();
+        $stockItems = StockItemCategory::where('enterprise_id', $u->enterprise_id)
+            ->orderBy('name')
+            ->get()
+            ->pluck('name', 'id')
+            ->toArray();
+
         $form->radio('to_be_managed_by_inventory', 'Manage by Inventory?')
             ->options([
-                'Yes' => 'Yes - This service requires inventory/stock tracking',
-                'No' => 'No - This is a regular service subscription'
+                'No' => 'No - Regular service subscription',
+                'Yes' => 'Yes - Track inventory items for this service',
             ])
             ->default('No')
-            ->help('Select "Yes" if this service requires physical inventory to be provided to students. This setting will apply to all subscriptions created from this batch.');
+            ->when('Yes', function (Form $form) use ($stockItems) {
+                $form->hasMany('batchItems', 'Items to be Offered', function (Form\NestedForm $form) use ($stockItems) {
+                    $form->select('stock_item_category_id', 'Stock Item')->options($stockItems)->rules('required');
+                    $form->number('quantity', 'Quantity')->default(1)->rules('required|min:1');
+                });
+            })
+            ->help('Select "Yes" to specify inventory items and quantities to track for each subscriber.');
 
         $form->radioCard('link_with', 'Link this subscription with?')->options([
             'Transport' => 'Transport',
