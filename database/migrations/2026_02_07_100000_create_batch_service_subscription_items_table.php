@@ -8,7 +8,7 @@ class CreateBatchServiceSubscriptionItemsTable extends Migration
 {
     public function up()
     {
-        Schema::create('batch_service_subscription_items', function (Blueprint $table) {
+        Schema::createIfNotExists('batch_service_subscription_items', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('batch_service_subscription_id');
             $table->unsignedBigInteger('stock_item_category_id');
