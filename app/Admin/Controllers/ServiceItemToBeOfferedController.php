@@ -84,18 +84,13 @@ class ServiceItemToBeOfferedController extends AdminController
             if ($sub) {
                 $studentName = $sub->subscriber ? $sub->subscriber->name : 'N/A';
                 return "<a href='/admin/service-subscriptions/{$id}' target='_blank'>
-                    <strong>#{$id}</strong><br/>
-                    <small>{$studentName}</small>
+                    <strong>#{$id}</strong> - {$studentName}
                 </a>";
             }
             return "#$id";
-        })->width(180);
+        })->width(200);
 
-        $grid->column('service_name', 'Service')->display(function () {
-            return $this->serviceSubscription->service->name ?? 'N/A';
-        })->width(150);
-
-        $grid->column('item_name', 'Item')->display(function () {
+        $grid->column('stock_item_category_id', 'Item')->display(function ($id) {
             return $this->stockItemCategory->name ?? 'N/A';
         })->sortable()->width(200);
 
@@ -137,17 +132,38 @@ class ServiceItemToBeOfferedController extends AdminController
             return '<span class="text-muted">-</span>';
         })->width(150);
 
-        // Export
+        // Export - plain values only
         $grid->export(function ($export) {
             $export->filename('Service_Items_Tracking_' . date('Y-m-d'));
-            $export->column('id', 'ID');
-            $export->column('created_at', 'Date Created');
-            $export->column('service_subscription_id', 'Subscription ID');
-            $export->column('item_name', 'Item');
-            $export->column('quantity', 'Quantity');
-            $export->column('is_service_offered', 'Status');
-            $export->column('stock_batch_id', 'Batch ID');
-            $export->column('offered_at', 'Offered Date');
+            $export->except(['actions']);
+            $export->originalValue(['quantity', 'is_service_offered', 'remarks']);
+
+            $export->column('service_subscription_id', function ($value, $original) {
+                return $original;
+            });
+            $export->column('created_at', function ($value, $original) {
+                return $original ? date('Y-m-d', strtotime($original)) : '';
+            });
+            $export->column('stock_item_category_id', function ($value, $original) {
+                $item = \App\Models\StockItemCategory::find($original);
+                return $item ? $item->name : $original;
+            });
+            $export->column('is_service_offered', function ($value, $original) {
+                return $original === 'Yes' ? 'Offered' : 'Pending';
+            });
+            $export->column('stock_batch_id', function ($value, $original) {
+                return $original ?? '';
+            });
+            $export->column('offered_at', function ($value, $original) {
+                return $original ? date('Y-m-d', strtotime($original)) : '';
+            });
+            $export->column('offered_by_id', function ($value, $original) {
+                if ($original) {
+                    $user = \App\Models\User::find($original);
+                    return $user ? $user->name : $original;
+                }
+                return '';
+            });
         });
 
         // Disable create button (records are auto-generated)
