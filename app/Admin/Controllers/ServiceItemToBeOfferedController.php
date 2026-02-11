@@ -79,16 +79,21 @@ class ServiceItemToBeOfferedController extends AdminController
             return date('M d, Y', strtotime($date));
         })->sortable()->width(120);
 
-        $grid->column('service_subscription_id', 'Subscription')->display(function ($id) {
+        $grid->column('service_subscription_id', 'Student')->display(function ($id) {
             $sub = $this->serviceSubscription;
-            if ($sub) {
-                $studentName = $sub->subscriber ? $sub->subscriber->name : 'N/A';
-                return "<a href='/admin/service-subscriptions/{$id}' target='_blank'>
-                    <strong>#{$id}</strong> - {$studentName}
-                </a>";
+            if ($sub && $sub->subscriber) {
+                return $sub->subscriber->name;
             }
             return "#$id";
-        })->width(200);
+        })->width(180);
+
+        $grid->column('current_class', 'Class')->display(function () {
+            $sub = $this->serviceSubscription;
+            if ($sub && $sub->subscriber && $sub->subscriber->current_class) {
+                return $sub->subscriber->current_class->name_text;
+            }
+            return '-';
+        })->width(120);
 
         $grid->column('stock_item_category_id', 'Item')->display(function ($id) {
             return $this->stockItemCategory->name ?? 'N/A';
@@ -144,6 +149,9 @@ class ServiceItemToBeOfferedController extends AdminController
                     return $sub->subscriber->name;
                 }
                 return $original;
+            });
+            $export->column('current_class', function ($value, $original) {
+                return $value;
             });
             $export->column('created_at', function ($value, $original) {
                 return $original ? date('Y-m-d', strtotime($original)) : '';
