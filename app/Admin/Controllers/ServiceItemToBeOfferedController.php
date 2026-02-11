@@ -139,6 +139,10 @@ class ServiceItemToBeOfferedController extends AdminController
             $export->originalValue(['quantity', 'is_service_offered', 'remarks']);
 
             $export->column('service_subscription_id', function ($value, $original) {
+                $sub = \App\Models\ServiceSubscription::find($original);
+                if ($sub && $sub->subscriber) {
+                    return $sub->subscriber->name;
+                }
                 return $original;
             });
             $export->column('created_at', function ($value, $original) {
