@@ -80,7 +80,7 @@ class AttendanceDashboardController extends Controller
         $theology_class_stats = $this->getTheologyClassStats($enterprise_id, $start_date, $end_date, $term_id);
 
         return $content
-            ->title('Comprehensive attendance insights for Kira Junior School - Kito')
+            ->title('Comprehensive attendance insights for ' . $ent->name)
             ->description('')
             ->view('admin.attendance-dashboard', compact(
                 'ent', 'start_date', 'end_date', 'term_id', 'class_id', 'attendance_type',
