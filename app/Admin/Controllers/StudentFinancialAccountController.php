@@ -154,11 +154,10 @@ class StudentFinancialAccountController extends AdminController
         $grid->column('type', __('Account type'))->hide()->sortable();
 
         $grid->column('name', __('Account owner'))
-
             ->display(function () {
                 return
                     '<b><a target="_blank" class="text-primary" title="Click to View Account Details" href="' . admin_url('students/' . $this->administrator_id) . '">' . $this->name . "</a><b>";;
-            });
+            })->sortable();
         $grid->column('owner.status', __('Student\'s Status'))
             ->using([0 => 'Not active', 1 => 'Active', 2 => 'Pending'])
             ->width(100)
@@ -396,7 +395,7 @@ class StudentFinancialAccountController extends AdminController
                 }
                 $balance = $payable + $paid;
 
-                $form->display('name', __('Account name'));
+                $form->text('name', __('Account name'));
                 $form->display('payable', __('Total payable fees'))
                     ->default("UGX " . number_format($payable));
 
