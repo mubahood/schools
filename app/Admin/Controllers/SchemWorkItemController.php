@@ -80,13 +80,13 @@ class SchemWorkItemController extends AdminController
                 ->select(array_combine(range(1, 18), array_map(function ($i) { return "Week $i"; }, range(1, 18))));
         });
 
-        // Query scope
-        $conds = ['enterprise_id' => $u->enterprise_id];
-        if (!$u->isRole('dos')) {
-            $conds['teacher_id'] = $u->id;
+        // Query scope — admin, dos, hm see all; teachers see only their own
+        $isPrivileged = $u->isRole('admin') || $u->isRole('dos') || $u->isRole('hm');
+        $grid->model()->where('enterprise_id', $u->enterprise_id);
+        if (!$isPrivileged) {
+            $grid->model()->where('teacher_id', $u->id);
         }
-
-        $grid->model()->where($conds)->orderBy('term_id', 'desc')->orderBy('week', 'asc');
+        $grid->model()->orderBy('term_id', 'desc')->orderBy('week', 'asc');
         $grid->quickSearch('topic', 'competence', 'methods')->placeholder('Search topic, competence...');
 
         // Columns
@@ -240,12 +240,28 @@ class SchemWorkItemController extends AdminController
             return $form;
         }
 
-        // Build subject options for this teacher
+        // Determine if user is privileged (admin, dos, hm)
+        $isPrivileged = $u->isRole('admin') || $u->isRole('dos') || $u->isRole('hm');
         $userModel = User::find($u->id);
+
+        // Build subject options — privileged users see ALL subjects, teachers see only theirs
         $subjects = [];
-        foreach ($userModel->my_subjects() as $s) {
-            $c = AcademicClass::find($s->academic_class_id);
-            $subjects[$s->id] = $s->subject_name . ' — ' . ($c ? $c->name : 'N/A');
+        if ($isPrivileged) {
+            $allSubjects = Subject::where('enterprise_id', $u->enterprise_id)
+                ->whereHas('academic_class', function ($q) use ($active_term) {
+                    $q->where('academic_year_id', $active_term->academic_year_id);
+                })
+                ->orderBy('subject_name')
+                ->get();
+            foreach ($allSubjects as $s) {
+                $c = AcademicClass::find($s->academic_class_id);
+                $subjects[$s->id] = $s->subject_name . ' — ' . ($c ? $c->name : 'N/A');
+            }
+        } else {
+            foreach ($userModel->my_subjects() as $s) {
+                $c = AcademicClass::find($s->academic_class_id);
+                $subjects[$s->id] = $s->subject_name . ' — ' . ($c ? $c->name : 'N/A');
+            }
         }
 
         $preSelected = request()->get('subject_id');
@@ -255,8 +271,24 @@ class SchemWorkItemController extends AdminController
         $form->hidden('term_id')->value($active_term->id);
 
         if ($form->isCreating()) {
-            $form->hidden('teacher_id')->value($u->id);
-            $form->hidden('supervisor_id')->value($userModel->supervisor_id ?? $u->id);
+            if ($isPrivileged) {
+                // Privileged users can assign any teacher
+                $teachers = User::where(['enterprise_id' => $u->enterprise_id, 'user_type' => 'employee'])
+                    ->orderBy('first_name')->get()->pluck('name', 'id')->toArray();
+                $form->select('teacher_id', 'Teacher')->options($teachers)->rules('required');
+                $form->select('supervisor_id', 'Supervisor')->options($teachers)->default($u->id);
+            } else {
+                $form->hidden('teacher_id')->value($u->id);
+                $form->hidden('supervisor_id')->value($userModel->supervisor_id ?? $u->id);
+            }
+        } else {
+            // On edit, privileged users can change teacher
+            if ($isPrivileged) {
+                $teachers = User::where(['enterprise_id' => $u->enterprise_id, 'user_type' => 'employee'])
+                    ->orderBy('first_name')->get()->pluck('name', 'id')->toArray();
+                $form->select('teacher_id', 'Teacher')->options($teachers)->rules('required');
+                $form->select('supervisor_id', 'Supervisor')->options($teachers);
+            }
         }
 
         $subjectField = $form->select('subject_id', 'Subject')
@@ -339,6 +371,17 @@ class SchemWorkItemController extends AdminController
         if ($form->isCreating()) {
             $form->hidden('supervisor_status')->value('Pending');
             $form->hidden('status')->value('Pending');
+        }
+
+        // Privileged users can also set supervisor status
+        if (!$form->isCreating() && $isPrivileged) {
+            $form->divider('Supervisor Review');
+            $form->radio('supervisor_status', 'Supervisor Status')
+                ->options([
+                    'Pending'  => 'Pending',
+                    'Approved' => 'Approved',
+                    'Rejected' => 'Rejected',
+                ])->default('Pending');
         }
 
         // Save callback

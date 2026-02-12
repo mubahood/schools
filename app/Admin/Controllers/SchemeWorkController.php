@@ -170,14 +170,22 @@ class SchemeWorkController extends AdminController
         // Quick search
         $grid->quickSearch('subject_name', 'code')->placeholder('Search by subject name or code');
 
-        // Model query
-        $conds = [
-            'enterprise_id' => $u->enterprise_id,
-            'academic_year_id' => $active_year->id
-        ];
+        // Model query — privileged users see all subjects, teachers see only theirs
+        $isPrivileged = $u->isRole('admin') || $u->isRole('dos') || $u->isRole('hm');
 
         $grid->model()
-            ->where($conds)
+            ->where([
+                'enterprise_id' => $u->enterprise_id,
+                'academic_year_id' => $active_year->id
+            ])
+            ->when(!$isPrivileged, function ($query) use ($u) {
+                $query->where(function ($q) use ($u) {
+                    $q->where('subject_teacher', $u->id)
+                      ->orWhere('teacher_1', $u->id)
+                      ->orWhere('teacher_2', $u->id)
+                      ->orWhere('teacher_3', $u->id);
+                });
+            })
             ->orderBy('academic_class_id', 'asc')
             ->orderBy('subject_name', 'asc');
 
