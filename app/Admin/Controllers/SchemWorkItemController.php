@@ -275,7 +275,7 @@ class SchemWorkItemController extends AdminController
                 // Privileged users can assign any teacher
                 $teachers = User::where(['enterprise_id' => $u->enterprise_id, 'user_type' => 'employee'])
                     ->orderBy('first_name')->get()->pluck('name', 'id')->toArray();
-                $form->select('teacher_id', 'Teacher')->options($teachers)->rules('required');
+                $form->select('teacher_id', 'Teacher')->options($teachers)->default($u->id)->rules('required');
                 $form->select('supervisor_id', 'Supervisor')->options($teachers)->default($u->id);
             } else {
                 $form->hidden('teacher_id')->value($u->id);
