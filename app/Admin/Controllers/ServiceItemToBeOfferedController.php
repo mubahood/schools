@@ -55,7 +55,26 @@ class ServiceItemToBeOfferedController extends AdminController
         $grid->filter(function ($filter) {
             $filter->disableIdFilter();
 
-            $filter->equal('service_subscription_id', 'Subscription ID')->integer();
+            $u = Auth::user();
+            $ajax_url = url(
+                '/api/ajax-users?'
+                    . 'enterprise_id=' . $u->enterprise_id
+                    . '&search_by_1=name'
+                    . '&search_by_2=id'
+                    . '&user_type=student'
+                    . '&model=User'
+            );
+
+            $filter->where(function ($query) {
+                $query->whereHas('serviceSubscription', function ($q) {
+                    $q->where('administrator_id', $this->input);
+                });
+            }, 'Student')->select(function ($id) {
+                $a = User::find($id);
+                if ($a) {
+                    return [$a->id => $a->name_text];
+                }
+            })->ajax($ajax_url);
 
             $filter->equal('stock_item_category_id', 'Stock Item')->select(function () {
                 $u = Auth::user();
@@ -68,8 +87,6 @@ class ServiceItemToBeOfferedController extends AdminController
                 'No' => 'Not Offered'
             ]);
 
-            $filter->between('created_at', 'Created Date')->date();
-            $filter->between('offered_at', 'Offered Date')->date();
         });
 
         // Grid columns

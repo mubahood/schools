@@ -251,43 +251,102 @@ Route::get('classes', function (Request $r) {
 
 Route::get('ajax-users', function (Request $r) {
     $q = trim($r->get('q'));
-    $enterprise_id = $r->get('enterprise_id');
+    $enterprise_id = ((int) $r->get('enterprise_id'));
     $user_type = $r->get('user_type');
     $status = $r->get('status');
-    $conditions['enterprise_id'] =  $enterprise_id;
-    if ($user_type != null) {
-        $conditions['user_type'] =  $user_type;
-    }
-    if ($status != null) {
-        $conditions['status'] =  $status;
+
+    // SaaS guard — enterprise_id is mandatory
+    if ($enterprise_id < 1) {
+        return ['data' => []];
     }
 
-    $c = Administrator::where($conditions)
-        ->where('name', 'like', "%$q%")
-        ->limit(100)->get();
-
-    $data = [];
-    $surfix = "";
-    foreach ($c as $key => $v) {
-
-
-        if ($v->status != 1) {
-            continue;
+    // Helper: build base query with common filters
+    $makeBase = function () use ($enterprise_id, $user_type, $status) {
+        $qry = Administrator::where('enterprise_id', $enterprise_id)
+            ->where('status', 1);
+        if ($user_type != null && $user_type != '') {
+            $qry->where('user_type', $user_type);
         }
+        if ($status != null && $status != '') {
+            $qry->where('status', $status);
+        }
+        return $qry;
+    };
 
-        if (strtolower($user_type) == 'student') {
-            if ($v->current_class != null) {
-                $surfix = " - " . $v->current_class->name_text;
+    if ($q != null && $q != '') {
+        // Exact ID match
+        if (is_numeric($q)) {
+            $results = $makeBase()->where(function ($qb) use ($q) {
+                $qb->where('id', $q)
+                    ->orWhere('user_number', $q)
+                    ->orWhere('phone_number_1', 'like', "%{$q}%");
+            })->orderBy('name', 'asc')->limit(20)->get();
+        } else {
+            $words = preg_split('/\s+/', $q);
+
+            if (count($words) >= 2) {
+                // 1) AND matching: all words must appear (order-independent)
+                $results = $makeBase()->where(function ($qb) use ($words) {
+                    $qb->where(function ($all) use ($words) {
+                        foreach ($words as $word) {
+                            $all->where('name', 'like', "%{$word}%");
+                        }
+                    })->orWhere(function ($combo) use ($words) {
+                        foreach ($words as $word) {
+                            $combo->where(function ($field) use ($word) {
+                                $field->where('first_name', 'like', "%{$word}%")
+                                      ->orWhere('last_name', 'like', "%{$word}%");
+                            });
+                        }
+                    });
+                })->orderBy('name', 'asc')->limit(20)->get();
+
+                // 2) Fallback: OR matching — any word matches (partial results)
+                if ($results->isEmpty()) {
+                    $results = $makeBase()->where(function ($qb) use ($words) {
+                        foreach ($words as $word) {
+                            $qb->orWhere('name', 'like', "%{$word}%")
+                                ->orWhere('first_name', 'like', "%{$word}%")
+                                ->orWhere('last_name', 'like', "%{$word}%");
+                        }
+                    })->orderBy('name', 'asc')->limit(20)->get();
+                }
+            } else {
+                // Single word: search across name, first_name, last_name, user_number
+                $results = $makeBase()->where(function ($qb) use ($q) {
+                    $qb->where('name', 'like', "%{$q}%")
+                        ->orWhere('first_name', 'like', "{$q}%")
+                        ->orWhere('last_name', 'like', "{$q}%")
+                        ->orWhere('user_number', 'like', "{$q}%")
+                        ->orWhere('phone_number_1', 'like', "%{$q}%");
+                })->orderBy('name', 'asc')->limit(20)->get();
             }
         }
+    } else {
+        $results = $makeBase()->orderBy('name', 'asc')->limit(20)->get();
+    }
+
+    $data = [];
+    foreach ($results as $v) {
+        $label = "#{$v->id} - " . $v->name;
+
+        // Append class info for students
+        if (strtolower($user_type) == 'student' && $v->current_class != null) {
+            $label .= ' - ' . $v->current_class->name_text;
+        }
+
+        // Append user_number if available
+        if (!empty($v->user_number)) {
+            $label .= " ({$v->user_number})";
+        }
+
         $data[] = [
-            'id' => $v->id . "",
-            'text' => "#{$v->id} - " . $v->name . $surfix
+            'id' => $v->id . '',
+            'text' => $label,
         ];
     }
-    return [
-        'data' => $data
-    ];
+
+    return ['data' => $data];
 });
 
 
