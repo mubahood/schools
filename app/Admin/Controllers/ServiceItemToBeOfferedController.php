@@ -76,9 +76,21 @@ class ServiceItemToBeOfferedController extends AdminController
                 }
             })->ajax($ajax_url);
 
-            $filter->equal('stock_item_category_id', 'Stock Item')->select(function () {
+            $filter->equal('stock_item_category_id', 'Item')->select(function () {
                 $u = Auth::user();
                 return StockItemCategory::where('enterprise_id', $u->enterprise_id)
+                    ->orderBy('name')
+                    ->pluck('name', 'id');
+            });
+
+            $filter->where(function ($query) {
+                $query->whereHas('serviceSubscription', function ($q) {
+                    $q->where('service_id', $this->input);
+                });
+            }, 'Service')->select(function () {
+                $u = Auth::user();
+                return \App\Models\Service::where('enterprise_id', $u->enterprise_id)
+                    ->orderBy('name')
                     ->pluck('name', 'id');
             });
 
