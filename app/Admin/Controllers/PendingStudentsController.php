@@ -438,7 +438,10 @@ class PendingStudentsController extends AdminController
             $form->text('given_name');
             $form->text('last_name')->rules('required');
 
-            $form->text('school_pay_payment_code')->rules('required');
+            $form->text('school_pay_payment_code')->rules('required')
+                ->creationRules('unique:admin_users,school_pay_payment_code,NULL,id,enterprise_id,' . Admin::user()->enterprise_id . ',user_type,student')
+                ->updateRules('unique:admin_users,school_pay_payment_code,{{id}},id,enterprise_id,' . Admin::user()->enterprise_id . ',user_type,student')
+                ->help('Must be unique per school.');
             $form->text('school_pay_account_id')->rules('required');
             $form->select('sex', 'Gender')->options(['Male' => 'Male', 'Female' => 'Female'])->rules('required');
 

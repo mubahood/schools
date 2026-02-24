@@ -2424,6 +2424,24 @@ Route::get('temp-import', function () {
     // exactly one
     $user = $users->first();
     $user = User::find($user->id); // Ensure we have a User model instance
+
+    // Check for duplicate school_pay_payment_code before assigning
+    if ($schoo_pay_code != null && strlen(trim($schoo_pay_code)) >= 3) {
+      $codeConflict = User::where('enterprise_id', $user->enterprise_id)
+        ->where('school_pay_payment_code', trim($schoo_pay_code))
+        ->where('user_type', 'student')
+        ->where('id', '!=', $user->id)
+        ->first();
+      if ($codeConflict != null) {
+        echo "<br><span style='background-color: #f8d7da; color: #721c24; padding: 2px 6px; border-radius: 3px;'>"
+          . "SKIPPED: School Pay Code " . htmlspecialchars($schoo_pay_code) . " already assigned to "
+          . htmlspecialchars($codeConflict->name) . " (ID: " . $codeConflict->id . "). Cannot assign to "
+          . htmlspecialchars($user->name) . " (ID: " . $user->id . ")"
+          . "</span><br>";
+        continue;
+      }
+    }
+
     $user->school_pay_payment_code = $schoo_pay_code;
     $user->has_account_info = 'Yes'; // Mark as having account info
     $user->school_pay_account_id = $student_account;

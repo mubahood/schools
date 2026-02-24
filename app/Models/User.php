@@ -41,6 +41,25 @@ class User extends Administrator implements JWTSubject
                     $m->parent_id = $parent->id;
                 }
             }
+
+            // Prevent duplicate school_pay_payment_code within same enterprise
+            if (
+                $m->school_pay_payment_code != null &&
+                strlen(trim($m->school_pay_payment_code)) >= 3
+            ) {
+                $code = trim($m->school_pay_payment_code);
+                $m->school_pay_payment_code = $code;
+                $duplicate = User::where('enterprise_id', $m->enterprise_id)
+                    ->where('school_pay_payment_code', $code)
+                    ->where('user_type', 'student')
+                    ->first();
+                if ($duplicate != null) {
+                    throw new \Exception(
+                        "School Pay Code '{$code}' is already assigned to {$duplicate->name} (ID: {$duplicate->id}). Each student must have a unique School Pay code."
+                    );
+                }
+            }
+
             return $m;
         });
 
@@ -57,8 +76,27 @@ class User extends Administrator implements JWTSubject
                 if ($parent != null) {
                     $m->parent_id = $parent->id;
                 }
-                if ($m->school_pay_payment_code != null && strlen($m->school_pay_payment_code)  > 4) {
+                if ($m->school_pay_payment_code != null && strlen($m->school_pay_payment_code) > 4) {
                     $m->has_account_info = 'Yes';
+                }
+
+                // Prevent duplicate school_pay_payment_code within same enterprise
+                if (
+                    $m->school_pay_payment_code != null &&
+                    strlen(trim($m->school_pay_payment_code)) >= 3
+                ) {
+                    $code = trim($m->school_pay_payment_code);
+                    $m->school_pay_payment_code = $code;
+                    $duplicate = User::where('enterprise_id', $m->enterprise_id)
+                        ->where('school_pay_payment_code', $code)
+                        ->where('user_type', 'student')
+                        ->where('id', '!=', $m->id)
+                        ->first();
+                    if ($duplicate != null) {
+                        throw new \Exception(
+                            "School Pay Code '{$code}' is already assigned to {$duplicate->name} (ID: {$duplicate->id}). Each student must have a unique School Pay code."
+                        );
+                    }
                 }
             }
             return $m;

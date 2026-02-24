@@ -924,7 +924,10 @@ class StudentsController extends AdminController
             $form->text('last_name');
             $form->text('lin', 'Student\'s LIN');
 
-            $form->text('school_pay_payment_code');
+            $form->text('school_pay_payment_code')
+                ->creationRules('nullable|unique:admin_users,school_pay_payment_code,NULL,id,enterprise_id,' . Admin::user()->enterprise_id . ',user_type,student')
+                ->updateRules('nullable|unique:admin_users,school_pay_payment_code,{{id}},id,enterprise_id,' . Admin::user()->enterprise_id . ',user_type,student')
+                ->help('Must be unique per school. Leave empty if not applicable.');
             $form->text('school_pay_account_id');
             $form->radio('sex', 'Gender')->options(['Male' => 'Male', 'Female' => 'Female'])->rules('required');
             $form->radio('residence', 'Residence')

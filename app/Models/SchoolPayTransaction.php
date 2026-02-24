@@ -165,9 +165,17 @@ class SchoolPayTransaction extends Model
 
                 if (!$accountHasPaymentCodeSet) {
                     if ($this->studentPaymentCode != null && strlen($this->studentPaymentCode) > 4) {
-                        $userAccount->school_pay_payment_code = $this->studentPaymentCode;
-                        $userAccount->has_account_info = 'Yes';
-                        $userAccount->save();
+                        // Check no other student already has this code in the same enterprise
+                        $codeConflict = User::where('enterprise_id', $this->enterprise_id)
+                            ->where('school_pay_payment_code', $this->studentPaymentCode)
+                            ->where('user_type', 'student')
+                            ->where('id', '!=', $userAccount->id)
+                            ->first();
+                        if ($codeConflict == null) {
+                            $userAccount->school_pay_payment_code = $this->studentPaymentCode;
+                            $userAccount->has_account_info = 'Yes';
+                            $userAccount->save();
+                        }
                     }
                 }
             }
