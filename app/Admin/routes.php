@@ -207,4 +207,9 @@ Route::group([
     $router->resource('session-reports', SessionReportController::class);
     $router->resource('inventory-subscriptions', InventorySubscriptionController::class);
     $router->resource('service-item-to-be-offereds', ServiceItemToBeOfferedController::class);
+
+    // Assignment / Homework Management
+    $router->get('assignments/{id}/regenerate-submissions', 'AssignmentController@regenerateSubmissions')->name('assignments.regenerate');
+    $router->resource('assignments', AssignmentController::class);
+    $router->resource('assignment-submissions', AssignmentSubmissionController::class);
 });
