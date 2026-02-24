@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Admin\Actions\Post\SchoolPayTransactionImport;
+use App\Admin\Actions\Post\SchoolPayTransactionFix;
 use App\Admin\Actions\Post\TransactionChangeDueTerm;
 use App\Models\Account;
 use App\Models\SchoolPayTransaction;
@@ -113,6 +114,7 @@ class SchoolPayTransactionController extends AdminController
         $grid->batchActions(function ($batch) {
             $batch->disableDelete();
             $batch->add(new SchoolPayTransactionImport());
+            $batch->add(new SchoolPayTransactionFix());
         });
 
         $grid->model()->where([

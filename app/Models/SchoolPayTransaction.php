@@ -198,14 +198,23 @@ class SchoolPayTransaction extends Model
         $trans->contra_entry_transaction_id = $this->contra_entry_transaction_id;
         $trans->termly_school_fees_balancing_id = $this->termly_school_fees_balancing_id;
         $trans->amount = abs($this->amount);
-        $description = $this->studentName . " Paid UGX " . number_format($this->amount, 2) . " through School Pay, Transaction ID: " . $school_pay_receipt_number . " on date: " . $this->payment_date . ". Description: " . $this->description;
-        $trans->description = $description;
+        $trans->description = self::buildCleanDescription($this);
         $trans->is_contra_entry = $this->is_contra_entry;
         $trans->type = $this->type;
         $trans->payment_date = $this->payment_date;
         $trans->source = $this->source;
         $this->account_id = $account->id;
         $trans->account_id = $account->id;
+
+        // Force created_at to the actual payment date from school pay record
+        $paymentDate = $this->payment_date ?? $this->paymentDateAndTime ?? null;
+        if ($paymentDate != null && strlen($paymentDate) >= 10) {
+            try {
+                $trans->created_at = \Carbon\Carbon::parse($paymentDate);
+            } catch (\Throwable $th) {
+                // fallback to current time if date parsing fails
+            }
+        }
 
         try {
             $trans->save();
@@ -217,6 +226,130 @@ class SchoolPayTransaction extends Model
         }
         $this->status = 'Imported';
         $this->save();
+    }
+
+    /**
+     * Build a clean, human-readable description from a SchoolPayTransaction record.
+     * Used both during import and when fixing existing transactions.
+     */
+    public static function buildCleanDescription($spt)
+    {
+        $studentName = $spt->studentName ?? 'Unknown Student';
+        $amount = number_format(abs((float)$spt->amount));
+        $paymentChannel = $spt->sourcePaymentChannel ?? $spt->source ?? 'School Pay';
+        $receiptNumber = $spt->schoolpayReceiptNumber ?? $spt->school_pay_transporter_id ?? '';
+        $paymentCode = $spt->studentPaymentCode ?? '';
+        $studentClass = $spt->studentClass ?? '';
+        $paymentDate = $spt->paymentDateAndTime ?? $spt->payment_date ?? '';
+
+        $desc = "School fees payment of UGX {$amount} by {$studentName}";
+        if (!empty($paymentChannel)) {
+            $desc .= " via {$paymentChannel}";
+        }
+        $desc .= ".";
+        if (!empty($receiptNumber)) {
+            $desc .= " Receipt: {$receiptNumber}.";
+        }
+        if (!empty($paymentCode)) {
+            $desc .= " Payment Code: {$paymentCode}.";
+        }
+        if (!empty($studentClass)) {
+            $desc .= " Class: {$studentClass}.";
+        }
+        if (!empty($paymentDate)) {
+            $desc .= " Date: {$paymentDate}.";
+        }
+        return $desc;
+    }
+
+    /**
+     * Fix the linked Transaction's description and created_at date.
+     * This method is idempotent — safe to call multiple times.
+     * Returns: ['success' => bool, 'message' => string]
+     */
+    public function fix()
+    {
+        // Find the corresponding Transaction record
+        $trans = Transaction::where([
+            'school_pay_transporter_id' => $this->school_pay_transporter_id
+        ])->first();
+
+        if ($trans == null && $this->schoolpayReceiptNumber != null && strlen($this->schoolpayReceiptNumber) > 4) {
+            $trans = Transaction::where([
+                'school_pay_transporter_id' => $this->schoolpayReceiptNumber
+            ])->first();
+        }
+
+        if ($trans == null && $this->sourceChannelTransactionId != null && strlen($this->sourceChannelTransactionId) > 4) {
+            $trans = Transaction::where([
+                'school_pay_transporter_id' => $this->sourceChannelTransactionId
+            ])->first();
+        }
+
+        if ($trans == null) {
+            return ['success' => false, 'message' => 'No linked transaction found for SchoolPay record #' . $this->id];
+        }
+
+        $changes = [];
+
+        // --- Fix description ---
+        $newDescription = self::buildCleanDescription($this);
+        if ($trans->description !== $newDescription) {
+            $trans->description = $newDescription;
+            $changes[] = 'description';
+        }
+
+        // --- Fix created_at to match payment date ---
+        $paymentDate = $this->paymentDateAndTime ?? $this->payment_date ?? null;
+        if ($paymentDate != null && strlen($paymentDate) >= 10) {
+            try {
+                $parsedDate = \Carbon\Carbon::parse($paymentDate);
+                $existingDate = $trans->created_at ? \Carbon\Carbon::parse($trans->created_at) : null;
+                // Only update if dates differ by more than 1 minute (avoid unnecessary updates)
+                if ($existingDate == null || abs($existingDate->diffInMinutes($parsedDate)) > 1) {
+                    $changes[] = 'created_at';
+                }
+            } catch (\Throwable $th) {
+                $parsedDate = null;
+            }
+        } else {
+            $parsedDate = null;
+        }
+
+        if (empty($changes)) {
+            return ['success' => true, 'message' => 'Transaction #' . $trans->id . ' already up to date.'];
+        }
+
+        // Use direct DB update to bypass model events (avoid triggering balance recalculations etc.)
+        $updateData = ['description' => $newDescription];
+        if ($parsedDate != null && in_array('created_at', $changes)) {
+            $updateData['created_at'] = $parsedDate->format('Y-m-d H:i:s');
+        }
+
+        DB::table('transactions')->where('id', $trans->id)->update($updateData);
+
+        // Also fix the SchoolPayTransaction description if it contains JSON
+        if ($this->description !== null && $this->isJsonString($this->description)) {
+            $this->description = $newDescription;
+            DB::table('school_pay_transactions')->where('id', $this->id)->update([
+                'description' => $newDescription
+            ]);
+        }
+
+        return [
+            'success' => true,
+            'message' => 'Fixed Transaction #' . $trans->id . ': updated ' . implode(', ', $changes) . '.'
+        ];
+    }
+
+    /**
+     * Check if a string is a JSON string.
+     */
+    private function isJsonString($str)
+    {
+        if (!is_string($str) || strlen($str) < 2) return false;
+        json_decode($str);
+        return json_last_error() === JSON_ERROR_NONE;
     }
 
     //getter for status attribute

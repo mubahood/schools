@@ -2047,8 +2047,8 @@ class Utils  extends Model
                 $tran->contra_entry_transaction_id = null;
                 $tran->contra_entry_account_id = null;
                 $tran->created_by_id = $ent->administrator_id;
-                $tran->description = json_encode($v);
                 $tran->data = json_encode($v);
+                $tran->description = SchoolPayTransaction::buildCleanDescription($tran);
 
                 if (isset($v->schoolpayReceiptNumber)) {
                     if ($v->schoolpayReceiptNumber != null) {
