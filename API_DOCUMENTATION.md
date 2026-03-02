@@ -14,6 +14,68 @@ Authorization: Bearer {your-token}
 
 ---
 
+## 📝 Assignment / Homework API Endpoints
+
+All endpoints below are mounted under `/api` and return the standard payload:
+
+```json
+{
+  "code": 1,
+  "message": "Success",
+  "data": {}
+}
+```
+
+### List Assignments
+**Endpoint:** `GET /api/assignments`
+
+Optional query params: `status`, `type`, `subject_id`, `academic_class_id`, `limit`
+
+### Assignment Details
+**Endpoint:** `GET /api/assignments/{id}`
+
+### Create Assignment (Staff)
+**Endpoint:** `POST /api/assignments`
+
+Key fields: `title`, `academic_class_id`, `type`, `status`, `submission_type`, `due_date`, `max_score`
+
+### Update Assignment Status (Staff)
+**Endpoint:** `POST /api/assignments/{id}/status`
+
+Body:
+```json
+{
+  "status": "Published"
+}
+```
+
+### Regenerate Submission Records (Staff)
+**Endpoint:** `POST /api/assignments/{id}/regenerate-submissions`
+
+### List Assignment Submissions
+**Endpoint:** `GET /api/assignment-submissions`
+
+Optional query params: `assignment_id`, `status`, `student_id`, `limit`
+
+### Student Submit Assignment
+**Endpoint:** `POST /api/assignment-submissions/{id}/submit`
+
+Supported body: `submission_text` and/or `attachment` (depends on assignment `submission_type`)
+
+### Grade Submission (Staff)
+**Endpoint:** `POST /api/assignment-submissions/{id}/grade`
+
+Body example:
+```json
+{
+  "status": "Graded",
+  "score": 18,
+  "feedback": "Well done"
+}
+```
+
+---
+
 ## 📱 SMS API Endpoints
 
 ### Send SMS

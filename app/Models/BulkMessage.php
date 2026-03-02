@@ -11,6 +11,12 @@ class BulkMessage extends Model
 {
     use HasFactory;
 
+    /**
+     * Set to true before saving a duplicate to skip auto-generation of DirectMessages.
+     * The duplicate is saved as Draft so the user can review before generating/sending.
+     */
+    public static bool $skipAutoGenerate = false;
+
     public static function boot()
     {
         parent::boot();
@@ -18,10 +24,14 @@ class BulkMessage extends Model
             DirectMessage::where('bulk_message_id', $m->id)->delete();
         });
         self::created(function ($m) {
-            BulkMessage::do_prepare_messages($m);
+            if (!BulkMessage::$skipAutoGenerate) {
+                BulkMessage::do_prepare_messages($m);
+            }
         });
         self::updated(function ($m) {
-            BulkMessage::do_prepare_messages($m);
+            if (!BulkMessage::$skipAutoGenerate) {
+                BulkMessage::do_prepare_messages($m);
+            }
         });
     }
 
@@ -30,9 +40,15 @@ class BulkMessage extends Model
     public static function do_prepare_messages($m)
     {
 
-        //set unlited execution time
+        //set unlimited execution time
         ini_set('max_execution_time', 0);
         ini_set('memory_limit', '1024M');
+
+        // Delete all unsent/draft messages for this bulk message so we can regenerate
+        // them fresh with up-to-date balances. Sent/Partial messages are preserved.
+        DirectMessage::where('bulk_message_id', $m->id)
+            ->whereNotIn('status', ['Sent', 'Partial'])
+            ->delete();
 
         $messages = [];
         $hasError = false;
@@ -41,6 +57,7 @@ class BulkMessage extends Model
         if ($enterprise == null) {
             $hasError = true;
             $errorMessage .= "Enterprise was not found.";
+            return;
         }
         $administrator_id = $enterprise->administrator_id;
         if ($m->target_types == 'Individuals') {
@@ -48,30 +65,11 @@ class BulkMessage extends Model
                 try {
                     $phone_numbers = explode(',', $m->target_individuals_phone_numbers);
                     foreach ($phone_numbers as $key => $receiver_number) {
-                        $msg = DirectMessage::where([
-                            'receiver_number' => $receiver_number,
-                            'bulk_message_id' => $m->id
-                        ])->first();
-
-                        if ($msg == null) {
-                            $msg = new DirectMessage();
-                        }
+                        $msg = new DirectMessage();
                         $msg->receiver_number = $receiver_number;
                         $msg->enterprise_id = $m->enterprise_id;
                         $msg->bulk_message_id = $m->id;
-                        $msg->administrator_id = $m->administrator_id;
-                        $msg->status = 'Pending';
-                        if ($m->message_delivery_type == 'Now') {
-                            $msg->delivery_time = Carbon::now();
-                            $msg->is_scheduled = 'Yes';
-                        } else {
-                            $msg->is_scheduled = 'No';
-                            $msg->delivery_time = Carbon::parse($m->message_delivery_time);
-                        }
-                        if ($m->send_action != 'Send') {
-                            $msg->status = 'Draft';
-                        }
-                        $msg->message_body = $m->message_body;
+                        $msg->administrator_id = $administrator_id;
                         $messages[] = $msg;
                     }
                 } catch (\Throwable $th) {
@@ -83,13 +81,7 @@ class BulkMessage extends Model
             if (is_array($m->target_teachers_ids)) {
                 try {
                     foreach ($m->target_teachers_ids as $key => $target_teachers_id) {
-                        $msg = DirectMessage::where([
-                            'administrator_id' => $target_teachers_id,
-                            'bulk_message_id' => $m->id
-                        ])->first();
-                        if ($msg == null) {
-                            $msg = new DirectMessage();
-                        }
+                        $msg = new DirectMessage();
                         $teacher = Administrator::find($target_teachers_id);
                         if ($teacher == null) {
                             $hasError = true;
@@ -109,7 +101,7 @@ class BulkMessage extends Model
                     }
                 } catch (\Throwable $th) {
                     $hasError = true;
-                    $errorMessage .= "Error in Individuals Phone Numbers. - " . $th->getMessage();
+                    $errorMessage .= "Error in Teachers. - " . $th->getMessage();
                 }
             }
         } else if ($m->target_types == 'To Parents') {
@@ -117,14 +109,7 @@ class BulkMessage extends Model
                 try {
                     foreach ($m->target_parents_condition_phone_numbers as $key => $target_id) {
 
-                        $msg = DirectMessage::where([
-                            'administrator_id' => $target_id,
-                            'bulk_message_id' => $m->id
-                        ])->first();
-                        if ($msg == null) {
-                            $msg = new DirectMessage();
-                        }
-
+                        $msg = new DirectMessage();
 
                         $balance = 0;
                         if ($m->target_parents_condition_type == 'Fees Balance') {
@@ -133,6 +118,8 @@ class BulkMessage extends Model
                                 $operator = '<';
                             }
 
+                            // Reset condition array each iteration to avoid stale keys
+                            $_acc_condition = [];
                             $_acc_condition['administrator_id'] = $target_id;
                             if ($m->target_parents_condition_fees_status == 'Only Verified') {
                                 $_acc_condition['status'] = 1;
@@ -147,6 +134,9 @@ class BulkMessage extends Model
                         }
 
                         $user = Administrator::find($target_id);
+                        if ($user == null) {
+                            continue;
+                        }
                         $parent = Administrator::find($user->parent_id);
                         if ($parent == null) {
                             $hasError = true;
@@ -156,6 +146,7 @@ class BulkMessage extends Model
 
                         $msg->STUDENT_NAME = $user->name;
                         $msg->TEACHER_NAME = $user->name;
+                        $msg->PARENT_NAME = $parent->name;
 
                         $phone_number = $parent->phone_number_1;
                         if ($phone_number == null || strlen($phone_number) < 2) {
@@ -168,7 +159,7 @@ class BulkMessage extends Model
                     }
                 } catch (\Throwable $th) {
                     $hasError = true;
-                    $errorMessage .= "Error in Individuals Phone Numbers. - " . $th->getMessage();
+                    $errorMessage .= "Error in To Parents. - " . $th->getMessage();
                 }
             }
         } else if ($m->target_types == 'To Classes') {
@@ -193,6 +184,9 @@ class BulkMessage extends Model
                         foreach ($class->students as $studentHasClass) {
                             $administrator_id = $studentHasClass->administrator_id;
                             $student = User::find($administrator_id);
+                            if ($student == null) {
+                                continue;
+                            }
                             $parent = $student->getParent();
                             if ($parent == null) {
                                 try {
@@ -209,7 +203,6 @@ class BulkMessage extends Model
                                 $phone_number = $parent->phone_number_1;
                             }
 
-
                             $balance = 0;
                             if ($m->target_parents_condition_type == 'Fees Balance') {
                                 $operator = '=';
@@ -217,6 +210,8 @@ class BulkMessage extends Model
                                     $operator = '<';
                                 }
 
+                                // Reset condition array each iteration to avoid stale keys
+                                $_acc_condition = [];
                                 $_acc_condition['administrator_id'] = $administrator_id;
                                 if ($m->target_parents_condition_fees_status == 'Only Verified') {
                                     $_acc_condition['status'] = 1;
@@ -230,19 +225,11 @@ class BulkMessage extends Model
                                 $balance = $acc->balance;
                             }
 
-
-                            $msg = DirectMessage::where([
-                                'administrator_id' => $parent->id,
-                                'bulk_message_id' => $m->id
-                            ])->first();
-                            if ($msg == null) {
-                                $msg = new DirectMessage();
-                            }
+                            $msg = new DirectMessage();
 
                             $msg->STUDENT_NAME = $student->name;
                             $msg->TEACHER_NAME = $student->name;
                             $msg->PARENT_NAME = $parent->name;
-
 
                             if ($phone_number == null || strlen($phone_number) < 2) {
                                 $phone_number = $parent->phone_number_2;
@@ -255,23 +242,27 @@ class BulkMessage extends Model
                     }
                 } catch (\Throwable $th) {
                     $hasError = true;
-                    $errorMessage .= "Error in Individuals Phone Numbers. - " . $th->getMessage();
+                    $errorMessage .= "Error in To Classes. - " . $th->getMessage();
                 }
             }
         }
 
         foreach ($messages as $key => $_msg) {
 
-            $isExisting = DirectMessage::where([
+            // Skip only if a message to this receiver has ALREADY BEEN SENT
+            // (do not skip Pending/Draft/Failed - those were cleared at the top)
+            $isAlreadySent = DirectMessage::where([
                 'receiver_number' => $_msg->receiver_number,
-                'bulk_message_id' => $m->id
-            ])->first();
-            if ($isExisting != null) {
+                'bulk_message_id' => $m->id,
+            ])->whereIn('status', ['Sent', 'Partial'])->first();
+            if ($isAlreadySent != null) {
                 continue;
-            } 
+            }
+
             $msg = $_msg;
             $msg->status = 'Pending';
-            if ($m->message_delivery_type == 'Now') {
+            // Fix: form stores 'Send Now', migration default is 'Now' — handle both
+            if (in_array($m->message_delivery_type, ['Now', 'Send Now'])) {
                 $msg->delivery_time = Carbon::now();
                 $msg->is_scheduled = 'Yes';
             } else {
@@ -284,17 +275,18 @@ class BulkMessage extends Model
             $msg->message_body = $m->message_body;
             $msg->enterprise_id = $m->enterprise_id;
             $msg->bulk_message_id = $m->id;
-            $msg->message_body = str_replace('[STUDENT_NAME]', $msg->STUDENT_NAME, $msg->message_body);
-            $msg->message_body = str_replace('[PARENT_NAME]', $msg->PARENT_NAME, $msg->message_body);
-            $msg->message_body = str_replace('[TEACHER_NAME]', $msg->TEACHER_NAME, $msg->message_body);
-            if (!isset($msg->administrator_id)) {
+            $msg->message_body = str_replace('[STUDENT_NAME]', $msg->STUDENT_NAME ?? '', $msg->message_body);
+            $msg->message_body = str_replace('[PARENT_NAME]', $msg->PARENT_NAME ?? '', $msg->message_body);
+            $msg->message_body = str_replace('[TEACHER_NAME]', $msg->TEACHER_NAME ?? '', $msg->message_body);
+            if (!isset($msg->administrator_id) || $msg->administrator_id == null) {
                 $msg->administrator_id = $enterprise->administrator_id;
-            } 
-            if ($msg->administrator_id == null) {
-                $msg->administrator_id = $enterprise->administrator_id; 
-            }  
-            $msg->message_body = str_replace('[FEES_BALANCE]', "UGX " . number_format($msg->balance), $msg->message_body);
-            $msg->save(); 
+            }
+            // Display balance as a positive number (accounts store debt as negative amounts).
+            // [FEES_BALANCE] is replaced with just the formatted number so the template
+            // can control the currency label, e.g. "UGX [FEES_BALANCE]" → "UGX 280,000"
+            $balanceDisplay = number_format(abs((int)($msg->balance ?? 0)));
+            $msg->message_body = str_replace('[FEES_BALANCE]', $balanceDisplay, $msg->message_body);
+            $msg->save();
         }
         // Utils::send_messages();
     }

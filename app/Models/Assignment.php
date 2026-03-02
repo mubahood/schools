@@ -5,10 +5,34 @@ namespace App\Models;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class Assignment extends Model
 {
     use HasFactory;
+
+    public const TYPES = [
+        'Homework',
+        'Assignment',
+        'Project',
+        'Classwork',
+        'Quiz',
+    ];
+
+    public const STATUSES = [
+        'Draft',
+        'Published',
+        'Closed',
+        'Archived',
+    ];
+
+    public const SUBMISSION_TYPES = [
+        'Both',
+        'File',
+        'Text',
+        'None',
+    ];
 
     protected $fillable = [
         'enterprise_id',
@@ -85,16 +109,7 @@ class Assignment extends Model
         parent::boot();
 
         self::creating(function ($m) {
-            // Validate required fields
-            if ($m->enterprise_id == null || $m->enterprise_id < 1) {
-                throw new Exception("Enterprise is required.");
-            }
-            if (empty($m->title)) {
-                throw new Exception("Assignment title is required.");
-            }
-            if ($m->academic_class_id == null || $m->academic_class_id < 1) {
-                throw new Exception("Target class is required.");
-            }
+            $m->normalizeAndValidate();
 
             // Auto-fill academic year & term from enterprise active term
             $ent = Enterprise::find($m->enterprise_id);
@@ -123,11 +138,15 @@ class Assignment extends Model
             try {
                 $m->generateSubmissions();
             } catch (\Throwable $th) {
-                // Log but don't block — teacher can regenerate later
+                Log::warning('Assignment submission generation failed on create.', [
+                    'assignment_id' => $m->id,
+                    'error' => $th->getMessage(),
+                ]);
             }
         });
 
         self::updating(function ($m) {
+            $m->normalizeAndValidate();
             return $m;
         });
 
@@ -148,51 +167,59 @@ class Assignment extends Model
             return;
         }
 
-        // Find students in the target class
-        $query = StudentHasClass::where('academic_class_id', $this->academic_class_id);
+        DB::transaction(function () {
+            $query = StudentHasClass::where('academic_class_id', $this->academic_class_id)
+                ->select(['administrator_id', 'stream_id']);
 
-        // If a specific stream is targeted, narrow down
-        if ($this->stream_id != null && $this->stream_id > 0) {
-            $query->where('stream_id', $this->stream_id);
-        }
-
-        $studentRecords = $query->get();
-        $count = 0;
-
-        foreach ($studentRecords as $shc) {
-            // Skip if submission already exists for this student+assignment
-            $existing = AssignmentSubmission::where([
-                'assignment_id' => $this->id,
-                'student_id' => $shc->administrator_id,
-            ])->first();
-
-            if ($existing != null) {
-                continue;
+            if ($this->stream_id != null && $this->stream_id > 0) {
+                $query->where('stream_id', $this->stream_id);
             }
 
-            $sub = new AssignmentSubmission();
-            $sub->enterprise_id = $this->enterprise_id;
-            $sub->assignment_id = $this->id;
-            $sub->student_id = $shc->administrator_id;
-            $sub->academic_class_id = $this->academic_class_id;
-            $sub->stream_id = $shc->stream_id;
-            $sub->subject_id = $this->subject_id;
-            $sub->academic_year_id = $this->academic_year_id;
-            $sub->term_id = $this->term_id;
-            $sub->max_score = $this->max_score;
-            $sub->status = 'Pending';
-            $sub->save();
+            $studentRecords = $query->get();
+            if ($studentRecords->isEmpty()) {
+                $this->updateStats();
+                return;
+            }
 
-            $count++;
-        }
+            $existingStudentIds = AssignmentSubmission::where('assignment_id', $this->id)
+                ->pluck('student_id')
+                ->map(function ($id) {
+                    return (int) $id;
+                })
+                ->toArray();
 
-        // Update cached counts
-        $this->total_students = AssignmentSubmission::where('assignment_id', $this->id)->count();
-        $this->submitted_count = AssignmentSubmission::where('assignment_id', $this->id)
-            ->whereIn('status', ['Submitted', 'Graded', 'Late'])->count();
-        $this->graded_count = AssignmentSubmission::where('assignment_id', $this->id)
-            ->where('status', 'Graded')->count();
-        $this->saveQuietly(); // avoid triggering hooks again
+            $insertRows = [];
+            $now = now();
+
+            foreach ($studentRecords as $shc) {
+                $studentId = (int) $shc->administrator_id;
+                if ($studentId < 1 || in_array($studentId, $existingStudentIds, true)) {
+                    continue;
+                }
+
+                $insertRows[] = [
+                    'enterprise_id' => $this->enterprise_id,
+                    'assignment_id' => $this->id,
+                    'student_id' => $studentId,
+                    'academic_class_id' => $this->academic_class_id,
+                    'stream_id' => $shc->stream_id,
+                    'subject_id' => $this->subject_id,
+                    'academic_year_id' => $this->academic_year_id,
+                    'term_id' => $this->term_id,
+                    'max_score' => $this->max_score,
+                    'status' => AssignmentSubmission::STATUS_PENDING,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+                $existingStudentIds[] = $studentId;
+            }
+
+            if (!empty($insertRows)) {
+                AssignmentSubmission::insert($insertRows);
+            }
+
+            $this->updateStats();
+        });
     }
 
     /**
@@ -210,10 +237,52 @@ class Assignment extends Model
     {
         $this->total_students = AssignmentSubmission::where('assignment_id', $this->id)->count();
         $this->submitted_count = AssignmentSubmission::where('assignment_id', $this->id)
-            ->whereIn('status', ['Submitted', 'Graded', 'Late'])->count();
+            ->whereIn('status', AssignmentSubmission::SUBMITTED_STATUSES)->count();
         $this->graded_count = AssignmentSubmission::where('assignment_id', $this->id)
-            ->where('status', 'Graded')->count();
+            ->where('status', AssignmentSubmission::STATUS_GRADED)->count();
         $this->saveQuietly();
+    }
+
+    protected function normalizeAndValidate(): void
+    {
+        $this->title = trim((string) $this->title);
+
+        if ($this->enterprise_id == null || $this->enterprise_id < 1) {
+            throw new Exception('Enterprise is required.');
+        }
+        if ($this->title === '') {
+            throw new Exception('Assignment title is required.');
+        }
+        if ($this->academic_class_id == null || $this->academic_class_id < 1) {
+            throw new Exception('Target class is required.');
+        }
+
+        if (!$this->type || !in_array($this->type, self::TYPES, true)) {
+            $this->type = 'Homework';
+        }
+        if (!$this->status || !in_array($this->status, self::STATUSES, true)) {
+            $this->status = 'Draft';
+        }
+        if (!$this->submission_type || !in_array($this->submission_type, self::SUBMISSION_TYPES, true)) {
+            $this->submission_type = 'Both';
+        }
+
+        if (!$this->is_assessed || !in_array($this->is_assessed, ['Yes', 'No'], true)) {
+            $this->is_assessed = 'Yes';
+        }
+        if (!$this->marks_display || !in_array($this->marks_display, ['Yes', 'No'], true)) {
+            $this->marks_display = 'No';
+        }
+
+        if ($this->is_assessed === 'No') {
+            $this->max_score = null;
+        } elseif ($this->max_score !== null && $this->max_score < 0) {
+            throw new Exception('Maximum score cannot be negative.');
+        }
+
+        if ($this->issue_date && $this->due_date && strtotime($this->due_date) < strtotime($this->issue_date)) {
+            throw new Exception('Due date cannot be earlier than issue date.');
+        }
     }
 
     // ── Accessors ──────────────────────────────────────────────────

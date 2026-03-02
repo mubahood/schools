@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\Post\DuplicateBulkMessages;
 use App\Models\AcademicClass;
 use App\Models\AcademicYear;
 use App\Models\Account;
@@ -31,15 +32,7 @@ class BulkMessageController extends AdminController
      */
     protected function grid()
     {
-        $m = BulkMessage::find(6);
-        /* BulkMessage::do_prepare_messages($m);
-        die('done');
-        $m->target_parents_condition_fees_amount = -200000;
-        $m->save(); 
-        dd($m); */
-
         $grid = new Grid(new BulkMessage());
-        $grid->disableBatchActions();
         $u = Auth::user();
         $grid->model()
             ->where([
@@ -75,12 +68,14 @@ class BulkMessageController extends AdminController
                 return $this->direct_messages->count();
             });
 
-        //   Utils::send_messages();
-        //button for send now messages
         $grid->column('send_now', __('Send Now'))->display(function () {
-            return '<a 
-            target="_blank"
-            href="' . url('bulk-messages-sending?id=' . $this->id) . '" class="btn btn-success">Send Messages Now</a>';
+            return '<a target="_blank"
+                href="' . url('bulk-messages-sending?id=' . $this->id) . '"
+                class="btn btn-success btn-sm">Send Messages Now</a>';
+        });
+
+        $grid->batchActions(function ($batch) {
+            $batch->add(new DuplicateBulkMessages());
         });
 
         return $grid;
@@ -247,7 +242,7 @@ class BulkMessageController extends AdminController
         <p class="p-0 m-0">Student\'s Name: <code>[STUDENT_NAME]</code></p>
         <p class="p-0 m-0">Parent\'s Name: <code>[PARENT_NAME]</code></p>
         <p class="p-0 m-0">Teacher\'s Name: <code>[TEACHER_NAME]</code></p>
-        <p class="p-0 m-0">School fees balance: <code>[FEES_BALANCE]</code></p>
+        <p class="p-0 m-0">School fees balance (number only — include currency in template, e.g. <code>UGX [FEES_BALANCE]</code>): <code>[FEES_BALANCE]</code></p>
         ', '');
 
         return $form;

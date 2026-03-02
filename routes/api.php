@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ApiAuthController;
+use App\Http\Controllers\ApiAssignmentController;
 use App\Http\Controllers\ApiMainController;
 use App\Http\Controllers\QuickSearchController;
 use App\Http\Middleware\JwtMiddleware;
@@ -166,6 +167,16 @@ Route::middleware([JwtMiddleware::class])->group(function () {
     Route::post("visitors-record-create", [ApiMainController::class, 'visitors_record_create']);
     Route::post("get-student-details", [ApiMainController::class, 'get_student_details']);
     Route::post("roll-call-participant-submit", [ApiMainController::class, 'roll_call_participant_submit']);
+
+    // ===== ASSIGNMENTS / HOMEWORK =====
+    Route::get('assignments', [ApiAssignmentController::class, 'index']);
+    Route::get('assignments/{id}', [ApiAssignmentController::class, 'show']);
+    Route::post('assignments', [ApiAssignmentController::class, 'store']);
+    Route::post('assignments/{id}/status', [ApiAssignmentController::class, 'updateStatus']);
+    Route::post('assignments/{id}/regenerate-submissions', [ApiAssignmentController::class, 'regenerateSubmissions']);
+    Route::get('assignment-submissions', [ApiAssignmentController::class, 'submissions']);
+    Route::post('assignment-submissions/{id}/submit', [ApiAssignmentController::class, 'submit']);
+    Route::post('assignment-submissions/{id}/grade', [ApiAssignmentController::class, 'grade']);
 
     //=====ATTENDANCE========//
     Route::get("participants", [ApiMainController::class, 'participants']);
