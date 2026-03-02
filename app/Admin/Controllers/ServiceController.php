@@ -40,7 +40,7 @@ class ServiceController extends AdminController
             ->orderBy('id', 'desc');
 
         // Disable actions we don’t need
-        $grid->disableBatchActions();
+        // $grid->disableBatchActions();
         $grid->disableExport();
         $grid->actions(function ($actions) {
             $actions->disableView();
