@@ -68,10 +68,16 @@ class BulkMessageController extends AdminController
                 return $this->direct_messages->count();
             });
 
-        $grid->column('send_now', __('Send Now'))->display(function () {
-            return '<a target="_blank"
-                href="' . url('bulk-messages-sending?id=' . $this->id) . '"
-                class="btn btn-success btn-sm">Send Messages Now</a>';
+        $grid->column('send_now', __('Action'))->display(function () {
+            $url = url('bulk-messages-sending?id=' . $this->id);
+            if ($this->send_action === 'Send') {
+                return '<a target="_blank" href="' . $url . '" class="btn btn-success btn-sm">
+                            <i class="fa fa-paper-plane"></i> Send Messages Now
+                        </a>';
+            }
+            return '<a target="_blank" href="' . $url . '" class="btn btn-default btn-sm">
+                        <i class="fa fa-eye"></i> Preview Messages
+                    </a>';
         });
 
         $grid->batchActions(function ($batch) {
