@@ -207,7 +207,7 @@ class ApiAssignmentController extends Controller
         }
 
         $query = $this->submissionsQueryForUser($user)
-            ->with(['assignment', 'subject', 'academicClass', 'stream'])
+            ->with(['assignment', 'subject', 'academicClass', 'stream', 'student'])
             ->orderBy('id', 'desc');
 
         if ($request->filled('assignment_id')) {
@@ -237,19 +237,39 @@ class ApiAssignmentController extends Controller
         if (!$user) {
             return $this->error('User not found.');
         }
-        if (strtolower((string) $user->user_type) !== 'student') {
-            return $this->error('Only students can submit assignments.');
+        $userType = strtolower((string) $user->user_type);
+        if ($userType !== 'student' && $userType !== 'parent') {
+            return $this->error('Only students and parents can submit assignments.');
         }
 
         $request->validate([
             'submission_text' => 'nullable|string',
             'attachment' => 'nullable|file|max:10240',
+            'photos' => 'nullable|array|max:10',
+            'photos.*' => 'image|max:10240',
         ]);
 
-        $submission = AssignmentSubmission::where('enterprise_id', $user->enterprise_id)
-            ->where('student_id', $user->id)
-            ->where('id', (int) $id)
-            ->first();
+        // Students submit against their own record; parents submit on behalf of their child
+        $submission = null;
+        if ($userType === 'student') {
+            $submission = AssignmentSubmission::where('enterprise_id', $user->enterprise_id)
+                ->where('student_id', $user->id)
+                ->where('id', (int) $id)
+                ->first();
+        } else {
+            $childIds = User::where('parent_id', $user->id)
+                ->where('enterprise_id', $user->enterprise_id)
+                ->where('user_type', 'student')
+                ->pluck('id')
+                ->toArray();
+
+            if (!empty($childIds)) {
+                $submission = AssignmentSubmission::where('enterprise_id', $user->enterprise_id)
+                    ->whereIn('student_id', $childIds)
+                    ->where('id', (int) $id)
+                    ->first();
+            }
+        }
 
         if (!$submission) {
             return $this->error('Submission record not found.');
@@ -266,6 +286,9 @@ class ApiAssignmentController extends Controller
         $submissionType = $assignment->submission_type ?: 'Both';
         $text = trim((string) ($request->submission_text ?? ''));
         $hasFile = $request->hasFile('attachment');
+        $hasPhotos = $request->hasFile('photos');
+        $hasAnyFile = $hasFile || $hasPhotos;
+        $existingPhotos = is_array($submission->photos) ? $submission->photos : [];
 
         if ($submissionType === 'None') {
             return $this->error('This assignment does not require direct submission.');
@@ -273,21 +296,41 @@ class ApiAssignmentController extends Controller
         if ($submissionType === 'Text' && $text === '') {
             return $this->error('Text submission is required.');
         }
-        if ($submissionType === 'File' && !$hasFile && !$submission->attachment) {
+        if ($submissionType === 'File' && !$hasAnyFile && !$submission->attachment && empty($existingPhotos)) {
             return $this->error('File attachment is required.');
         }
-        if ($submissionType === 'Both' && !$hasFile && $text === '' && !$submission->attachment) {
+        if ($submissionType === 'Both' && !$hasAnyFile && $text === '' && !$submission->attachment && empty($existingPhotos)) {
             return $this->error('Provide text or file attachment.');
         }
 
         if ($text !== '') {
             $submission->submission_text = $text;
         }
+
+        // Handle single document attachment (PDF, doc, etc.)
         if ($hasFile) {
             if (!empty($submission->attachment)) {
                 Storage::disk('public')->delete($submission->attachment);
             }
             $submission->attachment = $request->file('attachment')->store('assignments/student-submissions', 'public');
+        }
+
+        // Handle multiple photos — compress-ready images from mobile app
+        if ($hasPhotos) {
+            // Delete old photos from storage
+            if (!empty($existingPhotos)) {
+                foreach ($existingPhotos as $oldPath) {
+                    if (!empty($oldPath)) {
+                        Storage::disk('public')->delete($oldPath);
+                    }
+                }
+            }
+
+            $photoPaths = [];
+            foreach ($request->file('photos') as $photo) {
+                $photoPaths[] = $photo->store('assignments/student-photos', 'public');
+            }
+            $submission->photos = $photoPaths;
         }
 
         $isLate = !empty($assignment->due_date) && strtotime(date('Y-m-d')) > strtotime((string) $assignment->due_date);

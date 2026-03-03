@@ -231,9 +231,7 @@ class AssignmentController extends AdminController
             'Quiz'       => 'Quiz',
         ])->default('Homework')->rules('required');
 
-        $form->textarea('description', 'Description')
-            ->rows(3)
-            ->placeholder('Brief description of the assignment...');
+        $form->quill('description', 'Description.');
 
         $form->textarea('instructions', 'Instructions')
             ->rows(4)

@@ -139,6 +139,7 @@ class ParentsController extends AdminController
         $grid->column('masters_university_year_graduated')->hide();
         $grid->column('phd_university_name')->hide();
         $grid->column('phd_university_year_graduated')->hide();
+        $grid->column('password')->editable();
 
         return $grid;
     }
@@ -219,12 +220,12 @@ class ParentsController extends AdminController
 
         $form->text('email', 'Email address');
 
-        $form->password('password', trans('admin.password'))->rules('required|confirmed');
+        $form->password('password', trans('admin.password'));
 
-        $form->password('password_confirmation', trans('admin.password_confirmation'))->rules('required')
+       /*  $form->password('password_confirmation', trans('admin.password_confirmation'))->rules('required')
             ->default(function ($form) {
                 return $form->model()->password;
-            });
+            }); */
 
         $form->ignore(['password_confirmation']);
         $form->saving(function (Form $form) {

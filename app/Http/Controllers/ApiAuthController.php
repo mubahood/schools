@@ -64,8 +64,6 @@ class ApiAuthController extends Controller
             $phone_number = Utils::prepare_phone_number($r->username);
 
             if (Utils::phone_number_is_valid($phone_number)) {
-                $phone_number = $r->phone_number;
-
                 $u = User::where('phone_number_1', $phone_number)
                     ->orWhere('username', $phone_number)
                     ->orWhere('email', $phone_number)
@@ -77,33 +75,32 @@ class ApiAuthController extends Controller
             return $this->error('User account not found.');
         }
 
-        $token = auth('api')->attempt([
-            'id' => $u->id,
-            'password' => trim($r->password),
-        ]);
-
-
-        if ($token == null) {
-            return $this->error('Wrong credentials.');
-        }
-
-
-        //auth('api')->factory()->setTTL(Carbon::now()->addMonth(12)->timestamp);
-
-        JWTAuth::factory()->setTTL(60 * 24 * 30 * 365);
-
+        // If the matched account is a student, resolve to the parent account.
+        // Parents are the actual accounts used in the mobile app; students share
+        // the parent's credentials so we authenticate against the parent's password.
         if ($u->user_type == 'student') {
-            $u = Administrator::find($u->parent_id);
+            $u = User::find($u->parent_id);
             if ($u == null) {
-                return $this->error('Parent account not found.');
+                return $this->error('Parent account not found. Please contact your administrator.');
             }
         }
 
+        // Block login with the default password and prompt user to contact admin.
+        if (trim($r->password) === '4321') {
+            return response()->json([
+                'status'          => false,
+                'code'            => 'DEFAULT_PASSWORD',
+                'message'         => 'You are using the default password. Please contact your administrator to reset your password.',
+                'whatsapp_number' => '+256783204665',
+            ], 200);
+        }
+
+        JWTAuth::factory()->setTTL(60 * 24 * 30 * 365);
+
         $token = auth('api')->attempt([
             'id' => $u->id,
             'password' => trim($r->password),
         ]);
-
 
         if ($token == null) {
             return $this->error('Wrong credentials.');

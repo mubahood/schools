@@ -229,7 +229,7 @@ class ApiMainController extends Controller
             return $this->error('Active term not found.');
         }
 
-        $secula_subjects = $u->get_my_subjetcs();
+        $secula_subjects = $u->get_my_subjetcs() ?? [];
         $subject_ids = [];
         foreach ($secula_subjects as $key => $value) {
             $subject_ids[] = $value->id;
@@ -531,12 +531,120 @@ class ApiMainController extends Controller
         if ($active_term == null) {
             return $this->error('Active term not found.');
         }
-        $data = Participant::where([
-            'enterprise_id' => $u->enterprise_id,
-            'term_id' => $active_term->id
-        ])->limit(100000)->orderBy('id', 'desc')->get();
+
+        $query = Participant::with('user')
+            ->where([
+                'enterprise_id' => $u->enterprise_id,
+                'term_id'       => $active_term->id,
+            ]);
+
+        if ($u->isRole('parent') || $u->user_type === 'parent') {
+            $students = $u->get_my_students($u);
+            $studentIds = collect($students)->pluck('id')->toArray();
+            if (!empty($studentIds)) {
+                $query->whereIn('administrator_id', $studentIds);
+            } else {
+                return $this->success([], 'Success', 200);
+            }
+        }
+
+        $rows = $query->limit(100000)->orderBy('id', 'desc')->get();
+        $term_text = 'Term ' . $active_term->name;
+
+        $data = $rows->map(function ($p) use ($term_text) {
+            return [
+                'id'                 => $p->id,
+                'created_at'         => $p->created_at,
+                'updated_at'         => $p->updated_at,
+                'enterprise_id'      => $p->enterprise_id,
+                'administrator_id'   => $p->administrator_id,
+                'administrator_text' => $p->user ? $p->user->name : '',
+                'avatar'             => $p->user ? $p->user->avatar : '',
+                'academic_year_id'   => $p->academic_year_id,
+                'term_id'            => $p->term_id,
+                'term_text'          => $term_text,
+                'academic_class_id'  => $p->academic_class_id,
+                'subject_id'         => $p->subject_id,
+                'service_id'         => $p->service_id,
+                'is_present'         => $p->is_present,
+                'session_id'         => $p->session_id,
+                'session_text'       => $p->title ?? '',
+                'type'               => $p->type ?? '',
+                'title'              => $p->title ?? '',
+                'is_done'            => $p->is_done,
+            ];
+        });
 
         return $this->success($data, $message = "Success", 200);
+    }
+
+    public function attendance_summary()
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        $ent = $u->ent;
+        if ($ent == null) {
+            return $this->error('Enterprise not found.');
+        }
+        $active_term = $ent->active_term();
+        if ($active_term == null) {
+            return $this->error('Active term not found.');
+        }
+
+        $term_text = 'Term ' . $active_term->name;
+        $is_parent = $u->isRole('parent') || $u->user_type === 'parent';
+
+        $query = Participant::where([
+            'enterprise_id' => $u->enterprise_id,
+            'term_id'       => $active_term->id,
+        ]);
+
+        $children = [];
+        if ($is_parent) {
+            $students = $u->get_my_students($u);
+            $studentIds = collect($students)->pluck('id')->toArray();
+            if (empty($studentIds)) {
+                return $this->success([
+                    'term_text' => $term_text,
+                    'total'     => 0,
+                    'present'   => 0,
+                    'absent'    => 0,
+                    'children'  => [],
+                ], 'Success', 200);
+            }
+            $query->whereIn('administrator_id', $studentIds);
+
+            foreach ($students as $s) {
+                $base = Participant::where([
+                    'enterprise_id'    => $u->enterprise_id,
+                    'term_id'          => $active_term->id,
+                    'administrator_id' => $s->id,
+                ]);
+                $childTotal   = (clone $base)->count();
+                $childPresent = (clone $base)->where('is_present', '1')->count();
+                $children[] = [
+                    'name'    => $s->name,
+                    'avatar'  => $s->avatar ?? '',
+                    'total'   => $childTotal,
+                    'present' => $childPresent,
+                    'absent'  => $childTotal - $childPresent,
+                ];
+            }
+        }
+
+        $all     = $query->get();
+        $total   = $all->count();
+        $present = $all->where('is_present', '1')->count();
+
+        return $this->success([
+            'term_text' => $term_text,
+            'total'     => $total,
+            'present'   => $present,
+            'absent'    => $total - $present,
+            'children'  => $children,
+        ], 'Success', 200);
     }
 
     public function streams()
@@ -2641,6 +2749,56 @@ lin
     }
 
 
+    public function student_transactions(Request $r)
+    {
+        $u = auth('api')->user();
+
+        $is_bursar   = $u->isRole('bursar');
+        $is_parent   = $u->isRole('parent') || $u->user_type === 'parent';
+
+        if (!$is_bursar && !$is_parent) {
+            return $this->error('Unauthorized');
+        }
+
+        $student_id = intval($r->student_id);
+        if ($student_id < 1) {
+            return $this->error('Student ID required');
+        }
+
+        // Parents may only view their own children
+        if ($is_parent && !$is_bursar) {
+            $students   = $u->get_my_students($u);
+            $studentIds = [];
+            foreach ($students as $s) {
+                $studentIds[] = intval($s->id);
+            }
+            if (!in_array($student_id, $studentIds)) {
+                return $this->error('Unauthorized');
+            }
+        }
+
+        $recs = DB::select("SELECT
+            transactions.id            AS id,
+            transactions.created_at    AS created_at,
+            transactions.type          AS type,
+            transactions.payment_date  AS payment_date,
+            transactions.account_id,
+            transactions.amount,
+            transactions.description,
+            accounts.name              AS account_name,
+            accounts.administrator_id  AS administrator_id
+            FROM transactions, accounts
+            WHERE
+                transactions.account_id  = accounts.id
+                AND transactions.enterprise_id = $u->enterprise_id
+                AND is_contra_entry      = 0
+                AND accounts.administrator_id = $student_id
+            ORDER BY transactions.id DESC
+            LIMIT 1000");
+
+        return $this->success($recs, 'Success', 200);
+    }
+
     public function transactions_post(Request $r)
     {
         $u = auth('api')->user();
@@ -2749,7 +2907,7 @@ lin
     {
         $u = auth('api')->user();
 
-        $secula_subjects = $u->get_my_subjetcs();
+        $secula_subjects = $u->get_my_subjetcs() ?? [];
         //$theology_subjects = $u->get_my_theology_subjetcs();
         $subjects_ids = [];
         foreach ($secula_subjects as $key => $value) {
@@ -2844,7 +3002,7 @@ lin
     {
         $u = auth('api')->user();
 
-        $secula_subjects = $u->get_my_subjetcs();
+        $secula_subjects = $u->get_my_subjetcs() ?? [];
         //$theology_subjects = $u->get_my_theology_subjetcs();
         $subjects = [];
         foreach ($secula_subjects as $key => $value) {

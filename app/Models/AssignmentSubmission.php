@@ -43,6 +43,7 @@ class AssignmentSubmission extends Model
         'status',
         'submission_text',
         'attachment',
+        'photos',
         'submitted_at',
         'score',
         'max_score',
@@ -57,6 +58,7 @@ class AssignmentSubmission extends Model
     protected $casts = [
         'submitted_at' => 'datetime',
         'graded_at' => 'datetime',
+        'photos' => 'array',
     ];
 
     // ── Relationships ──────────────────────────────────────────────

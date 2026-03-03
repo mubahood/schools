@@ -159,6 +159,7 @@ Route::middleware([JwtMiddleware::class])->group(function () {
     Route::get("student-has-class", [ApiMainController::class, 'student_has_class']);
     Route::get("transactions", [ApiMainController::class, 'transactions']);
     Route::post("transactions", [ApiMainController::class, 'transactions_post']);
+    Route::get("student-transactions", [ApiMainController::class, 'student_transactions']);
     Route::post("accounts-change-balance", [ApiMainController::class, 'accounts_change_balance']);
     Route::post("accounts-change-status", [ApiMainController::class, 'accounts_change_status']);
     Route::get("my-sessions", [ApiMainController::class, 'my_sessions']);
@@ -180,6 +181,7 @@ Route::middleware([JwtMiddleware::class])->group(function () {
 
     //=====ATTENDANCE========//
     Route::get("participants", [ApiMainController::class, 'participants']);
+    Route::get("attendance-summary", [ApiMainController::class, 'attendance_summary']);
     Route::get("student-report-cards", [ApiMainController::class, 'student_report_cards']);
     Route::get("disciplinary-records", [ApiMainController::class, 'disciplinary_records']);
     /* ====== END OF ATTENDANCE ====== */
