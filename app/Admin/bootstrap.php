@@ -214,4 +214,6 @@ Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
 Admin::css('/css/jquery-confirm.min.css');
 Admin::js('/js/charts.js');
 
+Admin::css('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 Admin::css(url('/assets/bootstrap.css'));
+Admin::css('/css/design-system.css');

@@ -552,7 +552,6 @@
         </form>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script data-exec-on-popstate>
         // Check if Chart.js is loaded
         console.log('Chart.js available:', typeof Chart !== 'undefined');

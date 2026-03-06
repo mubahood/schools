@@ -1,0 +1,939 @@
+/*
+ * Global Design System — School Dynamics Admin
+ * Square corners, compact spacing, enterprise primary color via var(--primary)
+ * Loaded globally via Admin::css() in bootstrap.php
+ * Inherits var(--primary) set dynamically in widgets/css.blade.php
+ */
+
+/* ═══════════════════════════════════════════════
+   1. GLOBAL RESETS — Square corners everywhere
+   ═══════════════════════════════════════════════ */
+
+*,
+*::before,
+*::after {
+    border-radius: 0 !important;
+}
+
+/* ═══════════════════════════════════════════════
+   2. TYPOGRAPHY — Inter font, smaller, tighter
+   ═══════════════════════════════════════════════ */
+
+body,
+body.sidebar-mini {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 13px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+h1, .h1 { font-size: 22px; }
+h2, .h2 { font-size: 18px; }
+h3, .h3 { font-size: 15px; }
+h4, .h4 { font-size: 13px; }
+h5, .h5 { font-size: 12px; }
+h6, .h6 { font-size: 11px; }
+
+/* ═══════════════════════════════════════════════
+   3. BUTTONS — Square, compact, consistent
+   ═══════════════════════════════════════════════ */
+
+.btn {
+    border-radius: 0 !important;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 12px;
+    letter-spacing: 0.3px;
+    transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s;
+    box-shadow: none !important;
+}
+
+.btn:focus,
+.btn:active:focus {
+    outline: none;
+    box-shadow: none !important;
+}
+
+.btn-xs {
+    font-size: 10px;
+    padding: 2px 6px;
+}
+
+.btn-sm {
+    font-size: 11px;
+    padding: 4px 10px;
+}
+
+.btn-lg {
+    font-size: 14px;
+    padding: 8px 18px;
+}
+
+.btn-primary {
+    background-color: var(--primary, #343a40);
+    border-color: var(--primary, #343a40);
+    color: #fff;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: var(--primary, #343a40);
+    border-color: var(--primary, #343a40);
+    opacity: 0.88;
+    color: #fff;
+}
+
+.btn-default {
+    background: #fff;
+    border: 1px solid #ced4da;
+    color: #495057;
+}
+
+.btn-default:hover {
+    background: #f5f6f8;
+    border-color: #adb5bd;
+}
+
+.btn-success {
+    background-color: #277C61;
+    border-color: #277C61;
+}
+
+.btn-success:hover {
+    background-color: #1f6a52;
+    border-color: #1f6a52;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+    border-color: #c82333;
+}
+
+.btn-warning {
+    background-color: #e8930c;
+    border-color: #e8930c;
+    color: #fff;
+}
+
+.btn-warning:hover {
+    background-color: #d08108;
+    border-color: #d08108;
+    color: #fff;
+}
+
+.btn-info {
+    background-color: #2980b9;
+    border-color: #2980b9;
+}
+
+.btn-info:hover {
+    background-color: #2472a4;
+    border-color: #2472a4;
+}
+
+/* Button groups */
+.btn-group > .btn {
+    border-radius: 0 !important;
+}
+
+/* ═══════════════════════════════════════════════
+   4. CARDS / BOXES — Square, compact
+   ═══════════════════════════════════════════════ */
+
+.box {
+    border-radius: 0 !important;
+    border-top-width: 2px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    margin-bottom: 14px;
+}
+
+.box-header {
+    padding: 8px 12px;
+    border-bottom: 1px solid #e8e8e8;
+}
+
+.box-header .box-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.box-header .box-tools {
+    top: 6px;
+    right: 8px;
+}
+
+.box-body {
+    padding: 10px 12px;
+}
+
+.box-footer {
+    padding: 8px 12px;
+    background: #fafbfc;
+    border-top: 1px solid #e8e8e8;
+}
+
+/* Modern box overrides — match square design */
+.modern-box {
+    border-radius: 0 !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    margin-bottom: 14px;
+    border: 1px solid #e0e0e0;
+}
+
+.modern-box:hover {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    border: 1px solid var(--primary, #adb5bd);
+}
+
+.modern-box-header {
+    padding: 8px 12px;
+    background: #fafbfc;
+    border-bottom: 1px solid #e8e8e8;
+}
+
+.modern-box:hover .modern-box-header {
+    background: #f5f6f8;
+}
+
+.modern-box-title {
+    font-size: 13px !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: #343a40;
+}
+
+.modern-box:hover .modern-box-title {
+    color: var(--primary, #343a40);
+}
+
+.modern-box-body {
+    padding: 10px 12px;
+    font-size: 13px;
+}
+
+.modern-box-footer {
+    padding: 8px 12px;
+    background: #fafbfc;
+    border-top: 1px solid #e8e8e8;
+    font-size: 12px;
+}
+
+/* Bootstrap cards */
+.card {
+    border-radius: 0 !important;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    margin-bottom: 14px;
+}
+
+.card-header {
+    padding: 8px 12px;
+    border-bottom: 1px solid #e8e8e8;
+    background: #fafbfc;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.card-body {
+    padding: 10px 12px;
+}
+
+.card-footer {
+    padding: 8px 12px;
+    background: #fafbfc;
+    border-top: 1px solid #e8e8e8;
+}
+
+/* ═══════════════════════════════════════════════
+   5. STAT CARDS — Dashboard stat widgets (ds-stat)
+   ═══════════════════════════════════════════════ */
+
+.ds-stat {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    background: #fff;
+    border: 1px solid #e8e8e8;
+    border-left: 3px solid var(--primary, #343a40);
+    text-decoration: none !important;
+    color: inherit;
+    margin-bottom: 14px;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.ds-stat:hover {
+    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    transform: translateY(-1px);
+    text-decoration: none !important;
+    color: inherit;
+}
+
+.ds-stat:focus {
+    text-decoration: none !important;
+    color: inherit;
+    outline: none;
+}
+
+.ds-stat__icon {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(var(--primary-rgb, 52,58,64), 0.08);
+    color: var(--primary, #343a40);
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.ds-stat__body {
+    flex: 1;
+    min-width: 0;
+}
+
+.ds-stat__label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #868e96;
+    line-height: 1.2;
+    margin-bottom: 2px;
+}
+
+.ds-stat__value {
+    display: block;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #212529;
+}
+
+.ds-stat__value small {
+    font-size: 11px;
+    font-weight: 600;
+    opacity: 0.5;
+    margin-right: 2px;
+    vertical-align: middle;
+}
+
+.ds-stat__caption {
+    display: block;
+    font-size: 10px;
+    color: #adb5bd;
+    margin-top: 3px;
+    line-height: 1.3;
+    font-weight: 500;
+}
+
+/* Accent variant (primary bg) */
+.ds-stat--accent {
+    background: var(--primary, #343a40);
+    border-color: var(--primary, #343a40);
+    border-left-color: rgba(255,255,255,0.25);
+}
+
+.ds-stat--accent:hover {
+    color: #fff;
+}
+
+.ds-stat--accent .ds-stat__icon {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+}
+
+.ds-stat--accent .ds-stat__label {
+    color: rgba(255,255,255,0.65);
+}
+
+.ds-stat--accent .ds-stat__value {
+    color: #fff;
+}
+
+.ds-stat--accent .ds-stat__value small {
+    color: rgba(255,255,255,0.55);
+}
+
+.ds-stat--accent .ds-stat__caption {
+    color: rgba(255,255,255,0.55);
+}
+
+/* Danger variant */
+.ds-stat--danger {
+    background: #dc3545;
+    border-color: #dc3545;
+    border-left-color: rgba(255,255,255,0.25);
+}
+
+.ds-stat--danger:hover {
+    color: #fff;
+}
+
+.ds-stat--danger .ds-stat__icon {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+}
+
+.ds-stat--danger .ds-stat__label,
+.ds-stat--danger .ds-stat__caption {
+    color: rgba(255,255,255,0.65);
+}
+
+.ds-stat--danger .ds-stat__value {
+    color: #fff;
+}
+
+/* Legacy small-box & info-box (non-dashboard) */
+.small-box {
+    border-radius: 0 !important;
+    margin-bottom: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.small-box > .inner { padding: 8px 12px; }
+.small-box > .inner h3 { font-size: 24px; font-weight: 700; margin: 0 0 2px 0; }
+.small-box > .inner p { font-size: 12px; margin: 0; }
+.small-box > .icon { font-size: 56px; top: 4px; right: 8px; }
+.small-box > .small-box-footer { padding: 4px 12px; font-size: 11px; }
+
+.info-box { border-radius: 0 !important; min-height: auto; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.info-box-icon { border-radius: 0 !important; width: 60px; height: 60px; line-height: 60px; font-size: 28px; }
+.info-box-content { padding: 6px 10px; }
+.info-box-text { font-size: 11px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.3px; }
+.info-box-number { font-size: 18px; font-weight: 700; }
+
+/* ═══════════════════════════════════════════════
+   6. TABLES — Compact, tight
+   ═══════════════════════════════════════════════ */
+
+.table {
+    font-size: 12px;
+}
+
+.table > thead > tr > th {
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    background: #f5f6f8;
+    border-bottom: 1px solid #dee2e6;
+    color: #495057;
+    white-space: nowrap;
+}
+
+.table > tbody > tr > td {
+    padding: 5px 10px;
+    vertical-align: middle;
+    border-top: 1px solid #f2f2f2;
+}
+
+.table > tbody > tr:hover {
+    background-color: #f8f9fa;
+}
+
+.table > tfoot > tr > td,
+.table > tfoot > tr > th {
+    padding: 6px 10px;
+    font-weight: 700;
+    border-top: 1px solid #dee2e6;
+    background: #f5f6f8;
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: #fcfcfd;
+}
+
+/* Grid table */
+.grid-table .table {
+    margin-bottom: 0;
+}
+
+/* ═══════════════════════════════════════════════
+   7. FORMS — Compact inputs
+   ═══════════════════════════════════════════════ */
+
+.form-control {
+    border-radius: 0 !important;
+    font-size: 13px;
+    padding: 5px 10px;
+    height: 32px;
+    border: 1px solid #ced4da;
+    box-shadow: none;
+    transition: border-color 0.15s;
+}
+
+.form-control:focus {
+    border-color: var(--primary, #343a40);
+    box-shadow: 0 0 0 1px var(--primary, #343a40);
+}
+
+textarea.form-control {
+    height: auto;
+}
+
+.form-group {
+    margin-bottom: 12px;
+}
+
+.form-group label,
+.control-label {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 3px;
+}
+
+.input-group-addon {
+    border-radius: 0 !important;
+    padding: 4px 10px;
+    font-size: 12px;
+    border: 1px solid #ced4da;
+    background: #f5f6f8;
+}
+
+.input-group-btn .btn {
+    border-radius: 0 !important;
+}
+
+/* Select2 overrides */
+.select2-container .select2-selection {
+    border-radius: 0 !important;
+    border: 1px solid #ced4da;
+    min-height: 32px;
+    font-size: 13px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 30px;
+    font-size: 13px;
+}
+
+.select2-dropdown {
+    border-radius: 0 !important;
+    border: 1px solid #ced4da;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: var(--primary, #343a40);
+}
+
+.select2-search__field {
+    border-radius: 0 !important;
+}
+
+/* ═══════════════════════════════════════════════
+   8. NAVIGATION — Sidebar & Navbar compact
+   ═══════════════════════════════════════════════ */
+
+.main-header .navbar {
+    min-height: 42px;
+}
+
+.main-header .logo {
+    height: 42px;
+    line-height: 42px;
+    font-size: 15px;
+    padding: 0 12px;
+}
+
+.main-header .sidebar-toggle {
+    padding: 11px 14px;
+}
+
+.navbar-nav > li > a {
+    padding: 10px 14px;
+    font-size: 13px;
+}
+
+.content-header {
+    padding: 8px 14px;
+}
+
+.content-header > h1 {
+    font-size: 17px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.content-header > .breadcrumb {
+    font-size: 11px;
+    padding: 4px 0;
+    margin-bottom: 0;
+    top: 10px;
+    right: 14px;
+}
+
+.breadcrumb > li + li:before {
+    padding: 0 4px;
+}
+
+.sidebar-menu > li > a {
+    padding: 9px 14px;
+    font-size: 13px;
+}
+
+.sidebar-menu > li > a > .fa,
+.sidebar-menu > li > a > .glyphicon,
+.sidebar-menu > li > a > .ion {
+    width: 22px;
+    font-size: 14px;
+}
+
+.sidebar-menu .treeview-menu > li > a {
+    padding: 6px 14px 6px 36px;
+    font-size: 12px;
+}
+
+/* ═══════════════════════════════════════════════
+   9. DROPDOWNS — Square, compact
+   ═══════════════════════════════════════════════ */
+
+.dropdown-menu {
+    border-radius: 0 !important;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 4px 0;
+    font-size: 12px;
+}
+
+.dropdown-menu > li > a {
+    padding: 5px 14px;
+    font-size: 12px;
+}
+
+.dropdown-menu > li > a:hover {
+    background: #f5f6f8;
+}
+
+/* ═══════════════════════════════════════════════
+   10. MODALS — Square, compact
+   ═══════════════════════════════════════════════ */
+
+.modal-content {
+    border-radius: 0 !important;
+    border: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.modal-header {
+    padding: 10px 14px;
+    border-bottom: 1px solid #e8e8e8;
+    background: #fafbfc;
+}
+
+.modal-header .modal-title {
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.modal-body {
+    padding: 14px;
+}
+
+.modal-footer {
+    padding: 8px 14px;
+    border-top: 1px solid #e8e8e8;
+    background: #fafbfc;
+}
+
+/* ═══════════════════════════════════════════════
+   11. PAGINATION — Square, small
+   ═══════════════════════════════════════════════ */
+
+.pagination > li > a,
+.pagination > li > span {
+    border-radius: 0 !important;
+    padding: 4px 10px;
+    font-size: 12px;
+    color: #495057;
+    border: 1px solid #dee2e6;
+}
+
+.pagination > .active > a,
+.pagination > .active > a:hover,
+.pagination > .active > span,
+.pagination > .active > span:hover {
+    background-color: var(--primary, #343a40);
+    border-color: var(--primary, #343a40);
+    color: #fff;
+}
+
+.pagination > li > a:hover {
+    background-color: #f5f6f8;
+    color: #343a40;
+}
+
+/* ═══════════════════════════════════════════════
+   12. LABELS / BADGES — Square
+   ═══════════════════════════════════════════════ */
+
+.label {
+    border-radius: 0 !important;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    letter-spacing: 0.3px;
+}
+
+.badge {
+    border-radius: 0 !important;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+}
+
+.label-primary,
+.badge-primary {
+    background-color: var(--primary, #343a40);
+}
+
+/* ═══════════════════════════════════════════════
+   13. ALERTS — Square, compact
+   ═══════════════════════════════════════════════ */
+
+.alert {
+    border-radius: 0 !important;
+    padding: 8px 14px;
+    font-size: 12px;
+    margin-bottom: 14px;
+    border-width: 1px;
+    border-left-width: 3px;
+}
+
+.callout {
+    border-radius: 0 !important;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+}
+
+/* ═══════════════════════════════════════════════
+   14. TABS / NAV — Square
+   ═══════════════════════════════════════════════ */
+
+.nav-tabs > li > a {
+    border-radius: 0 !important;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover {
+    border-top: 2px solid var(--primary, #343a40);
+    font-weight: 700;
+}
+
+.nav-pills > li > a {
+    border-radius: 0 !important;
+}
+
+.tab-content {
+    padding: 12px;
+}
+
+/* ═══════════════════════════════════════════════
+   15. PROGRESS BARS — Square, thin
+   ═══════════════════════════════════════════════ */
+
+.progress {
+    border-radius: 0 !important;
+    height: 16px;
+    margin-bottom: 10px;
+    box-shadow: none;
+}
+
+.progress-bar {
+    border-radius: 0 !important;
+    font-size: 10px;
+    line-height: 16px;
+    box-shadow: none;
+}
+
+/* ═══════════════════════════════════════════════
+   16. PANELS / WELLS — Square
+   ═══════════════════════════════════════════════ */
+
+.panel {
+    border-radius: 0 !important;
+    margin-bottom: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.panel-heading {
+    border-radius: 0 !important;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.panel-body {
+    padding: 10px 12px;
+}
+
+.panel-footer {
+    border-radius: 0 !important;
+    padding: 8px 12px;
+}
+
+.well {
+    border-radius: 0 !important;
+    padding: 10px 14px;
+    box-shadow: none;
+    border: 1px solid #e0e0e0;
+    background: #fafbfc;
+}
+
+/* ═══════════════════════════════════════════════
+   17. TOOLTIPS / POPOVERS — Square
+   ═══════════════════════════════════════════════ */
+
+.tooltip-inner {
+    border-radius: 0 !important;
+    font-size: 11px;
+    padding: 4px 8px;
+    background: #343a40;
+}
+
+.popover {
+    border-radius: 0 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+
+.popover-title {
+    border-radius: 0 !important;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 10px;
+}
+
+.popover-content {
+    font-size: 12px;
+    padding: 8px 10px;
+}
+
+/* ═══════════════════════════════════════════════
+   18. CONTENT AREA — Tighter spacing
+   ═══════════════════════════════════════════════ */
+
+.content-wrapper {
+    background: #f4f5f7;
+}
+
+.content {
+    padding: 10px 14px;
+}
+
+/* ═══════════════════════════════════════════════
+   19. GRID / ROW tweaks
+   ═══════════════════════════════════════════════ */
+
+.row {
+    margin-left: -7px;
+    margin-right: -7px;
+}
+
+.col-xs-1, .col-xs-2, .col-xs-3, .col-xs-4, .col-xs-5, .col-xs-6,
+.col-xs-7, .col-xs-8, .col-xs-9, .col-xs-10, .col-xs-11, .col-xs-12,
+.col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6,
+.col-sm-7, .col-sm-8, .col-sm-9, .col-sm-10, .col-sm-11, .col-sm-12,
+.col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6,
+.col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12,
+.col-lg-1, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6,
+.col-lg-7, .col-lg-8, .col-lg-9, .col-lg-10, .col-lg-11, .col-lg-12 {
+    padding-left: 7px;
+    padding-right: 7px;
+}
+
+/* ═══════════════════════════════════════════════
+   20. LARAVEL-ADMIN GRID — Action buttons, filters
+   ═══════════════════════════════════════════════ */
+
+.grid-dropdown-actions .dropdown-menu {
+    min-width: 120px;
+}
+
+.column-filter-item .form-control {
+    height: 28px;
+    font-size: 11px;
+    padding: 3px 8px;
+}
+
+/* Grid action buttons */
+.grid-row-actions .btn {
+    padding: 2px 6px;
+    font-size: 11px;
+}
+
+/* Box tools */
+.box-header .btn-box-tool {
+    padding: 2px 6px;
+    font-size: 12px;
+}
+
+/* Admin footer */
+.main-footer {
+    padding: 8px 14px;
+    font-size: 11px;
+    border-top: 1px solid #e8e8e8;
+    background: #fafbfc;
+}
+
+/* ═══════════════════════════════════════════════
+   21. SCROLLBARS — Thin, subtle
+   ═══════════════════════════════════════════════ */
+
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f0f0f0;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c0c0c0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a0a0a0;
+}
+
+/* ═══════════════════════════════════════════════
+   22. IMAGES — Square avatars
+   ═══════════════════════════════════════════════ */
+
+.img-circle {
+    border-radius: 0 !important;
+}
+
+.user-panel > .image > img {
+    border-radius: 0 !important;
+    width: 36px;
+    height: 36px;
+}
+
+/* ═══════════════════════════════════════════════
+   23. JQUERY CONFIRM — Square overrides
+   ═══════════════════════════════════════════════ */
+
+.jconfirm .jconfirm-box {
+    border-radius: 0 !important;
+}
+
+.jconfirm .jconfirm-box .jconfirm-buttons .btn {
+    border-radius: 0 !important;
+}

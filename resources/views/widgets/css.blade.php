@@ -1,7 +1,16 @@
 <?php
 use App\Models\Utils;
 $ent = Utils::ent();
+$_hex = $ent->color ?? '#343a40';
+$_r = hexdec(substr($_hex, 1, 2));
+$_g = hexdec(substr($_hex, 3, 2));
+$_b = hexdec(substr($_hex, 5, 2));
 ?><style>
+    :root {
+        --primary: {{ $ent->color }};
+        --primary-rgb: {{ $_r }}, {{ $_g }}, {{ $_b }};
+    }
+
     .sidebar {
         background-color: #FFFFFF;
     }
@@ -11,10 +20,9 @@ $ent = Utils::ent();
     }
 
     .sidebar-menu .active {
-        border-left: solid 5px {{ $ent->color }} !important;
+        border-left: solid 3px {{ $ent->color }} !important;
         color: {{ $ent->color }} !important;
     }
-
 
     .navbar,
     .logo,
@@ -28,15 +36,17 @@ $ent = Utils::ent();
         background-color: {{ $ent->color }} !important;
     }
 
+    .btn-primary:hover,
+    .btn-primary:focus {
+        background-color: {{ $ent->color }} !important;
+        opacity: 0.88;
+    }
+
     .dropdown-menu {
-        border: none !important;
+        border: 1px solid #e0e0e0 !important;
     }
 
     .box-success {
-        border-top: {{ $ent->color }} .5rem solid !important;
-    }
-
-    :root {
-        --primary: {{ $ent->color }};
+        border-top-color: {{ $ent->color }} !important;
     }
 </style>

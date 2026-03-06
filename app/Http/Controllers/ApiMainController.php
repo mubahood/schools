@@ -3433,4 +3433,34 @@ lin
         }
         return $this->success($ent, $message = "Profile details", 200);
     }
+
+    public function unclassed_students()
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        $eid = $u->enterprise_id;
+
+        $students = DB::select("
+            SELECT u.id, u.name, u.avatar, u.current_class_id,
+                   ac.name AS current_class_name, y.name AS year_name
+            FROM admin_users u
+            LEFT JOIN academic_classes ac ON u.current_class_id = ac.id
+            LEFT JOIN academic_years y ON ac.academic_year_id = y.id
+            WHERE u.enterprise_id = ?
+              AND u.user_type = 'Student'
+              AND u.status = 1
+              AND (
+                u.current_class_id IS NULL
+                OR u.current_class_id = 0
+                OR y.is_active != 1
+                OR y.id IS NULL
+              )
+            ORDER BY u.name ASC
+            LIMIT 200
+        ", [$eid]);
+
+        return $this->success($students, "Unclassed students", 200);
+    }
 }

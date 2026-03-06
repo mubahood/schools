@@ -1,87 +1,71 @@
-<?php
-use App\Models\Utils;
-?><style>
-    .ext-icon {
-        color: rgba(0, 0, 0, 0.5);
-        margin-left: 10px;
-    }
+<?php use App\Models\Utils; ?>
+<?php $color = $color ?? '#343a40'; ?>
+@include('dashboard._ds-styles')
 
-    .installed {
-        color: #00a65a;
-        margin-right: 10px;
-    }
-
-    .card {
-        border-radius: 5px;
-    }
-
-    .case-item:hover {
-        background-color: rgb(254, 254, 254);
-    }
-</style>
-<div class="card  mb-4 mb-md-5 border-0">
-    <!--begin::Header-->
-    <div class="d-flex justify-content-between px-3 px-md-4 ">
-        <h3 class="h4">
-            <b>Expenditure - {{ count($labels) }} days ago</b>
-        </h3>
-        <div>
-            <a href="{{ url('/financial-records-expenditure') }}" class="btn btn-sm btn-primary mt-md-4 mt-4">
-                View All
-            </a>
+<div class="ds-card" style="--ds-accent: {{ $color }};">
+    <div class="ds-card-header" style="background: {{ $color }};">
+        <div class="ds-card-header-left">
+            <span class="ds-card-icon" style="background: rgba(255,255,255,0.15);"><i class="fa fa-credit-card"></i></span>
+            <div class="ds-card-title" style="color: #fff;">Expenditure — {{ count($labels) }} Days</div>
+        </div>
+        <a href="{{ url('/financial-records-expenditure') }}" class="ds-btn-sm" style="border-color: rgba(255,255,255,0.4); color: #fff;">View All</a>
+    </div>
+    <div style="padding: 10px 14px 14px;">
+        <div class="ds-chart-container">
+            <canvas id="grapth-expenditure"></canvas>
         </div>
     </div>
-    <div class="card-body py-2 py-md-3">
+</div>
 
-
-        <canvas id="grapth-expenditure" style="width: 100%;"></canvas>
-        <script>
-            $(function() {
-
-
-                function randomScalingFactor() {
-                    return Math.floor(Math.random() * 100)
-                }
-                window.chartColors = {
-                    red: 'rgb(255, 99, 132)',
-                    orange: 'rgb(255, 159, 64)',
-                    yellow: 'rgb(255, 205, 86)',
-                    green: '#277C61',
-                    blue: 'rgb(54, 162, 235)',
-                    purple: 'rgb(153, 102, 255)',
-                    grey: 'rgb(201, 203, 207)'
-                };
-
-                var chartData = {
-                    labels: JSON.parse('<?php echo json_encode($labels); ?>'),
-                    datasets: [{
-                        type: 'bar',
-                        label: 'Total Expense',
-                        backgroundColor: window.chartColors.green,
-                        data: JSON.parse('<?php echo json_encode($data); ?>')
-                    }]
-
-                };
-
-                var ctx = document.getElementById('grapth-expenditure').getContext('2d');
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: chartData,
-                    options: {
-                        responsive: true,
-                        title: {
-                            display: true,
-                            text: 'Chart.js Combo Bar Line Chart'
-                        },
-                        tooltips: {
-                            mode: 'index',
-                            intersect: true
+<script>
+$(function() {
+    var el = document.getElementById('grapth-expenditure');
+    if (!el) return;
+    var primaryColor = @json($color);
+    new Chart(el.getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: @json($labels),
+            datasets: [{
+                label: 'Total Expense',
+                backgroundColor: '#dc3545',
+                data: @json($data),
+                borderRadius: 0,
+                barPercentage: 0.7
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#343a40',
+                    titleFont: { size: 11, weight: 'bold' },
+                    bodyFont: { size: 11 },
+                    cornerRadius: 0,
+                    padding: 8,
+                    callbacks: {
+                        label: function(ctx) {
+                            return ' ' + Number(ctx.parsed.y).toLocaleString();
                         }
                     }
-                });
-            });
-        </script>
-
-
-    </div>
-</div>
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(0,0,0,0.04)', drawBorder: false },
+                    ticks: { font: { size: 10, weight: '600' }, color: '#868e96', padding: 6 },
+                    border: { display: false }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { font: { size: 10, weight: '600' }, color: '#868e96', padding: 4, maxRotation: 45, minRotation: 0 },
+                    border: { display: false }
+                }
+            }
+        }
+    });
+});
+</script>

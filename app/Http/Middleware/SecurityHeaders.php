@@ -28,9 +28,9 @@ class SecurityHeaders
         // Content Security Policy (basic)
         $response->headers->set('Content-Security-Policy', 
             "default-src 'self'; " .
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://www.googletagmanager.com; " .
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://www.googletagmanager.com https://cdn.jsdelivr.net; " .
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; " .
-            "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; " .
+            "font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; " .
             "img-src 'self' data: https: blob:; " .
             "connect-src 'self' https:; " .
             "frame-src 'self' https://www.youtube.com https://youtube.com;"

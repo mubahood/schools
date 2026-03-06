@@ -143,6 +143,7 @@ Route::middleware([JwtMiddleware::class])->group(function () {
     Route::post("marks", [ApiMainController::class, 'mark_submit']);
     Route::get("users/me", [ApiAuthController::class, 'me']);
     Route::get("manifest", [ApiMainController::class, 'manifest']);
+    Route::get("unclassed-students", [ApiMainController::class, 'unclassed_students']);
     Route::get("my-classes", [ApiMainController::class, 'classes']);
     Route::get("theology-classes", [ApiMainController::class, 'theology_classes']);
     Route::get("class-streams", [ApiMainController::class, 'streams']);

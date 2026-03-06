@@ -1,51 +1,71 @@
-<?php
-use App\Models\Utils;
-?>
-<div class="card  mb-4 mb-md-5 border-0">
-    <!--begin::Header-->
-    <div class="d-flex justify-content-between px-3 px-md-4 ">
-        <h3 class="h3">
-            <b>FEES COLLECTION - {{ count($labels) }} DAYS AGO</b>
-        </h3>
-        <div>
-            <a href="{{ url('/transactions') }}" class="btn btn-sm btn-primary mt-md-4 mt-4">
-                View All
-            </a>
+<?php use App\Models\Utils; ?>
+<?php $color = $color ?? '#343a40'; ?>
+@include('dashboard._ds-styles')
+
+<div class="ds-card" style="--ds-accent: {{ $color }};">
+    <div class="ds-card-header" style="background: {{ $color }};">
+        <div class="ds-card-header-left">
+            <span class="ds-card-icon" style="background: rgba(255,255,255,0.15);"><i class="fa fa-money"></i></span>
+            <div class="ds-card-title" style="color: #fff;">Fees Collection — {{ count($labels) }} Days</div>
+        </div>
+        <a href="{{ url('/transactions') }}" class="ds-btn-sm" style="border-color: rgba(255,255,255,0.4); color: #fff;">View All</a>
+    </div>
+    <div style="padding: 10px 14px 14px;">
+        <div class="ds-chart-container">
+            <canvas id="grapth-fees-collection"></canvas>
         </div>
     </div>
-    <div class="card-body py-2 py-md-3">
+</div>
 
-
-        <canvas id="grapth-fees-collection" style="width: 100%;"></canvas>
-        <script>
-            $(function() {
-
-                var chartData = {
-                    labels: JSON.parse('<?php echo json_encode($labels); ?>'),
-                    datasets: [{
-                        label: 'Total Collected School Fees',
-                        backgroundColor: '#277C61',
-                        data: JSON.parse('<?php echo json_encode($data); ?>')
-                    }]
-
-                };
-
-                var ctx = document.getElementById('grapth-fees-collection').getContext('2d');
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: chartData,
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                display: false,
-                            },
+<script>
+$(function() {
+    var el = document.getElementById('grapth-fees-collection');
+    if (!el) return;
+    var primaryColor = @json($color);
+    new Chart(el.getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: @json($labels),
+            datasets: [{
+                label: 'Collected Fees',
+                backgroundColor: primaryColor,
+                data: @json($data),
+                borderRadius: 0,
+                barPercentage: 0.7
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#343a40',
+                    titleFont: { size: 11, weight: 'bold' },
+                    bodyFont: { size: 11 },
+                    cornerRadius: 0,
+                    padding: 8,
+                    callbacks: {
+                        label: function(ctx) {
+                            return ' ' + Number(ctx.parsed.y).toLocaleString();
                         }
                     }
-                });
-            });
-        </script>
-
-
-    </div>
-</div>
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(0,0,0,0.04)', drawBorder: false },
+                    ticks: { font: { size: 10, weight: '600' }, color: '#868e96', padding: 6 },
+                    border: { display: false }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { font: { size: 10, weight: '600' }, color: '#868e96', padding: 4, maxRotation: 45, minRotation: 0 },
+                    border: { display: false }
+                }
+            }
+        }
+    });
+});
+</script>

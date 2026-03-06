@@ -537,8 +537,9 @@ class HomeController extends Controller
 
                         $column->append(view('widgets.box-5', [
                             'is_dark' => false,
-                            'title' => 'Expected Services Fees',
-                            'sub_title' => 'Total sum of service subscription fees of this term.',
+                            'title' => 'Service Fees',
+                            'icon' => 'file-text-o',
+                            'sub_title' => 'Subscription fees this term',
                             'number' => "<small>UGX</small>" . number_format(
                                 Manifest::get_total_expected_service_fees(Admin::user()),
                                 0,
@@ -561,8 +562,9 @@ class HomeController extends Controller
                         }
                         $column->append(view('widgets.box-5', [
                             'is_dark' => false,
-                            'title' => 'Total Bursaries Offered',
-                            'sub_title' => 'Total sum of bursaries offered this term.',
+                            'title' => 'Bursaries',
+                            'icon' => 'gift',
+                            'sub_title' => 'Offered this term',
                             'number' => "<small>UGX</small>" . number_format($val),
                             'link' => admin_url('transactions')
                         ]));
@@ -575,8 +577,9 @@ class HomeController extends Controller
 
                         $column->append(view('widgets.box-5', [
                             'is_dark' => true,
-                            'title' => 'Total Expected Income',
-                            'sub_title' => 'Sum of tution fees and services subscriptions fees..',
+                            'title' => 'Expected Revenue',
+                            'icon' => 'line-chart',
+                            'sub_title' => 'Tuition + service fees',
                             'number' => "<small>UGX</small>" . number_format($val),
                             'link' => admin_url('transactions')
                         ]));
@@ -589,8 +592,9 @@ class HomeController extends Controller
                         if ($term == null) {
                             $column->append(view('widgets.box-5', [
                                 'is_dark' => true,
-                                'title' => 'Total Income',
-                                'sub_title' => 'Total sum of all payments made this term.',
+                                'title' => 'Income Received',
+                                'icon' => 'check-circle',
+                                'sub_title' => 'Payments this term',
                                 'number' => "<small>UGX</small>" . number_format(0),
                                 'link' => admin_url('transactions')
                             ]));
@@ -606,8 +610,9 @@ class HomeController extends Controller
 
                         $column->append(view('widgets.box-5', [
                             'is_dark' => true,
-                            'title' => 'Total Income',
-                            'sub_title' => 'Total sum of all payments made this term.',
+                            'title' => 'Income Received',
+                            'icon' => 'check-circle',
+                            'sub_title' => 'Payments this term',
                             'number' => "<small>UGX</small>" . number_format($transsactions_tot),
                             'link' => admin_url('transactions')
                         ]));
@@ -628,8 +633,9 @@ class HomeController extends Controller
 
                         $column->append(view('widgets.box-5', [
                             'is_dark' => true,
-                            'title' => 'School Fees Balance',
-                            'sub_title' => 'Total school fees balance of all active students.',
+                            'title' => 'Fees Balance',
+                            'icon' => 'balance-scale',
+                            'sub_title' => 'All active students',
                             'number' => "<small>UGX</small>" . number_format(
                                 $total_balance_of_students
                             ),
@@ -649,8 +655,9 @@ class HomeController extends Controller
                         }
                         $column->append(view('widgets.box-5', [
                             'is_dark' => false,
-                            'title' => 'Total Budget',
-                            'sub_title' => 'Planned to be spent this term.',
+                            'title' => 'Term Budget',
+                            'icon' => 'calculator',
+                            'sub_title' => 'Planned spending',
                             'number' => "<small>UGX</small>" . number_format($val),
                             'link' => admin_url('financial-records-budget')
                         ]));
@@ -668,8 +675,9 @@ class HomeController extends Controller
                         }
                         $column->append(view('widgets.box-5', [
                             'is_dark' => false,
-                            'title' => 'Total Expenditure',
-                            'sub_title' => 'Total amount of money spent this term.',
+                            'title' => 'Expenditure',
+                            'icon' => 'credit-card',
+                            'sub_title' => 'Spent this term',
                             'number' => "<small>UGX</small>" . number_format($val),
                             'link' => admin_url('financial-records-expenditure')
                         ]));
@@ -683,7 +691,8 @@ class HomeController extends Controller
                         $column->append(view('widgets.box-5', [
                             'is_dark' => false,
                             'title' => 'Stock Value',
-                            'sub_title' => 'Current total stock value in stores.',
+                            'icon' => 'cubes',
+                            'sub_title' => 'Current store value',
                             'number' => "<small>UGX</small>" . number_format($val),
                             'link' => admin_url('stock-batches')
                         ]));
@@ -704,6 +713,19 @@ class HomeController extends Controller
             }
 
 
+            // Unclassed students alert
+            $content->row(function (Row $row) {
+                $row->column(12, function (Column $column) {
+                    $column->append(Dashboard::unclassedStudents());
+                });
+            });
+
+            // Class enrollment stats with chart
+            $content->row(function (Row $row) {
+                $row->column(12, function (Column $column) {
+                    $column->append(Dashboard::classEnrollmentStats());
+                });
+            });
 
             $content->row(function (Row $row) {
                 $row->column(3, function (Column $column) {

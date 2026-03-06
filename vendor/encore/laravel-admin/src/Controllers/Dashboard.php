@@ -500,6 +500,7 @@ class Dashboard
             $data['labels'][] = Utils::my_date_3($max);
         }
 
+        $data['color'] = $u->ent->color ?? '#343a40';
         return view('dashboard.fees_collection', $data);
     }
 
@@ -522,6 +523,7 @@ class Dashboard
             $data['labels'][] = Utils::my_date_3($max);
         }
 
+        $data['color'] = $u->ent->color ?? '#343a40';
         return view('dashboard.expenditure', $data);
     }
 
@@ -538,7 +540,8 @@ class Dashboard
         if ($r == null) {
             return view('widgets.box-5', [
                 'is_dark' => false,
-                'title' => 'Expected school fees',
+                'title' => 'Tuition Fees',
+                'icon' => 'money',
                 'sub_title' => 'No data found.',
                 'number' => "UGX " . number_format(0),
                 'link' => admin_url('transactions')
@@ -547,8 +550,9 @@ class Dashboard
 
         return view('widgets.box-5', [
             'is_dark' => false,
-            'title' => 'Expected Tution Fees',
-            'sub_title' => 'Total sum of tution fees of the term from all active students.',
+            'title' => 'Tuition Fees',
+            'icon' => 'money',
+            'sub_title' => 'Expected this term',
             'number' => "<small>UGX</small>" . number_format(Manifest::get_total_expected_tuition(Auth::user())),
             'link' => admin_url('transactions')
         ]);
@@ -655,12 +659,13 @@ class Dashboard
 
         $female_students = $all_students - $male_students;
 
-        $sub_title = number_format($male_students) . ' Males, ';
-        $sub_title .= number_format($female_students) . ' Females, ';
-        $sub_title .= number_format($parents) . ' Parents.';
+        $sub_title = number_format($male_students) . ' M · ';
+        $sub_title .= number_format($female_students) . ' F · ';
+        $sub_title .= number_format($parents) . ' Parents';
         return view('widgets.box-5', [
             'is_dark' => false,
-            'title' => 'Students',
+            'title' => 'Active Students',
+            'icon' => 'graduation-cap',
             'sub_title' => $sub_title,
             'number' => number_format($all_students),
             'link' => admin_url('students')
@@ -670,28 +675,29 @@ class Dashboard
     public static function teachers()
     {
         $u = Auth::user();
-        $all_students = User::where([
+        $all_staff = User::where([
             'enterprise_id' => $u->enterprise_id,
             'user_type' => 'employee',
             'status' => 1
         ])->count();
 
-        $male_students = User::where([
+        $male_staff = User::where([
             'enterprise_id' => $u->enterprise_id,
             'user_type' => 'employee',
             'sex' => 'Male',
             'status' => 1
         ])->count();
 
-        $female_students = $all_students - $male_students;
+        $female_staff = $all_staff - $male_staff;
 
-        $sub_title = number_format($male_students) . ' Males, ';
-        $sub_title .= number_format($female_students) . ' Females.';
+        $sub_title = number_format($male_staff) . ' M · ';
+        $sub_title .= number_format($female_staff) . ' F';
         return view('widgets.box-5', [
             'is_dark' => false,
-            'title' => 'Teachers & Staff',
+            'title' => 'Staff',
+            'icon' => 'briefcase',
             'sub_title' => $sub_title,
-            'number' => number_format($all_students),
+            'number' => number_format($all_staff),
             'link' => admin_url('employees')
         ]);
     }
@@ -922,6 +928,38 @@ class Dashboard
     }
 
     /**
+     * Active students whose current class is not in the active academic year.
+     */
+    public static function unclassedStudents()
+    {
+        $u = Auth::user();
+        $eid = $u->enterprise_id;
+
+        $students = DB::select("
+            SELECT u.id, u.name, u.current_class_id, ac.name AS current_class_name, y.name AS year_name
+            FROM admin_users u
+            LEFT JOIN academic_classes ac ON u.current_class_id = ac.id
+            LEFT JOIN academic_years y ON ac.academic_year_id = y.id
+            WHERE u.enterprise_id = ?
+              AND u.user_type = 'Student'
+              AND u.status = 1
+              AND (
+                u.current_class_id IS NULL
+                OR u.current_class_id = 0
+                OR y.is_active != 1
+                OR y.id IS NULL
+              )
+            ORDER BY u.name ASC
+        ", [$eid]);
+
+        return view('dashboard.unclassed-students', [
+            'students' => $students,
+            'count' => count($students),
+            'color' => $u->ent->color ?? '#343a40',
+        ]);
+    }
+
+    /**
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
     public static function extensions()
@@ -992,5 +1030,58 @@ class Dashboard
         $dependencies = json_decode($json, true)['require'];
 
         return Admin::component('admin::dashboard.dependencies', compact('dependencies'));
+    }
+
+    public static function classEnrollmentStats()
+    {
+        $u = Auth::user();
+        $eid = $u->enterprise_id;
+
+        $rows = DB::select("
+            SELECT 
+                ac.id AS class_id,
+                ac.short_name AS class_name,
+                (SELECT COUNT(*) FROM academic_class_sctreams s WHERE s.academic_class_id = ac.id) AS streams,
+                SUM(CASE WHEN u.sex = 'Male' THEN 1 ELSE 0 END) AS boys,
+                SUM(CASE WHEN u.sex = 'Female' THEN 1 ELSE 0 END) AS girls,
+                COUNT(u.id) AS total
+            FROM academic_classes ac
+            INNER JOIN academic_years ay ON ac.academic_year_id = ay.id AND ay.is_active = 1
+            LEFT JOIN admin_users u ON u.current_class_id = ac.id 
+                AND u.user_type = 'Student' AND u.status = 1
+            WHERE ac.enterprise_id = ?
+            GROUP BY ac.id, ac.short_name
+            ORDER BY ac.id ASC
+        ", [$eid]);
+
+        $labels = [];
+        $boysData = [];
+        $girlsData = [];
+        $totalData = [];
+        $grandBoys = 0;
+        $grandGirls = 0;
+        $grandTotal = 0;
+
+        foreach ($rows as $r) {
+            $labels[] = $r->class_name;
+            $boysData[] = (int) $r->boys;
+            $girlsData[] = (int) $r->girls;
+            $totalData[] = (int) $r->total;
+            $grandBoys += (int) $r->boys;
+            $grandGirls += (int) $r->girls;
+            $grandTotal += (int) $r->total;
+        }
+
+        return view('dashboard.class-enrollment-stats', [
+            'rows' => $rows,
+            'labels' => $labels,
+            'boysData' => $boysData,
+            'girlsData' => $girlsData,
+            'totalData' => $totalData,
+            'grandBoys' => $grandBoys,
+            'grandGirls' => $grandGirls,
+            'grandTotal' => $grandTotal,
+            'color' => $u->ent->color ?? '#343a40',
+        ]);
     }
 }
