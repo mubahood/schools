@@ -54,7 +54,7 @@
         <div class="ds-card" style="--ds-accent: {{ $color }};">
             <div class="ds-card-header" style="background: {{ $color }};">
                 <div class="ds-card-header-left">
-                    <span class="ds-card-icon" style="background: rgba(255,255,255,0.15);"><i class="fa fa-chart-line"></i></span>
+                    <span class="ds-card-icon" style="background: rgba(255,255,255,0.15);"><i class="fa fa-line-chart"></i></span>
                     <div class="ds-card-title" style="color: #fff;">Enrollment Trend</div>
                 </div>
             </div>
