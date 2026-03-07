@@ -34,17 +34,25 @@ class ServiceController extends AdminController
     {
         $grid = new Grid(new Service());
 
+        $u = Admin::user();
+
+        // Ensure a default service exists for this enterprise
+        Service::ensureDefaultService($u->enterprise_id);
+
         // Scope to current enterprise & newest first
         $grid->model()
-            ->where('enterprise_id', Admin::user()->enterprise_id)
+            ->where('enterprise_id', $u->enterprise_id)
             ->orderBy('id', 'desc');
 
-        // Disable actions we don’t need
+        // Disable actions we don't need
         // $grid->disableBatchActions();
         $grid->disableExport();
         $grid->actions(function ($actions) {
             $actions->disableView();
-            $actions->disableDelete();
+            // Prevent deletion of the default service
+            if ($actions->row->is_default === 'Yes') {
+                $actions->disableDelete();
+            }
         });
 
         // Filters
@@ -72,6 +80,12 @@ class ServiceController extends AdminController
         // Columns
         $grid->column('id',        'ID')->sortable();
         $grid->column('name',      'Name')->sortable();
+        $grid->column('is_default', 'Default')
+            ->using(['Yes' => 'Default', 'No' => ''])
+            ->label([
+                'Default' => 'warning',
+            ])
+            ->sortable();
         $grid->column('service_category.name', 'Category')
             ->sortable()
             ->label('info');
@@ -176,6 +190,18 @@ class ServiceController extends AdminController
         $form = new Form(new Service());
         $u = Admin::user();
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
+
+        // If editing a default service, make the name read-only display
+        if ($form->isEditing()) {
+            $id = request()->route('service');
+            $service = Service::find($id);
+            if ($service && $service->is_default === 'Yes') {
+                $form->display('is_default', 'Status')->with(function () {
+                    return '<span class="label label-warning">Default Service</span>';
+                });
+            }
+        }
+
         $form->text('name', __('Name'))->rules('required');
 
         $form->select('service_category_id', 'Service category')
@@ -295,6 +321,11 @@ class ServiceController extends AdminController
         // $form->disableEditingCheck();
         $form->disableViewCheck();
         $form->disableReset();
+
+        // Prevent setting is_default via the form
+        $form->saving(function (Form $form) {
+            $form->is_default = $form->model()->is_default ?? 'No';
+        });
 
         return $form;
     }

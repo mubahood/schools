@@ -21,6 +21,7 @@ class Service extends Model
         'description',
         'is_compulsory',
         'service_category_id',
+        'is_default',
     ];
 
     public function service_category()
@@ -39,8 +40,62 @@ class Service extends Model
         });
 
         self::deleting(function ($m) {
-            die("You cannot delete this item.");
+            if ($m->is_default === 'Yes') {
+                throw new Exception("The default service cannot be deleted.");
+            }
+
+            $defaultService = Service::where([
+                'enterprise_id' => $m->enterprise_id,
+                'is_default' => 'Yes',
+            ])->first();
+
+            if (!$defaultService) {
+                throw new Exception("No default service found. Cannot reassign subscriptions.");
+            }
+
+            // Reassign all subscriptions from this service to the default service
+            ServiceSubscription::where('service_id', $m->id)
+                ->update(['service_id' => $defaultService->id]);
+
+            // Reassign batch service subscriptions too
+            BatchServiceSubscription::where('service_id', $m->id)
+                ->update(['service_id' => $defaultService->id]);
         });
+    }
+
+    /**
+     * Get or create the default service for an enterprise.
+     */
+    public static function ensureDefaultService($enterprise_id)
+    {
+        $default = self::where([
+            'enterprise_id' => $enterprise_id,
+            'is_default' => 'Yes',
+        ])->first();
+
+        if ($default) {
+            return $default;
+        }
+
+        // Find or create an "Others" service category for this enterprise
+        $category = ServiceCategory::where('enterprise_id', $enterprise_id)->first();
+        if (!$category) {
+            $category = ServiceCategory::create([
+                'enterprise_id' => $enterprise_id,
+                'name' => 'Others',
+            ]);
+        }
+
+        $default = new self();
+        $default->enterprise_id = $enterprise_id;
+        $default->name = 'Default Service';
+        $default->fee = 0;
+        $default->description = 'Default service. Subscriptions from deleted services are reassigned here.';
+        $default->service_category_id = $category->id;
+        $default->is_default = 'Yes';
+        $default->save();
+
+        return $default;
     }
 
 
