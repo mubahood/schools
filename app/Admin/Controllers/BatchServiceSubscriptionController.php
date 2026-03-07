@@ -84,7 +84,7 @@ class BatchServiceSubscriptionController extends AdminController
 
         $grid->actions(function ($actions) {
             $actions->disableView();
-            if ($actions->row->is_processed != 'Yes') {
+            if ($actions->row->is_processed == 'Yes') {
                 $actions->disableEdit();
             }
         });
