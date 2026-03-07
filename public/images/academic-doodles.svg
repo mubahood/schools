@@ -1,0 +1,1023 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1600" viewBox="0 0 1600 1600">
+  <defs>
+    <style>
+      .d { fill: none; stroke: #cad0d6; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; opacity: 0.45; }
+      .f { fill: #cad0d6; stroke: none; opacity: 0.28; }
+    </style>
+  </defs>
+
+  <!-- ROW 1 -->
+
+  <!-- 1. Graduation Cap -->
+  <g transform="translate(60,60) rotate(-6)">
+    <path class="d" d="M0,30 L50,8 L100,30 L50,52 Z"/>
+    <line class="d" x1="50" y1="52" x2="50" y2="75"/>
+    <path class="d" d="M22,40 L22,62 C22,62 36,74 50,74 C64,74 78,62 78,62 L78,40"/>
+    <circle class="f" cx="50" cy="75" r="3"/>
+    <line class="d" x1="90" y1="34" x2="90" y2="68"/>
+    <path class="d" d="M86,68 C86,68 90,74 94,68"/>
+  </g>
+
+  <!-- 2. Open Book -->
+  <g transform="translate(280,50) rotate(4)">
+    <path class="d" d="M0,30 C0,30 3,2 30,2 C57,2 60,14 60,14 C60,14 63,2 90,2 C117,2 120,30 120,30"/>
+    <path class="d" d="M0,30 L0,72 C0,72 3,45 30,45 C57,45 60,56 60,56 L60,14"/>
+    <path class="d" d="M120,30 L120,72 C120,72 117,45 90,45 C63,45 60,56 60,56"/>
+    <line class="d" x1="12" y1="40" x2="48" y2="40"/>
+    <line class="d" x1="12" y1="50" x2="45" y2="50"/>
+    <line class="d" x1="12" y1="60" x2="40" y2="60"/>
+    <line class="d" x1="72" y1="40" x2="108" y2="40"/>
+    <line class="d" x1="72" y1="50" x2="105" y2="50"/>
+    <line class="d" x1="72" y1="60" x2="100" y2="60"/>
+  </g>
+
+  <!-- 3. Microscope -->
+  <g transform="translate(530,40) rotate(-3)">
+    <path class="d" d="M35,0 L35,20 L50,20 L50,0"/>
+    <path class="d" d="M42,20 L42,45"/>
+    <path class="d" d="M30,45 L30,55 L25,70"/>
+    <path class="d" d="M55,45 L55,55 L60,70"/>
+    <circle class="d" cx="42" cy="55" r="8"/>
+    <path class="d" d="M42,63 L42,80"/>
+    <path class="d" d="M20,80 L65,80"/>
+    <rect class="d" x="15" y="80" width="55" height="8"/>
+    <path class="d" d="M30,45 L55,45"/>
+    <circle class="f" cx="42" cy="55" r="3"/>
+  </g>
+
+  <!-- 4. Calculator -->
+  <g transform="translate(760,55) rotate(5)">
+    <rect class="d" x="0" y="0" width="55" height="78"/>
+    <rect class="d" x="7" y="7" width="41" height="18"/>
+    <circle class="f" cx="16" cy="38" r="3.5"/>
+    <circle class="f" cx="28" cy="38" r="3.5"/>
+    <circle class="f" cx="40" cy="38" r="3.5"/>
+    <circle class="f" cx="16" cy="50" r="3.5"/>
+    <circle class="f" cx="28" cy="50" r="3.5"/>
+    <circle class="f" cx="40" cy="50" r="3.5"/>
+    <circle class="f" cx="16" cy="62" r="3.5"/>
+    <circle class="f" cx="28" cy="62" r="3.5"/>
+    <rect class="f" x="36" y="47" width="8" height="18"/>
+  </g>
+
+  <!-- 5. Light Bulb -->
+  <g transform="translate(1000,45) rotate(-7)">
+    <path class="d" d="M30,0 C13,0 0,14 0,30 C0,42 8,50 12,58 L12,68 L48,68 L48,58 C52,50 60,42 60,30 C60,14 47,0 30,0 Z"/>
+    <line class="d" x1="15" y1="73" x2="45" y2="73"/>
+    <line class="d" x1="18" y1="78" x2="42" y2="78"/>
+    <line class="d" x1="21" y1="83" x2="39" y2="83"/>
+    <path class="d" d="M22,28 C22,18 30,14 30,14"/>
+    <line class="d" x1="30" y1="-10" x2="30" y2="-18" style="opacity:0.3"/>
+    <line class="d" x1="-10" y1="30" x2="-18" y2="30" style="opacity:0.3"/>
+    <line class="d" x1="70" y1="30" x2="78" y2="30" style="opacity:0.3"/>
+    <line class="d" x1="8" y1="8" x2="2" y2="2" style="opacity:0.3"/>
+    <line class="d" x1="52" y1="8" x2="58" y2="2" style="opacity:0.3"/>
+  </g>
+
+  <!-- 6. Globe -->
+  <g transform="translate(1250,50) rotate(3)">
+    <circle class="d" cx="40" cy="40" r="38"/>
+    <ellipse class="d" cx="40" cy="40" rx="16" ry="38"/>
+    <path class="d" d="M4,26 C4,26 22,22 40,24 C58,26 76,26 76,26"/>
+    <path class="d" d="M4,54 C4,54 22,58 40,56 C58,54 76,54 76,54"/>
+    <line class="d" x1="40" y1="2" x2="40" y2="78"/>
+    <line class="d" x1="2" y1="40" x2="78" y2="40"/>
+    <line class="d" x1="40" y1="78" x2="40" y2="92"/>
+    <path class="d" d="M25,92 L55,92"/>
+  </g>
+
+  <!-- 7. Pencil -->
+  <g transform="translate(1470,30) rotate(30)">
+    <path class="d" d="M0,0 L10,0 L10,65 L5,78 L0,65 Z"/>
+    <line class="d" x1="0" y1="65" x2="10" y2="65"/>
+    <line class="d" x1="0" y1="10" x2="10" y2="10"/>
+    <path class="f" d="M1,65 L5,78 L9,65 Z"/>
+    <line class="d" x1="3" y1="10" x2="3" y2="0"/>
+    <line class="d" x1="7" y1="10" x2="7" y2="0"/>
+  </g>
+
+  <!-- ROW 2 -->
+
+  <!-- 8. School Backpack -->
+  <g transform="translate(80,230) rotate(4)">
+    <path class="d" d="M15,10 C15,2 25,0 35,0 C45,0 55,2 55,10"/>
+    <rect class="d" x="8" y="10" width="54" height="65"/>
+    <rect class="d" x="18" y="20" width="34" height="25"/>
+    <path class="d" d="M0,25 C0,25 0,55 8,55"/>
+    <path class="d" d="M70,25 C70,25 70,55 62,55"/>
+    <line class="d" x1="35" y1="45" x2="35" y2="55"/>
+    <path class="d" d="M28,55 L42,55"/>
+    <circle class="f" cx="35" cy="32" r="3"/>
+  </g>
+
+  <!-- 9. Blackboard -->
+  <g transform="translate(280,220) rotate(-3)">
+    <rect class="d" x="0" y="0" width="110" height="70"/>
+    <rect class="d" x="5" y="5" width="100" height="55"/>
+    <line class="d" x1="18" y1="30" x2="80" y2="30"/>
+    <line class="d" x1="18" y1="45" x2="80" y2="45"/>
+    <path class="d" d="M0,70 L-8,88"/>
+    <path class="d" d="M110,70 L118,88"/>
+    <rect class="f" x="30" y="62" width="20" height="5"/>
+    <rect class="f" x="60" y="61" width="16" height="7"/>
+  </g>
+
+  <!-- 10. Diploma Scroll -->
+  <g transform="translate(530,235) rotate(8)">
+    <path class="d" d="M10,0 C10,0 0,0 0,8 C0,16 10,16 10,16 L70,16 C70,16 80,16 80,8 C80,0 70,0 70,0 Z"/>
+    <path class="d" d="M10,16 L10,60 C10,60 0,60 0,68 C0,76 10,76 10,76 L70,76 C70,76 80,76 80,68 C80,60 70,60 70,60 L70,16"/>
+    <line class="d" x1="22" y1="30" x2="58" y2="30"/>
+    <line class="d" x1="22" y1="38" x2="58" y2="38"/>
+    <line class="d" x1="22" y1="46" x2="50" y2="46"/>
+    <circle class="d" cx="40" cy="60" r="6"/>
+    <path class="d" d="M36,66 L33,76"/>
+    <path class="d" d="M44,66 L47,76"/>
+  </g>
+
+  <!-- 11. Pen -->
+  <g transform="translate(780,225) rotate(-25)">
+    <path class="d" d="M0,0 L8,0 L8,50 L6,55 L5,65 L3,55 L0,50 Z"/>
+    <line class="d" x1="0" y1="12" x2="8" y2="12"/>
+    <line class="d" x1="0" y1="50" x2="8" y2="50"/>
+    <path class="d" d="M2,12 L2,0 L6,0 L6,12"/>
+    <path class="f" d="M3,55 L4,65 L5,55"/>
+  </g>
+
+  <!-- 12. Laptop -->
+  <g transform="translate(980,230) rotate(2)">
+    <path class="d" d="M10,0 L90,0 L90,52 L10,52 Z"/>
+    <rect class="d" x="16" y="5" width="68" height="42"/>
+    <path class="d" d="M0,52 L10,52 L90,52 L100,52 L95,62 L5,62 Z"/>
+    <line class="d" x1="40" y1="55" x2="60" y2="55"/>
+    <line class="d" x1="22" y1="15" x2="60" y2="15" style="opacity:0.3"/>
+    <line class="d" x1="22" y1="22" x2="55" y2="22" style="opacity:0.3"/>
+    <line class="d" x1="22" y1="29" x2="50" y2="29" style="opacity:0.3"/>
+  </g>
+
+  <!-- 13. School Bell -->
+  <g transform="translate(1260,225) rotate(-5)">
+    <path class="d" d="M30,0 L30,8"/>
+    <circle class="f" cx="30" cy="4" r="4"/>
+    <path class="d" d="M10,10 C10,10 10,8 30,8 C50,8 50,10 50,10"/>
+    <path class="d" d="M10,10 C10,10 4,35 2,50 L58,50 C56,35 50,10 50,10"/>
+    <path class="d" d="M0,50 L60,50 L60,56 L0,56 Z"/>
+    <circle class="f" cx="30" cy="56" r="5"/>
+    <path class="d" d="M64,30 C68,28 68,36 64,34" style="opacity:0.3"/>
+    <path class="d" d="M70,26 C76,24 76,40 70,38" style="opacity:0.3"/>
+  </g>
+
+  <!-- 14. Closed Book Stack -->
+  <g transform="translate(1440,240) rotate(6)">
+    <path class="d" d="M0,50 L70,50 L70,60 L0,60 Z"/>
+    <path class="d" d="M0,50 L0,60"/>
+    <path class="d" d="M-3,36 L73,36 L73,48 L-3,48 Z"/>
+    <path class="d" d="M-3,36 L-3,48"/>
+    <line class="d" x1="10" y1="42" x2="50" y2="42" style="opacity:0.3"/>
+    <path class="d" d="M2,22 L68,22 L68,34 L2,34 Z"/>
+    <path class="d" d="M2,22 L2,34"/>
+    <line class="d" x1="12" y1="28" x2="45" y2="28" style="opacity:0.3"/>
+    <path class="d" d="M50,22 L50,14 L55,18 L60,14 L60,22"/>
+  </g>
+
+  <!-- ROW 3 -->
+
+  <!-- 15. Test Tube -->
+  <g transform="translate(65,430) rotate(15)">
+    <path class="d" d="M8,0 L8,55 C8,65 28,65 28,55 L28,0"/>
+    <line class="d" x1="3" y1="0" x2="33" y2="0"/>
+    <path class="d" d="M8,40 C8,40 14,35 18,40 C22,45 28,40 28,40" style="opacity:0.35"/>
+    <circle class="f" cx="14" cy="52" r="3"/>
+    <circle class="f" cx="22" cy="48" r="2"/>
+  </g>
+
+  <!-- 16. Atom -->
+  <g transform="translate(260,420) rotate(10)">
+    <ellipse class="d" cx="35" cy="35" rx="34" ry="12"/>
+    <ellipse class="d" cx="35" cy="35" rx="34" ry="12" transform="rotate(60,35,35)"/>
+    <ellipse class="d" cx="35" cy="35" rx="34" ry="12" transform="rotate(-60,35,35)"/>
+    <circle class="f" cx="35" cy="35" r="5"/>
+  </g>
+
+  <!-- 17. Paper Airplane -->
+  <g transform="translate(500,430) rotate(-20)">
+    <path class="d" d="M0,30 L80,0 L28,22 Z"/>
+    <path class="d" d="M28,22 L80,0 L35,55 Z"/>
+    <line class="d" x1="28" y1="22" x2="35" y2="55"/>
+    <line class="d" x1="-6" y1="35" x2="-20" y2="40" style="opacity:0.2"/>
+    <line class="d" x1="-4" y1="42" x2="-16" y2="50" style="opacity:0.15"/>
+  </g>
+
+  <!-- 18. Ruler -->
+  <g transform="translate(730,440) rotate(-8)">
+    <rect class="d" x="0" y="0" width="120" height="24"/>
+    <line class="d" x1="15" y1="0" x2="15" y2="12"/>
+    <line class="d" x1="30" y1="0" x2="30" y2="8"/>
+    <line class="d" x1="45" y1="0" x2="45" y2="12"/>
+    <line class="d" x1="60" y1="0" x2="60" y2="8"/>
+    <line class="d" x1="75" y1="0" x2="75" y2="12"/>
+    <line class="d" x1="90" y1="0" x2="90" y2="8"/>
+    <line class="d" x1="105" y1="0" x2="105" y2="12"/>
+  </g>
+
+  <!-- 19. Apple -->
+  <g transform="translate(1020,420) rotate(-4)">
+    <path class="d" d="M32,12 C22,6 8,14 4,30 C0,48 14,66 28,66 C32,66 32,62 36,62 C40,62 40,66 44,66 C58,66 72,48 68,30 C64,14 50,6 40,12"/>
+    <path class="d" d="M36,12 C36,12 38,0 46,0"/>
+    <path class="d" d="M40,8 C40,8 48,6 52,12" style="opacity:0.4"/>
+    <path class="d" d="M20,30 C20,30 28,26 36,32" style="opacity:0.25"/>
+  </g>
+
+  <!-- 20. Spiral Notebook -->
+  <g transform="translate(1240,420) rotate(5)">
+    <rect class="d" x="14" y="0" width="72" height="90"/>
+    <line class="d" x1="30" y1="0" x2="30" y2="90"/>
+    <circle class="d" cx="14" cy="12" r="5"/>
+    <circle class="d" cx="14" cy="28" r="5"/>
+    <circle class="d" cx="14" cy="44" r="5"/>
+    <circle class="d" cx="14" cy="60" r="5"/>
+    <circle class="d" cx="14" cy="76" r="5"/>
+    <line class="d" x1="38" y1="18" x2="76" y2="18"/>
+    <line class="d" x1="38" y1="28" x2="72" y2="28"/>
+    <line class="d" x1="38" y1="38" x2="76" y2="38"/>
+    <line class="d" x1="38" y1="48" x2="68" y2="48"/>
+    <line class="d" x1="38" y1="58" x2="74" y2="58"/>
+    <line class="d" x1="38" y1="68" x2="60" y2="68"/>
+  </g>
+
+  <!-- 21. Compass (geometry) -->
+  <g transform="translate(1460,430) rotate(-10)">
+    <path class="d" d="M32,0 L32,18 L12,75"/>
+    <path class="d" d="M32,18 L52,75"/>
+    <circle class="f" cx="32" cy="0" r="4"/>
+    <path class="d" d="M48,65 C48,65 58,78 40,82"/>
+    <circle class="f" cx="12" cy="75" r="2"/>
+  </g>
+
+  <!-- ROW 4 -->
+
+  <!-- 22. Flask -->
+  <g transform="translate(70,620) rotate(-5)">
+    <path class="d" d="M20,0 L20,35 L0,75 L65,75 L45,35 L45,0 Z"/>
+    <line class="d" x1="14" y1="0" x2="51" y2="0"/>
+    <path class="d" d="M10,58 C10,58 22,52 32,58 C42,64 54,58 54,58" style="opacity:0.35"/>
+    <circle class="f" cx="24" cy="65" r="3"/>
+    <circle class="f" cx="40" cy="63" r="2"/>
+    <circle class="f" cx="32" cy="70" r="2.5"/>
+    <circle class="d" cx="26" cy="48" r="2" style="opacity:0.3"/>
+    <circle class="d" cx="35" cy="44" r="1.5" style="opacity:0.25"/>
+  </g>
+
+  <!-- 23. Pi symbol -->
+  <g transform="translate(280,640) rotate(-8)">
+    <path class="d" d="M0,8 L50,8" style="stroke-width:2"/>
+    <path class="d" d="M12,8 C12,8 14,50 16,52"/>
+    <path class="d" d="M38,8 C38,8 34,45 30,52"/>
+  </g>
+
+  <!-- 24. Sigma -->
+  <g transform="translate(460,628) rotate(6)">
+    <path class="d" d="M40,0 L0,0 L25,30 L0,60 L40,60" style="stroke-width:1.6"/>
+  </g>
+
+  <!-- 25. Chalk pieces -->
+  <g transform="translate(640,640) rotate(15)">
+    <rect class="d" x="0" y="0" width="8" height="40" rx="0"/>
+    <path class="f" d="M0,0 L8,0 L8,6 L0,6 Z" style="opacity:0.2"/>
+  </g>
+  <g transform="translate(670,660) rotate(-30)">
+    <rect class="d" x="0" y="0" width="7" height="28" rx="0"/>
+    <path class="f" d="M0,0 L7,0 L7,5 L0,5 Z" style="opacity:0.2"/>
+  </g>
+
+  <!-- 26. Star -->
+  <g transform="translate(830,630) rotate(12)">
+    <path class="d" d="M30,0 L38,22 L60,22 L42,36 L50,60 L30,45 L10,60 L18,36 L0,22 L22,22 Z"/>
+  </g>
+
+  <!-- 27. Music Note -->
+  <g transform="translate(1040,640) rotate(-8)">
+    <ellipse class="f" cx="10" cy="50" rx="10" ry="7" transform="rotate(-15,10,50)"/>
+    <line class="d" x1="19" y1="47" x2="19" y2="0"/>
+    <path class="d" d="M19,0 C19,0 36,5 36,18 C36,26 26,22 19,16"/>
+  </g>
+
+  <!-- 28. Infinity -->
+  <g transform="translate(1220,650) rotate(3)">
+    <path class="d" d="M22,18 C22,8 10,0 0,9 C-8,16 0,30 12,27 C20,24 24,18 30,18 C36,18 38,24 48,27 C60,30 68,16 60,9 C50,0 38,8 38,18" style="stroke-width:1.6"/>
+  </g>
+
+  <!-- 29. DNA helix -->
+  <g transform="translate(1420,620) rotate(12)">
+    <path class="d" d="M0,0 C12,12 32,12 44,0"/>
+    <path class="d" d="M0,0 C12,-12 32,-12 44,0"/>
+    <path class="d" d="M0,20 C12,32 32,32 44,20"/>
+    <path class="d" d="M0,20 C12,8 32,8 44,20"/>
+    <path class="d" d="M0,40 C12,52 32,52 44,40"/>
+    <path class="d" d="M0,40 C12,28 32,28 44,40"/>
+    <path class="d" d="M0,60 C12,72 32,72 44,60"/>
+    <path class="d" d="M0,60 C12,48 32,48 44,60"/>
+    <line class="d" x1="10" y1="0" x2="10" y2="5" style="opacity:0.25"/>
+    <line class="d" x1="22" y1="12" x2="22" y2="20" style="opacity:0.25"/>
+    <line class="d" x1="34" y1="20" x2="34" y2="25" style="opacity:0.25"/>
+    <line class="d" x1="22" y1="32" x2="22" y2="40" style="opacity:0.25"/>
+  </g>
+
+  <!-- ROW 5 -->
+
+  <!-- 30. Magnifying Glass -->
+  <g transform="translate(70,830) rotate(-12)">
+    <circle class="d" cx="25" cy="25" r="24"/>
+    <line class="d" x1="42" y1="42" x2="62" y2="62" style="stroke-width:2.5"/>
+    <path class="d" d="M16,18 C16,18 14,26 20,30" style="opacity:0.3"/>
+  </g>
+
+  <!-- 31. Clock -->
+  <g transform="translate(280,820) rotate(5)">
+    <circle class="d" cx="35" cy="35" r="34"/>
+    <circle class="d" cx="35" cy="35" r="30"/>
+    <line class="d" x1="35" y1="35" x2="35" y2="14"/>
+    <line class="d" x1="35" y1="35" x2="52" y2="35"/>
+    <circle class="f" cx="35" cy="35" r="3"/>
+    <line class="d" x1="35" y1="5" x2="35" y2="9" style="opacity:0.3"/>
+    <line class="d" x1="35" y1="61" x2="35" y2="65" style="opacity:0.3"/>
+    <line class="d" x1="5" y1="35" x2="9" y2="35" style="opacity:0.3"/>
+    <line class="d" x1="61" y1="35" x2="65" y2="35" style="opacity:0.3"/>
+  </g>
+
+  <!-- 32. Paint Palette -->
+  <g transform="translate(500,830) rotate(-6)">
+    <path class="d" d="M42,0 C18,0 0,20 0,42 C0,64 20,78 42,78 C50,78 50,65 58,65 C66,65 66,78 76,72 C90,60 84,20 42,0 Z"/>
+    <circle class="f" cx="18" cy="30" r="6"/>
+    <circle class="f" cx="32" cy="18" r="5"/>
+    <circle class="f" cx="52" cy="18" r="4.5"/>
+    <circle class="f" cx="64" cy="32" r="5"/>
+    <circle class="f" cx="18" cy="50" r="4.5"/>
+    <circle class="f" cx="38" cy="54" r="4"/>
+  </g>
+
+  <!-- 33. Triangle / Set Square -->
+  <g transform="translate(730,845) rotate(8)">
+    <path class="d" d="M0,65 L35,0 L70,65 Z"/>
+    <path class="d" d="M48,65 L48,50 L63,50" style="opacity:0.5"/>
+  </g>
+
+  <!-- 34. Eraser -->
+  <g transform="translate(970,850) rotate(-10)">
+    <path class="d" d="M0,12 L12,0 L70,0 L70,24 L58,36 L0,36 Z"/>
+    <line class="d" x1="20" y1="0" x2="8" y2="12"/>
+    <line class="d" x1="20" y1="0" x2="20" y2="36"/>
+    <path class="f" d="M0,12 L12,0 L20,0 L20,36 L0,36 Z" style="opacity:0.15"/>
+  </g>
+
+  <!-- 35. Certificate -->
+  <g transform="translate(1200,840) rotate(4)">
+    <path class="d" d="M0,10 C0,0 8,0 8,0 L72,0 C72,0 80,0 80,10"/>
+    <path class="d" d="M0,10 L0,60 C0,70 8,70 8,70 L72,70 C72,70 80,70 80,60 L80,10"/>
+    <circle class="d" cx="40" cy="50" r="8"/>
+    <path class="d" d="M35,58 L30,74"/>
+    <path class="d" d="M45,58 L50,74"/>
+    <line class="d" x1="18" y1="22" x2="62" y2="22"/>
+    <line class="d" x1="18" y1="30" x2="62" y2="30"/>
+    <line class="d" x1="25" y1="38" x2="55" y2="38"/>
+  </g>
+
+  <!-- 36. Wi-Fi / Waves -->
+  <g transform="translate(1440,860) rotate(0)">
+    <path class="d" d="M0,40 C0,40 20,20 40,40" style="opacity:0.3"/>
+    <path class="d" d="M6,34 C6,34 20,20 34,34" style="opacity:0.4"/>
+    <path class="d" d="M12,28 C12,28 20,18 28,28" style="opacity:0.5"/>
+    <circle class="f" cx="20" cy="40" r="3.5"/>
+  </g>
+
+  <!-- ROW 6 -->
+
+  <!-- 37. Open Book 2 -->
+  <g transform="translate(80,1050) rotate(8)">
+    <path class="d" d="M0,22 C0,22 2,2 20,2 C38,2 40,10 40,10 C40,10 42,2 60,2 C78,2 80,22 80,22"/>
+    <path class="d" d="M0,22 L0,55 C0,55 2,36 20,36 C38,36 40,46 40,46 L40,10"/>
+    <path class="d" d="M80,22 L80,55 C80,55 78,36 60,36 C42,36 40,46 40,46"/>
+    <line class="d" x1="8" y1="32" x2="32" y2="32"/>
+    <line class="d" x1="8" y1="40" x2="30" y2="40"/>
+    <line class="d" x1="48" y1="32" x2="72" y2="32"/>
+    <line class="d" x1="48" y1="40" x2="70" y2="40"/>
+  </g>
+
+  <!-- 38. Protractor -->
+  <g transform="translate(310,1040) rotate(-3)">
+    <path class="d" d="M0,50 A50,50 0 0,1 100,50 L0,50 Z"/>
+    <path class="d" d="M10,50 A40,40 0 0,1 90,50" style="opacity:0.3"/>
+    <line class="d" x1="50" y1="0" x2="50" y2="6" style="opacity:0.3"/>
+    <line class="d" x1="15" y1="15" x2="19" y2="19" style="opacity:0.3"/>
+    <line class="d" x1="85" y1="15" x2="81" y2="19" style="opacity:0.3"/>
+    <circle class="f" cx="50" cy="50" r="2"/>
+  </g>
+
+  <!-- 39. Pencil Sharpener -->
+  <g transform="translate(540,1055) rotate(10)">
+    <rect class="d" x="0" y="0" width="45" height="28"/>
+    <circle class="d" cx="15" cy="14" r="9"/>
+    <circle class="f" cx="15" cy="14" r="4"/>
+    <path class="d" d="M28,8 L40,8 L40,20 L28,20" style="opacity:0.3"/>
+  </g>
+
+  <!-- 40. ABC Letters -->
+  <g transform="translate(740,1050) rotate(-5)">
+    <path class="d" d="M0,36 L12,0 L24,36 M5,24 L19,24" style="stroke-width:1.6"/>
+    <path class="d" d="M32,0 L32,36 M32,0 C32,0 50,0 50,10 C50,18 32,18 32,18 C32,18 52,18 52,28 C52,36 32,36 32,36" style="stroke-width:1.6"/>
+    <path class="d" d="M80,10 C80,2 70,0 64,4 C58,8 58,16 64,20 C58,24 58,32 64,36 C70,40 80,36 80,30" style="stroke-width:1.6"/>
+  </g>
+
+  <!-- 41. Question Mark -->
+  <g transform="translate(1000,1050) rotate(5)">
+    <path class="d" d="M8,12 C8,0 32,0 32,16 C32,26 20,26 20,36" style="stroke-width:1.8"/>
+    <circle class="f" cx="20" cy="44" r="3"/>
+  </g>
+
+  <!-- 42. Pencil Case -->
+  <g transform="translate(1200,1045) rotate(-6)">
+    <path class="d" d="M0,10 C0,4 4,0 10,0 L80,0 C86,0 90,4 90,10 L90,35 C90,41 86,45 80,45 L10,45 C4,45 0,41 0,35 Z"/>
+    <path class="d" d="M70,0 L70,45"/>
+    <circle class="f" cx="75" cy="22" r="3"/>
+    <line class="d" x1="15" y1="18" x2="55" y2="18" style="opacity:0.3"/>
+    <line class="d" x1="15" y1="28" x2="50" y2="28" style="opacity:0.3"/>
+  </g>
+
+  <!-- 43. Target -->
+  <g transform="translate(1440,1040) rotate(3)">
+    <circle class="d" cx="30" cy="30" r="28"/>
+    <circle class="d" cx="30" cy="30" r="18"/>
+    <circle class="d" cx="30" cy="30" r="8"/>
+    <circle class="f" cx="30" cy="30" r="3"/>
+  </g>
+
+  <!-- ROW 7 -->
+
+  <!-- 44. Trophy -->
+  <g transform="translate(70,1250) rotate(-4)">
+    <path class="d" d="M15,0 L55,0 L50,40 C50,40 45,55 35,55 C25,55 20,40 20,40 Z"/>
+    <path class="d" d="M15,0 C15,0 0,5 0,18 C0,30 15,30 20,25"/>
+    <path class="d" d="M55,0 C55,0 70,5 70,18 C70,30 55,30 50,25"/>
+    <line class="d" x1="35" y1="55" x2="35" y2="68"/>
+    <path class="d" d="M20,68 L50,68 L50,74 L20,74 Z"/>
+  </g>
+
+  <!-- 45. Headphones -->
+  <g transform="translate(290,1250) rotate(3)">
+    <path class="d" d="M10,40 C10,16 22,0 40,0 C58,0 70,16 70,40"/>
+    <rect class="d" x="0" y="36" width="16" height="24"/>
+    <rect class="d" x="64" y="36" width="16" height="24"/>
+    <path class="f" d="M0,36 L16,36 L16,60 L0,60 Z" style="opacity:0.15"/>
+    <path class="f" d="M64,36 L80,36 L80,60 L64,60 Z" style="opacity:0.15"/>
+  </g>
+
+  <!-- 46. Hourglass -->
+  <g transform="translate(520,1250) rotate(-5)">
+    <path class="d" d="M5,0 L55,0 L55,6 L35,28 L55,50 L55,56 L5,56 L5,50 L25,28 L5,6 Z"/>
+    <path class="d" d="M15,50 C15,50 22,44 30,50 C38,56 45,50 45,50" style="opacity:0.3"/>
+    <path class="f" d="M15,50 L30,38 L45,50 L45,56 L5,56 L5,50 Z" style="opacity:0.12"/>
+  </g>
+
+  <!-- 47. Abacus -->
+  <g transform="translate(730,1245) rotate(4)">
+    <rect class="d" x="0" y="0" width="80" height="60"/>
+    <line class="d" x1="0" y1="15" x2="80" y2="15"/>
+    <line class="d" x1="0" y1="30" x2="80" y2="30"/>
+    <line class="d" x1="0" y1="45" x2="80" y2="45"/>
+    <circle class="f" cx="15" cy="15" r="5"/>
+    <circle class="f" cx="28" cy="15" r="5"/>
+    <circle class="f" cx="41" cy="15" r="5"/>
+    <circle class="f" cx="15" cy="30" r="5"/>
+    <circle class="f" cx="28" cy="30" r="5"/>
+    <circle class="f" cx="15" cy="45" r="5"/>
+    <circle class="f" cx="28" cy="45" r="5"/>
+    <circle class="f" cx="41" cy="45" r="5"/>
+    <circle class="f" cx="54" cy="45" r="5"/>
+  </g>
+
+  <!-- 48. Graduation Cap 2 -->
+  <g transform="translate(1000,1260) rotate(10)">
+    <path class="d" d="M0,25 L40,8 L80,25 L40,42 Z"/>
+    <path class="d" d="M18,33 L18,52 C18,52 28,60 40,60 C52,60 62,52 62,52 L62,33"/>
+    <line class="d" x1="72" y1="28" x2="72" y2="55"/>
+    <path class="d" d="M68,55 C68,55 72,60 76,55"/>
+  </g>
+
+  <!-- 49. Scissors -->
+  <g transform="translate(1240,1260) rotate(-15)">
+    <circle class="d" cx="10" cy="50" r="9"/>
+    <circle class="d" cx="50" cy="50" r="9"/>
+    <path class="d" d="M16,43 L44,43"/>
+    <path class="d" d="M10,41 L40,0"/>
+    <path class="d" d="M50,41 L20,0"/>
+  </g>
+
+  <!-- 50. Document -->
+  <g transform="translate(1440,1240) rotate(6)">
+    <path class="d" d="M0,0 L55,0 L70,15 L70,85 L0,85 Z"/>
+    <path class="d" d="M55,0 L55,15 L70,15"/>
+    <line class="d" x1="10" y1="28" x2="55" y2="28" style="opacity:0.3"/>
+    <line class="d" x1="10" y1="38" x2="55" y2="38" style="opacity:0.3"/>
+    <line class="d" x1="10" y1="48" x2="50" y2="48" style="opacity:0.3"/>
+    <line class="d" x1="10" y1="58" x2="55" y2="58" style="opacity:0.3"/>
+    <line class="d" x1="10" y1="68" x2="40" y2="68" style="opacity:0.3"/>
+  </g>
+
+  <!-- ROW 8 - scattered small elements -->
+
+  <!-- Plus signs -->
+  <g transform="translate(170,1450) rotate(20)">
+    <line class="d" x1="10" y1="0" x2="10" y2="20"/>
+    <line class="d" x1="0" y1="10" x2="20" y2="10"/>
+  </g>
+  <g transform="translate(450,1470) rotate(-15)">
+    <line class="d" x1="8" y1="0" x2="8" y2="16"/>
+    <line class="d" x1="0" y1="8" x2="16" y2="8"/>
+  </g>
+  <g transform="translate(1350,1460) rotate(30)">
+    <line class="d" x1="8" y1="0" x2="8" y2="16"/>
+    <line class="d" x1="0" y1="8" x2="16" y2="8"/>
+  </g>
+
+  <!-- Equals -->
+  <g transform="translate(650,1440) rotate(-8)">
+    <line class="d" x1="0" y1="0" x2="24" y2="0"/>
+    <line class="d" x1="0" y1="8" x2="24" y2="8"/>
+  </g>
+
+  <!-- X marks -->
+  <g transform="translate(900,1450) rotate(25)">
+    <line class="d" x1="0" y1="0" x2="14" y2="14" style="opacity:0.3"/>
+    <line class="d" x1="14" y1="0" x2="0" y2="14" style="opacity:0.3"/>
+  </g>
+  <g transform="translate(1100,1480) rotate(-20)">
+    <line class="d" x1="0" y1="0" x2="12" y2="12" style="opacity:0.3"/>
+    <line class="d" x1="12" y1="0" x2="0" y2="12" style="opacity:0.3"/>
+  </g>
+
+  <!-- Wavy underlines -->
+  <path class="d" d="M200,1500 C206,1494 212,1506 218,1500 C224,1494 230,1506 236,1500 C242,1494 248,1506 254,1500" style="opacity:0.2"/>
+  <path class="d" d="M750,1520 C756,1514 762,1526 768,1520 C774,1514 780,1526 786,1520" style="opacity:0.2"/>
+  <path class="d" d="M1200,1510 C1206,1504 1212,1516 1218,1510 C1224,1504 1230,1516 1236,1510 C1242,1504 1248,1516 1254,1510" style="opacity:0.2"/>
+
+  <!-- Scattered dots -->
+  <circle class="f" cx="140" cy="170" r="2" style="opacity:0.15"/>
+  <circle class="f" cx="420" cy="150" r="2" style="opacity:0.15"/>
+  <circle class="f" cx="680" cy="180" r="2" style="opacity:0.15"/>
+  <circle class="f" cx="940" cy="160" r="2" style="opacity:0.15"/>
+  <circle class="f" cx="1150" cy="175" r="2" style="opacity:0.15"/>
+  <circle class="f" cx="1380" cy="155" r="2" style="opacity:0.15"/>
+  <circle class="f" cx="200" cy="380" r="2" style="opacity:0.15"/>
+  <circle class="f" cx="420" cy="360" r="2" style="opacity:0.15"/>
+  <circle class="f" cx="900" cy="380" r="2" style="opacity:0.15"/>
+  <circle class="f" cx="1150" cy="370" r="2" style="opacity:0.15"/>
+  <circle class="f" cx="180" cy="580" r="2" style="opacity:0.15"/>
+  <circle class="f" cx="420" cy="570" r="2" style="opacity:0.15"/>
+  <circle class="f" cx="860" cy="590" r="2" style="opacity:0.15"/>
+  <circle class="f" cx="1130" cy="580" r="2" style="opacity:0.15"/>
+  <circle class="f" cx="200" cy="780" r="2" style="opacity:0.15"/>
+  <circle class="f" cx="650" cy="770" r="2" style="opacity:0.15"/>
+  <circle class="f" cx="1100" cy="790" r="2" style="opacity:0.15"/>
+  <circle class="f" cx="1380" cy="775" r="2" style="opacity:0.15"/>
+  <circle class="f" cx="180" cy="980" r="2" style="opacity:0.15"/>
+  <circle class="f" cx="450" cy="970" r="2" style="opacity:0.15"/>
+  <circle class="f" cx="920" cy="980" r="2" style="opacity:0.15"/>
+  <circle class="f" cx="1350" cy="970" r="2" style="opacity:0.15"/>
+  <circle class="f" cx="200" cy="1180" r="2" style="opacity:0.15"/>
+  <circle class="f" cx="650" cy="1170" r="2" style="opacity:0.15"/>
+  <circle class="f" cx="1100" cy="1190" r="2" style="opacity:0.15"/>
+  <circle class="f" cx="1500" cy="1180" r="2" style="opacity:0.15"/>
+
+  <!-- Small triangles -->
+  <path class="d" d="M380,780 L388,764 L396,780 Z" style="opacity:0.2"/>
+  <path class="d" d="M1080,440 L1088,426 L1096,440 Z" style="opacity:0.2"/>
+  <path class="d" d="M600,1180 L608,1166 L616,1180 Z" style="opacity:0.2"/>
+
+  <!-- Small circles -->
+  <circle class="d" cx="180" cy="500" r="6" style="opacity:0.2"/>
+  <circle class="d" cx="930" cy="540" r="5" style="opacity:0.2"/>
+  <circle class="d" cx="1300" cy="780" r="6" style="opacity:0.2"/>
+  <circle class="d" cx="620" cy="1380" r="5" style="opacity:0.2"/>
+  <circle class="d" cx="1100" cy="1380" r="6" style="opacity:0.2"/>
+
+  <!-- Small squares -->
+  <rect class="d" x="420" y="880" width="12" height="12" style="opacity:0.2"/>
+  <rect class="d" x="1090" y="1080" width="10" height="10" style="opacity:0.2"/>
+  <rect class="d" x="360" y="1350" width="11" height="11" style="opacity:0.2"/>
+
+  <!-- Hashtag -->
+  <g transform="translate(850,1100) rotate(8)">
+    <line class="d" x1="6" y1="0" x2="6" y2="22"/>
+    <line class="d" x1="16" y1="0" x2="16" y2="22"/>
+    <line class="d" x1="0" y1="7" x2="22" y2="7"/>
+    <line class="d" x1="0" y1="15" x2="22" y2="15"/>
+  </g>
+
+  <!-- Percentage -->
+  <g transform="translate(600,260) rotate(-8)">
+    <circle class="d" cx="6" cy="6" r="5"/>
+    <circle class="d" cx="24" cy="24" r="5"/>
+    <line class="d" x1="28" y1="2" x2="2" y2="28"/>
+  </g>
+
+  <!-- ============ EXTRA DOODLES — between rows ============ -->
+
+  <!-- 61. Beaker (between row 1-2) -->
+  <g transform="translate(170,155) rotate(7)">
+    <path class="d" d="M10,0 L10,28 L0,55 L50,55 L40,28 L40,0 Z"/>
+    <line class="d" x1="6" y1="0" x2="44" y2="0"/>
+    <circle class="d" cx="20" cy="42" r="3" style="opacity:0.3"/>
+    <circle class="d" cx="30" cy="38" r="2" style="opacity:0.25"/>
+  </g>
+
+  <!-- 62. Tablet / iPad (between row 1-2) -->
+  <g transform="translate(460,150) rotate(-4)">
+    <rect class="d" x="0" y="0" width="50" height="68" rx="4"/>
+    <rect class="d" x="5" y="8" width="40" height="48"/>
+    <circle class="f" cx="25" cy="62" r="2.5"/>
+  </g>
+
+  <!-- 63. Magnifier with book (between row 1-2) -->
+  <g transform="translate(700,148) rotate(6)">
+    <rect class="d" x="0" y="10" width="40" height="30"/>
+    <line class="d" x1="6" y1="20" x2="34" y2="20" style="opacity:0.3"/>
+    <line class="d" x1="6" y1="27" x2="30" y2="27" style="opacity:0.3"/>
+    <line class="d" x1="6" y1="34" x2="26" y2="34" style="opacity:0.3"/>
+    <circle class="d" cx="46" cy="8" r="12"/>
+    <line class="d" x1="54" y1="16" x2="66" y2="28" style="stroke-width:2"/>
+  </g>
+
+  <!-- 64. Crayons (between row 1-2) -->
+  <g transform="translate(1120,145) rotate(-10)">
+    <path class="d" d="M0,12 L0,48 L8,48 L8,12 L4,0 Z"/>
+    <path class="d" d="M14,12 L14,48 L22,48 L22,12 L18,0 Z"/>
+    <path class="d" d="M28,12 L28,48 L36,48 L36,12 L32,0 Z"/>
+    <line class="d" x1="0" y1="12" x2="8" y2="12"/>
+    <line class="d" x1="14" y1="12" x2="22" y2="12"/>
+    <line class="d" x1="28" y1="12" x2="36" y2="12"/>
+  </g>
+
+  <!-- 65. Quill feather pen (between row 1-2) -->
+  <g transform="translate(1380,150) rotate(20)">
+    <path class="d" d="M20,0 C20,0 5,15 2,40 C0,55 0,65 0,65"/>
+    <path class="d" d="M20,0 C20,0 30,20 20,45"/>
+    <path class="d" d="M8,25 C8,25 16,22 20,28" style="opacity:0.3"/>
+    <path class="d" d="M5,38 C5,38 12,36 16,40" style="opacity:0.3"/>
+  </g>
+
+  <!-- 66. Stopwatch (between row 2-3) -->
+  <g transform="translate(180,350) rotate(-5)">
+    <circle class="d" cx="25" cy="30" r="22"/>
+    <line class="d" x1="25" y1="30" x2="25" y2="16"/>
+    <line class="d" x1="25" y1="30" x2="36" y2="30"/>
+    <circle class="f" cx="25" cy="30" r="2"/>
+    <path class="d" d="M22,8 L28,8 L28,4 L22,4 Z"/>
+    <line class="d" x1="25" y1="4" x2="25" y2="0"/>
+    <path class="d" d="M39,12 L44,7"/>
+  </g>
+
+  <!-- 67. Thumbtack / Pushpin (between row 2-3) -->
+  <g transform="translate(420,345) rotate(12)">
+    <circle class="d" cx="15" cy="12" r="11"/>
+    <path class="d" d="M15,23 L15,55"/>
+    <circle class="f" cx="15" cy="12" r="5"/>
+  </g>
+
+  <!-- 68. Clip / Paperclip (between row 2-3) -->
+  <g transform="translate(680,340) rotate(-18)">
+    <path class="d" d="M4,0 L4,40 C4,48 16,48 16,40 L16,8 C16,2 8,2 8,8 L8,35"/>
+  </g>
+
+  <!-- 69. Cube / 3D Box (between row 2-3) -->
+  <g transform="translate(920,340) rotate(5)">
+    <path class="d" d="M20,0 L44,10 L44,38 L20,48 L20,20 Z"/>
+    <path class="d" d="M20,0 L0,12 L0,40 L20,48"/>
+    <path class="d" d="M0,12 L20,20 L44,10"/>
+  </g>
+
+  <!-- 70. Speech bubble (between row 2-3) -->
+  <g transform="translate(1120,340) rotate(-4)">
+    <path class="d" d="M0,10 C0,2 6,0 15,0 L50,0 C60,0 65,5 65,15 L65,28 C65,36 58,40 50,40 L22,40 L10,52 L14,40 L10,40 C4,40 0,35 0,28 Z"/>
+    <line class="d" x1="12" y1="14" x2="52" y2="14" style="opacity:0.3"/>
+    <line class="d" x1="12" y1="22" x2="48" y2="22" style="opacity:0.3"/>
+    <line class="d" x1="12" y1="30" x2="38" y2="30" style="opacity:0.3"/>
+  </g>
+
+  <!-- 71. Desk lamp (between row 2-3) -->
+  <g transform="translate(1360,340) rotate(3)">
+    <path class="d" d="M25,60 L25,35 L10,10"/>
+    <path class="d" d="M0,18 L10,10 L25,0 L30,8 L15,18 Z"/>
+    <rect class="d" x="15" y="60" width="20" height="5"/>
+    <path class="d" d="M20,26 L24,34" style="opacity:0.25"/>
+  </g>
+
+  <!-- 72. Mortarboard tassel (between row 3-4) -->
+  <g transform="translate(170,540) rotate(-8)">
+    <path class="d" d="M0,0 L8,5 L3,15 C3,15 8,25 5,30"/>
+    <circle class="f" cx="5" cy="32" r="3"/>
+    <line class="d" x1="0" y1="0" x2="8" y2="5" style="stroke-width:1.8"/>
+  </g>
+
+  <!-- 73. Lightbulb small (between row 3-4) -->
+  <g transform="translate(380,550) rotate(10)">
+    <path class="d" d="M15,0 C7,0 0,8 0,16 C0,22 5,26 7,30 L7,36 L23,36 L23,30 C25,26 30,22 30,16 C30,8 23,0 15,0 Z"/>
+    <line class="d" x1="9" y1="38" x2="21" y2="38"/>
+    <line class="d" x1="11" y1="40" x2="19" y2="40"/>
+  </g>
+
+  <!-- 74. Diploma hat throw (between row 3-4) -->
+  <g transform="translate(620,540) rotate(15)">
+    <path class="d" d="M0,20 L30,8 L60,20 L30,32 Z"/>
+    <path class="d" d="M55,22 L58,12 L62,8" style="opacity:0.3"/>
+    <path class="d" d="M50,24 L54,16" style="opacity:0.25"/>
+  </g>
+
+  <!-- 75. Chemistry beaker (between row 3-4) -->
+  <g transform="translate(880,540) rotate(-6)">
+    <rect class="d" x="5" y="0" width="30" height="40"/>
+    <line class="d" x1="0" y1="0" x2="40" y2="0"/>
+    <path class="d" d="M5,28 C5,28 12,24 20,28 C28,32 35,28 35,28" style="opacity:0.3"/>
+  </g>
+
+  <!-- 76. Leaf / Nature study (between row 3-4) -->
+  <g transform="translate(1150,545) rotate(-12)">
+    <path class="d" d="M0,40 C0,40 5,20 20,10 C35,0 50,2 50,2 C50,2 45,20 30,30 C15,40 0,40 0,40 Z"/>
+    <path class="d" d="M0,40 C0,40 20,28 50,2" style="opacity:0.3"/>
+    <path class="d" d="M15,30 L25,22" style="opacity:0.25"/>
+    <path class="d" d="M8,35 L18,28" style="opacity:0.25"/>
+  </g>
+
+  <!-- 77. Gear / Settings (between row 3-4) -->
+  <g transform="translate(1410,545) rotate(8)">
+    <circle class="d" cx="20" cy="20" r="8"/>
+    <circle class="d" cx="20" cy="20" r="16"/>
+    <line class="d" x1="20" y1="0" x2="20" y2="4"/>
+    <line class="d" x1="20" y1="36" x2="20" y2="40"/>
+    <line class="d" x1="0" y1="20" x2="4" y2="20"/>
+    <line class="d" x1="36" y1="20" x2="40" y2="20"/>
+    <line class="d" x1="6" y1="6" x2="9" y2="9"/>
+    <line class="d" x1="31" y1="31" x2="34" y2="34"/>
+    <line class="d" x1="34" y1="6" x2="31" y2="9"/>
+    <line class="d" x1="9" y1="31" x2="6" y2="34"/>
+  </g>
+
+  <!-- 78. Pencil & ruler crossed (between row 4-5) -->
+  <g transform="translate(170,740) rotate(-6)">
+    <path class="d" d="M0,50 L5,0 L10,50 Z"/>
+    <line class="d" x1="5" y1="0" x2="5" y2="40"/>
+    <rect class="d" x="16" y="5" width="8" height="48" transform="rotate(15,20,30)"/>
+    <line class="d" x1="16" y1="15" x2="24" y2="15" transform="rotate(15,20,30)" style="opacity:0.3"/>
+    <line class="d" x1="16" y1="25" x2="24" y2="25" transform="rotate(15,20,30)" style="opacity:0.3"/>
+    <line class="d" x1="16" y1="35" x2="24" y2="35" transform="rotate(15,20,30)" style="opacity:0.3"/>
+  </g>
+
+  <!-- 79. Bow tie / Award ribbon (between row 4-5) -->
+  <g transform="translate(420,745) rotate(5)">
+    <path class="d" d="M20,0 C20,0 0,10 0,18 C0,26 20,36 20,36 C20,36 40,26 40,18 C40,10 20,0 20,0 Z"/>
+    <circle class="d" cx="20" cy="18" r="6"/>
+    <path class="d" d="M14,36 L10,55"/>
+    <path class="d" d="M26,36 L30,55"/>
+  </g>
+
+  <!-- 80. Telescope (between row 4-5) -->
+  <g transform="translate(660,735) rotate(-15)">
+    <path class="d" d="M0,15 L8,10 L55,10 L55,20 L8,20 Z"/>
+    <path class="d" d="M55,8 L65,5 L65,25 L55,22"/>
+    <line class="d" x1="30" y1="20" x2="20" y2="45"/>
+    <line class="d" x1="38" y1="20" x2="48" y2="45"/>
+  </g>
+
+  <!-- 81. Bookmark (between row 4-5) -->
+  <g transform="translate(920,740) rotate(8)">
+    <path class="d" d="M0,0 L30,0 L30,55 L15,42 L0,55 Z"/>
+    <line class="d" x1="7" y1="12" x2="23" y2="12" style="opacity:0.3"/>
+    <line class="d" x1="7" y1="20" x2="20" y2="20" style="opacity:0.3"/>
+  </g>
+
+  <!-- 82. Brain (between row 4-5) -->
+  <g transform="translate(1140,735) rotate(-3)">
+    <path class="d" d="M25,5 C15,0 5,8 5,18 C0,20 -2,30 5,35 C2,40 5,50 15,50 C18,55 28,55 32,50 C40,52 48,45 45,35 C50,30 50,20 44,16 C45,8 38,2 30,5"/>
+    <path class="d" d="M25,5 C25,5 25,25 25,50" style="opacity:0.3"/>
+    <path class="d" d="M10,20 C10,20 18,22 25,18" style="opacity:0.2"/>
+    <path class="d" d="M25,30 C25,30 35,28 40,32" style="opacity:0.2"/>
+  </g>
+
+  <!-- 83. Puzzle piece (between row 4-5) -->
+  <g transform="translate(1380,740) rotate(12)">
+    <path class="d" d="M0,10 L12,10 C12,10 12,4 18,4 C24,4 24,10 24,10 L40,10 L40,22 C40,22 46,22 46,28 C46,34 40,34 40,34 L40,50 L24,50 C24,50 24,56 18,56 C12,56 12,50 12,50 L0,50 Z"/>
+  </g>
+
+  <!-- 84. Solar system (between row 5-6) -->
+  <g transform="translate(170,940) rotate(-4)">
+    <circle class="f" cx="25" cy="25" r="6"/>
+    <ellipse class="d" cx="25" cy="25" rx="18" ry="8" transform="rotate(-20,25,25)"/>
+    <ellipse class="d" cx="25" cy="25" rx="28" ry="10" transform="rotate(10,25,25)"/>
+    <circle class="f" cx="42" cy="20" r="2.5"/>
+    <circle class="f" cx="8" cy="22" r="2"/>
+  </g>
+
+  <!-- 85. Funnel (between row 5-6) -->
+  <g transform="translate(410,945) rotate(6)">
+    <path class="d" d="M0,0 L40,0 L24,35 L24,55 L16,55 L16,35 Z"/>
+    <line class="d" x1="4" y1="8" x2="36" y2="8" style="opacity:0.3"/>
+  </g>
+
+  <!-- 86. Medal / Award (between row 5-6) -->
+  <g transform="translate(660,935) rotate(-8)">
+    <path class="d" d="M15,0 L25,0 L30,20 L20,14 L10,20 Z"/>
+    <circle class="d" cx="20" cy="34" r="14"/>
+    <circle class="d" cx="20" cy="34" r="8"/>
+    <path class="d" d="M16,28 L20,22 L24,28 L24,40 L20,36 L16,40 Z" style="opacity:0.3"/>
+  </g>
+
+  <!-- 87. Easel / Painting stand (between row 5-6) -->
+  <g transform="translate(920,932) rotate(4)">
+    <rect class="d" x="8" y="0" width="40" height="32"/>
+    <line class="d" x1="0" y1="0" x2="28" y2="55"/>
+    <line class="d" x1="56" y1="0" x2="28" y2="55"/>
+    <line class="d" x1="28" y1="32" x2="44" y2="55"/>
+    <rect class="d" x="14" y="6" width="28" height="20" style="opacity:0.3"/>
+  </g>
+
+  <!-- 88. Wrench / Spanner (between row 5-6) -->
+  <g transform="translate(1160,940) rotate(25)">
+    <path class="d" d="M0,10 C0,2 8,0 12,4 L12,18 C16,22 10,28 4,22 L4,14 C0,12 0,10 0,10"/>
+    <rect class="d" x="4" y="18" width="8" height="30"/>
+    <path class="d" d="M0,48 L4,48 L4,52 L12,52 L12,48 L16,48"/>
+  </g>
+
+  <!-- 89. Safety goggles (between row 5-6) -->
+  <g transform="translate(1390,935) rotate(-6)">
+    <circle class="d" cx="14" cy="16" r="12"/>
+    <circle class="d" cx="46" cy="16" r="12"/>
+    <path class="d" d="M26,14 C26,14 30,10 34,14"/>
+    <path class="d" d="M2,10 L-4,6"/>
+    <path class="d" d="M58,10 L64,6"/>
+  </g>
+
+  <!-- 90. Map / Treasure map (between row 6-7) -->
+  <g transform="translate(170,1150) rotate(5)">
+    <rect class="d" x="0" y="0" width="60" height="45"/>
+    <path class="d" d="M15,10 L15,20 L30,15 L30,25 L45,20 L45,35" style="opacity:0.4"/>
+    <circle class="f" cx="45" cy="35" r="3"/>
+    <path class="d" d="M42,32 L48,38" style="opacity:0.3"/>
+    <path class="d" d="M48,32 L42,38" style="opacity:0.3"/>
+  </g>
+
+  <!-- 91. Battery (between row 6-7) -->
+  <g transform="translate(440,1145) rotate(-7)">
+    <rect class="d" x="0" y="5" width="40" height="22"/>
+    <rect class="d" x="40" y="10" width="6" height="12"/>
+    <rect class="f" x="4" y="9" width="18" height="14" style="opacity:0.15"/>
+    <line class="d" x1="10" y1="14" x2="16" y2="14" style="opacity:0.4"/>
+    <line class="d" x1="13" y1="11" x2="13" y2="17" style="opacity:0.4"/>
+  </g>
+
+  <!-- 92. Piano keys (between row 6-7) -->
+  <g transform="translate(680,1148) rotate(3)">
+    <rect class="d" x="0" y="0" width="60" height="30"/>
+    <line class="d" x1="10" y1="0" x2="10" y2="30"/>
+    <line class="d" x1="20" y1="0" x2="20" y2="30"/>
+    <line class="d" x1="30" y1="0" x2="30" y2="30"/>
+    <line class="d" x1="40" y1="0" x2="40" y2="30"/>
+    <line class="d" x1="50" y1="0" x2="50" y2="30"/>
+    <rect class="f" x="7" y="0" width="6" height="18"/>
+    <rect class="f" x="17" y="0" width="6" height="18"/>
+    <rect class="f" x="37" y="0" width="6" height="18"/>
+    <rect class="f" x="47" y="0" width="6" height="18"/>
+  </g>
+
+  <!-- 93. Satellite (between row 6-7) -->
+  <g transform="translate(920,1145) rotate(-10)">
+    <rect class="d" x="18" y="10" width="14" height="14"/>
+    <rect class="d" x="0" y="8" width="18" height="18"/>
+    <rect class="d" x="32" y="8" width="18" height="18"/>
+    <line class="d" x1="25" y1="0" x2="25" y2="10"/>
+    <line class="d" x1="25" y1="24" x2="25" y2="34"/>
+    <circle class="f" cx="25" cy="17" r="3"/>
+  </g>
+
+  <!-- 94. Crown (between row 6-7) -->
+  <g transform="translate(1160,1150) rotate(6)">
+    <path class="d" d="M0,35 L0,10 L12,22 L25,0 L38,22 L50,10 L50,35 Z"/>
+    <line class="d" x1="0" y1="35" x2="50" y2="35"/>
+    <circle class="f" cx="12" cy="12" r="2" style="opacity:0.3"/>
+    <circle class="f" cx="25" cy="4" r="2" style="opacity:0.3"/>
+    <circle class="f" cx="38" cy="12" r="2" style="opacity:0.3"/>
+  </g>
+
+  <!-- 95. Anchor (between row 6-7) -->
+  <g transform="translate(1400,1140) rotate(-5)">
+    <circle class="d" cx="20" cy="8" r="7"/>
+    <line class="d" x1="20" y1="15" x2="20" y2="50"/>
+    <path class="d" d="M0,50 C0,50 0,36 20,36"/>
+    <path class="d" d="M40,50 C40,50 40,36 20,36"/>
+    <line class="d" x1="8" y1="26" x2="32" y2="26"/>
+  </g>
+
+  <!-- 96. Rocket (between row 7-8) -->
+  <g transform="translate(170,1365) rotate(15)">
+    <path class="d" d="M15,0 C15,0 25,10 25,30 L25,45 L15,50 L5,45 L5,30 C5,10 15,0 15,0 Z"/>
+    <path class="d" d="M5,38 L0,48 L5,45"/>
+    <path class="d" d="M25,38 L30,48 L25,45"/>
+    <circle class="d" cx="15" cy="22" r="4"/>
+    <path class="d" d="M10,50 L12,58" style="opacity:0.3"/>
+    <path class="d" d="M20,50 L18,58" style="opacity:0.3"/>
+    <path class="d" d="M15,50 L15,60" style="opacity:0.3"/>
+  </g>
+
+  <!-- 97. Science atom small (between row 7-8) -->
+  <g transform="translate(430,1370) rotate(-12)">
+    <ellipse class="d" cx="18" cy="18" rx="17" ry="6"/>
+    <ellipse class="d" cx="18" cy="18" rx="17" ry="6" transform="rotate(60,18,18)"/>
+    <ellipse class="d" cx="18" cy="18" rx="17" ry="6" transform="rotate(-60,18,18)"/>
+    <circle class="f" cx="18" cy="18" r="3"/>
+  </g>
+
+  <!-- 98. Thermometer (between row 7-8) -->
+  <g transform="translate(680,1360) rotate(5)">
+    <path class="d" d="M10,0 L10,45 C4,48 0,54 0,60 C0,68 7,75 15,75 C23,75 30,68 30,60 C30,54 26,48 20,45 L20,0 Z"/>
+    <circle class="f" cx="15" cy="60" r="8"/>
+    <rect class="f" x="12" y="20" width="6" height="35" style="opacity:0.15"/>
+    <line class="d" x1="22" y1="10" x2="26" y2="10" style="opacity:0.3"/>
+    <line class="d" x1="22" y1="18" x2="26" y2="18" style="opacity:0.3"/>
+    <line class="d" x1="22" y1="26" x2="26" y2="26" style="opacity:0.3"/>
+    <line class="d" x1="22" y1="34" x2="26" y2="34" style="opacity:0.3"/>
+  </g>
+
+  <!-- 99. Checkmark / Tick (between row 7-8) -->
+  <g transform="translate(920,1370) rotate(-5)">
+    <path class="d" d="M0,18 L10,30 L30,0" style="stroke-width:2.2"/>
+  </g>
+
+  <!-- 100. Magnet (between row 7-8) -->
+  <g transform="translate(1150,1365) rotate(10)">
+    <path class="d" d="M0,0 L0,30 C0,44 20,44 20,30 L20,0"/>
+    <line class="d" x1="0" y1="10" x2="7" y2="10"/>
+    <line class="d" x1="13" y1="10" x2="20" y2="10"/>
+    <path class="f" d="M0,0 L7,0 L7,10 L0,10 Z" style="opacity:0.15"/>
+    <path class="f" d="M13,0 L20,0 L20,10 L13,10 Z" style="opacity:0.15"/>
+  </g>
+
+  <!-- 101. Key (between row 7-8) -->
+  <g transform="translate(1380,1360) rotate(-18)">
+    <circle class="d" cx="12" cy="12" r="10"/>
+    <circle class="d" cx="12" cy="12" r="4"/>
+    <line class="d" x1="22" y1="12" x2="50" y2="12"/>
+    <line class="d" x1="42" y1="12" x2="42" y2="20"/>
+    <line class="d" x1="48" y1="12" x2="48" y2="18"/>
+  </g>
+
+  <!-- More scattered texture elements -->
+
+  <!-- Stars scattered -->
+  <g transform="translate(560,155) rotate(15)">
+    <path class="d" d="M8,0 L10,6 L16,6 L11,10 L13,16 L8,12 L3,16 L5,10 L0,6 L6,6 Z" style="opacity:0.25"/>
+  </g>
+  <g transform="translate(870,155) rotate(-10)">
+    <path class="d" d="M6,0 L8,5 L13,5 L9,8 L10,13 L6,10 L2,13 L4,8 L0,5 L5,5 Z" style="opacity:0.25"/>
+  </g>
+  <g transform="translate(1050,340) rotate(20)">
+    <path class="d" d="M7,0 L9,5 L14,5 L10,8 L11,14 L7,10 L3,14 L4,8 L0,5 L5,5 Z" style="opacity:0.25"/>
+  </g>
+
+  <!-- More dots scattered in gaps -->
+  <circle class="f" cx="320" cy="170" r="2.5" style="opacity:0.12"/>
+  <circle class="f" cx="580" cy="350" r="2" style="opacity:0.12"/>
+  <circle class="f" cx="780" cy="540" r="2.5" style="opacity:0.12"/>
+  <circle class="f" cx="1300" cy="540" r="2" style="opacity:0.12"/>
+  <circle class="f" cx="300" cy="740" r="2.5" style="opacity:0.12"/>
+  <circle class="f" cx="560" cy="740" r="2" style="opacity:0.12"/>
+  <circle class="f" cx="1080" cy="740" r="2.5" style="opacity:0.12"/>
+  <circle class="f" cx="300" cy="940" r="2" style="opacity:0.12"/>
+  <circle class="f" cx="560" cy="940" r="2.5" style="opacity:0.12"/>
+  <circle class="f" cx="780" cy="940" r="2" style="opacity:0.12"/>
+  <circle class="f" cx="1080" cy="1150" r="2.5" style="opacity:0.12"/>
+  <circle class="f" cx="300" cy="1360" r="2" style="opacity:0.12"/>
+  <circle class="f" cx="1050" cy="1370" r="2.5" style="opacity:0.12"/>
+
+  <!-- More plus signs -->
+  <g transform="translate(800,165) rotate(25)">
+    <line class="d" x1="6" y1="0" x2="6" y2="12"/>
+    <line class="d" x1="0" y1="6" x2="12" y2="6"/>
+  </g>
+  <g transform="translate(1000,545) rotate(-18)">
+    <line class="d" x1="6" y1="0" x2="6" y2="12"/>
+    <line class="d" x1="0" y1="6" x2="12" y2="6"/>
+  </g>
+  <g transform="translate(300,1050) rotate(12)">
+    <line class="d" x1="6" y1="0" x2="6" y2="12"/>
+    <line class="d" x1="0" y1="6" x2="12" y2="6"/>
+  </g>
+
+  <!-- Small wavy lines in gaps -->
+  <path class="d" d="M480,545 C484,540 488,550 492,545 C496,540 500,550 504,545" style="opacity:0.18"/>
+  <path class="d" d="M1280,740 C1284,735 1288,745 1292,740" style="opacity:0.18"/>
+  <path class="d" d="M500,1150 C504,1145 508,1155 512,1150 C516,1145 520,1155 524,1150" style="opacity:0.18"/>
+  <path class="d" d="M1280,1360 C1284,1355 1288,1365 1292,1360 C1296,1355 1300,1365 1304,1360" style="opacity:0.18"/>
+
+  <!-- Extra small triangles -->
+  <path class="d" d="M700,740 L706,728 L712,740 Z" style="opacity:0.18"/>
+  <path class="d" d="M1300,1150 L1306,1138 L1312,1150 Z" style="opacity:0.18"/>
+  <path class="d" d="M250,1370 L256,1358 L262,1370 Z" style="opacity:0.18"/>
+
+</svg>

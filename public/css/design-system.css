@@ -825,11 +825,12 @@ textarea.form-control {
 }
 
 /* ═══════════════════════════════════════════════
-   18. CONTENT AREA — Tighter spacing
+   18. CONTENT AREA — Tighter spacing + academic doodle bg
    ═══════════════════════════════════════════════ */
 
 .content-wrapper {
-    background: #f4f5f7;
+    background: #f4f5f7 url('../images/academic-doodles.svg') repeat fixed;
+    background-size: 1600px 1600px;
 }
 
 .content {
