@@ -15,6 +15,12 @@ class Transaction extends Model
 {
     use HasFactory;
 
+    /**
+     * Temporarily holds the original account_id during updates
+     * so the old account's balance can be recalculated.
+     */
+    protected static $pendingOldAccountIds = [];
+
     protected $fillable = [
         'enterprise_id',
         'academic_year_id',
@@ -392,8 +398,26 @@ class Transaction extends Model
 
 
 
+        self::updating(function ($m) {
+            // Stash the original account_id so updated hook can recalculate old balance
+            if ($m->isDirty('account_id')) {
+                static::$pendingOldAccountIds[$m->id] = $m->getOriginal('account_id');
+            }
+        });
+
         self::updated(function ($m) {
             Transaction::my_update($m);
+
+            // If account_id changed, recalculate the OLD account's balance too
+            $oldAccountId = static::$pendingOldAccountIds[$m->id] ?? null;
+            unset(static::$pendingOldAccountIds[$m->id]);
+            if ($oldAccountId && $oldAccountId != $m->account_id) {
+                $oldAcc = Account::find($oldAccountId);
+                if ($oldAcc) {
+                    $oldAcc->balance = Transaction::where('account_id', $oldAcc->id)->sum('amount');
+                    $oldAcc->save();
+                }
+            }
         });
     }
 
