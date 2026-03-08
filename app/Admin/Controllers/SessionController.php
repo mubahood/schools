@@ -126,7 +126,7 @@ class SessionController extends AdminController
         });
 
         // $grid->disableActions();
-        $grid->disableBatchActions();
+        // $grid->disableBatchActions();
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
         ])
