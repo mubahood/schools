@@ -126,7 +126,8 @@ class StudentHasClassController extends AdminController
                 if ($ex->academic_class->academic_year_id != $year->id) {
                     continue;
                 }
-                $streams[$ex->id] = $ex->academic_class->short_name . " - " . $ex->name;
+                $yearName = $ex->academic_class->academic_year ? $ex->academic_class->academic_year->name : '';
+                $streams[$ex->id] = $ex->academic_class->short_name . " - " . $ex->name . " (" . $yearName . ")";
             }
 
             $filter->equal('stream_id', 'Filter by Stream')->select($streams);
