@@ -246,5 +246,19 @@ if ($demand->message_4 != null && $demand->message_4 != '') {
             <td>&nbsp;</td>
         </tr>
     </table>
+    @php
+        $sig_path = null;
+        if ($ent->bursar_signature && strlen($ent->bursar_signature) > 3) {
+            $sig_path = public_path('storage/' . $ent->bursar_signature);
+            if (!file_exists($sig_path)) {
+                $sig_path = null;
+            }
+        }
+    @endphp
+    @if ($sig_path)
+        <p class="m-0 mt-1" style="font-size: 10px;">Signature: <img src="{{ $sig_path }}" alt="Signature" style="width: 60px; height: 20px; vertical-align: middle;"></p>
+    @else
+        <p class="m-0 mt-1" style="font-size: 10px;">Signature: __________________________</p>
+    @endif
 
 </div>
