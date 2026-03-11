@@ -6,9 +6,7 @@ use App\Models\Utils;
 $sig_path = null;
 if ($ent->bursar_signature && strlen($ent->bursar_signature) > 3) {
     $sig_path = public_path('storage/' . $ent->bursar_signature);
-    if (file_exists($sig_path)) {
-        $sig_path = asset('storage/' . $ent->bursar_signature);
-    } else {
+    if (!file_exists($sig_path)) {
         $sig_path = null;
     }
 }
