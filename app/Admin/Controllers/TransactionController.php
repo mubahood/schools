@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\Post\BatchPrintReceipts;
 use App\Admin\Actions\Post\TransactionChangeDueTerm;
 use App\Models\Account;
 use App\Models\BankAccount;
@@ -163,6 +164,7 @@ class TransactionController extends AdminController
 
         $grid->batchActions(function ($batch) {
             $batch->add(new TransactionChangeDueTerm());
+            $batch->add(new BatchPrintReceipts());
         });
 
         $grid->model()->where([

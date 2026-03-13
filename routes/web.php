@@ -3972,6 +3972,11 @@ Route::get('print-receipt', function () {
   $pdf->loadHTML(view('print/print-receipt'));
   return $pdf->stream();
 });
+Route::get('print-receipt-batch', function () {
+  $pdf = App::make('dompdf.wrapper');
+  $pdf->loadHTML(view('print/print-receipt-batch'));
+  return $pdf->stream();
+});
 Route::get('import-transaction', function (Request $request) {
   $schoo_pay = SchoolPayTransaction::find($request->trans_id);
   if ($schoo_pay == null) return "Transaction not found";
