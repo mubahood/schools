@@ -3991,6 +3991,11 @@ Route::get('income-sheet-print', function (Request $request) {
       $query->whereBetween('payment_date', [$incomeSheet->date_from, $incomeSheet->date_to]);
   }
 
+  $sources = $incomeSheet->sources;
+  if (!empty($sources) && is_array($sources)) {
+      $query->whereIn('source', $sources);
+  }
+
   $transactions = $query->orderBy('payment_date', 'ASC')->orderBy('id', 'ASC')->get();
 
   $incomeSheet->status = 'Generated';

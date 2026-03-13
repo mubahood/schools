@@ -13,7 +13,12 @@ class IncomeSheet extends Model
         'date_from',
         'date_to',
         'type',
+        'sources',
         'status',
+    ];
+
+    protected $casts = [
+        'sources' => 'array',
     ];
 
     public function enterprise()
