@@ -3985,7 +3985,6 @@ Route::get('income-sheet-print', function (Request $request) {
 
   $query = \App\Models\Transaction::where([
       'enterprise_id' => $incomeSheet->enterprise_id,
-      'term_id' => $incomeSheet->term_id,
   ])->where('type', 'FEES_PAYMENT');
 
   if ($incomeSheet->date_from && $incomeSheet->date_to) {

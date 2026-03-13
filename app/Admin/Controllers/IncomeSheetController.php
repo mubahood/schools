@@ -3,7 +3,6 @@
 namespace App\Admin\Controllers;
 
 use App\Models\IncomeSheet;
-use App\Models\Term;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -30,10 +29,6 @@ class IncomeSheetController extends AdminController
             });
 
         $grid->column('title', __('Title'));
-        $grid->column('term_id', __('Term'))->display(function () {
-            if ($this->term == null) return $this->term_id;
-            return "Term " . $this->term->name_text;
-        });
         $grid->column('date_from', __('Date From'));
         $grid->column('date_to', __('Date To'));
         $grid->column('type', __('Type'))->label('primary');
@@ -51,7 +46,6 @@ class IncomeSheetController extends AdminController
         $show = new Show(IncomeSheet::findOrFail($id));
         $show->field('id', __('ID'));
         $show->field('title', __('Title'));
-        $show->field('term_id', __('Term'));
         $show->field('date_from', __('Date From'));
         $show->field('date_to', __('Date To'));
         $show->field('type', __('Type'));
@@ -68,12 +62,6 @@ class IncomeSheetController extends AdminController
 
         $form->text('title', __('Title'))
             ->placeholder('e.g. Income Sheet - Term 1 2025')
-            ->rules('required');
-
-        $form->select('term_id', __('Term'))
-            ->options(Term::getItemsToArray([
-                'enterprise_id' => Admin::user()->enterprise_id,
-            ]))
             ->rules('required');
 
         $form->date('date_from', __('Date From'))->rules('required');
