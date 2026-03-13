@@ -157,6 +157,12 @@ class TransactionController extends AdminController
                 $group->lt('less than');
                 $group->equal('equal to');
             });
+
+            $filter->equal('is_printed', 'Filter by print status')
+                ->select([
+                    'Yes' => 'Printed',
+                    'No' => 'Not Printed',
+                ]);
         });
 
         $grid->quickSearch('description', 'particulars')
@@ -282,6 +288,13 @@ class TransactionController extends AdminController
 
         //particulars
         $grid->column('particulars', __('Particulars'))->sortable();
+
+        $grid->column('is_printed', __('Printed'))->display(function () {
+            if ($this->is_printed == 'Yes') {
+                return '<span style="color: #fff; background-color: #28a745; padding: 2px 8px; border-radius: 3px; font-size: 12px;"><i class="fa fa-check"></i> Printed</span>';
+            }
+            return '<span style="color: #fff; background-color: #dc3545; padding: 2px 8px; border-radius: 3px; font-size: 12px;"><i class="fa fa-times"></i> Not Printed</span>';
+        })->sortable();
 
         return $grid;
     }

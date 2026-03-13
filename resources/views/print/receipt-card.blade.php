@@ -17,119 +17,73 @@ if ($ent->bursar_signature && strlen($ent->bursar_signature) > 3) {
     }
 }
 ?>
-<div style="border: 2px solid #1a3a5c; padding: 20px 25px 15px 25px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 12px; color: #222; max-width: 100%; box-sizing: border-box;">
+<div style="border: 2px solid #333; padding: 20px 28px 15px 28px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; color: #222;">
 
-    {{-- Header with logo, school info, and receipt number --}}
-    <table style="width: 100%; border-collapse: collapse; margin-bottom: 5px;">
+    {{-- Header --}}
+    <table style="width: 100%; border-collapse: collapse;">
         <tr>
-            <td style="width: 70px; vertical-align: top; padding-right: 12px;">
-                <img src="{{ $logo_link }}" alt="{{ $ent->name }}" style="width: 65px; height: auto;">
+            <td style="width: 60px; vertical-align: top; padding-right: 10px;">
+                <img src="{{ $logo_link }}" alt="{{ $ent->name }}" style="width: 55px; height: auto;">
             </td>
             <td style="vertical-align: top;">
-                <p style="margin: 0; font-size: 16px; font-weight: bold; color: #1a3a5c; letter-spacing: 0.5px;">{{ strtoupper($ent->name) }}</p>
-                @if (!empty($ent->address))
-                    <p style="margin: 2px 0 0 0; font-size: 11px; color: #555;">{{ $ent->address }}</p>
-                @endif
-                <p style="margin: 2px 0 0 0; font-size: 11px; color: #555;">
-                    Email: {{ $ent->email }}
-                    &nbsp;|&nbsp; Tel: {{ $ent->phone_number }}@if(!empty($ent->phone_number_2)), {{ $ent->phone_number_2 }}@endif
-                </p>
+                <p style="margin: 0; font-size: 16px; font-weight: bold;">{{ strtoupper($ent->name) }}</p>
+                <p style="margin: 2px 0 0 0; font-size: 11px; color: #555;">Email: {{ $ent->email }}</p>
+                <p style="margin: 2px 0 0 0; font-size: 11px;">Tel: <b>{{ $ent->phone_number }}</b>@if(!empty($ent->phone_number_2)), <b>{{ $ent->phone_number_2 }}</b>@endif</p>
             </td>
-            <td style="width: 140px; vertical-align: top; text-align: right;">
-                <div style="background-color: #1a3a5c; color: #fff; padding: 6px 10px; font-size: 11px; text-align: center; border-radius: 3px;">
-                    RECEIPT No.
-                    <div style="font-size: 16px; font-weight: bold; margin-top: 2px;">{{ $transaction->id }}</div>
-                </div>
+            <td style="vertical-align: top; text-align: right; white-space: nowrap;">
+                <b>No. <span style="color: red; font-size: 15px;">{{ $transaction->id }}</span></b>
             </td>
         </tr>
     </table>
-
-    {{-- Divider --}}
-    <div style="border-top: 2px solid #1a3a5c; margin: 8px 0 12px 0;"></div>
 
     {{-- Title --}}
-    <h2 style="text-align: center; font-size: 15px; margin: 0 0 12px 0; color: #1a3a5c; letter-spacing: 1px; text-transform: uppercase;">
-        Payment Receipt
-    </h2>
+    <h2 style="text-align: center; font-size: 15px; margin: 18px 0 15px 0; text-decoration: underline;">RECEIPT</h2>
 
-    {{-- Details table --}}
-    <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 12px;">
-        <tr>
-            <td style="padding: 5px 8px; background-color: #f0f4f8; border: 1px solid #d0d8e0; width: 30%; font-weight: bold; color: #444;">Date</td>
-            <td style="padding: 5px 8px; border: 1px solid #d0d8e0;">{{ Utils::my_date_time($transaction->payment_date) }}</td>
-        </tr>
-        <tr>
-            <td style="padding: 5px 8px; background-color: #f0f4f8; border: 1px solid #d0d8e0; font-weight: bold; color: #444;">Student Name</td>
-            <td style="padding: 5px 8px; border: 1px solid #d0d8e0;">{{ $owner->name }}</td>
-        </tr>
-        <tr>
-            <td style="padding: 5px 8px; background-color: #f0f4f8; border: 1px solid #d0d8e0; font-weight: bold; color: #444;">Student Code</td>
-            <td style="padding: 5px 8px; border: 1px solid #d0d8e0;">{{ $owner->school_pay_payment_code }}</td>
-        </tr>
-        <tr>
-            <td style="padding: 5px 8px; background-color: #f0f4f8; border: 1px solid #d0d8e0; font-weight: bold; color: #444;">Payment Method</td>
-            <td style="padding: 5px 8px; border: 1px solid #d0d8e0;">{{ str_replace('_', ' ', $transaction->source) }}</td>
-        </tr>
-        @if ($transaction->source == 'SCHOOL_PAY' && !empty($transaction->school_pay_transporter_id))
-        <tr>
-            <td style="padding: 5px 8px; background-color: #f0f4f8; border: 1px solid #d0d8e0; font-weight: bold; color: #444;">Transaction ID</td>
-            <td style="padding: 5px 8px; border: 1px solid #d0d8e0;">{{ $transaction->school_pay_transporter_id }}</td>
-        </tr>
-        @endif
-        @if (!empty($transaction->description))
-        <tr>
-            <td style="padding: 5px 8px; background-color: #f0f4f8; border: 1px solid #d0d8e0; font-weight: bold; color: #444;">Description</td>
-            <td style="padding: 5px 8px; border: 1px solid #d0d8e0;">{{ $transaction->description }}</td>
-        </tr>
-        @endif
-        @if (!empty($transaction->particulars))
-        <tr>
-            <td style="padding: 5px 8px; background-color: #f0f4f8; border: 1px solid #d0d8e0; font-weight: bold; color: #444;">Particulars</td>
-            <td style="padding: 5px 8px; border: 1px solid #d0d8e0;">{{ $transaction->particulars }}</td>
-        </tr>
-        @endif
-    </table>
+    {{-- Date --}}
+    <p style="text-align: right; margin: 0 0 12px 0;"><b>{{ Utils::my_date_time($transaction->payment_date) }}</b></p>
 
-    {{-- Amount section --}}
-    <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
+    {{-- Narrative body --}}
+    <p style="margin: 0 0 8px 0; line-height: 1.6;">
+        Received sum of <b>UGX {{ number_format($transaction->amount) }}</b> in words:
+        <b>{{ $amount_in_words }}</b>
+        only from
+        <b>{{ $owner->name }} - {{ $owner->school_pay_payment_code }}</b>@if ($transaction->source == 'SCHOOL_PAY' && !empty($transaction->school_pay_transporter_id))
+        through School Pay, Transaction ID: <b>{{ $transaction->school_pay_transporter_id }}</b>@endif.
+    </p>
+
+    @if (!empty($transaction->description))
+        <p style="margin: 0 0 5px 0;">Description: {{ $transaction->description }}</p>
+    @endif
+
+    @if (!empty($transaction->particulars))
+        <p style="margin: 0 0 5px 0;">Particulars: {{ $transaction->particulars }}</p>
+    @endif
+
+    <p style="margin: 0 0 5px 0;">Payment Method: <b>{{ str_replace('_', ' ', $transaction->source) }}</b></p>
+
+    <p style="margin: 12px 0 15px 0;">FEES BALANCE: <b>UGX {{ number_format($account->balance) }}</b></p>
+
+    {{-- Amount box and signature --}}
+    <table style="width: 100%;">
         <tr>
-            <td style="padding: 5px 8px; background-color: #f0f4f8; border: 1px solid #d0d8e0; width: 30%; font-weight: bold; color: #444; font-size: 12px;">Amount Paid</td>
-            <td style="padding: 8px; border: 1px solid #1a3a5c; background-color: #e8f0fe; text-align: center;">
-                <span style="font-size: 16px; font-weight: bold; color: #1a3a5c;">UGX {{ number_format($transaction->amount) }}</span>
+            <td style="vertical-align: bottom;">
+                <div style="display: inline-block; padding: 6px 14px; font-weight: 800; font-size: 15px; border: 2px solid #333;">
+                    UGX {{ number_format($transaction->amount) }}
+                </div>
             </td>
-        </tr>
-        <tr>
-            <td style="padding: 5px 8px; background-color: #f0f4f8; border: 1px solid #d0d8e0; font-weight: bold; color: #444; font-size: 12px;">Amount in Words</td>
-            <td style="padding: 5px 8px; border: 1px solid #d0d8e0; font-style: italic;">{{ ucfirst($amount_in_words) }} shillings only</td>
-        </tr>
-        <tr>
-            <td style="padding: 5px 8px; background-color: #f0f4f8; border: 1px solid #d0d8e0; font-weight: bold; color: #444; font-size: 12px;">Fees Balance</td>
-            <td style="padding: 5px 8px; border: 1px solid #d0d8e0; font-weight: bold;">UGX {{ number_format($account->balance) }}</td>
-        </tr>
-    </table>
-
-    {{-- Signature & approval --}}
-    <table style="width: 100%; margin-top: 15px;">
-        <tr>
-            <td style="width: 50%; vertical-align: bottom; padding-right: 20px;">
-                <p style="margin: 0; font-size: 11px; color: #666;">Received by (Student/Parent):</p>
-                <div style="border-bottom: 1px solid #999; height: 25px; margin-top: 5px;"></div>
-            </td>
-            <td style="width: 50%; vertical-align: bottom; text-align: right;">
-                <p style="margin: 0; font-size: 11px; color: #666;">Approved by (Bursar):</p>
+            <td style="text-align: right; vertical-align: bottom;">
                 @if ($sig_path)
-                    <div style="margin-top: 3px; text-align: right;">
-                        <img src="{{ $sig_path }}" alt="Bursar Signature" style="width: 80px; height: 28px;">
-                    </div>
+                    <span>Approved by:</span><br>
+                    <img src="{{ $sig_path }}" alt="Signature" style="width: 80px; height: 28px; margin-top: 3px;">
                 @else
-                    <div style="border-bottom: 1px solid #999; height: 25px; margin-top: 5px;"></div>
+                    <span>Approved by <b>.............................</b></span>
                 @endif
             </td>
         </tr>
     </table>
 
     {{-- Footer --}}
-    <div style="border-top: 1px solid #ccc; margin-top: 10px; padding-top: 5px; text-align: center; font-size: 9px; color: #888;">
-        This is a computer-generated receipt. &nbsp;|&nbsp; Printed on {{ date('d M, Y - h:i A') }} &nbsp;|&nbsp; Powered by School Dynamics
-    </div>
+    <p style="text-align: center; font-size: 9px; color: #999; margin: 14px 0 0 0; border-top: 1px solid #ddd; padding-top: 6px;">
+        Printed on {{ date('d M, Y - h:i A') }} &nbsp;|&nbsp; Powered by School Dynamics
+    </p>
 </div>
