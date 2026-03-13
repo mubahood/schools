@@ -98,6 +98,7 @@ Route::group([
     $router->resource('mark-records', MarkRecordController::class);
     $router->resource('theology-mark-records', TheologyMarkRecordController::class);
     $router->resource('report-finances', ReportFinanceController::class);
+    $router->resource('income-sheets', IncomeSheetController::class);
     $router->resource('bulk-messages', BulkMessageController::class);
     $router->resource('direct-messages', DirectMessageController::class);
     $router->resource('wallet-records', WalletRecordController::class);

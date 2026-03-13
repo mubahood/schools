@@ -3977,6 +3977,35 @@ Route::get('print-receipt-batch', function () {
   $pdf->loadHTML(view('print/print-receipt-batch'));
   return $pdf->stream();
 });
+Route::get('income-sheet-print', function (Request $request) {
+  $incomeSheet = \App\Models\IncomeSheet::find($request->id);
+  if ($incomeSheet == null) return "Income sheet not found";
+  $ent = \App\Models\Enterprise::find($incomeSheet->enterprise_id);
+  if ($ent == null) return "Enterprise not found";
+
+  $query = \App\Models\Transaction::where([
+      'enterprise_id' => $incomeSheet->enterprise_id,
+      'term_id' => $incomeSheet->term_id,
+  ])->where('type', 'FEES_PAYMENT');
+
+  if ($incomeSheet->date_from && $incomeSheet->date_to) {
+      $query->whereBetween('payment_date', [$incomeSheet->date_from, $incomeSheet->date_to]);
+  }
+
+  $transactions = $query->orderBy('payment_date', 'ASC')->orderBy('id', 'ASC')->get();
+
+  $incomeSheet->status = 'Generated';
+  $incomeSheet->save();
+
+  $pdf = App::make('dompdf.wrapper');
+  $pdf->loadHTML(view('print/income-sheet', [
+      'incomeSheet' => $incomeSheet,
+      'ent' => $ent,
+      'transactions' => $transactions,
+  ]));
+  $pdf->setPaper('A4', 'portrait');
+  return $pdf->stream('income-sheet-' . $incomeSheet->id . '.pdf');
+});
 Route::get('import-transaction', function (Request $request) {
   $schoo_pay = SchoolPayTransaction::find($request->trans_id);
   if ($schoo_pay == null) return "Transaction not found";
