@@ -30,7 +30,7 @@ Transaction::whereIn('id', $id_array)->update(['is_printed' => 'Yes']);
     <style>
         @page {
             size: A4;
-            margin: 20mm 20mm;
+            margin: 8mm;
         }
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -41,7 +41,7 @@ Transaction::whereIn('id', $id_array)->update(['is_printed' => 'Yes']);
             page-break-after: always;
         }
         .receipt-spacer {
-            height: 25px;
+            height: 8px;
         }
     </style>
 </head>
@@ -60,13 +60,13 @@ Transaction::whereIn('id', $id_array)->update(['is_printed' => 'Yes']);
             $counter++;
         ?>
 
-        @include('print.receipt-card', ['transaction' => $transaction, 'ent' => $ent, 'logo_link' => $logo_link])
+        @include('print.receipt-card', ['transaction' => $transaction, 'ent' => $ent, 'logo_link' => $logo_link, 'compact' => true])
 
-        @if ($counter % 2 == 0 && $counter < $total)
-            {{-- Page break after every 2 receipts --}}
+        @if ($counter % 4 == 0 && $counter < $total)
+            {{-- Page break after every 4 receipts --}}
             <div class="page-break"></div>
-        @elseif ($counter % 2 == 1 && $counter < $total)
-            {{-- Spacer between 2 receipts on the same page --}}
+        @elseif ($counter < $total)
+            {{-- Spacer between receipts on the same page --}}
             <div class="receipt-spacer"></div>
         @endif
     @endforeach

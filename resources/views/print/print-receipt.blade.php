@@ -34,7 +34,7 @@ $transaction->save();
     <style>
         @page {
             size: A4;
-            margin: 25mm 20mm;
+            margin: 10mm;
         }
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
