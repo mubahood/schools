@@ -31,4 +31,9 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'eurosatgroup' => [
+        'username' => env('EUROSATGROUP_USERNAME'),
+        'password' => env('EUROSATGROUP_PASSWORD'),
+    ],
+
 ];

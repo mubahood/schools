@@ -534,9 +534,9 @@ class DirectMessage extends Model
      */
     private static function sendSingleMessage($m, $messageText, $ent)
     {
-        // Get credentials from environment
-        $username = env('EUROSATGROUP_USERNAME');
-        $password = env('EUROSATGROUP_PASSWORD');
+        // Get credentials from config (env() fails when config is cached)
+        $username = config('services.eurosatgroup.username');
+        $password = config('services.eurosatgroup.password');
 
         if (empty($username) || empty($password)) {
             $m->status = 'Failed';
