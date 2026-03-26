@@ -87,17 +87,18 @@ class TransactionController extends AdminController
 
 
             $ajax_url = url(
-                '/api/ajax?'
+                '/api/ajax-accounts?'
                     . 'enterprise_id=' . $u->enterprise_id
-                    . "&search_by_1=name"
-                    . "&search_by_2=id"
-                    . "&model=Account"
             );
             $filter->equal('account_id', 'Filter by account')
                 ->select(function ($id) {
                     $a = Account::find($id);
                     if ($a) {
-                        return [$a->id => $a->name];
+                        $label = $a->name;
+                        if ($a->academic_class_id && $a->academic_class) {
+                            $label .= ' - ' . $a->academic_class->name_text;
+                        }
+                        return [$a->id => $label];
                     }
                 })->ajax($ajax_url);
 

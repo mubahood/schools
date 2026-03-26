@@ -7,6 +7,7 @@ use App\Http\Controllers\QuickSearchController;
 use App\Http\Middleware\JwtMiddleware;
 use App\Models\AcademicClass;
 use App\Models\AcademicClassSctream;
+use App\Models\Account;
 use App\Models\Book;
 use App\Models\DirectMessage;
 use App\Models\SchoolPayHook;
@@ -352,6 +353,53 @@ Route::get('ajax-users', function (Request $r) {
         // Append user_number if available
         if (!empty($v->user_number)) {
             $label .= " ({$v->user_number})";
+        }
+
+        $data[] = [
+            'id' => $v->id . '',
+            'text' => $label,
+        ];
+    }
+
+    return ['data' => $data];
+});
+
+Route::get('ajax-accounts', function (Request $r) {
+    $q = trim($r->get('q'));
+    $enterprise_id = ((int) $r->get('enterprise_id'));
+
+    if ($enterprise_id < 1) {
+        return ['data' => []];
+    }
+
+    if ($q == null || $q == '') {
+        $results = Account::where('enterprise_id', $enterprise_id)
+            ->orderBy('name', 'asc')
+            ->limit(20)
+            ->get();
+    } elseif (is_numeric($q)) {
+        $results = Account::where('enterprise_id', $enterprise_id)
+            ->where(function ($qb) use ($q) {
+                $qb->where('id', $q)
+                    ->orWhere('name', 'like', "%{$q}%");
+            })
+            ->orderBy('name', 'asc')
+            ->limit(20)
+            ->get();
+    } else {
+        $results = Account::where('enterprise_id', $enterprise_id)
+            ->where('name', 'like', "%{$q}%")
+            ->orderBy('name', 'asc')
+            ->limit(20)
+            ->get();
+    }
+
+    $data = [];
+    foreach ($results as $v) {
+        $label = "#{$v->id} - " . $v->name;
+
+        if ($v->academic_class_id != null && $v->academic_class != null) {
+            $label .= ' - ' . $v->academic_class->name_text;
         }
 
         $data[] = [
