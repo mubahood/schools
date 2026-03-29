@@ -1995,8 +1995,8 @@ class Utils  extends Model
         try {
             $response = $client->get($url, [
                 'verify'          => false,
-                'timeout'         => 30,
-                'connect_timeout' => 15,
+                'timeout'         => 300,
+                'connect_timeout' => 300,
             ]);
         } catch (\Throwable $e) {
             $rec->details = "Failed on {$rec_date}: " . $e->getMessage();
