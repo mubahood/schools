@@ -1994,13 +1994,15 @@ class Utils  extends Model
         $client = new \GuzzleHttp\Client();
         try {
             $response = $client->get($url, [
-                'verify'  => false,
-                'timeout' => 100,
+                'verify'          => false,
+                'timeout'         => 30,
+                'connect_timeout' => 15,
             ]);
-        } catch (\GuzzleHttp\Exception\RequestException $e) {
+        } catch (\Throwable $e) {
             $rec->details = "Failed on {$rec_date}: " . $e->getMessage();
             $rec->save();
-            die("HTTP request failed: " . $e->getMessage());
+            echo "SchoolPay sync failed for {$rec_date}: " . $e->getMessage() . "\n";
+            return;
         }
 
         $body = (string)$response->getBody();
