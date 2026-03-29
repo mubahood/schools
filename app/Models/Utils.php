@@ -1991,21 +1991,127 @@ class Utils  extends Model
         echo "Request URL: {$url}\n";
         echo "</pre>";
 
-        $client = new \GuzzleHttp\Client();
+        $body = null;
+
+        // Strategy 1: Guzzle with forced IPv4 (fixes shared hosting IPv6 routing issues)
+        echo "<pre>Trying Strategy 1: Guzzle + forced IPv4...</pre>";
         try {
+            $client = new \GuzzleHttp\Client();
             $response = $client->get($url, [
                 'verify'          => false,
-                'timeout'         => 300,
-                'connect_timeout' => 300,
+                'timeout'         => 120,
+                'connect_timeout' => 30,
+                'curl'            => [
+                    CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+                ],
             ]);
+            $body = (string)$response->getBody();
+            echo "<pre>Strategy 1 succeeded.</pre>";
         } catch (\Throwable $e) {
-            $rec->details = "Failed on {$rec_date}: " . $e->getMessage();
+            echo "<pre>Strategy 1 failed: " . $e->getMessage() . "</pre>";
+        }
+
+        // Strategy 2: Guzzle with explicit IP resolution (bypass DNS issues)
+        if ($body === null) {
+            echo "<pre>Trying Strategy 2: Guzzle + DNS resolve override...</pre>";
+            try {
+                $ip = gethostbyname('schoolpay.co.ug');
+                if ($ip && $ip !== 'schoolpay.co.ug') {
+                    echo "<pre>Resolved schoolpay.co.ug to {$ip}</pre>";
+                    $client = new \GuzzleHttp\Client();
+                    $response = $client->get($url, [
+                        'verify'          => false,
+                        'timeout'         => 120,
+                        'connect_timeout' => 30,
+                        'curl'            => [
+                            CURLOPT_IPRESOLVE  => CURL_IPRESOLVE_V4,
+                            CURLOPT_RESOLVE    => ["schoolpay.co.ug:443:{$ip}"],
+                        ],
+                    ]);
+                    $body = (string)$response->getBody();
+                    echo "<pre>Strategy 2 succeeded.</pre>";
+                } else {
+                    echo "<pre>Strategy 2 skipped: DNS resolution failed.</pre>";
+                }
+            } catch (\Throwable $e) {
+                echo "<pre>Strategy 2 failed: " . $e->getMessage() . "</pre>";
+            }
+        }
+
+        // Strategy 3: file_get_contents (uses PHP stream wrappers, different networking stack)
+        if ($body === null) {
+            echo "<pre>Trying Strategy 3: file_get_contents stream...</pre>";
+            try {
+                $ctx = stream_context_create([
+                    'http' => [
+                        'timeout' => 120,
+                        'ignore_errors' => true,
+                    ],
+                    'ssl' => [
+                        'verify_peer'      => false,
+                        'verify_peer_name' => false,
+                    ],
+                ]);
+                $result = @file_get_contents($url, false, $ctx);
+                if ($result !== false && strlen($result) > 0) {
+                    $body = $result;
+                    echo "<pre>Strategy 3 succeeded.</pre>";
+                } else {
+                    echo "<pre>Strategy 3 returned empty.</pre>";
+                }
+            } catch (\Throwable $e) {
+                echo "<pre>Strategy 3 failed: " . $e->getMessage() . "</pre>";
+            }
+        }
+
+        // Strategy 4: Raw cURL with aggressive options
+        if ($body === null) {
+            echo "<pre>Trying Strategy 4: Raw cURL with aggressive options...</pre>";
+            try {
+                $ch = curl_init();
+                curl_setopt_array($ch, [
+                    CURLOPT_URL            => $url,
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_SSL_VERIFYPEER => false,
+                    CURLOPT_SSL_VERIFYHOST => 0,
+                    CURLOPT_TIMEOUT        => 120,
+                    CURLOPT_CONNECTTIMEOUT => 30,
+                    CURLOPT_IPRESOLVE      => CURL_IPRESOLVE_V4,
+                    CURLOPT_FOLLOWLOCATION => true,
+                    CURLOPT_HTTPHEADER     => [
+                        'User-Agent: Mozilla/5.0 (compatible; SchoolDynamics/1.0)',
+                        'Accept: application/json',
+                    ],
+                    CURLOPT_ENCODING       => '',  // Accept all encodings
+                ]);
+                $result = curl_exec($ch);
+                $errno  = curl_errno($ch);
+                $error  = curl_error($ch);
+                $info   = curl_getinfo($ch);
+                curl_close($ch);
+
+                echo "<pre>cURL info: HTTP {$info['http_code']}, IP: {$info['primary_ip']}, Time: {$info['total_time']}s</pre>";
+
+                if ($errno === 0 && $result !== false && strlen($result) > 0) {
+                    $body = $result;
+                    echo "<pre>Strategy 4 succeeded.</pre>";
+                } else {
+                    echo "<pre>Strategy 4 failed: [{$errno}] {$error}</pre>";
+                }
+            } catch (\Throwable $e) {
+                echo "<pre>Strategy 4 failed: " . $e->getMessage() . "</pre>";
+            }
+        }
+
+        // All strategies failed
+        if ($body === null) {
+            $rec->details = "All connection strategies failed for {$rec_date}. Server may be blocked from reaching schoolpay.co.ug:443.";
             $rec->save();
-            echo "SchoolPay sync failed for {$rec_date}: " . $e->getMessage() . "\n";
+            echo "<pre>All strategies failed. The hosting provider likely blocks outbound HTTPS to schoolpay.co.ug.\n";
+            echo "Consider contacting the host to whitelist schoolpay.co.ug or using a relay server.</pre>";
             return;
         }
 
-        $body = (string)$response->getBody();
         $data = json_decode($body);
 
         // 6) Output and process
