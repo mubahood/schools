@@ -1792,21 +1792,19 @@ class Utils  extends Model
     {
 
         $url = url('api/reconcile?enterprise_id=' . $enterprise_id);
-        $ctx = stream_context_create(['http' => ['timeout' => 3]]);
 
-        try {
-            $data =  file_get_contents($url);
-        } catch (Exception $x) {
-        }
-
+        // Fire-and-forget: trigger the reconcile endpoint without waiting
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 0.0000001);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 0.0000001);
-        $response = curl_exec($ch);
+        curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_NOSIGNAL, 1);
+        curl_exec($ch);
+        curl_close($ch);
     }
 
 

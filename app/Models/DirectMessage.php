@@ -109,9 +109,13 @@ class DirectMessage extends Model
 
             // Initialize Guzzle HTTP client
             $client = new Client([
-                'verify' => false, // Equivalent to CURLOPT_SSL_VERIFYPEER => false
-                'timeout' => 30,   // Equivalent to CURLOPT_TIMEOUT => 30
-                'allow_redirects' => true, // Equivalent to CURLOPT_FOLLOWLOCATION => true
+                'verify' => false,
+                'timeout' => 30,
+                'connect_timeout' => 15,
+                'allow_redirects' => true,
+                'curl' => [
+                    CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+                ],
             ]);
 
             // Make the GET request
@@ -570,9 +574,13 @@ class DirectMessage extends Model
         try {
             // Initialize Guzzle HTTP client
             $client = new Client([
-                'verify' => false, // Equivalent to CURLOPT_SSL_VERIFYPEER => false
-                'timeout' => 30,   // Equivalent to CURLOPT_TIMEOUT => 30
-                'allow_redirects' => true, // Equivalent to CURLOPT_FOLLOWLOCATION => true
+                'verify' => false,
+                'timeout' => 30,
+                'connect_timeout' => 15,
+                'allow_redirects' => true,
+                'curl' => [
+                    CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+                ],
             ]);
 
             // Make the GET request
