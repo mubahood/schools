@@ -288,7 +288,7 @@ class AssessmentSheet extends Model
 
         foreach ($subjects as $key => $subject) {
             $s['id'] = $subject->id;
-            $s['name'] = $subject->subject_name;
+            $s['name'] = $subject->short_name();
             $marks_conds['subject_id'] = $subject->id;
             $s['d1'] = MarkRecord::where($marks_conds)->where('aggr_value', 1)->count();
             $s['d2'] = MarkRecord::where($marks_conds)->where('aggr_value', 2)->count();
