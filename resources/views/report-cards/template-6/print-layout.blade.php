@@ -52,9 +52,9 @@ if ($tr != null) {
         if($owner->theology_stream_id != null){
             $theo_stream = TheologyStream::find($owner->theology_stream_id);
             if($theo_stream!=null){
+                $theo_stream_class = ' - ' . $theo_stream->name;
                 if($theo_stream->teacher != null){
                     $class_teacher_name_1 = $theo_stream->teacher->name;
-                    $theo_stream_class = ' - ' . $theo_stream->name;
                 }
             }
         }
@@ -73,7 +73,14 @@ if ($tr != null) {
     $hasTheologyClass = StudentHasTheologyClass::where(['administrator_id' => $tr->owner->id, 'theology_class_id' => $tr->theology_class_id])->first();
     if ($hasTheologyClass != null) {
         if ($hasTheologyClass->stream != null) {
-            // $theo_stream_class = ' - ' . $hasTheologyClass->stream->name;
+            $theo_stream_class = ' - ' . $hasTheologyClass->stream->name;
+        }
+    }
+    // Fallback: use stream_id from theology report card
+    if ($theo_stream_class == '.......' && $tr != null && $tr->stream_id != null) {
+        $_fb_stream = TheologyStream::find($tr->stream_id);
+        if ($_fb_stream != null) {
+            $theo_stream_class = ' - ' . $_fb_stream->name;
         }
     }
 }

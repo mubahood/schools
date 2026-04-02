@@ -1,5 +1,6 @@
 <?php
 use App\Models\Utils;
+use App\Models\TheologyStream;
 use App\Models\StudentHasClass;
 use App\Models\StudentHasTheologyClass;
 
@@ -76,6 +77,21 @@ if ($tr != null) {
                     }
                 }
             }
+        }
+    }
+}
+// Fallback: use stream_id from theology report card or owner's theology_stream_id
+if ($theo_stream_class == '.......' && $tr != null) {
+    if ($tr->stream_id != null) {
+        $_fb_stream = TheologyStream::find($tr->stream_id);
+        if ($_fb_stream != null) {
+            $theo_stream_class = ' - ' . $_fb_stream->name;
+        }
+    }
+    if ($theo_stream_class == '.......' && $owner->theology_stream_id != null) {
+        $_fb_stream = TheologyStream::find($owner->theology_stream_id);
+        if ($_fb_stream != null) {
+            $theo_stream_class = ' - ' . $_fb_stream->name;
         }
     }
 }
