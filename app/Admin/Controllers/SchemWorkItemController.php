@@ -87,7 +87,8 @@ class SchemWorkItemController extends AdminController
             $grid->model()->where('teacher_id', $u->id);
         }
         $grid->model()->orderBy('term_id', 'desc')->orderBy('week', 'asc');
-        $grid->quickSearch('topic', 'competence', 'methods')->placeholder('Search topic, competence...');
+        $grid->quickSearch('theme', 'topic', 'sub_topic', 'competence_subject', 'competence_language', 'methods')
+            ->placeholder('Search theme, topic, subtopic, competences...');
 
         // Columns
         $grid->column('id', 'ID')->sortable()->hide();
@@ -110,9 +111,17 @@ class SchemWorkItemController extends AdminController
             return "<span class='ent-dark'>{$v}P</span>";
         })->sortable();
 
+        $grid->column('theme', 'Theme')->display(function ($v) {
+            return $v ? '<strong>' . Str::limit($v, 30) . '</strong>' : '<span class="text-muted">—</span>';
+        });
+
         $grid->column('topic', 'Topic')->display(function ($v) {
             return $v ? '<strong>' . Str::limit($v, 40) . '</strong>' : '<span class="text-muted">—</span>';
         });
+
+        $grid->column('sub_topic', 'Subtopic')->display(function ($v) {
+            return ($v && strlen($v) > 2) ? Str::limit($v, 35) : '<span class="text-muted">—</span>';
+        })->hide();
 
         $grid->column('teacher_id', 'Teacher')->display(function () {
             return $this->teacher ? $this->teacher->name : '-';
@@ -133,7 +142,19 @@ class SchemWorkItemController extends AdminController
         });
 
         // Hidden columns (available via column selector)
-        $grid->column('competence', 'Competence')->display(function ($v) {
+        $grid->column('content', 'Content')->display(function ($v) {
+            return ($v && strlen($v) > 2) ? Str::limit($v, 50) : '—';
+        })->hide();
+
+        $grid->column('competence_subject', 'Competence (Subject)')->display(function ($v) {
+            return ($v && strlen($v) > 2) ? Str::limit($v, 50) : '—';
+        })->hide();
+
+        $grid->column('competence_language', 'Competence (Language)')->display(function ($v) {
+            return ($v && strlen($v) > 2) ? Str::limit($v, 50) : '—';
+        })->hide();
+
+        $grid->column('competence', 'Competence (Legacy)')->display(function ($v) {
             return ($v && strlen($v) > 2) ? Str::limit($v, 50) : '—';
         })->hide();
 
@@ -141,7 +162,11 @@ class SchemWorkItemController extends AdminController
             return ($v && strlen($v) > 2) ? Str::limit($v, 50) : '—';
         })->hide();
 
-        $grid->column('skills', 'Skills')->display(function ($v) {
+        $grid->column('life_skills_values', 'Life Skills & Values')->display(function ($v) {
+            return ($v && strlen($v) > 2) ? Str::limit($v, 50) : '—';
+        })->hide();
+
+        $grid->column('skills', 'Skills (Legacy)')->display(function ($v) {
             return ($v && strlen($v) > 2) ? Str::limit($v, 50) : '—';
         })->hide();
 
@@ -205,11 +230,22 @@ class SchemWorkItemController extends AdminController
         $show->divider('Lesson Plan');
         $show->field('week', 'Week');
         $show->field('period', 'Periods');
+        $show->field('theme', 'Theme');
         $show->field('topic', 'Topic');
-        $show->field('supervisor_comment', 'Content / Notes')->unescape()->as(function ($v) { return nl2br($v ?: '-'); });
-        $show->field('competence', 'Competence')->unescape()->as(function ($v) { return nl2br($v ?: '-'); });
-        $show->field('methods', 'Teaching Methods')->unescape()->as(function ($v) { return nl2br($v ?: '-'); });
-        $show->field('skills', 'Skills')->unescape()->as(function ($v) { return nl2br($v ?: '-'); });
+        $show->field('sub_topic', 'Subtopic');
+        $show->field('content', 'Content')->unescape()->as(function ($v) {
+            return nl2br($v ?: ($this->supervisor_comment ?: '-'));
+        });
+        $show->field('competence_subject', 'Competence (Subject)')->unescape()->as(function ($v) {
+            return nl2br($v ?: ($this->competence ?: '-'));
+        });
+        $show->field('competence_language', 'Competence (Language)')->unescape()->as(function ($v) {
+            return nl2br($v ?: '-');
+        });
+        $show->field('methods', 'Methods & Techniques')->unescape()->as(function ($v) { return nl2br($v ?: '-'); });
+        $show->field('life_skills_values', 'Life Skills & Values')->unescape()->as(function ($v) {
+            return nl2br($v ?: ($this->skills ?: '-'));
+        });
         $show->field('suggested_activity', 'Activities')->unescape()->as(function ($v) { return nl2br($v ?: '-'); });
         $show->field('instructional_material', 'Materials')->unescape()->as(function ($v) { return nl2br($v ?: '-'); });
         $show->field('references', 'References')->unescape()->as(function ($v) { return nl2br($v ?: '-'); });
@@ -239,6 +275,92 @@ class SchemWorkItemController extends AdminController
             admin_error('Error', 'No active term found. Please activate a term first.');
             return $form;
         }
+
+        // Match edit/create form layout with popup grid alignment.
+        Admin::style(<<<'CSS'
+            .field_week,
+            .field_period,
+            .field_teacher_status,
+            .field_theme,
+            .field_topic,
+            .field_content,
+            .field_competence_subject,
+            .field_competence_language,
+            .field_methods,
+            .field_life_skills_values,
+            .field_suggested_activity,
+            .field_instructional_material,
+            .field_references {
+                float: left;
+                padding-right: 8px;
+            }
+
+            .field_week,
+            .field_period,
+            .field_teacher_status {
+                width: 33.3333%;
+            }
+
+            .field_theme,
+            .field_topic,
+            .field_content,
+            .field_competence_subject,
+            .field_competence_language,
+            .field_methods,
+            .field_life_skills_values,
+            .field_suggested_activity,
+            .field_instructional_material,
+            .field_references {
+                width: 50%;
+            }
+
+            .field_week,
+            .field_theme,
+            .field_sub_topic,
+            .field_content,
+            .field_competence_language,
+            .field_life_skills_values,
+            .field_instructional_material,
+            .field_teacher_comment {
+                clear: both;
+            }
+
+            .field_topic,
+            .field_competence_subject,
+            .field_methods,
+            .field_suggested_activity,
+            .field_references {
+                padding-right: 0;
+            }
+
+            .field_sub_topic,
+            .field_teacher_comment {
+                width: 100%;
+            }
+
+            @media (max-width: 991px) {
+                .field_week,
+                .field_period,
+                .field_teacher_status,
+                .field_theme,
+                .field_topic,
+                .field_content,
+                .field_competence_subject,
+                .field_competence_language,
+                .field_methods,
+                .field_life_skills_values,
+                .field_suggested_activity,
+                .field_instructional_material,
+                .field_references,
+                .field_sub_topic,
+                .field_teacher_comment {
+                    float: none;
+                    width: 100%;
+                    clear: both;
+                    padding-right: 0;
+                }
+            }
+        CSS);
 
         // Determine if user is privileged (admin, dos, hm)
         $isPrivileged = $u->isRole('admin') || $u->isRole('dos') || $u->isRole('hm');
@@ -302,71 +424,98 @@ class SchemWorkItemController extends AdminController
         $form->select('week', 'Week')
             ->options(array_combine(range(1, 18), array_map(function ($i) { return "Week $i"; }, range(1, 18))))
             ->rules('required')
-            ->default(1);
+            ->default(1)
+            ->width(4);
 
         $form->select('period', 'Periods')
             ->options(array_combine(range(1, 10), array_map(function ($i) { return "$i Period" . ($i > 1 ? 's' : ''); }, range(1, 10))))
             ->rules('required')
-            ->default(1);
+            ->default(1)
+            ->width(4);
 
-        // === Section: Lesson Details ===
-        $form->divider('Lesson Details');
-
-        $form->text('topic', 'Topic')
-            ->rules('required|min:3')
-            ->placeholder('e.g. Introduction to Algebra');
-
-        $form->textarea('supervisor_comment', 'Content / Notes')
-            ->rows(3)
-            ->placeholder('Key points to cover in this lesson...');
-
-        $form->textarea('competence', 'Competence / Objectives')
-            ->rows(3)
-            ->placeholder('By the end of this lesson, students should be able to...');
-
-        $form->textarea('methods', 'Teaching Methods')
-            ->rows(3)
-            ->placeholder('e.g. Discussion, Demonstration, Group Work...');
-
-        $form->textarea('skills', 'Skills')
-            ->rows(3)
-            ->placeholder('e.g. Critical thinking, Problem solving...');
-
-        $form->textarea('suggested_activity', 'Activities')
-            ->rows(3)
-            ->placeholder('e.g. Class discussion, practical exercises...');
-
-        $form->textarea('instructional_material', 'Materials')
-            ->rows(2)
-            ->placeholder('e.g. Textbooks, charts, lab equipment...');
-
-        $form->textarea('references', 'References')
-            ->rows(2)
-            ->placeholder('e.g. Textbook pages, websites...');
-
-        // === Section: Status ===
-        $form->divider('Lesson Status');
-
-        $form->radio('teacher_status', 'Status')
+        $form->select('teacher_status', 'Status')
             ->options([
-                'Pending'   => 'Pending',
+                'Pending' => 'Pending',
                 'Conducted' => 'Conducted',
-                'Skipped'   => 'Skipped',
+                'Skipped' => 'Skipped',
             ])
             ->default('Pending')
             ->rules('required')
-            ->when('Conducted', function (Form $form) {
-                $form->textarea('teacher_comment', 'Remarks')
-                    ->rows(2)
-                    ->rules('required|min:5')
-                    ->placeholder('How did the lesson go?');
-            })
-            ->when('Skipped', function (Form $form) {
-                $form->textarea('teacher_comment', 'Reason')
-                    ->rows(2)
-                    ->rules('required|min:3')
-                    ->placeholder('Why was this lesson skipped?');
-            });
+            ->width(4);
+
+        // === Section: Lesson Details ===
+        $form->divider('Scheme of Work Details');
+
+        $form->text('theme', 'Theme')
+            ->rules('required|min:2')
+            ->placeholder('e.g. Human Body')
+            ->width(6);
+
+        $form->text('topic', 'Topic')
+            ->rules('required|min:2')
+            ->placeholder('e.g. Muscular-Skeletal System')
+            ->width(6);
+
+        $form->text('sub_topic', 'Subtopic')
+            ->rules('required|min:2')
+            ->placeholder('e.g. Skeleton / Human skeleton');
+
+        $form->textarea('content', 'Content')
+            ->rows(3)
+            ->rules('required|min:3')
+            ->help('Explain the lesson content in steps or bullet points.')
+            ->width(6);
+
+        $form->textarea('competence_subject', 'Competence - Subject')
+            ->rows(3)
+            ->rules('required|min:3')
+            ->help('Describe subject-specific competences clearly.')
+            ->width(6);
+
+        $form->textarea('competence_language', 'Competence - Language')
+            ->rows(3)
+            ->rules('required|min:3')
+            ->placeholder('Language competences and vocabulary for the learner...')
+            ->width(6);
+
+        $form->textarea('methods', 'Methods & Techniques')
+            ->rows(3)
+            ->rules('required|min:3')
+            ->placeholder('e.g. Guided discovery, Question and answer, Explanation, Discussion...')
+            ->width(6);
+
+        $form->textarea('life_skills_values', 'Life Skills & Values')
+            ->rows(3)
+            ->rules('required|min:3')
+            ->placeholder('e.g. Effective communication, Logical reasoning, Self-awareness...')
+            ->width(6);
+
+        $form->textarea('suggested_activity', 'Suggested Activities')
+            ->rows(3)
+            ->rules('required|min:3')
+            ->placeholder('Activity steps for learners...')
+            ->width(6);
+
+        $form->textarea('instructional_material', 'Instructional Materials')
+            ->rows(3)
+            ->rules('required|min:2')
+            ->placeholder('e.g. Insects, charts, models, textbooks...')
+            ->width(6);
+
+        $form->textarea('references', 'References')
+            ->rows(3)
+            ->rules('required|min:2')
+            ->placeholder('e.g. P7 curriculum pg. 64, Oxford Sci dictionary...')
+            ->width(6);
+
+        $form->textarea('teacher_comment', 'Remarks (optional)')
+            ->rows(3)
+            ->placeholder('Any remarks for this lesson item...');
+
+        // Keep legacy fields synchronized for backward compatibility with older reports/views.
+        $form->hidden('supervisor_comment')->default('');
+        $form->hidden('competence')->default('');
+        $form->hidden('skills')->default('');
 
         if ($form->isCreating()) {
             $form->hidden('supervisor_status')->value('Pending');
@@ -385,6 +534,12 @@ class SchemWorkItemController extends AdminController
         }
 
         // Save callback
+        $form->saving(function (Form $form) {
+            $form->supervisor_comment = $form->content;
+            $form->competence = $form->competence_subject;
+            $form->skills = $form->life_skills_values;
+        });
+
         $form->saved(function (Form $form) {
             admin_success('Saved', 'Scheme work item saved.');
             return redirect(admin_url('schems-work-items'));

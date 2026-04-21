@@ -13,6 +13,8 @@ use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class SchemeWorkController extends AdminController
 {
@@ -50,6 +52,7 @@ class SchemeWorkController extends AdminController
         ])->first();
 
         $grid = new Grid(new Subject());
+        $grid->disableCreateButton();
         
         // Get enterprise primary color
         $primaryColor = $u->ent->color ?? '#337ab7';
@@ -81,11 +84,84 @@ class SchemeWorkController extends AdminController
                 border-color: {$primaryColor}66 !important;
             }
         ");
+        Admin::style($this->getPopupStyle());
         
         // Disable batch actions
         $grid->disableBatchActions();
-        $grid->disableExport();
-        $grid->disableCreateButton();
+        $popupConfig = [
+            'defaultTermId' => $active_term ? (int) $active_term->id : 0,
+            'storeUrl' => admin_url('scheme-works/add-item-ajax'),
+        ];
+        Admin::script('window.SCHEME_POPUP_CONFIG = ' . json_encode($popupConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . ';');
+        Admin::js('/js/scheme-work-popup.js?v=20260422-1');
+        Admin::script(<<<'JS'
+            (function () {
+                // Debugbar may call hljs using a newer signature while another package exposes an older hljs API.
+                function escapeHtml(s) {
+                    return String(s)
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;');
+                }
+
+                function patchDebugbarHighlight() {
+                    if (!window.PhpDebugBar || !PhpDebugBar.Widgets || !PhpDebugBar.Widgets.highlight) {
+                        return false;
+                    }
+                    if (PhpDebugBar.Widgets.__schemeHljsPatched) {
+                        return true;
+                    }
+
+                    var original = PhpDebugBar.Widgets.highlight;
+                    PhpDebugBar.Widgets.highlight = function (code, lang) {
+                        if (typeof code === 'string' && typeof window.hljs !== 'undefined' && lang) {
+                            try {
+                                if (typeof hljs.getLanguage === 'function' && !hljs.getLanguage(lang)) {
+                                    return escapeHtml(code);
+                                }
+
+                                // Try highlight.js new API first.
+                                try {
+                                    if (typeof hljs.highlight === 'function') {
+                                        var modern = hljs.highlight(code, { language: lang });
+                                        if (modern && modern.value) return modern.value;
+                                    }
+                                } catch (e1) {
+                                    // Fallback for old highlight.js signature: highlight(lang, code)
+                                    try {
+                                        var legacy = hljs.highlight(lang, code);
+                                        if (legacy && legacy.value) return legacy.value;
+                                    } catch (e2) {
+                                        return escapeHtml(code);
+                                    }
+                                }
+                            } catch (e) {
+                                return escapeHtml(code);
+                            }
+                        }
+
+                        try {
+                            return original(code, lang);
+                        } catch (e3) {
+                            return typeof code === 'string' ? escapeHtml(code) : code;
+                        }
+                    };
+
+                    PhpDebugBar.Widgets.__schemeHljsPatched = true;
+                    return true;
+                }
+
+                if (!patchDebugbarHighlight()) {
+                    var attempts = 0;
+                    var t = setInterval(function () {
+                        attempts++;
+                        if (patchDebugbarHighlight() || attempts > 30) {
+                            clearInterval(t);
+                        }
+                    }, 120);
+                }
+            })();
+        JS);
         
         // Header with term information
         $grid->header(function () use ($active_term) {
@@ -207,7 +283,7 @@ class SchemeWorkController extends AdminController
         $grid->column('code', __('Code'))
             ->display(function ($code) {
                 return $code ?: '<span class="text-muted">-</span>';
-            })->sortable();
+            })->sortable()->hide();
 
         $grid->column('subject_teacher', __('Main Teacher'))
             ->display(function ($teacher_id) {
@@ -252,17 +328,14 @@ class SchemeWorkController extends AdminController
 
                 $percentage = $total > 0 ? round(($conducted / $total) * 100, 1) : 0;
 
-                // Show which term's data is being displayed
-                $termBadge = '<span class="enterprise-badge-primary" style="font-size:10px;">' . $display_term->name_text . '</span><br>';
-                
                 return '
-                    <div style="font-size: 11px;">
-                        ' . $termBadge . '
-                        <span class="scheme-status-badge badge-total">' . $total . ' Total</span>
-                        <span class="scheme-status-badge badge-done">' . $conducted . ' Done</span>
-                        <span class="scheme-status-badge badge-pending">' . $pending . ' Pending</span>
-                        <span class="scheme-status-badge badge-skipped">' . $skipped . ' Skipped</span>
-                        <br><small><strong>' . $percentage . '% Completed</strong></small>
+                    <div class="scheme-stat-block" id="scheme-stat-' . $this->id . '">
+                        <span class="scheme-term-chip">' . $display_term->name_text . '</span>
+                        <span class="scheme-status-badge badge-total"><span class="js-stat-total">' . $total . '</span> Total</span>
+                        <span class="scheme-status-badge badge-done"><span class="js-stat-done">' . $conducted . '</span> Done</span>
+                        <span class="scheme-status-badge badge-pending"><span class="js-stat-pending">' . $pending . '</span> Pending</span>
+                        <span class="scheme-status-badge badge-skipped"><span class="js-stat-skipped">' . $skipped . '</span> Skipped</span>
+                        <span class="scheme-percent"><span class="js-stat-percent">' . $percentage . '</span>%</span>
                     </div>
                 ';
             });
@@ -271,18 +344,17 @@ class SchemeWorkController extends AdminController
         $grid->column('actions', __('Actions'))
             ->display(function () {
                 $viewUrl = admin_url('schems-work-items?subject_id=' . $this->id);
-                $createUrl = admin_url('schems-work-items/create?subject_id=' . $this->id);
                 $printUrl = url('scheme-of-work-print?id=' . $this->id);
                 
                 return '
                     <div class="scheme-work-actions">
-                        <a href="' . $createUrl . '" class="btn btn-sm btn-add" title="Add New Item">
+                        <a href="#" class="btn btn-sm btn-add js-open-scheme-popup" data-subject-id="' . $this->id . '" data-subject-name="' . e($this->subject_name) . '" title="Add New Item">
                             <i class="fa fa-plus"></i> Add
                         </a>
-                        <a href="' . $viewUrl . '" class="btn btn-sm btn-view" title="View Items">
+                        <a href="' . $viewUrl . '" target="_blank" rel="noopener" class="btn btn-sm btn-view" title="View Items">
                             <i class="fa fa-list"></i> View
                         </a>
-                        <a href="' . $printUrl . '" target="_blank" class="btn btn-sm btn-print" title="Print">
+                        <a href="' . $printUrl . '" target="_blank" class="btn btn-sm btn-print btn-icon" title="Print">
                             <i class="fa fa-print"></i>
                         </a>
                     </div>
@@ -381,11 +453,277 @@ class SchemeWorkController extends AdminController
         return $show;
     }
 
+    protected function getPopupStyle()
+    {
+        return <<<CSS
+        .scheme-popup .modal-dialog {
+            width: calc(100vw - 32px);
+            max-width: 1240px;
+            margin: 16px auto;
+        }
+        .scheme-popup .modal-content {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 12px 32px rgba(19, 37, 58, .28);
+            border: 1px solid #d8e3ee;
+        }
+        .scheme-popup .modal-header {
+            background: linear-gradient(90deg, #f6fbff, #eef5fc);
+            border-bottom: 1px solid #dbe7f2;
+            position: sticky;
+            top: 0;
+            z-index: 3;
+            padding: 12px 16px;
+        }
+        .scheme-popup .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #294055;
+        }
+        .scheme-popup .modal-body {
+            max-height: calc(100vh - 170px);
+            overflow-y: auto;
+            background: #fcfeff;
+            padding: 14px 16px 10px;
+        }
+        .scheme-popup .modal-footer {
+            position: sticky;
+            bottom: 0;
+            z-index: 3;
+            background: #fff;
+            border-top: 1px solid #dbe7f2;
+            padding: 10px 14px;
+        }
+        .scheme-popup .popup-feedback { display:none; margin-bottom: 10px; }
+        .scheme-popup .form-grid { margin-bottom: 2px; }
+        .scheme-popup .form-group { margin-bottom: 10px; }
+        .scheme-popup label {
+            font-size: 12px;
+            margin-bottom: 4px;
+            color: #3f4f5f;
+            font-weight: 700;
+        }
+        .scheme-popup .form-control {
+            height: 36px;
+            border-radius: 8px;
+            border-color: #d6e2ef;
+        }
+        .scheme-popup textarea.form-control {
+            min-height: 88px;
+            resize: vertical;
+            line-height: 1.4;
+        }
+        .scheme-popup .section-title {
+            font-weight: 700;
+            color: #36485b;
+            margin: 8px 0 10px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: .3px;
+        }
+        .scheme-popup .btn { border-radius: 8px; }
+        .scheme-popup .btn + .btn { margin-left: 6px; }
+        .scheme-popup .btn-save-more {
+            background: #1f6f8b;
+            border-color: #1f6f8b;
+            color: #fff;
+        }
+        .scheme-popup .btn-save-more:hover {
+            background: #1b6178;
+            border-color: #1b6178;
+            color: #fff;
+        }
+        .scheme-popup .btn[disabled] { opacity: .75; }
+        /* Inline suggestion row directly below each field */
+        .scheme-popup .inline-sugg-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 5px;
+            margin-bottom: 4px;
+        }
+        .scheme-popup .sugg-chip {
+            display: inline-block;
+            border: 1px solid #c9dcef;
+            background: #fff;
+            color: #31506a;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 9px;
+            margin: 0 5px 5px 0;
+            cursor: pointer;
+            transition: all .15s ease-in-out;
+        }
+        .scheme-popup .sugg-chip:hover {
+            border-color: #8bb7db;
+            background: #eaf4ff;
+            transform: translateY(-1px);
+        }
+        .scheme-popup .sugg-chip:active {
+            transform: translateY(0);
+        }
+        .scheme-popup .field-append-flash {
+            box-shadow: 0 0 0 2px rgba(79, 152, 220, .28);
+        }
+
+        @media (max-width: 991px) {
+            .scheme-popup .modal-dialog {
+                width: calc(100vw - 12px);
+                margin: 6px auto;
+            }
+            .scheme-popup .modal-body {
+                max-height: calc(100vh - 145px);
+                padding: 12px 10px;
+            }
+            .scheme-popup .modal-title {
+                font-size: 16px;
+            }
+            .scheme-popup .btn + .btn {
+                margin-left: 4px;
+            }
+        }
+        CSS;
+    }
+
+    public function storeItemAjax(Request $request)
+    {
+        $u = Admin::user();
+        if (!$u) {
+            return response()->json(['status' => false, 'message' => 'Unauthorized.'], 401);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'subject_id' => 'required|integer',
+            'term_id' => 'nullable|integer',
+            'week' => 'required|integer|min:1|max:18',
+            'period' => 'required|integer|min:1|max:10',
+            'theme' => 'required|string|min:2|max:255',
+            'topic' => 'required|string|min:2|max:255',
+            'sub_topic' => 'required|string|min:2|max:255',
+            'content' => 'required|string|min:3',
+            'competence_subject' => 'required|string|min:3',
+            'competence_language' => 'required|string|min:3',
+            'methods' => 'required|string|min:3',
+            'life_skills_values' => 'required|string|min:3',
+            'suggested_activity' => 'required|string|min:3',
+            'instructional_material' => 'required|string|min:2',
+            'references' => 'required|string|min:2',
+            'teacher_status' => 'nullable|in:Pending,Conducted,Skipped',
+            'teacher_comment' => 'nullable|string|max:2000',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation failed.',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $subject = Subject::where('enterprise_id', $u->enterprise_id)
+            ->where('id', (int) $request->subject_id)
+            ->first();
+        if (!$subject) {
+            return response()->json(['status' => false, 'message' => 'Subject not found.'], 404);
+        }
+
+        $isPrivileged = $u->isRole('admin') || $u->isRole('dos') || $u->isRole('hm');
+        if (!$isPrivileged) {
+            $teacherIds = [(int) $subject->subject_teacher, (int) $subject->teacher_1, (int) $subject->teacher_2, (int) $subject->teacher_3];
+            if (!in_array((int) $u->id, $teacherIds, true)) {
+                return response()->json(['status' => false, 'message' => 'You are not allowed to add items for this subject.'], 403);
+            }
+        }
+
+        $termId = (int) $request->term_id;
+        if ($termId < 1) {
+            $activeTerm = Term::where('enterprise_id', $u->enterprise_id)->where('is_active', 1)->first();
+            if (!$activeTerm) {
+                return response()->json(['status' => false, 'message' => 'No active term found.'], 422);
+            }
+            $termId = (int) $activeTerm->id;
+        }
+
+        $term = Term::where('enterprise_id', $u->enterprise_id)->where('id', $termId)->first();
+        if (!$term) {
+            return response()->json(['status' => false, 'message' => 'Invalid term selected.'], 422);
+        }
+
+        $item = new SchemWorkItem();
+        $item->enterprise_id = $u->enterprise_id;
+        $item->term_id = $termId;
+        $item->subject_id = $subject->id;
+        $item->teacher_id = (int) ($subject->subject_teacher ?: $u->id);
+        $item->supervisor_id = (int) ($u->supervisor_id ?: $u->id);
+        $item->week = (int) $request->week;
+        $item->period = (int) $request->period;
+        $item->theme = trim((string) $request->theme);
+        $item->topic = trim((string) $request->topic);
+        $item->sub_topic = trim((string) $request->sub_topic);
+        $item->content = trim((string) $request->content);
+        $item->competence_subject = trim((string) $request->competence_subject);
+        $item->competence_language = trim((string) $request->competence_language);
+        $item->methods = trim((string) $request->methods);
+        $item->life_skills_values = trim((string) $request->life_skills_values);
+        $item->suggested_activity = trim((string) $request->suggested_activity);
+        $item->instructional_material = trim((string) $request->instructional_material);
+        $item->references = trim((string) $request->references);
+        $item->teacher_status = $request->teacher_status ?: 'Pending';
+        $item->teacher_comment = trim((string) $request->teacher_comment);
+        $item->supervisor_status = 'Pending';
+        $item->status = 'Pending';
+
+        // Legacy sync fields for backward compatibility in older views/reports.
+        $item->supervisor_comment = $item->content;
+        $item->competence = $item->competence_subject;
+        $item->skills = $item->life_skills_values;
+
+        $item->save();
+
+        $total = SchemWorkItem::where(['subject_id' => $subject->id, 'term_id' => $termId])->count();
+        $conducted = SchemWorkItem::where(['subject_id' => $subject->id, 'term_id' => $termId, 'teacher_status' => 'Conducted'])->count();
+        $pending = SchemWorkItem::where(['subject_id' => $subject->id, 'term_id' => $termId, 'teacher_status' => 'Pending'])->count();
+        $skipped = SchemWorkItem::where(['subject_id' => $subject->id, 'term_id' => $termId, 'teacher_status' => 'Skipped'])->count();
+        $percent = $total > 0 ? round(($conducted / $total) * 100, 1) : 0;
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Scheme work item saved successfully.',
+            'item_id' => $item->id,
+            'stats' => [
+                'total' => $total,
+                'conducted' => $conducted,
+                'pending' => $pending,
+                'skipped' => $skipped,
+                'percent' => $percent,
+            ],
+        ]);
+    }
+
     /**
      * Make a form builder.
      *
      * @return Form
      */
+    /**
+     * Override store to avoid calling form()->store() since this controller is read-only.
+     */
+    public function store()
+    {
+        admin_warning('Information', 'Subjects are managed in the Subjects section. This is a read-only view.');
+        return redirect(admin_url('subjects'));
+    }
+
+    /**
+     * Override update for the same reason.
+     */
+    public function update($id)
+    {
+        admin_warning('Information', 'Subjects are managed in the Subjects section. This is a read-only view.');
+        return redirect(admin_url('subjects'));
+    }
+
     protected function form()
     {
         // This controller is read-only. Subjects are managed in the Subjects section.

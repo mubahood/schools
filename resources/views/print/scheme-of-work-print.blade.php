@@ -5,7 +5,7 @@
     <style>
         @page {
             size: A4 landscape;
-            margin: 15mm 15mm 12mm 15mm;
+            margin: 10mm 8mm 8mm 8mm;
         }
         * {
             margin: 0;
@@ -15,116 +15,104 @@
         body {
             font-family: Arial, Helvetica, sans-serif;
             font-size: 9px;
-            line-height: 1.2;
-            color: #222;
-            padding: 15px 25px 12px 25px;
+            line-height: 1.18;
+            color: #000;
+            padding: 8px;
         }
 
         /* === HEADER === */
-        .header-table {
+        .meta-line {
             width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 2px;
-        }
-        .header-table td {
-            vertical-align: middle;
-            padding: 0;
-        }
-        .logo-cell {
-            width: 40px;
-            text-align: center;
-        }
-        .logo-cell img {
-            width: 38px;
-            height: auto;
-        }
-        .info-cell {
-            text-align: center;
-            padding: 0 4px;
-        }
-        .school-name {
-            font-size: 15px;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: {{ $ent->color ?? '#337ab7' }};
-            margin: 0;
-            padding: 0;
-            line-height: 1.1;
-        }
-        .motto {
-            font-size: 8px;
-            font-style: italic;
-            margin: 1px 0;
-            color: #555;
-        }
-        .contacts {
-            font-size: 7.5px;
-            color: #444;
-            margin: 0;
-        }
-        .header-line {
-            height: 3px;
-            background: {{ $ent->color ?? '#337ab7' }};
-            border: none;
-            margin: 3px 0 4px 0;
-        }
-        .doc-title {
-            text-align: center;
+            margin-bottom: 3px;
             font-size: 11px;
             font-weight: 700;
-            text-transform: uppercase;
-            margin: 0 0 4px 0;
+            font-style: italic;
+        }
+        .meta-line td {
             padding: 0;
-            text-decoration: underline;
-            letter-spacing: 0.3px;
+        }
+        .meta-line .meta-school {
+            color: #0a8f3f;
+            text-transform: uppercase;
+        }
+        .meta-line .meta-teacher {
+            color: #0a8f3f;
+            text-transform: uppercase;
+            text-align: right;
+        }
+        .term-line {
+            text-align: center;
+            color: #d10000;
+            font-size: 11px;
+            font-style: italic;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+        .subject-line {
+            text-align: center;
+            color: #0068bf;
+            font-size: 10.5px;
+            font-style: italic;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 5px;
         }
 
         /* === DATA TABLE === */
         .scheme-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 8.5px;
-            line-height: 1.2;
+            table-layout: fixed;
+            font-size: 7.8px;
+            line-height: 1.12;
         }
         .scheme-table thead th {
-            background: {{ $ent->color ?? '#337ab7' }};
-            color: #fff;
-            font-size: 7.5px;
+            background: #d9d9d9;
+            color: #000;
+            font-size: 6.8px;
             font-weight: 700;
             text-transform: uppercase;
             text-align: center;
-            padding: 3px 2px;
-            border: 1px solid {{ $ent->color ?? '#337ab7' }};
-            white-space: nowrap;
-            letter-spacing: 0.2px;
+            padding: 2px 1px;
+            border: 1px solid #111;
+            white-space: normal;
         }
         .scheme-table tbody td {
-            padding: 2px 3px;
-            border: 1px solid #ccc;
+            padding: 1.5px 2px;
+            border: 1px solid #111;
             vertical-align: top;
-            font-size: 8.5px;
+            font-size: 7.6px;
             word-wrap: break-word;
+            overflow-wrap: break-word;
             page-break-inside: avoid;
         }
-        .scheme-table tbody tr:nth-child(even) {
-            background: #f8f8f8;
-        }
-        .scheme-table tbody tr:hover {
-            background: #eef4fb;
-        }
 
-        /* Column widths - optimised for landscape A4 */
-        .col-wk    { width: 3%; text-align: center; }
-        .col-pd    { width: 3%; text-align: center; }
-        .col-topic { width: 14%; }
-        .col-comp  { width: 13%; }
-        .col-meth  { width: 10%; }
-        .col-skill { width: 10%; }
-        .col-act   { width: 12%; }
-        .col-mat   { width: 10%; }
-        .col-cont  { width: 10%; }
-        .col-ref   { width: 8%; }
-        .col-rem   { width: 7%; }
+        /* Column widths matching sample layout */
+        .col-wk { width: 2.4%; text-align: center; }
+        .col-pd { width: 2.3%; text-align: center; }
+        .col-theme { width: 4.5%; }
+        .col-topic { width: 6%; }
+        .col-subtopic { width: 6.3%; }
+        .col-content { width: 17.4%; }
+        .col-comp-sub { width: 7%; }
+        .col-comp-lang { width: 7%; }
+        .col-methods { width: 8.2%; }
+        .col-life-skills { width: 9.2%; }
+        .col-activities { width: 10%; }
+        .col-materials { width: 8.7%; }
+        .col-references { width: 8.1%; }
+        .col-rem { width: 3%; }
+
+        .vtext {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            direction: rtl;
+            transform: none;
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: 0.25px;
+        }
 
         .text-c { text-align: center; }
         .text-l { text-align: left; }
@@ -142,59 +130,141 @@
 <body>
 
     {{-- ===== HEADER ===== --}}
-    <table class="header-table">
+
+    <table class="meta-line">
         <tr>
-            <td class="logo-cell">
-                <img src="{{ public_path('storage/' . $ent->logo) }}">
+            <td>
+                SCHOOL: <span class="meta-school">{{ $ent->name ?? '' }}</span>
             </td>
-            <td class="info-cell">
-                <div class="school-name">{{ $ent->name }}</div>
-                @if($ent->motto)<div class="motto">"{{ $ent->motto }}"</div>@endif
-                <div class="contacts">Tel: {{ $ent->phone_number }}@if($ent->phone_number_2), {{ $ent->phone_number_2 }}@endif &nbsp;|&nbsp; {{ $ent->email }} &nbsp;|&nbsp; {{ $ent->website }} &nbsp;|&nbsp; {{ $ent->p_o_box }}</div>
+            <td class="meta-teacher">
+                TEACHER: {{ strtoupper(optional($sub->teacher)->name ?? 'N/A') }}
             </td>
-            <td style="width: 40px;"></td>
         </tr>
     </table>
-
-    <div class="header-line"></div>
-
-    <div class="doc-title">Scheme of Work &mdash; {{ $class->name ?? '' }} &mdash; {{ $sub->subject_name ?? $sub->name ?? '' }} &mdash; {{ $term->name_text ?? '' }}</div>
+    <div class="term-line">{{ $class->name ?? '' }} SCHEME OF WORK, {{ $term->name_text ?? '' }} {{ date('Y') }}</div>
+    <div class="subject-line">{{ strtoupper($sub->subject_name ?? $sub->name ?? '') }}</div>
 
     {{-- ===== DATA TABLE ===== --}}
     <table class="scheme-table">
         <thead>
             <tr>
-                <th class="col-wk">Wk</th>
-                <th class="col-pd">Pd</th>
-                <th class="col-topic">Topic</th>
-                <th class="col-comp">Competence</th>
-                <th class="col-meth">Methods</th>
-                <th class="col-skill">Skills</th>
-                <th class="col-act">Activities</th>
-                <th class="col-mat">Materials</th>
-                <th class="col-cont">Content</th>
-                <th class="col-ref">References</th>
-                <th class="col-rem">Remarks</th>
+                <th class="col-wk" rowspan="2">WK</th>
+                <th class="col-pd" rowspan="2">PD</th>
+                <th class="col-theme" rowspan="2">THEME</th>
+                <th class="col-topic" rowspan="2">TOPIC</th>
+                <th class="col-subtopic" rowspan="2">SUBTOPIC</th>
+                <th class="col-content" rowspan="2">CONTENT</th>
+                <th colspan="2">COMPETENCES</th>
+                <th class="col-methods" rowspan="2">METHODS &amp;<br>TECHNIQUES</th>
+                <th class="col-life-skills" rowspan="2">LIFE SKILLS &amp;<br>VALUES</th>
+                <th class="col-activities" rowspan="2">SUGGESTED<br>ACTIVITIES</th>
+                <th class="col-materials" rowspan="2">INSTRUCTIONAL<br>MATERIALS</th>
+                <th class="col-references" rowspan="2">REFERENCES</th>
+                <th class="col-rem" rowspan="2">REM</th>
+            </tr>
+            <tr>
+                <th class="col-comp-sub">SUBJECT</th>
+                <th class="col-comp-lang">LANGUAGE</th>
             </tr>
         </thead>
         <tbody>
-            @forelse ($items->sortBy('week') as $item)
+            @php
+                $asPrintable = function ($text) {
+                    if ($text === null) {
+                        return '—';
+                    }
+
+                    $raw = trim((string) $text);
+                    if ($raw === '') {
+                        return '—';
+                    }
+
+                    $normalized = preg_replace('/<\s*br\s*\/?\s*>/i', "\n", $raw);
+                    $normalized = preg_replace('/<\s*\/\s*p\s*>/i', "\n", $normalized);
+                    $normalized = preg_replace('/<\s*p[^>]*>/i', '', $normalized);
+                    $normalized = preg_replace('/<\s*\/\s*div\s*>/i', "\n", $normalized);
+                    $normalized = preg_replace('/<\s*div[^>]*>/i', '', $normalized);
+                    $normalized = preg_replace('/<\s*li[^>]*>/i', "\n- ", $normalized);
+                    $normalized = preg_replace('/<\s*\/\s*li\s*>/i', '', $normalized);
+                    $normalized = strip_tags($normalized);
+                    $normalized = preg_replace("/\n{2,}/", "\n", $normalized);
+                    $normalized = trim($normalized);
+
+                    if ($normalized === '') {
+                        return '—';
+                    }
+
+                    return nl2br(e($normalized));
+                };
+
+                $sortedItems = $items->sortBy(function ($i) {
+                    return sprintf(
+                        '%03d-%03d-%s-%s',
+                        (int) ($i->week ?? 0),
+                        (int) ($i->period ?? 0),
+                        strtolower(trim((string) ($i->theme ?? ''))),
+                        strtolower(trim((string) ($i->topic ?? '')))
+                    );
+                })->values();
+
+                $weekCounts = [];
+                $themeCounts = [];
+                $topicCounts = [];
+
+                foreach ($sortedItems as $row) {
+                    $wkKey = (string) ($row->week ?? '0');
+                    $themeKey = $wkKey . '|' . trim((string) ($row->theme ?? ''));
+                    $topicKey = $themeKey . '|' . trim((string) ($row->topic ?? ''));
+
+                    $weekCounts[$wkKey] = ($weekCounts[$wkKey] ?? 0) + 1;
+                    $themeCounts[$themeKey] = ($themeCounts[$themeKey] ?? 0) + 1;
+                    $topicCounts[$topicKey] = ($topicCounts[$topicKey] ?? 0) + 1;
+                }
+
+                $weekRendered = [];
+                $themeRendered = [];
+                $topicRendered = [];
+            @endphp
+
+            @forelse ($sortedItems as $item)
                 <tr>
-                    <td class="col-wk text-c">{{ $item->week }}</td>
+                    @php
+                        $wkKey = (string) ($item->week ?? '0');
+                        $themeKey = $wkKey . '|' . trim((string) ($item->theme ?? ''));
+                        $topicKey = $themeKey . '|' . trim((string) ($item->topic ?? ''));
+                    @endphp
+
+                    @if (!isset($weekRendered[$wkKey]))
+                        <td class="col-wk text-c" rowspan="{{ $weekCounts[$wkKey] }}"><strong>{{ $item->week }}</strong></td>
+                        @php $weekRendered[$wkKey] = true; @endphp
+                    @endif
+
                     <td class="col-pd text-c">{{ $item->period }}</td>
-                    <td class="col-topic text-l">{!! nl2br(e($item->topic ?? '—')) !!}</td>
-                    <td class="col-comp text-l">{!! nl2br(e($item->competence ?? '—')) !!}</td>
-                    <td class="col-meth text-l">{!! nl2br(e($item->methods ?? '—')) !!}</td>
-                    <td class="col-skill text-l">{!! nl2br(e($item->skills ?? '—')) !!}</td>
-                    <td class="col-act text-l">{!! nl2br(e($item->suggested_activity ?? '—')) !!}</td>
-                    <td class="col-mat text-l">{!! nl2br(e($item->instructional_material ?? '—')) !!}</td>
-                    <td class="col-cont text-l">{!! nl2br(e($item->supervisor_comment ?? '—')) !!}</td>
-                    <td class="col-ref text-l">{!! nl2br(e($item->references ?? '—')) !!}</td>
-                    <td class="col-rem text-l">{!! nl2br(e($item->teacher_comment ?? '—')) !!}</td>
+
+                    @if (!isset($themeRendered[$themeKey]))
+                        <td class="col-theme text-l" rowspan="{{ $themeCounts[$themeKey] }}"><div class="vtext">{{ strtoupper($item->theme ?? '—') }}</div></td>
+                        @php $themeRendered[$themeKey] = true; @endphp
+                    @endif
+
+                    @if (!isset($topicRendered[$topicKey]))
+                        <td class="col-topic text-l" rowspan="{{ $topicCounts[$topicKey] }}"><div class="vtext">{{ strtoupper($item->topic ?? '—') }}</div></td>
+                        @php $topicRendered[$topicKey] = true; @endphp
+                    @endif
+
+                    <td class="col-subtopic text-l">{!! $asPrintable($item->sub_topic ?? '—') !!}</td>
+                    <td class="col-content text-l">{!! $asPrintable($item->content ?? $item->supervisor_comment ?? '—') !!}</td>
+                    <td class="col-comp-sub text-l">{!! $asPrintable($item->competence_subject ?? $item->competence ?? '—') !!}</td>
+                    <td class="col-comp-lang text-l">{!! $asPrintable($item->competence_language ?? '—') !!}</td>
+                    <td class="col-methods text-l">{!! $asPrintable($item->methods ?? '—') !!}</td>
+                    <td class="col-life-skills text-l">{!! $asPrintable($item->life_skills_values ?? $item->skills ?? '—') !!}</td>
+                    <td class="col-activities text-l">{!! $asPrintable($item->suggested_activity ?? '—') !!}</td>
+                    <td class="col-materials text-l">{!! $asPrintable($item->instructional_material ?? '—') !!}</td>
+                    <td class="col-references text-l">{!! $asPrintable($item->references ?? '—') !!}</td>
+                    <td class="col-rem text-l">{!! $asPrintable($item->teacher_comment ?? '—') !!}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="11" class="text-c" style="padding: 8px; color: #999;">No scheme work items found for this subject and term.</td>
+                    <td colspan="14" class="text-c" style="padding: 8px; color: #999;">No scheme work items found for this subject and term.</td>
                 </tr>
             @endforelse
         </tbody>

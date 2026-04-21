@@ -128,8 +128,14 @@ Route::group([
     $router->resource('transport-vehicles', TransportVehicleController::class);
     $router->resource('transport-subscriptions', TransportSubscriptionController::class);
     $router->resource('schems-work-items', SchemWorkItemController::class);
+    $router->get('lesson-plans-dashboard', 'LessonPlanController@dashboard')->name('lesson-plans.dashboard');
+    $router->get('lesson-plans/{id}/submit', 'LessonPlanController@submit')->name('lesson-plans.submit');
+    $router->get('lesson-plans/{id}/review', 'LessonPlanController@review')->name('lesson-plans.review');
+    $router->get('lesson-plans/{id}/print', 'LessonPlanController@print')->name('lesson-plans.print');
+    $router->resource('lesson-plans', LessonPlanController::class);
     $router->resource('identification-cards', IdentificationCardController::class);
     $router->resource('report-card-prints', ReportCardPrintController::class);
+    $router->post('scheme-works/add-item-ajax', 'SchemeWorkController@storeItemAjax');
     $router->resource('scheme-works', SchemeWorkController::class);
     $router->resource('visitors', VisitorController::class);
     $router->resource('visitor-records', VisitorRecordController::class);

@@ -53,10 +53,24 @@ if (typeof(PhpDebugBar) == 'undefined') {
             if (typeof(hljs) === 'undefined') {
                 return htmlize(code);
             }
-            if (lang && hljs.getLanguage(lang)) {
-                return hljs.highlight(code, {language: lang}).value;
+            if (lang && (!hljs.getLanguage || hljs.getLanguage(lang))) {
+                try {
+                    // highlight.js >= 10
+                    return hljs.highlight(code, {language: lang}).value;
+                } catch (e) {
+                    try {
+                        // highlight.js <= 9 (legacy signature)
+                        return hljs.highlight(lang, code).value;
+                    } catch (e2) {
+                        return htmlize(code);
+                    }
+                }
             }
-            return hljs.highlightAuto(code).value;
+            try {
+                return hljs.highlightAuto(code).value;
+            } catch (e3) {
+                return htmlize(code);
+            }
         }
 
         if (typeof(hljs) === 'object') {

@@ -24,6 +24,7 @@ class Subject extends Model
         'course_id',
         'subject_name',
         'demo_id',
+        'scheme_template',
         'is_optional',
     ];
 

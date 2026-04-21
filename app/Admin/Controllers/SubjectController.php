@@ -48,6 +48,15 @@ class SubjectController extends AdminController
 
 
 
+        $u = Admin::user();
+        $templateOptions = [
+            'auto' => 'Auto by Subject',
+            'science' => 'Science',
+            'mathematics' => 'Mathematics',
+            'language' => 'English / Language',
+            'generic' => 'General Purpose',
+        ];
+
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
             'academic_year_id' => Admin::user()->ent->dp_year,
@@ -93,6 +102,18 @@ class SubjectController extends AdminController
         $grid->column('id', __('#ID'))->sortable();
         $grid->column('subject_name', __('SUBJECT'))
             ->sortable();
+
+        $templateCol = $grid->column('scheme_template', __('Scheme Template'))
+            ->display(function ($value) use ($templateOptions) {
+                $key = $value ?: 'auto';
+                return $templateOptions[$key] ?? $templateOptions['auto'];
+            })
+            ->sortable();
+
+        if ($u->isRole('dos') || $u->isRole('admin') || $u->isRole('hm')) {
+            $templateCol->editable('select', $templateOptions);
+        }
+
         $grid->column('academic_class_id', __('Class'))
             ->display(function ($t) {
                 if ($this->academic_class == null) {
