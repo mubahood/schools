@@ -9,6 +9,11 @@ class BulkPhotoUpload extends Model
 {
     use HasFactory;
 
+    protected $casts = [
+        'images' => 'array',
+        'delete_old_photo' => 'boolean',
+    ];
+
 
     //setter images to json
     public function setImagesAttribute($value)

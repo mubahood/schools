@@ -17,7 +17,7 @@ class BulkPhotoUploadItemController extends AdminController
      *
      * @var string
      */
-    protected $title = 'BulkPhotoUploadItem';
+    protected $title = 'Bulk Photo Upload Items';
 
     /**
      * Make a grid builder.
@@ -70,6 +70,9 @@ class BulkPhotoUploadItemController extends AdminController
             })->sortable();
         $grid->column('new_image_path', __('New Photo'))
             ->display(function ($new_image_path) {
+                if (!$new_image_path) {
+                    return 'N/A';
+                }
                 $app_url = env('APP_URL');
                 $url = $app_url . "/storage/" . $new_image_path;
                 return "<a href='$url' target='_blank'><img src='$url' style='max-width: 80px; max-height: 80px;'></a>";
@@ -89,6 +92,26 @@ class BulkPhotoUploadItemController extends AdminController
             ])->sortable();
         $grid->column('file_name', __('File name'))
             ->filter('like')->sortable();
+        $grid->column('compressed', __('Compressed'))->display(function ($v) {
+            if ($v === null) {
+                return 'N/A';
+            }
+            return ((int) $v) === 1 ? 'Yes' : 'No';
+        })->label([
+            'Yes' => 'success',
+            'No' => 'warning',
+            'N/A' => 'default',
+        ])->hide();
+        $grid->column('old_photo_deleted', __('Old Deleted'))->display(function ($v) {
+            if ($v === null) {
+                return 'N/A';
+            }
+            return ((int) $v) === 1 ? 'Yes' : 'No';
+        })->label([
+            'Yes' => 'success',
+            'No' => 'default',
+            'N/A' => 'default',
+        ])->hide();
 
 
         //action buttons

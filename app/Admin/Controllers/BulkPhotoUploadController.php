@@ -17,7 +17,7 @@ class BulkPhotoUploadController extends AdminController
      *
      * @var string
      */
-    protected $title = 'BulkPhotoUpload';
+    protected $title = 'Bulk Photo Uploads';
 
     /**
      * Make a grid builder.
@@ -55,11 +55,22 @@ class BulkPhotoUploadController extends AdminController
                 'name' => 'success',
                 'school_pay' => 'danger',
             ])->sortable();
-        $grid->column('status', __('Status'));
+        $grid->column('status', __('Status'))->label([
+            'Pending' => 'info',
+            'Processing' => 'warning',
+            'Completed' => 'success',
+            'Failed' => 'danger',
+        ]);
         $grid->column('error_message', __('Error message'))->hide();
         $grid->column('total_images', __('Total images'))->hide();
         $grid->column('success_images', __('Success images'))->hide();
         $grid->column('failed_images', __('Failed images'))->hide();
+        $grid->column('delete_old_photo', __('Delete old photo'))->display(function ($v) {
+            return ((int) $v) === 1 ? 'Yes' : 'No';
+        })->label([
+            'Yes' => 'success',
+            'No' => 'default',
+        ])->hide();
         $grid->column('action_buttons', __('Action buttons'))->display(function () {
             if ($this->status != 'Completed') {
                 $url = url("bulk-photo-uploads-process?id={$this->id}");
@@ -152,6 +163,18 @@ class BulkPhotoUploadController extends AdminController
                 ->removable()
                 ->help('Select images. The images should be named as per the naming type selected below. The images should not be password protected"');
         }
+
+        $form->divider('Photo Processing Options');
+        $form->switch('delete_old_photo', 'Delete previous student photo after successful replacement')
+            ->default(1)
+            ->help('When enabled, old custom photos are deleted only if they are not shared by any other user.');
+        $form->number('max_image_kb', 'Target max image size (KB)')
+            ->default(350)
+            ->min(50)
+            ->help('Large photos are compressed toward this target size.');
+        $form->number('max_width', 'Max width (px)')->default(1200)->min(200);
+        $form->number('max_height', 'Max height (px)')->default(1200)->min(200);
+        $form->number('jpeg_quality', 'JPEG quality (45-90)')->default(78)->min(45)->max(90);
         // $form->textarea('file_name', __('File name')); file_name
         $form->radio('naming_type', __('Image naming type'))->options([
             'student_no' => 'Student ID number',

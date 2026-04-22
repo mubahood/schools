@@ -65,6 +65,7 @@ use App\Models\TransportSubscription;
 use App\Models\UniversityProgramme;
 use App\Models\User;
 use App\Models\Utils;
+use App\Services\BulkPhotoUploadService;
 use Carbon\Carbon;
 use Dflydev\DotAccessData\Util;
 use Encore\Admin\Auth\Database\Administrator;
@@ -3193,6 +3194,19 @@ Route::get('generate-demand-notice', function () {
 
 
 Route::get('bulk-photo-uploads-process', function () {
+  if (!Admin::user()) {
+    abort(403, 'Unauthorized');
+  }
+
+  $id = (int) request()->get('id');
+  $upload = BulkPhotoUpload::find($id);
+  if (!$upload) {
+    return 'Bulk Upload not found';
+  }
+
+  $service = app(BulkPhotoUploadService::class);
+  return $service->processUpload($upload);
+
   $id = ($_GET['id']);
   $class_error = " background-color: #ff0000; color: #fff; padding: 0px; margin: 0px; ";
   $class_success = " background-color: green; color: #fff; padding: 0px; margin: 0px; ";
@@ -3528,6 +3542,19 @@ Route::get('bulk-photo-uploads-process', function () {
 
 //make bulk-photo-upload-item-process
 Route::get('bulk-photo-upload-item-process', function () {
+  if (!Admin::user()) {
+    abort(403, 'Unauthorized');
+  }
+
+  $id = (int) request()->get('id');
+  $item = BulkPhotoUploadItem::find($id);
+  if (!$item) {
+    return 'Item not found';
+  }
+
+  $service = app(BulkPhotoUploadService::class);
+  return $service->processItem($item);
+
   $id = ($_GET['id']);
   $item = BulkPhotoUploadItem::find($id);
   if ($item == null) {

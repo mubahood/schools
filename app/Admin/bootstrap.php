@@ -214,6 +214,11 @@ Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
 Admin::css('/css/jquery-confirm.min.css');
 Admin::js('/js/charts.js');
 
+// Keep PJAX enabled globally. Load Scheme of Work assets globally so they are
+// available even when the page is opened via PJAX navigation.
+Admin::css('/css/scheme-work-custom.css');
+Admin::js('/js/scheme-work-popup.js?v=20260422-1');
+
 Admin::css('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 Admin::css(url('/assets/bootstrap.css'));
 Admin::css('/css/design-system.css');

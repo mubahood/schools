@@ -21,18 +21,22 @@ class BulkPhotoUploadItem extends Model
         $naming_type = $this->naming_type;
         $student  = null;
         $ent = Enterprise::find($this->enterprise_id);
-        //this remaplce images/
-        $this->file_name = str_replace('images/', '', $this->file_name);
+        if ($ent == null) {
+            return null;
+        }
+
+        $fileName = str_replace('images/', '', (string) $this->file_name);
+        $fileName = trim($fileName);
+        if ($fileName === '') {
+            return null;
+        }
+
+        $nameWithoutExt = pathinfo($fileName, PATHINFO_FILENAME);
+        $nameWithoutExt = trim($nameWithoutExt);
  
 
         if ($naming_type == 'school_pay') {
-            $exp = explode('.', $this->file_name);
-            $user_number = null;
-            if (count($exp) < 1) {
-                $user_number = $this->file_name;
-            } else {
-                $user_number = $exp[0];
-            }
+            $user_number = $nameWithoutExt;
             $user_number = trim($user_number);
             $student = User::where([
                 'school_pay_payment_code' => $user_number,
@@ -52,15 +56,8 @@ class BulkPhotoUploadItem extends Model
             return $student;
         }
         if ($naming_type == 'name') {
-            $file_name = $this->file_name;
-            $exp = explode('.', $file_name);
-            $name = null;
-            if (count($exp) < 1) {
-                $name = $file_name;
-            } else {
-                $name = $exp[0];
-            }
-            $name = trim($name);
+            $name = preg_replace('/\s+/', ' ', str_replace(['-', '_'], ' ', $nameWithoutExt));
+            $name = trim((string) $name);
             $student = User::where([
                 'name' => $name,
                 'enterprise_id' => $ent->id,
@@ -71,25 +68,10 @@ class BulkPhotoUploadItem extends Model
             }
             $first_name = null;
             $last_name = null;
-            $name = trim($name);
-            $anme = str_replace('  ', ' ', $name);
-            $anme = str_replace('  ', ' ', $name);
-            $anme = str_replace('  ', ' ', $name);
-            $anme = str_replace('  ', ' ', $name);
-            $anme = str_replace('   ', ' ', $name);
-            $anme = str_replace('   ', ' ', $name);
-            $anme = str_replace('-', ' ', $name);
-            $anme = str_replace('-', ' ', $name);
             $exp = explode(' ', $name);
-            if (count($exp)  == 2) {
+            if (count($exp) >= 2) {
                 $first_name = $exp[0];
-                $last_name = $exp[1];
-            } else if (count($exp)  == 3) {
-                $first_name = $exp[0];
-                $last_name = $exp[2];
-            } else if (count($exp)  == 4) {
-                $first_name = $exp[0];
-                $last_name = $exp[3];
+                $last_name = $exp[count($exp) - 1];
             }
 
             $student = User::where([
@@ -121,13 +103,7 @@ class BulkPhotoUploadItem extends Model
         }
 
         if ($naming_type == 'student_no') {
-            $exp = explode('.', $this->file_name);
-            $user_number = null;
-            if (count($exp) < 1) {
-                $user_number = $this->file_name;
-            } else {
-                $user_number = $exp[0];
-            }
+            $user_number = $nameWithoutExt;
             $user_number = trim($user_number);
             $student = User::where([
                 'user_number' => $user_number,
