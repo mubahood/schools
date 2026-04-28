@@ -44,7 +44,15 @@ class Handler extends ExceptionHandler
     public function register()
     {
         $this->reportable(function (Throwable $e) {
-            //
+            $message = (string) $e->getMessage();
+
+            // Ignore known PHP 8.4 deprecation warnings emitted by legacy SwiftMailer internals.
+            if (
+                stripos($message, 'Callables of the form ["Swift_SmtpTransport"') !== false ||
+                (stripos($message, 'Callables of the form') !== false && stripos($message, 'Swift_') !== false)
+            ) {
+                return false;
+            }
         });
     }
 }

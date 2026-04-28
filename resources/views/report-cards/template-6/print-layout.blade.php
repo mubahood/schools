@@ -519,6 +519,10 @@ dd($theology_termly_report_card); */
                             <td>{{ (int) $v->eot_score }}</td>
                             <td>{{ $v->eot_grade }}</td>
                         @endif
+                        @if (!$isOneExam)
+                            <td>{{ (int) $v->total_score_display }}</td>
+                            <td>{{ $v->aggr_name }}</td>
+                        @endif
                         <td class="remarks text-center">{{ $v->remarks }}</td>
                         <td class="remarks text-center">{{ $v->initials }}</td>
                     </tr>
@@ -527,18 +531,22 @@ dd($theology_termly_report_card); */
                     <th><b>TOTAL</b></th>
                     @if ($theology_termly_report_card->reports_include_bot == 'Yes')
                         <th class="text-center">{{ $bot_tot }}</th>
-                        <th>{{ (int) $tr->average_aggregates }}</th>
+                        <th></th>
                     @endif
                     @if ($theology_termly_report_card->reports_include_mot == 'Yes')
                         <th class="text-center">{{ $mot_tot }}</th>
-                        <th>{{ (int) $tr->average_aggregates }}</th>
+                        <th></th>
                     @endif
                     @if ($theology_termly_report_card->reports_include_eot == 'Yes')
                         <th class="text-center">{{ $eot_tot }}</th>
+                        <th></th>
                     @endif
-                    {{-- <td>{{ (int) $tr->average_aggregates }}</td> --}}
-                    {{--                     <td><b>{{ $tr->total_aggregates }}</b></td> --}}
-                    <td colspan="2"></td>
+                    @if (!$isOneExam)
+                        <td><b>{{ (int) ($tr->total_marks ?? 0) }}</b></td>
+                        <td><b>{{ (int) ($tr->total_aggregates ?? 0) }}</b></td>
+                    @endif
+                    <td></td>
+                    <td></td>
                 </tr>
 
             </table>

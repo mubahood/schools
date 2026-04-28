@@ -84,6 +84,16 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 
+Route::get('storage/{path}', function ($path) {
+  $filePath = public_path('storage/' . ltrim($path, '/'));
+
+  if (!is_file($filePath)) {
+    abort(404);
+  }
+
+  return response()->file($filePath);
+})->where('path', '.*');
+
 Route::get('process-school-issues', function (Request $request) {
   $enterprise_id = $request->get('enterprise_id', null);
   

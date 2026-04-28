@@ -14,6 +14,14 @@ Route::group([
     $router->resource('employees-batch-importers', EmployeesBatchImporterController::class);
     $router->resource('employees', EmployeesController::class);
     $router->resource('not-active-employees', EmployeesController::class);
+    $router->get('employee-monitoring-dashboard', 'EmployeeMonitoringRecordController@dashboard')->name('employee-monitoring.dashboard');
+    $router->resource('employee-monitoring-records', EmployeeMonitoringRecordController::class);
+    $router->get('employee-monitoring-report-records/ajax/classes-by-term', 'EmployeeMonitoringReportRecordController@ajaxClassesByTerm')->name('employee-monitoring-report-records.ajax.classes-by-term');
+    $router->get('employee-monitoring-report-records/ajax/subjects-by-class', 'EmployeeMonitoringReportRecordController@ajaxSubjectsByClass')->name('employee-monitoring-report-records.ajax.subjects-by-class');
+    $router->get('employee-monitoring-report-records/ajax/teachers-by-subject', 'EmployeeMonitoringReportRecordController@ajaxTeachersBySubject')->name('employee-monitoring-report-records.ajax.teachers-by-subject');
+    $router->get('employee-monitoring-report-records/{id}/generate', 'EmployeeMonitoringReportRecordController@generate')->name('employee-monitoring-report-records.generate');
+    $router->resource('employee-monitoring-report-records', EmployeeMonitoringReportRecordController::class)
+        ->parameters(['employee-monitoring-report-records' => 'emt_report']);
     $router->resource('books-categories', BooksCategoryController::class);
     $router->resource('book-authors', BookAuthorController::class);
     $router->resource('books', BookController::class);
@@ -219,4 +227,11 @@ Route::group([
     $router->get('assignments/{id}/regenerate-submissions', 'AssignmentController@regenerateSubmissions')->name('assignments.regenerate');
     $router->resource('assignments', AssignmentController::class);
     $router->resource('assignment-submissions', AssignmentSubmissionController::class);
+
+    // Parent Commitment Module (Fees)
+    // IMPORTANT: dashboard and AJAX routes MUST come BEFORE the resource route
+    $router->get('parent-commitment-dashboard', 'ParentCommitmentRecordController@dashboard')->name('parent-commitment.dashboard');
+    $router->get('parent-commitment-records/ajax/student-info', 'ParentCommitmentRecordController@ajaxStudentInfo')->name('parent-commitment-records.ajax.student-info');
+    $router->resource('parent-commitment-records', ParentCommitmentRecordController::class)
+        ->parameters(['parent-commitment-records' => 'pcom']);
 });
