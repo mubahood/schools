@@ -52,7 +52,7 @@ class Subject extends Model
             if (strlen($m->subject_name) < 2) {
                 $c = MainCourse::find($m->course_id);
                 $m->main_course_id = $c->main_course_id;
-                $m->subject_name = $c->name;
+                $m->subject_name = strtoupper(trim($c->name));
                 $m->code = $c->code;
             }
 
@@ -151,6 +151,17 @@ class Subject extends Model
             return $course->short_name;
         }
         return $this->subject_name;
+    }
+
+    /**
+     * Always store subject_name in UPPER CASE, stripping any leading
+     * numeric prefix such as "1.", "2. " that may be typed by users.
+     */
+    public function setSubjectNameAttribute($value)
+    {
+        // Strip leading patterns like "1.", "2. ", "1 -", etc.
+        $cleaned = preg_replace('/^\d+[\.\-\s]+\s*/u', '', (string) $value);
+        $this->attributes['subject_name'] = strtoupper(trim($cleaned));
     }
 
 

@@ -232,6 +232,7 @@ Route::group([
     // IMPORTANT: dashboard and AJAX routes MUST come BEFORE the resource route
     $router->get('parent-commitment-dashboard', 'ParentCommitmentRecordController@dashboard')->name('parent-commitment.dashboard');
     $router->get('parent-commitment-records/ajax/student-info', 'ParentCommitmentRecordController@ajaxStudentInfo')->name('parent-commitment-records.ajax.student-info');
+    $router->get('parent-commitment-records/{pcom}/demand-notice', 'ParentCommitmentRecordController@demandNotice')->name('parent-commitment-records.demand-notice');
     $router->resource('parent-commitment-records', ParentCommitmentRecordController::class)
         ->parameters(['parent-commitment-records' => 'pcom']);
 });

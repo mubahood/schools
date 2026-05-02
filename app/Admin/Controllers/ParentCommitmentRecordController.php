@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Models\Account;
 use App\Models\AcademicClass;
+use App\Models\Enterprise;
 use App\Models\ParentCommitmentRecord;
 use App\Models\User;
 use Encore\Admin\Controllers\AdminController;
@@ -119,6 +120,18 @@ class ParentCommitmentRecordController extends AdminController
         $grid->column('created_at', 'Created')->display(function ($v) {
             return $v ? date('d M Y', strtotime($v)) : '-';
         })->sortable();
+
+        // Demand Notice action button for Pending / Overdue records
+        $grid->actions(function ($actions) {
+            $rec = $actions->row;
+            if (in_array($rec->promise_status, ['Pending', 'Overdue'])) {
+                $url = admin_url('parent-commitment-records/' . $rec->id . '/demand-notice');
+                $actions->prepend(
+                    '<a href="' . $url . '" target="_blank" class="btn btn-xs btn-danger" title="Print Demand Notice">'
+                    . '<i class="fa fa-print"></i> Demand Notice</a> '
+                );
+            }
+        });
 
         return $grid;
     }
@@ -392,6 +405,38 @@ JS);
                 'overdueList'     => $overdueList,
                 'recent'          => $recent,
             ]));
+    }
+
+    // =========================================================================
+    // DEMAND NOTICE — Printable demand notice for a specific commitment record
+    // =========================================================================
+
+    public function demandNotice($id)
+    {
+        $u = Admin::user();
+        $record = ParentCommitmentRecord::where('enterprise_id', $u->enterprise_id)
+            ->findOrFail($id);
+
+        $student = $record->student_id ? User::find($record->student_id) : null;
+
+        $studentClass = '-';
+        if ($student && $student->current_class_id) {
+            $cls = AcademicClass::find($student->current_class_id);
+            $studentClass = $cls ? $cls->name_text : '-';
+        }
+
+        $ent = Enterprise::find($u->enterprise_id);
+
+        // Grace period wording based on status
+        $graceText = $record->promise_status === 'Overdue' ? '3 (three) working days' : '7 (seven) days';
+
+        return view('print.parent-commitment-demand-notice', [
+            'record'       => $record,
+            'student'      => $student,
+            'studentClass' => $studentClass,
+            'ent'          => $ent,
+            'graceText'    => $graceText,
+        ]);
     }
 
     // =========================================================================

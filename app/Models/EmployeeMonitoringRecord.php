@@ -15,6 +15,7 @@ class EmployeeMonitoringRecord extends Model
         'due_date',
         'monitored_on',
         'time_in',
+        'standard_time',
         'time_out',
         'hours',
         'duration_minutes',

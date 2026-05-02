@@ -72,8 +72,26 @@ class EmployeeMonitoringRecordController extends AdminController
             return optional($this->academicClass)->name_text ?: '-';
         });
         $grid->column('time_in', 'Time In');
+        $grid->column('standard_time', 'Standard Time')->display(function ($v) {
+            return $v ?: '<span class="text-muted">-</span>';
+        });
         $grid->column('time_out', 'Time Out');
         $grid->column('hours', 'Hours')->sortable();
+        $grid->column('_punctuality', 'Punctuality')->display(function () {
+            if (empty($this->time_in) || empty($this->standard_time)) {
+                return '<span class="label label-default">N/A</span>';
+            }
+            $stdSeconds = strtotime('1970-01-01 ' . $this->standard_time);
+            $inSeconds  = strtotime('1970-01-01 ' . $this->time_in);
+            if ($inSeconds === false || $stdSeconds === false) {
+                return '<span class="label label-default">N/A</span>';
+            }
+            $diffMins = (int) round(($inSeconds - $stdSeconds) / 60);
+            if ($diffMins <= 0) {
+                return '<span class="label label-success">On Time</span>';
+            }
+            return '<span class="label label-danger">Late +' . $diffMins . ' min</span>';
+        });
         $grid->column('monitor_name', 'Monitor');
         $grid->column('monitor_role', 'Role')->display(function ($v) {
             return $v ?: '-';
@@ -223,6 +241,7 @@ class EmployeeMonitoringRecordController extends AdminController
             return optional($this->academicClass)->name_text ?: '-';
         });
         $show->field('time_in', 'Time In');
+        $show->field('standard_time', 'Standard Entry Time');
         $show->field('time_out', 'Time Out');
         $show->field('hours', 'Hours');
         $show->field('duration_minutes', 'Duration (Minutes)');
@@ -269,6 +288,9 @@ class EmployeeMonitoringRecordController extends AdminController
             ->rules('required');
 
         $form->time('time_in', 'Time In')->rules('required');
+        $form->time('standard_time', 'Standard Entry Time')
+            ->help('The expected/standard time the teacher should have entered class. Used to calculate punctuality (On Time / Late).')
+            ->rules('nullable');
         $form->time('time_out', 'Time Out')->rules('required');
         $form->decimal('hours', 'Hours')->readonly();
 

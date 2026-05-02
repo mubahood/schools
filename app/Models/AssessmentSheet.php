@@ -415,6 +415,11 @@ class AssessmentSheet extends Model
             }
             return null;
         }
+
+        if ($this->type != "Stream" || empty($this->academic_class_sctream_id)) {
+            return null;
+        }
+
         $stream = AcademicClassSctream::find($this->academic_class_sctream_id);
         if ($stream == null) {
             throw new Exception("Stream not found", 1);
