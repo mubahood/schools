@@ -80,10 +80,7 @@ class GenerateTheologyClass extends Model
         $class->save();
 
         $m->updateSubjects($class);
-
-        if ($short_name != 'P.7') {
-            $m->updateStudents($class);
-        }
+        $m->updateStudents($class);
     }
 
     public function updateSubjects($class)

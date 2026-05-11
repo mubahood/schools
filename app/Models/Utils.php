@@ -2626,6 +2626,9 @@ class Utils  extends Model
             case 'P.6':
                 $name = 9;
                 break;
+            case 'P.7':
+                $name = 10;
+                break;
             case 'BC':
                 $name = 1;
                 break;
@@ -2661,6 +2664,9 @@ class Utils  extends Model
                 break;
             case 'P.6':
                 $name = 'Primary six';
+                break;
+            case 'P.7':
+                $name = 'Primary seven';
                 break;
             case 'BC':
                 $name = 'Baby class';

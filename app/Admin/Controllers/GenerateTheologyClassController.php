@@ -56,7 +56,7 @@ class GenerateTheologyClassController extends AdminController
         $grid->column('P4', __('P4'));
         $grid->column('P5', __('P5'));
         $grid->column('P6', __('P6'));
-        $grid->column('P7', __('Shuubah'));
+        $grid->column('P7', __('P.7'));
 
         return $grid;
     }
@@ -85,7 +85,7 @@ class GenerateTheologyClassController extends AdminController
         $show->field('P4', __('P4'));
         $show->field('P5', __('P5'));
         $show->field('P6', __('P6'));
-        $show->field('P7', __('Shuubah'));
+        $show->field('P7', __('P.7'));
 
         return $show;
     }
@@ -144,7 +144,7 @@ class GenerateTheologyClassController extends AdminController
         $form->radio('P4', __('P4'))->options(['Yes' => 'Yes', 'No' => 'No'])->rules('required');
         $form->radio('P5', __('P5'))->options(['Yes' => 'Yes', 'No' => 'No'])->rules('required');
         $form->radio('P6', __('P6'))->options(['Yes' => 'Yes', 'No' => 'No'])->rules('required');
-        $form->radio('P7', __('Shuubah'))->options(['Yes' => 'Yes', 'No' => 'No'])->rules('required');
+        $form->radio('P7', __('P.7'))->options(['Yes' => 'Yes', 'No' => 'No'])->rules('required');
 
         return $form;
     }
