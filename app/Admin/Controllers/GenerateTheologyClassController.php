@@ -10,7 +10,6 @@ use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
-use Tymon\JWTAuth\Contracts\Providers\Auth;
 
 class GenerateTheologyClassController extends AdminController
 {
@@ -45,7 +44,7 @@ class GenerateTheologyClassController extends AdminController
         $grid->disableBatchActions();
 
         $grid->column('academic_year_id', __('Academic year'))->display(function () {
-            return $this->academic_year->name;
+            return optional($this->academic_year)->name ?: '-';
         });
         $grid->column('BC', __('BC'));
         $grid->column('MC', __('MC'));
@@ -101,7 +100,12 @@ class GenerateTheologyClassController extends AdminController
 
         $u = Admin::user();
         $ent = Enterprise::find($u->enterprise_id);
-        $year = $ent->active_academic_year();
+        $year = $ent ? $ent->active_academic_year() : null;
+        $academicYears = AcademicYear::where([
+            'enterprise_id' => $u->enterprise_id,
+        ])->orderBy('id', 'desc')->get()->pluck('name', 'id');
+        $defaultAcademicYearId = $year ? $year->id : $academicYears->keys()->first();
+
         $form->hidden('enterprise_id')->rules('required')->default(Admin::user()->enterprise_id)
             ->value($u->enterprise_id);
 
@@ -111,28 +115,15 @@ class GenerateTheologyClassController extends AdminController
         $form->disableViewCheck();
         if ($form->isCreating()) {
             $form->select('academic_year_id', 'Academic year')
-                ->options(
-                    AcademicYear::where([
-                        'enterprise_id' => $u->enterprise_id,
-                    ])
-                        ->orderBy('id', 'desc')
-                        ->get()
-                        ->pluck('name', 'id')
-                )
-                ->default($year->id)
+                ->options($academicYears)
+                ->default($defaultAcademicYearId)
                 ->readOnly()
                 ->rules('required');
         } else {
             $form->select('academic_year_id', 'Academic year')
                 ->readOnly()
-                ->options(
-                    AcademicYear::where([
-                        'enterprise_id' => $u->enterprise_id,
-                    ])
-                        ->orderBy('id', 'desc')
-                        ->get()
-                        ->pluck('name', 'id')
-                )->rules('required');
+                ->options($academicYears)
+                ->rules('required');
         }
 
         $form->radio('BC', __('BC'))->options(['Yes' => 'Yes', 'No' => 'No'])->rules('required');

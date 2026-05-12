@@ -4132,7 +4132,3 @@ Route::group(['prefix' => 'onboarding'], function () {
   Route::get('validate-school-email', [OnboardingController::class, 'validateSchoolEmail'])->name('onboarding.validate.school.email');
 });
 
-// Update the enterprises/create route to redirect to onboarding
-Route::get('enterprises/create', function () {
-  return redirect('onboarding/step1');
-});

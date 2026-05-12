@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 class GenerateTheologyClass extends Model
 {
@@ -35,6 +36,10 @@ class GenerateTheologyClass extends Model
 
     public function generateClasses()
     {
+        if (empty($this->enterprise_id) || empty($this->academic_year_id)) {
+            return;
+        }
+
         set_time_limit(-1);
         ini_set('memory_limit', '-1');
         $this->createClass($this->P1, 'P.1');
@@ -52,12 +57,14 @@ class GenerateTheologyClass extends Model
 
     public function createClass($class_type, $short_name)
     {
-        if ($class_type == null) {
+        if ($class_type == null || empty($short_name)) {
             return false;
         }
-        if ($class_type != 'Yes') {
+
+        if (strtolower(trim((string) $class_type)) !== 'yes') {
             return false;
         }
+
         $m = $this;
         $class = TheologyClass::where([
             'short_name' => $short_name,
@@ -68,7 +75,7 @@ class GenerateTheologyClass extends Model
         if ($class == null) {
             $class = new TheologyClass();
             $ent = Enterprise::find($m->enterprise_id);
-            $class->class_teahcer_id = $ent->owner->id;
+            $class->class_teahcer_id = optional(optional($ent)->owner)->id ?: optional($ent)->administrator_id;
         }
 
 
@@ -81,12 +88,16 @@ class GenerateTheologyClass extends Model
 
         $m->updateSubjects($class);
         $m->updateStudents($class);
+
+        return true;
     }
 
     public function updateSubjects($class)
-    { 
+    {
         $courses = TheologyCourse::all();
         $ent = Enterprise::find($class->enterprise_id);
+        $subjectTeacherId = optional(optional($ent)->owner)->id ?: optional($ent)->administrator_id;
+
         foreach ($courses as $key => $course) {
             $sub = TheologySubject::where([
                 'theology_course_id' => $course->id,
@@ -100,11 +111,15 @@ class GenerateTheologyClass extends Model
             $sub->code = $course->code;
             $sub->theology_class_id = $class->id;
             $sub->enterprise_id = $class->enterprise_id;
-            $sub->subject_teacher =  $ent->owner->id;
+            $sub->subject_teacher = $subjectTeacherId;
             try {
                 $sub->save();
             } catch (\Throwable $th) {
-                //throw $th;
+                Log::warning('Failed to create theology subject during class generation.', [
+                    'theology_class_id' => $class->id,
+                    'theology_course_id' => $course->id,
+                    'error' => $th->getMessage(),
+                ]);
             }
         }
     }
@@ -120,32 +135,44 @@ class GenerateTheologyClass extends Model
         if ($level == null) {
             return;
         }
-        $academicClass = AcademicClass::where([
+
+        $academicClasses = AcademicClass::where([
             'academic_class_level_id' => $level,
             'enterprise_id' => $class->enterprise_id,
             'academic_year_id' => $class->academic_year_id,
-        ])->first();
-        if ($academicClass == null) {
+        ])->get();
+
+        if ($academicClasses->isEmpty()) {
             return;
         }
 
-        foreach ($academicClass->students as $key => $stud) {
-            $hasClass = StudentHasTheologyClass::where([
-                'theology_class_id' => $class->id,
-                'administrator_id' => $stud->administrator_id,
-            ])->first();
-            if ($hasClass != null) {
-                continue;
-            }
+        foreach ($academicClasses as $academicClass) {
+            foreach ($academicClass->students as $key => $stud) {
+                if (empty($stud->administrator_id)) {
+                    continue;
+                }
 
-            $hasClass = new StudentHasTheologyClass();
-            $hasClass->enterprise_id = $class->enterprise_id;
-            $hasClass->administrator_id = $stud->administrator_id;
-            $hasClass->theology_class_id = $class->id;
-            try {
-                $hasClass->save();
-            } catch (\Throwable $th) {
-                //throw $th;
+                $hasClass = StudentHasTheologyClass::where([
+                    'theology_class_id' => $class->id,
+                    'administrator_id' => $stud->administrator_id,
+                ])->first();
+                if ($hasClass != null) {
+                    continue;
+                }
+
+                $hasClass = new StudentHasTheologyClass();
+                $hasClass->enterprise_id = $class->enterprise_id;
+                $hasClass->administrator_id = $stud->administrator_id;
+                $hasClass->theology_class_id = $class->id;
+                try {
+                    $hasClass->save();
+                } catch (\Throwable $th) {
+                    Log::warning('Failed to map student to theology class during generation.', [
+                        'theology_class_id' => $class->id,
+                        'administrator_id' => $stud->administrator_id,
+                        'error' => $th->getMessage(),
+                    ]);
+                }
             }
         }
     }

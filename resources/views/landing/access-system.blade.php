@@ -84,7 +84,7 @@ use App\Models\Utils;
                 </div>
                 <h3>Register New School</h3>
                 <p>Start your journey with us by registering your educational institution and setting up your management system.</p>
-                <a href="{{ url('enterprises/create') }}" class="btn btn-primary">
+                <a href="{{ url('onboarding/step1') }}" class="btn btn-primary">
                     <i class="fas fa-plus-circle"></i>
                     Register School
                 </a>

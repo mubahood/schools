@@ -2606,7 +2606,9 @@ class Utils  extends Model
 
     public static function get_class_level_from_short_name($short_name)
     {
-        $name = $short_name;
+        $short_name = Utils::normalize_class_short_name($short_name);
+        $name = null;
+
         switch ($short_name) {
             case 'P.1':
                 $name = 4;
@@ -2640,12 +2642,20 @@ class Utils  extends Model
                 break;
         }
 
+        if ($name === null) {
+            $name = AcademicClassLevel::where('short_name', $short_name)
+                ->orWhere('short_name', str_replace('.', '', $short_name))
+                ->value('id');
+        }
+
         return $name;
     }
 
     public static function get_class_name_from_short_name($short_name)
     {
+        $short_name = Utils::normalize_class_short_name($short_name);
         $name = $short_name;
+
         switch ($short_name) {
             case 'P.1':
                 $name = 'Primary one';
@@ -2679,8 +2689,27 @@ class Utils  extends Model
                 break;
         }
 
+        if ($name === $short_name) {
+            $name = AcademicClassLevel::where('short_name', $short_name)
+                ->orWhere('short_name', str_replace('.', '', $short_name))
+                ->value('name') ?: $short_name;
+        }
+
         return $name;
     }
+
+    public static function normalize_class_short_name($short_name)
+    {
+        $short_name = strtoupper(trim((string) $short_name));
+        $short_name = str_replace(' ', '', $short_name);
+
+        if (preg_match('/^P\\.?([1-7])$/', $short_name, $matches)) {
+            return 'P.' . $matches[1];
+        }
+
+        return $short_name;
+    }
+
     public static function courses_primary()
     {
         return [

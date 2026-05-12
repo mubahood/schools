@@ -324,6 +324,32 @@ class EnterpriseController extends AdminController
 
         $u = Admin::user();
 
+        // Sanitize subdomain BEFORE validation runs (strips full URLs/domains, lowercases, removes invalid chars)
+        $form->submitted(function (Form $form) {
+            $sub = $form->input('subdomain');
+            if ($sub) {
+                // Strip protocol and any domain suffix (e.g. https://ckdk.schooldynamics.ug -> ckdk)
+                $sub = preg_replace('#^https?://#i', '', $sub);
+                $sub = explode('.', $sub)[0];          // take only the leftmost label
+                $sub = strtolower(trim($sub));         // lowercase
+                $sub = preg_replace('/[^a-z0-9-]/', '', $sub); // keep letters, digits, hyphens only
+                $form->input('subdomain', $sub);
+            }
+        });
+
+        // These checkbox fields are virtual (not DB columns); compiled to JSON in saving()
+        $form->ignore([
+            'req_doc_birth_certificate',
+            'req_doc_previous_school_report',
+            'req_doc_passport_photo',
+            'req_doc_parent_id',
+            'req_doc_immunization',
+            'req_doc_recommendation',
+            'req_doc_leaving_certificate',
+            'req_doc_medical_report',
+            'custom_required_documents',
+        ]);
+
         // Custom validation and saving logic
         $form->saving(function (Form $form) {
             // Ensure unique subdomain if provided
@@ -542,9 +568,9 @@ class EnterpriseController extends AdminController
             ->help('Secondary brand color for accents');
 
         $form->text('subdomain', __('Subdomain'))
-            ->rules('nullable|string|max:50|alpha_dash')
-            ->help('Unique subdomain for school (letters, numbers, hyphens only)')
-            ->placeholder('e.g., myschool');
+            ->rules('nullable|string|max:100')
+            ->help('Enter the subdomain or full URL (e.g. ckdk or ckdk.schooldynamics.ug)')
+            ->placeholder('e.g., ckdk');
 
         // Financial & Payment Settings
         $form->divider('SchoolPay Integration');
