@@ -11,18 +11,27 @@ use ZipArchive;
 
 class BulkPhotoUploadService
 {
-    private $report = [];
-    private $tempDirs = [];
+    private array $report   = [];
+    private array $tempDirs = [];
 
     public function processUpload(BulkPhotoUpload $upload): string
     {
-        $this->report = [];
+        $this->report   = [];
         $this->tempDirs = [];
-        $this->line('Starting processing for upload #' . $upload->id, 'info');
 
+        $this->line('Starting processing for upload #' . $upload->id, 'info');
         $this->setUploadStatus($upload, 'Processing', null);
 
-        $sources = $this->collectSourceFiles($upload);
+        try {
+            $sources = $this->collectSourceFiles($upload);
+        } catch (\Throwable $e) {
+            $msg = 'Error collecting source files: ' . $e->getMessage();
+            $this->setUploadStatus($upload, 'Failed', $msg);
+            $this->line(e($msg), 'error');
+            $this->cleanupTempDirs();
+            return $this->renderReport();
+        }
+
         if (count($sources) === 0) {
             $this->setUploadStatus($upload, 'Failed', 'No image files found to process.');
             $this->line('No image files found to process.', 'error');
@@ -31,7 +40,14 @@ class BulkPhotoUploadService
         }
 
         foreach ($sources as $source) {
-            $this->processSingleFile($upload, $source['path'], $source['name']);
+            try {
+                $this->processSingleFile($upload, $source['path'], $source['name']);
+            } catch (\Throwable $e) {
+                $this->line(
+                    'Unexpected error processing ' . e($source['name']) . ': ' . e($e->getMessage()),
+                    'error'
+                );
+            }
         }
 
         $this->refreshUploadStats($upload);
@@ -46,20 +62,28 @@ class BulkPhotoUploadService
     {
         $this->report = [];
 
-        $student = $item->get_student();
-        if (!$student) {
-            $item->status = 'Failed';
-            $item->error_message = 'Student not found';
-            $item->save();
-            $this->line('Student not found for file: ' . e($item->file_name), 'error');
-            return $this->renderReport();
-        }
+        try {
+            $student = $item->get_student();
+            if (!$student) {
+                $item->status        = 'Failed';
+                $item->error_message = 'Student not found';
+                $item->save();
+                $this->line('Student not found for file: ' . e((string) $item->file_name), 'error');
+                return $this->renderReport();
+            }
 
-        $this->applyPhotoToStudent($item, $student);
-        $this->line('Photo successfully updated for student: ' . e($student->name), 'success');
+            $this->applyPhotoToStudent($item, $student);
+            $this->line('Photo successfully updated for student: ' . e($student->name), 'success');
+        } catch (\Throwable $e) {
+            $this->line('Error processing item #' . $item->id . ': ' . e($e->getMessage()), 'error');
+        }
 
         return $this->renderReport();
     }
+
+    // -------------------------------------------------------------------------
+    // Source collection
+    // -------------------------------------------------------------------------
 
     private function collectSourceFiles(BulkPhotoUpload $upload): array
     {
@@ -72,7 +96,7 @@ class BulkPhotoUploadService
 
     private function collectFromImagesField(BulkPhotoUpload $upload): array
     {
-        $items = [];
+        $items  = [];
         $images = is_array($upload->images) ? $upload->images : [];
 
         foreach ($images as $relativePath) {
@@ -98,15 +122,16 @@ class BulkPhotoUploadService
 
     private function collectFromZip(BulkPhotoUpload $upload): array
     {
-        $items = [];
+        $items   = [];
         $zipPath = public_path('storage/' . ltrim((string) $upload->file_path, '/'));
+
         if (!is_file($zipPath)) {
             $this->line('Zip file not found: ' . e((string) $upload->file_path), 'error');
             return $items;
         }
 
         $tempDir = public_path('storage/temp_' . Utils::get_unique_text());
-        if (!@mkdir($tempDir) && !is_dir($tempDir)) {
+        if (!@mkdir($tempDir, 0755, true) && !is_dir($tempDir)) {
             $this->line('Failed to create temp directory for zip extraction.', 'error');
             return $items;
         }
@@ -139,41 +164,59 @@ class BulkPhotoUploadService
         return $items;
     }
 
+    // -------------------------------------------------------------------------
+    // Processing
+    // -------------------------------------------------------------------------
+
     private function processSingleFile(BulkPhotoUpload $upload, string $sourcePath, string $originalName): void
     {
         if (!$this->isSupportedImage($sourcePath)) {
-            $this->line('Unsupported image type: ' . e($originalName), 'error');
+            $this->line('Unsupported image type skipped: ' . e($originalName), 'error');
             return;
         }
 
         $compression = $this->compressAndStore($upload, $sourcePath);
         if (!$compression['ok']) {
-            $this->line('Failed processing image: ' . e($originalName) . ' (' . e($compression['error']) . ')', 'error');
+            $this->line(
+                'Failed to process image: ' . e($originalName) . ' — ' . e($compression['error']),
+                'error'
+            );
             return;
         }
 
+        // firstOrNew uses fill() → requires $fillable on the model (now defined)
         $item = BulkPhotoUploadItem::firstOrNew([
             'bulk_photo_upload_id' => $upload->id,
-            'file_name' => $originalName,
+            'file_name'            => $originalName,
         ]);
 
-        $item->enterprise_id = $upload->enterprise_id;
-        $item->academic_class_id = $upload->academic_class_id;
-        $item->new_image_path = $compression['relative_path'];
-        $item->naming_type = $upload->naming_type;
-        $item->status = 'Pending';
-        $item->error_message = null;
+        // Always set bulk_photo_upload_id explicitly in case firstOrNew built a new instance
+        $item->bulk_photo_upload_id = $upload->id;
+        $item->enterprise_id        = $upload->enterprise_id;
+        $item->academic_class_id    = $upload->academic_class_id;
+        $item->new_image_path       = $compression['relative_path'];
+        $item->naming_type          = $upload->naming_type;
+        $item->status               = 'Pending';
+        $item->error_message        = null;
 
-        $this->setIfColumnExists($item, 'compressed', (int) $compression['compressed']);
+        $this->setIfColumnExists($item, 'compressed',       (int) $compression['compressed']);
         $this->setIfColumnExists($item, 'original_size_kb', $compression['original_kb']);
-        $this->setIfColumnExists($item, 'final_size_kb', $compression['final_kb']);
-        $this->setIfColumnExists($item, 'mime_type', $compression['mime']);
+        $this->setIfColumnExists($item, 'final_size_kb',    $compression['final_kb']);
+        $this->setIfColumnExists($item, 'mime_type',        $compression['mime']);
 
-        $item->save();
+        try {
+            $item->save();
+        } catch (\Throwable $e) {
+            $this->line(
+                'Failed to save item record for: ' . e($originalName) . ' — ' . e($e->getMessage()),
+                'error'
+            );
+            return;
+        }
 
         $student = $item->get_student();
         if (!$student) {
-            $item->status = 'Failed';
+            $item->status        = 'Failed';
             $item->error_message = 'Student not found';
             $item->save();
             $this->line('Student not found for: ' . e($originalName), 'error');
@@ -188,16 +231,29 @@ class BulkPhotoUploadService
     {
         $oldRelative = $this->normalizeAvatarPath((string) $student->avatar);
 
-        $item->student_id = $student->id;
+        $item->student_id    = $student->id;
         $item->old_image_path = $oldRelative;
-        $item->status = 'Success';
+        $item->status        = 'Success';
         $item->error_message = null;
 
-        $student->avatar = $item->new_image_path;
-        $student->save();
+        try {
+            $student->avatar = $item->new_image_path;
+            $student->save();
+        } catch (\Throwable $e) {
+            $item->status        = 'Failed';
+            $item->error_message = 'Failed to update student avatar: ' . $e->getMessage();
+            $item->save();
+            $this->line(
+                'Failed to save avatar for student #' . $student->id . ': ' . e($e->getMessage()),
+                'error'
+            );
+            return;
+        }
 
-        $deleted = false;
-        $deleteOld = $this->uploadOption($item->bulk_photo_upload_id, 'delete_old_photo', true);
+        $deleted   = false;
+        $uploadId  = (int) $item->bulk_photo_upload_id;
+        $deleteOld = $this->uploadOption($uploadId, 'delete_old_photo', true);
+
         if ($deleteOld) {
             $deleted = $this->safeDeleteOldPhoto($oldRelative, $student->id);
         }
@@ -206,49 +262,37 @@ class BulkPhotoUploadService
         $item->save();
     }
 
-    private function uploadOption(int $uploadId, string $key, $default)
-    {
-        static $cache = [];
-        if (!isset($cache[$uploadId])) {
-            $cache[$uploadId] = BulkPhotoUpload::find($uploadId);
-        }
-
-        $upload = $cache[$uploadId];
-        if (!$upload || !Schema::hasColumn('bulk_photo_uploads', $key)) {
-            return $default;
-        }
-
-        $value = $upload->{$key};
-        return $value === null ? $default : $value;
-    }
+    // -------------------------------------------------------------------------
+    // Image compression
+    // -------------------------------------------------------------------------
 
     private function compressAndStore(BulkPhotoUpload $upload, string $sourcePath): array
     {
         $destinationDir = public_path('storage/images');
-        if (!is_dir($destinationDir)) {
-            @mkdir($destinationDir, 0755, true);
+        if (!is_dir($destinationDir) && !@mkdir($destinationDir, 0755, true)) {
+            return ['ok' => false, 'error' => 'cannot create storage/images directory'];
         }
 
-        $maxKb = (int) ($this->uploadOption($upload->id, 'max_image_kb', 350));
-        $maxWidth = (int) ($this->uploadOption($upload->id, 'max_width', 1200));
-        $maxHeight = (int) ($this->uploadOption($upload->id, 'max_height', 1200));
-        $jpegQuality = (int) ($this->uploadOption($upload->id, 'jpeg_quality', 78));
+        $maxKb       = max(1, (int) $this->uploadOption($upload->id, 'max_image_kb', 350));
+        $maxWidth    = max(1, (int) $this->uploadOption($upload->id, 'max_width',    1200));
+        $maxHeight   = max(1, (int) $this->uploadOption($upload->id, 'max_height',   1200));
+        $jpegQuality = (int) $this->uploadOption($upload->id, 'jpeg_quality', 78);
         $jpegQuality = max(45, min(90, $jpegQuality));
 
         $imageInfo = @getimagesize($sourcePath);
         if (!$imageInfo) {
-            return ['ok' => false, 'error' => 'invalid image'];
+            return ['ok' => false, 'error' => 'not a valid image file'];
         }
 
-        $mime = (string) ($imageInfo['mime'] ?? '');
+        $mime     = (string) ($imageInfo['mime'] ?? '');
         $origBytes = (int) @filesize($sourcePath);
-        $origKb = round($origBytes / 1024, 2);
+        $origKb   = round($origBytes / 1024, 2);
 
-        $newName = Utils::get_unique_text() . '.jpg';
+        $newName    = Utils::get_unique_text() . '.jpg';
         $targetPath = $destinationDir . '/' . $newName;
 
         $compressed = false;
-        $saved = false;
+        $saved      = false;
 
         if (function_exists('imagecreatefromjpeg')) {
             $resource = $this->createImageResource($sourcePath, $mime);
@@ -257,25 +301,34 @@ class BulkPhotoUploadService
                 $srcH = imagesy($resource);
 
                 $ratio = min(
-                    1,
-                    $maxWidth > 0 ? ($maxWidth / max(1, $srcW)) : 1,
-                    $maxHeight > 0 ? ($maxHeight / max(1, $srcH)) : 1
+                    1.0,
+                    $maxWidth  > 0 ? ($maxWidth  / max(1, $srcW)) : 1.0,
+                    $maxHeight > 0 ? ($maxHeight / max(1, $srcH)) : 1.0
                 );
 
-                $dstW = max(1, (int) round($srcW * $ratio));
-                $dstH = max(1, (int) round($srcH * $ratio));
-
+                $dstW   = max(1, (int) round($srcW * $ratio));
+                $dstH   = max(1, (int) round($srcH * $ratio));
                 $canvas = imagecreatetruecolor($dstW, $dstH);
+
+                // Preserve transparency for PNG sources
+                imagealphablending($canvas, false);
+                imagesavealpha($canvas, true);
+                $white = imagecolorallocate($canvas, 255, 255, 255);
+                imagefill($canvas, 0, 0, $white);
+
                 imagecopyresampled($canvas, $resource, 0, 0, 0, 0, $dstW, $dstH, $srcW, $srcH);
 
                 $quality = $jpegQuality;
                 do {
-                    $saved = imagejpeg($canvas, $targetPath, $quality);
-                    $sizeKb = $saved && is_file($targetPath) ? ((int) filesize($targetPath) / 1024) : 0;
+                    $saved  = imagejpeg($canvas, $targetPath, $quality);
+                    $sizeKb = ($saved && is_file($targetPath))
+                        ? ((int) filesize($targetPath) / 1024)
+                        : 0;
+
                     if ($sizeKb <= $maxKb || $quality <= 50) {
                         break;
                     }
-                    $quality -= 8;
+                    $quality   -= 8;
                     $compressed = true;
                 } while ($quality >= 50);
 
@@ -284,12 +337,13 @@ class BulkPhotoUploadService
             }
         }
 
+        // Fallback: plain copy if GD produced nothing
         if (!$saved) {
             $saved = @copy($sourcePath, $targetPath);
         }
 
         if (!$saved || !is_file($targetPath)) {
-            return ['ok' => false, 'error' => 'failed to save image'];
+            return ['ok' => false, 'error' => 'failed to write output image'];
         }
 
         $finalKb = round(((int) filesize($targetPath)) / 1024, 2);
@@ -298,12 +352,12 @@ class BulkPhotoUploadService
         }
 
         return [
-            'ok' => true,
+            'ok'            => true,
             'relative_path' => 'images/' . $newName,
-            'compressed' => $compressed,
-            'original_kb' => $origKb,
-            'final_kb' => $finalKb,
-            'mime' => $mime,
+            'compressed'    => $compressed,
+            'original_kb'   => $origKb,
+            'final_kb'      => $finalKb,
+            'mime'          => $mime,
         ];
     }
 
@@ -330,6 +384,10 @@ class BulkPhotoUploadService
         return in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true);
     }
 
+    // -------------------------------------------------------------------------
+    // Old-photo deletion
+    // -------------------------------------------------------------------------
+
     private function safeDeleteOldPhoto(?string $relativePath, int $excludeUserId): bool
     {
         $relativePath = trim((string) $relativePath);
@@ -337,10 +395,12 @@ class BulkPhotoUploadService
             return false;
         }
 
-        if (strpos($relativePath, 'http://') === 0 || strpos($relativePath, 'https://') === 0) {
+        // Never delete external URLs
+        if (str_starts_with($relativePath, 'http://') || str_starts_with($relativePath, 'https://')) {
             return false;
         }
 
+        // Never delete default placeholder images
         $baseName = strtolower(basename($relativePath));
         if (in_array($baseName, ['user.jpeg', 'user.jpg', 'user.png', 'no_image.jpg', 'no_image.png'], true)) {
             return false;
@@ -351,43 +411,70 @@ class BulkPhotoUploadService
             return false;
         }
 
-        $inUse = User::where('avatar', $normalized)->where('id', '!=', $excludeUserId)->exists();
-        if ($inUse) {
+        // Do not delete if another user is still using this file
+        if (User::where('avatar', $normalized)->where('id', '!=', $excludeUserId)->exists()) {
             return false;
         }
 
-        $absolute = public_path('storage/' . $normalized);
+        $absolute    = public_path('storage/' . $normalized);
         $storageRoot = realpath(public_path('storage'));
-        $targetDir = realpath(dirname($absolute));
+        $targetDir   = realpath(dirname($absolute));
 
-        if (!$storageRoot || !$targetDir || strpos($targetDir, $storageRoot) !== 0) {
+        // Path traversal guard
+        if (!$storageRoot || !$targetDir || !str_starts_with($targetDir, $storageRoot)) {
             return false;
         }
 
-        if (is_file($absolute)) {
-            return @unlink($absolute);
-        }
-
-        return false;
+        return is_file($absolute) && @unlink($absolute);
     }
+
+    // -------------------------------------------------------------------------
+    // Stats & status helpers
+    // -------------------------------------------------------------------------
 
     private function refreshUploadStats(BulkPhotoUpload $upload): void
     {
-        $query = BulkPhotoUploadItem::where('bulk_photo_upload_id', $upload->id);
-        $upload->total_images = (clone $query)->count();
-        $upload->success_images = (clone $query)->where('status', 'Success')->count();
-        $upload->failed_images = (clone $query)->where('status', 'Failed')->count();
+        $base                  = BulkPhotoUploadItem::where('bulk_photo_upload_id', $upload->id);
+        $upload->total_images  = (clone $base)->count();
+        $upload->success_images = (clone $base)->where('status', 'Success')->count();
+        $upload->failed_images  = (clone $base)->where('status', 'Failed')->count();
         $upload->save();
 
-        $this->line('Summary: total=' . $upload->total_images . ', success=' . $upload->success_images . ', failed=' . $upload->failed_images, 'info');
+        $this->line(
+            'Summary — total: ' . $upload->total_images
+            . ' | success: ' . $upload->success_images
+            . ' | failed: '  . $upload->failed_images,
+            'info'
+        );
     }
 
     private function setUploadStatus(BulkPhotoUpload $upload, string $status, ?string $error): void
     {
-        $upload->status = $status;
+        $upload->status        = $status;
         $upload->error_message = $error;
         $upload->save();
     }
+
+    private function uploadOption(int $uploadId, string $key, $default)
+    {
+        static $cache = [];
+
+        if (!isset($cache[$uploadId])) {
+            $cache[$uploadId] = BulkPhotoUpload::find($uploadId);
+        }
+
+        $upload = $cache[$uploadId];
+        if (!$upload || !Schema::hasColumn('bulk_photo_uploads', $key)) {
+            return $default;
+        }
+
+        $value = $upload->{$key};
+        return ($value === null) ? $default : $value;
+    }
+
+    // -------------------------------------------------------------------------
+    // Utilities
+    // -------------------------------------------------------------------------
 
     private function normalizeAvatarPath(string $avatar): ?string
     {
@@ -396,7 +483,7 @@ class BulkPhotoUploadService
             return null;
         }
 
-        if (strpos($avatar, 'http://') === 0 || strpos($avatar, 'https://') === 0) {
+        if (str_starts_with($avatar, 'http://') || str_starts_with($avatar, 'https://')) {
             return null;
         }
 
@@ -407,30 +494,52 @@ class BulkPhotoUploadService
     {
         static $columns = [];
         $table = $model->getTable();
-        if (!array_key_exists($table . '.' . $column, $columns)) {
-            $columns[$table . '.' . $column] = Schema::hasColumn($table, $column);
+        $key   = $table . '.' . $column;
+
+        if (!array_key_exists($key, $columns)) {
+            $columns[$key] = Schema::hasColumn($table, $column);
         }
 
-        if ($columns[$table . '.' . $column]) {
+        if ($columns[$key]) {
             $model->{$column} = $value;
         }
     }
 
+    // -------------------------------------------------------------------------
+    // Reporting
+    // -------------------------------------------------------------------------
+
     private function line(string $message, string $type = 'info'): void
     {
         $styles = [
-            'success' => 'background-color:green;color:#fff;padding:5px;margin:4px 0;',
-            'error' => 'background-color:#c0392b;color:#fff;padding:5px;margin:4px 0;',
-            'info' => 'background-color:#2c3e50;color:#fff;padding:5px;margin:4px 0;',
+            'success' => 'background:#27ae60;color:#fff;padding:6px 12px;margin:3px 0;border-radius:4px;',
+            'error'   => 'background:#c0392b;color:#fff;padding:6px 12px;margin:3px 0;border-radius:4px;',
+            'info'    => 'background:#2c3e50;color:#fff;padding:6px 12px;margin:3px 0;border-radius:4px;',
         ];
 
-        $style = $styles[$type] ?? $styles['info'];
-        $this->report[] = '<p style="' . $style . '">' . $message . '</p>';
+        $style           = $styles[$type] ?? $styles['info'];
+        $this->report[]  = '<p style="' . $style . '">' . $message . '</p>';
     }
 
     private function renderReport(): string
     {
-        return implode("\n", $this->report) . "\nDone";
+        $body = implode("\n", $this->report);
+
+        return '<!DOCTYPE html>'
+            . '<html lang="en">'
+            . '<head><meta charset="UTF-8"><title>Bulk Photo Upload Report</title>'
+            . '<style>'
+            . 'body{font-family:Arial,Helvetica,sans-serif;padding:24px;background:#f0f2f5;max-width:960px;margin:0 auto;}'
+            . 'h2{color:#2c3e50;margin-bottom:16px;}'
+            . 'p{margin:3px 0;font-size:13px;}'
+            . '.done{background:#1a252f;color:#fff;padding:6px 12px;margin:10px 0 0;border-radius:4px;font-weight:bold;}'
+            . '</style>'
+            . '</head>'
+            . '<body>'
+            . '<h2>Bulk Photo Upload — Processing Report</h2>'
+            . $body
+            . '<p class="done">Done.</p>'
+            . '</body></html>';
     }
 
     private function cleanupTempDirs(): void
@@ -446,11 +555,7 @@ class BulkPhotoUploadService
             );
 
             foreach ($it as $node) {
-                if ($node->isDir()) {
-                    @rmdir($node->getPathname());
-                } else {
-                    @unlink($node->getPathname());
-                }
+                $node->isDir() ? @rmdir($node->getPathname()) : @unlink($node->getPathname());
             }
 
             @rmdir($dir);

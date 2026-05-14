@@ -47,6 +47,37 @@
         return '<label>' + label + '</label>' + ctrl + chipsHtml(name);
     }
 
+    function isLowerPrimaryTemplate(template) {
+        if (!template) return false;
+        template = String(template).toLowerCase();
+        return template === 'auto' || template === 'generic';
+    }
+
+    function configureSchemePopup(template) {
+        var lower = isLowerPrimaryTemplate(template);
+        var subjectField = document.querySelector('#scheme-popup-form [name="competence_subject"]');
+        var languageField = document.querySelector('#scheme-popup-form [name="competence_language"]');
+
+        if (subjectField) {
+            var subjectLabel = subjectField.previousElementSibling;
+            if (subjectLabel && subjectLabel.tagName.toLowerCase() === 'label') {
+                subjectLabel.textContent = lower ? 'Competences' : 'Competence - Subject';
+            }
+            subjectField.required = false;
+        }
+
+        if (languageField) {
+            var languageContainer = languageField.closest('.col-md-6, .col-md-12');
+            if (languageContainer) {
+                languageContainer.style.display = lower ? 'none' : '';
+            }
+            languageField.required = false;
+            if (lower) {
+                languageField.value = '';
+            }
+        }
+    }
+
     function ensureModal() {
         if (document.getElementById('scheme-item-popup')) return;
 
@@ -75,27 +106,27 @@
             + '            <div class="col-md-6 col-sm-4"><label>Status</label><select class="form-control" name="teacher_status"><option>Pending</option><option>Conducted</option><option>Skipped</option></select></div>'
             + '          </div>'
             + '          <div class="row form-grid">'
-            + '            <div class="col-md-6 col-sm-6">' + fieldRow('Theme', 'theme', 'input', true) + '</div>'
-            + '            <div class="col-md-6 col-sm-6">' + fieldRow('Topic', 'topic', 'input', true) + '</div>'
+            + '            <div class="col-md-6 col-sm-6">' + fieldRow('Theme', 'theme', 'input', false) + '</div>'
+            + '            <div class="col-md-6 col-sm-6">' + fieldRow('Topic', 'topic', 'input', false) + '</div>'
             + '          </div>'
             + '          <div class="row form-grid">'
-            + '            <div class="col-md-12">' + fieldRow('Subtopic', 'sub_topic', 'input', true) + '</div>'
+            + '            <div class="col-md-12">' + fieldRow('Subtopic', 'sub_topic', 'input', false) + '</div>'
             + '          </div>'
             + '          <div class="row form-grid">'
-            + '            <div class="col-md-6 col-sm-12">' + fieldRow('Content', 'content', 'textarea', true) + '</div>'
-            + '            <div class="col-md-6 col-sm-12">' + fieldRow('Competence - Subject', 'competence_subject', 'textarea', true) + '</div>'
+            + '            <div class="col-md-6 col-sm-12">' + fieldRow('Content', 'content', 'textarea', false) + '</div>'
+            + '            <div class="col-md-6 col-sm-12">' + fieldRow('Competence - Subject', 'competence_subject', 'textarea', false) + '</div>'
             + '          </div>'
             + '          <div class="row form-grid">'
-            + '            <div class="col-md-6 col-sm-12">' + fieldRow('Competence - Language', 'competence_language', 'textarea', true) + '</div>'
-            + '            <div class="col-md-6 col-sm-12">' + fieldRow('Methods &amp; Techniques', 'methods', 'textarea', true) + '</div>'
+            + '            <div class="col-md-6 col-sm-12">' + fieldRow('Competence - Language', 'competence_language', 'textarea', false) + '</div>'
+            + '            <div class="col-md-6 col-sm-12">' + fieldRow('Methods &amp; Techniques', 'methods', 'textarea', false) + '</div>'
             + '          </div>'
             + '          <div class="row form-grid">'
-            + '            <div class="col-md-6 col-sm-12">' + fieldRow('Life Skills &amp; Values', 'life_skills_values', 'textarea', true) + '</div>'
-            + '            <div class="col-md-6 col-sm-12">' + fieldRow('Suggested Activities', 'suggested_activity', 'textarea', true) + '</div>'
+            + '            <div class="col-md-6 col-sm-12">' + fieldRow('Life Skills &amp; Values', 'life_skills_values', 'textarea', false) + '</div>'
+            + '            <div class="col-md-6 col-sm-12">' + fieldRow('Suggested Activities', 'suggested_activity', 'textarea', false) + '</div>'
             + '          </div>'
             + '          <div class="row form-grid">'
-            + '            <div class="col-md-6 col-sm-12">' + fieldRow('Instructional Materials', 'instructional_material', 'textarea', true) + '</div>'
-            + '            <div class="col-md-6 col-sm-12">' + fieldRow('References', 'references', 'textarea', true) + '</div>'
+            + '            <div class="col-md-6 col-sm-12">' + fieldRow('Instructional Materials', 'instructional_material', 'textarea', false) + '</div>'
+            + '            <div class="col-md-6 col-sm-12">' + fieldRow('References', 'references', 'textarea', false) + '</div>'
             + '          </div>'
             + '          <div class="row form-grid">'
             + '            <div class="col-md-12">' + fieldRow('Remarks (optional)', 'teacher_comment', 'textarea', false) + '</div>'
@@ -202,11 +233,13 @@
         ensureModal();
         var subjectId = btn.getAttribute('data-subject-id');
         var subjectName = btn.getAttribute('data-subject-name') || 'Subject';
+        var schemeTemplate = btn.getAttribute('data-scheme-template');
         var form = document.getElementById('scheme-popup-form');
         document.getElementById('popup-subject-id').value = subjectId;
         document.getElementById('popup-subject-name').innerText = '- ' + subjectName;
         document.getElementById('popup-term-id').value = currentTermId();
         form.reset();
+        configureSchemePopup(schemeTemplate);
         // Refresh CSRF token on each open in case session was renewed
         var tokenEl = form.querySelector('[name="_token"]');
         if (tokenEl) tokenEl.value = getToken();

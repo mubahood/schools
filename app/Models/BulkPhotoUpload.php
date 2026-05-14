@@ -9,6 +9,26 @@ class BulkPhotoUpload extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'enterprise_id',
+        'academic_class_id',
+        'file_path',
+        'file_name',
+        'naming_type',
+        'status',
+        'error_message',
+        'total_images',
+        'success_images',
+        'failed_images',
+        'file_type',
+        'images',
+        'delete_old_photo',
+        'max_image_kb',
+        'max_width',
+        'max_height',
+        'jpeg_quality',
+    ];
+
     protected $casts = [
         'images' => 'array',
         'delete_old_photo' => 'boolean',

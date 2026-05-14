@@ -2949,105 +2949,155 @@ Route::get('test', function (Request $request) {
     "aggr_value" => 1
 */
 Route::get('process-batch-service-subscriptions', function (Request $request) {
-  $rep = BatchServiceSubscription::find($request->id);
-  if ($rep == null) return "Report not found";
-  if ($rep->is_processed == 'Yes') return "Already processed";
+  // ── Auth guard ────────────────────────────────────────────────────────────
+  $authUser = \Encore\Admin\Facades\Admin::user();
+  if (!$authUser) {
+    return response('<p style="color:red;font-family:monospace;">Unauthorized. Please log in to the admin panel first.</p>', 401);
+  }
 
-  $total = count($rep->administrators);
-  $success = 0;
-  $fail = 0;
+  set_time_limit(180); // Allow up to 3 minutes for large batches
+
+  $rep = BatchServiceSubscription::find((int) $request->id);
+  if (!$rep) {
+    return '<p style="color:red;font-family:monospace;">Batch not found.</p>';
+  }
+
+  // Enterprise ownership check
+  if ((int) $rep->enterprise_id !== (int) $authUser->enterprise_id) {
+    return '<p style="color:red;font-family:monospace;">Access denied.</p>';
+  }
+
+  if ($rep->is_processed === 'Yes') {
+    $backUrl = admin_url('batch-service-subscriptions');
+    return response("
+      <div style='font-family:monospace;padding:20px;max-width:700px'>
+        <h3 style='color:#856404'>Already Processed</h3>
+        <p>This batch was already processed.</p>
+        <p>Success: <strong>{$rep->success_count}</strong> &nbsp;|&nbsp;
+           Failed: <strong>{$rep->fail_count}</strong> &nbsp;|&nbsp;
+           Total: <strong>{$rep->total_count}</strong></p>
+        " . ($rep->processed_notes ? "<pre style='background:#f8f9fa;padding:10px;font-size:12px'>" . e($rep->processed_notes) . "</pre>" : '') . "
+        <p><a href='{$backUrl}'>← Back to Batch Subscriptions</a></p>
+      </div>");
+  }
+
+  $administrators = $rep->administrators;
+  if (empty($administrators)) {
+    return '<p style="color:orange;font-family:monospace;">No subscribers found in this batch.</p>';
+  }
+
+  $inventoryMode = $rep->to_be_managed_by_inventory ?? 'No';
+  $batchItems    = ($inventoryMode === 'Yes') ? $rep->batchItems()->get() : collect();
+  $quantity      = max(1, (int) $rep->quantity);
+
+  $success     = 0;
+  $fail        = 0;
   $total_count = 0;
-  $fail_text = "";
-  foreach ($rep->administrators as $key => $admin) {
+  $rows        = [];
+  $fail_text   = '';
+
+  foreach ($administrators as $adminId) {
     $total_count++;
-    $user = User::find($admin);
-    if ($user == null) {
+    $user = User::find($adminId);
+
+    if (!$user) {
       $fail++;
-      $fail_text .= "User not found: " . $admin . "<br>";
+      $msg        = "User #{$adminId} not found";
+      $fail_text .= $msg . "\n";
+      $rows[]     = "<span style='color:#c0392b'>SKIP — {$msg}</span>";
       continue;
     }
 
-    //existing subscription
-    $sub = ServiceSubscription::where([
-      'service_id' => $rep->service_id,
+    // Pre-check for existing subscription (avoids relying solely on model Exception)
+    $existing = ServiceSubscription::where([
+      'service_id'       => $rep->service_id,
       'administrator_id' => $user->id,
-      'due_term_id' => $rep->due_term_id,
+      'due_term_id'      => $rep->due_term_id,
     ])->first();
 
-    if ($sub != null) {
+    if ($existing) {
       $fail++;
-      $fail_text .= "User already subscribed: " . $user->name . ", ref: " . $sub->id . "<br>";
-      echo 'Skipped: ' . $user->name . " because already subscribed<br>";
+      $msg        = "Already subscribed: {$user->name} (sub #{$existing->id})";
+      $fail_text .= $msg . "\n";
+      $rows[]     = "<span style='color:#e67e22'>SKIP — {$msg}</span>";
       continue;
     }
-    $sub = new ServiceSubscription();
-    $sub->service_id = $rep->service_id;
-    $sub->enterprise_id = $rep->enterprise_id;
 
-    $sub->quantity = $rep->quantity;
-    $sub->due_term_id = $rep->due_term_id;
-    $sub->administrator_id = $user->id;
-    $sub->due_academic_year_id = $rep->due_academic_year_id;
-    $sub->link_with = $rep->link_with;
-    $sub->transport_route_id = $rep->transport_route_id;
-    $sub->trip_type = $rep->trip_type;
+    // Build individual subscription
+    $sub                          = new ServiceSubscription();
+    $sub->service_id              = $rep->service_id;
+    $sub->enterprise_id           = $rep->enterprise_id;
+    $sub->administrator_id        = $user->id;
+    $sub->quantity                = $quantity;
+    $sub->due_term_id             = $rep->due_term_id;
+    $sub->due_academic_year_id    = $rep->due_academic_year_id;
+    $sub->link_with               = $rep->link_with;
+    $sub->transport_route_id      = $rep->transport_route_id;
+    $sub->trip_type               = $rep->trip_type;
+    $sub->to_be_managed_by_inventory = $inventoryMode;
+    $sub->is_service_offered      = 'No';
+    $sub->is_completed            = 'No';
 
-    // Handle inventory management
-    $inventoryMode = $rep->to_be_managed_by_inventory ?? 'No';
-    if ($inventoryMode === 'Yes') {
-      $sub->to_be_managed_by_inventory = 'Yes';
-      // Don't set items_to_be_offered here — we'll create tracking records manually after save
-    } else {
-      $sub->to_be_managed_by_inventory = 'No';
-    }
-
-    $sub->is_service_offered = 'No';
-    $sub->is_completed = 'No';
-    $error_text = null;
     try {
       $sub->save();
-      
-      // Create ServiceItemToBeOffered records from batch items (hasMany relationship)
-      if ($inventoryMode === 'Yes') {
-        $batchItems = $rep->batchItems;
-        if ($batchItems && $batchItems->count() > 0) {
-          foreach ($batchItems as $batchItem) {
-            if (empty($batchItem->stock_item_category_id)) continue;
-            $exists = \App\Models\ServiceItemToBeOffered::where('service_subscription_id', $sub->id)
-              ->where('stock_item_category_id', $batchItem->stock_item_category_id)
-              ->exists();
-            if (!$exists) {
-              \App\Models\ServiceItemToBeOffered::create([
-                'service_subscription_id' => $sub->id,
-                'stock_item_category_id' => $batchItem->stock_item_category_id,
-                'quantity' => $batchItem->quantity ?? 1,
-                'is_service_offered' => 'No',
-                'user_id' => $user->id,
-                'enterprise_id' => $rep->enterprise_id,
-              ]);
-            }
-          }
+
+      // Create per-subscriber inventory tracking records from the batch items
+      if ($inventoryMode === 'Yes' && $batchItems->count() > 0) {
+        foreach ($batchItems as $batchItem) {
+          if (empty($batchItem->stock_item_category_id)) continue;
+          \App\Models\ServiceItemToBeOffered::firstOrCreate(
+            [
+              'service_subscription_id' => $sub->id,
+              'stock_item_category_id'  => $batchItem->stock_item_category_id,
+            ],
+            [
+              'quantity'           => max(1, (int) ($batchItem->quantity ?? 1)),
+              'is_service_offered' => 'No',
+              'user_id'            => $user->id,
+              'enterprise_id'      => $rep->enterprise_id,
+            ]
+          );
         }
       }
-      
-      echo 'SUCCESS: ' . $user->name . "<br>";
-    } catch (\Exception $e) {
-      $error_text = $e->getMessage();
-      throw $e;
-    }
-    if ($error_text == null) {
+
       $success++;
-    } else {
+      $rows[] = "<span style='color:#27ae60'>OK — {$user->name}</span>";
+    } catch (\Throwable $e) {
       $fail++;
-      $fail_text .= "Error: " . $error_text . "<br>";
+      $msg        = $e->getMessage();
+      $fail_text .= "Error for {$user->name}: {$msg}\n";
+      $rows[]     = "<span style='color:#c0392b'>FAIL — {$user->name} — " . e($msg) . "</span>";
     }
   }
-  $rep->success_count = $success;
-  $rep->fail_count = $fail;
-  $rep->total_count = $total_count;
-  $rep->is_processed = 'Yes';
-  $rep->processed_notes = $fail_text;
-  $rep->save();
+
+  // Persist final counts regardless of individual failures
+  try {
+    $rep->success_count   = $success;
+    $rep->fail_count      = $fail;
+    $rep->total_count     = $total_count;
+    $rep->is_processed    = 'Yes';
+    $rep->processed_notes = $fail_text;
+    $rep->save();
+  } catch (\Throwable $e) {
+    $rows[] = "<span style='color:red'><strong>Warning:</strong> Could not save batch status — " . e($e->getMessage()) . "</span>";
+  }
+
+  $summaryColor = ($fail === 0) ? '#27ae60' : (($success === 0) ? '#c0392b' : '#e67e22');
+  $backUrl      = admin_url('batch-service-subscriptions');
+  $rowsHtml     = implode('<br>', $rows);
+
+  return response("
+    <div style='font-family:monospace;padding:20px;max-width:800px'>
+      <h3>Batch Processing Complete</h3>
+      <p style='font-size:15px;color:{$summaryColor}'>
+        <strong>Success: {$success} &nbsp;|&nbsp; Failed: {$fail} &nbsp;|&nbsp; Total: {$total_count}</strong>
+      </p>
+      <hr style='border:none;border-top:1px solid #ddd;margin:12px 0'>
+      <div style='line-height:1.8;font-size:13px'>{$rowsHtml}</div>
+      <hr style='border:none;border-top:1px solid #ddd;margin:12px 0'>
+      <p><a href='{$backUrl}' style='color:#337ab7'>← Back to Batch Subscriptions</a></p>
+    </div>
+  ");
 });
 Route::get('gen-code', function () {
   $data = '1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcefghijklmnopqrstuvwxyz';
@@ -3216,338 +3266,6 @@ Route::get('bulk-photo-uploads-process', function () {
 
   $service = app(BulkPhotoUploadService::class);
   return $service->processUpload($upload);
-
-  $id = ($_GET['id']);
-  $class_error = " background-color: #ff0000; color: #fff; padding: 0px; margin: 0px; ";
-  $class_success = " background-color: green; color: #fff; padding: 0px; margin: 0px; ";
-  $blk = BulkPhotoUpload::where([
-    'id' => $id,
-  ])->first();
-  if ($blk == null) {
-    return "Bulk Upload not found";
-  }
-  $ent = Enterprise::find($blk->enterprise_id);
-  if ($ent == null) {
-    return "Enterprise not found";
-  }
-
-
-  if ($blk->file_type == 'images') {
-    //if not array
-    if (!is_array($blk->images)) {
-      return "File path is not an array";
-    }
-
-    //if empty
-    if (count($blk->images) < 1) {
-      return "No files to process";
-    }
-
-
-    //for images
-    foreach ($blk->images as $key => $file) {
-      $path = public_path('storage/' . $file);
-      if (!file_exists($path)) {
-        echo '<p style="background-color: #ff0000; color: #fff; padding: 5px; margin: 5px;">File not found: ' . htmlspecialchars($file) . '</p>';
-        continue;
-      }
-
-      $ext = pathinfo($file, PATHINFO_EXTENSION);
-      $new_name = Utils::get_unique_text() . '.' . $ext;
-      $destination_path = public_path('storage/images/' . $new_name);
-      $moved = rename($path, $destination_path);
-      if (!$moved) {
-        echo '<p style="background-color: #ff0000; color: #fff; padding: 5px; margin: 5px;">Failed to move file: ' . htmlspecialchars($file) . '</p>';
-        continue;
-      }
-      $photo = new BulkPhotoUploadItem();
-      $photo->enterprise_id = $ent->id;
-      $photo->bulk_photo_upload_id = $blk->id;
-      $photo->academic_class_id = $blk->academic_class_id;
-      $photo->new_image_path = 'images/' . $new_name;
-      $photo->file_name = $file;
-      $photo->naming_type = $blk->naming_type;
-      $photo->error_message = null;
-      $photo->status = 'Pending';
-      try {
-        $photo->save();
-        //echo context
-        echo '<p style="background-color: green; color: #fff; padding: 5px; margin: 5px;">' . $file . ' saved as ' . $new_name . '</p>';
-      } catch (\Throwable $th) {
-        echo '<p style="background-color: #ff0000; color: #fff; padding: 5px; margin: 5px;">Failed to save file: ' . htmlspecialchars($file) . '</p>';
-        continue;
-      }
-    }
-    $blk->status = 'Completed';
-    $blk->save();
-
-    $stats_success = BulkPhotoUploadItem::where([
-      'bulk_photo_upload_id' => $blk->id,
-      'status' => 'Success',
-    ])->count();
-
-    $stats_failed = BulkPhotoUploadItem::where([
-      'bulk_photo_upload_id' => $blk->id,
-      'status' => 'Failed',
-    ])->count();
-
-    $stats_pending = BulkPhotoUploadItem::where([
-      'bulk_photo_upload_id' => $blk->id,
-      'status' => 'Pending',
-    ])->count();
-
-
-    $items = BulkPhotoUploadItem::where([
-      'bulk_photo_upload_id' => $blk->id,
-    ])->get();
-
-    foreach ($items as $key => $item) {
-      if ($item->status == 'Success') {
-        $sudent = Administrator::find($item->student_id);
-        if ($sudent == null) {
-          $item->status = 'Failed';
-          $item->error_message = 'Student not found';
-
-          $item->save();
-          //error display
-          echo '<p style="background-color: #ff0000; color: #fff; padding: 0px; margin: 0px;">Failed to process: Student not found in the system.</p>';
-          continue;
-        }
-        //display success message
-        echo '<p style="background-color: green; color: #fff; padding: 0px; margin: 0px;">Photo successfully updated for student: ' . $sudent->name . '</p>';
-        continue;
-      }
-
-
-      $student = $item->get_student();
-
-      if ($student != null) {
-        $old = $student->avatar;
-        $old_explode = explode('/', $old);
-        $old_file_name = end($old_explode);
-
-        if ($old_file_name != 'user.jpeg') {
-          $old = public_path('storage/' . $old);
-          if (file_exists($old)) {
-            unlink($old);
-          }
-        }
-
-        $item->student_id = $student->id;
-        $item->error_message = null;
-        $item->status = 'Success';
-        $item->save();
-        $student->avatar = $item->new_image_path;
-        $student->save();
-        //success display
-        echo '<p style="background-color: green; color: #fff; padding: 0px; margin: 0px;">Photo successfully updated for student: ' . $student->name . '</p>';
-      } else {
-        $item->status = 'Failed';
-        $item->error_message = 'Student not found';
-        $item->save();
-        //error display
-        echo '<p style="background-color: #ff0000; color: #fff; padding: 0px; margin: 0px;">Failed to process: Student not found in the system. File: ' . $item->file_name . '</p>';
-      }
-    }
-
-
-    echo '<p style="background-color: green; color: #fff; padding: 5px; margin: 5px;">Success: ' . $stats_success . '</p>';
-    echo '<p style="background-color: #ff0000; color: #fff; padding: 5px; margin: 5px;">Failed: ' . $stats_failed . '</p>';
-    echo '<p style="background-color: #0000ff; color: #fff; padding: 5px; margin: 5px;">Pending: ' . $stats_pending . '</p>';
-
-
-    return "done";
-  }
-
-  $file_path = public_path('storage/' . $blk->file_path);
-  if (!file_exists($file_path)) {
-    return "File not found";
-  }
-  //size of zip in mb
-  $size = filesize($file_path);
-  $size = $size / 1024 / 1024;
-  $size = number_format($size, 2);
-  $blk->file_name = $size;
-  $blk->save();
-
-
-
-
-  //time to unzip and get images in file
-
-  //create_temp_dir
-
-  //check if directory was created
-
-  if ($blk->status != 'Completed') {
-    try {
-      $temp_dir_name = 'temp_' . Utils::get_unique_text();
-      $temp_dir = public_path('storage/' . $temp_dir_name);
-      mkdir($temp_dir);
-
-      if (!file_exists($temp_dir)) {
-        return "Failed to create temp directory";
-      }
-      $zip = new \ZipArchive();
-      $zip->open($file_path);
-      $zip->extractTo($temp_dir);
-      $zip->close();
-      $blk->status = 'Completed';
-      $blk->error_message = $temp_dir;
-      $blk->save();
-    } catch (\Throwable $th) {
-      return "Failed to extract zip file because: " . $th->getMessage();
-    }
-  }
-  $temp_dir_name = $blk->error_message;
-  //check if $blk->error_messag is directory'
-  if (is_dir($blk->error_message)) {
-
-    //get all files in the directory
-    $files = scandir($blk->error_message);
-
-    $count = 0;
-    $success_count = 0;
-
-    foreach ($files as $file) {
-
-      if ($file == '.' || $file == '..') {
-        continue;
-      }
-      $count++;
-      $path = $temp_dir_name . '/' . $file;
-      $file_exists = file_exists($path);
-      if (!$file_exists) {
-        echo '<p style="' . $class_error . '">' . $count . '. ' . $file . ' SKIPPED BECAUSE: ' . $path . ' does not exist.</P>';
-        continue;
-      }
-      $file_size = filesize($path);
-      $file_size = $file_size / 1024 / 1024;
-      $file_size = number_format($file_size, 2);
-
-      if ($file_size > 1) {
-        $thumb = Utils::create_thumbnail($path);
-        if (file_exists($thumb)) {
-          $path = $thumb;
-        }
-      }
-
-
-      //ceck if file is exist
-      $file_exists = file_exists($path);
-      if (!$file_exists) {
-        echo '<p style="' . $class_error . '">' . $count . '. ' . $file . ' SKIPPED BECAUSE: ' . $path . ' does not exist.</P>';
-        continue;
-      }
-      //last of explode of path by /
-      $explode = explode('/', $path);
-      $file_name = end($explode);
-      $images_folder = public_path('storage/images');
-      $ext = pathinfo($file_name, PATHINFO_EXTENSION);
-      $new_name = Utils::get_unique_text() . '.' . $ext;
-      $destination_path = $images_folder . '/' . $new_name;
-      //move
-      try {
-        $moved = rename($path, $destination_path);
-      } catch (\Throwable $th) {
-        echo '<p style="' . $class_error . '">' . $count . '. ' . $file . ' SKIPPED BECAUSE: ' . $th->getMessage() . '</P>';
-        continue;
-      }
-
-
-      $photo = new BulkPhotoUploadItem();
-      $photo->enterprise_id = $ent->id;
-      $photo->bulk_photo_upload_id = $blk->id;
-      $photo->academic_class_id = $blk->academic_class_id;
-      $photo->new_image_path = 'images/' . $new_name;
-      $photo->file_name = $file_name;
-      $photo->naming_type = $blk->naming_type;
-      $photo->error_message = null;
-      $photo->status = 'Pending';
-      try {
-        $photo->save();
-      } catch (\Throwable $th) {
-        echo '<p style="' . $class_error . '">' . $count . '. ' . $file . ' SKIPPED BECAUSE: ' . $th->getMessage() . '</P>';
-        continue;
-      }
-    }
-  }
-
-  //check if folder exists
-  if (is_dir($temp_dir_name)) {
-    array_map('unlink', glob("$temp_dir_name/*.*"));
-    rmdir($temp_dir_name);
-  }
-
-
-  $items = BulkPhotoUploadItem::where([
-    'bulk_photo_upload_id' => $blk->id,
-  ])->get();
-
-  foreach ($items as $key => $item) {
-    if ($item->status == 'Success') {
-      $sudent = Administrator::find($item->student_id);
-      if ($sudent == null) {
-        $item->status = 'Failed';
-        $item->error_message = 'Student not found';
-
-        $item->save();
-        //error display
-        echo '<p style="background-color: #ff0000; color: #fff; padding: 0px; margin: 0px;">Failed to process: Student not found in the system.</p>';
-        continue;
-      }
-      //display success message
-      echo '<p style="background-color: green; color: #fff; padding: 0px; margin: 0px;">Photo successfully updated for student: ' . $sudent->name . '</p>';
-      continue;
-    }
-
-
-    $student = $item->get_student();
-
-    if ($student != null) {
-      $old = $student->avatar;
-      $old_explode = explode('/', $old);
-      $old_file_name = end($old_explode);
-
-      if ($old_file_name != 'user.jpeg') {
-        $old = public_path('storage/' . $old);
-        if (file_exists($old)) {
-          unlink($old);
-        }
-      }
-
-      $item->student_id = $student->id;
-      $item->error_message = null;
-      $item->status = 'Success';
-      $item->save();
-      $student->avatar = $item->new_image_path;
-      $student->save();
-      //success display
-      echo '<p style="background-color: green; color: #fff; padding: 0px; margin: 0px;">Photo successfully updated for student: ' . $student->name . '</p>';
-    } else {
-      $item->status = 'Failed';
-      $item->error_message = 'Student not found';
-      $item->save();
-      //error display
-      echo '<p style="background-color: #ff0000; color: #fff; padding: 0px; margin: 0px;">Failed to process: Student not found in the system. File: ' . $item->file_name . '</p>';
-    }
-  }
-
-  $stats = BulkPhotoUploadItem::where([
-    'bulk_photo_upload_id' => $blk->id,
-  ])->groupBy('status')->select('status', DB::raw('count(*) as total'))->get();
-  foreach ($stats as $key => $stat) {
-    echo '<p style="background-color: #000; color: #fff; padding: 0px; margin: 0px;">' . $stat->status . ': ' . $stat->total . '</p>';
-  }
-  $failed = BulkPhotoUploadItem::where([
-    'bulk_photo_upload_id' => $blk->id,
-    'status' => 'Failed',
-  ])->get();
-  foreach ($failed as $key => $fail) {
-    echo '<p style="background-color: #ff0000; color: #fff; padding: 0px; margin: 0px;">File: ' . $fail->file_name . ' - ' . $fail->error_message . '</p>';
-  }
-
-  return "Done";
 });
 
 //make bulk-photo-upload-item-process
@@ -3564,41 +3282,6 @@ Route::get('bulk-photo-upload-item-process', function () {
 
   $service = app(BulkPhotoUploadService::class);
   return $service->processItem($item);
-
-  $id = ($_GET['id']);
-  $item = BulkPhotoUploadItem::find($id);
-  if ($item == null) {
-    return "Item not found";
-  }
-  $ent = Enterprise::find($item->enterprise_id);
-  if ($ent == null) {
-    return "Enterprise not found";
-  }
-  $student = $item->get_student();
-  if ($student == null) {
-    $item->status = 'Failed';
-    $item->error_message = 'Student not found';
-    $item->save();
-    return "Student not found";
-  }
-  $old = $student->avatar;
-  $old_explode = explode('/', $old);
-  $old_file_name = end($old_explode);
-
-  if ($old_file_name != 'user.jpeg') {
-    $old = public_path('storage/' . $old);
-    if (file_exists($old)) {
-      unlink($old);
-    }
-  }
-
-  $item->student_id = $student->id;
-  $item->error_message = null;
-  $item->status = 'Success';
-  $item->save();
-  $student->avatar = $item->new_image_path;
-  $student->save();
-  return "Success";
 });
 
 Route::get('photos-zip-generation', function () {

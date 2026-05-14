@@ -87,10 +87,8 @@ class ServiceSubscription extends Model
 
             $m->due_academic_year_id = $term->academic_year_id;
             $m->enterprise_id = $term->enterprise_id;
-            $quantity = ((int)($m->quantity));
-            if ($quantity < 0) {
-                $m->quantity = $quantity;
-            }
+            $quantity = (int) $m->quantity;
+            $m->quantity = $quantity < 1 ? 1 : $quantity;
             $m->total = $service->fee * $m->quantity;
             
             // Auto-copy inventory fields from Service (only if not explicitly set by form)
@@ -231,18 +229,12 @@ class ServiceSubscription extends Model
             $t->description = 'Generated from ' . $m->service->name . ' service subscription. REF: #' . $m->id . "";
             $t->save();
         } else {
+            // If this subscription was previously linked to transport, remove that link
             $t = TransportSubscription::where([
                 'service_subscription_id' => $m->id,
             ])->first();
-
-            if ($t != null) {
-                $t = TransportSubscription::where([
-                    'user_id' => $m->administrator_id,
-                    'term_id' => $m->due_term_id,
-                ])->first();
-                if ($t == null) {
-                    $t->delete();
-                }
+            if ($t !== null) {
+                $t->delete();
             }
         }
     }

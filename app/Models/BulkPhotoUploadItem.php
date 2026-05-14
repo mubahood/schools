@@ -2,13 +2,30 @@
 
 namespace App\Models;
 
-use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class BulkPhotoUploadItem extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'enterprise_id',
+        'academic_class_id',
+        'bulk_photo_upload_id',
+        'student_id',
+        'new_image_path',
+        'old_image_path',
+        'status',
+        'error_message',
+        'naming_type',
+        'file_name',
+        'compressed',
+        'original_size_kb',
+        'final_size_kb',
+        'mime_type',
+        'old_photo_deleted',
+    ];
 
     //on saving file_name , remove images/ from the file_name
     public function setFileNameAttribute($value)

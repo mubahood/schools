@@ -10,60 +10,46 @@ class BatchServiceSubscription extends Model
 {
     use HasFactory;
 
-    //setter for administrators
+    protected $fillable = [
+        'enterprise_id',
+        'service_id',
+        'quantity',
+        'total',
+        'due_academic_year_id',
+        'due_term_id',
+        'link_with',
+        'transport_route_id',
+        'trip_type',
+        'administrators',
+        'is_processed',
+        'processed_notes',
+        'success_count',
+        'fail_count',
+        'total_count',
+        'to_be_managed_by_inventory',
+        'items_to_be_offered',
+    ];
+
+    // ── Accessors / Mutators ─────────────────────────────────────────────────
+
     public function setAdministratorsAttribute($value)
     {
-        //check null
-        if ($value == null) {
+        if ($value === null || $value === '') {
             $this->attributes['administrators'] = json_encode([]);
             return;
         }
-
-        //check if it is an array
         if (is_array($value)) {
-            $this->attributes['administrators'] = json_encode($value);
+            $this->attributes['administrators'] = json_encode(array_values(array_filter($value)));
             return;
         }
-
-        //check if it is empty
-        if ($value == "") {
-            $this->attributes['administrators'] = json_encode([]);
-            return;
-        }
-
-        //check if it is already a json
-        if (json_decode($value) != null) {
-            $this->attributes['administrators'] = $value;
-            return;
-        }
-
-        $this->attributes['administrators'] = json_encode($value);
+        // Accept already-encoded JSON string
+        $decoded = json_decode($value, true);
+        $this->attributes['administrators'] = ($decoded !== null) ? $value : json_encode([]);
     }
 
-    //getter for administrators
     public function getAdministratorsAttribute($value)
     {
-        //first checkt
-        if ($value == null) {
-            return [];
-        }
-
-        //check if it is already an array
-        if (is_array($value)) {
-            return $value;
-        }
-        //check if not empty
-        if ($value == "") {
-            return [];
-        }
-
-        return json_decode($value);
-    }
-
-    // items_to_be_offered getter - decode JSON to array
-    public function getItemsToBeOfferedAttribute($value)
-    {
-        if ($value == null || $value == '') {
+        if ($value === null || $value === '') {
             return [];
         }
         if (is_array($value)) {
@@ -73,7 +59,6 @@ class BatchServiceSubscription extends Model
         return is_array($decoded) ? $decoded : [];
     }
 
-    // items_to_be_offered setter - encode array as JSON
     public function setItemsToBeOfferedAttribute($value)
     {
         if (is_array($value)) {
@@ -85,46 +70,53 @@ class BatchServiceSubscription extends Model
         }
     }
 
+    public function getItemsToBeOfferedAttribute($value)
+    {
+        if ($value === null || $value === '') {
+            return [];
+        }
+        if (is_array($value)) {
+            return $value;
+        }
+        $decoded = json_decode($value, true);
+        return is_array($decoded) ? $decoded : [];
+    }
+
+    // ── Lifecycle hooks ──────────────────────────────────────────────────────
+
     public static function boot()
     {
         parent::boot();
-         
-        self::creating(function ($m) {
 
+        self::creating(function ($m) {
             $term = Term::find($m->due_term_id);
-            if ($term == null) {
-                throw new Exception("Due term not found.", 1);
+            if ($term === null) {
+                throw new Exception("Due term not found.");
             }
             $service = Service::find($m->service_id);
-            if ($service == null) {
-                throw new Exception("Service Not Found.", 1);
+            if ($service === null) {
+                throw new Exception("Service not found.");
             }
- 
 
             $m->due_academic_year_id = $term->academic_year_id;
-            $m->enterprise_id = $term->enterprise_id;
-            $quantity = ((int)($m->quantity));
-            if ($quantity < 0) {
-                $m->quantity = $quantity;
-            }
-            $m->total = 0;
-            return $m;
+            $m->enterprise_id        = $term->enterprise_id;
+
+            // Quantity must be at least 1
+            $quantity   = (int) $m->quantity;
+            $m->quantity = $quantity < 1 ? 1 : $quantity;
+            $m->total   = 0; // Batch total is 0; per-subscriber totals are computed on processing
         });
 
-
         self::deleting(function ($m) {
-            // Delete child items
+            // Remove child inventory items
             $m->batchItems()->delete();
-            //service_subscription_id delete transport_subscription
-            TransportSubscription::where([
-                'service_subscription_id' => $m->id,
-            ])->delete();
-        }); 
+            // Note: TransportSubscriptions and ServiceSubscriptions created during processing
+            // manage their own cleanup through their own lifecycle hooks.
+        });
     }
 
-    /**
-     * Items to be offered (hasMany relationship for the form)
-     */
+    // ── Relationships ────────────────────────────────────────────────────────
+
     public function batchItems()
     {
         return $this->hasMany(BatchServiceSubscriptionItem::class);

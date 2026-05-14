@@ -48,7 +48,6 @@ class SubjectController extends AdminController
 
 
 
-        $u = Admin::user();
         $templateOptions = [
             'auto' => 'Auto by Subject',
             'science' => 'Science',
@@ -110,9 +109,7 @@ class SubjectController extends AdminController
             })
             ->sortable();
 
-        if ($u->isRole('dos') || $u->isRole('admin') || $u->isRole('hm')) {
-            $templateCol->editable('select', $templateOptions);
-        }
+        $templateCol->editable('select', $templateOptions);
 
         $grid->column('academic_class_id', __('Class'))
             ->display(function ($t) {
@@ -282,7 +279,18 @@ class SubjectController extends AdminController
                 $teachers
             );
 
+        $templateOptions = [
+            'auto' => 'Auto by Subject',
+            'science' => 'Science',
+            'mathematics' => 'Mathematics',
+            'language' => 'English / Language',
+            'generic' => 'General Purpose',
+        ];
 
+        $form->select('scheme_template', 'Scheme Template')
+            ->options($templateOptions)
+            ->default('auto')
+            ->rules('required');
 
         if (!$form->isCreating()) {
             $form->text('subject_name', __('Subject Name'))->rules('required');

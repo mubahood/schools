@@ -191,8 +191,12 @@ class SchemeWorkController extends AdminController
         $grid->filter(function ($filter) use ($u, $active_year, $active_term) {
             $filter->disableIdFilter();
             
-            // Filter by academic term
-            $filter->equal('term_filter', 'Academic Term')
+            // Filter by academic term — term_filter is not a real column; it is read
+            // by display callbacks via request()->get('term_filter'), so we use a
+            // no-op where closure to avoid "Unknown column 'term_filter'" errors.
+            $filter->where(function ($query) {
+                // intentionally empty — term_filter only drives display, not SQL
+            }, 'Academic Term', 'term_filter')
                 ->select(Term::where([
                     'enterprise_id' => $u->enterprise_id
                 ])->orderBy('is_active', 'desc')
@@ -292,6 +296,20 @@ class SchemeWorkController extends AdminController
                 return '<i class="fa fa-user"></i> ' . $t->name;
             })->sortable();
 
+        $templateOptions = [
+            'auto' => 'Auto by Subject',
+            'science' => 'Science',
+            'mathematics' => 'Mathematics',
+            'language' => 'English / Language',
+            'generic' => 'General Purpose',
+        ];
+
+        $grid->column('scheme_template', __('Scheme Template'))
+            ->display(function ($value) use ($templateOptions) {
+                $key = $value ?: 'auto';
+                return $templateOptions[$key] ?? $templateOptions['auto'];
+            })->sortable();
+
         // Scheme work statistics
         $grid->column('statistics', __('Scheme Work Statistics'))
             ->display(function () use ($active_term, $u) {
@@ -345,20 +363,32 @@ class SchemeWorkController extends AdminController
             ->display(function () {
                 $viewUrl = admin_url('schems-work-items?subject_id=' . $this->id);
                 $printUrl = url('scheme-of-work-print?id=' . $this->id);
-                
-                return '
+                $editTemplateUrl = admin_url('subjects/' . $this->id . '/edit');
+                $canEditTemplate = Admin::user()->isRole('admin') || Admin::user()->isRole('dos') || Admin::user()->isRole('hm');
+
+                $buttons = '
                     <div class="scheme-work-actions">
-                        <a href="#" class="btn btn-sm btn-add js-open-scheme-popup" data-subject-id="' . $this->id . '" data-subject-name="' . e($this->subject_name) . '" title="Add New Item">
+                        <a href="#" class="btn btn-sm btn-add js-open-scheme-popup" data-subject-id="' . $this->id . '" data-subject-name="' . e($this->subject_name) . '" data-scheme-template="' . e($this->scheme_template) . '" title="Add New Item">
                             <i class="fa fa-plus"></i> Add
                         </a>
                         <a href="' . $viewUrl . '" target="_blank" rel="noopener" class="btn btn-sm btn-view" title="View Items">
                             <i class="fa fa-list"></i> View
-                        </a>
+                        </a>';
+
+                if ($canEditTemplate) {
+                    $buttons .= '
+                        <a href="' . $editTemplateUrl . '" target="_blank" class="btn btn-sm btn-warning" title="Edit Printing Template">
+                            <i class="fa fa-pencil"></i> Template
+                        </a>';
+                }
+
+                $buttons .= '
                         <a href="' . $printUrl . '" target="_blank" class="btn btn-sm btn-print btn-icon" title="Print">
                             <i class="fa fa-print"></i>
                         </a>
-                    </div>
-                ';
+                    </div>';
+
+                return $buttons;
             });
 
         $grid->disableActions();
@@ -593,24 +623,32 @@ class SchemeWorkController extends AdminController
             return response()->json(['status' => false, 'message' => 'Unauthorized.'], 401);
         }
 
+        $subject = Subject::where('enterprise_id', $u->enterprise_id)
+            ->where('id', (int) $request->subject_id)
+            ->first();
+
+        if (!$subject) {
+            return response()->json(['status' => false, 'message' => 'Subject not found.'], 404);
+        }
+
         $validator = Validator::make($request->all(), [
-            'subject_id' => 'required|integer',
-            'term_id' => 'nullable|integer',
-            'week' => 'required|integer|min:1|max:18',
-            'period' => 'required|integer|min:1|max:10',
-            'theme' => 'required|string|min:2|max:255',
-            'topic' => 'required|string|min:2|max:255',
-            'sub_topic' => 'required|string|min:2|max:255',
-            'content' => 'required|string|min:3',
-            'competence_subject' => 'required|string|min:3',
-            'competence_language' => 'required|string|min:3',
-            'methods' => 'required|string|min:3',
-            'life_skills_values' => 'required|string|min:3',
-            'suggested_activity' => 'required|string|min:3',
-            'instructional_material' => 'required|string|min:2',
-            'references' => 'required|string|min:2',
-            'teacher_status' => 'nullable|in:Pending,Conducted,Skipped',
-            'teacher_comment' => 'nullable|string|max:2000',
+            'subject_id'             => 'required|integer',
+            'term_id'                => 'nullable|integer',
+            'week'                   => 'required|integer|min:1|max:18',
+            'period'                 => 'required|integer|min:1|max:10',
+            'theme'                  => 'nullable|string|max:255',
+            'topic'                  => 'nullable|string|max:255',
+            'sub_topic'              => 'nullable|string|max:255',
+            'content'                => 'nullable|string',
+            'competence_subject'     => 'nullable|string',
+            'competence_language'    => 'nullable|string',
+            'methods'                => 'nullable|string',
+            'life_skills_values'     => 'nullable|string',
+            'suggested_activity'     => 'nullable|string',
+            'instructional_material' => 'nullable|string',
+            'references'             => 'nullable|string',
+            'teacher_status'         => 'nullable|in:Pending,Conducted,Skipped',
+            'teacher_comment'        => 'nullable|string|max:2000',
         ]);
 
         if ($validator->fails()) {
@@ -663,7 +701,8 @@ class SchemeWorkController extends AdminController
         $item->sub_topic = trim((string) $request->sub_topic);
         $item->content = trim((string) $request->content);
         $item->competence_subject = trim((string) $request->competence_subject);
-        $item->competence_language = trim((string) $request->competence_language);
+        $tmpl = $subject->scheme_template ?: 'auto';
+        $item->competence_language = in_array($tmpl, ['auto', 'generic']) ? '' : trim((string) $request->competence_language);
         $item->methods = trim((string) $request->methods);
         $item->life_skills_values = trim((string) $request->life_skills_values);
         $item->suggested_activity = trim((string) $request->suggested_activity);

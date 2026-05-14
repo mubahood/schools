@@ -7,272 +7,277 @@
             size: A4 landscape;
             margin: 10mm 8mm 8mm 8mm;
         }
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: Arial, Helvetica, sans-serif;
-            font-size: 9px;
-            line-height: 1.18;
+            font-size: 8px;
+            line-height: 1.2;
             color: #000;
-            padding: 8px;
         }
 
-        /* === HEADER === */
-        .meta-line {
-            width: 100%;
-            margin-bottom: 3px;
-            font-size: 11px;
-            font-weight: 700;
-            font-style: italic;
+        /* ── HEADER ── */
+        .meta-table { width: 100%; margin-bottom: 3px; }
+        .meta-table td {
+            font-size: 10px; font-weight: bold;
+            font-style: italic; padding: 0;
         }
-        .meta-line td {
-            padding: 0;
-        }
-        .meta-line .meta-school {
-            color: #0a8f3f;
-            text-transform: uppercase;
-        }
-        .meta-line .meta-teacher {
-            color: #0a8f3f;
-            text-transform: uppercase;
-            text-align: right;
-        }
+        .meta-school  { color: #0a8f3f; text-transform: uppercase; }
+        .meta-teacher { color: #0a8f3f; text-transform: uppercase; text-align: right; }
         .term-line {
-            text-align: center;
-            color: #d10000;
-            font-size: 11px;
-            font-style: italic;
-            font-weight: 700;
-            text-transform: uppercase;
-            margin-bottom: 2px;
+            text-align: center; color: #d10000;
+            font-size: 11px; font-style: italic;
+            font-weight: bold; text-transform: uppercase; margin-bottom: 1px;
         }
         .subject-line {
-            text-align: center;
-            color: #0068bf;
-            font-size: 10.5px;
-            font-style: italic;
-            font-weight: 700;
-            text-transform: uppercase;
-            margin-bottom: 5px;
+            text-align: center; color: #0068bf;
+            font-size: 10px; font-style: italic;
+            font-weight: bold; text-transform: uppercase; margin-bottom: 4px;
         }
 
-        /* === DATA TABLE === */
+        /* ── TABLE ── */
         .scheme-table {
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
-            font-size: 7.8px;
-            line-height: 1.12;
+            font-size: 7px;
+            line-height: 1.15;
+            border: 1.5px solid #222;
         }
-        .scheme-table thead th {
-            background: #d9d9d9;
+        thead { display: table-header-group; }
+        tbody { display: table-row-group; }
+
+        .scheme-table th {
+            background-color: #c8d8ea;
             color: #000;
-            font-size: 6.8px;
-            font-weight: 700;
+            font-size: 6.2px;
+            font-weight: bold;
             text-transform: uppercase;
             text-align: center;
+            vertical-align: middle;
             padding: 2px 1px;
-            border: 1px solid #111;
-            white-space: normal;
-        }
-        .scheme-table tbody td {
-            padding: 1.5px 2px;
-            border: 1px solid #111;
-            vertical-align: top;
-            font-size: 7.6px;
+            border: 1px solid #333;
             word-wrap: break-word;
             overflow-wrap: break-word;
-            page-break-inside: avoid;
         }
+        .scheme-table th.th-group { background-color: #a8bedc; }
 
-        /* Column widths matching sample layout */
-        .col-wk { width: 2.4%; text-align: center; }
-        .col-pd { width: 2.3%; text-align: center; }
-        .col-theme { width: 4.5%; }
-        .col-topic { width: 6%; }
-        .col-subtopic { width: 6.3%; }
-        .col-content { width: 17.4%; }
-        .col-comp-sub { width: 7%; }
-        .col-comp-lang { width: 7%; }
-        .col-methods { width: 8.2%; }
-        .col-life-skills { width: 9.2%; }
-        .col-activities { width: 10%; }
-        .col-materials { width: 8.7%; }
-        .col-references { width: 8.1%; }
-        .col-rem { width: 3%; }
-
-        .vtext {
-            writing-mode: vertical-rl;
-            text-orientation: mixed;
-            direction: rtl;
-            transform: none;
-            text-align: center;
-            font-weight: 700;
-            letter-spacing: 0.25px;
-        }
-
-        .text-c { text-align: center; }
-        .text-l { text-align: left; }
-        .text-muted { color: #999; }
-
-        /* Footer */
-        .footer {
-            margin-top: 6px;
+        .scheme-table td {
+            padding: 1.5px 2px;
+            border: 1px solid #555;
+            vertical-align: top;
             font-size: 7px;
-            color: #888;
-            text-align: right;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            overflow: hidden;
+        }
+
+        .italic-prefix { color: #555; font-style: italic; font-size: 6.5px; }
+        .empty-dash    { color: #bbb; }
+
+        /* ── FOOTER ── */
+        .footer {
+            margin-top: 4px; font-size: 6.5px;
+            color: #888; text-align: right;
         }
     </style>
 </head>
 <body>
 
-    {{-- ===== HEADER ===== --}}
+@php
+    $isLowerPrimary = in_array($sub->scheme_template ?? 'auto', ['auto', 'generic']);
+    $totalColumns   = $isLowerPrimary ? 13 : 14;
 
-    <table class="meta-line">
+    $termNameText = $term->name_text ?? '';
+    $currentYear  = date('Y');
+    $titleTerm    = (strpos((string) $termNameText, (string) $currentYear) !== false)
+                    ? $termNameText
+                    : trim($termNameText . ' ' . $currentYear);
+@endphp
+
+{{-- ── HEADER ── --}}
+<table class="meta-table">
+    <tr>
+        <td>SCHOOL: <span class="meta-school">{{ $ent->name ?? '' }}</span></td>
+        <td class="meta-teacher">TEACHER: {{ strtoupper(optional($sub->teacher)->name ?? 'N/A') }}</td>
+    </tr>
+</table>
+<div class="term-line">{{ strtoupper($class->name ?? '') }} SCHEME OF WORK, {{ strtoupper($titleTerm) }}</div>
+<div class="subject-line">{{ strtoupper($sub->subject_name ?? $sub->name ?? '') }}</div>
+
+{{-- ── DATA TABLE ── --}}
+<table class="scheme-table" width="100%">
+    {{--
+        colgroup widths (HTML attribute + inline style — belt & suspenders for DomPDF).
+        Lower primary  (13 cols): 2.8+2.5+5.0+6.0+6.5+14.5+15.2+9+9+9+8.5+8+4 = 100%
+        Upper primary  (14 cols): 2.8+2.5+5.0+6.0+6.5+14.5+7.6+7.6+9+9+9+8.5+8+4 = 100%
+    --}}
+    <colgroup>
+        <col width="2.8%"  style="width:2.8%">
+        <col width="2.5%"  style="width:2.5%">
+        <col width="5.0%"  style="width:5.0%">
+        <col width="6.0%"  style="width:6.0%">
+        <col width="6.5%"  style="width:6.5%">
+        <col width="14.5%" style="width:14.5%">
+        @if($isLowerPrimary)
+            <col width="15.2%" style="width:15.2%">
+        @else
+            <col width="7.6%"  style="width:7.6%">
+            <col width="7.6%"  style="width:7.6%">
+        @endif
+        <col width="9.0%"  style="width:9.0%">
+        <col width="9.0%"  style="width:9.0%">
+        <col width="9.0%"  style="width:9.0%">
+        <col width="8.5%"  style="width:8.5%">
+        <col width="8.0%"  style="width:8.0%">
+        <col width="4.0%"  style="width:4.0%">
+    </colgroup>
+
+    {{--
+        THEAD — CRITICAL: For lower primary (single header row) do NOT use rowspan="2".
+        DomPDF steals the first tbody row to fill the phantom "second header row" when
+        rowspan="2" appears in a thead with only one <tr>, pushing Week-1 off to the right.
+        Upper primary genuinely has 2 header rows so rowspan="2" is correct there.
+    --}}
+    <thead>
+        @if($isLowerPrimary)
+        {{-- Single-row header: no rowspan --}}
         <tr>
-            <td>
-                SCHOOL: <span class="meta-school">{{ $ent->name ?? '' }}</span>
-            </td>
-            <td class="meta-teacher">
-                TEACHER: {{ strtoupper(optional($sub->teacher)->name ?? 'N/A') }}
-            </td>
+            <th style="width:2.8%">WK</th>
+            <th style="width:2.5%">PD</th>
+            <th style="width:5.0%">THEME</th>
+            <th style="width:6.0%">TOPIC</th>
+            <th style="width:6.5%">SUB<br>TOPIC</th>
+            <th style="width:14.5%">CONTENT</th>
+            <th style="width:15.2%">COMPETENCES</th>
+            <th style="width:9.0%">METHODS&nbsp;&amp;<br>TECHNIQUES</th>
+            <th style="width:9.0%">INDICATORS OF<br>LIFE SKILLS<br>&amp;&nbsp;VALUES</th>
+            <th style="width:9.0%">SUGGESTED<br>ACTIVITIES</th>
+            <th style="width:8.5%">INSTRUCTIONAL<br>MATERIALS</th>
+            <th style="width:8.0%">REFERENCES</th>
+            <th style="width:4.0%">REM</th>
         </tr>
-    </table>
-    <div class="term-line">{{ $class->name ?? '' }} SCHEME OF WORK, {{ $term->name_text ?? '' }} {{ date('Y') }}</div>
-    <div class="subject-line">{{ strtoupper($sub->subject_name ?? $sub->name ?? '') }}</div>
+        @else
+        {{-- Two-row header for upper primary --}}
+        <tr>
+            <th rowspan="2" style="width:2.8%">WK</th>
+            <th rowspan="2" style="width:2.5%">PD</th>
+            <th rowspan="2" style="width:5.0%">THEME</th>
+            <th rowspan="2" style="width:6.0%">TOPIC</th>
+            <th rowspan="2" style="width:6.5%">SUB<br>TOPIC</th>
+            <th rowspan="2" style="width:14.5%">CONTENT</th>
+            <th class="th-group" colspan="2">COMPETENCES</th>
+            <th rowspan="2" style="width:9.0%">METHODS&nbsp;&amp;<br>TECHNIQUES</th>
+            <th rowspan="2" style="width:9.0%">LIFE SKILLS<br>&amp;&nbsp;VALUES</th>
+            <th rowspan="2" style="width:9.0%">SUGGESTED<br>ACTIVITIES</th>
+            <th rowspan="2" style="width:8.5%">INSTRUCTIONAL<br>MATERIALS</th>
+            <th rowspan="2" style="width:8.0%">REFERENCES</th>
+            <th rowspan="2" style="width:4.0%">REM</th>
+        </tr>
+        <tr>
+            <th style="width:7.6%">SUBJECT</th>
+            <th style="width:7.6%">LANGUAGE</th>
+        </tr>
+        @endif
+    </thead>
 
-    {{-- ===== DATA TABLE ===== --}}
-    <table class="scheme-table">
-        <thead>
-            <tr>
-                <th class="col-wk" rowspan="2">WK</th>
-                <th class="col-pd" rowspan="2">PD</th>
-                <th class="col-theme" rowspan="2">THEME</th>
-                <th class="col-topic" rowspan="2">TOPIC</th>
-                <th class="col-subtopic" rowspan="2">SUBTOPIC</th>
-                <th class="col-content" rowspan="2">CONTENT</th>
-                <th colspan="2">COMPETENCES</th>
-                <th class="col-methods" rowspan="2">METHODS &amp;<br>TECHNIQUES</th>
-                <th class="col-life-skills" rowspan="2">LIFE SKILLS &amp;<br>VALUES</th>
-                <th class="col-activities" rowspan="2">SUGGESTED<br>ACTIVITIES</th>
-                <th class="col-materials" rowspan="2">INSTRUCTIONAL<br>MATERIALS</th>
-                <th class="col-references" rowspan="2">REFERENCES</th>
-                <th class="col-rem" rowspan="2">REM</th>
-            </tr>
-            <tr>
-                <th class="col-comp-sub">SUBJECT</th>
-                <th class="col-comp-lang">LANGUAGE</th>
-            </tr>
-        </thead>
-        <tbody>
+    <tbody>
+        @php
+            $asPrintable = function ($text) {
+                if ($text === null) return '<span class="empty-dash">&mdash;</span>';
+                $raw = trim((string) $text);
+                if ($raw === '') return '<span class="empty-dash">&mdash;</span>';
+                $n = preg_replace('/<\s*br\s*\/?\s*>/i', "\n", $raw);
+                $n = preg_replace('/<\s*\/?\s*p[^>]*>/i', "\n", $n);
+                $n = preg_replace('/<\s*\/?\s*div[^>]*>/i', "\n", $n);
+                $n = preg_replace('/<\s*li[^>]*>/i', "\n\xE2\x80\xa2 ", $n);
+                $n = preg_replace('/<\s*\/\s*li\s*>/i', '', $n);
+                $n = strip_tags($n);
+                $n = preg_replace("/\n{3,}/", "\n\n", $n);
+                $n = trim($n);
+                return $n === '' ? '<span class="empty-dash">&mdash;</span>' : nl2br(e($n));
+            };
+
+            $sortedItems = $items->sortBy(function ($i) {
+                return sprintf('%03d-%03d-%s-%s',
+                    (int) ($i->week   ?? 0),
+                    (int) ($i->period ?? 0),
+                    strtolower(trim((string) ($i->theme ?? ''))),
+                    strtolower(trim((string) ($i->topic ?? '')))
+                );
+            })->values();
+        @endphp
+
+        @forelse ($sortedItems as $item)
             @php
-                $asPrintable = function ($text) {
-                    if ($text === null) {
-                        return '—';
-                    }
+                $idx  = $loop->index;
+                $prev = $idx > 0 ? $sortedItems[$idx - 1] : null;
 
-                    $raw = trim((string) $text);
-                    if ($raw === '') {
-                        return '—';
-                    }
+                $curWk    = (string) ($item->week  ?? '0');
+                $curTheme = trim((string) ($item->theme ?? ''));
+                $curTopic = trim((string) ($item->topic ?? ''));
 
-                    $normalized = preg_replace('/<\s*br\s*\/?\s*>/i', "\n", $raw);
-                    $normalized = preg_replace('/<\s*\/\s*p\s*>/i', "\n", $normalized);
-                    $normalized = preg_replace('/<\s*p[^>]*>/i', '', $normalized);
-                    $normalized = preg_replace('/<\s*\/\s*div\s*>/i', "\n", $normalized);
-                    $normalized = preg_replace('/<\s*div[^>]*>/i', '', $normalized);
-                    $normalized = preg_replace('/<\s*li[^>]*>/i', "\n- ", $normalized);
-                    $normalized = preg_replace('/<\s*\/\s*li\s*>/i', '', $normalized);
-                    $normalized = strip_tags($normalized);
-                    $normalized = preg_replace("/\n{2,}/", "\n", $normalized);
-                    $normalized = trim($normalized);
+                $prevWk    = $prev ? (string) ($prev->week  ?? '0') : null;
+                $prevTheme = $prev ? trim((string) ($prev->theme ?? '')) : null;
+                $prevTopic = $prev ? trim((string) ($prev->topic ?? '')) : null;
 
-                    if ($normalized === '') {
-                        return '—';
-                    }
+                $contWk    = $prev && $prevWk    === $curWk;
+                $contTheme = $contWk  && $prevTheme === $curTheme;
+                $contTopic = $contTheme && $prevTopic === $curTopic;
 
-                    return nl2br(e($normalized));
-                };
+                $rawContent    = trim((string) ($item->content ?? $item->supervisor_comment ?? ''));
+                $rawLifeSkills = trim((string) ($item->life_skills_values ?? $item->skills ?? ''));
+                $compSub       = trim((string) ($item->competence_subject  ?? ''));
+                $compLang      = trim((string) ($item->competence_language ?? ''));
+                $sep           = ($compSub !== '' && $compLang !== '') ? "\n" : '';
+                $cellCompAll   = trim($compSub . $sep . $compLang) ?: null;
 
-                $sortedItems = $items->sortBy(function ($i) {
-                    return sprintf(
-                        '%03d-%03d-%s-%s',
-                        (int) ($i->week ?? 0),
-                        (int) ($i->period ?? 0),
-                        strtolower(trim((string) ($i->theme ?? ''))),
-                        strtolower(trim((string) ($i->topic ?? '')))
-                    );
-                })->values();
+                /* Inline styles for WK/THEME/TOPIC visual merge (no-class approach = safer in DomPDF) */
+                $wkBg    = 'background-color:#dce8f5;text-align:center;vertical-align:middle;font-weight:bold;font-size:8px;';
+                $themeBg = 'background-color:#eaf1f9;text-align:center;vertical-align:middle;font-weight:bold;font-size:6.5px;';
+                $topicBg = 'background-color:#f2f7fc;text-align:center;vertical-align:middle;font-weight:bold;font-size:6.5px;';
 
-                $weekCounts = [];
-                $themeCounts = [];
-                $topicCounts = [];
-
-                foreach ($sortedItems as $row) {
-                    $wkKey = (string) ($row->week ?? '0');
-                    $themeKey = $wkKey . '|' . trim((string) ($row->theme ?? ''));
-                    $topicKey = $themeKey . '|' . trim((string) ($row->topic ?? ''));
-
-                    $weekCounts[$wkKey] = ($weekCounts[$wkKey] ?? 0) + 1;
-                    $themeCounts[$themeKey] = ($themeCounts[$themeKey] ?? 0) + 1;
-                    $topicCounts[$topicKey] = ($topicCounts[$topicKey] ?? 0) + 1;
-                }
-
-                $weekRendered = [];
-                $themeRendered = [];
-                $topicRendered = [];
+                $wkBorder    = $contWk    ? 'border-top:none;'  : '';
+                $themeBorder = $contTheme ? 'border-top:none;'  : '';
+                $topicBorder = $contTopic ? 'border-top:none;'  : '';
             @endphp
 
-            @forelse ($sortedItems as $item)
-                <tr>
-                    @php
-                        $wkKey = (string) ($item->week ?? '0');
-                        $themeKey = $wkKey . '|' . trim((string) ($item->theme ?? ''));
-                        $topicKey = $themeKey . '|' . trim((string) ($item->topic ?? ''));
-                    @endphp
+            <tr>
+                <td style="{{ $wkBg }}{{ $wkBorder }}">{{ $contWk ? '' : $item->week }}</td>
+                <td style="text-align:center;vertical-align:middle;">{{ $item->period }}</td>
+                <td style="{{ $themeBg }}{{ $themeBorder }}">{{ $contTheme ? '' : strtoupper($curTheme ?: '—') }}</td>
+                <td style="{{ $topicBg }}{{ $topicBorder }}">{{ $contTopic ? '' : strtoupper($curTopic ?: '—') }}</td>
 
-                    @if (!isset($weekRendered[$wkKey]))
-                        <td class="col-wk text-c" rowspan="{{ $weekCounts[$wkKey] }}"><strong>{{ $item->week }}</strong></td>
-                        @php $weekRendered[$wkKey] = true; @endphp
-                    @endif
+                <td>{!! $asPrintable($item->sub_topic ?? null) !!}</td>
 
-                    <td class="col-pd text-c">{{ $item->period }}</td>
+                <td>@if($isLowerPrimary && $rawContent !== '')<span class="italic-prefix">The learner;</span><br>@endif{!! $asPrintable($rawContent ?: null) !!}</td>
 
-                    @if (!isset($themeRendered[$themeKey]))
-                        <td class="col-theme text-l" rowspan="{{ $themeCounts[$themeKey] }}"><div class="vtext">{{ strtoupper($item->theme ?? '—') }}</div></td>
-                        @php $themeRendered[$themeKey] = true; @endphp
-                    @endif
+                @if($isLowerPrimary)
+                    <td>{!! $asPrintable($cellCompAll) !!}</td>
+                @else
+                    <td>{!! $asPrintable($item->competence_subject ?? $item->competence ?? null) !!}</td>
+                    <td>{!! $asPrintable($item->competence_language ?? null) !!}</td>
+                @endif
 
-                    @if (!isset($topicRendered[$topicKey]))
-                        <td class="col-topic text-l" rowspan="{{ $topicCounts[$topicKey] }}"><div class="vtext">{{ strtoupper($item->topic ?? '—') }}</div></td>
-                        @php $topicRendered[$topicKey] = true; @endphp
-                    @endif
+                <td>{!! $asPrintable($item->methods ?? null) !!}</td>
 
-                    <td class="col-subtopic text-l">{!! $asPrintable($item->sub_topic ?? '—') !!}</td>
-                    <td class="col-content text-l">{!! $asPrintable($item->content ?? $item->supervisor_comment ?? '—') !!}</td>
-                    <td class="col-comp-sub text-l">{!! $asPrintable($item->competence_subject ?? $item->competence ?? '—') !!}</td>
-                    <td class="col-comp-lang text-l">{!! $asPrintable($item->competence_language ?? '—') !!}</td>
-                    <td class="col-methods text-l">{!! $asPrintable($item->methods ?? '—') !!}</td>
-                    <td class="col-life-skills text-l">{!! $asPrintable($item->life_skills_values ?? $item->skills ?? '—') !!}</td>
-                    <td class="col-activities text-l">{!! $asPrintable($item->suggested_activity ?? '—') !!}</td>
-                    <td class="col-materials text-l">{!! $asPrintable($item->instructional_material ?? '—') !!}</td>
-                    <td class="col-references text-l">{!! $asPrintable($item->references ?? '—') !!}</td>
-                    <td class="col-rem text-l">{!! $asPrintable($item->teacher_comment ?? '—') !!}</td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="14" class="text-c" style="padding: 8px; color: #999;">No scheme work items found for this subject and term.</td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
+                <td>@if($isLowerPrimary && $rawLifeSkills !== '')<span class="italic-prefix">Indicators of</span><br>@endif{!! $asPrintable($rawLifeSkills ?: null) !!}</td>
 
-    <div class="footer">
-        Printed on {{ date('d M Y') }} &nbsp;|&nbsp; {{ $ent->name }}
-    </div>
+                <td>{!! $asPrintable($item->suggested_activity ?? null) !!}</td>
+                <td>{!! $asPrintable($item->instructional_material ?? null) !!}</td>
+                <td>{!! $asPrintable($item->references ?? null) !!}</td>
+                <td>{!! $asPrintable($item->teacher_comment ?? null) !!}</td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="{{ $totalColumns }}" style="padding:10px;text-align:center;color:#999;font-style:italic;">
+                    No scheme work items found for this subject and term.
+                </td>
+            </tr>
+        @endforelse
+    </tbody>
+</table>
+
+<div class="footer">Printed on {{ date('d M Y') }} &nbsp;|&nbsp; {{ $ent->name ?? '' }}</div>
 
 </body>
 </html>
