@@ -9,7 +9,7 @@
  * Instructions:
  * 1. Run: php add_attendance_menu.php
  * 2. The attendance dashboard will appear in the admin menu
- * 3. Access it at: /attendance-dashboard
+ * 3. Access it at: /attendance-dashboard new
  */
 
 require_once 'vendor/autoload.php';
