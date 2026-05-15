@@ -1991,10 +1991,15 @@ class Utils  extends Model
 
         $body = null;
 
+        $defaultHeaders = [
+            'User-Agent' => 'Mozilla/5.0 (compatible; SchoolDynamics/1.0; +https://schooldynamics.ug)',
+            'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        ];
+
         // Strategy 1: Guzzle with forced IPv4 (fixes shared hosting IPv6 routing issues)
         echo "<pre>Trying Strategy 1: Guzzle + forced IPv4...</pre>";
         try {
-            $client = new \GuzzleHttp\Client();
+            $client = new \GuzzleHttp\Client(['headers' => $defaultHeaders]);
             $response = $client->get($url, [
                 'verify'          => false,
                 'timeout'         => 120,
@@ -2016,7 +2021,7 @@ class Utils  extends Model
                 $ip = gethostbyname('schoolpay.co.ug');
                 if ($ip && $ip !== 'schoolpay.co.ug') {
                     echo "<pre>Resolved schoolpay.co.ug to {$ip}</pre>";
-                    $client = new \GuzzleHttp\Client();
+                    $client = new \GuzzleHttp\Client(['headers' => $defaultHeaders]);
                     $response = $client->get($url, [
                         'verify'          => false,
                         'timeout'         => 120,
@@ -2044,6 +2049,8 @@ class Utils  extends Model
                     'http' => [
                         'timeout' => 120,
                         'ignore_errors' => true,
+                        'user_agent' => 'Mozilla/5.0 (compatible; SchoolDynamics/1.0; +https://schooldynamics.ug)',
+                        'header' => "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n",
                     ],
                     'ssl' => [
                         'verify_peer'      => false,

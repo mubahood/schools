@@ -1,0 +1,44 @@
+name: Deploy to schooldynamics.ug
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install sshpass and rsync
+        run: sudo apt-get install -y sshpass rsync
+
+      - name: Rsync files to server
+        run: |
+          sshpass -p '${{ secrets.SSH_PASSWORD }}' rsync -azr --delete \
+            --exclude='.git/' \
+            --exclude='.env' \
+            --exclude='storage/app/' \
+            --exclude='storage/logs/' \
+            --exclude='public/storage' \
+            -e "ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=password -o IdentitiesOnly=yes -o KexAlgorithms=diffie-hellman-group-exchange-sha256" \
+            ./ schooics@162.241.194.81:/home4/schooics/public_html/
+
+      - name: Run post-deploy commands
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 162.241.194.81
+          username: schooics
+          password: ${{ secrets.SSH_PASSWORD }}
+          use_insecure_cipher: true
+          script: |
+            cd /home4/schooics/public_html
+            php artisan migrate --force 2>&1 || echo "Migration failed or nothing to migrate"
+            php artisan config:cache 2>&1 || true
+            php artisan route:cache 2>&1 || true
+            php artisan view:cache 2>&1 || true
+            php artisan queue:restart 2>&1 || true
+            echo "Deployed at $(date)"

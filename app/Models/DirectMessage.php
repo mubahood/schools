@@ -113,6 +113,10 @@ class DirectMessage extends Model
                 'timeout' => 30,
                 'connect_timeout' => 15,
                 'allow_redirects' => true,
+                'headers' => [
+                    'User-Agent' => 'Mozilla/5.0 (compatible; SchoolDynamics/1.0; +https://schooldynamics.ug)',
+                    'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                ],
                 'curl' => [
                     CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
                 ],
@@ -578,6 +582,10 @@ class DirectMessage extends Model
                 'timeout' => 30,
                 'connect_timeout' => 15,
                 'allow_redirects' => true,
+                'headers' => [
+                    'User-Agent' => 'Mozilla/5.0 (compatible; SchoolDynamics/1.0; +https://schooldynamics.ug)',
+                    'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                ],
                 'curl' => [
                     CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
                 ],
