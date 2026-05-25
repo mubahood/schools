@@ -240,6 +240,9 @@ Route::group([
     // Progressive Assessment Module
     $router->resource('progressive-assessments', ProgressiveAssessmentController::class);
     $router->resource('student-test-records', StudentTestRecordController::class);
+    // Dashboard MUST come before resource route
+    $router->get('pa-report-card-printing', 'StudentProgressiveReportController@dashboard')
+        ->name('pa-report-card-printing');
     $router->get('student-progressive-reports/{id}/generate-pdf', 'StudentProgressiveReportController@generatePdf')
         ->name('student-progressive-reports.generate-pdf');
     $router->resource('student-progressive-reports', StudentProgressiveReportController::class);

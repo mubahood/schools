@@ -3508,6 +3508,90 @@ Route::get('generate-report-cards-pdf', function () {
   die('DONE!');
 });
 
+// ── Progressive Assessment: single PDF generate + print ─────────────────────
+Route::get('pa-generate-pdf', function () {
+    set_time_limit(-1);
+    ini_set('memory_limit', '-1');
+    $rep = \App\Models\StudentProgressiveReport::find($_GET['id'] ?? 0);
+    if (!$rep) throw new \Exception('Report not found.');
+    $name = $rep->download_self();
+    return redirect(url('storage/files/' . $name . '?rand=' . rand(1, 100000)));
+});
+
+// Stream a single report card PDF directly (without saving to disk)
+Route::get('pa-print', function () {
+    set_time_limit(-1);
+    ini_set('memory_limit', '-1');
+    $rep = \App\Models\StudentProgressiveReport::find($_GET['id'] ?? 0);
+    if (!$rep) throw new \Exception('Report not found.');
+    $pa = $rep->progressive_assessment;
+    if (!$pa) throw new \Exception('Assessment not found.');
+    $viewData = [
+        'items'      => collect([$rep]),
+        'ent'        => $pa->enterprise,
+        'assessment' => $pa,
+    ];
+    $pdf = \Illuminate\Support\Facades\App::make('dompdf.wrapper');
+    $pdf->setPaper('A4', 'landscape');
+    $pdf->loadHTML(view('progressive-assessment.print', $viewData));
+    return $pdf->stream('report-card.pdf');
+});
+
+// ── Progressive Assessment: generate ALL PDFs for a class ───────────────────
+Route::get('pa-generate-all-pdfs', function () {
+    set_time_limit(-1);
+    ini_set('memory_limit', '-1');
+    $paId    = (int) ($_GET['pa_id']    ?? 0);
+    $classId = (int) ($_GET['class_id'] ?? 0);
+
+    $query = \App\Models\StudentProgressiveReport::where('progressive_assessment_id', $paId);
+    if ($classId) $query->where('academic_class_id', $classId);
+    $reports = $query->orderBy('position')->get();
+
+    $i = 0;
+    foreach ($reports as $rep) {
+        if (!$rep->owner) continue;
+        $i++;
+        try {
+            $rep->download_self();
+            $url = url('storage/files/' . $rep->pdf_url);
+            echo $i . '. ' . htmlspecialchars($rep->owner->name) . ' — <a href="' . $url . '" target="_blank">Download</a><br>';
+        } catch (\Throwable $e) {
+            echo $i . '. ERROR for ' . htmlspecialchars($rep->owner->name ?? '?') . ': ' . $e->getMessage() . '<br>';
+        }
+        flush();
+    }
+    die('<br><strong>Done! ' . $i . ' PDFs generated.</strong>');
+});
+
+// ── Progressive Assessment: batch-print all cards for a class as one PDF ────
+Route::get('pa-batch-print', function () {
+    set_time_limit(-1);
+    ini_set('memory_limit', '-1');
+    $paId    = (int) ($_GET['pa_id']    ?? 0);
+    $classId = (int) ($_GET['class_id'] ?? 0);
+
+    $pa = \App\Models\ProgressiveAssessment::find($paId);
+    if (!$pa) throw new \Exception('Progressive Assessment not found.');
+
+    $query = \App\Models\StudentProgressiveReport::where('progressive_assessment_id', $paId);
+    if ($classId) $query->where('academic_class_id', $classId);
+    $reports = $query->orderBy('position')->get();
+
+    if ($reports->isEmpty()) throw new \Exception('No reports found for this class.');
+
+    $viewData = [
+        'items'      => $reports,
+        'ent'        => $pa->enterprise,
+        'assessment' => $pa,
+    ];
+
+    $pdf = \Illuminate\Support\Facades\App::make('dompdf.wrapper');
+    $pdf->setPaper('A4', 'landscape');
+    $pdf->loadHTML(view('progressive-assessment.print', $viewData));
+    return $pdf->stream('batch-report-cards.pdf');
+});
+
 Route::get('curl-test', function () {
     return view('curl-test');
 });
