@@ -51,13 +51,23 @@ class AddProgressiveAssessmentAdminMenus extends Migration
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+            [
+                'parent_id'  => 41,
+                'order'      => $order + 5,
+                'title'      => 'Test Performance Stats',
+                'icon'       => 'fa-bar-chart',
+                'uri'        => 'pa-stats',
+                'permission' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ]);
     }
 
     public function down()
     {
         DB::table('admin_menu')
-            ->whereIn('uri', ['progressive-assessments', 'student-test-records', 'student-progressive-reports', 'pa-report-card-printing'])
+            ->whereIn('uri', ['progressive-assessments', 'student-test-records', 'student-progressive-reports', 'pa-report-card-printing', 'pa-stats'])
             ->delete();
     }
 }
