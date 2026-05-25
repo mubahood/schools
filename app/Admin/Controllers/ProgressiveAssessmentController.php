@@ -88,7 +88,7 @@ class ProgressiveAssessmentController extends AdminController
         }
 
         // Grading scales
-        $scales = GradingScale::pluck('name', 'id');
+        $scales = GradingScale::where('enterprise_id', $u->enterprise_id)->pluck('name', 'id');
 
         // Classes
         $year = $u->ent->active_academic_year();
