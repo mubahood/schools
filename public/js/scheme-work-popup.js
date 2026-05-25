@@ -48,32 +48,60 @@
     }
 
     function isLowerPrimaryTemplate(template) {
-        if (!template) return false;
+        if (!template) return true;
         template = String(template).toLowerCase();
-        return template === 'auto' || template === 'generic';
+        if (template === 'upper') return false;
+        return template === 'lower' || template === 'auto' || template === 'generic';
     }
 
     function configureSchemePopup(template) {
-        var lower = isLowerPrimaryTemplate(template);
-        var subjectField = document.querySelector('#scheme-popup-form [name="competence_subject"]');
+        var tpl          = String(template || '').toLowerCase();
+        var lower        = isLowerPrimaryTemplate(template);
+        var isLangUpper  = !lower && tpl === 'language';
+        // Single competence: lower section OR language/English upper
+        var singleComp   = lower || isLangUpper;
+
+        // Topic field — hide only for lower (language upper keeps Topic)
+        var topicField = document.querySelector('#scheme-popup-form [name="topic"]');
+        if (topicField) {
+            var topicContainer = topicField.closest('.col-md-6, .col-md-12');
+            if (topicContainer) topicContainer.style.display = lower ? 'none' : '';
+        }
+
+        // Sub Topic / Sub Theme label
+        var subTopicField = document.querySelector('#scheme-popup-form [name="sub_topic"]');
+        if (subTopicField) {
+            var subTopicLabel = subTopicField.previousElementSibling;
+            if (subTopicLabel && subTopicLabel.tagName.toLowerCase() === 'label') {
+                subTopicLabel.textContent = lower ? 'Sub Theme' : 'Sub Topic';
+            }
+        }
+
+        // Competence fields
+        var subjectField  = document.querySelector('#scheme-popup-form [name="competence_subject"]');
         var languageField = document.querySelector('#scheme-popup-form [name="competence_language"]');
 
         if (subjectField) {
             var subjectLabel = subjectField.previousElementSibling;
             if (subjectLabel && subjectLabel.tagName.toLowerCase() === 'label') {
-                subjectLabel.textContent = lower ? 'Competences' : 'Competence - Subject';
+                subjectLabel.textContent = singleComp ? 'Competence' : 'Competence - Subject';
             }
             subjectField.required = false;
         }
 
         if (languageField) {
             var languageContainer = languageField.closest('.col-md-6, .col-md-12');
-            if (languageContainer) {
-                languageContainer.style.display = lower ? 'none' : '';
-            }
+            if (languageContainer) languageContainer.style.display = singleComp ? 'none' : '';
             languageField.required = false;
-            if (lower) {
-                languageField.value = '';
+            if (singleComp) languageField.value = '';
+        }
+
+        // Life Skills label — always "Indicators of…" to match the PDF column header
+        var lifeSkillsField = document.querySelector('#scheme-popup-form [name="life_skills_values"]');
+        if (lifeSkillsField) {
+            var lifeSkillsLabel = lifeSkillsField.previousElementSibling;
+            if (lifeSkillsLabel && lifeSkillsLabel.tagName.toLowerCase() === 'label') {
+                lifeSkillsLabel.innerHTML = 'Indicators of Life Skills &amp; Values';
             }
         }
     }

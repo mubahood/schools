@@ -84,8 +84,19 @@
 <body>
 
 @php
-    $isLowerPrimary = in_array($sub->scheme_template ?? 'auto', ['auto', 'generic']);
-    $totalColumns   = $isLowerPrimary ? 13 : 14;
+    $tmpl = $sub->scheme_template ?? 'auto';
+    if (in_array($tmpl, ['lower', 'generic'])) {
+        $isLowerPrimary = true;
+    } elseif (in_array($tmpl, ['upper', 'science', 'mathematics', 'language'])) {
+        $isLowerPrimary = false;
+    } else {
+        // 'auto' — infer from class name (P1/P.1/Primary 1 … → upper)
+        $_cn = trim((string) ($class->name ?? $class->name_text ?? ''));
+        $isLowerPrimary = !preg_match('/\bp\.?\s*[1-9]\b|\bprimary\s*[1-9]\b/i', $_cn);
+    }
+    // 'language' template: upper layout (has TOPIC/SUB TOPIC) but single Competence column
+    $splitCompetence = !$isLowerPrimary && $tmpl !== 'language';
+    $totalColumns    = $isLowerPrimary ? 12 : ($splitCompetence ? 14 : 13);
 
     $termNameText = $term->name_text ?? '';
     $currentYear  = date('Y');
@@ -108,28 +119,57 @@
 <table class="scheme-table" width="100%">
     {{--
         colgroup widths (HTML attribute + inline style — belt & suspenders for DomPDF).
-        Lower primary  (13 cols): 2.8+2.5+5.0+6.0+6.5+14.5+15.2+9+9+9+8.5+8+4 = 100%
-        Upper primary  (14 cols): 2.8+2.5+5.0+6.0+6.5+14.5+7.6+7.6+9+9+9+8.5+8+4 = 100%
+        Lower            (12 cols): 3.0+2.5+6.5+8.5+15.0+15.0+9.0+10.0+9.0+8.5+8.0+5.0     = 100%
+        Language upper   (13 cols): 2.8+2.5+5.0+6.0+6.5+14.5+15.2+9.0+9.0+9.0+8.5+8.0+4.0  = 100%
+        Standard upper   (14 cols): 2.8+2.5+5.0+6.0+6.5+14.5+7.6+7.6+9.0+9.0+9.0+8.5+8.0+4.0 = 100%
     --}}
     <colgroup>
-        <col width="2.8%"  style="width:2.8%">
-        <col width="2.5%"  style="width:2.5%">
-        <col width="5.0%"  style="width:5.0%">
-        <col width="6.0%"  style="width:6.0%">
-        <col width="6.5%"  style="width:6.5%">
-        <col width="14.5%" style="width:14.5%">
         @if($isLowerPrimary)
+            {{-- 12 cols --}}
+            <col width="3.0%"  style="width:3.0%">
+            <col width="2.5%"  style="width:2.5%">
+            <col width="6.5%"  style="width:6.5%">
+            <col width="8.5%"  style="width:8.5%">
+            <col width="15.0%" style="width:15.0%">
+            <col width="15.0%" style="width:15.0%">
+            <col width="9.0%"  style="width:9.0%">
+            <col width="10.0%" style="width:10.0%">
+            <col width="9.0%"  style="width:9.0%">
+            <col width="8.5%"  style="width:8.5%">
+            <col width="8.0%"  style="width:8.0%">
+            <col width="5.0%"  style="width:5.0%">
+        @elseif(!$splitCompetence)
+            {{-- 13 cols: language upper — single Competence column --}}
+            <col width="2.8%"  style="width:2.8%">
+            <col width="2.5%"  style="width:2.5%">
+            <col width="5.0%"  style="width:5.0%">
+            <col width="6.0%"  style="width:6.0%">
+            <col width="6.5%"  style="width:6.5%">
+            <col width="14.5%" style="width:14.5%">
             <col width="15.2%" style="width:15.2%">
+            <col width="9.0%"  style="width:9.0%">
+            <col width="9.0%"  style="width:9.0%">
+            <col width="9.0%"  style="width:9.0%">
+            <col width="8.5%"  style="width:8.5%">
+            <col width="8.0%"  style="width:8.0%">
+            <col width="4.0%"  style="width:4.0%">
         @else
+            {{-- 14 cols: standard upper — Competences split Subject + Language --}}
+            <col width="2.8%"  style="width:2.8%">
+            <col width="2.5%"  style="width:2.5%">
+            <col width="5.0%"  style="width:5.0%">
+            <col width="6.0%"  style="width:6.0%">
+            <col width="6.5%"  style="width:6.5%">
+            <col width="14.5%" style="width:14.5%">
             <col width="7.6%"  style="width:7.6%">
             <col width="7.6%"  style="width:7.6%">
+            <col width="9.0%"  style="width:9.0%">
+            <col width="9.0%"  style="width:9.0%">
+            <col width="9.0%"  style="width:9.0%">
+            <col width="8.5%"  style="width:8.5%">
+            <col width="8.0%"  style="width:8.0%">
+            <col width="4.0%"  style="width:4.0%">
         @endif
-        <col width="9.0%"  style="width:9.0%">
-        <col width="9.0%"  style="width:9.0%">
-        <col width="9.0%"  style="width:9.0%">
-        <col width="8.5%"  style="width:8.5%">
-        <col width="8.0%"  style="width:8.0%">
-        <col width="4.0%"  style="width:4.0%">
     </colgroup>
 
     {{--
@@ -140,7 +180,23 @@
     --}}
     <thead>
         @if($isLowerPrimary)
-        {{-- Single-row header: no rowspan --}}
+        {{-- Single-row header (12 cols): no TOPIC column --}}
+        <tr>
+            <th style="width:3.0%">WK</th>
+            <th style="width:2.5%">PD</th>
+            <th style="width:6.5%">THEME</th>
+            <th style="width:8.5%">SUB<br>THEME</th>
+            <th style="width:15.0%">CONTENT</th>
+            <th style="width:15.0%">COMPETENCE</th>
+            <th style="width:9.0%">METHODS&nbsp;&amp;<br>TECHNIQUES</th>
+            <th style="width:10.0%">INDICATORS OF<br>LIFE SKILLS<br>&amp;&nbsp;VALUES</th>
+            <th style="width:9.0%">SUGGESTED<br>ACTIVITIES</th>
+            <th style="width:8.5%">INSTRUCTIONAL<br>MATERIALS</th>
+            <th style="width:8.0%">REFERENCES</th>
+            <th style="width:5.0%">REM</th>
+        </tr>
+        @elseif(!$splitCompetence)
+        {{-- Single-row header (13 cols): language upper — TOPIC present, single COMPETENCE --}}
         <tr>
             <th style="width:2.8%">WK</th>
             <th style="width:2.5%">PD</th>
@@ -148,7 +204,7 @@
             <th style="width:6.0%">TOPIC</th>
             <th style="width:6.5%">SUB<br>TOPIC</th>
             <th style="width:14.5%">CONTENT</th>
-            <th style="width:15.2%">COMPETENCES</th>
+            <th style="width:15.2%">COMPETENCE</th>
             <th style="width:9.0%">METHODS&nbsp;&amp;<br>TECHNIQUES</th>
             <th style="width:9.0%">INDICATORS OF<br>LIFE SKILLS<br>&amp;&nbsp;VALUES</th>
             <th style="width:9.0%">SUGGESTED<br>ACTIVITIES</th>
@@ -157,7 +213,7 @@
             <th style="width:4.0%">REM</th>
         </tr>
         @else
-        {{-- Two-row header for upper primary --}}
+        {{-- Two-row header (14 cols): standard upper — COMPETENCES split into Subject + Language --}}
         <tr>
             <th rowspan="2" style="width:2.8%">WK</th>
             <th rowspan="2" style="width:2.5%">PD</th>
@@ -167,7 +223,7 @@
             <th rowspan="2" style="width:14.5%">CONTENT</th>
             <th class="th-group" colspan="2">COMPETENCES</th>
             <th rowspan="2" style="width:9.0%">METHODS&nbsp;&amp;<br>TECHNIQUES</th>
-            <th rowspan="2" style="width:9.0%">LIFE SKILLS<br>&amp;&nbsp;VALUES</th>
+            <th rowspan="2" style="width:9.0%">INDICATORS OF<br>LIFE SKILLS<br>&amp;&nbsp;VALUES</th>
             <th rowspan="2" style="width:9.0%">SUGGESTED<br>ACTIVITIES</th>
             <th rowspan="2" style="width:8.5%">INSTRUCTIONAL<br>MATERIALS</th>
             <th rowspan="2" style="width:8.0%">REFERENCES</th>
@@ -245,22 +301,24 @@
                 <td style="{{ $wkBg }}{{ $wkBorder }}">{{ $contWk ? '' : $item->week }}</td>
                 <td style="text-align:center;vertical-align:middle;">{{ $item->period }}</td>
                 <td style="{{ $themeBg }}{{ $themeBorder }}">{{ $contTheme ? '' : strtoupper($curTheme ?: '—') }}</td>
+                @if(!$isLowerPrimary)
                 <td style="{{ $topicBg }}{{ $topicBorder }}">{{ $contTopic ? '' : strtoupper($curTopic ?: '—') }}</td>
+                @endif
 
                 <td>{!! $asPrintable($item->sub_topic ?? null) !!}</td>
 
                 <td>@if($isLowerPrimary && $rawContent !== '')<span class="italic-prefix">The learner;</span><br>@endif{!! $asPrintable($rawContent ?: null) !!}</td>
 
-                @if($isLowerPrimary)
-                    <td>{!! $asPrintable($cellCompAll) !!}</td>
-                @else
+                @if($splitCompetence)
                     <td>{!! $asPrintable($item->competence_subject ?? $item->competence ?? null) !!}</td>
                     <td>{!! $asPrintable($item->competence_language ?? null) !!}</td>
+                @else
+                    <td>{!! $asPrintable($cellCompAll) !!}</td>
                 @endif
 
                 <td>{!! $asPrintable($item->methods ?? null) !!}</td>
 
-                <td>@if($isLowerPrimary && $rawLifeSkills !== '')<span class="italic-prefix">Indicators of</span><br>@endif{!! $asPrintable($rawLifeSkills ?: null) !!}</td>
+                <td>{!! $asPrintable($rawLifeSkills ?: null) !!}</td>
 
                 <td>{!! $asPrintable($item->suggested_activity ?? null) !!}</td>
                 <td>{!! $asPrintable($item->instructional_material ?? null) !!}</td>

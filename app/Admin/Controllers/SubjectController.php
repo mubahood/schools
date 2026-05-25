@@ -49,11 +49,13 @@ class SubjectController extends AdminController
 
 
         $templateOptions = [
-            'auto' => 'Auto by Subject',
-            'science' => 'Science',
+            'lower'       => 'Lower Section (Baby/Middle/Top/KG)',
+            'upper'       => 'Upper Section (P1-P7)',
+            'auto'        => 'Auto by Subject',
+            'science'     => 'Science',
             'mathematics' => 'Mathematics',
-            'language' => 'English / Language',
-            'generic' => 'General Purpose',
+            'language'    => 'English / Language',
+            'generic'     => 'General Purpose',
         ];
 
         $grid->model()->where([
@@ -280,11 +282,13 @@ class SubjectController extends AdminController
             );
 
         $templateOptions = [
-            'auto' => 'Auto by Subject',
-            'science' => 'Science',
+            'lower'       => 'Lower Section (Baby/Middle/Top/KG)',
+            'upper'       => 'Upper Section (P1-P7)',
+            'auto'        => 'Auto by Subject',
+            'science'     => 'Science',
             'mathematics' => 'Mathematics',
-            'language' => 'English / Language',
-            'generic' => 'General Purpose',
+            'language'    => 'English / Language',
+            'generic'     => 'General Purpose',
         ];
 
         $form->select('scheme_template', 'Scheme Template')

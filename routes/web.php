@@ -3508,6 +3508,53 @@ Route::get('generate-report-cards-pdf', function () {
   die('DONE!');
 });
 
+Route::get('curl-test', function () {
+    return view('curl-test');
+});
+
+Route::post('curl-test', function (Request $request) {
+    $url = trim($request->input('url', ''));
+    if (empty($url)) {
+        return response()->json(['error' => 'URL is required'], 400);
+    }
+    if (!preg_match('/^https?:\/\//i', $url)) {
+        $url = 'https://' . $url;
+    }
+
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_MAXREDIRS      => 5,
+        CURLOPT_TIMEOUT        => 15,
+        CURLOPT_CONNECTTIMEOUT => 10,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_USERAGENT      => 'Mozilla/5.0 (curl-test)',
+        CURLOPT_HEADER         => true,
+    ]);
+
+    $raw      = curl_exec($ch);
+    $info     = curl_getinfo($ch);
+    $errno    = curl_errno($ch);
+    $errmsg   = curl_error($ch);
+    curl_close($ch);
+
+    $headerSize = $info['header_size'] ?? 0;
+    $headers    = substr($raw, 0, $headerSize);
+    $body       = substr($raw, $headerSize);
+
+    return response()->json([
+        'url'          => $info['url'] ?? $url,
+        'http_code'    => $info['http_code'] ?? 0,
+        'total_time'   => round(($info['total_time'] ?? 0) * 1000) . ' ms',
+        'content_type' => $info['content_type'] ?? '',
+        'size'         => strlen($body) . ' bytes',
+        'curl_error'   => $errno ? "({$errno}) {$errmsg}" : null,
+        'headers'      => $headers,
+        'body'         => mb_substr($body, 0, 50000),
+    ]);
+});
+
 Route::get('reports-finance-process', function (Request $request) {
   $rep = ReportFinanceModel::find($request->id);
   if ($rep == null) return "Report not found";

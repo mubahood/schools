@@ -297,23 +297,23 @@ $mainReport = $r;
                 @endphp
                 <th>{{ $v->subject->subject_name }}</th>
                 @if ($termly_report_card->reports_include_bot == 'Yes')
-                    <td>{{ (int) $v->bot_score }}</td>
-                    <td>{{ $v->subject->grade_subject == 'Yes' ? $v->bot_grade : '-' }}
+                    <td>{{ (int) $v->bot_score >= 1 ? (int) $v->bot_score : '-' }}</td>
+                    <td>{{ ((int) $v->bot_score >= 1 && $v->subject->grade_subject == 'Yes') ? $v->bot_grade : '-' }}
                 @endif
                 @if ($termly_report_card->reports_include_mot == 'Yes')
-                    <td>{{ (int) $v->mot_score }}</td>
-                    <td>{{ $v->subject->grade_subject == 'Yes' ? $v->mot_grade : '-' }}
+                    <td>{{ (int) $v->mot_score >= 1 ? (int) $v->mot_score : '-' }}</td>
+                    <td>{{ ((int) $v->mot_score >= 1 && $v->subject->grade_subject == 'Yes') ? $v->mot_grade : '-' }}
                     </td>
                 @endif
                 @if ($termly_report_card->reports_include_eot == 'Yes')
-                    <td>{{ (int) $v->eot_score }}</td>
-                    <td>{{ $v->subject->grade_subject == 'Yes' ? $v->eot_grade : '-' }}
+                    <td>{{ (int) $v->eot_score >= 1 ? (int) $v->eot_score : '-' }}</td>
+                    <td>{{ ((int) $v->eot_score >= 1 && $v->subject->grade_subject == 'Yes') ? $v->eot_grade : '-' }}
                     </td>
                 @endif
 
                 @if ($termly_report_card->display_avg == 'Yes')
-                    <td>{{ (int) $v->total_score_display }}</td>
-                    <td>{{ $v->aggr_name }}</td>
+                    <td>{{ (int) $v->total_score_display >= 1 ? (int) $v->total_score_display : '-' }}</td>
+                    <td>{{ $v->aggr_name ?: '-' }}</td>
                 @endif
 
                 <td class="remarks text-center">{{ $v->remarks }}</td>
@@ -469,19 +469,19 @@ $mainReport = $r;
                     @endphp
                     <th>{{ $v->subject->name }}</th>
                     @if ($termly_report_card->reports_include_bot == 'Yes')
-                        <td>{{ (int) $v->bot_score }}</td>
-                        <td>{{ $v->bot_grade }}</td>
+                        <td>{{ (int) $v->bot_score >= 1 ? (int) $v->bot_score : '-' }}</td>
+                        <td>{{ (int) $v->bot_score >= 1 ? $v->bot_grade : '-' }}</td>
                     @endif
                     @if ($termly_report_card->reports_include_mot == 'Yes')
-                        <td>{{ (int) $v->mot_score }}</td>
-                        <td>{{ $v->mot_grade }}</td>
+                        <td>{{ (int) $v->mot_score >= 1 ? (int) $v->mot_score : '-' }}</td>
+                        <td>{{ (int) $v->mot_score >= 1 ? $v->mot_grade : '-' }}</td>
                     @endif
                     @if ($termly_report_card->reports_include_eot == 'Yes')
-                        <td>{{ (int) $v->eot_score }}</td>
-                        <td>{{ $v->eot_grade }}</td>
+                        <td>{{ (int) $v->eot_score >= 1 ? (int) $v->eot_score : '-' }}</td>
+                        <td>{{ (int) $v->eot_score >= 1 ? $v->eot_grade : '-' }}</td>
                         @if ($theology_termly_report_card->display_avg == 'Yes')
-                            <td>{{ (int) $v->total_score_display }}</td>
-                            <td>{{ $v->aggr_name }}</td>
+                            <td>{{ (int) $v->total_score_display >= 1 ? (int) $v->total_score_display : '-' }}</td>
+                            <td>{{ $v->aggr_name ?: '-' }}</td>
                         @endif
                         <td class="remarks text-center">{{ $v->remarks }}</td>
                         <td class="remarks text-center">{{ $v->initials }}</td>

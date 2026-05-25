@@ -89,11 +89,13 @@ class SchemeWorkController extends AdminController
         // Disable batch actions
         $grid->disableBatchActions();
         $popupConfig = [
-            'defaultTermId' => $active_term ? (int) $active_term->id : 0,
-            'storeUrl' => admin_url('scheme-works/add-item-ajax'),
+            'defaultTermId'     => $active_term ? (int) $active_term->id : 0,
+            'storeUrl'          => admin_url('scheme-works/add-item-ajax'),
+            'updateTemplateUrl' => admin_url('scheme-works/update-template-ajax'),
         ];
         Admin::script('window.SCHEME_POPUP_CONFIG = ' . json_encode($popupConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . ';');
         Admin::js('/js/scheme-work-popup.js?v=20260422-1');
+        Admin::js('/js/scheme-template-switcher.js?v=20260523-1');
         Admin::script(<<<'JS'
             (function () {
                 // Debugbar may call hljs using a newer signature while another package exposes an older hljs API.
@@ -296,18 +298,43 @@ class SchemeWorkController extends AdminController
                 return '<i class="fa fa-user"></i> ' . $t->name;
             })->sortable();
 
-        $templateOptions = [
-            'auto' => 'Auto by Subject',
-            'science' => 'Science',
-            'mathematics' => 'Mathematics',
-            'language' => 'English / Language',
-            'generic' => 'General Purpose',
+        $tplMeta = [
+            'lower'       => ['label' => 'Lower Section', 'color' => '#1565C0', 'icon' => 'fa-child'],
+            'upper'       => ['label' => 'Upper Section', 'color' => '#2E7D32', 'icon' => 'fa-graduation-cap'],
+            'science'     => ['label' => 'Science',       'color' => '#BF360C', 'icon' => 'fa-flask'],
+            'mathematics' => ['label' => 'Mathematics',   'color' => '#AD1457', 'icon' => 'fa-calculator'],
+            'language'    => ['label' => 'Language',      'color' => '#00695C', 'icon' => 'fa-book'],
+            'generic'     => ['label' => 'General',       'color' => '#37474F', 'icon' => 'fa-file-text-o'],
+            'auto'        => ['label' => 'Auto',          'color' => '#4527A0', 'icon' => 'fa-magic'],
         ];
+        $canEditTpl = $u->isRole('admin') || $u->isRole('dos') || $u->isRole('hm');
 
-        $grid->column('scheme_template', __('Scheme Template'))
-            ->display(function ($value) use ($templateOptions) {
-                $key = $value ?: 'auto';
-                return $templateOptions[$key] ?? $templateOptions['auto'];
+        $grid->column('scheme_template', __('Template'))
+            ->display(function ($value) use ($tplMeta, $canEditTpl) {
+                $key  = $value ?: 'lower';
+                $meta = $tplMeta[$key] ?? $tplMeta['lower'];
+                $badge = '<span class="js-tpl-badge tpl-badge"'
+                    . ' data-subject-id="' . $this->id . '"'
+                    . ' data-current-tpl="' . e($key) . '"'
+                    . ' style="background:' . $meta['color'] . ';display:inline-flex;align-items:center;gap:5px;'
+                    . 'padding:4px 10px;border-radius:999px;color:#fff;font-size:11px;font-weight:700;white-space:nowrap;">'
+                    . '<i class="fa ' . $meta['icon'] . ' js-tpl-icon"></i>'
+                    . '<span class="js-tpl-label">' . $meta['label'] . '</span>'
+                    . '</span>';
+
+                if ($canEditTpl) {
+                    $badge .= '&nbsp;<button type="button"'
+                        . ' class="js-tpl-switch-btn btn btn-xs btn-default"'
+                        . ' data-subject-id="' . $this->id . '"'
+                        . ' data-subject-name="' . e($this->subject_name) . '"'
+                        . ' data-current-tpl="' . e($key) . '"'
+                        . ' title="Change template"'
+                        . ' style="padding:2px 6px;border-radius:6px;font-size:11px;">'
+                        . '<i class="fa fa-pencil"></i>'
+                        . '</button>';
+                }
+
+                return $badge;
             })->sortable();
 
         // Scheme work statistics
@@ -361,10 +388,8 @@ class SchemeWorkController extends AdminController
         // Actions
         $grid->column('actions', __('Actions'))
             ->display(function () {
-                $viewUrl = admin_url('schems-work-items?subject_id=' . $this->id);
+                $viewUrl  = admin_url('schems-work-items?subject_id=' . $this->id);
                 $printUrl = url('scheme-of-work-print?id=' . $this->id);
-                $editTemplateUrl = admin_url('subjects/' . $this->id . '/edit');
-                $canEditTemplate = Admin::user()->isRole('admin') || Admin::user()->isRole('dos') || Admin::user()->isRole('hm');
 
                 $buttons = '
                     <div class="scheme-work-actions">
@@ -375,12 +400,6 @@ class SchemeWorkController extends AdminController
                             <i class="fa fa-list"></i> View
                         </a>';
 
-                if ($canEditTemplate) {
-                    $buttons .= '
-                        <a href="' . $editTemplateUrl . '" target="_blank" class="btn btn-sm btn-warning" title="Edit Printing Template">
-                            <i class="fa fa-pencil"></i> Template
-                        </a>';
-                }
 
                 $buttons .= '
                         <a href="' . $printUrl . '" target="_blank" class="btn btn-sm btn-print btn-icon" title="Print">
@@ -613,6 +632,142 @@ class SchemeWorkController extends AdminController
                 margin-left: 4px;
             }
         }
+
+        /* ── Template Switcher Modal ────────────────────────────────── */
+        #scheme-tpl-modal .scheme-tpl-dialog {
+            max-width: 740px;
+            width: calc(100vw - 32px);
+            margin: 36px auto;
+        }
+        #scheme-tpl-modal .scheme-tpl-mc {
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 20px 56px rgba(0,0,0,.22);
+            border: none;
+        }
+        #scheme-tpl-modal .scheme-tpl-hd {
+            background: linear-gradient(120deg, #0d2b45 0%, #1a4a72 100%);
+            border: none;
+            padding: 16px 20px 14px;
+        }
+        #scheme-tpl-modal .scheme-tpl-close {
+            color: rgba(255,255,255,.75);
+            opacity: 1;
+            text-shadow: none;
+            font-size: 24px;
+            line-height: 1;
+            margin-top: -2px;
+        }
+        #scheme-tpl-modal .scheme-tpl-close:hover { color: #fff; }
+        #scheme-tpl-modal .scheme-tpl-title {
+            color: #fff;
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: .2px;
+        }
+        .scheme-tpl-subname {
+            font-size: 12px;
+            color: rgba(255,255,255,.65);
+            margin-top: 4px;
+            font-style: italic;
+        }
+        #scheme-tpl-modal .scheme-tpl-bd {
+            background: #f1f6fb;
+            padding: 18px 16px 14px;
+        }
+        #scheme-tpl-modal .scheme-tpl-ft {
+            background: #fff;
+            border-top: 1px solid #dce8f2;
+            padding: 10px 16px;
+        }
+
+        /* card grid */
+        .scheme-tpl-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .scheme-tpl-card {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 13px 14px 13px 12px;
+            background: var(--stc-bg, #fff);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform .17s ease, border-color .17s ease, box-shadow .17s ease;
+            box-shadow: 0 2px 7px rgba(0,0,0,.08);
+            user-select: none;
+        }
+        .scheme-tpl-card:hover {
+            border-color: var(--stc-color, #337ab7);
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(0,0,0,.13);
+        }
+        .scheme-tpl-card.stc-active {
+            border-color: var(--stc-color, #337ab7);
+            box-shadow: 0 4px 14px rgba(0,0,0,.12);
+        }
+        .scheme-tpl-card.stc-dim {
+            opacity: .4;
+            pointer-events: none;
+        }
+        .scheme-tpl-card.stc-loading {
+            opacity: 1 !important;
+            pointer-events: none;
+        }
+        .scheme-tpl-card.stc-loading .stc-icon {
+            animation: stc-spin .8s linear infinite;
+        }
+        @keyframes stc-spin {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+        .stc-check {
+            position: absolute;
+            top: 7px;
+            right: 8px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--stc-color, #337ab7);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+        }
+        .stc-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--stc-color, #337ab7);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        .stc-info { flex: 1; min-width: 0; }
+        .stc-name {
+            font-size: 12px;
+            font-weight: 700;
+            color: #1b2d3e;
+            line-height: 1.25;
+        }
+        .stc-desc {
+            font-size: 10px;
+            color: #6b849a;
+            margin-top: 2px;
+            line-height: 1.35;
+        }
+
+        @media (max-width: 600px) {
+            .scheme-tpl-grid { grid-template-columns: 1fr 1fr; }
+        }
         CSS;
     }
 
@@ -701,8 +856,8 @@ class SchemeWorkController extends AdminController
         $item->sub_topic = trim((string) $request->sub_topic);
         $item->content = trim((string) $request->content);
         $item->competence_subject = trim((string) $request->competence_subject);
-        $tmpl = $subject->scheme_template ?: 'auto';
-        $item->competence_language = in_array($tmpl, ['auto', 'generic']) ? '' : trim((string) $request->competence_language);
+        $tmpl = $subject->scheme_template ?: 'lower';
+        $item->competence_language = in_array($tmpl, ['lower', 'language', 'auto', 'generic']) ? '' : trim((string) $request->competence_language);
         $item->methods = trim((string) $request->methods);
         $item->life_skills_values = trim((string) $request->life_skills_values);
         $item->suggested_activity = trim((string) $request->suggested_activity);
@@ -737,6 +892,53 @@ class SchemeWorkController extends AdminController
                 'skipped' => $skipped,
                 'percent' => $percent,
             ],
+        ]);
+    }
+
+    public function updateTemplateAjax(Request $request)
+    {
+        $u = Admin::user();
+        if (!$u) {
+            return response()->json(['status' => false, 'message' => 'Unauthorized.'], 401);
+        }
+
+        $isPrivileged = $u->isRole('admin') || $u->isRole('dos') || $u->isRole('hm');
+        if (!$isPrivileged) {
+            return response()->json(['status' => false, 'message' => 'You do not have permission to change scheme templates.'], 403);
+        }
+
+        $allowed = ['lower', 'upper', 'auto', 'science', 'mathematics', 'language', 'generic'];
+        $template = $request->input('template');
+        if (!in_array($template, $allowed, true)) {
+            return response()->json(['status' => false, 'message' => 'Invalid template value.'], 422);
+        }
+
+        $subject = Subject::where('enterprise_id', $u->enterprise_id)
+            ->where('id', (int) $request->subject_id)
+            ->first();
+
+        if (!$subject) {
+            return response()->json(['status' => false, 'message' => 'Subject not found.'], 404);
+        }
+
+        $subject->scheme_template = $template;
+        $subject->save();
+
+        $labels = [
+            'lower'       => 'Lower Section (Baby/Middle/Top/KG)',
+            'upper'       => 'Upper Section (P1-P7)',
+            'auto'        => 'Auto by Subject',
+            'science'     => 'Science',
+            'mathematics' => 'Mathematics',
+            'language'    => 'English / Language',
+            'generic'     => 'General Purpose',
+        ];
+
+        return response()->json([
+            'status'   => true,
+            'template' => $template,
+            'label'    => $labels[$template] ?? $template,
+            'message'  => 'Template updated successfully.',
         ]);
     }
 

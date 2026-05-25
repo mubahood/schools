@@ -144,6 +144,7 @@ Route::group([
     $router->resource('identification-cards', IdentificationCardController::class);
     $router->resource('report-card-prints', ReportCardPrintController::class);
     $router->post('scheme-works/add-item-ajax', 'SchemeWorkController@storeItemAjax');
+    $router->post('scheme-works/update-template-ajax', 'SchemeWorkController@updateTemplateAjax');
     $router->resource('scheme-works', SchemeWorkController::class);
     $router->resource('visitors', VisitorController::class);
     $router->resource('visitor-records', VisitorRecordController::class);
@@ -235,4 +236,11 @@ Route::group([
     $router->get('parent-commitment-records/{pcom}/demand-notice', 'ParentCommitmentRecordController@demandNotice')->name('parent-commitment-records.demand-notice');
     $router->resource('parent-commitment-records', ParentCommitmentRecordController::class)
         ->parameters(['parent-commitment-records' => 'pcom']);
+
+    // Progressive Assessment Module
+    $router->resource('progressive-assessments', ProgressiveAssessmentController::class);
+    $router->resource('student-test-records', StudentTestRecordController::class);
+    $router->get('student-progressive-reports/{id}/generate-pdf', 'StudentProgressiveReportController@generatePdf')
+        ->name('student-progressive-reports.generate-pdf');
+    $router->resource('student-progressive-reports', StudentProgressiveReportController::class);
 });

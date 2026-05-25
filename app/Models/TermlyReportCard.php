@@ -384,15 +384,22 @@ class TermlyReportCard extends Model
                     }
 
 
-                    $mark->bot_grade = Utils::generateAggregates($grading_scale, $mark->bot_score)['aggr_name'];
-                    $mark->mot_grade = Utils::generateAggregates($grading_scale, $mark->mot_score)['aggr_name'];
-                    $mark->eot_grade = Utils::generateAggregates($grading_scale, $mark->eot_score)['aggr_name'];
+                    // Grade each exam — 'X' if student did not sit it (score < 1)
+                    $mark->bot_grade = ((int) $mark->bot_score < 1)
+                        ? 'X'
+                        : Utils::generateAggregates($grading_scale, $mark->bot_score)['aggr_name'];
+                    $mark->mot_grade = ((int) $mark->mot_score < 1)
+                        ? 'X'
+                        : Utils::generateAggregates($grading_scale, $mark->mot_score)['aggr_name'];
+                    $mark->eot_grade = ((int) $mark->eot_score < 1)
+                        ? 'X'
+                        : Utils::generateAggregates($grading_scale, $mark->eot_score)['aggr_name'];
 
                     $total_scored_marks = 0;
-
+                    $divisor = $number_of_exams;
 
                     if (strtolower($m->positioning_method) == 'specific') {
-                        $number_of_exams = 1;
+                        $divisor = 1;
                         if ($m->positioning_exam == 'eot') {
                             $total_scored_marks += (int)$mark->eot_score;
                         } else if (strtolower($m->positioning_exam) == 'mot') {
@@ -403,33 +410,42 @@ class TermlyReportCard extends Model
                             $total_scored_marks += (int)$mark->bot_score;
                             $total_scored_marks += (int)$mark->mot_score;
                             $total_scored_marks += (int)$mark->eot_score;
-                            $total_scored_marks = $total_scored_marks / 3;
+                            $divisor = 3;
                         }
                     } else {
-                        if ($m->reports_include_bot == 'Yes') {
+                        $exams_taken = 0;
+                        if ($m->reports_include_bot == 'Yes' && (int)$mark->bot_score >= 1) {
                             $total_scored_marks += (int)$mark->bot_score;
+                            $exams_taken++;
                         }
-                        if ($m->reports_include_mot == 'Yes') {
+                        if ($m->reports_include_mot == 'Yes' && (int)$mark->mot_score >= 1) {
                             $total_scored_marks += (int)$mark->mot_score;
+                            $exams_taken++;
                         }
-                        if ($m->reports_include_eot == 'Yes') {
+                        if ($m->reports_include_eot == 'Yes' && (int)$mark->eot_score >= 1) {
                             $total_scored_marks += (int)$mark->eot_score;
+                            $exams_taken++;
                         }
+                        $divisor = $exams_taken > 0 ? $exams_taken : 1;
                     }
 
-                    $average_mark = ((int)(($total_scored_marks) / $number_of_exams));
+                    $average_mark = ((int)($total_scored_marks / $divisor));
 
                     $mark->total_score = $total_scored_marks;
                     $mark->total_score_display = $average_mark;
-                    $mark->remarks = Utils::get_automaic_mark_remarks($mark->total_score_display);
+                    $mark->remarks = $average_mark < 1
+                        ? '-'
+                        : Utils::get_automaic_mark_remarks($average_mark);
 
                     $mark->aggr_value = null;
                     $mark->aggr_name = null;
-                    foreach ($ranges as $range) {
-                        if ($mark->total_score_display >= $range->min_mark && $mark->total_score_display <= $range->max_mark) {
-                            $mark->aggr_value = $range->aggregates;
-                            $mark->aggr_name = $range->name;
-                            break;
+                    if ($mark->total_score_display >= 1) {
+                        foreach ($ranges as $range) {
+                            if ($mark->total_score_display >= $range->min_mark && $mark->total_score_display <= $range->max_mark) {
+                                $mark->aggr_value = $range->aggregates;
+                                $mark->aggr_name = $range->name;
+                                break;
+                            }
                         }
                     }
 
