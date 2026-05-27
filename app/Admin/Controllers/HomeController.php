@@ -748,6 +748,13 @@ class HomeController extends Controller
                     $column->append(Dashboard::budget());
                 });
             });
+
+            // Commitment reminders widget — shown to admin/dos/hm/bursar
+            $content->row(function (Row $row) {
+                $row->column(12, function (Column $column) {
+                    $column->append(view('dashboard.commitment-reminders'));
+                });
+            });
         }
 
 
