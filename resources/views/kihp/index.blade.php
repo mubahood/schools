@@ -11,7 +11,7 @@
 <link rel="shortcut icon" href="{{ url('storage/' . $school->logo) }}" type="image/jpeg">
 <meta property="og:title" content="KIHP — Every Life Counts | Health Training Kampala">
 <meta property="og:description" content="Accredited certificate & diploma programmes. {{ $studentCount }}+ graduates. Kampala, Uganda.">
-<meta property="og:image" content="{{ url('kihp/hero-bg.jpg') }}">
+<meta property="og:image" content="{{ url('kihp-assets/hero-bg.jpg') }}">
 <meta property="og:url" content="{{ url('/kihp') }}">
 <meta name="twitter:card" content="summary_large_image">
 
@@ -101,7 +101,7 @@ a{color:inherit;text-decoration:none}
 
 /* ── Hero ───────────────────────────────────────────────── */
 .hero{position:relative;min-height:100svh;display:flex;align-items:center;overflow:hidden;padding-top:0}
-.hero-bg{position:absolute;inset:0;background-image:url('{{ url("kihp/hero-bg.jpg") }}');background-size:cover;background-position:center 30%;z-index:0;animation:kenBurns 22s ease-in-out infinite alternate}
+.hero-bg{position:absolute;inset:0;background-image:url('{{ url("kihp-assets/hero-bg.jpg") }}');background-size:cover;background-position:center 30%;z-index:0;animation:kenBurns 22s ease-in-out infinite alternate}
 @keyframes kenBurns{0%{background-size:105%;background-position:center 30%}100%{background-size:115%;background-position:center 40%}}
 .hero-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(110deg,rgba(6,19,37,.92) 0%,rgba(11,32,64,.82) 50%,rgba(14,190,242,.25) 100%)}
 .hero-bg::before{content:'';position:absolute;inset:0;z-index:1;background-image:radial-gradient(circle,rgba(255,255,255,.08) 1px,transparent 1px);background-size:28px 28px}
@@ -484,8 +484,8 @@ a{color:inherit;text-decoration:none}
             </div>
 
             <div class="about-visual slide-right">
-                <img src="{{ url('kihp/faculty-group.jpg') }}" alt="KIHP Faculty in academic regalia" class="about-img-main">
-                <img src="{{ url('kihp/principal.jpg') }}" alt="KIHP Principal addressing graduation" class="about-img-inset">
+                <img src="{{ url('kihp-assets/faculty-group.jpg') }}" alt="KIHP Faculty in academic regalia" class="about-img-main">
+                <img src="{{ url('kihp-assets/principal.jpg') }}" alt="KIHP Principal addressing graduation" class="about-img-inset">
                 <div class="about-badge">
                     <strong class="count-up" data-target="{{ $studentCount }}">0</strong>
                     <span style="font-size:.7rem;color:rgba(255,255,255,.6);display:block;margin-top:2px">Graduates</span>
@@ -591,7 +591,7 @@ a{color:inherit;text-decoration:none}
             <div class="prog-card fade-up stagger-{{ ($i % 4) + 1 }}">
                 <div class="prog-card-img">
                     @if($meta['img'])
-                        <img src="{{ url('kihp/' . $meta['img']) }}" alt="{{ $displayName }}" loading="lazy">
+                        <img src="{{ url('kihp-assets/' . $meta['img']) }}" alt="{{ $displayName }}" loading="lazy">
                     @else
                         <div class="prog-card-img-fallback" style="background:linear-gradient(135deg,{{ $imgGrads[$i % 4] }},var(--navy-md))">
                             <i class="fa {{ $meta['icon'] }}" style="color:rgba(255,255,255,.4)"></i>
@@ -681,8 +681,8 @@ a{color:inherit;text-decoration:none}
 
         <div class="gallery-grid">
             @foreach($galleryImages as $img)
-            <a href="{{ url('kihp/' . $img['src']) }}" class="gal-item glightbox fade-in" data-gallery="kihp-gallery" data-description="{{ $img['caption'] }}">
-                <img src="{{ url('kihp/' . $img['src']) }}" alt="{{ $img['caption'] }}" loading="lazy">
+            <a href="{{ url('kihp-assets/' . $img['src']) }}" class="gal-item glightbox fade-in" data-gallery="kihp-gallery" data-description="{{ $img['caption'] }}">
+                <img src="{{ url('kihp-assets/' . $img['src']) }}" alt="{{ $img['caption'] }}" loading="lazy">
                 <div class="gal-overlay"><div class="gal-zoom"><i class="fa fa-expand"></i></div></div>
             </a>
             @endforeach
@@ -703,7 +703,7 @@ a{color:inherit;text-decoration:none}
                 <div class="testi-stars"><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i></div>
                 <p class="testi-text">The clinical placements at KIHP gave me real hands-on experience. By the time I graduated, I felt truly ready to work in a health facility. The instructors are professionals who genuinely care about our success.</p>
                 <div class="testi-author">
-                    <img src="{{ url('kihp/student-1.jpg') }}" alt="KIHP Student" class="testi-avatar">
+                    <img src="{{ url('kihp-assets/student-1.jpg') }}" alt="KIHP Student" class="testi-avatar">
                     <div>
                         <div class="testi-name">KIHP Graduate</div>
                         <div class="testi-prog">Diploma in Clinical Medicine</div>
@@ -715,7 +715,7 @@ a{color:inherit;text-decoration:none}
                 <div class="testi-stars"><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i></div>
                 <p class="testi-text">I chose KIHP because of the affordable fees and the weekday flexibility. The online diploma option was a game changer for me — I could study while still supporting my family. Highly recommended!</p>
                 <div class="testi-author">
-                    <img src="{{ url('kihp/student-2.jpg') }}" alt="KIHP Student" class="testi-avatar">
+                    <img src="{{ url('kihp-assets/student-2.jpg') }}" alt="KIHP Student" class="testi-avatar">
                     <div>
                         <div class="testi-name">KIHP Graduate</div>
                         <div class="testi-prog">Diploma in Pharmacy</div>
@@ -727,7 +727,7 @@ a{color:inherit;text-decoration:none}
                 <div class="testi-stars"><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star-half-stroke"></i></div>
                 <p class="testi-text">KIHP prepared me for the real world of healthcare. The lecturers have practical experience, not just theory. Our graduation ceremony was a proud moment — and it showed me KIHP truly celebrates its students.</p>
                 <div class="testi-author">
-                    <img src="{{ url('kihp/student-3.jpg') }}" alt="KIHP Student" class="testi-avatar">
+                    <img src="{{ url('kihp-assets/student-3.jpg') }}" alt="KIHP Student" class="testi-avatar">
                     <div>
                         <div class="testi-name">KIHP Graduate</div>
                         <div class="testi-prog">Certificate in Medical Laboratory</div>
@@ -780,7 +780,7 @@ a{color:inherit;text-decoration:none}
             </div>
 
             <div class="admit-poster slide-right">
-                <img src="{{ url('kihp/admission-poster.jpg') }}" alt="KIHP Admissions 2026">
+                <img src="{{ url('kihp-assets/admission-poster.jpg') }}" alt="KIHP Admissions 2026">
                 <div class="admit-poster-cta">
                     <a href="#" onclick="openWA(event)" class="btn-wa-admit">
                         <i class="fa-brands fa-whatsapp"></i> Start Application on WhatsApp
