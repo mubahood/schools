@@ -3946,3 +3946,20 @@ Route::group(['prefix' => 'onboarding'], function () {
   Route::get('validate-school-email', [OnboardingController::class, 'validateSchoolEmail'])->name('onboarding.validate.school.email');
 });
 
+// ── KIHP Public Landing Page ───────────────────────────────────────────────
+Route::get('/kihp', function () {
+    $school = \App\Models\Enterprise::find(24);
+    $studentCount = \App\Models\User::where('enterprise_id', 24)
+        ->where('user_type', 'student')
+        ->where('status', 1)
+        ->count();
+    $programs = \App\Models\AcademicClass::where('enterprise_id', 24)
+        ->distinct()
+        ->pluck('name')
+        ->map(fn($n) => trim($n))
+        ->unique()
+        ->sort()
+        ->values();
+    return view('kihp.index', compact('school', 'studentCount', 'programs'));
+})->name('kihp.landing');
+
