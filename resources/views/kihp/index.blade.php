@@ -1,20 +1,237 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-UG" prefix="og: https://ogp.me/ns#">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="X-UA-Compatible" content="ie=edge">
-<title>KIHP — Kampala Institute of Health Professionals | Every Life Counts</title>
-<meta name="description" content="KIHP — Accredited health professional training in Clinical Medicine, Pharmacy, Medical Laboratory, Public Health. Plot 201B Albert Cook Road, Kampala. Affordable fees. Online & weekend options.">
-<meta name="keywords" content="KIHP, Kampala Institute Health Professionals, Clinical Medicine Uganda, Pharmacy training Kampala, Medical Laboratory, Public Health Uganda">
-<link rel="canonical" href="{{ url('/kihp') }}">
-<link rel="shortcut icon" href="{{ url('storage/' . $school->logo) }}" type="image/jpeg">
-<meta property="og:title" content="KIHP — Every Life Counts | Health Training Kampala">
-<meta property="og:description" content="Accredited certificate & diploma programmes. {{ $studentCount }}+ graduates. Kampala, Uganda.">
-<meta property="og:image" content="{{ url('kihp-assets/hero-bg.jpg') }}">
-<meta property="og:url" content="{{ url('/kihp') }}">
-<meta name="twitter:card" content="summary_large_image">
 
+<!-- ═══════════════════════════════════════════════════════════
+     PRIMARY SEO
+═══════════════════════════════════════════════════════════ -->
+<title>KIHP — Kampala Institute of Health Professionals | Clinical Medicine, Pharmacy &amp; Health Training Uganda</title>
+<meta name="description" content="Study Clinical Medicine, Pharmacy, Medical Laboratory or Public Health at KIHP — Uganda's accredited health training institute on Albert Cook Road, Kampala. Affordable fees, online &amp; weekend options. Apply now!">
+<meta name="keywords" content="KIHP, Kampala Institute of Health Professionals, clinical medicine Uganda, pharmacy training Kampala, medical laboratory techniques Uganda, public health diploma Uganda, health training Uganda, accredited health college Uganda">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+<meta name="author" content="Kampala Institute of Health Professionals">
+<link rel="canonical" href="{{ url('/kihp') }}">
+
+<!-- ═══════════════════════════════════════════════════════════
+     FAVICON & TOUCH ICONS
+═══════════════════════════════════════════════════════════ -->
+<link rel="icon" type="image/jpeg" href="{{ url('storage/' . ($school->logo ?? 'images/KIHP.jpg')) }}">
+<link rel="apple-touch-icon" href="{{ url('storage/' . ($school->logo ?? 'images/KIHP.jpg')) }}">
+<meta name="theme-color" content="#0EBEF2">
+<meta name="msapplication-TileColor" content="#0EBEF2">
+
+<!-- ═══════════════════════════════════════════════════════════
+     OPEN GRAPH  (Facebook · WhatsApp · LinkedIn · Telegram)
+═══════════════════════════════════════════════════════════ -->
+<meta property="og:type"        content="website">
+<meta property="og:site_name"   content="Kampala Institute of Health Professionals">
+<meta property="og:locale"      content="en_UG">
+<meta property="og:url"         content="{{ url('/kihp') }}">
+<meta property="og:title"       content="KIHP — Train with Purpose. Heal with Impact. | Kampala, Uganda">
+<meta property="og:description" content="Uganda's trusted health training college. Accredited diplomas &amp; certificates in Clinical Medicine, Pharmacy, Medical Lab &amp; Public Health. {{ $studentCount }}+ students enrolled. Plot 201B Albert Cook Road, Kampala. Chat with us on WhatsApp to apply!">
+<meta property="og:image"              content="{{ url('kihp-assets/og-image.jpg') }}">
+<meta property="og:image:secure_url"   content="{{ url('kihp-assets/og-image.jpg') }}">
+<meta property="og:image:type"         content="image/jpeg">
+<meta property="og:image:width"        content="1200">
+<meta property="og:image:height"       content="630">
+<meta property="og:image:alt"          content="KIHP graduates in colourful academic regalia at Kampala Institute of Health Professionals">
+
+<!-- ═══════════════════════════════════════════════════════════
+     TWITTER / X CARD
+═══════════════════════════════════════════════════════════ -->
+<meta name="twitter:card"        content="summary_large_image">
+<meta name="twitter:title"       content="KIHP — Health Training College | Kampala, Uganda">
+<meta name="twitter:description" content="Accredited diplomas &amp; certificates in Clinical Medicine, Pharmacy, Medical Lab &amp; Public Health. {{ $studentCount }}+ students. Affordable fees. Online &amp; weekend classes. Apply via WhatsApp!">
+<meta name="twitter:image"       content="{{ url('kihp-assets/og-image.jpg') }}">
+<meta name="twitter:image:alt"   content="KIHP graduates in academic regalia, Kampala Institute of Health Professionals">
+
+<!-- ═══════════════════════════════════════════════════════════
+     GEO / LOCAL SEO
+═══════════════════════════════════════════════════════════ -->
+<meta name="geo.region"      content="UG-101">
+<meta name="geo.placename"   content="Kampala, Uganda">
+<meta name="geo.position"    content="0.3191;32.5729">
+<meta name="ICBM"            content="0.3191, 32.5729">
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCHEMA.ORG STRUCTURED DATA (JSON-LD)
+═══════════════════════════════════════════════════════════ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "CollegeOrUniversity",
+      "@id": "{{ url('/kihp') }}#school",
+      "name": "Kampala Institute of Health Professionals",
+      "alternateName": "KIHP",
+      "url": "{{ url('/kihp') }}",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "{{ url('storage/' . ($school->logo ?? 'images/KIHP.jpg')) }}",
+        "width": 200,
+        "height": 200
+      },
+      "image": {
+        "@type": "ImageObject",
+        "url": "{{ url('kihp-assets/og-image.jpg') }}",
+        "width": 1200,
+        "height": 630
+      },
+      "description": "Kampala Institute of Health Professionals (KIHP) is an accredited Ugandan health training college offering diplomas and certificates in Clinical Medicine, Pharmacy, Medical Laboratory Techniques and Public Health. Located on Albert Cook Road, Kampala.",
+      "foundingDate": "2010",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Plot 201B Albert Cook Road",
+        "addressLocality": "Kampala",
+        "addressCountry": "UG",
+        "addressRegion": "Central Region"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 0.3191,
+        "longitude": 32.5729
+      },
+      "telephone": "+256774750076",
+      "contactPoint": [
+        {
+          "@type": "ContactPoint",
+          "telephone": "+256708343674",
+          "contactType": "admissions",
+          "contactOption": "WhatsApp",
+          "availableLanguage": ["English", "Luganda"]
+        },
+        {
+          "@type": "ContactPoint",
+          "telephone": "+256774750076",
+          "contactType": "customer support",
+          "availableLanguage": ["English", "Luganda"]
+        }
+      ],
+      "numberOfStudents": {{ $studentCount }},
+      "accreditationBody": "Uganda Allied Health Examinations Board (UAHEB)",
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Health Training Programmes",
+        "itemListElement": [
+          {
+            "@type": "Course",
+            "name": "Diploma in Clinical Medicine and Community Health",
+            "description": "A comprehensive diploma programme training competent clinical officers for Uganda's healthcare system.",
+            "provider": {"@id": "{{ url('/kihp') }}#school"},
+            "courseMode": ["onsite", "online"],
+            "educationalLevel": "Diploma",
+            "timeRequired": "P3Y"
+          },
+          {
+            "@type": "Course",
+            "name": "Diploma in Pharmacy",
+            "description": "Professional pharmacy training covering dispensing, drug compounding and pharmaceutical care.",
+            "provider": {"@id": "{{ url('/kihp') }}#school"},
+            "courseMode": "onsite",
+            "educationalLevel": "Diploma"
+          },
+          {
+            "@type": "Course",
+            "name": "Diploma in Medical Laboratory Techniques",
+            "description": "Hands-on medical laboratory sciences training including haematology, microbiology and clinical chemistry.",
+            "provider": {"@id": "{{ url('/kihp') }}#school"},
+            "courseMode": "onsite",
+            "educationalLevel": "Diploma"
+          },
+          {
+            "@type": "Course",
+            "name": "Certificate in Public Health",
+            "description": "Community-focused public health certificate programme addressing Uganda's primary healthcare needs.",
+            "provider": {"@id": "{{ url('/kihp') }}#school"},
+            "courseMode": "onsite",
+            "educationalLevel": "Certificate"
+          }
+        ]
+      },
+      "sameAs": [
+        "https://www.kihp.ac.ug"
+      ]
+    },
+    {
+      "@type": "WebPage",
+      "@id": "{{ url('/kihp') }}#webpage",
+      "url": "{{ url('/kihp') }}",
+      "name": "KIHP — Kampala Institute of Health Professionals",
+      "description": "Official landing page of Kampala Institute of Health Professionals. Discover our accredited health training programmes, admissions process and student life.",
+      "isPartOf": {"@id": "{{ url('/') }}#website"},
+      "about": {"@id": "{{ url('/kihp') }}#school"},
+      "primaryImageOfPage": {
+        "@type": "ImageObject",
+        "url": "{{ url('kihp-assets/og-image.jpg') }}",
+        "width": 1200,
+        "height": 630
+      },
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "{{ url('/') }}"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "KIHP",
+            "item": "{{ url('/kihp') }}"
+          }
+        ]
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What programmes does KIHP offer?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "KIHP offers diplomas in Clinical Medicine and Community Health (including an online option), Diploma in Pharmacy, and Diploma in Medical Laboratory Techniques, plus certificate programmes in Medical Laboratory, Pharmacy, Medical Records and Public Health."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Where is KIHP located?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "KIHP is located at Plot 201B Albert Cook Road, Kampala, Uganda."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I apply to KIHP?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "You can apply by sending a WhatsApp message to +256708343674 or calling +256774750076. Our admissions team will guide you through the requirements and enrolment process."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does KIHP offer online or weekend classes?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. KIHP offers an online Diploma in Clinical Medicine for students who cannot attend full-time, as well as weekend classes designed for working health professionals."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PERFORMANCE & FONTS
+═══════════════════════════════════════════════════════════ -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
