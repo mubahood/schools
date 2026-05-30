@@ -30,8 +30,8 @@
 <meta property="og:site_name"   content="Kampala Institute of Health Professionals">
 <meta property="og:locale"      content="en_UG">
 <meta property="og:url"         content="{{ url('/kihp') }}">
-<meta property="og:title"       content="KIHP — Train with Purpose. Heal with Impact. | Kampala, Uganda">
-<meta property="og:description" content="Uganda's trusted health training college. Accredited diplomas &amp; certificates in Clinical Medicine, Pharmacy, Medical Lab &amp; Public Health. {{ $studentCount }}+ students enrolled. Plot 201B Albert Cook Road, Kampala. Chat with us on WhatsApp to apply!">
+<meta property="og:title"       content="KIHP | Health Training College, Kampala Uganda">
+<meta property="og:description" content="Uganda's accredited health college. Clinical Medicine, Pharmacy &amp; Medical Lab diplomas. {{ $studentCount }}+ students. Online &amp; weekend classes. Apply via WhatsApp!">
 <meta property="og:image"              content="{{ url('kihp-assets/og-image.jpg') }}">
 <meta property="og:image:secure_url"   content="{{ url('kihp-assets/og-image.jpg') }}">
 <meta property="og:image:type"         content="image/jpeg">
@@ -43,8 +43,10 @@
      TWITTER / X CARD
 ═══════════════════════════════════════════════════════════ -->
 <meta name="twitter:card"        content="summary_large_image">
-<meta name="twitter:title"       content="KIHP — Health Training College | Kampala, Uganda">
-<meta name="twitter:description" content="Accredited diplomas &amp; certificates in Clinical Medicine, Pharmacy, Medical Lab &amp; Public Health. {{ $studentCount }}+ students. Affordable fees. Online &amp; weekend classes. Apply via WhatsApp!">
+<meta property="twitter:domain"  content="schooldynamics.ug">
+<meta property="twitter:url"     content="{{ url('/kihp') }}">
+<meta name="twitter:title"       content="KIHP | Health Training College, Kampala Uganda">
+<meta name="twitter:description" content="Uganda's accredited health college. Clinical Medicine, Pharmacy &amp; Medical Lab diplomas. {{ $studentCount }}+ students. Online &amp; weekend classes. Apply via WhatsApp!">
 <meta name="twitter:image"       content="{{ url('kihp-assets/og-image.jpg') }}">
 <meta name="twitter:image:alt"   content="KIHP graduates in academic regalia, Kampala Institute of Health Professionals">
 
