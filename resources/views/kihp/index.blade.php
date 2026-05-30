@@ -1149,7 +1149,21 @@ document.querySelectorAll('a[href^="#"]').forEach(function(a){
 });
 
 /* GLightbox */
-GLightbox({ selector:'.glightbox', touchNavigation:true, loop:true, openEffect:'fade', closeEffect:'fade', slideEffect:'slide' });
+GLightbox({
+    selector:'.glightbox',
+    touchNavigation:true,
+    loop:true,
+    openEffect:'fade',
+    closeEffect:'fade',
+    slideEffect:'slide',
+    onOpen:function(){
+        // Blur the trigger so the browser doesn't conflict when GLightbox
+        // sets aria-hidden on the gallery section to trap focus in the modal.
+        if(document.activeElement && document.activeElement !== document.body){
+            document.activeElement.blur();
+        }
+    }
+});
 
 /* Intersection Observer — scroll animations */
 var io = new IntersectionObserver(function(entries){
