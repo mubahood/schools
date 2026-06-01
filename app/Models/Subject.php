@@ -52,7 +52,9 @@ class Subject extends Model
             if (strlen($m->subject_name) < 2) {
                 $c = MainCourse::find($m->course_id);
                 $m->main_course_id = $c->main_course_id;
-                $m->subject_name = strtoupper(trim($c->name));
+                // Strip " - paper N" so the stored name is clean (e.g. "BIOLOGY" not "BIOLOGY - PAPER 1")
+                $baseName = preg_replace('/\s*-?\s*paper\s+\d+\s*$/iu', '', $c->name);
+                $m->subject_name = strtoupper(trim($baseName));
                 $m->code = $c->code;
             }
 
@@ -154,13 +156,15 @@ class Subject extends Model
     }
 
     /**
-     * Always store subject_name in UPPER CASE, stripping any leading
-     * numeric prefix such as "1.", "2. " that may be typed by users.
+     * Store subject_name in UPPER CASE, stripping leading numeric prefixes
+     * AND any trailing "- paper N" / "paper N" suffixes so the paper concept
+     * is never exposed to users.
      */
     public function setSubjectNameAttribute($value)
     {
-        // Strip leading patterns like "1.", "2. ", "1 -", etc.
         $cleaned = preg_replace('/^\d+[\.\-\s]+\s*/u', '', (string) $value);
+        // Strip trailing "- paper N" or "paper N" (case-insensitive)
+        $cleaned = preg_replace('/\s*-?\s*paper\s+\d+\s*$/iu', '', $cleaned);
         $this->attributes['subject_name'] = strtoupper(trim($cleaned));
     }
 

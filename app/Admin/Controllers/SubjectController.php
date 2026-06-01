@@ -102,6 +102,10 @@ class SubjectController extends AdminController
             ->where('enterprise_id', Admin::user()->enterprise_id);
         $grid->column('id', __('#ID'))->sortable();
         $grid->column('subject_name', __('SUBJECT'))
+            ->display(function ($val) {
+                // Strip any leftover "- paper N" from legacy data for display
+                return strtoupper(trim(preg_replace('/\s*-?\s*paper\s+\d+\s*$/iu', '', $val)));
+            })
             ->editable()
             ->sortable();
 
@@ -258,10 +262,22 @@ class SubjectController extends AdminController
         }
 
 
+        // Build a deduplicated, paper-free dropdown.
+        // Strip "- paper N" from the display name and keep only the first
+        // (lowest id) entry per base subject — so "Biology" appears once,
+        // not as "Biology - paper 1", "Biology - paper 2", "Biology - paper 3".
+        $subjectOptions = [];
+        foreach ($subjects->sortBy('id') as $s) {
+            $baseName = strtoupper(trim(preg_replace('/\s*-?\s*paper\s+\d+\s*$/iu', '', $s->name)));
+            if (!isset($subjectOptions[$baseName])) {
+                $subjectOptions[$s->id] = $baseName;
+            }
+        }
+        asort($subjectOptions); // alphabetical
+
         $form->select('course_id', 'Subject')
-            ->options(
-                $subjects->pluck('name', 'id')
-            )->rules('required');
+            ->options($subjectOptions)
+            ->rules('required');
 
         $form->text('subject_name', 'Subject Display Name')
             ->placeholder('Leave blank to use the default course name')
