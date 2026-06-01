@@ -263,13 +263,14 @@ class SubjectController extends AdminController
 
 
         // Build a deduplicated, paper-free dropdown.
-        // Strip "- paper N" from the display name and keep only the first
-        // (lowest id) entry per base subject — so "Biology" appears once,
-        // not as "Biology - paper 1", "Biology - paper 2", "Biology - paper 3".
+        // Strip "- paper N" and keep only the first (lowest id) entry per
+        // base name — so "Biology" appears once, not three times.
         $subjectOptions = [];
+        $seen = [];
         foreach ($subjects->sortBy('id') as $s) {
             $baseName = strtoupper(trim(preg_replace('/\s*-?\s*paper\s+\d+\s*$/iu', '', $s->name)));
-            if (!isset($subjectOptions[$baseName])) {
+            if (!isset($seen[$baseName])) {
+                $seen[$baseName]       = true;
                 $subjectOptions[$s->id] = $baseName;
             }
         }
