@@ -102,6 +102,7 @@ class SubjectController extends AdminController
             ->where('enterprise_id', Admin::user()->enterprise_id);
         $grid->column('id', __('#ID'))->sortable();
         $grid->column('subject_name', __('SUBJECT'))
+            ->editable()
             ->sortable();
 
         $templateCol = $grid->column('scheme_template', __('Scheme Template'))
@@ -262,6 +263,9 @@ class SubjectController extends AdminController
                 $subjects->pluck('name', 'id')
             )->rules('required');
 
+        $form->text('subject_name', 'Subject Display Name')
+            ->placeholder('Leave blank to use the default course name')
+            ->help('This is the name shown on reports and marksheets. You can rename it freely — e.g. "MATH" → "MATHEMATICS", or "ENG" → "ENGLISH LANGUAGE".');
 
         $form->select('subject_teacher', 'Subject teacher')
             ->options(
@@ -296,9 +300,6 @@ class SubjectController extends AdminController
             ->default('auto')
             ->rules('required');
 
-        if (!$form->isCreating()) {
-            $form->text('subject_name', __('Subject Name'))->rules('required');
-        }
         $form->text('code', __('Subject Code'));
 
         $form->radio('is_optional', 'Subject type')
