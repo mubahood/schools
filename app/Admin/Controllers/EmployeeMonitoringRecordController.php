@@ -43,7 +43,14 @@ class EmployeeMonitoringRecordController extends AdminController
                     ->orderBy('name')->get()->pluck('name', 'id')
             );
             $filter->equal('subject_id', 'Subject')->select(
-                Subject::where('enterprise_id', $u->enterprise_id)->orderBy('subject_name')->get()->pluck('subject_name', 'id')
+                Subject::where('enterprise_id', $u->enterprise_id)
+                    ->with('academic_class')
+                    ->orderBy('subject_name')
+                    ->get()
+                    ->sortBy(fn($s) => $s->subject_name . '|' . optional($s->academic_class)->name_text)
+                    ->mapWithKeys(fn($s) => [
+                        $s->id => $s->subject_name . '  —  ' . (optional($s->academic_class)->name_text ?: '?'),
+                    ])
             );
             $filter->equal('academic_class_id', 'Class')->select(
                 AcademicClass::where('enterprise_id', $u->enterprise_id)->orderBy('name')->get()->pluck('name_text', 'id')
@@ -280,7 +287,16 @@ class EmployeeMonitoringRecordController extends AdminController
             ->rules('required');
 
         $form->select('subject_id', 'Subject')
-            ->options(Subject::where('enterprise_id', $u->enterprise_id)->orderBy('subject_name')->get()->pluck('subject_name', 'id'))
+            ->options(
+                Subject::where('enterprise_id', $u->enterprise_id)
+                    ->with('academic_class')
+                    ->orderBy('subject_name')
+                    ->get()
+                    ->sortBy(fn($s) => $s->subject_name . '|' . optional($s->academic_class)->name_text)
+                    ->mapWithKeys(fn($s) => [
+                        $s->id => $s->subject_name . '  —  ' . (optional($s->academic_class)->name_text ?: '?'),
+                    ])
+            )
             ->rules('required');
 
         $form->select('academic_class_id', 'Class')
