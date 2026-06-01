@@ -44,6 +44,7 @@ class EmployeeMonitoringRecordController extends AdminController
             );
             $filter->equal('subject_id', 'Subject')->select(
                 Subject::where('enterprise_id', $u->enterprise_id)
+                    ->where('academic_year_id', $u->ent->dp_year)
                     ->with('academic_class')
                     ->orderBy('subject_name')
                     ->get()
@@ -289,6 +290,7 @@ class EmployeeMonitoringRecordController extends AdminController
         $form->select('subject_id', 'Subject')
             ->options(
                 Subject::where('enterprise_id', $u->enterprise_id)
+                    ->where('academic_year_id', $u->ent->dp_year)
                     ->with('academic_class')
                     ->orderBy('subject_name')
                     ->get()
