@@ -27,6 +27,20 @@
         return t || getCfg().defaultTermId || '';
     }
 
+    // Build <option> elements for the term select from config, selecting the given id
+    function buildTermOpts(selectedId) {
+        var terms = getCfg().terms || [];
+        var defId = String(selectedId || getCfg().defaultTermId || '');
+        if (!terms.length) {
+            return '<option value="">— no terms found —</option>';
+        }
+        return terms.map(function (t) {
+            var sel = (String(t.id) === defId) ? ' selected' : '';
+            var safe = String(t.name).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return '<option value="' + t.id + '"' + sel + '>' + safe + '</option>';
+        }).join('');
+    }
+
     function chipsHtml(field) {
         var items = suggestionMap[field];
         if (!items || !items.length) return '';
@@ -127,11 +141,18 @@
             + '        <form id="scheme-popup-form">'
             + '          <input type="hidden" name="_token" value="' + getToken() + '">'
             + '          <input type="hidden" name="subject_id" id="popup-subject-id">'
-            + '          <input type="hidden" name="term_id" id="popup-term-id">'
+            /* ── Row 1: Term · Week · Periods · Status ── */
             + '          <div class="row form-grid">'
-            + '            <div class="col-md-3 col-sm-4"><label>Week</label><select class="form-control" name="week" id="popup-week">' + weekOpts + '</select></div>'
-            + '            <div class="col-md-3 col-sm-4"><label>Periods</label><select class="form-control" name="period" id="popup-period">' + periodOpts + '</select></div>'
-            + '            <div class="col-md-6 col-sm-4"><label>Status</label><select class="form-control" name="teacher_status"><option>Pending</option><option>Conducted</option><option>Skipped</option></select></div>'
+            + '            <div class="col-md-4 col-sm-12">'
+            + '              <label style="display:flex;align-items:center;gap:6px;">'
+            + '                Term'
+            + '                <span style="font-size:10px;font-weight:400;color:#6b849a;">(default: active term)</span>'
+            + '              </label>'
+            + '              <select class="form-control" name="term_id" id="popup-term-id"></select>'
+            + '            </div>'
+            + '            <div class="col-md-2 col-sm-4"><label>Week</label><select class="form-control" name="week" id="popup-week">' + weekOpts + '</select></div>'
+            + '            <div class="col-md-2 col-sm-4"><label>Periods</label><select class="form-control" name="period" id="popup-period">' + periodOpts + '</select></div>'
+            + '            <div class="col-md-4 col-sm-4"><label>Status</label><select class="form-control" name="teacher_status"><option>Pending</option><option>Conducted</option><option>Skipped</option></select></div>'
             + '          </div>'
             + '          <div class="row form-grid">'
             + '            <div class="col-md-6 col-sm-6">' + fieldRow('Theme', 'theme', 'input', false) + '</div>'
@@ -242,6 +263,7 @@
     function clearForNextEntry() {
         var form = document.getElementById('scheme-popup-form');
         if (!form) return;
+        // term_id is intentionally NOT cleared — user keeps their term selection
         ['theme', 'topic', 'sub_topic', 'content', 'competence_subject', 'competence_language', 'methods', 'life_skills_values', 'suggested_activity', 'instructional_material', 'references', 'teacher_comment']
             .forEach(function (name) { setVal(name, ''); });
 
@@ -265,8 +287,18 @@
         var form = document.getElementById('scheme-popup-form');
         document.getElementById('popup-subject-id').value = subjectId;
         document.getElementById('popup-subject-name').innerText = '- ' + subjectName;
-        document.getElementById('popup-term-id').value = currentTermId();
+
+        // Populate term dropdown (refresh options each open so new terms appear)
+        var termEl = document.getElementById('popup-term-id');
+        if (termEl) {
+            termEl.innerHTML = buildTermOpts(currentTermId());
+        }
+
         form.reset();
+
+        // Re-apply after form.reset() clears the select
+        if (termEl) termEl.innerHTML = buildTermOpts(currentTermId());
+
         configureSchemePopup(schemeTemplate);
         // Refresh CSRF token on each open in case session was renewed
         var tokenEl = form.querySelector('[name="_token"]');

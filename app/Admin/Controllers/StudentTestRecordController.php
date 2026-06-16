@@ -129,13 +129,40 @@ class StudentTestRecordController extends AdminController
             );
         });
 
-        // Determine number of tests from filtered PA (or max)
+        // ── Resolve the Progressive Assessment ───────────────────────────────
+        // Priority: URL filter → most-recent open PA for this enterprise.
+        // We ALWAYS need a PA to know which test slots are editable.
         $paId = $_GET['progressive_assessment_id'] ?? null;
-        $numTests = 10;
-        $pa = null;
-        if ($paId) {
-            $pa = ProgressiveAssessment::find($paId);
-            if ($pa) $numTests = (int) $pa->number_of_tests;
+        $pa   = $paId
+            ? ProgressiveAssessment::find((int) $paId)
+            : ProgressiveAssessment::where('enterprise_id', $u->enterprise_id)
+                ->where('can_submit_tests', 'Yes')
+                ->orderBy('id', 'desc')
+                ->first();
+
+        // Fall back to the very latest PA if none is currently "open"
+        if (!$pa) {
+            $pa = ProgressiveAssessment::where('enterprise_id', $u->enterprise_id)
+                ->orderBy('id', 'desc')
+                ->first();
+        }
+
+        $numTests     = $pa ? (int) $pa->number_of_tests : 10;
+        $allowedTests = [];   // empty = nothing editable until we confirm below
+
+        if ($pa) {
+            $raw = $pa->allowed_tests; // int[] from model accessor
+            if (!empty($raw)) {
+                // Only keep slot numbers within the configured range
+                $allowedTests = array_values(array_filter(
+                    $raw,
+                    fn($n) => $n >= 1 && $n <= $numTests
+                ));
+                sort($allowedTests);
+            } else {
+                // No whitelist set → every slot up to numTests is editable
+                $allowedTests = range(1, $numTests);
+            }
         }
 
         // ── columns ──────────────────────────────────────────────────────────
@@ -157,12 +184,18 @@ class StudentTestRecordController extends AdminController
             return $this->subject?->subject_name ?? '—';
         })->sortable();
 
-        // Test score columns — editable, shown only up to numTests
-        for ($i = 1; $i <= $numTests; $i++) {
-            $col   = "t{$i}_score";
-            $label = "T{$i}";
-            $grid->column($col, $label)->editable()->sortable();
-        }
+        // Always show T1–T10 (static).
+        // Each column is editable only if its number is in $allowedTests.
+        if (in_array(1,  $allowedTests)) { $grid->column('t1_score',  'T1')->editable()->sortable(); }  else { $grid->column('t1_score',  'T1')->sortable(); }
+        if (in_array(2,  $allowedTests)) { $grid->column('t2_score',  'T2')->editable()->sortable(); }  else { $grid->column('t2_score',  'T2')->sortable(); }
+        if (in_array(3,  $allowedTests)) { $grid->column('t3_score',  'T3')->editable()->sortable(); }  else { $grid->column('t3_score',  'T3')->sortable(); }
+        if (in_array(4,  $allowedTests)) { $grid->column('t4_score',  'T4')->editable()->sortable(); }  else { $grid->column('t4_score',  'T4')->sortable(); }
+        if (in_array(5,  $allowedTests)) { $grid->column('t5_score',  'T5')->editable()->sortable(); }  else { $grid->column('t5_score',  'T5')->sortable(); }
+        if (in_array(6,  $allowedTests)) { $grid->column('t6_score',  'T6')->editable()->sortable(); }  else { $grid->column('t6_score',  'T6')->sortable(); }
+        if (in_array(7,  $allowedTests)) { $grid->column('t7_score',  'T7')->editable()->sortable(); }  else { $grid->column('t7_score',  'T7')->sortable(); }
+        if (in_array(8,  $allowedTests)) { $grid->column('t8_score',  'T8')->editable()->sortable(); }  else { $grid->column('t8_score',  'T8')->sortable(); }
+        if (in_array(9,  $allowedTests)) { $grid->column('t9_score',  'T9')->editable()->sortable(); }  else { $grid->column('t9_score',  'T9')->sortable(); }
+        if (in_array(10, $allowedTests)) { $grid->column('t10_score', 'T10')->editable()->sortable(); } else { $grid->column('t10_score', 'T10')->sortable(); }
 
         $grid->column('average_score', 'Avg')->sortable();
         $grid->column('aggr_name', 'Grade')->sortable();

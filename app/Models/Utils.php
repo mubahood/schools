@@ -1937,16 +1937,31 @@ class Utils  extends Model
         $rec->last_update   = time();
         $rec->back_day      = 0;
 
-        $rec_date = date('Y-m-d');                    // e.g. "2025-05-13"
+        $rec_date = date('Y-m-d');                    // default: today
         if ($lastRec) {
-            $lastDay = Carbon::createFromTimestamp($lastRec->last_update);
+            // last_update is always stored as a unix timestamp (integer).
+            // Carbon::createFromTimestamp() requires a unix integer — never pass a
+            // date string here, as PHP would silently coerce it to just the year.
+            $lastDay = Carbon::createFromTimestamp((int) $lastRec->last_update);
             if ($lastDay->isToday()) {
-                $back = min(($lastRec->back_day ?? 2) + 2, 30);
-                $rec->back_day      = $back;
-                $rec_date           = date('Y-m-d', strtotime("-{$back} days"));
-                $rec->last_update   = date('Y-m-d H:i:s', strtotime("-{$back} days"));
+                // Last call fetched "today" → now go one day further back.
+                // Increment by 1 so back-dates advance one day at a time:
+                // today-1, today-2, … today-60, then reset and start over.
+                $back = min(($lastRec->back_day ?? 0) + 1, 60);
+                $rec->back_day    = $back;
+                $rec_date         = date('Y-m-d', strtotime("-{$back} days"));
+                // Store as unix timestamp so Carbon::createFromTimestamp() reads it
+                // correctly next call and isToday() returns false (it's a past date).
+                $rec->last_update = strtotime("-{$back} days");
             } else {
-                $rec->back_day = $lastRec->back_day;
+                // Last call fetched a back-date → this call fetches today.
+                // If we just finished the full 60-day cycle, reset back_day to 0
+                // so the next back-date call restarts from today-1.
+                if (($lastRec->back_day ?? 0) >= 60) {
+                    $rec->back_day = 0;
+                } else {
+                    $rec->back_day = $lastRec->back_day;
+                }
             }
         }
         // $rec_date = '2025-06-19';

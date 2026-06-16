@@ -361,7 +361,17 @@ class ProgressiveAssessmentController extends AdminController
 
         $form->divider('Submission Settings');
         $form->radioCard('can_submit_tests', 'Allow teachers to enter test marks?')
-            ->options(['Yes' => 'Yes', 'No' => 'No'])->default('No');
+            ->options(['Yes' => 'Yes', 'No' => 'No'])->default('No')
+            ->when('Yes', function (Form $form) {
+                // Build T1–T10 options
+                $testOpts = [];
+                for ($i = 1; $i <= 10; $i++) {
+                    $testOpts[(string) $i] = 'T' . $i;
+                }
+                $form->checkbox('allowed_tests', 'Tests open for entry')
+                    ->options($testOpts)
+                    ->help('Check only the tests teachers should see and fill in. Leave ALL unchecked to open every test up to the configured count.');
+            });
 
         if ($form->isEditing()) {
             $form->tools(function (Form\Tools $tools) {

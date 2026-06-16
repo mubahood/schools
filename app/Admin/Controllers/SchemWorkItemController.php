@@ -357,6 +357,9 @@ JS);
 
         // ── Layout CSS ──────────────────────────────────────────────────────
         Admin::style(<<<'CSS'
+            /* term + subject side-by-side at the top */
+            .field_term_id  { float:left; width:50%; padding-right:8px; clear:both; }
+            .field_subject_id { float:left; width:50%; padding-right:0; }
             .field_week, .field_period, .field_teacher_status { float:left; width:33.3333%; padding-right:8px; }
             .field_theme, .field_topic, .field_content, .field_competence_subject,
             .field_competence_language, .field_methods, .field_life_skills_values,
@@ -370,6 +373,7 @@ JS);
             .field_suggested_activity, .field_references { padding-right:0; }
             .field_sub_topic, .field_teacher_comment { width:100%; float:left; }
             @media (max-width:991px) {
+                .field_term_id, .field_subject_id,
                 .field_week, .field_period, .field_teacher_status, .field_theme, .field_topic,
                 .field_content, .field_competence_subject, .field_competence_language,
                 .field_methods, .field_life_skills_values, .field_suggested_activity,
@@ -380,8 +384,17 @@ JS);
         CSS);
 
         // ── Term & FK fields (required) ─────────────────────────────────────
-        $form->display('_term', 'Term')->default($active_term->name_text);
-        $form->hidden('term_id')->value($active_term->id);
+        $allTerms = Term::where('enterprise_id', $u->enterprise_id)
+            ->orderBy('id', 'desc')
+            ->get()
+            ->pluck('name_text', 'id')
+            ->toArray();
+
+        $form->select('term_id', 'Term')
+            ->options($allTerms)
+            ->default($active_term->id)
+            ->rules('required')
+            ->help('Defaults to the current active term. Change only if adding items for a different term.');
 
         $teachers = User::where(['enterprise_id' => $u->enterprise_id, 'user_type' => 'employee'])
             ->orderBy('first_name')->get()->pluck('name', 'id')->toArray();

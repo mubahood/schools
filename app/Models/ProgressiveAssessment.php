@@ -94,6 +94,24 @@ class ProgressiveAssessment extends Model
         $this->attributes['classes'] = is_array($value) ? json_encode($value) : $value;
     }
 
+    /**
+     * Allowed test slot numbers (e.g. [1,3,5]).
+     * NULL / empty array → all slots up to number_of_tests are open.
+     */
+    public function getAllowedTestsAttribute($value): array
+    {
+        if (is_array($value)) return array_map('intval', $value);
+        $decoded = $value ? json_decode($value, true) : [];
+        return is_array($decoded) ? array_map('intval', $decoded) : [];
+    }
+
+    public function setAllowedTestsAttribute($value): void
+    {
+        $this->attributes['allowed_tests'] = is_array($value)
+            ? json_encode(array_values(array_map('intval', $value)))
+            : $value;
+    }
+
     // ── relationships ────────────────────────────────────────────────────────
     public function term()          { return $this->belongsTo(Term::class); }
     public function academic_year() { return $this->belongsTo(AcademicYear::class); }

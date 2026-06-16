@@ -3662,26 +3662,50 @@ Route::get('reports-finance-create', function () {
 Route::get('scheme-of-work-print', function (Request $request) {
   $sub = Subject::find($request->id);
   if ($sub == null) return "Subject not found";
-  //active term
-  $active = Term::where([
-    'enterprise_id' => $sub->enterprise_id,
-    'is_active' => 1
-  ])->first();
-  if ($active == null) return "Active term not found";
-  $items = SchemWorkItem::where([
-    'subject_id' => $sub->id,
-    'term_id' => $active->id
-  ])->orderBy('week', 'asc')->orderBy('period', 'asc')->get();
-  $pdf = App::make('dompdf.wrapper');
+
+  // Fetch ALL items for this subject across all terms
+  $allItems = SchemWorkItem::where('subject_id', $sub->id)
+    ->orderBy('term_id', 'asc')
+    ->orderBy('week', 'asc')
+    ->orderBy('period', 'asc')
+    ->get();
+
+  // Collect the distinct term IDs that actually have items, ordered by term id
+  $termIds = $allItems->pluck('term_id')->unique()->sort()->values();
+  $termsById = Term::whereIn('id', $termIds)->get()->keyBy('id');
+
+  // Build [ ['term' => Term, 'items' => Collection], ... ]
+  $termGroups = $termIds->map(function ($termId) use ($termsById, $allItems) {
+    return [
+      'term'  => $termsById->get($termId),
+      'items' => $allItems->where('term_id', $termId)->values(),
+    ];
+  })->filter(function ($group) {
+    return $group['term'] !== null && $group['items']->count() > 0;
+  })->values();
+
+  // Fallback: no items at all — show empty state using active term
+  if ($termGroups->isEmpty()) {
+    $active = Term::where([
+      'enterprise_id' => $sub->enterprise_id,
+      'is_active'     => 1,
+    ])->first();
+    $termGroups = collect([[
+      'term'  => $active,
+      'items' => collect(),
+    ]]);
+  }
+
+  $ent   = \App\Models\Enterprise::find($sub->enterprise_id);
   $class = AcademicClass::find($sub->academic_class_id);
+  $pdf   = App::make('dompdf.wrapper');
   $pdf->setPaper('A4', 'landscape');
   $pdf->loadHTML(view('print.scheme-of-work-print', [
-    'term' => $active,
-    'ent' => $active->enterprise,
-    'sub' => $sub,
-    'class' => $class,
-    'isPrint' => true,
-    'items' => $items
+    'termGroups' => $termGroups,
+    'ent'        => $ent,
+    'sub'        => $sub,
+    'class'      => $class,
+    'isPrint'    => true,
   ]));
   return $pdf->stream();
 });

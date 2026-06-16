@@ -92,9 +92,15 @@ class SchemeWorkController extends AdminController
             'defaultTermId'     => $active_term ? (int) $active_term->id : 0,
             'storeUrl'          => admin_url('scheme-works/add-item-ajax'),
             'updateTemplateUrl' => admin_url('scheme-works/update-template-ajax'),
+            'terms'             => Term::where('enterprise_id', $u->enterprise_id)
+                                       ->orderBy('id', 'desc')
+                                       ->get()
+                                       ->map(fn ($t) => ['id' => (int) $t->id, 'name' => $t->name_text])
+                                       ->values()
+                                       ->toArray(),
         ];
         Admin::script('window.SCHEME_POPUP_CONFIG = ' . json_encode($popupConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . ';');
-        Admin::js('/js/scheme-work-popup.js?v=20260422-1');
+        Admin::js('/js/scheme-work-popup.js?v=20260605-1');
         Admin::js('/js/scheme-template-switcher.js?v=20260523-1');
         Admin::script(<<<'JS'
             (function () {

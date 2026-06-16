@@ -15,6 +15,10 @@
             color: #000;
         }
 
+        /* ── TERM SECTION ── */
+        .term-section { width: 100%; }
+        .term-section + .term-section { page-break-before: always; }
+
         /* ── HEADER ── */
         .meta-table { width: 100%; margin-bottom: 3px; }
         .meta-table td {
@@ -98,12 +102,39 @@
     $splitCompetence = !$isLowerPrimary && $tmpl !== 'language';
     $totalColumns    = $isLowerPrimary ? 12 : ($splitCompetence ? 14 : 13);
 
-    $termNameText = $term->name_text ?? '';
-    $currentYear  = date('Y');
-    $titleTerm    = (strpos((string) $termNameText, (string) $currentYear) !== false)
-                    ? $termNameText
-                    : trim($termNameText . ' ' . $currentYear);
+    $currentYear = date('Y');
+
+    $asPrintable = function ($text) {
+        if ($text === null) return '<span class="empty-dash">&mdash;</span>';
+        $raw = trim((string) $text);
+        if ($raw === '') return '<span class="empty-dash">&mdash;</span>';
+        $n = preg_replace('/<\s*br\s*\/?\s*>/i', "\n", $raw);
+        $n = preg_replace('/<\s*\/?\s*p[^>]*>/i', "\n", $n);
+        $n = preg_replace('/<\s*\/?\s*div[^>]*>/i', "\n", $n);
+        $n = preg_replace('/<\s*li[^>]*>/i', "\n\xE2\x80\xa2 ", $n);
+        $n = preg_replace('/<\s*\/\s*li\s*>/i', '', $n);
+        $n = strip_tags($n);
+        $n = preg_replace("/\n{3,}/", "\n\n", $n);
+        $n = trim($n);
+        return $n === '' ? '<span class="empty-dash">&mdash;</span>' : nl2br(e($n));
+    };
 @endphp
+
+@foreach ($termGroups as $termGroup)
+@php
+    $term  = $termGroup['term'];
+    $items = $termGroup['items'];
+
+    $termNameText = $term->name_text ?? '';
+    $titleTerm = (strpos((string) $termNameText, (string) $currentYear) !== false)
+                 ? $termNameText
+                 : trim($termNameText . ' ' . $currentYear);
+    // Prefix "TERM " if the name doesn't already contain the word "term"
+    if (!preg_match('/\bterm\b/i', (string) $titleTerm)) {
+        $titleTerm = 'TERM ' . $titleTerm;
+    }
+@endphp
+<div class="term-section">
 
 {{-- ── HEADER ── --}}
 <table class="meta-table">
@@ -238,21 +269,6 @@
 
     <tbody>
         @php
-            $asPrintable = function ($text) {
-                if ($text === null) return '<span class="empty-dash">&mdash;</span>';
-                $raw = trim((string) $text);
-                if ($raw === '') return '<span class="empty-dash">&mdash;</span>';
-                $n = preg_replace('/<\s*br\s*\/?\s*>/i', "\n", $raw);
-                $n = preg_replace('/<\s*\/?\s*p[^>]*>/i', "\n", $n);
-                $n = preg_replace('/<\s*\/?\s*div[^>]*>/i', "\n", $n);
-                $n = preg_replace('/<\s*li[^>]*>/i', "\n\xE2\x80\xa2 ", $n);
-                $n = preg_replace('/<\s*\/\s*li\s*>/i', '', $n);
-                $n = strip_tags($n);
-                $n = preg_replace("/\n{3,}/", "\n\n", $n);
-                $n = trim($n);
-                return $n === '' ? '<span class="empty-dash">&mdash;</span>' : nl2br(e($n));
-            };
-
             $sortedItems = $items->sortBy(function ($i) {
                 return sprintf('%03d-%03d-%s-%s',
                     (int) ($i->week   ?? 0),
@@ -334,6 +350,9 @@
         @endforelse
     </tbody>
 </table>
+
+</div>{{-- .term-section --}}
+@endforeach
 
 <div class="footer">Printed on {{ date('d M Y') }} &nbsp;|&nbsp; {{ $ent->name ?? '' }}</div>
 
