@@ -246,15 +246,56 @@ class Transaction extends Model
             if (!isset($m->type)) {
                 $m->type = 'other';
             }
-            //check if there is a duplicate of school_pay_transporter_id
-            if ($m->school_pay_transporter_id != null) {
-                if (strlen($m->school_pay_transporter_id) > 4) {
-                    $dup = Transaction::where([
-                        'school_pay_transporter_id' => $m->school_pay_transporter_id,
-                    ])->first();
-                    if ($dup != null) {
-                        throw new Exception("Duplicate Transaction #" . $m->school_pay_transporter_id . " ref: " . $m->id, 1);
-                    }
+
+            // ── SCHOOL_PAY must have a valid receipt number ───────────────────
+            // School Pay assigns a unique numeric receipt number (8+ digits) to
+            // every transaction. We must never record a SCHOOL_PAY entry without
+            // one — that is a sure sign of a bug in the caller or the mobile app
+            // sending "-" as a placeholder.
+            if ($m->source === 'SCHOOL_PAY') {
+                $spId = trim((string)($m->school_pay_transporter_id ?? ''));
+                if (strlen($spId) < 5 || !is_numeric($spId)) {
+                    throw new Exception(
+                        "SCHOOL_PAY transaction rejected: school_pay_transporter_id is missing or invalid " .
+                        "(got [" . $spId . "]). Every School Pay payment has a unique numeric receipt number.",
+                        1
+                    );
+                }
+            }
+
+            // ── Duplicate school_pay_transporter_id check ─────────────────────
+            // Any payment reference that is at least 3 chars must be unique
+            // across the whole transactions table. The original check used > 4
+            // which allowed "-" (1 char) to slip through silently.
+            $spRef = trim((string)($m->school_pay_transporter_id ?? ''));
+            if (strlen($spRef) >= 3) {
+                $dup = Transaction::where('school_pay_transporter_id', $spRef)->first();
+                if ($dup !== null) {
+                    throw new Exception(
+                        "Duplicate school pay receipt #" . $spRef .
+                        " — transaction ID " . $dup->id . " already exists with this reference.",
+                        1
+                    );
+                }
+            }
+
+            // ── BFSS back-date block (enterprise 19 — Bright Future SS) ──────
+            // Payments dated before 15-May-2026 have already been recorded.
+            // Any new transaction created from June 2026 onward with a
+            // payment_date before 2026-05-15 is either a duplicate or an error.
+            if ((int)$m->enterprise_id === 19 && $m->payment_date !== null) {
+                $paymentDay = Carbon::parse($m->payment_date);
+                $cutoff     = Carbon::parse('2026-05-15');
+                $goLiveDate = Carbon::parse('2026-06-01');
+                if (Carbon::now()->gte($goLiveDate) && $paymentDay->lt($cutoff)) {
+                    throw new Exception(
+                        "Transaction rejected for Bright Future SS: payment date " .
+                        $paymentDay->format('d-M-Y') .
+                        " is before 15-May-2026. All payments up to that date are " .
+                        "already recorded in the system. Contact the bursar if you " .
+                        "believe this is a genuine new payment.",
+                        1
+                    );
                 }
             }
 

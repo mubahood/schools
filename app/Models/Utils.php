@@ -1882,7 +1882,7 @@ class Utils  extends Model
             : 10;
 
         if ($dif_secs < 10) {
-            // throttle if needed
+            die("Sync throttled: last run was only {$dif_secs}s ago. Please wait.");
         }
 
         $schools = Enterprise::where('school_pay_status', 'Yes')

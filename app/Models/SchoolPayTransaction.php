@@ -230,6 +230,13 @@ class SchoolPayTransaction extends Model
             $this->status = 'Imported';
             $this->save();
         } catch (\Exception $e) {
+            // Catch UNIQUE constraint violation (duplicate receipt snuck past the SELECT check)
+            if (str_contains($e->getMessage(), '23000') || str_contains($e->getMessage(), 'uq_txn_school_pay_id') || str_contains($e->getMessage(), 'Duplicate entry')) {
+                $this->status = 'Imported';
+                $this->error_alert = "Duplicate blocked by DB constraint: receipt #{$school_pay_receipt_number}";
+                $this->save();
+                throw new Exception("Duplicate school pay receipt #{$school_pay_receipt_number} — blocked by database unique constraint.", 1);
+            }
             throw new Exception("Error saving transaction: " . $e->getMessage(), 1);
         }
         $this->status = 'Imported';
