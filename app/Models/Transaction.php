@@ -247,6 +247,17 @@ class Transaction extends Model
                 $m->type = 'other';
             }
 
+            // ── Normalise school_pay_transporter_id before any checks ────────
+            // Non-School-Pay transactions arrive with '' or '-' instead of NULL.
+            // The UNIQUE index allows multiple NULLs but treats '' as a real value,
+            // so we must convert every blank/placeholder to NULL here.
+            if (isset($m->school_pay_transporter_id)) {
+                $raw = trim((string)$m->school_pay_transporter_id);
+                if ($raw === '' || $raw === '-' || $raw === '--' || strlen($raw) < 3) {
+                    $m->school_pay_transporter_id = null;
+                }
+            }
+
             // ── SCHOOL_PAY must have a valid receipt number ───────────────────
             // School Pay assigns a unique numeric receipt number (8+ digits) to
             // every transaction. We must never record a SCHOOL_PAY entry without

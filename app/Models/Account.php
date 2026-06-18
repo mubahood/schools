@@ -120,7 +120,7 @@ class Account extends Model
                         $term = $ent->active_term();
                         $trans->academic_year_id = $term->academic_year_id;
                         $trans->term_id = $term->id;
-                        $trans->school_pay_transporter_id = "";
+                        $trans->school_pay_transporter_id = null;
 
                         $created_by = Admin::user();
                         if ($created_by == null) {
