@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Encore\Admin\Facades\Admin;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -10,6 +12,24 @@ class ParentCommitmentRecord extends Model
     use HasFactory;
 
     protected $table = 'parent_commitment_records';
+
+    /**
+     * Global scope: every query is automatically filtered to the current admin's
+     * enterprise. This ensures SaaS data isolation even when base controller
+     * methods (show, edit, update) call findOrFail() without an explicit
+     * enterprise_id WHERE clause.
+     *
+     * Skipped in CLI / queue contexts where no admin session exists.
+     */
+    protected static function booted(): void
+    {
+        static::addGlobalScope('enterprise', function (Builder $query) {
+            $u = Admin::user();
+            if ($u && $u->enterprise_id) {
+                $query->where('parent_commitment_records.enterprise_id', (int) $u->enterprise_id);
+            }
+        });
+    }
 
     protected $fillable = [
         'enterprise_id',
@@ -70,7 +90,10 @@ class ParentCommitmentRecord extends Model
      */
     public static function markOverdue(int $enterpriseId): void
     {
-        self::where('enterprise_id', $enterpriseId)
+        // withoutGlobalScope avoids double-filtering when enterprise_id is
+        // provided explicitly (e.g. from Artisan / scheduled commands).
+        self::withoutGlobalScope('enterprise')
+            ->where('enterprise_id', $enterpriseId)
             ->where('promise_status', 'Pending')
             ->whereNotNull('commitment_date')
             ->where('commitment_date', '<', now()->toDateString())

@@ -34,6 +34,7 @@ class ParentCommitmentRecordController extends AdminController
 
         $grid->model()
             ->where('enterprise_id', $u->enterprise_id)
+            ->with(['student'])
             ->orderBy('commitment_date', 'asc')
             ->orderBy('id', 'desc');
 
@@ -272,17 +273,28 @@ class ParentCommitmentRecordController extends AdminController
 }());
 JS);
 
-        // Saving callback: auto-set fulfilled_at, refresh updated_by
+        // Saving callback: enforce enterprise isolation + auto-set fulfilled_at
         $form->saving(function (Form $form) use ($u) {
-            $form->updated_by = $u->id;
+            $form->updated_by  = $u->id;
+            $form->enterprise_id = $u->enterprise_id;
+
+            // Guard: ensure the selected student belongs to this enterprise
+            if ($form->student_id) {
+                $studentExists = User::where([
+                    'id'            => $form->student_id,
+                    'enterprise_id' => $u->enterprise_id,
+                    'user_type'     => 'student',
+                ])->exists();
+                if (!$studentExists) {
+                    throw new \Exception('Selected student does not belong to your school.');
+                }
+            }
 
             if ($form->promise_status === 'Fulfilled') {
-                // Auto-stamp only when not already provided
                 if (empty($form->fulfilled_at)) {
                     $form->fulfilled_at = now();
                 }
             } else {
-                // Clear fulfilled_at only when status is being changed FROM Fulfilled
                 if ($form->model()->promise_status === 'Fulfilled') {
                     $form->fulfilled_at = null;
                 }
@@ -461,9 +473,11 @@ JS);
             return response()->json(['success' => false]);
         }
 
-        // Resolve parent
-        $parent     = $student->parent_id ? User::find($student->parent_id) : null;
-        $parentId   = $parent ? $parent->id : null;
+        // Resolve parent — scoped to same enterprise to prevent cross-tenant data
+        $parent   = $student->parent_id
+            ? User::where('enterprise_id', $u->enterprise_id)->find($student->parent_id)
+            : null;
+        $parentId = $parent ? $parent->id : null;
 
         // Parent name: prefer linked parent record, then fall back to student's emergency/mother/father fields
         $parentName = '';
