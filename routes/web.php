@@ -1502,8 +1502,8 @@ Route::get('fees-data-import-duplicate', function (Request $request) {
 
     // Reset fields that should not be copied
     $duplicate->status = 'Pending';
-    $duplicate->batch_identifier = null; // Will be auto-generated
-    $duplicate->file_hash = null; // Will be recalculated on processing
+    $duplicate->batch_identifier = null;
+    $duplicate->file_hash = null;
     $duplicate->total_rows = 0;
     $duplicate->processed_rows = 0;
     $duplicate->success_count = 0;
@@ -1511,12 +1511,10 @@ Route::get('fees-data-import-duplicate', function (Request $request) {
     $duplicate->skipped_count = 0;
     $duplicate->started_at = null;
     $duplicate->completed_at = null;
-    $duplicate->processed_at = null;
     $duplicate->summary = null;
     $duplicate->validation_errors = null;
-    $duplicate->validation_warnings = null;
     $duplicate->is_locked = false;
-    $duplicate->locked_by = null;
+    $duplicate->locked_by_id = null;
     $duplicate->locked_at = null;
 
     // Update metadata
@@ -2865,89 +2863,6 @@ Route::get('test-1', function (Request $request) {
 Route::get('app', function (Request $request) {
   return view('app');
 });
-Route::get('test', function (Request $request) {
-
-  return view('test');
-  $url = "https://www.socnetsolutions.com/projects/bulk/amfphp/services/blast.php?username=mubaraka&passwd=Mub4r4k4@2025";
-  //$m->receiver_number = '+256706638494';
-  $url .= "&msg=" . trim('$m->message_body');
-  $url .= "&numbers=" . '+256783204665';
-
-  try {
-    $result = file_get_contents($url, false, stream_context_create([
-      'http' => [
-        'method' => 'POST',
-        'header' => 'Content-Type: application/json',
-        /* 'content' => json_encode($m), */
-      ],
-    ]));
-    dd($result);
-  } catch (\Throwable $th) {
-    dd($th);
-  }
-
-  die("done");
-
-  $ent = Enterprise::find(7);
-  $ent = Utils::fetchDataFromRequest($ent, $request);
-  dd($ent->name);
-
-  dd($request->all());
-
-  die("tome to test");
-
-  $marks = TheologyMarkRecord::where([
-    'enterprise_id' => 7,
-  ])->get();
-
-  /*   foreach ($marks as $v) {
-    $v->bot_score = rand(20, 100);
-    $v->mot_score = rand(20, 100);
-    $v->eot_score = rand(20, 100);
-    echo $v->bot_score . ", " . $v->mot_score . ", " . $v->eot_score . "<br>";
-    $v->save();
-  }
-
-  die("done"); */
-
-  $rep = TheologyTermlyReportCard::find(14);
-  $rep->reports_generate = 'Yes';
-  $rep->report_title .= '1';
-  $rep->save();
-  dd($rep->report_title);
-  die("done");
-
-  //$rep->
-});
-/* 
-  #attributes: array:26 [▶
-    "id" => 55326
-    "created_at" => "2024-03-25 00:02:02"
-    "updated_at" => "2024-05-02 21:28:41"
-    "enterprise_id" => 7
-    "termly_report_card_id" => 16
-    "term_id" => 40
-    "administrator_id" => 12926
-    "academic_class_id" => 129
-    "academic_class_sctream_id" => 90
-    "main_course_id" => 1
-    "subject_id" => 1069
-    "bot_score" => 0
-    "mot_score" => 96
-    "eot_score" => 97
-    "bot_is_submitted" => "No"
-    "mot_is_submitted" => "Yes"
-    "eot_is_submitted" => "Yes"
-    "bot_missed" => "Yes"
-    "mot_missed" => "Yes"
-    "eot_missed" => "Yes"
-    "initials" => "KD"
-    "remarks" => "Excellent"
-    "total_score" => 97
-    "total_score_display" => 97
-    "aggr_name" => "D1"
-    "aggr_value" => 1
-*/
 Route::get('process-batch-service-subscriptions', function (Request $request) {
   // ── Auth guard ────────────────────────────────────────────────────────────
   $authUser = \Encore\Admin\Facades\Admin::user();
@@ -3564,6 +3479,73 @@ Route::get('pa-generate-all-pdfs', function () {
     die('<br><strong>Done! ' . $i . ' PDFs generated.</strong>');
 });
 
+// ── Progressive Assessment Sheet — PDF generation ─────────────────────────
+Route::get('progressive-assessment-sheet-generate', function (\Illuminate\Http\Request $request) {
+    set_time_limit(-1);
+    ini_set('memory_limit', '-1');
+
+    $id    = (int) $request->get('id', 0);
+    $sheet = \App\Models\ProgressiveAssessmentSheet::find($id);
+    if (!$sheet) abort(404, 'Progressive Assessment Sheet not found.');
+
+    // Re-compute stats and save
+    \App\Models\ProgressiveAssessmentSheet::prepare($sheet);
+    $sheet->save();
+
+    $pa      = $sheet->progressive_assessment;
+    $ent     = $pa?->enterprise ?? \App\Models\Enterprise::find($sheet->enterprise_id);
+    if (!$pa || !$ent) abort(404, 'Assessment or Enterprise not found.');
+
+    // Load reports for this class/stream, ordered by position
+    $reportQuery = \App\Models\StudentProgressiveReport::where([
+        'progressive_assessment_id' => $pa->id,
+        'enterprise_id'             => $sheet->enterprise_id,
+    ]);
+    if ($sheet->type === 'Stream' && $sheet->academic_class_sctream_id) {
+        $reportQuery->where('academic_class_id', $sheet->academic_class_id)
+                    ->where('stream_id', $sheet->academic_class_sctream_id);
+    } else {
+        $reportQuery->where('academic_class_id', $sheet->academic_class_id);
+    }
+    $reports = $reportQuery->with(['owner', 'academic_class', 'stream'])->orderBy('position')->get();
+
+    // Subjects (decoded from cached JSON for display column ordering)
+    $subjectStats = json_decode($sheet->getRawOriginal('subject_stats') ?? '[]', true) ?? [];
+    $subjects     = $subjectStats;
+
+    $viewData = [
+        'sheet'        => $sheet,
+        'pa'           => $pa,
+        'ent'          => $ent,
+        'reports'      => $reports,
+        'subjects'     => $subjects,
+        'subjectStats' => $subjectStats,
+    ];
+
+    $html = view('print.progressive-assessment-sheet', $viewData)->render();
+
+    // Save PDF
+    $safeName  = preg_replace('/[^A-Za-z0-9_-]/', '-', $sheet->get_title());
+    $filename  = $id . '-' . rand(1000, 9999) . '-' . $safeName . '.pdf';
+    $storagePath = 'files/' . $filename;
+    $fullPath    = public_path('storage/' . $storagePath);
+
+    if ($sheet->pdf_link && file_exists(public_path('storage/' . $sheet->pdf_link))) {
+        @unlink(public_path('storage/' . $sheet->pdf_link));
+    }
+
+    $pdf = \Illuminate\Support\Facades\App::make('dompdf.wrapper');
+    $pdf->setPaper('A4', 'landscape');
+    $pdf->loadHTML($html);
+    $pdf->save($fullPath);
+
+    $sheet->pdf_link  = $storagePath;
+    $sheet->generated = 'Yes';
+    $sheet->save();
+
+    return $pdf->stream('PA-Sheet-' . $safeName . '.pdf');
+});
+
 // ── Progressive Assessment: batch-print all cards for a class as one PDF ────
 Route::get('pa-batch-print', function () {
     set_time_limit(-1);
@@ -3767,13 +3749,18 @@ Route::get('university-programmes-fees-structure', function (Request $request) {
 });
 
 
-Route::get('print-admission-letter', function () {
-  //return view('print/print-admission-letter');
-  $pdf = App::make('dompdf.wrapper');
-  //$pdf->setOption(['DOMPDF_ENABLE_REMOTE' => false]);
+Route::get('print-admission-letter', function (Request $request) {
+  $id      = $request->get('id', 0);
+  $student = $id ? \App\Models\User::find($id) : null;
+  $name    = $student ? preg_replace('/[^A-Za-z0-9_-]/', '-', $student->name) : 'student';
 
-  $pdf->loadHTML(view('print/print-admission-letter'));
-  return $pdf->stream();
+  $html = view('print/print-admission-letter')->render();
+
+  $pdf = App::make('dompdf.wrapper');
+  $pdf->setPaper('A4', 'portrait');
+  $pdf->loadHTML($html);
+
+  return $pdf->stream("Admission-Letter-{$name}.pdf");
 });
 
 Route::get('bulk-messages-sending', function (Request $request) {
@@ -3986,4 +3973,76 @@ Route::get('/kihp', function () {
         ->values();
     return view('kihp.index', compact('school', 'studentCount', 'programs'));
 })->name('kihp.landing');
+
+// MRU School Pay testing console — no login required
+Route::get('mru-schoolpay-test',        [\App\Admin\Controllers\MruSchoolPayTestController::class, 'index'])->name('mru-schoolpay-test');
+Route::get('mru-schoolpay-test/proxy',  [\App\Admin\Controllers\MruSchoolPayTestController::class, 'proxy'])->name('mru-schoolpay-test.proxy');
+Route::get('mru-schoolpay-test/key',    [\App\Admin\Controllers\MruSchoolPayTestController::class, 'key'])->name('mru-schoolpay-test.key');
+
+// SchoolPay Transaction Sync testing console — no login required
+Route::get('schoolpay-sync-test',              [\App\Admin\Controllers\SchoolPaySyncTestController::class, 'index'])->name('schoolpay-sync-test');
+Route::get('schoolpay-sync-test/fetch',        [\App\Admin\Controllers\SchoolPaySyncTestController::class, 'fetch'])->name('schoolpay-sync-test.fetch');
+Route::get('schoolpay-sync-test/hash',         [\App\Admin\Controllers\SchoolPaySyncTestController::class, 'hash'])->name('schoolpay-sync-test.hash');
+Route::get('schoolpay-sync-test/fetch-range',  [\App\Admin\Controllers\SchoolPaySyncTestController::class, 'fetchRange'])->name('schoolpay-sync-test.fetch-range');
+
+// MRU SchoolPay Sync — dedicated page (reuses same fetch/hash endpoints above)
+Route::get('mru-schoolpay-sync', [\App\Admin\Controllers\SchoolPaySyncTestController::class, 'mru'])->name('mru-schoolpay-sync');
+
+// ---- SchoolPay one-click sync & import endpoints ----
+
+// Sync today (or a custom date) from SchoolPay API into staging for the current admin's enterprise
+Route::get('schoolpay/sync-now', function (Request $request) {
+    $u          = \Encore\Admin\Facades\Admin::user();
+    $enterprise = \App\Models\Enterprise::find($u->enterprise_id);
+    if (!$enterprise) {
+        return response()->json(['success' => false, 'message' => 'Enterprise not found'], 404);
+    }
+    $date   = $request->query('date', date('Y-m-d'));
+    $result = \App\Services\SchoolPaySyncService::syncDateRange($enterprise, $date, $date);
+    return response()->json([
+        'success' => true,
+        'date'    => $date,
+        'stored'  => $result['stored'],
+        'skipped' => $result['skipped'],
+        'errors'  => $result['errors'],
+        'message' => "Sync complete: {$result['stored']} new, {$result['skipped']} already known.",
+    ]);
+})->name('schoolpay.sync-now');
+
+// Import all pending staging records for the current enterprise
+Route::get('schoolpay/import-pending', function (Request $request) {
+    $u          = \Encore\Admin\Facades\Admin::user();
+    $enterprise = \App\Models\Enterprise::find($u->enterprise_id);
+    if (!$enterprise) {
+        return response()->json(['success' => false, 'message' => 'Enterprise not found'], 404);
+    }
+    $result = \App\Services\SchoolPaySyncService::autoImportPending($enterprise);
+    return response()->json([
+        'success'  => true,
+        'imported' => $result['imported'],
+        'errors'   => $result['errors'],
+        'message'  => "Imported {$result['imported']} transaction(s). " . count($result['errors']) . " error(s).",
+    ]);
+})->name('schoolpay.import-pending');
+
+// Sync + import in one call (fetch today then immediately import all pending)
+Route::get('schoolpay/sync-and-import', function (Request $request) {
+    $u          = \Encore\Admin\Facades\Admin::user();
+    $enterprise = \App\Models\Enterprise::find($u->enterprise_id);
+    if (!$enterprise) {
+        return response()->json(['success' => false, 'message' => 'Enterprise not found'], 404);
+    }
+    $date    = $request->query('date', date('Y-m-d'));
+    $synced  = \App\Services\SchoolPaySyncService::syncDateRange($enterprise, $date, $date);
+    $imp     = \App\Services\SchoolPaySyncService::autoImportPending($enterprise);
+    return response()->json([
+        'success'  => true,
+        'date'     => $date,
+        'stored'   => $synced['stored'],
+        'skipped'  => $synced['skipped'],
+        'imported' => $imp['imported'],
+        'errors'   => array_merge($synced['errors'], $imp['errors']),
+        'message'  => "{$synced['stored']} fetched, {$imp['imported']} imported.",
+    ]);
+})->name('schoolpay.sync-and-import');
 
