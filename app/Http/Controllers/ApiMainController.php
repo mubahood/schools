@@ -22,6 +22,9 @@ use App\Models\Service;
 use App\Models\ServiceSubscription;
 use App\Models\Session;
 use App\Models\StudentHasClass;
+use App\Models\ProgressiveAssessment;
+use App\Models\StudentProgressiveReport;
+use App\Models\StudentProgressiveReportItem;
 use App\Models\StudentReportCard;
 use App\Models\Subject;
 use App\Models\TermlyReportCard;
@@ -447,7 +450,7 @@ class ApiMainController extends Controller
         return $this->success($u->get_my_theology_classes(), $message = "Success", 200);
     }
 
-    public function student_report_cards()
+    public function student_report_cards(Request $r)
     {
         $u = auth('api')->user();
         if ($u == null) {
@@ -458,42 +461,113 @@ class ApiMainController extends Controller
             return $this->error('Enterprise not found.');
         }
 
+        // Optional filters from query string
+        $termId       = (int) $r->get('term_id', 0);
+        $academicYear = (int) $r->get('academic_year_id', 0);
 
-
-
-        $data = [];
+        $query = StudentReportCard::where('enterprise_id', $u->enterprise_id);
 
         if ($u->user_type == 'employee') {
-            $data = StudentReportCard::where([
-                'enterprise_id' => $u->enterprise_id,
-            ])
-                ->limit(10000)->orderBy('id', 'desc')->get();
+            // Employees see all report cards
         } else {
+            // Parents / other roles: only their own children
+            $parents_conditions = [];
             $students = $u->get_my_students($u);
-            foreach ($students as $key => $value) {
-                $parents_conditions[] =  $value->id;
+            foreach ($students as $value) {
+                $parents_conditions[] = (int) $value->id;
             }
-            $data = StudentReportCard::whereIn(
-                'student_id',
-                $parents_conditions
-            )
-                ->limit(10000)->orderBy('id', 'desc')->get();
+            if (empty($parents_conditions)) {
+                return $this->success([], 'No children linked to this account.', 200);
+            }
+            $query->whereIn('student_id', $parents_conditions);
         }
 
-        $_data = $data;
+        // Apply optional term / year filters
+        if ($termId > 0) {
+            $query->where('term_id', $termId);
+        }
+        if ($academicYear > 0) {
+            $query->where('academic_year_id', $academicYear);
+        }
+
+        $allData = $query->limit(10000)->orderBy('id', 'desc')->get();
+
+        // Enrich each card with PDF availability flags
         $data = [];
-        foreach ($_data as $key => $d) {
-            if ($d->pdf_url == null) {
-                continue;
-            }
-            if (strlen($d->pdf_url) < 3) {
-                continue;
-            }
+        foreach ($allData as $d) {
+            $hasPdf = !empty($d->pdf_url) && strlen($d->pdf_url) >= 3;
+            $d->has_pdf     = $hasPdf;
+            $d->full_pdf_url = $hasPdf ? url('storage/files/' . $d->pdf_url) : null;
             $data[] = $d;
         }
 
+        return $this->success($data, 'Success', 200);
+    }
 
-        return $this->success($data, $message = "Success", 200);
+    // ══════════════════════════════════════════════════════════════════════════
+    //  STUDENT REPORT CARD DETAIL — full structured data + subject marks
+    // ══════════════════════════════════════════════════════════════════════════
+
+    public function student_report_card_detail(Request $r, $id)
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+
+        $card = StudentReportCard::find((int) $id);
+        if (!$card) {
+            return $this->error('Report card not found.');
+        }
+
+        // Authorization: parents may only view their own children's cards
+        if ($u->user_type === 'parent' || $u->isRole('parent')) {
+            $studentIds = collect($u->get_my_students($u))->pluck('id')
+                ->map(fn($x) => (int) $x)->toArray();
+            if (!in_array((int) $card->student_id, $studentIds)) {
+                return $this->error('Access denied.', [], 403);
+            }
+        } elseif ($u->user_type === 'employee') {
+            // Employees must belong to the same enterprise
+            if ((int) $card->enterprise_id !== (int) $u->enterprise_id) {
+                return $this->error('Access denied.', [], 403);
+            }
+        }
+
+        // Build items with subject name resolved
+        $rawItems = \App\Models\StudentReportCardItem::where('student_report_card_id', $card->id)
+            ->orderBy('id')->get();
+
+        $items = $rawItems->map(function ($item) {
+            $subject = \App\Models\Subject::find($item->main_course_id);
+            return [
+                'id'            => $item->id,
+                'subject_id'    => $item->main_course_id,
+                'subject_name'  => $subject ? $subject->name : "Subject #{$item->main_course_id}",
+                'did_bot'       => $item->did_bot,
+                'did_mot'       => $item->did_mot,
+                'did_eot'       => $item->did_eot,
+                'bot_mark'      => $item->bot_mark,
+                'mot_mark'      => $item->mot_mark,
+                'eot_mark'      => $item->eot_mark,
+                'total'         => $item->total,
+                'grade_name'    => $item->grade_name,
+                'aggregates'    => $item->aggregates,
+                'remarks'       => $item->remarks,
+                'initials'      => $item->initials,
+            ];
+        })->values()->toArray();
+
+        $hasPdf = !empty($card->pdf_url) && strlen($card->pdf_url) >= 3;
+
+        $detail = array_merge($card->toArray(), [
+            'has_pdf'      => $hasPdf,
+            'full_pdf_url' => $hasPdf ? url('storage/files/' . $card->pdf_url) : null,
+            'items'        => $items,
+            'items_count'  => count($items),
+        ]);
+
+        return $this->success($detail, 'Success', 200);
     }
 
     public function disciplinary_records()
@@ -506,15 +580,22 @@ class ApiMainController extends Controller
         if ($ent == null) {
             return $this->error('Enterprise not found.');
         }
-        $active_term = $ent->active_term();
-        if ($active_term == null) {
-            return $this->error('Active term not found.');
-        }
-        $data = DisciplinaryRecord::where([
-            'enterprise_id' => $u->enterprise_id,
-        ])->limit(100000)->orderBy('id', 'desc')->get();
 
-        return $this->success($data, $message = "Success", 200);
+        $query = DisciplinaryRecord::where('enterprise_id', $u->enterprise_id);
+
+        // Parents only see their own children's records
+        if ($u->isRole('parent') || $u->user_type === 'parent') {
+            $students   = $u->get_my_students($u);
+            $studentIds = collect($students)->pluck('id')->toArray();
+            if (empty($studentIds)) {
+                return $this->success([], 'Success', 200);
+            }
+            $query->whereIn('administrator_id', $studentIds);
+        }
+
+        $data = $query->limit(100000)->orderBy('id', 'desc')->get();
+
+        return $this->success($data, 'Success', 200);
     }
 
     public function participants()
@@ -650,8 +731,11 @@ class ApiMainController extends Controller
     public function streams()
     {
         $u = auth('api')->user();
-        $ent = $u->ent;
         if ($u == null) {
+            return $this->error('User not found.');
+        }
+        $ent = $u->ent;
+        if ($ent == null) {
             return $this->error('Enterprise not found.');
         }
 
@@ -2139,7 +2223,13 @@ class ApiMainController extends Controller
     public function service_subscriptions()
     {
         $u = auth('api')->user();
-        $term = $u->ent->active_term();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+        $term = $u->ent ? $u->ent->active_term() : null;
+        if ($term == null) {
+            return $this->success([], 'No active term.', 200);
+        }
 
         if (
             $u->isRole('bursar') ||
@@ -2148,25 +2238,29 @@ class ApiMainController extends Controller
         ) {
             return $this->success(ServiceSubscription::where([
                 'enterprise_id' => $u->enterprise_id,
-                'due_term_id' => $term->id
-            ])->limit(100000)->orderBy('id', 'desc')->get(), $message = "Success", 200);
+                'due_term_id'   => $term->id,
+            ])->limit(100000)->orderBy('id', 'desc')->get(), 'Success', 200);
         }
 
-        if ($u->isRole('parent')) {
-
+        if ($u->isRole('parent') || $u->user_type === 'parent') {
             $parents_conditions = [];
             $students = $u->get_my_students($u);
-            foreach ($students as $key => $value) {
-                $parents_conditions[] =  $value->id;
+            foreach ($students as $value) {
+                $parents_conditions[] = (int) $value->id;
             }
-
+            if (empty($parents_conditions)) {
+                return $this->success([], 'Success', 200);
+            }
             return $this->success(ServiceSubscription::where([
                 'enterprise_id' => $u->enterprise_id,
-                'due_term_id' => $term->id
+                'due_term_id'   => $term->id,
             ])
                 ->whereIn('administrator_id', $parents_conditions)
-                ->limit(10000)->orderBy('id', 'desc')->get(), $message = "Success", 200);
+                ->limit(10000)->orderBy('id', 'desc')->get(), 'Success', 200);
         }
+
+        // All other roles (teachers, gate, etc.) — return empty
+        return $this->success([], 'Success', 200);
     }
 
     public function users_mini()
@@ -2704,48 +2798,52 @@ lin
     public function transactions()
     {
         $u = auth('api')->user();
-
-        if (
-            (!$u->isRole('bursar')) &&
-            (!$u->isRole('parent'))
-        ) {
-            return $this->success([], $message = "Success", 200);
+        if ($u == null) {
+            return $this->error('User not found.');
         }
 
-        $parents_conditions = "";
-        if (($u->isRole('parent'))) {
-            $students = $u->get_my_students($u);
-            $parents_conditions = ' AND administrator_id IN (';
-            $isFirst = true;
-            foreach ($students as $key => $value) {
-                if ($isFirst) {
-                    $isFirst = false;
-                } else {
-                    $parents_conditions .= ",";
-                }
-                $parents_conditions .= $value->id;
+        $isBursar = $u->isRole('bursar');
+        $isParent = $u->isRole('parent') || $u->user_type === 'parent';
+
+        if (!$isBursar && !$isParent) {
+            return $this->success([], 'Success', 200);
+        }
+
+        // Build parameterized query — never concatenate user-controlled values into SQL
+        $sql = "SELECT
+            transactions.id            AS id,
+            transactions.created_at    AS created_at,
+            transactions.type          AS type,
+            transactions.payment_date  AS payment_date,
+            transactions.account_id,
+            transactions.amount,
+            transactions.description,
+            accounts.name              AS account_name,
+            accounts.administrator_id  AS administrator_id
+        FROM transactions, accounts
+        WHERE
+            transactions.account_id   = accounts.id
+            AND transactions.enterprise_id = ?
+            AND is_contra_entry = 0";
+
+        $bindings = [(int) $u->enterprise_id];
+
+        if ($isParent && !$isBursar) {
+            $students   = $u->get_my_students($u);
+            $studentIds = collect($students)->pluck('id')->map(fn($id) => (int) $id)->toArray();
+            if (empty($studentIds)) {
+                return $this->success([], 'Success', 200);
             }
-            $parents_conditions .= ') ';
+            $placeholders = implode(',', array_fill(0, count($studentIds), '?'));
+            $sql         .= " AND accounts.administrator_id IN ($placeholders)";
+            $bindings     = array_merge($bindings, $studentIds);
         }
 
+        $sql .= " ORDER BY transactions.id DESC LIMIT 4000";
 
-        $recs =  DB::select("SELECT 
-        transactions.id as id,
-        transactions.created_at as created_at,
-        transactions.type as type,
-        transactions.payment_date as payment_date,
-        transactions.account_id, 
-        transactions.amount,
-        transactions.description,
-        accounts.name as account_name,
-        accounts.administrator_id as administrator_id
-         FROM transactions,accounts
-        WHERE 
-            transactions.account_id = accounts.id AND
-            transactions.enterprise_id = $u->enterprise_id AND
-            is_contra_entry = 0 $parents_conditions ORDER BY id DESC LIMIT 4000");
+        $recs = DB::select($sql, $bindings);
 
-        return $this->success($recs, $message = "Success", 200);
+        return $this->success($recs, 'Success', 200);
     }
 
 
@@ -3426,12 +3524,12 @@ lin
         $admin->last_seen = Carbon::now();
         $admin->save();
         $ent = Enterprise::find($admin->enterprise_id);
-        $ent->expiry = '4';
-
         if ($ent == null) {
             return $this->error('Enterprise not found.');
         }
-        return $this->success($ent, $message = "Profile details", 200);
+        $ent->expiry = '4';
+
+        return $this->success($ent, 'Profile details', 200);
     }
 
     public function unclassed_students()
@@ -3449,7 +3547,7 @@ lin
             LEFT JOIN academic_classes ac ON u.current_class_id = ac.id
             LEFT JOIN academic_years y ON ac.academic_year_id = y.id
             WHERE u.enterprise_id = ?
-              AND u.user_type = 'Student'
+              AND u.user_type = 'student'
               AND u.status = 1
               AND (
                 u.current_class_id IS NULL
@@ -3462,5 +3560,470 @@ lin
         ", [$eid]);
 
         return $this->success($students, "Unclassed students", 200);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    //  TOKEN REFRESH  (GAP-002)
+    // ══════════════════════════════════════════════════════════════════════════
+
+    public function refresh_token()
+    {
+        try {
+            $newToken = JWTAuth::refresh(JWTAuth::getToken());
+            return $this->success(['token' => $newToken], 'Token refreshed successfully.', 200);
+        } catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
+            // Token too old to refresh — force re-login
+            return response()->json([
+                'code'    => 0,
+                'status'  => false,
+                'message' => 'Session expired. Please log in again.',
+            ], 401);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'code'    => 0,
+                'status'  => false,
+                'message' => 'Could not refresh token. Please log in again.',
+            ], 401);
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    //  PARENT OTP — send OTP (GAP-003)
+    // ══════════════════════════════════════════════════════════════════════════
+
+    public function send_parent_otp(Request $r)
+    {
+        $phone = Utils::prepare_phone_number(trim($r->get('phone_number', '')));
+        if (!Utils::phone_number_is_valid($phone)) {
+            return $this->error('Invalid phone number. Use format: 0701234567 or +256701234567');
+        }
+
+        $user = User::where('phone_number_1', $phone)
+            ->where('user_type', 'parent')
+            ->first();
+
+        if (!$user) {
+            // Return generic message to avoid user enumeration
+            return $this->success([], 'If this number is registered, you will receive an OTP.', 200);
+        }
+
+        $otp    = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $expiry = Carbon::now()->addMinutes(15);
+
+        DB::table('parent_otps')->updateOrInsert(
+            ['phone_number' => $phone],
+            [
+                'otp_code'   => password_hash($otp, PASSWORD_DEFAULT),
+                'expires_at' => $expiry,
+                'is_used'    => 0,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ]
+        );
+
+        try {
+            $sms = "School Dynamics\nYour password reset code is: $otp\nExpires in 15 minutes. Do not share it.";
+            \App\Models\DirectMessage::send_sms($phone, $sms);
+        } catch (\Throwable $e) {
+            return $this->error('Failed to send OTP. Please try again.');
+        }
+
+        return $this->success([], 'OTP sent to your phone number.', 200);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    //  PARENT OTP — activate / reset password (GAP-003)
+    // ══════════════════════════════════════════════════════════════════════════
+
+    public function parent_activate(Request $r)
+    {
+        $phone    = Utils::prepare_phone_number(trim($r->get('phone_number', '')));
+        $otp      = trim($r->get('otp', ''));
+        $newPass  = trim($r->get('new_password', ''));
+
+        if (!Utils::phone_number_is_valid($phone)) {
+            return $this->error('Invalid phone number.');
+        }
+        if (strlen($otp) < 6) {
+            return $this->error('OTP code is required.');
+        }
+        if (strlen($newPass) < 4) {
+            return $this->error('Password must be at least 4 characters.');
+        }
+        if ($newPass === '4321') {
+            return $this->error('You cannot use the default password.');
+        }
+
+        $record = DB::table('parent_otps')
+            ->where('phone_number', $phone)
+            ->where('is_used', 0)
+            ->first();
+
+        if (!$record) {
+            return $this->error('No OTP found for this number. Please request a new one.');
+        }
+        if (Carbon::parse($record->expires_at)->isPast()) {
+            return $this->error('OTP has expired. Please request a new one.');
+        }
+        if (!password_verify($otp, $record->otp_code)) {
+            return $this->error('Invalid OTP. Please try again.');
+        }
+
+        // Mark OTP as used
+        DB::table('parent_otps')
+            ->where('phone_number', $phone)
+            ->update(['is_used' => 1, 'updated_at' => Carbon::now()]);
+
+        // Update password
+        $user = User::where('phone_number_1', $phone)
+            ->where('user_type', 'parent')
+            ->first();
+
+        if (!$user) {
+            return $this->error('User account not found.');
+        }
+
+        $user->password       = password_hash($newPass, PASSWORD_DEFAULT);
+        $user->plain_password = $newPass;
+        $user->save();
+
+        // Auto-login and return token
+        JWTAuth::factory()->setTTL(60 * 24 * 30 * 365);
+        $token = auth('api')->attempt(['id' => $user->id, 'password' => $newPass]);
+        $user->token          = $token;
+        $user->remember_token = $token;
+        $user->roles_text     = json_encode($user->roles);
+
+        return $this->success($user, 'Password set successfully. You are now logged in.', 200);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    //  GENERATE REPORT CARD PDF  (GAP-007)
+    // ══════════════════════════════════════════════════════════════════════════
+
+    public function generate_report_card_pdf(Request $r, $id)
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+
+        $card = StudentReportCard::find((int) $id);
+        if (!$card) {
+            return $this->error('Report card not found.');
+        }
+
+        // Parents may only generate PDFs for their own children
+        if ($u->isRole('parent') || $u->user_type === 'parent') {
+            $students   = $u->get_my_students($u);
+            $studentIds = collect($students)->pluck('id')->map(fn($x) => (int) $x)->toArray();
+            if (!in_array((int) $card->student_id, $studentIds)) {
+                return $this->error('Unauthorized.');
+            }
+        }
+
+        try {
+            set_time_limit(120);
+            $pdfName = $card->download_self();
+            return $this->success([
+                'pdf_url'  => $pdfName,
+                'full_url' => url('storage/files/' . $pdfName),
+            ], 'PDF generated successfully.', 200);
+        } catch (\Throwable $e) {
+            return $this->error('Failed to generate PDF: ' . $e->getMessage());
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    //  GENERATE PA (PROGRESSIVE ASSESSMENT) PDF  (GAP-007 variant)
+    // ══════════════════════════════════════════════════════════════════════════
+
+    public function generate_pa_report_pdf(Request $r, $id)
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+
+        $report = StudentProgressiveReport::find((int) $id);
+        if (!$report) {
+            return $this->error('Progressive report not found.');
+        }
+
+        // Parents may only trigger PDF for their own children
+        if ($u->isRole('parent') || $u->user_type === 'parent') {
+            $students   = $u->get_my_students($u);
+            $studentIds = collect($students)->pluck('id')->map(fn($x) => (int) $x)->toArray();
+            if (!in_array((int) $report->student_id, $studentIds)) {
+                return $this->error('Unauthorized.');
+            }
+        }
+
+        try {
+            set_time_limit(120);
+            $pdfName = $report->download_self();
+            return $this->success([
+                'pdf_url'  => $pdfName,
+                'full_url' => url('storage/files/' . $pdfName),
+            ], 'PDF generated successfully.', 200);
+        } catch (\Throwable $e) {
+            return $this->error('Failed to generate PDF: ' . $e->getMessage());
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    //  T-011: Authenticated PDF download
+    // ══════════════════════════════════════════════════════════════════════════
+
+    public function download_report_card(Request $r, $id)
+    {
+        $u = auth('api')->user();
+        if (!$u) return $this->error('User not found.', [], 401);
+
+        $card = \App\Models\StudentReportCard::find($id);
+        if (!$card) return $this->error('Report card not found.', [], 404);
+
+        // Parent can only access their own children's cards
+        if ($u->user_type === 'parent' || $u->isRole('parent')) {
+            $myStudentIds = collect($u->get_my_students($u))->pluck('id')->toArray();
+            if (!in_array($card->student_id, $myStudentIds)) {
+                return $this->error('Access denied.', [], 403);
+            }
+        }
+
+        if (empty($card->pdf_url)) {
+            // Auto-generate if missing
+            try {
+                $pdfName = $card->download_self();
+                if (!$pdfName) return $this->error('PDF generation failed.');
+            } catch (\Throwable $e) {
+                return $this->error('PDF generation error: ' . $e->getMessage());
+            }
+            $card = \App\Models\StudentReportCard::find($id);
+        }
+
+        $filePath = public_path('storage/files/' . $card->pdf_url);
+        if (!file_exists($filePath)) {
+            return $this->error('PDF file not found on server. Please try generating it again.');
+        }
+
+        return response()->file($filePath, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . basename($card->pdf_url) . '"',
+        ]);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    //  T-022: OneSignal player ID update
+    // ══════════════════════════════════════════════════════════════════════════
+
+    public function update_player_id(Request $r)
+    {
+        $u = auth('api')->user();
+        if (!$u) return $this->error('User not found.');
+        $playerId = trim($r->get('player_id', ''));
+        if (empty($playerId)) return $this->error('player_id is required.');
+        $u->onesignal_player_id = $playerId;
+        $u->save();
+        return $this->success([], 'Player ID updated.');
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    //  T-034: PA summary endpoint
+    // ══════════════════════════════════════════════════════════════════════════
+
+    public function pa_summary(Request $r)
+    {
+        $u = auth('api')->user();
+        if (!$u) return $this->error('User not found.');
+
+        $studentIds = [];
+        if ($u->user_type === 'parent' || $u->isRole('parent')) {
+            $studentIds = collect($u->get_my_students($u))->pluck('id')->toArray();
+            if (empty($studentIds)) return $this->success([], 'No children found.');
+        }
+
+        $query = \App\Models\StudentProgressiveReport::where('enterprise_id', $u->enterprise_id)
+            ->with(['progressive_assessment'])
+            ->orderBy('id', 'desc');
+
+        if (!empty($studentIds)) {
+            $query->whereIn('student_id', $studentIds);
+        }
+
+        $reports = $query->get();
+
+        // Group by student_id and compute per-student summary
+        $summary = [];
+        foreach ($reports as $rep) {
+            $sid = $rep->student_id;
+            if (!isset($summary[$sid])) {
+                $summary[$sid] = [
+                    'student_id'   => $sid,
+                    'student_name' => $rep->student_name ?? '',
+                    'total_tests'  => 0,
+                    'total_score'  => 0,
+                    'average'      => 0,
+                    'pa_count'     => 0,
+                    'reports'      => [],
+                ];
+            }
+            $items = \App\Models\StudentProgressiveReportItem::where('student_progressive_report_id', $rep->id)->get();
+            $repScore = 0;
+            $repCount = 0;
+            foreach ($items as $item) {
+                $scores = is_array($item->test_scores) ? $item->test_scores : [];
+                foreach ($scores as $s) {
+                    $val = isset($s['score']) ? (float)$s['score'] : 0;
+                    $repScore += $val;
+                    $repCount++;
+                }
+            }
+            $summary[$sid]['total_tests']  += $repCount;
+            $summary[$sid]['total_score']  += $repScore;
+            $summary[$sid]['pa_count']++;
+            $summary[$sid]['reports'][] = [
+                'pa_id'     => $rep->progressive_assessment_id,
+                'pa_title'  => $rep->progressive_assessment ? $rep->progressive_assessment->title : '',
+                'avg_score' => $repCount > 0 ? round($repScore / $repCount, 1) : 0,
+            ];
+        }
+
+        foreach ($summary as &$s) {
+            $s['average'] = $s['total_tests'] > 0
+                ? round($s['total_score'] / $s['total_tests'], 1)
+                : 0;
+            unset($s['total_score']);
+        }
+
+        return $this->success(array_values($summary), 'Success');
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    //  PROGRESSIVE ASSESSMENTS — list  (GAP-001)
+    // ══════════════════════════════════════════════════════════════════════════
+
+    public function progressive_assessments(Request $r)
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+
+        $query = ProgressiveAssessment::where('enterprise_id', $u->enterprise_id);
+
+        // Optional term filter
+        $termId = (int) $r->get('term_id', 0);
+        if ($termId > 0) {
+            $query->where('term_id', $termId);
+        }
+
+        // Parents only see assessments that are published to parents
+        if ($u->isRole('parent') || $u->user_type === 'parent') {
+            $query->where('display_to_parents', 'Yes');
+        }
+
+        $data = $query->orderBy('id', 'desc')->get();
+        return $this->success($data, 'Success', 200);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    //  STUDENT PROGRESSIVE REPORTS — list  (GAP-001)
+    // ══════════════════════════════════════════════════════════════════════════
+
+    public function student_progressive_reports(Request $r)
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+
+        $query = StudentProgressiveReport::where('enterprise_id', $u->enterprise_id)
+            ->with(['items', 'progressive_assessment']);
+
+        if ($u->isRole('parent') || $u->user_type === 'parent') {
+            // Parents only see their own children's reports
+            $students   = $u->get_my_students($u);
+            $studentIds = collect($students)->pluck('id')->map(fn($x) => (int) $x)->toArray();
+            if (empty($studentIds)) {
+                return $this->success([], 'No children linked to this account.', 200);
+            }
+            $query->whereIn('student_id', $studentIds);
+            // Only show reports from PA assessments published to parents
+            $query->whereHas('progressive_assessment', function ($q) {
+                $q->where('display_to_parents', 'Yes');
+            });
+        }
+
+        // Optional filters
+        $termId = (int) $r->get('term_id', 0);
+        if ($termId > 0) {
+            $query->where('term_id', $termId);
+        }
+        $studentId = (int) $r->get('student_id', 0);
+        if ($studentId > 0) {
+            $query->where('student_id', $studentId);
+        }
+        $paId = (int) $r->get('progressive_assessment_id', 0);
+        if ($paId > 0) {
+            $query->where('progressive_assessment_id', $paId);
+        }
+
+        $data = $query->orderBy('id', 'desc')->limit(500)->get();
+
+        // Flatten items + enrich with subject names for easy mobile consumption
+        $data->each(function ($rep) {
+            $rep->items->each(function ($item) {
+                $sub = \App\Models\Subject::find($item->subject_id);
+                $item->subject_name    = $sub ? $sub->subject_name : '';
+                $item->main_course_name = '';
+                if ($sub && $sub->course_id) {
+                    $course = \App\Models\MainCourse::find($sub->course_id);
+                    $item->main_course_name = $course ? $course->name : '';
+                }
+            });
+        });
+
+        return $this->success($data, 'Success', 200);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    //  STUDENT PROGRESSIVE REPORT ITEMS — detail for one report  (GAP-001)
+    // ══════════════════════════════════════════════════════════════════════════
+
+    public function student_progressive_report_detail(Request $r, $id)
+    {
+        $u = auth('api')->user();
+        if ($u == null) {
+            return $this->error('User not found.');
+        }
+
+        $report = StudentProgressiveReport::with(['items', 'progressive_assessment'])->find((int) $id);
+        if (!$report) {
+            return $this->error('Report not found.');
+        }
+
+        // Parents may only view reports for their own children
+        if ($u->isRole('parent') || $u->user_type === 'parent') {
+            $students   = $u->get_my_students($u);
+            $studentIds = collect($students)->pluck('id')->map(fn($x) => (int) $x)->toArray();
+            if (!in_array((int) $report->student_id, $studentIds)) {
+                return $this->error('Unauthorized.');
+            }
+        }
+
+        $report->items->each(function ($item) {
+            $sub = \App\Models\Subject::find($item->subject_id);
+            $item->subject_name     = $sub ? $sub->subject_name : '';
+            $item->main_course_name = '';
+            if ($sub && $sub->course_id) {
+                $course = \App\Models\MainCourse::find($sub->course_id);
+                $item->main_course_name = $course ? $course->name : '';
+            }
+            // test_scores accessor already decodes JSON → array
+            $item->test_scores_parsed = $item->test_scores ?? [];
+        });
+
+        return $this->success($report, 'Success', 200);
     }
 }
