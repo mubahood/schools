@@ -47,7 +47,7 @@ class TheologyMarkRecordController extends AdminController
 
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
-        ])->with(['term', 'theologyClass', 'stream', 'subject', 'student'])
+        ])->with(['term', 'academicClass', 'stream', 'subject', 'student', 'termlyReportCard'])
           ->orderBy('id', 'DESC');
 
         $grid->disableActions();
