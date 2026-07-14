@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Admin\Actions\Post\BatchPrintReceipts;
 use App\Admin\Actions\Post\TransactionChangeDueTerm;
+use App\Models\AcademicClass;
 use App\Models\Account;
 use App\Models\BankAccount;
 use App\Models\StudentHasFee;
@@ -102,6 +103,35 @@ class TransactionController extends AdminController
                     }
                 })->ajax($ajax_url);
 
+            // Filter by student class — all years, most recent first, with year name in label
+            $ent_id = $u->enterprise_id;
+            $classes = [];
+            $years = DB::table('academic_years')
+                ->where('enterprise_id', $ent_id)
+                ->orderBy('id', 'desc')
+                ->get();
+            foreach ($years as $year) {
+                $yearClasses = AcademicClass::where('enterprise_id', $ent_id)
+                    ->where('academic_year_id', $year->id)
+                    ->orderBy('name', 'asc')
+                    ->get();
+                foreach ($yearClasses as $cls) {
+                    $classes[$cls->id] = $year->name . ' — ' . $cls->short_name;
+                }
+            }
+            $filter->where(function ($query) use ($ent_id) {
+                $classId = $this->input;
+                if (empty($classId)) {
+                    return;
+                }
+                $accountIds = DB::table('accounts')
+                    ->select('accounts.id')
+                    ->join('admin_users', 'accounts.administrator_id', '=', 'admin_users.id')
+                    ->where('admin_users.current_class_id', $classId)
+                    ->where('accounts.enterprise_id', $ent_id)
+                    ->pluck('accounts.id');
+                $query->whereIn('account_id', $accountIds);
+            }, 'Filter by class', 'class_id')->select($classes);
 
             $terms = [];
             $active_term = 0;
@@ -177,6 +207,7 @@ class TransactionController extends AdminController
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
         ])
+            ->with(['account', 'term', 'by'])
             ->orderBy('id', 'Desc');
 
         /*         $grid->column('id', __('Id'))->sortable(); */

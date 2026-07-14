@@ -136,10 +136,9 @@ class Enterprise extends Model
 
     public function updateWalletBalance()
     {
-        $sql = "SELECT SUM(amount) as total FROM wallet_records WHERE enterprise_id = $this->id";
-        $total = DB::select($sql);
-        $this->wallet_balance = $total[0]->total;
-        $this->save();
+        $total = DB::table('wallet_records')->where('enterprise_id', $this->id)->sum('amount');
+        DB::table('enterprises')->where('id', $this->id)->update(['wallet_balance' => $total]);
+        $this->wallet_balance = $total;
     }
     public function active_term()
     {

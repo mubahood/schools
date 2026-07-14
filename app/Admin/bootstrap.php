@@ -1,19 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Log;
-
-Log::info('Admin bootstrap started');
-
 try {
-/*     $fp = fsockopen("ssl://schooldynamics.ug", 443, $e, $s, 1);
-    if ($fp) {
-        $final_url = "https://schooldynamics.ug/api/school-pay-reconcile";
-        fwrite($fp, "GET /api/school-pay-reconcile HTTP/1.1\r\nHost: schooldynamics.ug\r\nConnection: Close\r\n\r\n");
-        fclose($fp);
-    } */
 } catch (\Exception $e) {
-    // Handle exception if needed
-    // echo "Error: " . $e->getMessage();
 }
 
 /**
@@ -52,9 +40,19 @@ use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Console\Scheduling\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
-Utils::system_boot(Admin::user());
+// Run system_boot at most once every 5 minutes per enterprise to avoid
+// running 5+ DB queries/writes on every admin page request.
+$_boot_user = Admin::user();
+if ($_boot_user !== null) {
+    $_boot_cache_key = 'system_boot_' . $_boot_user->enterprise_id;
+    if (!Cache::has($_boot_cache_key)) {
+        Cache::put($_boot_cache_key, true, 300); // 5 minutes
+        Utils::system_boot($_boot_user);
+    }
+}
 
 //dd(Utils::docs_root()); 
 
@@ -113,17 +111,21 @@ if ($u != null) {
     try {
         $active_term = Admin::user()->ent->active_term();
         $ent = Admin::user()->ent;
-        $ent->dp_year = $active_term->academic_year_id;
-        $ent->dp_term_id = $active_term->id;
-        $ent->save();
+        if (
+            $ent->dp_year != $active_term->academic_year_id ||
+            $ent->dp_term_id != $active_term->id
+        ) {
+            $ent->dp_year = $active_term->academic_year_id;
+            $ent->dp_term_id = $active_term->id;
+            $ent->save();
+        }
         $u = User::find($u->id);
-        if($u != null) {
+        if ($u != null) {
             $u->getDefaultRole();
         }
     } catch (\Exception $e) {
         //die($e->getMessage());
     }
-    //Utils::system_boot($u);
 }
 
 

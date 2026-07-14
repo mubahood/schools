@@ -381,7 +381,7 @@ class StudentsController extends AdminController
             });
         }
 
-        $grid->model()->where($conds);
+        $grid->model()->where($conds)->with(['current_class', 'stream', 'account', 'parent']);
 
 
         /*  if (Admin::user()->isRole('dos')) {
@@ -511,24 +511,6 @@ class StudentsController extends AdminController
             }
         } {
 
-            //masters_university_year_graduated
-            $grid->column('masters_university_year_graduated', __('School Pay Issues'))
-                ->sortable()
-                ->filter([
-                    'ISSUE' => 'Has Issues',
-                ])
-                ->using([
-                    'ISSUE' => 'Has Issues',
-                ])
-                ->width(150)
-                ->label([
-                    'ISSUE' => 'danger',
-                ]);
-            //phd_university_name
-            $grid->column('phd_university_name', __('Issues Details'))
-                ->sortable()
-                ->label('danger')
-                ->filter('like');
         }
 
 
@@ -603,10 +585,11 @@ class StudentsController extends AdminController
             ->sortable()
             ->hide();
         if (!in_array('school-pay-issues', $segments)) {
-            $grid->column('documents', __('Print Documents'))
+            $grid->column('documents', __('Documents'))
                 ->display(function () {
-                    $admission_letter = url('print-admission-letter?id=' . $this->id);
-                    return '<a title="Print admission letter" href="' . $admission_letter . '" target="_blank">Admission letter</a>';
+                    $url = url('print-admission-letter?id=' . $this->id);
+                    return '<a href="' . $url . '" target="_blank" class="btn btn-xs btn-success">'
+                         . '<i class="fa fa-file-text-o"></i> Admission Letter</a>';
                 });
         }
 

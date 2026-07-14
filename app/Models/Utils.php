@@ -1000,7 +1000,7 @@ class Utils  extends Model
             return;
         }
 
-        foreach (Term::all() as $key => $term) {
+        foreach (Term::where('enterprise_id', $u->enterprise_id)->get() as $key => $term) {
             $r = ReportFinanceModel::where([
                 'term_id' => $term->id
             ])->first();
@@ -2273,52 +2273,78 @@ class Utils  extends Model
 
     public static function prepareUgandanPhoneNumber($phoneNumber)
     {
-        $phoneNumber = trim($phoneNumber);
-        $phoneNumber = str_replace(' ', '', $phoneNumber);
-        if (substr($phoneNumber, 0, 1) == '0') {
-            $phoneNumber = substr($phoneNumber, 1);
-        } else if (substr($phoneNumber, 0, 3) == '256') {
-            $phoneNumber = substr($phoneNumber, 3);
-        } else if (substr($phoneNumber, 0, 4) == '+256') {
-            $phoneNumber = substr($phoneNumber, 4);
+        if (empty($phoneNumber)) return '';
+        $phoneNumber = trim((string)$phoneNumber);
+
+        // Strip ALL non-digit characters (handles spaces, dashes, parens, dots, etc.)
+        $digits = preg_replace('/[^\d]/', '', $phoneNumber);
+
+        // Strip country-code prefix, leaving the 9-digit local number
+        if (str_starts_with($digits, '256')) {
+            $digits = substr($digits, 3);
+        } elseif (str_starts_with($digits, '0')) {
+            $digits = substr($digits, 1);
         }
-        if (strlen($phoneNumber) < 8) {
+
+        // Uganda local numbers are 9 digits (7XXXXXXXX); allow 8–10 for edge cases
+        if (strlen($digits) < 8 || strlen($digits) > 10) {
             return '';
         }
-        $phoneNumber = '+256' . $phoneNumber;
-        return $phoneNumber;
-        // Remove any non-numeric characters from the phone number
-        $phoneNumber = preg_replace('/[^0-9]/', '', $phoneNumber);
 
-        // Check if the phone number starts with "07", "256", or "+256"
-        if (preg_match('/^(07|256|\+256)([1-9]\d+)$/', $phoneNumber, $matches)) {
-            // Extract the numeric part
-            $numericPart = $matches[2];
-
-            // Standardize the phone number by adding "7" after "0" and "+256" at the beginning
-            $standardizedNumber = '+256' . '0' . $numericPart;
-
-            return $standardizedNumber;
-        } else {
-            // If the phone number does not match the expected format, return it as is
-            return $phoneNumber;
-        }
+        return '+256' . $digits;
     }
 
     public static function validateUgandanPhoneNumber($phoneNumber)
     {
-        $num = Utils::prepareUgandanPhoneNumber($phoneNumber);
+        $num = self::prepareUgandanPhoneNumber($phoneNumber);
+        if (empty($num)) return false;
+        // +256 + 9 local digits = 13 chars (normal); allow 12–14 for edge cases
+        return strlen($num) >= 12 && strlen($num) <= 14 && str_starts_with($num, '+256');
+    }
 
-        if ($num == '') {
-            return false;
+    /**
+     * Resolve the best available Ugandan phone number for any user (student or parent).
+     *
+     * Priority:
+     *  1. phone_number_1, phone_number_2
+     *  2. father_phone, mother_phone, spouse_phone, emergency_person_phone
+     *  3. If user_type = 'parent' → also check the linked student's same fields
+     *
+     * Returns a normalised +256XXXXXXXXX string, or '' if nothing valid is found.
+     */
+    public static function resolvePhone($user): string
+    {
+        if (empty($user)) return '';
+
+        $fields = [
+            'phone_number_1', 'phone_number_2',
+            'father_phone', 'mother_phone',
+            'spouse_phone', 'emergency_person_phone',
+        ];
+
+        foreach ($fields as $field) {
+            $raw = trim((string)($user->$field ?? ''));
+            if (strlen($raw) < 5) continue;
+            $prepared = self::prepareUgandanPhoneNumber($raw);
+            if (self::validateUgandanPhoneNumber($prepared)) return $prepared;
         }
-        if (strlen($num) < 13) {
-            return false;
+
+        // For a parent admin_user whose own phone fields are all empty,
+        // fall back to the linked student's contact fields (parents' phones are
+        // often stored on the student's profile during registration).
+        if (($user->user_type ?? '') === 'parent' && !empty($user->id)) {
+            $student = \App\Models\User::where('parent_id', $user->id)->first();
+            if ($student) {
+                foreach ($fields as $field) {
+                    $raw = trim((string)($student->$field ?? ''));
+                    if (strlen($raw) < 5) continue;
+                    $prepared = self::prepareUgandanPhoneNumber($raw);
+                    if (self::validateUgandanPhoneNumber($prepared)) return $prepared;
+                }
+            }
         }
-        if (strlen($num) > 15) {
-            return false;
-        }
-        return true;
+
+        return '';
     }
 
 

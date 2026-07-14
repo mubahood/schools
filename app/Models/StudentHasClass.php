@@ -193,35 +193,22 @@ class StudentHasClass extends Model
 
     function getAcademicClassTextAttribute()
     {
-        $class = AcademicClass::find($this->academic_class_id);
-        if ($class != null) {
-            return $class->name;
-        }
-        return '-';
+        return $this->class ? $this->class->name : '-';
     }
+
     function getAdministratorPhotoAttribute()
     {
-        $student = Administrator::find($this->administrator_id);
-        if ($student != null) {
-            return $student->avatar;
-        }
-        return '-';
+        return $this->student ? $this->student->avatar : '-';
     }
+
     function getStreamTextAttribute()
     {
-        $stream = AcademicClassSctream::find($this->stream_id);
-        if ($stream != null) {
-            return $stream->name;
-        }
-        return '-';
+        return $this->stream ? $this->stream->name : '-';
     }
+
     function getAdministratorTextAttribute()
     {
-        $student = Administrator::find($this->administrator_id);
-        if ($student != null) {
-            return $student->name;
-        }
-        return '-';
+        return $this->student ? $this->student->name : '-';
     }
 
     public function setNewCurriculumOptionalSubjectsAttribute($value)

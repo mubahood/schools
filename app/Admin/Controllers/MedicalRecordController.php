@@ -59,11 +59,11 @@ class MedicalRecordController extends AdminController
 
             $terms = [];
             $active_term = 0;
-            foreach (Term::where(
+            foreach (Term::with('academic_year')->where(
                 'enterprise_id',
                 Admin::user()->enterprise_id
             )->orderBy('id', 'desc')->get() as $key => $term) {
-                $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
+                $terms[$term->id] = "Term " . $term->name . " - " . ($term->academic_year ? $term->academic_year->name : '');
                 if ($term->is_active) {
                     $active_term = $term->id;
                 }

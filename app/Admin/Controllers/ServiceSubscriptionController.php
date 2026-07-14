@@ -61,19 +61,18 @@ class ServiceSubscriptionController extends AdminController
             }); */
         });
         $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
+            ->with(['due_term', 'sub.account', 'service'])
             ->orderBy('id', 'Desc');
-
-
 
         $terms = [];
         $active_term = 0;
         foreach (
-            Term::where(
-                'enterprise_id',
-                Admin::user()->enterprise_id
-            )->orderBy('id', 'desc')->get() as $key => $term
+            Term::with('academic_year')
+                ->where('enterprise_id', Admin::user()->enterprise_id)
+                ->orderBy('id', 'desc')
+                ->get() as $term
         ) {
-            $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
+            $terms[$term->id] = "Term " . $term->name . " - " . ($term->academic_year ? $term->academic_year->name : '');
             if ($term->is_active) {
                 $active_term = $term->id;
             }
@@ -81,7 +80,6 @@ class ServiceSubscriptionController extends AdminController
         if (!isset($_GET['due_term_id'])) {
             $grid->model()->where('due_term_id', $active_term);
         }
-        //where sub.status = active
         $grid->model()->whereHas('sub', function ($q) {
             $q->where('status', 1);
         });
@@ -117,12 +115,12 @@ class ServiceSubscriptionController extends AdminController
 
             $terms = [];
             foreach (
-                Term::where(
+                Term::with('academic_year')->where(
                     'enterprise_id',
                     Admin::user()->enterprise_id
                 )->orderBy('id', 'desc')->get() as $key => $term
             ) {
-                $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
+                $terms[$term->id] = "Term " . $term->name . " - " . ($term->academic_year ? $term->academic_year->name : '');
             }
 
             $filter->equal('due_term_id', 'Filter by term')
@@ -176,6 +174,7 @@ class ServiceSubscriptionController extends AdminController
 
 
         $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
+            ->with(['due_term', 'sub.account', 'service'])
             ->orderBy('id', 'Desc');
 
         $grid->column('id', __('id'))->sortable()->hide();
@@ -291,12 +290,12 @@ class ServiceSubscriptionController extends AdminController
         $terms = [];
         $active_term = 0;
         foreach (
-            Term::where(
+            Term::with('academic_year')->where(
                 'enterprise_id',
                 Admin::user()->enterprise_id
             )->orderBy('id', 'desc')->get() as $key => $term
         ) {
-            $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
+            $terms[$term->id] = "Term " . $term->name . " - " . ($term->academic_year ? $term->academic_year->name : '');
             if ($term->is_active) {
                 $active_term = $term->id;
             }

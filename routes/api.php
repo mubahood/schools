@@ -21,36 +21,140 @@ use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+/**
+ * Parse a raw SchoolPay / PegPay webhook payload and, if enough data is present,
+ * create a SchoolPayTransaction staging record and attempt auto-import.
+ */
+if (!function_exists('_process_schoolpay_webhook')) {
+function _process_schoolpay_webhook(array $payload): void
+{
+    try {
+        $receiptNumber = $payload['schoolpayReceiptNumber']     ?? $payload['receipt_number']    ?? null;
+        $sourceTxnId   = $payload['sourceChannelTransactionId'] ?? $payload['transaction_id']    ?? null;
+        $uniqueId      = $receiptNumber ?: $sourceTxnId;
+        $amount        = $payload['amount'] ?? $payload['Amount'] ?? null;
+
+        if (!$uniqueId || !$amount) {
+            return; // Not enough info to create a record
+        }
+
+        // Determine which enterprise this payment belongs to via studentPaymentCode
+        $paymentCode = $payload['studentPaymentCode'] ?? $payload['payment_code'] ?? null;
+        $regNumber   = $payload['studentRegistrationNumber'] ?? $payload['reg_number'] ?? null;
+
+        $enterprise = null;
+        $user       = null;
+
+        if ($paymentCode) {
+            $user = \App\Models\User::where('school_pay_payment_code', $paymentCode)->first();
+        }
+        if (!$user && $regNumber) {
+            $user = \App\Models\User::where('user_number', $regNumber)->first();
+        }
+        if ($user) {
+            $enterprise = \App\Models\Enterprise::find($user->enterprise_id);
+        }
+        if (!$enterprise) {
+            // Fall back: use the only enterprise or the one matching school code in payload
+            $enterprise = \App\Models\Enterprise::where('school_pay_status', 'Active')->first();
+        }
+        if (!$enterprise) {
+            return;
+        }
+
+        // Use firstOrCreate to safely handle concurrent/retried webhook calls
+        [$spt, $created] = [null, false];
+        try {
+            $activeTerm = $enterprise->active_term();
+            $accountId  = ($user && $user->account) ? $user->account->id : null;
+
+            [$spt, $created] = \App\Models\SchoolPayTransaction::firstOrCreate(
+                ['school_pay_transporter_id' => $uniqueId],
+                [
+                    'enterprise_id'               => $enterprise->id,
+                    'source'                      => 'school_pay',
+                    'type'                        => 'SCHOOL_PAY',
+                    'amount'                      => abs((float) $amount),
+                    'payment_date'                => date('Y-m-d'),
+                    'schoolpayReceiptNumber'       => $receiptNumber,
+                    'sourceChannelTransactionId'  => $sourceTxnId,
+                    'studentPaymentCode'          => $paymentCode,
+                    'studentRegistrationNumber'   => $regNumber,
+                    'studentName'                 => $payload['studentName']         ?? $payload['student_name']  ?? null,
+                    'studentClass'                => $payload['studentClass']         ?? $payload['class']         ?? null,
+                    'sourcePaymentChannel'        => $payload['sourcePaymentChannel'] ?? $payload['channel']       ?? null,
+                    'paymentDateAndTime'          => $payload['paymentDateAndTime']  ?? null,
+                    'transactionCompletionStatus' => $payload['transactionCompletionStatus'] ?? 'Completed',
+                    'data'                        => json_encode($payload),
+                    'account_id'                  => $accountId,
+                    'term_id'                     => $activeTerm?->id,
+                    'academic_year_id'            => $activeTerm?->academic_year_id ?? null,
+                ]
+            );
+
+            // Set description after firstOrCreate so the model has its id
+            if ($created && $spt) {
+                $spt->description = \App\Models\SchoolPayTransaction::buildCleanDescription($spt);
+                $spt->save();
+            }
+
+            if (!$created) {
+                return; // Already processed
+            }
+        } catch (\Throwable $e) {
+            return; // Duplicate key or other transient error
+        }
+
+        // Auto-import immediately if enterprise is configured for it
+        if ($enterprise->school_pay_import_automatically === 'Yes') {
+            try { $spt->doImport(); } catch (\Throwable $e) { /* already handled in doImport */ }
+        }
+    } catch (\Throwable $e) {
+        \Illuminate\Support\Facades\Log::warning('[SchoolPayWebhook] processing error: ' . $e->getMessage());
+    }
+}
+} // end if (!function_exists)
+
 Route::POST("users/register", [ApiAuthController::class, "register"]);
 Route::POST("users/login", [ApiAuthController::class, "login"]);
+Route::POST("auth/refresh", [ApiMainController::class, "refresh_token"]);   // kept for backward compat
+Route::POST("renew-token", [ApiMainController::class, "refresh_token"]);      // WAF-safe alias
+Route::POST("send-parent-otp", [ApiMainController::class, "send_parent_otp"]);
+Route::POST("parent-activate", [ApiMainController::class, "parent_activate"]);
 Route::POST("forget-password-request", [ApiMainController::class, 'forget_password_request']);
 Route::POST("forget-password-reset", [ApiMainController::class, 'forget_password_reset']);
 
-//make endpot that accepts post and get school-pay-web-hooks
-Route::MATCH([
-    'POST',
-    'GET'
-], "school-pay-web-hooks", (function (Request $r) {
-    $rec = new SchoolPayHook();
-    $rec->post_data = json_encode($r->post());
-    $rec->get_data = json_encode($r->all());
-    $rec->method = $r->method();
+// SchoolPay webhook — store raw payload then immediately try to process
+Route::MATCH(['POST', 'GET'], "school-pay-web-hooks", function (Request $r) {
+    // 1. Persist raw hook
+    $rec             = new SchoolPayHook();
+    $rec->post_data  = json_encode($r->post());
+    $rec->get_data   = json_encode($r->all());
+    $rec->method     = $r->method();
     $rec->server_data = json_encode($r->server());
     $rec->save();
-    return $rec;
-}));
-Route::MATCH([
-    'POST',
-    'GET'
-], "peg-pay-web-hooks", (function (Request $r) {
-    $rec = new SchoolPayHook();
-    $rec->post_data = json_encode($r->post());
-    $rec->get_data = json_encode($r->all());
-    $rec->method = $r->method();
+
+    // 2. Try to derive a SchoolPayTransaction from the payload
+    $payload = $r->post() ?: $r->all();
+    _process_schoolpay_webhook($payload);
+
+    return response()->json(['status' => 'received', 'id' => $rec->id]);
+});
+
+// PegPay webhook — same pattern
+Route::MATCH(['POST', 'GET'], "peg-pay-web-hooks", function (Request $r) {
+    $rec             = new SchoolPayHook();
+    $rec->post_data  = json_encode($r->post());
+    $rec->get_data   = json_encode($r->all());
+    $rec->method     = $r->method();
     $rec->server_data = json_encode($r->server());
     $rec->save();
-    return $rec;
-}));
+
+    $payload = $r->post() ?: $r->all();
+    _process_schoolpay_webhook($payload);
+
+    return response()->json(['status' => 'received', 'id' => $rec->id]);
+});
 
 Route::POST("mail-sender", (function (Request $r) {
     //validate
@@ -187,6 +291,20 @@ Route::middleware([JwtMiddleware::class])->group(function () {
     Route::get("student-report-cards", [ApiMainController::class, 'student_report_cards']);
     Route::get("disciplinary-records", [ApiMainController::class, 'disciplinary_records']);
     /* ====== END OF ATTENDANCE ====== */
+
+    // ===== REPORT CARD PDF GENERATION =====
+    Route::post("generate-report-card-pdf/{id}", [ApiMainController::class, 'generate_report_card_pdf']); // kept
+    Route::post("make-pdf/{id}", [ApiMainController::class, 'generate_report_card_pdf']);                  // WAF-safe
+    Route::post("generate-pa-report-pdf/{id}", [ApiMainController::class, 'generate_pa_report_pdf']);     // kept
+    Route::post("make-pa-pdf/{id}", [ApiMainController::class, 'generate_pa_report_pdf']);                 // WAF-safe
+    Route::get('download/report-card/{id}', [ApiMainController::class, 'download_report_card'])->middleware(JwtMiddleware::class);
+    Route::post('update-player-id', [ApiMainController::class, 'update_player_id'])->middleware(JwtMiddleware::class);
+    Route::get('pa-summary', [ApiMainController::class, 'pa_summary'])->middleware(JwtMiddleware::class);
+
+    // ===== PROGRESSIVE ASSESSMENTS (GAP-001) =====
+    Route::get("progressive-assessments", [ApiMainController::class, 'progressive_assessments']);
+    Route::get("student-progressive-reports", [ApiMainController::class, 'student_progressive_reports']);
+    Route::get("student-progressive-report/{id}", [ApiMainController::class, 'student_progressive_report_detail']);
 
 
     /*========START OF Exams & Report Cards========*/

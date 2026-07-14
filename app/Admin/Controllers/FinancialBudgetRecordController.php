@@ -7,13 +7,11 @@ use App\Models\AccountParent;
 use App\Models\FinancialRecord;
 use App\Models\Term;
 use App\Models\Utils;
-use Dflydev\DotAccessData\Util;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -47,7 +45,7 @@ class FinancialBudgetRecordController extends AdminController
             Term::where(
                 'enterprise_id',
                 Admin::user()->enterprise_id
-            )->orderBy('id', 'desc')->get() as $key => $term
+            )->orderBy('id', 'desc')->get() as $term
         ) {
             $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
             if ($term->is_active) {
@@ -101,15 +99,16 @@ class FinancialBudgetRecordController extends AdminController
                 ->select($accs);
 
 
+            $terms = [];
             foreach (
                 Term::where(
                     'enterprise_id',
                     Admin::user()->enterprise_id
-                )->orderBy('id', 'desc')->get() as $key => $term
+                )->orderBy('id', 'desc')->get() as $term
             ) {
                 $terms[$term->id] = "Term " . $term->name . " - " . $term->academic_year->name;
             }
-            $filter->equal('term_id', 'Fliter by term')->select($terms);
+            $filter->equal('term_id', 'Filter by term')->select($terms);
 
 
             $filter->between('payment_date', 'Date Created between')->date();
@@ -127,7 +126,7 @@ class FinancialBudgetRecordController extends AdminController
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
             'type' => 'BUDGET',
-        ])->orderBy('id', 'DESC');
+        ])->with(['account', 'par', 'term', 'created_by'])->orderBy('id', 'DESC');
 
         $grid->column('created_at', __('Created'))
             ->display(function ($x) {
@@ -176,17 +175,19 @@ class FinancialBudgetRecordController extends AdminController
                 if ($this->account == null) {
                     return $x;
                 }
-                return $this->account->name;
+                $url = admin_url('financial-records-budget?account_id=' . $x);
+                return '<a href="' . $url . '">' . e($this->account->name) . '</a>';
             })->sortable();
-
 
         $grid->column('parent_account_id', __('Vote'))
             ->display(function ($x) {
                 if ($this->par == null) {
                     return $x;
                 }
-                return $this->par->name;
+                $url = admin_url('financial-records-budget?parent_account_id=' . $x);
+                return '<a href="' . $url . '">' . e($this->par->name) . '</a>';
             })->sortable();
+
         $grid->column('term_id', __('Term'))
             ->display(function ($x) {
                 if ($this->term == null) {
@@ -201,9 +202,12 @@ class FinancialBudgetRecordController extends AdminController
                     return $x;
                 }
                 return $this->created_by->name;
-            })->sortable();
+            })->sortable()->hide();
 
-
+        $grid->column('quick_links', 'Links')->display(function () {
+            $expUrl = admin_url('financial-records-expenditure?account_id=' . $this->account_id);
+            return "<a href='$expUrl' class='btn btn-xs btn-danger' title='View expenditure for this account'>View Expenditure</a>";
+        });
 
         return $grid;
     }

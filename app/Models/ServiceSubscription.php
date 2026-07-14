@@ -177,27 +177,17 @@ class ServiceSubscription extends Model
 
     public function getServiceTextAttribute()
     {
-        $s = Service::find($this->service_id);
-        if ($s == null) {
-            return $this->service_id;
-        }
-        return $s->name;
+        return $this->service ? $this->service->name : (string) $this->service_id;
     }
+
     public function getDueTermTextAttribute()
     {
-        $s = Term::find($this->due_term_id);
-        if ($s == null) {
-            return $this->due_term_id;
-        }
-        return $s->name_text;
+        return $this->due_term ? $this->due_term->name_text : (string) $this->due_term_id;
     }
+
     public function getAdministratorTextAttribute()
     {
-        $s = Administrator::find($this->administrator_id);
-        if ($s == null) {
-            return $this->administrator_id;
-        }
-        return $s->name;
+        return $this->administrator ? $this->administrator->name : (string) $this->administrator_id;
     }
     protected $appends = ['service_text', 'due_term_text', 'administrator_text'];
 

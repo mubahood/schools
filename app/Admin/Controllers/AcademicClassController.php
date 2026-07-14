@@ -51,13 +51,19 @@ class AcademicClassController extends AdminController
             // disable delete or other batch actions as needed
             $batch->add(new BatchCopyAcademicClass());
         });
+        // Pre-aggregate active student counts per class (current_class_id on admin_users)
+        $eid = Admin::user()->enterprise_id;
+        $studentCounts = \DB::table('admin_users')
+            ->where(['enterprise_id' => $eid, 'user_type' => 'student', 'status' => 1])
+            ->selectRaw('current_class_id, COUNT(*) as cnt')
+            ->groupBy('current_class_id')
+            ->pluck('cnt', 'current_class_id');
+
         $grid->model()
             ->orderBy('id', 'Desc')
-            ->where(
-                [
-                    'enterprise_id' => Admin::user()->enterprise_id,
-                ]
-            );
+            ->where(['enterprise_id' => $eid])
+            ->with(['class_teacher'])
+            ->withCount(['academic_class_sctreams', 'subjects']);
 
         $grid->column('id', __('Class #ID'))->sortable();
         $grid->column('name', __('Name'))->sortable()->editable();
@@ -105,19 +111,8 @@ class AcademicClassController extends AdminController
             ->sortable()
             ->editable('select', $years);
 
-        $grid->column('class_teahcer_id', __('Class teahcer'))->display(function ($ay) {
-            if ($this->class_teacher == null) {
-                $this->class_teahcer_id = $this->ent->administrator_id;
-                $u = User::find($this->class_teahcer_id);
-                if ($u == null) {
-                    die("Enterprise admin not found");
-                }
-                $this->save();
-            }
-            if ($this->class_teacher == null) {
-                return "No teacher assigned";
-            }
-            return $this->class_teacher->name;
+        $grid->column('class_teahcer_id', __('Class teahcer'))->display(function () {
+            return $this->class_teacher ? $this->class_teacher->name : 'No teacher assigned';
         })->hide();
 
 
@@ -128,19 +123,15 @@ class AcademicClassController extends AdminController
         });
 
         $grid->column('details', __('Details'))->hide();
-        $grid->column('streams', __('Streams'))->display(function ($ay) {
-            return $this->academic_class_sctreams->count();
+        $grid->column('streams', __('Streams'))->display(function () {
+            return $this->academic_class_sctreams_count;
         });
-        $grid->column('subjects', __('Subjects'))->display(function ($ay) {
-            return count($this->subjects);
+        $grid->column('subjects', __('Subjects'))->display(function () {
+            return $this->subjects_count;
         });
 
-        $grid->column('students_count', __('Students'))->display(function () {
-            $count = User::where([
-                'current_class_id' => $this->id,
-                'status' => 1,
-            ])->count();
-            return $count;
+        $grid->column('students_count', __('Students'))->display(function () use ($studentCounts) {
+            return $studentCounts[$this->id] ?? 0;
         });
 
         /*         $grid->column('competences', __('Competences'))->display(function () {

@@ -66,6 +66,7 @@ class StudentHasClassController extends AdminController
         //$grid->paginate(500);
 
         $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
+            ->with(['student', 'class', 'stream', 'year'])
             ->orderBy('id', 'Desc');
         if (!Admin::user()->isRole('dos')) {
             $grid->disableCreateButton();
@@ -112,20 +113,13 @@ class StudentHasClassController extends AdminController
 
             $streams = [];
             foreach (
-                AcademicClassSctream::where(
-                    [
-                        'enterprise_id' => $u->enterprise_id,
-                    ]
-                )
+                AcademicClassSctream::with(['academic_class.academic_year'])
+                    ->where(['enterprise_id' => $u->enterprise_id])
                     ->orderBy('id', 'desc')
                     ->get() as $ex
             ) {
-                if ($ex->academic_class == null) {
-                    continue;
-                }
-                if ($ex->academic_class->academic_year_id != $year->id) {
-                    continue;
-                }
+                if ($ex->academic_class == null) continue;
+                if ($ex->academic_class->academic_year_id != $year->id) continue;
                 $yearName = $ex->academic_class->academic_year ? $ex->academic_class->academic_year->name : '';
                 $streams[$ex->id] = $ex->academic_class->short_name . " - " . $ex->name . " (" . $yearName . ")";
             }

@@ -117,16 +117,22 @@ class Subject extends Model
     
     function teacher()
     {
-        $admin  = Administrator::find(((int)($this->subject_teacher)));
-        if ($admin == null) {
-            $ent = Enterprise::find($this->enterprise_id);
-            if ($ent == null) {
-                die("Enterprise not found.");
-            }
-            $this->subject_teacher  = $ent->administrator_id;
-            DB::update("UPDATE subjects SET subject_teacher = $ent->administrator_id WHERE id = $this->id");
-        }
         return $this->belongsTo(Administrator::class, 'subject_teacher');
+    }
+
+    function teacher1Rel()
+    {
+        return $this->belongsTo(Administrator::class, 'teacher_1');
+    }
+
+    function teacher2Rel()
+    {
+        return $this->belongsTo(Administrator::class, 'teacher_2');
+    }
+
+    function teacher3Rel()
+    {
+        return $this->belongsTo(Administrator::class, 'teacher_3');
     }
 
     // Relationship to scheme work items
@@ -178,44 +184,24 @@ class Subject extends Model
         'academic_class_text',
     ];
 
-    //teacher_name getter
     public function getTeacherNameAttribute()
     {
-        $admin = Administrator::find($this->subject_teacher);
-        if ($admin != null) {
-            return $admin->name;
-        }
-        return "N/A";
+        return $this->teacher ? $this->teacher->name : 'N/A';
     }
 
-    // getter attribute
     public function getTeacher1NameAttribute()
     {
-        $admin = Administrator::find($this->teacher_1);
-        if ($admin != null) {
-            return $admin->name;
-        }
-        return "";
+        return $this->teacher1Rel ? $this->teacher1Rel->name : '';
     }
 
-    // getter attribute
     public function getTeacher2NameAttribute()
     {
-        $admin = Administrator::find($this->teacher_2);
-        if ($admin != null) {
-            return $admin->name;
-        }
-        return "";
+        return $this->teacher2Rel ? $this->teacher2Rel->name : '';
     }
 
-    // getter attribute
     public function getTeacher3NameAttribute()
     {
-        $admin = Administrator::find($this->teacher_3);
-        if ($admin != null) {
-            return $admin->name;
-        }
-        return "";
+        return $this->teacher3Rel ? $this->teacher3Rel->name : '';
     }
 
     //get academic_class_text attribute

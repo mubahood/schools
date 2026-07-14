@@ -94,9 +94,6 @@ class Account extends Model
         self::updated(function ($m) {
             Account::doTransfer($m);
         });
-        self::updated(function ($m) {
-            Account::doTransfer($m);
-        });
         self::updating(function ($m) {
             if (isset($m->new_balance)) {
                 if ($m->new_balance == 1) {
@@ -326,5 +323,5 @@ class Account extends Model
             ->sum('amount');
     }
 
-    protected $appends = ['debit', 'credit'];
+    protected $appends = [];
 }

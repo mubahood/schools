@@ -103,6 +103,8 @@ Route::group([
     $router->resource('financial-records', FinancialRecordController::class);
     $router->resource('financial-records-budget', FinancialBudgetRecordController::class);
     $router->resource('financial-records-expenditure', FinancialExpenditureRecordController::class);
+    $router->resource('creditor-records', CreditorRecordController::class);
+    $router->resource('creditor-payments', CreditorPaymentController::class);
     $router->resource('mark-records', MarkRecordController::class);
     $router->resource('theology-mark-records', TheologyMarkRecordController::class);
     $router->resource('report-finances', ReportFinanceController::class);
@@ -171,6 +173,16 @@ Route::group([
     $router->get('fees-data-import-retry', 'FeesDataImportController@retry');
     $router->get('fees-data-import-duplicate', 'FeesDataImportController@duplicate');
 
+    // SchoolPay Student Import routes (specific routes BEFORE resource)
+    $router->get('school-pay-student-import/preview/{code}', 'SchoolPayStudentImportController@preview')
+        ->name('school-pay-student-import.preview');
+    $router->post('school-pay-student-import/register', 'SchoolPayStudentImportController@register')
+        ->name('school-pay-student-import.register');
+    $router->get('school-pay-student-import/success/{id}', 'SchoolPayStudentImportController@success')
+        ->name('school-pay-student-import.success');
+    $router->get('school-pay-student-import', 'SchoolPayStudentImportController@index')
+        ->name('school-pay-student-import.index');
+
     $router->resource('student-data-imports', StudentDataImportController::class);
     $router->resource('import-school-pay-transactions', ImportSchoolPayTransactionController::class);
     $router->resource('student-has-semeters', StudentHasSemeterController::class);
@@ -187,7 +199,7 @@ Route::group([
     // $router->get('/dashboard', 'HomeController@index')->name('dashboard');
 
     $router->get('dashboard', 'HomeController@stats')->name('home');
-    $router->get('/reports-finance', 'HomeController@reports_finance')->name('home');
+    $router->get('/reports-finance', 'HomeController@reports_finance')->name('reports-finance');
     $router->resource('assessment-sheets', AssessmentSheetController::class);
 
 
@@ -245,4 +257,6 @@ Route::group([
     $router->get('student-progressive-reports/{id}/generate-pdf', 'StudentProgressiveReportController@generatePdf')
         ->name('student-progressive-reports.generate-pdf');
     $router->resource('student-progressive-reports', StudentProgressiveReportController::class);
+    $router->resource('progressive-assessment-sheets', ProgressiveAssessmentSheetController::class);
+
 });

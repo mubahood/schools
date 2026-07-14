@@ -305,179 +305,193 @@ class TermlyReportCard extends Model
         if (!is_array($m->classes)) {
             return;
         }
-        $grading_scale = $m->grading_scale;
-        $ranges = $grading_scale->grade_ranges;
 
+        $grading_scale = $m->grading_scale;
         if ($grading_scale == null) {
             throw new Exception("Grading scale not found.", 1);
         }
+        $ranges = $grading_scale->grade_ranges;
 
         $number_of_exams = 0;
-        if ($m->reports_include_bot == 'Yes') {
-            $number_of_exams++;
-        }
-        if ($m->reports_include_mot == 'Yes') {
-            $number_of_exams++;
-        }
-        if ($m->reports_include_eot == 'Yes') {
-            $number_of_exams++;
-        }
+        if ($m->reports_include_bot == 'Yes') $number_of_exams++;
+        if ($m->reports_include_mot == 'Yes') $number_of_exams++;
+        if ($m->reports_include_eot == 'Yes') $number_of_exams++;
         if ($number_of_exams < 1) {
             throw new Exception("You must include at least one exam.", 1);
         }
 
+        $now = now()->format('Y-m-d H:i:s');
+
+        // Pre-load subject metadata scoped to this enterprise only
+        $subjectCache = Subject::where('enterprise_id', $m->enterprise_id)->get()->keyBy('id');
 
         foreach ($m->classes as $class_id) {
-            $class = AcademicClass::find(((int)($class_id)));
+            $class = AcademicClass::find((int) $class_id);
             if ($class == null) {
-                throw new Exception("Class not found.", 1);
                 continue;
             }
 
-            foreach ($class->students as $key => $student_has_class) {
-                $student = $student_has_class->student;
-                /* if($student->student_id != 7669){
-                    continue;
-                } */
-                if ($student == null) {
+            // Load all mark records for this class + TRC in ONE query
+            $allMarks = MarkRecord::where([
+                'termly_report_card_id' => $m->id,
+                'academic_class_id'     => $class->id,
+            ])->get()->groupBy('administrator_id');
+
+            // Load all existing report cards for this class + TRC in ONE query
+            $existingReports = StudentReportCard::where([
+                'termly_report_card_id' => $m->id,
+                'academic_class_id'     => $class->id,
+            ])->get()->keyBy('student_id');
+
+            $markUpdates   = [];
+            $reportUpserts = [];
+
+            foreach ($class->students()->with('student')->get() as $shc) {
+                $student = $shc->student;
+                if ($student === null || $student->status != 1) {
                     continue;
                 }
 
-                if ($student->status != 1) {
-                    continue;
-                }
+                $studentMarks = $allMarks->get($student->id, collect());
 
-                $report = StudentReportCard::where([
-                    'student_id' => $student->id,
-                    'termly_report_card_id' => $m->id,
-                ])
-                    ->orderBy('id', 'DESC')
-                    ->first();
-                if ($report == null) {
-                    $report = new StudentReportCard();
-                    $report->student_id = $student->id;
-                    $report->termly_report_card_id = $m->id;
-                }
-                $report->term_id = $m->term_id;
-                $report->academic_year_id = $m->academic_year_id;
-                $report->enterprise_id = $m->enterprise_id;
-                $report->stream_id = $student_has_class->stream_id;
-                $report->academic_class_id = $student_has_class->academic_class_id;
+                $totalMarks       = 0;
+                $avgAggregates    = 0;
+                $markUpdateRows   = [];
 
-
-                $marks = MarkRecord::where([
-                    'administrator_id' => $student->id,
-                    'termly_report_card_id' => $m->id,
-                    'academic_class_id' => $class->id,
-                ])->get();
-
-
-
-                $report->total_marks = 0;
-                $report->average_aggregates = 0;
-                foreach ($marks as $mark) {
-                    if ($mark->subject == null) {
-                        continue;
-                    }
-                    if ($mark->subject->show_in_report != 'Yes') {
+                foreach ($studentMarks as $mark) {
+                    $subject = $subjectCache->get($mark->subject_id);
+                    if ($subject === null || $subject->show_in_report != 'Yes') {
                         continue;
                     }
 
-
-                    // Grade each exam — 'X' if student did not sit it (score < 1)
-                    $mark->bot_grade = ((int) $mark->bot_score < 1)
+                    // Grade each exam column
+                    $botGrade = ((int) $mark->bot_score < 1)
                         ? 'X'
                         : Utils::generateAggregates($grading_scale, $mark->bot_score)['aggr_name'];
-                    $mark->mot_grade = ((int) $mark->mot_score < 1)
+                    $motGrade = ((int) $mark->mot_score < 1)
                         ? 'X'
                         : Utils::generateAggregates($grading_scale, $mark->mot_score)['aggr_name'];
-                    $mark->eot_grade = ((int) $mark->eot_score < 1)
+                    $eotGrade = ((int) $mark->eot_score < 1)
                         ? 'X'
                         : Utils::generateAggregates($grading_scale, $mark->eot_score)['aggr_name'];
 
-                    $total_scored_marks = 0;
-                    $divisor = $number_of_exams;
+                    // Compute total / average
+                    $totalScored = 0;
+                    $divisor     = $number_of_exams;
 
                     if (strtolower($m->positioning_method) == 'specific') {
                         $divisor = 1;
                         if ($m->positioning_exam == 'eot') {
-                            $total_scored_marks += (int)$mark->eot_score;
-                        } else if (strtolower($m->positioning_exam) == 'mot') {
-                            $total_scored_marks += (int)$mark->mot_score;
-                        } else if (strtolower($m->positioning_exam) == 'bot') {
-                            $total_scored_marks += (int)$mark->bot_score;
+                            $totalScored = (int) $mark->eot_score;
+                        } elseif (strtolower($m->positioning_exam) == 'mot') {
+                            $totalScored = (int) $mark->mot_score;
+                        } elseif (strtolower($m->positioning_exam) == 'bot') {
+                            $totalScored = (int) $mark->bot_score;
                         } else {
-                            $total_scored_marks += (int)$mark->bot_score;
-                            $total_scored_marks += (int)$mark->mot_score;
-                            $total_scored_marks += (int)$mark->eot_score;
-                            $divisor = 3;
+                            $totalScored = (int) $mark->bot_score + (int) $mark->mot_score + (int) $mark->eot_score;
+                            $divisor     = 3;
                         }
                     } else {
-                        $exams_taken = 0;
-                        if ($m->reports_include_bot == 'Yes' && (int)$mark->bot_score >= 1) {
-                            $total_scored_marks += (int)$mark->bot_score;
-                            $exams_taken++;
+                        $examsTaken = 0;
+                        if ($m->reports_include_bot == 'Yes' && (int) $mark->bot_score >= 1) {
+                            $totalScored += (int) $mark->bot_score;
+                            $examsTaken++;
                         }
-                        if ($m->reports_include_mot == 'Yes' && (int)$mark->mot_score >= 1) {
-                            $total_scored_marks += (int)$mark->mot_score;
-                            $exams_taken++;
+                        if ($m->reports_include_mot == 'Yes' && (int) $mark->mot_score >= 1) {
+                            $totalScored += (int) $mark->mot_score;
+                            $examsTaken++;
                         }
-                        if ($m->reports_include_eot == 'Yes' && (int)$mark->eot_score >= 1) {
-                            $total_scored_marks += (int)$mark->eot_score;
-                            $exams_taken++;
+                        if ($m->reports_include_eot == 'Yes' && (int) $mark->eot_score >= 1) {
+                            $totalScored += (int) $mark->eot_score;
+                            $examsTaken++;
                         }
-                        $divisor = $exams_taken > 0 ? $exams_taken : 1;
+                        $divisor = $examsTaken > 0 ? $examsTaken : 1;
                     }
 
-                    $average_mark = ((int)($total_scored_marks / $divisor));
+                    $averageMark = (int) ($totalScored / $divisor);
 
-                    $mark->total_score = $total_scored_marks;
-                    $mark->total_score_display = $average_mark;
-                    $mark->remarks = $average_mark < 1
-                        ? '-'
-                        : Utils::get_automaic_mark_remarks($average_mark);
-
-                    $mark->aggr_value = null;
-                    $mark->aggr_name = null;
-                    if ($mark->total_score_display >= 1) {
+                    // Aggregate lookup
+                    $aggrValue = null;
+                    $aggrName  = null;
+                    if ($averageMark >= 1) {
                         foreach ($ranges as $range) {
-                            if ($mark->total_score_display >= $range->min_mark && $mark->total_score_display <= $range->max_mark) {
-                                $mark->aggr_value = $range->aggregates;
-                                $mark->aggr_name = $range->name;
+                            if ($averageMark >= $range->min_mark && $averageMark <= $range->max_mark) {
+                                $aggrValue = $range->aggregates;
+                                $aggrName  = $range->name;
                                 break;
                             }
                         }
                     }
 
-                    if ($mark->subject->grade_subject != 'Yes') {
-                        $mark->save();
-                        continue;
+                    $markRow = [
+                        'id'                  => $mark->id,
+                        'bot_grade'           => $botGrade,
+                        'mot_grade'           => $motGrade,
+                        'eot_grade'           => $eotGrade,
+                        'total_score'         => $totalScored,
+                        'total_score_display' => $averageMark,
+                        'remarks'             => $averageMark < 1 ? '-' : Utils::get_automaic_mark_remarks($averageMark),
+                        'aggr_value'          => $aggrValue,
+                        'aggr_name'           => $aggrName,
+                        'updated_at'          => $now,
+                    ];
+
+                    if ($subject->grade_subject == 'Yes') {
+                        $avgAggregates += (int) $aggrValue;
+                        $totalMarks    += $averageMark;
                     }
 
-                    $report->average_aggregates += $mark->aggr_value;
-                    $report->total_marks += $mark->total_score_display;
-                    $mark->save();
+                    $markUpdates[] = $markRow;
                 }
 
-                //$report->total_marks = $number_of_exams * 100;
-                $report->total_aggregates = $report->average_aggregates;
+                // Determine grade band
+                if ($avgAggregates < 4)       $grade = 'X';
+                elseif ($avgAggregates <= 12)  $grade = '1';
+                elseif ($avgAggregates <= 24)  $grade = '2';
+                elseif ($avgAggregates <= 29)  $grade = '3';
+                elseif ($avgAggregates <= 35)  $grade = '4';
+                else                           $grade = 'U';
 
-                $report->position = 0;
-                if ($report->average_aggregates < 4) {
-                    $report->grade = 'X';
-                } else
-                if ($report->average_aggregates <= 12) {
-                    $report->grade = '1';
-                } else if ($report->average_aggregates <= 24) {
-                    $report->grade = '2';
-                } else if ($report->average_aggregates <= 29) {
-                    $report->grade = '3';
-                } else if ($report->average_aggregates <= 35) {
-                    $report->grade = '4';
+                $existingReport = $existingReports->get($student->id);
+                $reportRow = [
+                    'student_id'            => $student->id,
+                    'termly_report_card_id' => $m->id,
+                    'term_id'               => $m->term_id,
+                    'academic_year_id'      => $m->academic_year_id,
+                    'enterprise_id'         => $m->enterprise_id,
+                    'stream_id'             => $shc->stream_id,
+                    'academic_class_id'     => $shc->academic_class_id,
+                    'total_marks'           => $totalMarks,
+                    'average_aggregates'    => $avgAggregates,
+                    'total_aggregates'      => $avgAggregates,
+                    'grade'                 => $grade,
+                    'position'             => 0,
+                    'updated_at'            => $now,
+                ];
+                if ($existingReport) {
+                    $reportRow['id'] = $existingReport->id;
                 } else {
-                    $report->grade = 'U';
+                    $reportRow['created_at'] = $now;
                 }
-                $report->save();
+                $reportUpserts[] = $reportRow;
+            }
+
+            // Bulk-update mark records (chunk to avoid huge queries)
+            foreach (array_chunk($markUpdates, 200) as $chunk) {
+                DB::table('mark_records')->upsert(
+                    $chunk,
+                    ['id'],
+                    ['bot_grade', 'mot_grade', 'eot_grade', 'total_score', 'total_score_display', 'remarks', 'aggr_value', 'aggr_name', 'updated_at']
+                );
+            }
+
+            // Bulk-upsert report cards
+            foreach (array_chunk($reportUpserts, 200) as $chunk) {
+                DB::table('student_report_cards')->upsert(
+                    $chunk,
+                    ['student_id', 'termly_report_card_id'],
+                    ['term_id', 'academic_year_id', 'enterprise_id', 'stream_id', 'academic_class_id', 'total_marks', 'average_aggregates', 'total_aggregates', 'grade', 'position', 'updated_at']
+                );
             }
         }
     }
@@ -511,104 +525,144 @@ class TermlyReportCard extends Model
 
     public static function make_reports_for_primary($m)
     {
-
-
         set_time_limit(-1);
         ini_set('memory_limit', '-1');
-        $ent = Enterprise::find($m->enterprise_id);
+
         $year = AcademicYear::find($m->academic_year_id);
         if ($year == null) {
             throw new \Exception("Academic year not found.");
         }
 
-        if ($m->generate_marks_for_classes == null) {
-            return;
-        }
-        if ($m->generate_marks_for_classes == '') {
+        $classList = $m->generate_marks_for_classes;
+        if (empty($classList) || !is_array($classList)) {
             return;
         }
 
-        //is not array, return $m->generate_marks_for_classes
-        if (!is_array($m->generate_marks_for_classes)) {
-            return;
-        }
+        $now = now()->format('Y-m-d H:i:s');
 
         foreach ($m->term->academic_year->classes as $class) {
-
-            //id not in arre $m->generate_marks_for_classes continue
-            if (!in_array($class->id, $m->generate_marks_for_classes)) {
+            if (!in_array($class->id, $classList)) {
                 continue;
             }
 
-            $subjects = Subject::where([
-                'academic_class_id' => $class->id,
-            ])->get();
-            if ($subjects->count() < 1) {
+            // Load all subjects for this class
+            $subjects = Subject::where('academic_class_id', $class->id)->get()->keyBy('id');
+            if ($subjects->isEmpty()) {
                 continue;
             }
-            foreach ($class->students as $student_has_class) {
-                $student = $student_has_class->student;
-                if ($student == null) {
-                    $student_has_class->delete();
-                    continue;
-                }
-                if ($student->status != 1) {
-                    continue;
-                }
 
+            // Pre-compute initials + main_course_id per subject (avoids N×M lazy loads)
+            $subjectMeta = [];
+            foreach ($subjects as $subject) {
+                $initials = '';
+                if ($subject->subject_teacher) {
+                    $teacher = \Encore\Admin\Auth\Database\Administrator::find((int) $subject->subject_teacher);
+                    if ($teacher) {
+                        $initials = $teacher->get_initials();
+                    }
+                }
+                $subjectMeta[$subject->id] = [
+                    'initials'       => $initials,
+                    'main_course_id' => $subject->main_course_id,
+                ];
+            }
+
+            // Load all existing mark records for this class + term in one query
+            $existingKeys = DB::table('mark_records')
+                ->where('term_id', $m->term_id)
+                ->where('academic_class_id', $class->id)
+                ->selectRaw("CONCAT(administrator_id,'_',subject_id) AS k")
+                ->pluck('k')
+                ->flip(); // O(1) lookups
+
+            // Remove orphaned StudentHasClass rows and build active student list
+            $studentRows = [];
+            $streamMap   = []; // student_id => stream_id
+            foreach ($class->students()->with('student')->get() as $shc) {
+                if ($shc->student === null) {
+                    $shc->delete();
+                    continue;
+                }
+                if ($shc->student->status != 1) {
+                    continue;
+                }
+                $studentRows[] = $shc;
+                $streamMap[$shc->student->id] = $shc->stream_id;
+            }
+
+            // Build bulk-insert list for missing records
+            $inserts = [];
+            foreach ($studentRows as $shc) {
+                $sid = $shc->student->id;
                 foreach ($subjects as $subject) {
-
-                    /* $sql = "SELECT * FROM mark_records WHERE administrator_id = ? AND term_id = ? AND subject_id = ?";
-                    $rec = DB::select($sql, [$student->id, $m->term_id, $subject->id]);
-                    //check if mark record exists
-                    if (count($rec) > 0) {
+                    if (isset($existingKeys[$sid . '_' . $subject->id])) {
                         continue;
-                    } */
-
-                    $markRecordOld = MarkRecord::where([
-                        'administrator_id' => $student->id,
-                        'term_id' => $m->term_id,
-                        'subject_id' => $subject->id,
-                    ])->first();
-
-                    if ($markRecordOld == null) {
-                        $markRecordOld = new MarkRecord();
-                        $markRecordOld->enterprise_id = $m->enterprise_id;
-                        $markRecordOld->termly_report_card_id = $m->id;
-                        $markRecordOld->term_id = $m->term_id;
-                        $markRecordOld->subject_id = $subject->id;
-                        $markRecordOld->administrator_id = $student->id;
-                        $markRecordOld->academic_class_id = $class->id;
-                        $markRecordOld->bot_score = 0;
-                        $markRecordOld->mot_score = 0;
-                        $markRecordOld->eot_score = 0;
-                        $markRecordOld->total_score = 0;
-                        $markRecordOld->total_score_display = 0;
-                        $markRecordOld->bot_is_submitted = 'No';
-                        $markRecordOld->mot_is_submitted = 'No';
-                        $markRecordOld->eot_is_submitted = 'No';
-                        $markRecordOld->bot_missed = 'Yes';
-                        $markRecordOld->mot_missed = 'Yes';
-                        $markRecordOld->eot_missed = 'Yes';
-                        $markRecordOld->remarks = null;
-                    } else {
-                        //continue;
                     }
-
-                    if ($subject->teacher != null) {
-                        $markRecordOld->initials = $subject->teacher->get_initials();
-                    }
-
-                    $markRecordOld->academic_class_sctream_id = $student_has_class->stream_id;
-                    $markRecordOld->main_course_id = $subject->main_course_id;
-                    try {
-                        $markRecordOld->save();
-                        //echo "{$markRecordOld->id}. {$student->name} - {$subject->name} - {$class->name} <br> ";
-                        //die();
-                    } catch (\Throwable $e) {
-                        throw new \Exception($e->getMessage());
-                    }
+                    $inserts[] = [
+                        'enterprise_id'             => $m->enterprise_id,
+                        'termly_report_card_id'     => $m->id,
+                        'term_id'                   => $m->term_id,
+                        'subject_id'                => $subject->id,
+                        'administrator_id'          => $sid,
+                        'academic_class_id'         => $class->id,
+                        'academic_class_sctream_id' => $shc->stream_id,
+                        'main_course_id'            => $subjectMeta[$subject->id]['main_course_id'],
+                        'initials'                  => $subjectMeta[$subject->id]['initials'],
+                        'bot_score'                 => 0,
+                        'mot_score'                 => 0,
+                        'eot_score'                 => 0,
+                        'total_score'               => 0,
+                        'total_score_display'       => 0,
+                        'bot_is_submitted'          => 'No',
+                        'mot_is_submitted'          => 'No',
+                        'eot_is_submitted'          => 'No',
+                        'bot_missed'                => 'Yes',
+                        'mot_missed'                => 'Yes',
+                        'eot_missed'                => 'Yes',
+                        'remarks'                   => null,
+                        'created_at'                => $now,
+                        'updated_at'                => $now,
+                    ];
                 }
+            }
+
+            // Bulk insert new records (one query per 500-record chunk)
+            foreach (array_chunk($inserts, 500) as $chunk) {
+                DB::table('mark_records')->insertOrIgnore($chunk);
+            }
+
+            // Update initials + main_course_id — one query per subject instead of N×M
+            foreach ($subjects as $subject) {
+                DB::update(
+                    "UPDATE mark_records
+                     SET    initials = ?, main_course_id = ?, termly_report_card_id = ?, updated_at = ?
+                     WHERE  term_id = ? AND academic_class_id = ? AND subject_id = ?",
+                    [
+                        $subjectMeta[$subject->id]['initials'],
+                        $subjectMeta[$subject->id]['main_course_id'],
+                        $m->id,
+                        $now,
+                        $m->term_id,
+                        $class->id,
+                        $subject->id,
+                    ]
+                );
+            }
+
+            // Update stream — one query per stream group instead of one per student
+            $byStream = [];
+            foreach ($streamMap as $studentId => $streamId) {
+                $byStream[$streamId ?? 0][] = $studentId;
+            }
+            foreach ($byStream as $streamId => $studentIds) {
+                DB::table('mark_records')
+                    ->where('term_id', $m->term_id)
+                    ->where('academic_class_id', $class->id)
+                    ->whereIn('administrator_id', $studentIds)
+                    ->update([
+                        'academic_class_sctream_id' => $streamId === 0 ? null : $streamId,
+                        'updated_at'                => $now,
+                    ]);
             }
         }
     }

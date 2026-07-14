@@ -45,7 +45,8 @@ class MarkRecordController extends AdminController
 
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
-        ])->orderBy('id', 'DESC');
+        ])->with(['term', 'academicClass', 'stream', 'subject', 'student', 'termlyReportCard'])
+          ->orderBy('id', 'DESC');
 
         if (!Admin::user()->isRole('dos')) {
 
@@ -115,20 +116,15 @@ class MarkRecordController extends AdminController
 
             $streams = [];
             foreach (
-                AcademicClassSctream::where(
-                    [
-                        'enterprise_id' => $u->enterprise_id,
-                    ]
-                )
+                AcademicClassSctream::with('academic_class')
+                    ->where(['enterprise_id' => $u->enterprise_id])
                     ->orderBy('id', 'desc')
                     ->get() as $ex
             ) {
                 if ($ex->academic_class == null) {
                     continue;
                 }
-                if (
-                    $year->id != $ex->academic_class->academic_year_id
-                ) {
+                if ($year->id != $ex->academic_class->academic_year_id) {
                     continue;
                 }
                 $streams[$ex->id] = $ex->academic_class->short_name . " - " . $ex->name . " - " . $year->name;
@@ -149,9 +145,8 @@ class MarkRecordController extends AdminController
 
             $subs = [];
             foreach (
-                Subject::where([
-                    'enterprise_id' => $u->enterprise_id,
-                ])
+                Subject::with('academic_class')
+                    ->where(['enterprise_id' => $u->enterprise_id])
                     ->orderBy('id', 'desc')
                     ->get() as $ex
             ) {

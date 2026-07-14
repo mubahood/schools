@@ -52,7 +52,14 @@ class TermlyReportCardController extends AdminController
         $grid->disableBatchActions();
         $grid->model()->where([
             'enterprise_id' => Admin::user()->enterprise_id,
+        ])->withCount([
+            'mark_records',
+            'mark_records as bot_submitted_count' => fn($q) => $q->where('bot_is_submitted', 'Yes'),
+            'mark_records as mot_submitted_count' => fn($q) => $q->where('mot_is_submitted', 'Yes'),
+            'mark_records as eot_submitted_count' => fn($q) => $q->where('eot_is_submitted', 'Yes'),
+            'report_cards as report_cards_count',
         ])->orderBy('id', 'DESC');
+
         $grid->column('id', __('ID'))->sortable();
         $grid->column('academic_year.name', __('Academic Year'));
         $grid->column('term.name', __('Term'))->display(function () {
@@ -61,44 +68,32 @@ class TermlyReportCardController extends AdminController
 
         $grid->column('report_title', __('Report title'))->sortable();
         $grid->column('marks', __('Marks'))->display(function () {
-            return number_format(count($this->mark_records));
+            return number_format($this->mark_records_count);
         });
 
         $grid->column('bot', __('B.O.T'))->display(function () {
-            $total = count($this->mark_records);
-            if ($total == 0) {
-                return "0 (0%)";
-            }
-            $total_sub = count($this->mark_records->where('bot_is_submitted', 'Yes'));
-            $pecentage = ($total_sub / $total) * 100;
-            return number_format($total_sub) . " (" . number_format($pecentage) . "%)";
+            $total = $this->mark_records_count;
+            if ($total == 0) return "0 (0%)";
+            $pecentage = ($this->bot_submitted_count / $total) * 100;
+            return number_format($this->bot_submitted_count) . " (" . number_format($pecentage) . "%)";
         });
 
-
         $grid->column('mot', __('M.O.T'))->display(function () {
-            $total = count($this->mark_records);
-            if ($total == 0) {
-                return "0 (0%)";
-            }
-            $total_mot = count($this->mark_records->where('mot_is_submitted', 'Yes'));
-            $pecentage = ($total_mot / $total) * 100;
-            return number_format($total_mot) . " (" . number_format($pecentage) . "%)";
+            $total = $this->mark_records_count;
+            if ($total == 0) return "0 (0%)";
+            $pecentage = ($this->mot_submitted_count / $total) * 100;
+            return number_format($this->mot_submitted_count) . " (" . number_format($pecentage) . "%)";
         });
 
         $grid->column('eot', __('E.O.T'))->display(function () {
-            $total = count($this->mark_records);
-            if ($total == 0) {
-                return "0 (0%)";
-            }
-            $total_mot = count($this->mark_records->where('eot_is_submitted', 'Yes'));
-            $pecentage = ($total_mot / $total) * 100;
-            return number_format($total_mot) . " (" . number_format($pecentage) . "%)";
+            $total = $this->mark_records_count;
+            if ($total == 0) return "0 (0%)";
+            $pecentage = ($this->eot_submitted_count / $total) * 100;
+            return number_format($this->eot_submitted_count) . " (" . number_format($pecentage) . "%)";
         });
+
         $grid->column('report_cards_count', __('Report cards'))->display(function () {
-            $table = (new StudentReportCard())->getTable();
-            $sql = "SELECT COUNT(*) as count FROM $table WHERE termly_report_card_id = $this->id";
-            $count = \DB::select($sql);
-            return $count[0]->count;
+            return $this->report_cards_count;
         });
 
         $grid->column('has_beginning_term', __('Has beginning term'))->bool()->hide();
@@ -198,14 +193,14 @@ class TermlyReportCardController extends AdminController
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
         $form->hidden('academic_year_id', __('Academic year id'));
 
-        $_terms = Term::where([
+        $_terms = Term::with('academic_year')->where([
             'enterprise_id' => $u->enterprise_id
         ])
             ->orderBy('id', 'DESC')
             ->get();
         $terms = [];
         foreach ($_terms as  $v) {
-            $terms[$v->id] = $v->academic_year->name . " - " . $v->name;
+            $terms[$v->id] = ($v->academic_year ? $v->academic_year->name : '') . " - " . $v->name;
         }
 
         $scales = [];

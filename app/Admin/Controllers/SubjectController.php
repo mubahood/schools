@@ -62,6 +62,7 @@ class SubjectController extends AdminController
             'enterprise_id' => Admin::user()->enterprise_id,
             'academic_year_id' => Admin::user()->ent->dp_year,
         ])
+            ->with(['academic_class.academic_year', 'teacher'])
             ->orderBy('id', 'Desc');
         $grid->disableBatchActions();
 

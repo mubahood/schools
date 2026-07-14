@@ -50,10 +50,545 @@ class HomeController extends Controller
     public function index(Content $content)
     {
         Admin::style('.content-header {display: none;}');
-        $u = Admin::user();
+        $u   = Admin::user();
+        $eid = $u->enterprise_id;
+        $ent = $eid ? Enterprise::find($eid) : null;
+
+        // Detect primary role (ordered by specificity)
+        $role = 'generic';
+        $roleMap = [
+            'super-admin' => 'super-admin',
+            'hm'          => 'hm',
+            'deputy-hm'   => 'hm',
+            'dos'         => 'dos',
+            'admin'       => 'admin',
+            'bursar'      => 'bursar',
+            'finance'     => 'bursar',
+            'teacher'     => 'teacher',
+            'parent'      => 'parent',
+            'student'     => 'student',
+            'librarian'   => 'librarian',
+            'store'       => 'store',
+            'nurse'       => 'nurse',
+            'warden'      => 'warden',
+            'driver'      => 'transport',
+            'security'    => 'transport',
+            'gate'        => 'transport',
+            'receptionist'=> 'receptionist',
+            'purchaser'   => 'store',
+            'supervisor'  => 'admin',
+            'secretary'   => 'admin',
+        ];
+        foreach ($roleMap as $slug => $mapped) {
+            if ($u->isRole($slug)) { $role = $mapped; break; }
+        }
+
+        $dash = [];
+        try {
+            switch ($role) {
+                case 'super-admin':  $dash = $this->dashSuperAdmin(); break;
+                case 'hm':           $dash = $this->dashHm($u, $eid); break;
+                case 'dos':          $dash = $this->dashDos($u, $eid); break;
+                case 'admin':        $dash = $this->dashAdmin($u, $eid); break;
+                case 'bursar':       $dash = $this->dashBursar($u, $eid); break;
+                case 'teacher':      $dash = $this->dashTeacher($u, $eid); break;
+                case 'parent':       $dash = $this->dashParent($u, $eid); break;
+                case 'student':      $dash = $this->dashStudent($u, $eid); break;
+                case 'librarian':    $dash = $this->dashLibrarian($u, $eid); break;
+                case 'store':        $dash = $this->dashStore($u, $eid); break;
+                case 'nurse':        $dash = $this->dashNurse($u, $eid); break;
+                case 'warden':       $dash = $this->dashWarden($u, $eid); break;
+                case 'transport':    $dash = $this->dashTransport($u, $eid); break;
+                case 'receptionist': $dash = $this->dashReceptionist($u, $eid); break;
+                default:             $dash = $this->dashGeneric($u, $eid); break;
+            }
+        } catch (\Throwable $e) {
+            $dash = ['error' => $e->getMessage()];
+        }
+
         return $content->view('admin.index', [
-            'u' => $u
+            'u'    => $u,
+            'ent'  => $ent,
+            'role' => $role,
+            'dash' => $dash,
         ]);
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private function activeYear($eid)
+    {
+        return \App\Models\AcademicYear::where(['enterprise_id' => $eid, 'is_active' => 1])->first();
+    }
+
+    private function activeTerm($eid)
+    {
+        return \App\Models\Term::where(['enterprise_id' => $eid, 'is_active' => 1])->first();
+    }
+
+    private function activeTermlyCard($eid, $termId)
+    {
+        return \App\Models\TermlyReportCard::where(['enterprise_id' => $eid, 'term_id' => $termId])->first();
+    }
+
+    // ── Super Admin ───────────────────────────────────────────────────────────
+    private function dashSuperAdmin(): array
+    {
+        return [
+            'enterprises'  => Enterprise::count(),
+            'total_users'  => DB::table('admin_users')->count(),
+            'total_stud'   => DB::table('admin_users')->where('user_type', 'student')->count(),
+            'total_emp'    => DB::table('admin_users')->where('user_type', 'employee')->count(),
+            'recent_ents'  => Enterprise::orderBy('id','desc')->take(8)->get(['id','name','created_at']),
+        ];
+    }
+
+    // ── Headmaster ────────────────────────────────────────────────────────────
+    private function dashHm($u, $eid): array
+    {
+        $term = $this->activeTerm($eid);
+        $year = $this->activeYear($eid);
+        $tid  = $term?->id;
+
+        $totalStudents  = DB::table('admin_users')->where(['enterprise_id'=>$eid,'user_type'=>'student','status'=>1])->count();
+        $totalEmployees = DB::table('admin_users')->where(['enterprise_id'=>$eid,'user_type'=>'employee'])->count();
+
+        // Grade distribution (student_report_cards for active term)
+        $grades = DB::table('student_report_cards')
+            ->where('enterprise_id', $eid)
+            ->when($tid, fn($q) => $q->where('term_id', $tid))
+            ->selectRaw("grade, count(*) as cnt")
+            ->groupBy('grade')->get()
+            ->pluck('cnt', 'grade')->toArray();
+
+        // Class enrollment
+        $classes = AcademicClass::where(['enterprise_id'=>$eid,'academic_year_id'=>$year?->id])
+            ->withCount(['students as student_count'])
+            ->orderBy('name')->get(['id','name']);
+
+        // Mark submission overview for current term — single query
+        $mrStats = DB::table('mark_records')
+            ->where('enterprise_id', $eid)
+            ->when($tid, fn($q) => $q->where('term_id', $tid))
+            ->selectRaw("COUNT(*) as total,
+                SUM(CASE WHEN bot_is_submitted='Yes' THEN 1 ELSE 0 END) as bot_submitted,
+                SUM(CASE WHEN mot_is_submitted='Yes' THEN 1 ELSE 0 END) as mot_submitted,
+                SUM(CASE WHEN eot_is_submitted='Yes' THEN 1 ELSE 0 END) as eot_submitted")
+            ->first();
+        $totalMR      = $mrStats->total ?? 0;
+        $submittedBOT = $mrStats->bot_submitted ?? 0;
+        $submittedMOT = $mrStats->mot_submitted ?? 0;
+        $submittedEOT = $mrStats->eot_submitted ?? 0;
+
+        // Assessment sheets
+        $totalSheets = \App\Models\AssessmentSheet::where('enterprise_id',$eid)->count();
+
+        // Progressive assessments
+        $paReports = DB::table('student_progressive_reports')->where('enterprise_id',$eid)->count();
+
+        // Top 5 classes by grade-1 students
+        $top5 = DB::table('student_report_cards')
+            ->where(['enterprise_id'=>$eid,'grade'=>'1'])
+            ->when($tid, fn($q)=>$q->where('term_id',$tid))
+            ->selectRaw('academic_class_id, count(*) as g1_count')
+            ->groupBy('academic_class_id')
+            ->orderByDesc('g1_count')->take(5)->get();
+
+        return compact(
+            'term','year','totalStudents','totalEmployees','grades','classes',
+            'totalMR','submittedBOT','submittedMOT','submittedEOT',
+            'totalSheets','paReports','top5'
+        );
+    }
+
+    // ── Director of Studies ───────────────────────────────────────────────────
+    private function dashDos($u, $eid): array
+    {
+        $term = $this->activeTerm($eid);
+        $year = $this->activeYear($eid);
+        $tid  = $term?->id;
+        $trc  = $tid ? $this->activeTermlyCard($eid, $tid) : null;
+
+        // Mark submission rates — single query
+        $mrStats2  = DB::table('mark_records')
+            ->where('enterprise_id', $eid)
+            ->when($tid, fn($q) => $q->where('term_id', $tid))
+            ->selectRaw("COUNT(*) as total,
+                SUM(CASE WHEN bot_is_submitted='Yes' THEN 1 ELSE 0 END) as bot_submitted,
+                SUM(CASE WHEN mot_is_submitted='Yes' THEN 1 ELSE 0 END) as mot_submitted,
+                SUM(CASE WHEN eot_is_submitted='Yes' THEN 1 ELSE 0 END) as eot_submitted")
+            ->first();
+        $totalMR   = $mrStats2->total ?? 0;
+        $botSubmit  = $mrStats2->bot_submitted ?? 0;
+        $motSubmit  = $mrStats2->mot_submitted ?? 0;
+        $eotSubmit  = $mrStats2->eot_submitted ?? 0;
+
+        // Per-class mark completion — single grouped query instead of 2× per class
+        $yearId = $year?->id;
+        $classes = AcademicClass::where(['enterprise_id' => $eid])
+            ->when($yearId, fn($q) => $q->where('academic_year_id', $yearId))
+            ->get(['id', 'name']);
+
+        $classIds = $classes->pluck('id')->toArray();
+        $classMarkStats = DB::table('mark_records')
+            ->where('enterprise_id', $eid)
+            ->when($tid, fn($q) => $q->where('term_id', $tid))
+            ->whereIn('academic_class_id', $classIds)
+            ->selectRaw("academic_class_id, COUNT(*) as total,
+                SUM(CASE WHEN bot_is_submitted='Yes' THEN 1 ELSE 0 END) as sub")
+            ->groupBy('academic_class_id')
+            ->get()->keyBy('academic_class_id');
+
+        $classStats = [];
+        foreach ($classes->take(12) as $cls) {
+            $stat  = $classMarkStats->get($cls->id);
+            $total = $stat->total ?? 0;
+            $sub   = $stat->sub ?? 0;
+            $classStats[] = [
+                'name'  => $cls->name,
+                'total' => $total,
+                'sub'   => $sub,
+                'pct'   => $total > 0 ? round($sub / $total * 100) : 0,
+            ];
+        }
+
+        // Students with grade U or X this term
+        $atRisk = DB::table('student_report_cards')
+            ->where('enterprise_id',$eid)
+            ->when($tid, fn($q)=>$q->where('term_id',$tid))
+            ->whereIn('grade',['U','X'])
+            ->count();
+
+        $gradeOnePct = 0;
+        $totalCards  = DB::table('student_report_cards')->where('enterprise_id',$eid)->when($tid, fn($q)=>$q->where('term_id',$tid))->count();
+        $grade1      = DB::table('student_report_cards')->where(['enterprise_id'=>$eid,'grade'=>'1'])->when($tid, fn($q)=>$q->where('term_id',$tid))->count();
+        if ($totalCards > 0) $gradeOnePct = round($grade1 / $totalCards * 100);
+
+        // Subjects with lowest submission rates
+        $laggingSubjects = DB::table('mark_records')
+            ->join('subjects','mark_records.subject_id','=','subjects.id')
+            ->where('mark_records.enterprise_id',$eid)
+            ->when($tid, fn($q)=>$q->where('mark_records.term_id',$tid))
+            ->selectRaw('subjects.subject_name, count(*) as total, sum(case when mark_records.bot_is_submitted="Yes" then 1 else 0 end) as submitted')
+            ->groupBy('subjects.subject_name')
+            ->havingRaw('count(*) > 0')
+            ->orderByRaw('(sum(case when mark_records.bot_is_submitted="Yes" then 1 else 0 end)/count(*)) asc')
+            ->take(6)->get();
+
+        // Assessment sheets summary
+        $sheets = \App\Models\AssessmentSheet::where('enterprise_id',$eid)
+            ->when($tid, fn($q)=>$q->where('term_id',$tid))
+            ->count();
+        $sheetsGenerated = \App\Models\AssessmentSheet::where(['enterprise_id'=>$eid,'generated'=>'Yes'])
+            ->when($tid, fn($q)=>$q->where('term_id',$tid))
+            ->count();
+
+        // PA sheets
+        $paSheets = DB::table('progressive_assessment_sheets')->where('enterprise_id',$eid)->count();
+
+        $totalStudents = DB::table('admin_users')->where(['enterprise_id'=>$eid,'user_type'=>'student','status'=>1])->count();
+
+        return compact(
+            'term','year','trc','totalMR','botSubmit','motSubmit','eotSubmit',
+            'classStats','atRisk','totalCards','grade1','gradeOnePct',
+            'laggingSubjects','sheets','sheetsGenerated','paSheets','totalStudents'
+        );
+    }
+
+    // ── Admin (Enterprise Admin) ───────────────────────────────────────────────
+    private function dashAdmin($u, $eid): array
+    {
+        $totalStudents  = DB::table('admin_users')->where(['enterprise_id'=>$eid,'user_type'=>'student','status'=>1])->count();
+        $totalEmployees = DB::table('admin_users')->where(['enterprise_id'=>$eid,'user_type'=>'employee'])->count();
+        $totalParents   = DB::table('admin_users')->where(['enterprise_id'=>$eid,'user_type'=>'parent'])->count();
+
+        // Role distribution for employees
+        $roleCount = DB::table('admin_role_users')
+            ->join('admin_roles','admin_role_users.role_id','=','admin_roles.id')
+            ->join('admin_users','admin_role_users.user_id','=','admin_users.id')
+            ->where('admin_users.enterprise_id',$eid)
+            ->where('admin_users.user_type','employee')
+            ->selectRaw('admin_roles.name as role_name, count(*) as cnt')
+            ->groupBy('admin_roles.name')
+            ->orderByDesc('cnt')->take(8)->get();
+
+        $year    = $this->activeYear($eid);
+        $classes = AcademicClass::where(['enterprise_id'=>$eid])
+            ->when($year?->id, fn($q)=>$q->where('academic_year_id',$year->id))
+            ->count();
+
+        $newStudents = DB::table('admin_users')
+            ->where(['enterprise_id'=>$eid,'user_type'=>'student'])
+            ->where('created_at', '>=', now()->subDays(30))
+            ->count();
+
+        $recentEmployees = DB::table('admin_users')
+            ->where(['enterprise_id'=>$eid,'user_type'=>'employee'])
+            ->orderBy('created_at','desc')->take(6)
+            ->get(['name','created_at']);
+
+        return compact('totalStudents','totalEmployees','totalParents','roleCount','classes','newStudents','recentEmployees','year');
+    }
+
+    // ── Bursar / Finance ───────────────────────────────────────────────────────
+    private function dashBursar($u, $eid): array
+    {
+        $term = $this->activeTerm($eid);
+        $tid  = $term?->id;
+
+        // Fees / accounts
+        $totalAccounts  = DB::table('accounts')->where('enterprise_id',$eid)->count();
+        $totalDebt      = abs(DB::table('accounts')->where('enterprise_id',$eid)->where('balance','<',0)->sum('balance'));
+        $totalCredit    = DB::table('accounts')->where('enterprise_id',$eid)->where('balance','>',0)->sum('balance');
+        $debtorCount    = DB::table('accounts')->where('enterprise_id',$eid)->where('balance','<',0)->count();
+        $paidCount      = DB::table('accounts')->where('enterprise_id',$eid)->where('balance','>=',0)->count();
+
+        // Transactions this term
+        $txnBase       = DB::table('transactions')->where('enterprise_id',$eid);
+        $totalTxns     = (clone $txnBase)->count();
+        $recentTxns    = (clone $txnBase)->orderBy('id','desc')->take(8)->get(['id','source','amount','type','created_at']);
+
+        // Financial records (budget/expenditure)
+        $totalBudget   = DB::table('financial_records')->where(['enterprise_id'=>$eid,'type'=>'BUDGET'])->sum('amount');
+        $totalExpend   = abs(DB::table('financial_records')->where(['enterprise_id'=>$eid,'type'=>'EXPENDITURE'])->sum('amount'));
+
+        // Top debtors
+        $topDebtors = DB::table('accounts')
+            ->join('admin_users','accounts.administrator_id','=','admin_users.id')
+            ->where('accounts.enterprise_id',$eid)
+            ->where('accounts.balance','<',0)
+            ->orderBy('accounts.balance')
+            ->take(6)
+            ->get(['admin_users.name','accounts.balance']);
+
+        return compact('term','totalAccounts','totalDebt','totalCredit','debtorCount',
+            'paidCount','totalTxns','recentTxns','totalBudget','totalExpend','topDebtors');
+    }
+
+    // ── Teacher ───────────────────────────────────────────────────────────────
+    private function dashTeacher($u, $eid): array
+    {
+        $term = $this->activeTerm($eid);
+        $year = $this->activeYear($eid);
+        $tid  = $term?->id;
+        $uid  = $u->id;
+
+        // Subjects this teacher is assigned to
+        $mySubjects = Subject::where('enterprise_id',$eid)
+            ->where(fn($q) => $q->where('subject_teacher',$uid)
+                ->orWhere('teacher_1',$uid)->orWhere('teacher_2',$uid)->orWhere('teacher_3',$uid))
+            ->get(['id','subject_name','academic_class_id']);
+
+        // Mark submission per subject
+        $subjectStats = [];
+        $classIds = $mySubjects->pluck('academic_class_id')->unique()->filter();
+
+        foreach ($mySubjects as $subj) {
+            $base  = DB::table('mark_records')->where(['enterprise_id'=>$eid,'subject_id'=>$subj->id])->when($tid, fn($q)=>$q->where('term_id',$tid));
+            $total = (clone $base)->count();
+            $bot   = (clone $base)->where('bot_is_submitted','Yes')->count();
+            $mot   = (clone $base)->where('mot_is_submitted','Yes')->count();
+            $eot   = (clone $base)->where('eot_is_submitted','Yes')->count();
+            $cls   = AcademicClass::find($subj->academic_class_id);
+            $subjectStats[] = [
+                'name'      => $subj->subject_name,
+                'class'     => $cls?->name ?? '—',
+                'total_stu' => $total,
+                'bot'       => $bot,
+                'mot'       => $mot,
+                'eot'       => $eot,
+                'id'        => $subj->id,
+            ];
+        }
+
+        // My students' performance overview
+        $myStudentCount = $classIds->count() > 0
+            ? DB::table('student_has_classes')
+                ->join('academic_classes','student_has_classes.academic_class_id','=','academic_classes.id')
+                ->whereIn('student_has_classes.academic_class_id', $classIds)
+                ->where('academic_classes.enterprise_id',$eid)
+                ->when($year?->id, fn($q)=>$q->where('student_has_classes.academic_year_id',$year->id))
+                ->distinct('student_has_classes.administrator_id')
+                ->count('student_has_classes.administrator_id')
+            : 0;
+
+        // Grade distribution for my subjects
+        $myGrades = DB::table('student_report_cards')
+            ->where('enterprise_id',$eid)
+            ->when($tid, fn($q)=>$q->where('term_id',$tid))
+            ->whereIn('academic_class_id', $classIds->toArray())
+            ->selectRaw('grade, count(*) as cnt')->groupBy('grade')
+            ->get()->pluck('cnt','grade')->toArray();
+
+        $totalSubjects = $mySubjects->count();
+
+        return compact('term','year','mySubjects','subjectStats','myStudentCount','myGrades','totalSubjects','classIds');
+    }
+
+    // ── Parent ────────────────────────────────────────────────────────────────
+    private function dashParent($u, $eid): array
+    {
+        $term = $this->activeTerm($eid);
+        $tid  = $term?->id;
+
+        // Find children
+        $children = DB::table('admin_users')->where('parent_id',$u->id)->get(['id','name','status','avatar']);
+
+        $childrenData = [];
+        foreach ($children as $child) {
+            // Latest report card
+            $report = DB::table('student_report_cards')
+                ->where('student_id',$child->id)
+                ->when($tid, fn($q)=>$q->where('term_id',$tid))
+                ->orderBy('id','desc')->first();
+
+            // Current class
+            $hasClass = DB::table('student_has_classes')
+                ->join('academic_classes','student_has_classes.academic_class_id','=','academic_classes.id')
+                ->where('student_has_classes.administrator_id',$child->id)
+                ->orderBy('student_has_classes.academic_year_id','desc')
+                ->first(['academic_classes.name as class_name']);
+
+            // Fee balance
+            $account = DB::table('accounts')->where(['administrator_id'=>$child->id,'enterprise_id'=>$eid])->first();
+
+            $childrenData[] = [
+                'id'         => $child->id,
+                'name'       => $child->name,
+                'status'     => $child->status,
+                'class'      => $hasClass?->class_name ?? '—',
+                'grade'      => $report?->grade ?? '—',
+                'position'   => $report?->position ?? '—',
+                'total_stu'  => $report?->total_students ?? '—',
+                'total_marks'=> $report?->total_marks ?? '—',
+                'balance'    => $account?->balance ?? 0,
+            ];
+        }
+
+        return compact('term','children','childrenData');
+    }
+
+    // ── Student ───────────────────────────────────────────────────────────────
+    private function dashStudent($u, $eid): array
+    {
+        $term = $this->activeTerm($eid);
+        $tid  = $term?->id;
+
+        // Latest report
+        $latestReport = DB::table('student_report_cards')
+            ->where('student_id',$u->id)
+            ->when($tid, fn($q)=>$q->where('term_id',$tid))
+            ->orderBy('id','desc')->first();
+
+        // Historical reports
+        $history = DB::table('student_report_cards')
+            ->where('student_id',$u->id)
+            ->join('terms','student_report_cards.term_id','=','terms.id')
+            ->orderBy('student_report_cards.id','desc')
+            ->take(6)
+            ->get(['student_report_cards.total_marks','student_report_cards.grade','student_report_cards.position','terms.name as term_name']);
+
+        // Current class
+        $hasClass = DB::table('student_has_classes')
+            ->join('academic_classes','student_has_classes.academic_class_id','=','academic_classes.id')
+            ->where('student_has_classes.administrator_id',$u->id)
+            ->orderBy('student_has_classes.academic_year_id','desc')
+            ->first(['academic_classes.name as class_name']);
+
+        // Fee account
+        $account = DB::table('accounts')->where(['administrator_id'=>$u->id,'enterprise_id'=>$eid])->first();
+
+        // PA report
+        $paReport = DB::table('student_progressive_reports')
+            ->where('student_id',$u->id)
+            ->orderBy('id','desc')->first();
+
+        return compact('term','latestReport','history','hasClass','account','paReport');
+    }
+
+    // ── Librarian ─────────────────────────────────────────────────────────────
+    private function dashLibrarian($u, $eid): array
+    {
+        $totalBooks     = DB::table('books')->where('enterprise_id',$eid)->count();
+        $totalBorrowed  = DB::table('book_borrows')->where('enterprise_id',$eid)->where('status','Borrowed')->count();
+        $overdue        = DB::table('book_borrows')->where('enterprise_id',$eid)->where('status','Overdue')->count();
+        $categories     = DB::table('books_categories')->where('enterprise_id',$eid)->count();
+        $recentBorrows  = DB::table('book_borrows')
+            ->join('admin_users','book_borrows.borrowed_by','=','admin_users.id')
+            ->where('book_borrows.enterprise_id',$eid)
+            ->orderBy('book_borrows.id','desc')->take(8)
+            ->get(['admin_users.name','book_borrows.status','book_borrows.return_date','book_borrows.created_at']);
+
+        return compact('totalBooks','totalBorrowed','overdue','categories','recentBorrows');
+    }
+
+    // ── Store Keeper ─────────────────────────────────────────────────────────
+    private function dashStore($u, $eid): array
+    {
+        $totalCategories = DB::table('stock_item_categories')->where('enterprise_id',$eid)->count();
+        $totalBatches    = DB::table('stock_batches')->where('enterprise_id',$eid)->count();
+        $lowStock        = DB::table('stock_item_categories')
+            ->where('enterprise_id',$eid)
+            ->whereRaw('quantity <= reorder_level AND reorder_level > 0')
+            ->count();
+        $outOfStock      = DB::table('stock_item_categories')->where(['enterprise_id'=>$eid,'quantity'=>0])->count();
+        $recentBatches   = DB::table('stock_batches')
+            ->join('stock_item_categories','stock_batches.stock_item_category_id','=','stock_item_categories.id')
+            ->where('stock_batches.enterprise_id',$eid)
+            ->orderBy('stock_batches.id','desc')->take(8)
+            ->get(['stock_item_categories.name','stock_batches.current_quantity as quantity','stock_batches.worth','stock_batches.created_at']);
+        $lowStockItems   = DB::table('stock_item_categories')
+            ->where('enterprise_id',$eid)
+            ->whereRaw('quantity <= reorder_level AND reorder_level > 0')
+            ->orderBy('quantity')->take(6)
+            ->get(['name','quantity','reorder_level']);
+
+        return compact('totalCategories','totalBatches','lowStock','outOfStock','recentBatches','lowStockItems');
+    }
+
+    // ── Nurse ─────────────────────────────────────────────────────────────────
+    private function dashNurse($u, $eid): array
+    {
+        $totalStudents = DB::table('admin_users')->where(['enterprise_id'=>$eid,'user_type'=>'student','status'=>1])->count();
+        $visitors      = DB::table('visitor_records')->where('enterprise_id',$eid)->count();
+        $todayVisitors = DB::table('visitor_records')->where('enterprise_id',$eid)->whereDate('created_at',now())->count();
+        return compact('totalStudents','visitors','todayVisitors');
+    }
+
+    // ── Warden ────────────────────────────────────────────────────────────────
+    private function dashWarden($u, $eid): array
+    {
+        $totalStudents = DB::table('admin_users')->where(['enterprise_id'=>$eid,'user_type'=>'student','status'=>1])->count();
+        return compact('totalStudents');
+    }
+
+    // ── Transport (Driver/Security/Gate) ──────────────────────────────────────
+    private function dashTransport($u, $eid): array
+    {
+        $totalRoutes  = DB::table('transport_routes')->where('enterprise_id',$eid)->count();
+        $totalSubs    = DB::table('transport_subscriptions')->where('enterprise_id',$eid)->count();
+        $totalTrips   = DB::table('trips')->where('enterprise_id',$eid)->count();
+        $todayTrips   = DB::table('trips')->where('enterprise_id',$eid)->whereDate('created_at',now())->count();
+        $recentTrips  = DB::table('trips')->where('enterprise_id',$eid)->orderBy('id','desc')->take(6)->get();
+        return compact('totalRoutes','totalSubs','totalTrips','todayTrips','recentTrips');
+    }
+
+    // ── Receptionist ─────────────────────────────────────────────────────────
+    private function dashReceptionist($u, $eid): array
+    {
+        $todayVisitors = DB::table('visitor_records')->where('enterprise_id',$eid)->whereDate('created_at',now())->count();
+        $totalVisitors = DB::table('visitor_records')->where('enterprise_id',$eid)->count();
+        $totalStudents = DB::table('admin_users')->where(['enterprise_id'=>$eid,'user_type'=>'student','status'=>1])->count();
+        $recentVisitors= DB::table('visitor_records')->where('enterprise_id',$eid)->orderBy('id','desc')->take(8)->get();
+        return compact('todayVisitors','totalVisitors','totalStudents','recentVisitors');
+    }
+
+    // ── Generic fallback ──────────────────────────────────────────────────────
+    private function dashGeneric($u = null, $eid = null): array
+    {
+        return [
+            'totalStudents' => $eid ? DB::table('admin_users')->where(['enterprise_id'=>$eid,'user_type'=>'student','status'=>1])->count() : 0,
+        ];
     }
 
     public function transportStats(Content $content)
@@ -263,8 +798,8 @@ class HomeController extends Controller
 
     public function stats(Content $content)
     {
-
-        $u = Admin::user();
+        $u   = Admin::user();
+        $eid = $u->enterprise_id;
 
         $content->header($u->ent->name . ' - Dashboard');
 
@@ -837,6 +1372,71 @@ class HomeController extends Controller
             )));
         }
 
+
+        // ── Role-based rich dashboard for roles without existing content ──────
+        $roleDashRoles = ['dos','teacher','parent','student','nurse','warden',
+                          'driver','security','gate','receptionist','marketing-agent',
+                          'administrative-assistant','secretary','supervisor','purchaser'];
+        $needsRichDash = false;
+        foreach ($roleDashRoles as $_slug) {
+            if ($u->isRole($_slug)) { $needsRichDash = true; break; }
+        }
+        // Also inject for hm/admin/bursar roles as supplementary top panel
+        if (!$needsRichDash && ($u->isRole('hm') || $u->isRole('deputy-hm') || $u->isRole('admin') || $u->isRole('bursar') || $u->isRole('finance'))) {
+            $needsRichDash = true;
+        }
+
+        if ($needsRichDash) {
+            $roleMap2 = [
+                'super-admin'=>'super-admin','hm'=>'hm','deputy-hm'=>'hm','dos'=>'dos',
+                'admin'=>'admin','bursar'=>'bursar','finance'=>'bursar',
+                'teacher'=>'teacher','parent'=>'parent','student'=>'student',
+                'librarian'=>'librarian','store'=>'store','nurse'=>'nurse','warden'=>'warden',
+                'driver'=>'transport','security'=>'transport','gate'=>'transport',
+                'receptionist'=>'receptionist','purchaser'=>'store','supervisor'=>'admin',
+                'secretary'=>'admin','marketing-agent'=>'admin',
+                'administrative-assistant'=>'admin',
+            ];
+            $detectedRole = 'generic';
+            foreach ($roleMap2 as $_s => $_r) {
+                if ($u->isRole($_s)) { $detectedRole = $_r; break; }
+            }
+            try {
+                $richDash = match($detectedRole) {
+                    'super-admin' => $this->dashSuperAdmin(),
+                    'hm'         => $this->dashHm($u, $eid),
+                    'dos'        => $this->dashDos($u, $eid),
+                    'admin'      => $this->dashAdmin($u, $eid),
+                    'bursar'     => $this->dashBursar($u, $eid),
+                    'teacher'    => $this->dashTeacher($u, $eid),
+                    'parent'     => $this->dashParent($u, $eid),
+                    'student'    => $this->dashStudent($u, $eid),
+                    'librarian'  => $this->dashLibrarian($u, $eid),
+                    'store'      => $this->dashStore($u, $eid),
+                    'nurse'      => $this->dashNurse($u, $eid),
+                    'warden'     => $this->dashWarden($u, $eid),
+                    'transport'  => $this->dashTransport($u, $eid),
+                    'receptionist'=> $this->dashReceptionist($u, $eid),
+                    default      => $this->dashGeneric($u, $eid),
+                };
+            } catch (\Throwable $_e) {
+                $richDash = ['error' => $_e->getMessage()];
+            }
+            $_ent2 = $ent;
+            $_role2 = $detectedRole;
+            $_u2    = $u;
+            $_dash2 = $richDash;
+            $content->row(function (Row $row) use ($_u2, $_ent2, $_role2, $_dash2) {
+                $row->column(12, function (Column $column) use ($_u2, $_ent2, $_role2, $_dash2) {
+                    $column->append(view('admin.index', [
+                        'u'    => $_u2,
+                        'ent'  => $_ent2,
+                        'role' => $_role2,
+                        'dash' => $_dash2,
+                    ]));
+                });
+            });
+        }
 
         return $content;
     }
