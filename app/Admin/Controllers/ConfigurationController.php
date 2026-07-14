@@ -323,7 +323,15 @@ class ConfigurationController extends AdminController
             ->rows(3)
             ->help('Custom message to show when applications are closed (only used when set to "Custom")');
         
-        $form->divider();
+        $form->divider('ID Card Settings');
+
+        $form->date('student_id_expiry_date', __('Student ID Expiry Date'))
+            ->help('Date printed on student ID cards as the card expiry. Leave blank to default to 31-Dec of the current year.');
+
+        $form->date('employee_id_expiry_date', __('Employee ID Expiry Date'))
+            ->help('Date printed on employee ID cards as the card expiry. Leave blank to default to 31-Dec of the current year.');
+
+        $form->divider('Signatures');
         $form->text('hm_name', __('Head Teacher Name'));
         $form->image('hm_signature', __('Head Teacher signature'));
         $form->image('dos_signature', __('D.O.S signature'));

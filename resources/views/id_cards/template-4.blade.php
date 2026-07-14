@@ -26,6 +26,20 @@ if (!file_exists($qr_code)) {
 $current_year = date('Y');
 $next_year = date('Y', strtotime('+1 year'));
 
+$_expiry_raw = ($user->user_type === 'employee')
+    ? $user->ent->employee_id_expiry_date
+    : $user->ent->student_id_expiry_date;
+
+if ($_expiry_raw) {
+    $_expiry_ts    = strtotime($_expiry_raw);
+    $_expiry_year  = date('Y', $_expiry_ts);
+    $_expiry_label = strtoupper(date('d-M-Y', $_expiry_ts));
+} else {
+    $_expiry_year  = $current_year;
+    $_expiry_label = '31-DEC-' . $current_year;
+}
+$_validity_range = '01-JAN-' . $_expiry_year . ' - ' . $_expiry_label;
+
 ?>
 
 <div class="mt-4" style="">
@@ -92,7 +106,7 @@ $next_year = date('Y', strtotime('+1 year'));
                                 <p class="label mt-1">{{ strtoupper($user->user_type) }} NUMBER</p>
                                 <p class="value">{{ strtoupper($user->user_number) }}</p>
                                 <p class="label">DATE OF EXPIRY</p>
-                                <p class="value">{{ '31-DEC-' . ($current_year + 3) }}</p>
+                                <p class="value">{{ $_expiry_label }}</p>
                             </td>
                             <td>
                                 {{-- qr code --}}
