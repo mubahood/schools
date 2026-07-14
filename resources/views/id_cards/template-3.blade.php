@@ -100,14 +100,22 @@ $next_year = date('Y', strtotime('+1 year'));
 
             <div class="m-0 p-0 mt-2"
                 style="display: flex;
-        height: 12px!important; line-height: 12px!important;        
+        height: 12px!important; line-height: 12px!important;
       ">
+                @if($user->user_type === 'employee')
+                <p class="value d-inline-block text-muted pl-2" style="font-size: 10px!important; ">CONTACT: </p>
+                &nbsp;
+                <p class="value d-inline-block" style="font-size: 10px!important">
+                    {{ $user->phone_number_1 }}@if($user->email), {{ $user->email }}@endif
+                </p>
+                @else
                 <p class="value d-inline-block text-muted pl-2" style="font-size: 10px!important; ">GUARDIAN: </p>
                 &nbsp;
                 <p class="value d-inline-block" style="font-size: 10px!important">
                     {{ strtoupper($user->emergency_person_name) }},
                     {{ strtoupper($user->emergency_person_phone) }}.
                 </p>
+                @endif
             </div>
         </div>
 

@@ -132,14 +132,22 @@ $next_year = date('Y', strtotime('+1 year'));
 
         <div style="display: flex;
           height: 14px!important; line-height: 14px!important;
-          
+
         ">
+            @if($user->user_type === 'employee')
+            <p class="value d-inline-block text-muted pl-2" style="font-size: 10px!important; ">CONTACT: </p>
+            &nbsp;
+            <p class="value d-inline-block" style="font-size: 10px!important">
+                {{ $user->phone_number_1 }}@if($user->email), {{ $user->email }}@endif
+            </p>
+            @else
             <p class="value d-inline-block text-muted pl-2" style="font-size: 10px!important; ">GUARDIAN: </p>
             &nbsp;
             <p class="value d-inline-block" style="font-size: 10px!important">
                 {{ strtoupper($user->emergency_person_name) }},
                 {{ strtoupper($user->emergency_person_phone) }}.
             </p>
+            @endif
         </div>
 
     </div>
@@ -171,8 +179,11 @@ $next_year = date('Y', strtotime('+1 year'));
                     ">
                         <ul>
                             <li>This card is a property of {{ $user->ent->name }}</li>
-                            <li class="mt-1">If found, please contact the GUARDIAN or return to the address below.
-                            </li>
+                            @if($user->user_type === 'employee')
+                            <li class="mt-1">If found, please contact the school administration at the address below.</li>
+                            @else
+                            <li class="mt-1">If found, please contact the GUARDIAN or return to the address below.</li>
+                            @endif
                         </ul>
 
                     </td>

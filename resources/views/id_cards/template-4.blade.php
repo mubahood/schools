@@ -132,9 +132,17 @@ $next_year = date('Y', strtotime('+1 year'));
                 <div class="m-0 p-0 mt-1 text-center"
                     style="
         height: 12px!important; line-height: 12px!important;
-        align-content: center;        
+        align-content: center;
         align-self: center;
       ">
+                    @if($user->user_type === 'employee')
+                    <p class="value d-inline-block text-muted pl-2 text-center"
+                        style="font-size: 10px!important; align-content: center; ">CONTACT: </p>
+                    &nbsp;
+                    <p class="value d-inline-block" style="font-size: 10px!important">
+                        {{ $user->phone_number_1 }}
+                    </p>
+                    @else
                     <p class="value d-inline-block text-muted pl-2 text-center "
                         style="font-size: 10px!important; align-content: center; ">GUARDIAN: </p>
                     &nbsp;
@@ -142,6 +150,7 @@ $next_year = date('Y', strtotime('+1 year'));
                         {{ strtoupper($user->emergency_person_name) }},
                         {{ strtoupper($user->emergency_person_phone) }}.
                     </p>
+                    @endif
                 </div>
             </center>
 
@@ -149,15 +158,24 @@ $next_year = date('Y', strtotime('+1 year'));
                 <div class="m-0 p-0 mt-0 text-center"
                     style="
         height: 12px!important; line-height: 12px!important;
-        align-content: center;        
+        align-content: center;
         align-self: center;
       ">
+                    @if($user->user_type === 'employee')
+                    <p class="value d-inline-block text-muted pl-2 text-center"
+                        style="font-size: 10px!important; align-content: center; ">EMAIL: </p>
+                    &nbsp;
+                    <p class="value d-inline-block" style="font-size: 10px!important">
+                        {{ $user->email ?: ($user->home_address ?: '') }}
+                    </p>
+                    @else
                     <p class="value d-inline-block text-muted pl-2 text-center "
                         style="font-size: 10px!important; align-content: center; ">SCHOOL PAY CODE: </p>
                     &nbsp;
                     <p class="value d-inline-block" style="font-size: 10px!important">
                         {{ strtoupper($user->school_pay_payment_code) }}
                     </p>
+                    @endif
                 </div>
             </center>
         </div>
