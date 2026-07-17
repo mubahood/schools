@@ -12,7 +12,8 @@ $report_type = isset($report_type) ? $report_type : null;
 $ent = $r->ent;
 $owner = $r->owner;
 
-$tr = $r->get_theology_report();
+// Use pre-loaded map (passed from controller) to avoid per-student DB query.
+$tr = isset($theoRepMap) ? ($theoRepMap->get($r->student_id) ?? null) : $r->get_theology_report();
 $termly_report_card = $r->termly_report_card;
 $theology_termly_report_card = null;
 
@@ -62,7 +63,9 @@ if ($tr != null) {
 }
 $stream_class = '';
 $hasTheologyClass = null;
-$hasClass = StudentHasClass::where(['administrator_id' => $r->owner->id, 'academic_class_id' => $r->academic_class_id])->first();
+$hasClass = isset($hasClassMap)
+    ? ($hasClassMap->get($r->owner->id . '_' . $r->academic_class_id) ?? null)
+    : StudentHasClass::where(['administrator_id' => $r->owner->id, 'academic_class_id' => $r->academic_class_id])->first();
 if ($hasClass != null) {
     if ($hasClass->stream != null) {
         $stream_class = ' - ' . $hasClass->stream->name;
@@ -70,7 +73,9 @@ if ($hasClass != null) {
 }
 
 if ($tr != null) {
-    $hasTheologyClass = StudentHasTheologyClass::where(['administrator_id' => $tr->owner->id, 'theology_class_id' => $tr->theology_class_id])->first();
+    $hasTheologyClass = isset($hasTheoClassMap)
+        ? ($hasTheoClassMap->get($tr->owner->id . '_' . $tr->theology_class_id) ?? null)
+        : StudentHasTheologyClass::where(['administrator_id' => $tr->owner->id, 'theology_class_id' => $tr->theology_class_id])->first();
     if ($hasTheologyClass != null) {
         if ($hasTheologyClass->stream != null) {
             $theo_stream_class = ' - ' . $hasTheologyClass->stream->name;
@@ -84,7 +89,8 @@ if ($tr != null) {
         }
     }
 }
-if ($tr == null) {
+if ($tr == null && !isset($theoRepMap)) {
+    // Only re-query when the pre-loaded map wasn't available (fallback path).
     $tr = $r->get_theology_report();
 }
 if ($tr != null) {

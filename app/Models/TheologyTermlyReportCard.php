@@ -349,14 +349,27 @@ class TheologyTermlyReportCard extends Model
         }
     }
 
+    // Bulk cache: trc_id → Collection<administrator_id, Collection<TheologyMarkRecord>>
+    protected static array $_marksCache = [];
+
+    public static function warmGlobalMarksCache(int $trcId, $groupedMarks): void
+    {
+        static::$_marksCache[$trcId] = $groupedMarks;
+    }
+
     public function get_student_marks($student_id)
     {
-        $marks = TheologyMarkRecord::where([
-            'administrator_id' => $student_id,
-            'theology_termly_report_card_id' => $this->id,
-            'term_id' => $this->term_id
-        ])->get();
-        return $marks;
+        if (!isset(static::$_marksCache[$this->id])) {
+            // Lazy bulk-load: first call fetches ALL marks for this TRC in one query
+            static::$_marksCache[$this->id] = TheologyMarkRecord::where([
+                    'theology_termly_report_card_id' => $this->id,
+                    'term_id' => $this->term_id,
+                ])
+                ->with('subject')
+                ->get()
+                ->groupBy('administrator_id');
+        }
+        return static::$_marksCache[$this->id]->get($student_id, collect());
     }
 
     public static function do_generate_marks($m)

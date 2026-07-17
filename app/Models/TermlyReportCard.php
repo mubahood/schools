@@ -80,19 +80,19 @@ class TermlyReportCard extends Model
             if ($m->generate_class_teacher_comment == 'Yes') {
                 TermlyReportCard::do_generate_class_teacher_comment($m);
             }
-            if ($m->wasChanged('generate_positions') && $m->generate_positions == 'Yes') {
+            if ($m->generate_positions == 'Yes') {
                 TermlyReportCard::do_generate_positions($m);
             }
             if ($m->generate_head_teacher_comment == 'Yes') {
                 //TermlyReportCard::do_generate_head_teacher_comment($m);
             }
-            DB::update("UPDATE termly_report_cards SET 
+            DB::update("UPDATE termly_report_cards SET
             generate_marks = 'No',
             generate_class_teacher_comment = 'No',
-            /* generate_marks_for_classes = '', */
             generate_head_teacher_comment = 'No',
             delete_marks_for_non_active = 'No',
-            reports_generate = 'No'
+            reports_generate = 'No',
+            generate_positions = 'No'
              WHERE id = ?", [$m->id]);
         });
     }
@@ -302,7 +302,18 @@ class TermlyReportCard extends Model
 
     public static function do_reports_generate($m)
     {
-        if (!is_array($m->classes)) {
+        // Resolve class list: use the form-selected classes when available,
+        // otherwise fall back to every class that already has mark records for this TRC.
+        $classIds = (is_array($m->classes) && count($m->classes) > 0)
+            ? array_map('intval', $m->classes)
+            : MarkRecord::where('termly_report_card_id', $m->id)
+                  ->whereNotNull('academic_class_id')
+                  ->distinct()
+                  ->pluck('academic_class_id')
+                  ->map(fn($id) => (int) $id)
+                  ->toArray();
+
+        if (empty($classIds)) {
             return;
         }
 
@@ -325,8 +336,8 @@ class TermlyReportCard extends Model
         // Pre-load subject metadata scoped to this enterprise only
         $subjectCache = Subject::where('enterprise_id', $m->enterprise_id)->get()->keyBy('id');
 
-        foreach ($m->classes as $class_id) {
-            $class = AcademicClass::find((int) $class_id);
+        foreach ($classIds as $class_id) {
+            $class = AcademicClass::find($class_id);
             if ($class == null) {
                 continue;
             }
@@ -497,13 +508,25 @@ class TermlyReportCard extends Model
     }
 
 
+    // Bulk cache: trc_id → Collection<administrator_id, Collection<MarkRecord>>
+    // Pre-warm from controller to eliminate per-student queries.
+    protected static array $_marksCache = [];
+
+    public static function warmGlobalMarksCache(int $trcId, $groupedMarks): void
+    {
+        static::$_marksCache[$trcId] = $groupedMarks;
+    }
+
     public function get_student_marks($student_id)
     {
-        $marks = MarkRecord::where([
-            'administrator_id' => $student_id,
-            'termly_report_card_id' => $this->id,
-        ])->get();
-        return $marks;
+        if (!isset(static::$_marksCache[$this->id])) {
+            // Lazy bulk-load: first call fetches ALL marks for this TRC in one query
+            static::$_marksCache[$this->id] = MarkRecord::where('termly_report_card_id', $this->id)
+                ->with('subject')
+                ->get()
+                ->groupBy('administrator_id');
+        }
+        return static::$_marksCache[$this->id]->get($student_id, collect());
     }
 
     public function setClassesAttribute($Classes)

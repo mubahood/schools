@@ -13,14 +13,17 @@ use App\Models\ReportCard;
 use App\Models\ReportCardPrint;
 use App\Models\SecondaryReportCard;
 use App\Models\StudentHasClass;
+use App\Models\StudentHasTheologyClass;
 use App\Models\StudentReportCard;
 use App\Models\Subject;
 use App\Models\TermlyReportCard;
 use App\Models\TheologryStudentReportCard;
 use App\Models\TheologyClass;
+use App\Models\TheologyMarkRecord;
 use App\Models\TheologyStream;
 use App\Models\TheologyStudentReportCardItem;
 use App\Models\TheologySubject;
+use App\Models\TheologyTermlyReportCard;
 use App\Models\User;
 use App\Models\UserBatchImporter;
 use App\Models\Utils;
@@ -262,54 +265,109 @@ class ReportCardsPrintingController extends Controller
         }
  */
 
+        // ── Step 1: load the primary student report cards ────────────────────────
         if ($printing->type == 'Theology') {
             $theo_class = TheologyClass::find($printing->theology_class_id);
             if ($theo_class == null) {
                 die("Theology class not found.");
             }
-            $reports = TheologryStudentReportCard::where([
+            // Load all theology report cards for this class in ONE query and index by student_id.
+            $theoRepMap = TheologryStudentReportCard::where([
                 'theology_termly_report_card_id' => $printing->theology_termly_report_card_id,
-                'theology_class_id' => $printing->theology_class_id
-            ])->get();
-            $student_ids = [];
-            foreach ($reports as $key => $r) {
-                $student_ids[] = $r->student_id;
-            }
+                'theology_class_id'              => $printing->theology_class_id,
+            ])->with(['termly_report_card', 'theology_class'])->get()->keyBy('student_id');
 
-            $reps = StudentReportCard::where([
-                'termly_report_card_id' => $printing->termly_report_card_id,
-            ])
+            $student_ids = $theoRepMap->keys()->toArray();
+
+            $reps = StudentReportCard::where('termly_report_card_id', $printing->termly_report_card_id)
                 ->whereIn('student_id', $student_ids)
+                ->with([
+                    'owner',
+                    'ent',
+                    'academic_class.class_teacher',
+                    'termly_report_card.grading_scale.grade_ranges',
+                    'termly_report_card.term.exams',
+                ])
                 ->orderBy('id', 'asc')
                 ->get();
         } else {
+            $theoRepMap = collect();
+
             $reps = StudentReportCard::where([
                 'termly_report_card_id' => $printing->termly_report_card_id,
-                'academic_class_id' => $printing->academic_class_id
-            ])
-                ->orderBy('id', 'asc')
-                ->get();
+                'academic_class_id'     => $printing->academic_class_id,
+            ])->with([
+                'owner',
+                'ent',
+                'academic_class.class_teacher',
+                'termly_report_card.grading_scale.grade_ranges',
+                'termly_report_card.term.exams',
+            ])->orderBy('id', 'asc')->get();
+
+            // For secular prints, pre-load theology reports too.
+            $secStudentIds = $reps->pluck('student_id')->toArray();
+            $termId        = $reps->first()?->term_id;
+            $theoRepMap = $termId
+                ? TheologryStudentReportCard::where('term_id', $termId)
+                      ->whereIn('student_id', $secStudentIds)
+                      ->with(['termly_report_card', 'theology_class'])
+                      ->get()->keyBy('student_id')
+                : collect();
         }
 
+        $allStudentIds = $reps->pluck('student_id')->filter()->unique()->toArray();
 
+        // ── Step 2: bulk-warm the mark-record caches (2 queries total) ───────────
+        // Secular marks (with subjects) for this TRC
+        TermlyReportCard::warmGlobalMarksCache(
+            (int) $printing->termly_report_card_id,
+            MarkRecord::where('termly_report_card_id', $printing->termly_report_card_id)
+                ->with('subject')
+                ->get()
+                ->groupBy('administrator_id')
+        );
+
+        // Theology marks (with subjects) for the theology TRC
+        if ($printing->theology_termly_report_card_id) {
+            $theoTrc = TheologyTermlyReportCard::find($printing->theology_termly_report_card_id);
+            if ($theoTrc) {
+                TheologyTermlyReportCard::warmGlobalMarksCache(
+                    (int) $printing->theology_termly_report_card_id,
+                    TheologyMarkRecord::where([
+                        'theology_termly_report_card_id' => $printing->theology_termly_report_card_id,
+                        'term_id'                        => $theoTrc->term_id,
+                    ])->with('subject')->get()->groupBy('administrator_id')
+                );
+            }
+        }
+
+        // ── Step 3: pre-load StudentHasClass and StudentHasTheologyClass (2 queries) ──
+        $classIds    = $reps->pluck('academic_class_id')->filter()->unique()->toArray();
+        $hasClassMap = StudentHasClass::whereIn('administrator_id', $allStudentIds)
+            ->whereIn('academic_class_id', $classIds ?: [0])
+            ->with('stream')
+            ->get()
+            ->keyBy(fn($hc) => $hc->administrator_id . '_' . $hc->academic_class_id);
+
+        $hasTheoClassMap = StudentHasTheologyClass::whereIn('administrator_id', $allStudentIds)
+            ->with('stream')
+            ->get()
+            ->keyBy(fn($htc) => $htc->administrator_id . '_' . $htc->theology_class_id);
+
+        // ── Step 4: build the $items list (O(1) map lookups — no DB queries) ────
         foreach ($reps as $key => $r) {
             if ($i < $min_count) {
+                $i++;
                 continue;
             }
             if ($i > $max_count) {
                 break;
             }
             $i++;
-            $tr = TheologryStudentReportCard::where([
-                'student_id' => $r->student_id,
-                'term_id' => $r->term_id,
-                'theology_termly_report_card_id' => $printing->theology_termly_report_card_id,
-            ])->first();
             $items[] = [
-                'r' => $r,
-                'tr' => $tr,
+                'r'  => $r,
+                'tr' => $theoRepMap->get($r->student_id),
             ];
-            //break;
         }
 
         //check if $items is empty
@@ -318,79 +376,70 @@ class ReportCardsPrintingController extends Controller
         }
         // $printing->secular_tempate = 'Template_3';
 
+        // Shared extra view data carrying pre-loaded maps for the template.
+        $preloaded = [
+            'theoRepMap'      => $theoRepMap,
+            'hasClassMap'     => $hasClassMap,
+            'hasTheoClassMap' => $hasTheoClassMap,
+        ];
+
         if ($printing->secular_tempate == 'Template_3' && $printing->type == 'Secular') {
 
             if (isset($_GET['html'])) {
-                return view('report-cards.template-6.print', [
-                    'items' => $items,
+                return view('report-cards.template-6.print', array_merge([
+                    'items'       => $items,
                     'report_type' => $printing->type,
-                    'min_count' => $printing->min_count,
-                    'max_count' => $printing->max_count,
-                ]);
+                    'min_count'   => $printing->min_count,
+                    'max_count'   => $printing->max_count,
+                ], $preloaded));
             }
 
-            $pdf->loadHTML(view('report-cards.template-6.print', [
-                'items' => $items,
+            $pdf->loadHTML(view('report-cards.template-6.print', array_merge([
+                'items'       => $items,
                 'report_type' => $printing->type,
-                'min_count' => $printing->min_count,
-                'max_count' => $printing->max_count,
-            ]));
+                'min_count'   => $printing->min_count,
+                'max_count'   => $printing->max_count,
+            ], $preloaded)));
 
-            /* 
-            if (isset($_GET['html'])) {
-                return view('report-cards.template-3.print', [
-                    'items' => $reps, 
-                    'ent' => $printing->enterprise,
-                    'report_type' => $printing->type,
-                    'min_count' => $printing->min_count,
-                    'max_count' => $printing->max_count,
-                ]);
-            }
-            $pdf->loadHTML(view('report-cards.template-3.print', [
-                'items' => $reps,
-                'ent' => $printing->enterprise,
-                'report_type' => $printing->type,
-                'min_count' => $printing->min_count,
-                'max_count' => $printing->max_count,
-            ])); */
         } elseif ($printing->secular_tempate == 'Template_6') {
 
             if (isset($_GET['html'])) {
-                return view('report-cards.template-6.print', [
-                    'items' => $items,
+                return view('report-cards.template-6.print', array_merge([
+                    'items'       => $items,
                     'report_type' => $printing->type,
-                    'min_count' => $printing->min_count,
-                    'max_count' => $printing->max_count,
-                ]);
+                    'min_count'   => $printing->min_count,
+                    'max_count'   => $printing->max_count,
+                ], $preloaded));
             }
 
-            $pdf->loadHTML(view('report-cards.template-6.print', [
-                'items' => $items,
+            $pdf->loadHTML(view('report-cards.template-6.print', array_merge([
+                'items'       => $items,
                 'report_type' => $printing->type,
-                'min_count' => $printing->min_count,
-                'max_count' => $printing->max_count,
-            ]));
+                'min_count'   => $printing->min_count,
+                'max_count'   => $printing->max_count,
+            ], $preloaded)));
+
         } else {
             $my_items = [];
             foreach ($items as $key => $item) {
                 $my_items[] = $item['r'];
             }
             if (isset($_GET['html'])) {
-                return view('report-cards.template-3.print', [
-                    'items' => $my_items,
-                    'ent' => $printing->enterprise,
+                return view('report-cards.template-3.print', array_merge([
+                    'items'       => $my_items,
+                    'ent'         => $printing->enterprise,
                     'report_type' => $printing->type,
-                    'min_count' => $printing->min_count,
-                    'max_count' => $printing->max_count,
-                ]);
+                    'min_count'   => $printing->min_count,
+                    'max_count'   => $printing->max_count,
+                ], $preloaded));
             }
-            $pdf->loadHTML(view('report-cards.template-3.print', [
-                'items' => $my_items,
-                'ent' => $printing->enterprise,
+            $pdf->loadHTML(view('report-cards.template-3.print', array_merge([
+                'items'       => $my_items,
+                'ent'         => $printing->enterprise,
                 'report_type' => $printing->type,
-                'min_count' => $printing->min_count,
-                'max_count' => $printing->max_count,
-            ]));
+                'min_count'   => $printing->min_count,
+                'max_count'   => $printing->max_count,
+            ], $preloaded)));
         }
 
 
