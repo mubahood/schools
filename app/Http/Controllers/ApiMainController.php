@@ -534,40 +534,147 @@ class ApiMainController extends Controller
             }
         }
 
-        // Build items with subject name resolved
+        // ── Secular subject marks ────────────────────────────────────────────────
+        // Primary source: StudentReportCardItem (pre-generated rows).
+        // Fallback: MarkRecord (raw teacher-entered marks) — filtered to subjects
+        // that are configured to appear on the report card (show_in_report='Yes').
         $rawItems = \App\Models\StudentReportCardItem::where('student_report_card_id', $card->id)
             ->orderBy('id')->get();
 
-        $items = $rawItems->map(function ($item) {
-            $subject = \App\Models\Subject::find($item->main_course_id);
-            return [
-                'id'            => $item->id,
-                'subject_id'    => $item->main_course_id,
-                'subject_name'  => $subject ? $subject->name : "Subject #{$item->main_course_id}",
-                'did_bot'       => $item->did_bot,
-                'did_mot'       => $item->did_mot,
-                'did_eot'       => $item->did_eot,
-                'bot_mark'      => $item->bot_mark,
-                'mot_mark'      => $item->mot_mark,
-                'eot_mark'      => $item->eot_mark,
-                'total'         => $item->total,
-                'grade_name'    => $item->grade_name,
-                'aggregates'    => $item->aggregates,
-                'remarks'       => $item->remarks,
-                'initials'      => $item->initials,
+        if ($rawItems->isNotEmpty()) {
+            $items = $rawItems->map(function ($item) {
+                $subject = \App\Models\Subject::find($item->main_course_id);
+                return [
+                    'id'          => $item->id,
+                    'subject_id'  => $item->main_course_id,
+                    'subject_name'=> $subject ? $subject->subject_name : "Subject #{$item->main_course_id}",
+                    'did_bot'     => $item->did_bot,
+                    'did_mot'     => $item->did_mot,
+                    'did_eot'     => $item->did_eot,
+                    'bot_mark'    => $item->bot_mark,
+                    'mot_mark'    => $item->mot_mark,
+                    'eot_mark'    => $item->eot_mark,
+                    'total'       => $item->total,
+                    'grade_name'  => $item->grade_name,
+                    'aggregates'  => $item->aggregates,
+                    'remarks'     => $item->remarks,
+                    'initials'    => $item->initials,
+                ];
+            })->values()->toArray();
+        } else {
+            // Fall back to MarkRecord — same source the PDF renderer uses
+            $items = \App\Models\MarkRecord::with('subject')
+                ->where('termly_report_card_id', $card->termly_report_card_id)
+                ->where('administrator_id', $card->student_id)
+                ->orderBy('id')
+                ->get()
+                ->filter(fn($m) => $m->subject && $m->subject->show_in_report === 'Yes')
+                ->map(function ($m) {
+                    return [
+                        'id'          => $m->id,
+                        'subject_id'  => $m->subject_id,
+                        'subject_name'=> $m->subject->subject_name,
+                        'did_bot'     => $m->bot_is_submitted === 'Yes' ? 1 : 0,
+                        'did_mot'     => $m->mot_is_submitted === 'Yes' ? 1 : 0,
+                        'did_eot'     => $m->eot_is_submitted === 'Yes' ? 1 : 0,
+                        'bot_mark'    => $m->bot_score,
+                        'mot_mark'    => $m->mot_score,
+                        'eot_mark'    => $m->eot_score,
+                        'total'       => $m->total_score_display,
+                        'grade_name'  => $m->aggr_name,
+                        'aggregates'  => $m->aggr_value ?? null,
+                        'remarks'     => $m->remarks,
+                        'initials'    => $m->initials,
+                    ];
+                })->values()->toArray();
+        }
+
+        // ── Theology report card + marks ─────────────────────────────────────────
+        $theoCard = \App\Models\TheologryStudentReportCard::where([
+            'student_id' => $card->student_id,
+            'term_id'    => $card->term_id,
+        ])->first();
+
+        $theologyItems = [];
+        $theologyCard  = null;
+
+        if ($theoCard) {
+            // Primary: TheologyStudentReportCardItem; fallback: TheologyMarkRecord
+            $rawTheo = \App\Models\TheologyStudentReportCardItem::where(
+                'theologry_student_report_card_id', $theoCard->id
+            )->orderBy('id')->get();
+
+            if ($rawTheo->isNotEmpty()) {
+                $theologyItems = $rawTheo->map(function ($item) {
+                    $subject = \App\Models\TheologySubject::find($item->theology_subject_id);
+                    return [
+                        'id'          => $item->id,
+                        'subject_id'  => $item->theology_subject_id,
+                        'subject_name'=> $subject ? $subject->name : "Subject #{$item->theology_subject_id}",
+                        'did_bot'     => $item->did_bot,
+                        'did_mot'     => $item->did_mot,
+                        'did_eot'     => $item->did_eot,
+                        'bot_mark'    => $item->bot_mark,
+                        'mot_mark'    => $item->mot_mark,
+                        'eot_mark'    => $item->eot_mark,
+                        'total'       => $item->total,
+                        'grade_name'  => $item->grade_name,
+                        'aggregates'  => $item->aggregates,
+                        'remarks'     => $item->remarks,
+                        'initials'    => $item->initials,
+                    ];
+                })->values()->toArray();
+            } else {
+                // Fall back to TheologyMarkRecord
+                $theologyItems = \App\Models\TheologyMarkRecord::with('subject')
+                    ->where('theology_termly_report_card_id', $theoCard->theology_termly_report_card_id)
+                    ->where('administrator_id', $card->student_id)
+                    ->orderBy('id')
+                    ->get()
+                    ->map(function ($m) {
+                        return [
+                            'id'          => $m->id,
+                            'subject_id'  => $m->theology_subject_id,
+                            'subject_name'=> $m->subject ? $m->subject->name : "Subject #{$m->theology_subject_id}",
+                            'did_bot'     => $m->bot_is_submitted === 'Yes' ? 1 : 0,
+                            'did_mot'     => $m->mot_is_submitted === 'Yes' ? 1 : 0,
+                            'did_eot'     => $m->eot_is_submitted === 'Yes' ? 1 : 0,
+                            'bot_mark'    => $m->bot_score,
+                            'mot_mark'    => $m->mot_score,
+                            'eot_mark'    => $m->eot_score,
+                            'total'       => $m->total_score_display,
+                            'grade_name'  => $m->aggr_name,
+                            'aggregates'  => $m->aggr_value ?? null,
+                            'remarks'     => $m->remarks,
+                            'initials'    => $m->initials,
+                        ];
+                    })->values()->toArray();
+            }
+
+            $theologyCard = [
+                'id'                    => $theoCard->id,
+                'grade'                 => $theoCard->grade,
+                'position'              => $theoCard->position,
+                'total_students'        => $theoCard->total_students,
+                'total_marks'           => $theoCard->total_marks,
+                'total_aggregates'      => $theoCard->total_aggregates,
+                'class_teacher_comment' => $theoCard->class_teacher_comment,
+                'head_teacher_comment'  => $theoCard->head_teacher_comment,
             ];
-        })->values()->toArray();
+        }
 
         $hasPdf = !empty($card->pdf_url) && strlen($card->pdf_url) >= 3;
 
         $detail = array_merge($card->toArray(), [
-            'has_pdf'      => $hasPdf,
-            'full_pdf_url' => $hasPdf ? url('storage/files/' . $card->pdf_url) : null,
-            'items'        => $items,
-            'items_count'  => count($items),
+            'has_pdf'        => $hasPdf,
+            'full_pdf_url'   => $hasPdf ? url('storage/files/' . $card->pdf_url) : null,
+            'items'          => $items,
+            'items_count'    => count($items),
+            'theology_card'  => $theologyCard,
+            'theology_items' => $theologyItems,
         ]);
 
-        return $this->success($detail, 'Success', 200);
+        return $this->success($detail, 'Success');
     }
 
     public function disciplinary_records()

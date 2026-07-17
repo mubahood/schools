@@ -113,7 +113,20 @@ class ApiAuthController extends Controller
 
         if ($u) return $u;
 
-        // 2. Build all phone format variants and search any of them
+        // 2. "p<studentCode>" pattern: schools issue parents a login of the form
+        //    p<school_pay_payment_code> (e.g. p1010520770). Strip the prefix,
+        //    find the student, and return them — the caller resolves student → parent.
+        if (preg_match('/^p(\d{5,})$/i', $raw, $m)) {
+            $code = $m[1];
+            $student = User::where('user_type', 'student')
+                ->where(function ($q) use ($code) {
+                    $q->where('school_pay_payment_code', $code)
+                      ->orWhere('username', $code);
+                })->first();
+            if ($student) return $student;
+        }
+
+        // 3. Build all phone format variants and search any of them
         $variants = $this->phoneVariants($raw);
         if (empty($variants)) return null;
 
