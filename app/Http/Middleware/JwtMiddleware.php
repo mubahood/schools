@@ -77,15 +77,24 @@ class JwtMiddleware extends BaseMiddleware
             $request->headers->set('authorization', $Authorization); // set header in request
 
             $user = FacadesJWTAuth::parseToken()->authenticate();
+        } catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
+            return response()->json([
+                'code'    => 0,
+                'status'  => false,
+                'message' => 'Your session has expired. Please log in again.',
+            ], 401);
+        } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
+            return response()->json([
+                'code'    => 0,
+                'status'  => false,
+                'message' => 'Invalid authentication token. Please log in again.',
+            ], 401);
         } catch (Exception $e) {
+            // No token present or other JWT error — let request through
+            // so public/unauthenticated endpoints still work normally.
+            // Controllers that need auth call auth('api')->user() and
+            // return their own "User not found" response.
             return $next($request);
-            if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException) {
-                return response()->json(['status' => 'Token is Invalid']);
-            } else if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenExpiredException) {
-                return response()->json(['status' => 'Token is Expired']);
-            } else {
-                return Utils::error($e->getMessage());
-            }
         }
         return $next($request);
     }

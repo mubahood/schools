@@ -17,7 +17,11 @@ class CreateDatabaseLogger
         $pdo = DB::connection($config['connection'] ?? null)->getPdo();
 
         // level is a string like 'debug' — Monolog needs a numeric level
-        $level = Logger::toMonologLevel($config['level'] ?? 'debug');
+        try {
+            $level = Logger::toMonologLevel($config['level'] ?? 'debug');
+        } catch (\Throwable $e) {
+            $level = Logger::DEBUG;
+        }
 
         // handler: writes into `logs` table
         $handler = new PDOHandler(

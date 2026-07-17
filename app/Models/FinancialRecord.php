@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\User;
 use Encore\Admin\Auth\Database\Administrator;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,6 +15,11 @@ class FinancialRecord extends Model
     public function created_by()
     {
         return $this->belongsTo(Administrator::class, 'created_by_id');
+    }
+
+    public function supplier()
+    {
+        return $this->belongsTo(Administrator::class, 'supplier_id');
     }
 
     public function par()
@@ -30,9 +36,54 @@ class FinancialRecord extends Model
     {
         return $this->belongsTo(Account::class);
     }
+    public function creditor_record()
+    {
+        return $this->hasOne(CreditorRecord::class, 'financial_record_id');
+    }
+
     public static function boot()
     {
         parent::boot();
+
+        // Auto-create a CreditorRecord when an expenditure is saved on credit
+        self::created(function ($m) {
+            if ($m->type === 'EXPENDITURE'
+                && ($m->is_credit ?? 'No') === 'Yes'
+                && !empty($m->credit_amount)
+                && abs((int)$m->credit_amount) > 0
+            ) {
+                $creditor = new CreditorRecord();
+                $creditor->enterprise_id       = $m->enterprise_id;
+                $creditor->financial_record_id = $m->id;
+                $creditor->supplier_id         = $m->supplier_id;
+                $creditor->account_id          = $m->account_id;
+                $creditor->term_id             = $m->term_id;
+                $creditor->academic_year_id    = $m->academic_year_id;
+                $creditor->description         = $m->description ?? '';
+                $creditor->original_amount     = abs((int)$m->credit_amount);
+                $creditor->paid_amount         = 0;
+                $creditor->balance             = abs((int)$m->credit_amount);
+                $creditor->status              = 'Pending';
+                $creditor->created_by_id       = $m->created_by_id;
+                $creditor->save();
+            }
+        });
+
+        // Sync changes to credit_amount/supplier back to the linked CreditorRecord
+        self::updated(function ($m) {
+            if ($m->type !== 'EXPENDITURE') return;
+            $creditor = CreditorRecord::where('financial_record_id', $m->id)->first();
+            if (!$creditor) return;
+
+            if (($m->is_credit ?? 'No') === 'Yes' && !empty($m->credit_amount)) {
+                $creditor->original_amount = abs((int)$m->credit_amount);
+                $creditor->supplier_id     = $m->supplier_id;
+                $creditor->description     = $m->description ?? $creditor->description;
+                $creditor->balance         = max(0, $creditor->original_amount - $creditor->paid_amount);
+                $creditor->updateStatus();
+            }
+        });
+
         self::creating(function ($m) {
 
             if (

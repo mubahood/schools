@@ -325,35 +325,32 @@ class FeesImportServiceCSV
             // Load enterprise
             $this->enterprise = Enterprise::findOrFail($import->enterprise_id);
 
-            // Load current term
-            $this->currentTerm = $this->enterprise->active_term();
+            // Load term — prefer the import's configured term_id, fall back to active term
+            $this->currentTerm = null;
+            if (!empty($import->term_id)) {
+                $this->currentTerm = Term::find($import->term_id);
+            }
+            if (!$this->currentTerm) {
+                $this->currentTerm = $this->enterprise->active_term();
+            }
             if (!$this->currentTerm) {
                 $import->unlock();
                 return [
                     'success' => false,
-                    'message' => 'No active term found for this enterprise',
+                    'message' => 'No active term found for this enterprise. Please set an active term or configure one on this import.',
                     'stats' => []
                 ];
-            }
-
-            // Skip validation if already validated
-            if (empty($import->validation_errors) && !empty($import->total_rows)) {
-                Log::info("Skipping re-validation - import already validated", [
-                    'import_id' => $import->id,
-                    'total_rows' => $import->total_rows
-                ]);
-                echo "<script>document.getElementById('progress-info').innerHTML = 'Skipping validation (already done)...';</script>";
-                echo str_repeat(' ', 1024);
-                flush();
             }
 
             // Get file path
             $filePath = $this->resolveFilePath($import->file_path);
             $fileHash = $this->generateFileHash($filePath);
 
-            // Update import status
+            // Update import status — lock the term_id in if it wasn't set
             $import->file_hash = $fileHash;
-            $import->term_id = $this->currentTerm->id;
+            if (empty($import->term_id)) {
+                $import->term_id = $this->currentTerm->id;
+            }
             $import->status = FeesDataImport::STATUS_PROCESSING;
             $import->started_at = now();
             $import->save();
@@ -742,10 +739,8 @@ class FeesImportServiceCSV
             $existingTransaction->amount = $balance;
             $existingTransaction->description = "Previous term balance for {$student->name} - Updated from import";
             $existingTransaction->save();
-            
-            // Update account balance
-            $this->updateAccountBalance($account);
-            
+            // Balance updated automatically by Transaction::updated → my_update()
+
             return "Updated previous term balance from UGX " . number_format($oldAmount) . " to UGX " . number_format($balance);
         } else {
             // Create new transaction
@@ -761,12 +756,10 @@ class FeesImportServiceCSV
             $transaction->term_id = $this->currentTerm->id;
             $transaction->payment_date = now();
             $transaction->source = 'IMPORTED';
-            $transaction->school_pay_transporter_id = '-';
+            $transaction->school_pay_transporter_id = null;
             $transaction->save();
-            
-            // Update account balance
-            $this->updateAccountBalance($account);
-            
+            // Balance updated automatically by Transaction::created → my_update()
+
             return "Created previous term balance: UGX " . number_format($balance);
         }
     }
@@ -840,25 +833,25 @@ class FeesImportServiceCSV
         $subscription->is_processed = 'No';
         $subscription->save();
 
-        // Create transaction for the service subscription
+        // Create fee (debit) transaction for the service subscription.
+        // IMPORTANT: fees are stored as NEGATIVE amounts in this system
+        // (negative = debt/charge, positive = payment received).
         $account = Account::where('administrator_id', $student->id)->first();
         if ($account) {
             $transaction = new Transaction();
             $transaction->enterprise_id = $this->enterprise->id;
             $transaction->account_id = $account->id;
             $transaction->created_by_id = $this->user->id;
-            $transaction->amount = $amount;
-            $transaction->description = "Service subscription: {$service->name} (from import)";
+            $transaction->amount = $amount * -1; // negative = fee charge (debt)
+            $transaction->description = "Service fee: {$service->name} (from import)";
             $transaction->type = 'FEES_BILL';
             $transaction->academic_year_id = $this->currentTerm->academic_year_id;
             $transaction->term_id = $this->currentTerm->id;
             $transaction->payment_date = now();
             $transaction->source = 'IMPORTED';
-            $transaction->school_pay_transporter_id = '-';
+            $transaction->school_pay_transporter_id = null;
             $transaction->save();
-
-            // Update account balance
-            $this->updateAccountBalance($account);
+            // Balance is updated automatically by Transaction::created → my_update()
         }
 
         return [
@@ -868,17 +861,36 @@ class FeesImportServiceCSV
     }
 
     /**
+     * Convert a raw CSV balance value to its system representation.
+     *
+     * System convention: negative = debt (student owes), positive = credit (school owes).
+     * CSV conventions:
+     *   cater_for_balance = 'Yes'  → CSV uses its own sign: positive = debt, negative = credit
+     *                                 → system value = CSV value * -1
+     *   cater_for_balance = 'No'   → all CSV values are positive (debt assumed)
+     *                                 → system value = -abs(CSV value)
+     */
+    protected function csvBalanceToSystem(float $csvValue): float
+    {
+        if (($this->import->cater_for_balance ?? 'Yes') === 'Yes') {
+            // CSV: positive = debt, negative = credit → flip sign
+            return $csvValue * -1;
+        }
+        // No sign info → treat all as debt
+        return -abs($csvValue);
+    }
+
+    /**
      * Adjust account balance to match expected balance from CSV
-     * Uses same logic as AccountController form
      */
     protected function adjustAccountBalance($account, $student, $expectedBalance): string
     {
-        // Make expected balance negative (debt) - in our system debts are negative
-        $expectedBalance = abs($expectedBalance) * -1;
-        
-        // Calculate current balance from all transactions
-        $currentBalance = $account->balance();
-        
+        // Convert CSV balance to system convention
+        $expectedBalance = $this->csvBalanceToSystem((float)$expectedBalance);
+
+        // Read current balance directly from the transactions table (avoids stale relation cache)
+        $currentBalance = (float) Transaction::where('account_id', $account->id)->sum('amount');
+
         Log::info('Balance adjustment check', [
             'student_id' => $student->id,
             'account_id' => $account->id,
@@ -917,22 +929,19 @@ class FeesImportServiceCSV
 
         $transaction->academic_year_id = $this->currentTerm->academic_year_id;
         $transaction->term_id = $this->currentTerm->id;
-        $transaction->school_pay_transporter_id = '-';
+        $transaction->school_pay_transporter_id = null;
         $transaction->created_by_id = $this->user->id;
         $transaction->is_contra_entry = false;
         $transaction->type = 'BALANCE_ADJUSTMENT';
         $transaction->payment_date = now();
         $transaction->source = 'IMPORTED';
         $transaction->save();
+        // Balance updated automatically by Transaction::created → my_update()
 
-        // Update account balance
-        $this->updateAccountBalance($account);
-        
         Log::info('Balance adjustment completed', [
             'transaction_id' => $transaction->id,
             'student_id' => $student->id,
             'account_id' => $account->id,
-            'new_balance' => $account->balance
         ]);
 
         return "✓ Adjusted balance from UGX " . number_format($currentBalance) . " to UGX " . number_format($expectedBalance) . " (adjustment: UGX " . number_format($adjustmentAmount) . ")";

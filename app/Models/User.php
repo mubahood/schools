@@ -257,7 +257,11 @@ class User extends Administrator implements JWTSubject
                 $p->username = $phone_number_1;
             }
 
-            $p->password = password_hash('4321', PASSWORD_DEFAULT);
+            // Generate a unique 6-digit random password for the parent.
+            // This avoids the default '4321' which the login API blocks.
+            $plain_pw = (string) random_int(100000, 999999);
+            $p->password      = password_hash($plain_pw, PASSWORD_DEFAULT);
+            $p->plain_password = $plain_pw;
             if (
                 $s->emergency_person_name != null &&
                 strlen($s->emergency_person_name) > 2
@@ -317,14 +321,29 @@ class User extends Administrator implements JWTSubject
 
             $p = User::find($p->id);
             if ($p != null) {
-                //add role with id 17
+                // Add parent role (id=17)
                 try {
                     $r = new AdminRoleUser();
                     $r->role_id = 17;
                     $r->user_id = $p->id;
                     $r->save();
                 } catch (\Throwable $th) {
-                    //throw $th;
+                    //
+                }
+
+                // SMS the parent their login credentials so they are never locked out
+                if (
+                    isset($plain_pw) &&
+                    $p->phone_number_1 != null &&
+                    strlen($p->phone_number_1) > 5
+                ) {
+                    try {
+                        $student_name = $s->name ?? 'your child';
+                        $sms = "School Dynamics Login\nFor {$student_name}\nPhone: {$p->phone_number_1}\nPassword: {$plain_pw}\nApp: bit.ly/schdynamics";
+                        \App\Models\DirectMessage::send_sms($p->phone_number_1, $sms);
+                    } catch (\Throwable $th) {
+                        \Illuminate\Support\Facades\Log::warning('Failed to SMS parent credentials: ' . $th->getMessage());
+                    }
                 }
             }
         }

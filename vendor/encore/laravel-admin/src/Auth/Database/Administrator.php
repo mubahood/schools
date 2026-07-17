@@ -1043,7 +1043,7 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                     $user->current_class_text = $class->short_name;
                 }
 
-                $acc = $this->getAccount();
+                $acc = $user->getAccount();
                 if ($acc != null) {
                     $user->balance = $acc->balance;
                     $user->account_id = $acc->id;
@@ -1055,14 +1055,13 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
         if ($u->isRole('parent')) {
             foreach (
                 Administrator::where([
-                    'parent_id' => $u->id,
-                    'status' => 1,
-                    'user_type' => 'student',
+                    'parent_id'     => $u->id,
+                    'status'        => 1,
+                    'user_type'     => 'student',
+                    'enterprise_id' => $u->enterprise_id,
                 ])->get() as $user
             ) {
-                $students[] = $user;
-                continue;
-                $user->balance = 0;
+                $user->balance    = 0;
                 $user->account_id = 0;
 
                 $user->current_class_text = $user->current_class_id;
@@ -1071,10 +1070,17 @@ class Administrator extends Model implements AuthenticatableContract, JWTSubject
                     $user->current_class_text = $class->short_name;
                 }
 
-                $acc = $this->getAccount();
+                $acc = $user->getAccount();
+                $user->is_balance_verified = 0;
                 if ($acc != null) {
-                    $user->balance = $acc->balance;
                     $user->account_id = $acc->id;
+                    if ($acc->is_balance_verified) {
+                        $user->balance             = $acc->balance;
+                        $user->is_balance_verified = 1;
+                    } else {
+                        $user->balance             = 0;
+                        $user->is_balance_verified = 0;
+                    }
                 }
                 $students[] = $user;
             }

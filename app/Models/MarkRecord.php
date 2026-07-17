@@ -89,28 +89,19 @@ class MarkRecord extends Model
 
     protected $appends = ['administrator_text', 'academic_class_text', 'subject_text'];
 
-    //getter for academic_class_text
     public function getAcademicClassTextAttribute()
     {
-        $u = AcademicClass::find($this->academic_class_id);
-        if ($u == null) return 'N/A';
-        return $u->short_name;
+        return $this->academicClass ? $this->academicClass->short_name : 'N/A';
     }
 
-    //getter for subject_text
     public function getSubjectTextAttribute()
     {
-        $u = Subject::find($this->subject_id);
-        if ($u == null) return 'N/A';
-        return $u->subject_name;
+        return $this->subject ? $this->subject->subject_name : 'N/A';
     }
 
-    //appends for administrator_text
     public function getAdministratorTextAttribute()
     {
-        $u = Administrator::find($this->administrator_id);
-        if ($u == null) return 'N/A';
-        return $this->administrator->name;
+        return $this->student ? $this->student->name : 'N/A';
     }
 
     /* 

@@ -144,7 +144,8 @@ class ServiceItemToBeOfferedController extends AdminController
         $grid->column('stock_batch_id', 'Batch')->display(function ($batchId) {
             if ($batchId && $this->stockBatch) {
                 $batch = $this->stockBatch;
-                return "<a href='/admin/stock-records/{$batchId}' target='_blank'>
+                $batchUrl = admin_url("stock-records/{$batchId}");
+                return "<a href='{$batchUrl}' target='_blank'>
                     <strong>#{$batchId}</strong><br/>
                     <small>Qty: {$batch->current_quantity}</small>
                 </a>";
@@ -247,13 +248,13 @@ class ServiceItemToBeOfferedController extends AdminController
             }
             return "#$subId";
         })->link(function () {
-            return '/admin/service-subscriptions/' . $this->service_subscription_id;
+            return admin_url('service-subscriptions/' . $this->service_subscription_id);
         });
 
         $show->field('stock_item_category_id', 'Stock Item')->as(function ($itemId) {
             return $this->stockItemCategory ? $this->stockItemCategory->name : "Item #$itemId";
         })->link(function () {
-            return '/admin/stock-item-categories/' . $this->stock_item_category_id;
+            return admin_url('stock-item-categories/' . $this->stock_item_category_id);
         });
 
         $show->divider();
@@ -274,7 +275,7 @@ class ServiceItemToBeOfferedController extends AdminController
             }
             return 'Not Assigned';
         })->link(function () {
-            return $this->stock_batch_id ? '/admin/stock-records/' . $this->stock_batch_id : null;
+            return $this->stock_batch_id ? admin_url('stock-records/' . $this->stock_batch_id) : null;
         });
 
         $show->divider();
@@ -324,7 +325,7 @@ class ServiceItemToBeOfferedController extends AdminController
                 }
             }
             return [];
-        })->ajax('/admin/api/service-subscriptions', 'id', 'subscriber.name')
+        })->ajax(admin_url('api/service-subscriptions'), 'id', 'subscriber.name')
             ->rules('required');
 
         // Stock Item Category

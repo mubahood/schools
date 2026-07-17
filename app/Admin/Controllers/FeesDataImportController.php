@@ -5,7 +5,6 @@ namespace App\Admin\Controllers;
 use App\Models\FeesDataImport;
 use App\Models\Term;
 use App\Models\Utils;
-use App\Services\FeesImportService;
 use App\Services\FeesImportServiceOptimized;
 use App\Services\FeesImportServiceCSV;
 use Encore\Admin\Controllers\AdminController;
@@ -13,7 +12,6 @@ use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
 use Encore\Admin\Facades\Admin;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class FeesDataImportController extends AdminController
@@ -365,7 +363,7 @@ class FeesDataImportController extends AdminController
                     <div class="form-group">
                         <label class="col-sm-2 control-label"></label>
                         <div class="col-sm-8">
-                            <a href="' . url('fees-data-import-validate?import_id=' . $model->id) . '" 
+                            <a href="' . url('fees-data-import-validate?id=' . $model->id) . '"
                                class="btn btn-info" target="_blank">
                                 <i class="fa fa-check-circle"></i> Validate Import
                             </a>
@@ -380,8 +378,8 @@ class FeesDataImportController extends AdminController
                     <div class="form-group">
                         <label class="col-sm-2 control-label"></label>
                         <div class="col-sm-8">
-                            <a href="' . url('fees-data-import-do-import-optimized?import_id=' . $model->id) . '" 
-                               class="btn btn-success" 
+                            <a href="' . url('fees-data-import-do-import-optimized?id=' . $model->id) . '"
+                               class="btn btn-success"
                                onclick="return confirm(\'Start processing this import? This may take several minutes for large files.\')">
                                 <i class="fa fa-play"></i> Start Import
                             </a>

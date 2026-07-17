@@ -2,6 +2,8 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\Post\BatchSetBalanceNotVerified;
+use App\Admin\Actions\Post\BatchSetBalanceVerified;
 use App\Admin\Actions\Post\BatchSetProcessedAccountController;
 use App\Admin\Actions\Post\BatchStudentFinancialAccountChangeBalance;
 use App\Admin\Actions\Post\BatchStudentFinancialAccountSetNotVerified;
@@ -75,6 +77,8 @@ class StudentFinancialAccountController extends AdminController
             $batch->add(new BatchStudentFinancialAccountSetVerified());
             $batch->add(new BatchStudentFinancialAccountChangeBalance());
             $batch->add(new BatchSetProcessedAccountController());
+            $batch->add(new BatchSetBalanceVerified());
+            $batch->add(new BatchSetBalanceNotVerified());
         });
 
 
@@ -306,6 +310,21 @@ class StudentFinancialAccountController extends AdminController
                 1 => 'Verified',
             ]);
 
+        $grid->column('is_balance_verified', __('Show Balance to Parents'))
+            ->editable('select', [
+                0 => 'Hidden',
+                1 => 'Visible',
+            ])->sortable()
+            ->display(function ($v) {
+                return $v
+                    ? "<span class='badge badge-success'>Visible</span>"
+                    : "<span class='badge badge-default'>Hidden</span>";
+            })
+            ->filter([
+                0 => 'Hidden',
+                1 => 'Visible',
+            ]);
+
         //anjane
 
         $grid->export(function ($export) {
@@ -413,6 +432,14 @@ class StudentFinancialAccountController extends AdminController
                         0 => 'Not verified',
                         1 => 'Account verified',
                     ])->rules('required');
+
+                $form->radio('is_balance_verified', "Show balance to parent in mobile app?")
+                    ->options([
+                        0 => 'No — hide balance from parent',
+                        1 => 'Yes — show balance to parent',
+                    ])
+                    ->default(0)
+                    ->rules('required');
             }
 
             if ($form->isEditing()) {

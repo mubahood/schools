@@ -15,7 +15,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        // Fetch today's SchoolPay transactions every hour and auto-import them.
+        $schedule->command('schoolpay:sync')->hourly()
+            ->withoutOverlapping()
+            ->runInBackground()
+            ->appendOutputTo(storage_path('logs/schoolpay-sync.log'));
     }
 
     /**

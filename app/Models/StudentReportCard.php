@@ -196,6 +196,7 @@ class StudentReportCard extends Model
         $this->is_ready = $termly_report_card->reports_display_report_to_parents;
         $this->vatar = $this->owner->avatar;
         $this->save();
+        return $name;
     }
 
     function send_mail_to_parent()

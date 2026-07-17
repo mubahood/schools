@@ -30,6 +30,10 @@ $bal_text = $bal_amount < 0
     ? 'OUTSTANDING BALANCE: UGX ' . number_format($bal_abs)
     : ($bal_amount == 0 ? 'FEES BALANCE: UGX 0 (Fully Paid)' : 'FEES BALANCE: UGX ' . number_format($bal_amount) . ' (Credit)');
 
+// Resolve student's current class
+$current_class       = $owner ? $owner->current_class : null;
+$current_class_name  = $current_class ? $current_class->short_name : '';
+
 $compact = isset($compact) && $compact;
 $pad = $compact ? '10px 15px 8px 15px' : '20px 28px 15px 28px';
 $fontSize = $compact ? '11px' : '13px';
@@ -80,15 +84,13 @@ $sigH = $compact ? '20px' : '28px';
     <p style="margin: {{ $bodyMargin }}; line-height: {{ $bodyLine }};">
         Charged fees of <b>UGX {{ number_format($abs_amount) }}</b> in words:
         <b>{{ $amount_in_words }}</b>
-        to <b>{{ $owner->name }} - {{ $owner->school_pay_payment_code }}</b>.
+        to <b>{{ $owner->name }}</b>{!! $current_class_name ? ' of <b>'.e($current_class_name).'</b>' : '' !!}{!! !empty($owner->school_pay_payment_code) ? ' (Code: '.e($owner->school_pay_payment_code).')' : '' !!}.
     </p>
     @else
     <p style="margin: {{ $bodyMargin }}; line-height: {{ $bodyLine }};">
         Received sum of <b>UGX {{ number_format($abs_amount) }}</b> in words:
         <b>{{ $amount_in_words }}</b>
-        only from
-        <b>{{ $owner->name }} - {{ $owner->school_pay_payment_code }}</b>@if ($transaction->source == 'SCHOOL_PAY' && !empty($transaction->school_pay_transporter_id))
-        through School Pay, Transaction ID: <b>{{ $transaction->school_pay_transporter_id }}</b>@endif.
+        only from <b>{{ $owner->name }}</b>{!! $current_class_name ? ' of <b>'.e($current_class_name).'</b>' : '' !!}{!! !empty($owner->school_pay_payment_code) ? ' (Code: '.e($owner->school_pay_payment_code).')' : '' !!}{!! ($transaction->source === 'SCHOOL_PAY' && !empty($transaction->school_pay_transporter_id)) ? ' through School Pay, Transaction ID: <b>'.e($transaction->school_pay_transporter_id).'</b>' : '' !!}.
     </p>
     @endif
 

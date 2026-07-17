@@ -8,6 +8,7 @@ use App\Models\StockItemCategory;
 use App\Models\Term;
 use App\Models\TransportRoute;
 use App\Models\User;
+use App\Admin\Actions\ProcessBatchServiceSubscriptions;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -27,7 +28,9 @@ class BatchServiceSubscriptionController extends AdminController
             ->where('enterprise_id', $u->enterprise_id)
             ->orderBy('id', 'desc');
 
-        $grid->disableBatchActions();
+        $grid->batchActions(function ($batch) {
+            $batch->add(new ProcessBatchServiceSubscriptions());
+        });
 
         $grid->column('id', 'ID')->sortable()->hide();
         $grid->column('created_at', 'Created')->display(function () {

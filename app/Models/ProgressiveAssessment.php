@@ -64,6 +64,9 @@ class ProgressiveAssessment extends Model
             if ($m->wasChanged('generate_positions') && $m->generate_positions === 'Yes') {
                 self::do_generate_positions($m);
             }
+            if ($m->delete_excluded_records === 'Yes') {
+                self::do_delete_excluded_records($m);
+            }
 
             // Reset all trigger flags back to 'No'
             DB::update("UPDATE progressive_assessments SET
@@ -71,7 +74,8 @@ class ProgressiveAssessment extends Model
                 reports_generate = 'No',
                 generate_positions = 'No',
                 generate_comments = 'No',
-                delete_records_for_non_active = 'No'
+                delete_records_for_non_active = 'No',
+                delete_excluded_records = 'No'
                 WHERE id = ?", [$m->id]);
         });
 
@@ -112,6 +116,23 @@ class ProgressiveAssessment extends Model
             : $value;
     }
 
+    /**
+     * Subject IDs excluded from tracking (no records generated, not counted in reports).
+     */
+    public function getExcludedSubjectsAttribute($value): array
+    {
+        if (is_array($value)) return array_map('intval', $value);
+        $decoded = $value ? json_decode($value, true) : [];
+        return is_array($decoded) ? array_map('intval', $decoded) : [];
+    }
+
+    public function setExcludedSubjectsAttribute($value): void
+    {
+        $this->attributes['excluded_subjects'] = is_array($value)
+            ? json_encode(array_values(array_map('intval', array_filter($value))))
+            : $value;
+    }
+
     // ── relationships ────────────────────────────────────────────────────────
     public function term()          { return $this->belongsTo(Term::class); }
     public function academic_year() { return $this->belongsTo(AcademicYear::class); }
@@ -132,10 +153,13 @@ class ProgressiveAssessment extends Model
 
     /**
      * Generate a StudentTestRecord for every active student × subject in each class.
+     * Subjects in excluded_subjects are skipped entirely.
      */
     public static function do_generate_records(ProgressiveAssessment $m)
     {
         if (!is_array($m->classes) || count($m->classes) === 0) return;
+
+        $excluded = is_array($m->excluded_subjects) ? $m->excluded_subjects : [];
 
         foreach ($m->classes as $classId) {
             $class = AcademicClass::find((int) $classId);
@@ -145,17 +169,21 @@ class ProgressiveAssessment extends Model
                 $student = $shc->student;
                 if (!$student || $student->status != 1) continue;
 
-                $subjects = Subject::where([
+                $subjectQuery = Subject::where([
                     'academic_class_id' => $class->id,
                     'show_in_report'    => 'Yes',
-                ])->get();
+                ]);
+                if (!empty($excluded)) {
+                    $subjectQuery->whereNotIn('id', $excluded);
+                }
+                $subjects = $subjectQuery->get();
 
                 foreach ($subjects as $subject) {
                     $exists = StudentTestRecord::where([
                         'progressive_assessment_id' => $m->id,
                         'administrator_id'           => $student->id,
                         'subject_id'                 => $subject->id,
-                    ])->first();
+                    ])->exists();
 
                     if ($exists) continue;
 
@@ -171,6 +199,33 @@ class ProgressiveAssessment extends Model
                     $rec->save();
                 }
             }
+        }
+    }
+
+    /**
+     * Delete all test records (and their report items) for excluded subjects.
+     * Safe to call any time — only touches records whose subject is currently excluded.
+     */
+    public static function do_delete_excluded_records(ProgressiveAssessment $m)
+    {
+        $excluded = is_array($m->excluded_subjects) ? $m->excluded_subjects : [];
+        if (empty($excluded)) return;
+
+        // Find records for excluded subjects in this PA
+        $records = StudentTestRecord::where('progressive_assessment_id', $m->id)
+            ->whereIn('subject_id', $excluded)
+            ->get();
+
+        foreach ($records as $record) {
+            // Remove any report items backed by this record
+            StudentProgressiveReportItem::where('subject_id', $record->subject_id)
+                ->whereHas('report', function ($q) use ($m, $record) {
+                    $q->where('progressive_assessment_id', $m->id)
+                      ->where('student_id', $record->administrator_id);
+                })
+                ->delete();
+
+            $record->delete();
         }
     }
 
@@ -230,12 +285,18 @@ class ProgressiveAssessment extends Model
                 $report->total_aggregates  = 0;
                 $report->save();
 
-                // Process each subject record
-                $testRecords = StudentTestRecord::where([
+                $excluded = is_array($m->excluded_subjects) ? $m->excluded_subjects : [];
+
+                // Process each subject record (skip excluded subjects)
+                $trQuery = StudentTestRecord::where([
                     'progressive_assessment_id' => $m->id,
                     'administrator_id'           => $student->id,
                     'academic_class_id'          => $class->id,
-                ])->get();
+                ]);
+                if (!empty($excluded)) {
+                    $trQuery->whereNotIn('subject_id', $excluded);
+                }
+                $testRecords = $trQuery->get();
 
                 foreach ($testRecords as $tr) {
                     if (!$tr->subject || $tr->subject->show_in_report !== 'Yes') continue;

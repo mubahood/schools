@@ -5,6 +5,7 @@ namespace App\Models;
 use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 
@@ -22,28 +23,19 @@ class DirectMessage extends Model
             }
         });
         self::creating(function ($m) {
-            // Only fetch from user if receiver_number is not set or too short
+            // Resolve phone: use set value if valid, otherwise look up from the user record
             if (empty($m->receiver_number) || strlen(trim($m->receiver_number)) < 7) {
                 if (!empty($m->administrator_id)) {
-                    $u = Administrator::find($m->administrator_id);
+                    $u = User::find($m->administrator_id);
                     if ($u) {
-                        // Try phone_number_1 first
-                        if (!empty($u->phone_number_1) && strlen(trim($u->phone_number_1)) >= 7) {
-                            $m->receiver_number = $u->phone_number_1;
-                        } 
-                        // If phone_number_1 is not valid, try phone_number_2
-                        elseif (!empty($u->phone_number_2) && strlen(trim($u->phone_number_2)) >= 7) {
-                            $m->receiver_number = $u->phone_number_2;
-                        }
+                        $m->receiver_number = Utils::resolvePhone($u);
                     }
                 }
-            }
-            
-            // Standardize phone number format (handles 07..., 256..., +256...)
-            if (!empty($m->receiver_number)) {
+            } else {
+                // Normalise whatever was set
                 $m->receiver_number = Utils::prepareUgandanPhoneNumber($m->receiver_number);
             }
-            
+
             return $m;
         });
     }
@@ -311,29 +303,16 @@ class DirectMessage extends Model
             return "Message status is not 'Pending'. Current status: {$m->status}";
         }
 
-        // Prepare and validate phone number
-        // If receiver_number is set and valid, use it; otherwise get from user
-        if (empty($m->receiver_number) || strlen(trim($m->receiver_number)) < 7) {
-            // Get phone from administrator
-            if (!empty($m->administrator_id)) {
-                $user = Administrator::find($m->administrator_id);
-                if ($user) {
-                    // Try phone_number_1 first
-                    if (!empty($user->phone_number_1) && strlen(trim($user->phone_number_1)) >= 7) {
-                        $m->receiver_number = $user->phone_number_1;
-                    } 
-                    // If phone_number_1 is invalid, try phone_number_2
-                    elseif (!empty($user->phone_number_2) && strlen(trim($user->phone_number_2)) >= 7) {
-                        $m->receiver_number = $user->phone_number_2;
-                    }
-                }
+        // Resolve and validate phone number — try all fields including student fallback for parents
+        $phone = Utils::prepareUgandanPhoneNumber($m->receiver_number ?? '');
+        if (!Utils::validateUgandanPhoneNumber($phone) && !empty($m->administrator_id)) {
+            $user = User::find($m->administrator_id);
+            if ($user) {
+                $phone = Utils::resolvePhone($user);
             }
         }
+        $m->receiver_number = $phone;
 
-        // Standardize phone number format (handles 07..., 256..., +256...)
-        $m->receiver_number = Utils::prepareUgandanPhoneNumber($m->receiver_number);
-
-        // Validate phone number after preparation
         if (!Utils::validateUgandanPhoneNumber($m->receiver_number)) {
             $m->status = 'Failed';
             $m->error_message_message = 'Invalid phone number: ' . $m->receiver_number;

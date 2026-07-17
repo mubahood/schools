@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Utils;
 
 class BulkMessage extends Model
 {
@@ -90,12 +91,7 @@ class BulkMessage extends Model
                         }
                         $msg->STUDENT_NAME = $teacher->name;
                         $msg->TEACHER_NAME = $teacher->name;
-                        $phone_number = $teacher->phone_number_1;
-
-                        if ($phone_number == null || strlen($phone_number) < 2) {
-                            $phone_number = $teacher->phone_number_2;
-                        }
-                        $msg->receiver_number = $phone_number;
+                        $msg->receiver_number = Utils::resolvePhone($teacher);
                         $msg->administrator_id = $target_teachers_id;
                         $messages[] = $msg;
                     }
@@ -148,11 +144,7 @@ class BulkMessage extends Model
                         $msg->TEACHER_NAME = $user->name;
                         $msg->PARENT_NAME = $parent->name;
 
-                        $phone_number = $parent->phone_number_1;
-                        if ($phone_number == null || strlen($phone_number) < 2) {
-                            $phone_number = $parent->phone_number_2;
-                        }
-                        $msg->receiver_number = $phone_number;
+                        $msg->receiver_number = Utils::resolvePhone($parent);
                         $msg->administrator_id = $target_id;
                         $msg->balance = $balance;
                         $messages[] = $msg;
@@ -197,10 +189,7 @@ class BulkMessage extends Model
                             }
 
                             if ($parent == null) {
-                                $phone_number = $student->getParentPhonNumber();
                                 $parent = $student;
-                            } else {
-                                $phone_number = $parent->phone_number_1;
                             }
 
                             $balance = 0;
@@ -231,10 +220,7 @@ class BulkMessage extends Model
                             $msg->TEACHER_NAME = $student->name;
                             $msg->PARENT_NAME = $parent->name;
 
-                            if ($phone_number == null || strlen($phone_number) < 2) {
-                                $phone_number = $parent->phone_number_2;
-                            }
-                            $msg->receiver_number = $phone_number;
+                            $msg->receiver_number = Utils::resolvePhone($parent);
                             $msg->administrator_id = $parent->id;
                             $msg->balance = $balance;
                             $messages[] = $msg;

@@ -79,7 +79,7 @@ class KnowledgeBaseCategoryController extends AdminController
         $show->field('updated_at', __('Updated at'));
 
         $show->articles('Articles', function ($articles) {
-            $articles->resource('/admin/knowledge-base/articles');
+            $articles->resource(admin_url('knowledge-base/articles'));
             $articles->column('id', 'ID');
             $articles->column('title', 'Title');
             $articles->column('is_published', 'Published')->display(function ($value) {

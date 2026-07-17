@@ -111,6 +111,64 @@ class SchoolPayTransactionController extends AdminController
         $grid->quickSearch('school_pay_transporter_id', 'account_id', 'amount', 'status', 'payment_date', 'description', 'studentName', 'studentPaymentCode')
             ->placeholder('Search by ID, Account, Amount, Status, Date, Description, Student Name or Student Payment Code');
 
+        // --- SchoolPay sync + import toolbar buttons ---
+        $syncUrl         = url('schoolpay/sync-and-import?date=' . date('Y-m-d'));
+        $importUrl       = url('schoolpay/import-pending');
+        $pendingCount    = SchoolPayTransaction::where('enterprise_id', Admin::user()->enterprise_id)
+                            ->where('status', 'Not Imported')->count();
+        $errorCount      = SchoolPayTransaction::where('enterprise_id', Admin::user()->enterprise_id)
+                            ->where('status', 'Error')->count();
+
+        $grid->tools(function ($tools) use ($syncUrl, $importUrl, $pendingCount, $errorCount) {
+            $pendingBadge = $pendingCount > 0 ? " <span class='badge' style='background:#d97706'>$pendingCount</span>" : '';
+            $errorBadge   = $errorCount  > 0 ? " <span class='badge' style='background:#dc2626'>$errorCount</span>"  : '';
+
+            $tools->append(
+                "<button type='button' class='btn btn-sm btn-success sp-sync-btn' data-url='{$syncUrl}'
+                    title='Fetch today&#39;s transactions from SchoolPay API and import them immediately'>
+                    <i class='fa fa-refresh'></i> Sync &amp; Import Today
+                </button>
+                <button type='button' class='btn btn-sm btn-primary sp-import-btn' data-url='{$importUrl}'
+                    title='Import all pending staging records into the student ledger'>
+                    <i class='fa fa-upload'></i> Import Pending{$pendingBadge}
+                </button>"
+                . ($errorCount > 0
+                    ? "<a href='" . admin_url('school-pay-transactions?status[]=Error') . "' class='btn btn-sm btn-danger' title='View error records'>
+                            <i class='fa fa-exclamation-triangle'></i> Errors{$errorBadge}
+                       </a>"
+                    : '')
+            );
+        });
+
+        Admin::script(<<<'JS'
+(function () {
+    function spAjax(btn, url, label) {
+        btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> ' + label + '…');
+        $.getJSON(url)
+            .done(function (data) {
+                var msg = data.message || (data.imported + ' imported');
+                toastr ? toastr.success(msg, 'SchoolPay') : alert(msg);
+                setTimeout(function () { location.reload(); }, 1200);
+            })
+            .fail(function (xhr) {
+                var err = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : xhr.statusText;
+                toastr ? toastr.error('Error: ' + err, 'SchoolPay') : alert('Error: ' + err);
+                btn.prop('disabled', false).html(btn.data('orig'));
+            });
+    }
+    $(document).on('click', '.sp-sync-btn', function () {
+        var btn = $(this);
+        btn.data('orig', btn.html());
+        spAjax(btn, btn.data('url'), 'Syncing');
+    });
+    $(document).on('click', '.sp-import-btn', function () {
+        var btn = $(this);
+        btn.data('orig', btn.html());
+        spAjax(btn, btn.data('url'), 'Importing');
+    });
+})();
+JS);
+
         $grid->batchActions(function ($batch) {
             $batch->disableDelete();
             $batch->add(new SchoolPayTransactionImport());

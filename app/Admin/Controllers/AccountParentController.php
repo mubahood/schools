@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Models\AccountParent;
+use App\Models\Term;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
@@ -12,91 +13,117 @@ use Illuminate\Support\Facades\Auth;
 
 class AccountParentController extends AdminController
 {
-    /**
-     * Title for current resource.
-     *
-     * @var string
-     */
-    protected $title = 'Departments';
+    protected $title = 'Departments / Votes';
 
-    /**
-     * Make a grid builder.
-     *
-     * @return Grid
-     */
     protected function grid()
     {
         $grid = new Grid(new AccountParent());
 
         $grid->disableBatchActions();
-        $grid->model()->where('enterprise_id', Admin::user()->enterprise_id)
+        $grid->model()
+            ->where('enterprise_id', Admin::user()->enterprise_id)
             ->orderBy('name', 'Asc');
 
-        $grid->column('name', __('Name'))->sortable();
+        // Term selector: allow switching term for budget/expense display
+        $u = Admin::user();
+        $terms = [];
+        $activeTerm = $u->ent->dpTerm();
+        foreach (
+            Term::where('enterprise_id', $u->enterprise_id)
+                ->orderBy('id', 'desc')
+                ->get() as $t
+        ) {
+            $terms[$t->id] = 'Term ' . $t->name . ' - ' . $t->academic_year->name;
+        }
 
-        $grid->column('budget', __('Budget'))->display(function () {
-            $term = Auth::user()->ent->dpTerm();
-            return 'UGX ' . number_format($this->getBudget($term));
+        $selectedTermId = request('term_id', $activeTerm ? $activeTerm->id : null);
+        $selectedTerm = $activeTerm;
+        if ($selectedTermId && $selectedTermId != ($activeTerm ? $activeTerm->id : null)) {
+            $selectedTerm = Term::find($selectedTermId);
+        }
+
+        $grid->filter(function ($filter) use ($terms) {
+            $filter->disableIdFilter();
+            $filter->like('name', 'Search by name');
+            $filter->equal('term_id', 'Display term for budget/expense')
+                ->select($terms);
         });
 
-        $grid->column('expense', __('Expense'))->display(function () {
-            $term = Auth::user()->ent->dpTerm();
-            return 'UGX ' . number_format($this->getExpenditure($term));
+        $grid->quickSearch('name')->placeholder('Search departments...');
+
+        $grid->export(function ($export) {
+            $export->filename('Departments');
+            $export->except(['actions', 'quick_links']);
         });
 
-        $grid->column('balance', __('Balance'))->display(function () {
-            $term = Auth::user()->ent->dpTerm();
-            $bud = $this->getBudget($term);
-            $exp = $this->getExpenditure($term);
-            $bal = $bud + $exp;
-            $color = "green";
-            if ($bal < 0) {
-                $color = "red";
+        $grid->column('name', 'Department / Vote')->sortable();
+
+        $grid->column('budget', 'Budget')->display(function () use ($selectedTerm) {
+            if (!$selectedTerm) return 'UGX 0';
+            return 'UGX ' . number_format($this->getBudget($selectedTerm));
+        });
+
+        $grid->column('expense', 'Expenditure')->display(function () use ($selectedTerm) {
+            if (!$selectedTerm) return 'UGX 0';
+            return 'UGX ' . number_format(abs($this->getExpenditure($selectedTerm)));
+        });
+
+        $grid->column('balance', 'Balance')->display(function () use ($selectedTerm) {
+            if (!$selectedTerm) {
+                return '<span class="label label-default">UGX 0</span>';
             }
-            return '<span class="p-1 text-white" style="font-wight: 800!important; background-color: ' . $color . ';">UGX ' . number_format($bal) . '</span>';
+            $bud = $this->getBudget($selectedTerm);
+            $exp = $this->getExpenditure($selectedTerm);
+            $bal = $bud + $exp;
+            $label = $bal >= 0 ? 'label-success' : 'label-danger';
+            return '<span class="label ' . $label . '">UGX ' . number_format($bal) . '</span>';
         });
 
-        $grid->column('Accounts', __('Accounts'))->display(function () {
-            return count($this->accounts);
+        $grid->column('accounts_count', 'Accounts')->display(function () {
+            $count = \App\Models\Account::where('account_parent_id', $this->id)->count();
+            $url = admin_url('accounts?account_parent_id=' . $this->id);
+            return "<a href='$url' class='label label-info'>$count accounts</a>";
         });
-        $grid->column('description', __('Description'))->hide();
+
+        $grid->column('quick_links', 'Quick Links')->display(function () use ($selectedTermId) {
+            $budgetUrl = admin_url('financial-records-budget?parent_account_id=' . $this->id
+                . ($selectedTermId ? '&term_id=' . $selectedTermId : ''));
+            $expUrl = admin_url('financial-records-expenditure?parent_account_id=' . $this->id
+                . ($selectedTermId ? '&term_id=' . $selectedTermId : ''));
+            $accountsUrl = admin_url('accounts?account_parent_id=' . $this->id);
+            return "<a href='$budgetUrl' class='btn btn-xs btn-success' title='View budget records'>Budget</a> "
+                . "<a href='$expUrl' class='btn btn-xs btn-danger' title='View expenditure records'>Expenditure</a> "
+                . "<a href='$accountsUrl' class='btn btn-xs btn-info' title='View accounts in this department'>Accounts</a>";
+        });
+
+        $grid->column('description', 'Description')->hide();
 
         return $grid;
     }
 
-    /**
-     * Make a show builder.
-     *
-     * @param mixed $id
-     * @return Show
-     */
     protected function detail($id)
     {
         $show = new Show(AccountParent::findOrFail($id));
 
-        $show->field('id', __('Id'));
-        $show->field('created_at', __('Created at'));
-        $show->field('updated_at', __('Updated at'));
-        $show->field('enterprise_id', __('Enterprise id'));
-        $show->field('name', __('Name'));
-        $show->field('description', __('Description'));
+        $show->field('id', 'ID');
+        $show->field('name', 'Name');
+        $show->field('description', 'Description');
+        $show->field('created_at', 'Created');
 
         return $show;
     }
 
-    /**
-     * Make a form builder.
-     *
-     * @return Form
-     */
     protected function form()
     {
         $form = new Form(new AccountParent());
 
         $u = Admin::user();
-        $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
-        $form->text('name', __('Name'))->rules('required');
-        $form->textarea('description', __('Description'));
+        $form->hidden('enterprise_id')->default($u->enterprise_id)->rules('required');
+        $form->text('name', 'Department / Vote Name')->rules('required');
+        $form->textarea('description', 'Description');
+
+        $form->disableViewCheck();
+        $form->disableReset();
 
         return $form;
     }

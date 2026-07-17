@@ -146,15 +146,24 @@ class AccountController extends AdminController
             $bud = $this->getBudget($term);
             $exp = $this->getExpenditure($term);
             $bal = $bud + $exp;
-            $color = "green";
-            if ($bal < 0) {
-                $color = "red";
-            }
-            return '<span class="p-1 text-white" style="font-wight: 800!important; background-color: ' . $color . ';">UGX ' . number_format($bal) . '</span>';
+            $label = $bal >= 0 ? 'label-success' : 'label-danger';
+            return '<span class="label ' . $label . '">UGX ' . number_format($bal) . '</span>';
         });
 
+        $grid->column('is_balance_verified', 'Parent Visibility')->display(function ($v) {
+            return $v
+                ? "<span class='label label-success'>Visible</span>"
+                : "<span class='label label-default'>Hidden</span>";
+        })->sortable();
 
-        //anjane
+        $grid->column('quick_links', 'Links')->display(function () {
+            $transUrl = admin_url('transactions?account_id=' . $this->id);
+            $budgetUrl = admin_url('financial-records-budget?account_id=' . $this->id);
+            $expUrl = admin_url('financial-records-expenditure?account_id=' . $this->id);
+            return "<a href='$transUrl' class='btn btn-xs btn-primary' title='View transactions'>Transactions</a> "
+                . "<a href='$budgetUrl' class='btn btn-xs btn-success' title='View budget records'>Budget</a> "
+                . "<a href='$expUrl' class='btn btn-xs btn-warning' title='View expenditure records'>Expenditure</a>";
+        });
 
         $grid->export(function ($export) {
 
@@ -302,6 +311,14 @@ class AccountController extends AdminController
                     0 => 'Not verified',
                     1 => 'Account verified',
                 ])->rules('required');
+
+            $form->radio('is_balance_verified', "Show balance to parent in mobile app?")
+                ->options([
+                    0 => 'No — hide balance from parent',
+                    1 => 'Yes — show balance to parent',
+                ])
+                ->default(0)
+                ->rules('required');
         }
 
         if ($form->isEditing()) {
