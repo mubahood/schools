@@ -3,7 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Models\AcademicClass;
-use App\Models\TimetableEntry;
+use App\Models\AcademicYear;
 use App\Models\TimetableRoom;
 use App\Models\User;
 use Encore\Admin\Controllers\AdminController;
@@ -14,25 +14,34 @@ class TimetableEntryController extends AdminController
 {
     protected $title = 'Timetable Entries';
 
-    // Override index with full custom JS-powered page
     public function index(Content $content)
     {
-        $u = Admin::user();
+        $u   = Admin::user();
+        $ent = $u->ent;
 
-        $classes  = AcademicClass::where('enterprise_id', $u->enterprise_id)
+        // Only classes belonging to the enterprise's current academic year
+        $currentYearId = $ent->academic_year_id;
+        $currentYear   = AcademicYear::find($currentYearId);
+
+        $classes = AcademicClass::where('enterprise_id', $u->enterprise_id)
+            ->where('academic_year_id', $currentYearId)
             ->orderBy('name')->get();
-        $teachers = User::where(['enterprise_id' => $u->enterprise_id, 'user_type' => 'employee'])
-            ->orderBy('name')->get();
-        $rooms    = TimetableRoom::where('enterprise_id', $u->enterprise_id)
+
+        $teachers = User::where('enterprise_id', $u->enterprise_id)
+            ->where('user_type', 'employee')
+            ->orderBy('name')->get(['id', 'name']);
+
+        $rooms = TimetableRoom::where('enterprise_id', $u->enterprise_id)
             ->where('is_active', 1)->orderBy('name')->get();
 
         return $content
             ->title('Timetable Entries')
             ->breadcrumb(['text' => 'Timetable', 'url' => '#'], ['text' => 'Manage Entries'])
-            ->body(view('admin.timetable.entries', compact('classes', 'teachers', 'rooms')));
+            ->body(view('admin.timetable.entries', compact(
+                'classes', 'teachers', 'rooms', 'currentYear'
+            )));
     }
 
-    // All CRUD is handled by TimetableController API — block old form routes
     protected function grid()      { return null; }
     protected function detail($id) { return redirect(admin_url('timetable-entries')); }
     protected function form()      { return null; }

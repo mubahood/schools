@@ -424,7 +424,15 @@ class TimetableController extends Controller
         $u = Admin::user();
         $subjects = Subject::where('enterprise_id', $u->enterprise_id)
             ->where('academic_class_id', $request->class_id)
-            ->orderBy('subject_name')->get(['id', 'subject_name as name']);
+            ->whereNotNull('subject_name')
+            ->where('subject_name', '!=', '')
+            ->orderBy('subject_name')
+            ->get()
+            ->map(fn($s) => [
+                'id'    => $s->id,
+                'name'  => $s->subject_name,
+                'color' => $s->display_color,
+            ]);
         return response()->json($subjects);
     }
 }

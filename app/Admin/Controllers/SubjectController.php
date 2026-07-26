@@ -285,6 +285,9 @@ class SubjectController extends AdminController
             ->placeholder('Leave blank to use the default course name')
             ->help('This is the name shown on reports and marksheets. You can rename it freely — e.g. "MATH" → "MATHEMATICS", or "ENG" → "ENGLISH LANGUAGE".');
 
+        $form->color('color', 'Timetable Color')
+            ->help('Color used to display this subject on the timetable. Leave blank to auto-assign based on subject name.');
+
         $form->select('subject_teacher', 'Subject teacher')
             ->options(
                 $teachers

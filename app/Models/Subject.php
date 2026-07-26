@@ -23,10 +23,41 @@ class Subject extends Model
         'details',
         'course_id',
         'subject_name',
+        'color',
         'demo_id',
         'scheme_template',
         'is_optional',
     ];
+
+    public static function defaultColorFor(string $name): string
+    {
+        $n = strtolower($name);
+        $map = [
+            '#3a86ff' => ['math'],
+            '#8338ec' => ['english', 'language', 'lit'],
+            '#2b9348' => ['science', 'biology', 'chemistry', 'physics', 'integrated'],
+            '#fb8500' => ['social', 'sst', 'history', 'geography', 'civics'],
+            '#e63946' => ['religio', 'cre', 'ire', 'christian', 'islam'],
+            '#06d6a0' => ['kiswahili', 'swahili'],
+            '#f72585' => ['art', 'craft', 'creative', 'drawing'],
+            '#f4a261' => ['physical', 'sport', 'health', 'p.e', 'pe '],
+            '#1b4332' => ['agricult'],
+            '#0096c7' => ['ict', 'computer', 'technolog', 'digital'],
+            '#6a0572' => ['music'],
+            '#c77c00' => ['luganda', 'local', 'vernacular', 'mother'],
+        ];
+        foreach ($map as $color => $keywords) {
+            foreach ($keywords as $kw) {
+                if (str_contains($n, $kw)) return $color;
+            }
+        }
+        return '#6c757d';
+    }
+
+    public function getDisplayColorAttribute(): string
+    {
+        return $this->color ?: self::defaultColorFor($this->subject_name ?? '');
+    }
 
 
 
