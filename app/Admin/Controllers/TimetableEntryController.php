@@ -20,7 +20,7 @@ class TimetableEntryController extends AdminController
         $ent = $u->ent;
 
         // Only classes belonging to the enterprise's current academic year
-        $currentYearId = $ent->academic_year_id;
+        $currentYearId = $ent->academic_year_id ?: $ent->dp_year;
         $currentYear   = AcademicYear::find($currentYearId);
 
         $classes = AcademicClass::where('enterprise_id', $u->enterprise_id)
