@@ -342,7 +342,7 @@ class TimetableController extends Controller
             ->when($request->day,        fn($q) => $q->where('day_of_week', $request->day))
             ->when($request->status && $request->status !== 'all', fn($q) => $q->where('status', $request->status))
             ->with(['subject', 'academicClass', 'stream', 'teacher', 'room'])
-            ->orderBy('day_of_week')->orderBy('start_time')
+            ->orderByDesc('id')
             ->get()->map(fn($e) => $this->formatEntryJson($e));
         return response()->json($entries);
     }
