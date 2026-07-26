@@ -28,7 +28,7 @@ class TimetableController extends Controller
         $u   = Admin::user();
         $ent = $u->ent;
 
-        $yearId = request('year_id', $ent->academic_year_id);
+        $yearId = request('year_id', $ent->academic_year_id ?: $ent->dp_year);
         $termId = request('term_id');
 
         $base = TimetableEntry::where('enterprise_id', $u->enterprise_id)
@@ -100,7 +100,7 @@ class TimetableController extends Controller
         $rooms    = TimetableRoom::where('enterprise_id', $u->enterprise_id)->where('is_active', 1)->orderBy('name')->get();
         $streams  = AcademicClassSctream::where('enterprise_id', $u->enterprise_id)->orderBy('name')->get();
 
-        $defaultYearId = $ent->academic_year_id;
+        $defaultYearId = $ent->academic_year_id ?: $ent->dp_year;
         $defaultTermId = optional($ent->dpTerm())->id;
 
         return $content
@@ -120,7 +120,7 @@ class TimetableController extends Controller
         $u   = Admin::user();
         $ent = $u->ent;
 
-        $yearId   = request('year_id', $ent->academic_year_id);
+        $yearId   = request('year_id', $ent->academic_year_id ?: $ent->dp_year);
         $termId   = request('term_id');
         $teacherId = request('teacher_id');
 
@@ -173,7 +173,7 @@ class TimetableController extends Controller
     {
         $u      = Admin::user();
         $ent    = $u->ent;
-        $yearId = $request->get('year_id', $ent->academic_year_id);
+        $yearId = $request->get('year_id', $ent->academic_year_id ?: $ent->dp_year);
         $termId = $request->get('term_id');
         $classId   = $request->get('class_id');
         $teacherId = $request->get('teacher_id');
@@ -357,10 +357,13 @@ class TimetableController extends Controller
             'notes'                       => 'nullable|string',
             'status'                      => 'nullable|in:draft,active,disabled',
         ]);
-        $data['enterprise_id'] = $u->enterprise_id;
-        $data['created_by_id'] = $u->id;
-        $data['status']        = $data['status'] ?? 'active';
-        $data['is_active']     = $data['status'] === 'active' ? 1 : 0;
+        $data['enterprise_id']    = $u->enterprise_id;
+        $data['created_by_id']   = $u->id;
+        $data['status']          = $data['status'] ?? 'active';
+        $data['is_active']       = $data['status'] === 'active' ? 1 : 0;
+        // Auto-set academic_year_id from the selected class
+        $cls = AcademicClass::find($data['academic_class_id']);
+        $data['academic_year_id'] = $cls?->academic_year_id ?? ($u->ent->academic_year_id ?: $u->ent->dp_year);
         $entry = TimetableEntry::create($data);
         return response()->json(['success' => true, 'entry' => $this->formatEntryJson($entry)]);
     }
@@ -383,6 +386,9 @@ class TimetableController extends Controller
             'status'                      => 'nullable|in:draft,active,disabled',
         ]);
         $data['is_active'] = ($data['status'] ?? 'active') === 'active' ? 1 : 0;
+        // Sync academic_year_id whenever class changes
+        $cls = AcademicClass::find($data['academic_class_id']);
+        $data['academic_year_id'] = $cls?->academic_year_id ?? $entry->academic_year_id;
         $entry->update($data);
         return response()->json(['success' => true, 'entry' => $this->formatEntryJson($entry->fresh())]);
     }
