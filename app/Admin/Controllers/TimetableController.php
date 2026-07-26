@@ -287,4 +287,144 @@ class TimetableController extends Controller
             'room_conflict'    => $fmt($conflicts['roomConflict']),
         ]);
     }
+
+    // ─────────────────────────────────────────────
+    // ENTRIES CRUD API
+    // ─────────────────────────────────────────────
+
+    private function formatEntryJson(TimetableEntry $e): array
+    {
+        $e->loadMissing(['subject', 'academicClass', 'stream', 'teacher', 'room']);
+        return [
+            'id'           => $e->id,
+            'day'          => $e->day_of_week,
+            'day_name'     => $e->day_name,
+            'day_color'    => $e->day_color,
+            'start_time'   => substr($e->start_time, 0, 5),
+            'end_time'     => $e->end_time,
+            'duration'     => $e->duration_minutes,
+            'subject'      => optional($e->subject)->subject_name ?? '—',
+            'subject_id'   => $e->subject_id,
+            'class'        => optional($e->academicClass)->name ?? '—',
+            'class_id'     => $e->academic_class_id,
+            'stream'       => optional($e->stream)->name,
+            'stream_id'    => $e->academic_class_sctream_id,
+            'teacher'      => optional($e->teacher)->name ?? '—',
+            'teacher_id'   => $e->teacher_id,
+            'room'         => optional($e->room)->name,
+            'room_id'      => $e->timetable_room_id,
+            'color'        => $e->display_color,
+            'raw_color'    => $e->color,
+            'notes'        => $e->notes,
+            'status'       => $e->status ?? 'active',
+        ];
+    }
+
+    public function apiList(Request $request): JsonResponse
+    {
+        $u = Admin::user();
+        $entries = TimetableEntry::where('enterprise_id', $u->enterprise_id)
+            ->when($request->class_id,   fn($q) => $q->where('academic_class_id', $request->class_id))
+            ->when($request->teacher_id, fn($q) => $q->where('teacher_id', $request->teacher_id))
+            ->when($request->day,        fn($q) => $q->where('day_of_week', $request->day))
+            ->when($request->status && $request->status !== 'all', fn($q) => $q->where('status', $request->status))
+            ->with(['subject', 'academicClass', 'stream', 'teacher', 'room'])
+            ->orderBy('day_of_week')->orderBy('start_time')
+            ->get()->map(fn($e) => $this->formatEntryJson($e));
+        return response()->json($entries);
+    }
+
+    public function apiShow($id): JsonResponse
+    {
+        $u = Admin::user();
+        $entry = TimetableEntry::where('enterprise_id', $u->enterprise_id)->findOrFail($id);
+        return response()->json($this->formatEntryJson($entry));
+    }
+
+    public function apiStore(Request $request): JsonResponse
+    {
+        $u = Admin::user();
+        $data = $request->validate([
+            'academic_class_id'           => 'required|integer',
+            'academic_class_sctream_id'   => 'nullable|integer',
+            'subject_id'                  => 'required|integer',
+            'teacher_id'                  => 'required|integer',
+            'timetable_room_id'           => 'nullable|integer',
+            'day_of_week'                 => 'required|integer|between:1,6',
+            'start_time'                  => 'required|string',
+            'duration_minutes'            => 'required|integer|min:10|max:300',
+            'color'                       => 'nullable|string|max:20',
+            'notes'                       => 'nullable|string',
+            'status'                      => 'nullable|in:draft,active,disabled',
+        ]);
+        $data['enterprise_id'] = $u->enterprise_id;
+        $data['created_by_id'] = $u->id;
+        $data['status']        = $data['status'] ?? 'active';
+        $data['is_active']     = $data['status'] === 'active' ? 1 : 0;
+        $entry = TimetableEntry::create($data);
+        return response()->json(['success' => true, 'entry' => $this->formatEntryJson($entry)]);
+    }
+
+    public function apiUpdate(Request $request, $id): JsonResponse
+    {
+        $u = Admin::user();
+        $entry = TimetableEntry::where('enterprise_id', $u->enterprise_id)->findOrFail($id);
+        $data = $request->validate([
+            'academic_class_id'           => 'required|integer',
+            'academic_class_sctream_id'   => 'nullable|integer',
+            'subject_id'                  => 'required|integer',
+            'teacher_id'                  => 'required|integer',
+            'timetable_room_id'           => 'nullable|integer',
+            'day_of_week'                 => 'required|integer|between:1,6',
+            'start_time'                  => 'required|string',
+            'duration_minutes'            => 'required|integer|min:10|max:300',
+            'color'                       => 'nullable|string|max:20',
+            'notes'                       => 'nullable|string',
+            'status'                      => 'nullable|in:draft,active,disabled',
+        ]);
+        $data['is_active'] = ($data['status'] ?? 'active') === 'active' ? 1 : 0;
+        $entry->update($data);
+        return response()->json(['success' => true, 'entry' => $this->formatEntryJson($entry->fresh())]);
+    }
+
+    public function apiDestroy($id): JsonResponse
+    {
+        $u = Admin::user();
+        TimetableEntry::where('enterprise_id', $u->enterprise_id)->findOrFail($id)->delete();
+        return response()->json(['success' => true]);
+    }
+
+    public function apiDuplicate($id): JsonResponse
+    {
+        $u = Admin::user();
+        $orig = TimetableEntry::where('enterprise_id', $u->enterprise_id)->findOrFail($id);
+        $copy = $orig->replicate();
+        $copy->status     = 'draft';
+        $copy->is_active  = 0;
+        $copy->created_by_id = $u->id;
+        $copy->save();
+        return response()->json(['success' => true, 'entry' => $this->formatEntryJson($copy)]);
+    }
+
+    // ─────────────────────────────────────────────
+    // CASCADE AJAX
+    // ─────────────────────────────────────────────
+
+    public function apiStreamsByClass(Request $request): JsonResponse
+    {
+        $u = Admin::user();
+        $streams = AcademicClassSctream::where('enterprise_id', $u->enterprise_id)
+            ->where('academic_class_id', $request->class_id)
+            ->orderBy('name')->get(['id', 'name']);
+        return response()->json($streams);
+    }
+
+    public function apiSubjectsByClass(Request $request): JsonResponse
+    {
+        $u = Admin::user();
+        $subjects = Subject::where('enterprise_id', $u->enterprise_id)
+            ->where('academic_class_id', $request->class_id)
+            ->orderBy('subject_name')->get(['id', 'subject_name as name']);
+        return response()->json($subjects);
+    }
 }

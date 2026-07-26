@@ -8,17 +8,26 @@ class TimetableEntry extends Model
 {
     protected $table = 'timetable_entries';
 
+    const STATUS_DRAFT    = 'draft';
+    const STATUS_ACTIVE   = 'active';
+    const STATUS_DISABLED = 'disabled';
+
     protected $fillable = [
         'enterprise_id', 'academic_year_id', 'term_id',
         'academic_class_id', 'academic_class_sctream_id',
         'subject_id', 'teacher_id', 'timetable_room_id',
         'day_of_week', 'start_time', 'duration_minutes',
-        'color', 'notes', 'is_active', 'created_by_id',
+        'color', 'notes', 'is_active', 'status', 'created_by_id',
     ];
 
     public static $DAY_NAMES = [
         1 => 'Monday', 2 => 'Tuesday', 3 => 'Wednesday',
         4 => 'Thursday', 5 => 'Friday', 6 => 'Saturday',
+    ];
+
+    public static $DAY_COLORS = [
+        1 => '#1b4332', 2 => '#457b9d', 3 => '#6a0572',
+        4 => '#c77c00', 5 => '#c0392b', 6 => '#2b9348',
     ];
 
     public static $COLORS = [
@@ -62,7 +71,6 @@ class TimetableEntry extends Model
         return $this->belongsTo(Term::class, 'term_id');
     }
 
-    /** Minutes since midnight for start_time */
     public function startMinutes(): int
     {
         [$h, $m] = explode(':', substr($this->start_time, 0, 5));
@@ -79,6 +87,11 @@ class TimetableEntry extends Model
         return self::$DAY_NAMES[$this->day_of_week] ?? 'Unknown';
     }
 
+    public function getDayColorAttribute(): string
+    {
+        return self::$DAY_COLORS[$this->day_of_week] ?? '#666';
+    }
+
     public function getEndTimeAttribute(): string
     {
         $end = $this->endMinutes();
@@ -88,14 +101,9 @@ class TimetableEntry extends Model
     public function getDisplayColorAttribute(): string
     {
         if ($this->color) return $this->color;
-        return self::$COLORS[($this->subject_id - 1) % count(self::$COLORS)];
+        return self::$COLORS[(($this->subject_id ?? 0) - 1) % count(self::$COLORS)];
     }
 
-    /**
-     * Check conflicts for a potential entry.
-     * Returns array with keys: class_conflict, teacher_conflict, room_conflict
-     * each being null (no conflict) or the conflicting TimetableEntry.
-     */
     public static function checkConflicts(
         int $enterpriseId,
         int $dayOfWeek,
@@ -113,18 +121,15 @@ class TimetableEntry extends Model
 
         $base = TimetableEntry::where('enterprise_id', $enterpriseId)
             ->where('day_of_week', $dayOfWeek)
-            ->where('is_active', 1)
+            ->whereIn('status', ['active', 'draft'])
             ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
             ->with(['subject', 'teacher', 'academicClass']);
 
         $overlapFilter = function ($q) use ($startMin, $endMin) {
-            // Overlaps when: start < end_other AND end > start_other
-            // Using TIME arithmetic: entry starts before our end AND entry ends after our start
             $q->whereRaw("(TIME_TO_SEC(start_time)/60) < ?", [$endMin])
               ->whereRaw("(TIME_TO_SEC(start_time)/60 + duration_minutes) > ?", [$startMin]);
         };
 
-        // Class conflict (all streams share the class)
         $classConflict = (clone $base)
             ->where('academic_class_id', $classId)
             ->where(function ($q) use ($streamId) {
@@ -133,22 +138,17 @@ class TimetableEntry extends Model
                       ->orWhere('academic_class_sctream_id', $streamId);
                 }
             })
-            ->where($overlapFilter)
-            ->first();
+            ->where($overlapFilter)->first();
 
-        // Teacher conflict
         $teacherConflict = (clone $base)
             ->where('teacher_id', $teacherId)
-            ->where($overlapFilter)
-            ->first();
+            ->where($overlapFilter)->first();
 
-        // Room conflict
         $roomConflict = null;
         if ($roomId) {
             $roomConflict = (clone $base)
                 ->where('timetable_room_id', $roomId)
-                ->where($overlapFilter)
-                ->first();
+                ->where($overlapFilter)->first();
         }
 
         return compact('classConflict', 'teacherConflict', 'roomConflict');

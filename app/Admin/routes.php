@@ -268,13 +268,23 @@ Route::group([
     $router->resource('progressive-assessment-sheets', ProgressiveAssessmentSheetController::class);
 
     // ── Timetable & Load Allocation ─────────────────────────────────────────
-    // Custom pages (BEFORE resource routes to avoid parameter conflicts)
+    // Custom pages
     $router->get('timetable-dashboard',           'TimetableController@dashboard')->name('timetable.dashboard');
     $router->get('timetable-view',                'TimetableController@view')->name('timetable.view');
     $router->get('timetable-workload',            'TimetableController@workload')->name('timetable.workload');
     $router->get('timetable/export-pdf',          'TimetableController@exportPdf')->name('timetable.export-pdf');
     $router->get('timetable/entries-api',         'TimetableController@entriesApi')->name('timetable.entries-api');
     $router->get('timetable/check-conflict',      'TimetableController@checkConflict')->name('timetable.check-conflict');
+    // Entry CRUD API (JSON)
+    $router->get('timetable/api/entries',               'TimetableController@apiList')->name('timetable.api.list');
+    $router->post('timetable/api/entries',              'TimetableController@apiStore')->name('timetable.api.store');
+    $router->get('timetable/api/entries/{id}',          'TimetableController@apiShow')->name('timetable.api.show');
+    $router->put('timetable/api/entries/{id}',          'TimetableController@apiUpdate')->name('timetable.api.update');
+    $router->delete('timetable/api/entries/{id}',       'TimetableController@apiDestroy')->name('timetable.api.destroy');
+    $router->post('timetable/api/entries/{id}/duplicate','TimetableController@apiDuplicate')->name('timetable.api.duplicate');
+    // Cascade dropdowns
+    $router->get('timetable/api/streams-by-class',      'TimetableController@apiStreamsByClass')->name('timetable.api.streams');
+    $router->get('timetable/api/subjects-by-class',     'TimetableController@apiSubjectsByClass')->name('timetable.api.subjects');
     // Resource managers
     $router->resource('timetable-entries', TimetableEntryController::class);
     $router->resource('timetable-rooms',   TimetableRoomController::class);
