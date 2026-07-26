@@ -186,24 +186,25 @@ class TimetableController extends Controller
     {
         $u      = Admin::user();
         $ent    = $u->ent;
-        $yearId = $request->get('year_id', $ent->academic_year_id ?: $ent->dp_year);
-        $termId = $request->get('term_id');
         $classId   = $request->get('class_id');
         $teacherId = $request->get('teacher_id');
+        $streamId  = $request->get('stream_id');
+        $roomId    = $request->get('room_id');
+        $dayFilter = $request->get('day');
+        $bw        = (bool) $request->get('bw', 0);
 
         $entries = TimetableEntry::where('enterprise_id', $u->enterprise_id)
             ->where('is_active', 1)
-            ->where('academic_year_id', $yearId)
-            ->when($termId,    fn($q) => $q->where('term_id', $termId))
             ->when($classId,   fn($q) => $q->where('academic_class_id', $classId))
+            ->when($streamId,  fn($q) => $q->where('academic_class_sctream_id', $streamId))
             ->when($teacherId, fn($q) => $q->where('teacher_id', $teacherId))
+            ->when($roomId,    fn($q) => $q->where('timetable_room_id', $roomId))
+            ->when($dayFilter, fn($q) => $q->where('day_of_week', $dayFilter))
             ->with(['subject', 'academicClass', 'stream', 'teacher', 'room'])
             ->orderBy('day_of_week')
             ->orderBy('start_time')
             ->get();
 
-        $year    = AcademicYear::find($yearId);
-        $term    = Term::find($termId);
         $class   = AcademicClass::find($classId);
         $teacher = User::find($teacherId);
 
@@ -220,7 +221,7 @@ class TimetableController extends Controller
         }
 
         $pdf = App::make('dompdf.wrapper');
-        $pdf->loadView('print.timetable', compact('entries', 'grid', 'timeSlots', 'ent', 'year', 'term', 'class', 'teacher'))
+        $pdf->loadView('print.timetable', compact('entries', 'grid', 'timeSlots', 'ent', 'class', 'teacher', 'bw'))
             ->setPaper('a4', 'landscape');
 
         $filename = 'Timetable-' . ($class ? $class->name . '-' : '') . ($teacher ? $teacher->name . '-' : '') . now()->format('Y-m-d') . '.pdf';

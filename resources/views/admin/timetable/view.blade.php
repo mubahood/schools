@@ -70,6 +70,16 @@ table.tv-l tbody td{padding:8px 12px;font-size:.84rem;border-bottom:1px solid #f
 .dp{display:inline-block;padding:2px 9px;font-size:.71rem;font-weight:800;color:#fff}
 .sp{display:inline-block;padding:2px 9px;font-size:.74rem;font-weight:700;color:#fff}
 
+/* ── B&W cell overrides ── */
+.tt-ci.bw{background:#fff!important;border:1px solid #555;border-left:3px solid #222}
+.tt-ci.bw .tt-cs{color:#111}
+.tt-ci.bw .tt-cc{color:#333}
+.tt-ci.bw .tt-cm{color:#555}
+.tt-ci.bw .tt-time-row{color:#333;font-weight:700}
+/* ── B&W list overrides ── */
+.bw-pill{background:none!important;color:#111!important;border:1px solid #555;padding:2px 8px;font-weight:700}
+.bw-subj{background:none!important;color:#111!important;border:1px solid #888;padding:2px 8px;font-weight:700}
+
 /* ── States ── */
 .tv-empty{text-align:center;padding:56px 20px;color:#adb5bd}
 .tv-empty i{font-size:2.6rem;display:block;margin-bottom:12px;opacity:.45}
@@ -161,6 +171,14 @@ table.tv-l tbody td{padding:8px 12px;font-size:.84rem;border-bottom:1px solid #f
       </select>
     </div>
 
+    <div class="fg" style="max-width:140px">
+      <span class="flab">Display Mode</span>
+      <select class="fi" id="f-mode" onchange="TV.render();TV.updatePdfUrl()">
+        <option value="color">🎨 Color</option>
+        <option value="bw">⬜ Black &amp; White</option>
+      </select>
+    </div>
+
   </div>
 
   {{-- Toggle + export --}}
@@ -193,6 +211,7 @@ var SS = {
 };
 var openKey = null;
 var view = 'grid', data = [];
+function isBW(){ return document.getElementById('f-mode').value === 'bw'; }
 
 /* ─── Searchable select core ─── */
 function ssRender(key, items, q){
@@ -292,6 +311,19 @@ window.TV = {
     TV.load();
   },
 
+  updatePdfUrl:function(){
+    var p=new URLSearchParams();
+    var cl=SS.cls.val,st=SS.str.val,tc=SS.tch.val;
+    var rm=g('f-room'),dy=g('f-day');
+    if(cl) p.set('class_id',cl);
+    if(st) p.set('stream_id',st);
+    if(tc) p.set('teacher_id',tc);
+    if(rm) p.set('room_id',rm);
+    if(dy) p.set('day',dy);
+    if(isBW()) p.set('bw','1');
+    document.getElementById('exp-btn').href=PDF_URL+'?'+p.toString();
+  },
+
   load:function(){
     spin(true);
     var p=new URLSearchParams();
@@ -302,7 +334,6 @@ window.TV = {
     if(tc) p.set('teacher_id',tc);
     if(rm) p.set('room_id',rm);
     if(dy) p.set('day',dy);
-    document.getElementById('exp-btn').href=PDF_URL+'?'+p.toString();
     fetch(ENT_API+'?'+p.toString())
       .then(function(r){return r.json();})
       .then(function(rows){ spin(false); data=rows; TV.render(); })
@@ -362,12 +393,16 @@ function renderGrid(entries){
       var cells=(map[d]&&map[d][t])?map[d][t]:[];
       if(!cells.length){ h+='<div class="tt-empty">—</div>'; }
       cells.forEach(function(e){
-        h+='<div class="tt-ci" style="background:'+e.color+'">'
+        var bw=isBW();
+        var ci = bw
+          ? '<div class="tt-ci bw">'
+          : '<div class="tt-ci" style="background:'+e.color+'">';
+        h+=ci
           +'<div class="tt-cs">'+txt(e.subject)+'</div>'
           +(e.class!=='—'?'<div class="tt-cc">'+txt(e.class)+(e.stream&&e.stream!=='—'?' · '+txt(e.stream):'')+'</div>':'')
           +'<div class="tt-cm">'+txt(e.teacher)+'</div>'
           +(e.room&&e.room!=='—'?'<div class="tt-cm">'+txt(e.room)+'</div>':'')
-          +'<div class="tt-cm" style="margin-top:3px;font-weight:600;color:rgba(255,255,255,.95)">'+e.start_time+'–'+e.end_time+' &middot; '+e.duration+'min</div>'
+          +'<div class="tt-cm tt-time-row" style="margin-top:3px;font-weight:600'+(bw?'':';color:rgba(255,255,255,.95)')+'">'+e.start_time+'–'+e.end_time+' &middot; '+e.duration+'min</div>'
           +'</div>';
       });
       h+='</td>';
@@ -389,17 +424,23 @@ function renderList(entries){
     +'<th>Day</th><th>Time</th><th>Dur.</th><th>Class / Stream</th>'
     +'<th>Subject</th><th>Teacher</th><th>Room</th><th></th>'
     +'</tr></thead><tbody>';
+  var bw=isBW();
   entries.forEach(function(e){
     var dc=DC[e.day]||'#666';
+    var dayPill = bw
+      ? '<span class="bw-pill">'+txt(e.day_name)+'</span>'
+      : '<span class="dp" style="background:'+dc+'">'+txt(e.day_name)+'</span>';
+    var subjBadge = bw
+      ? '<span class="bw-subj">'+txt(e.subject)+'</span>'
+      : '<span class="sp" style="background:'+e.color+'">'+txt(e.subject)+'</span>';
     h+='<tr>'
-      +'<td><span class="dp" style="background:'+dc+'">'+txt(e.day_name)+'</span></td>'
+      +'<td>'+dayPill+'</td>'
       +'<td style="white-space:nowrap;font-family:monospace;font-size:.82rem">'+txt(e.start_time)+'–'+txt(e.end_time)+'</td>'
       +'<td style="color:#999;white-space:nowrap">'+e.duration+'m</td>'
       +'<td><strong>'+txt(e.class)+'</strong>'+(e.stream&&e.stream!=='—'?'<br><small style="color:#6c757d">'+txt(e.stream)+'</small>':'')+'</td>'
-      +'<td><span class="sp" style="background:'+e.color+'">'+txt(e.subject)+'</span></td>'
+      +'<td>'+subjBadge+'</td>'
       +'<td>'+txt(e.teacher)+'</td>'
       +'<td style="color:#6c757d">'+(e.room&&e.room!=='—'?txt(e.room):'—')+'</td>'
-      +'<td><a href="'+e.edit_url+'" style="color:#1b4332;font-size:.8rem;text-decoration:none"><i class="fa fa-pencil"></i></a></td>'
       +'</tr>';
   });
   h+='</tbody></table>';

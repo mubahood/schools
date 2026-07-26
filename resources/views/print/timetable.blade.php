@@ -33,6 +33,15 @@ table.tt thead tr th:first-child { width:48px; }
 .tt-cell-cls  { font-size:6.5pt; color:rgba(255,255,255,.95); font-weight:600; }
 .tt-cell-meta { font-size:6pt; color:rgba(255,255,255,.85); }
 .empty-cell { background:#fafbfa; min-height:28px; }
+/* B&W overrides */
+.bw .tt-cell-inner { background:#fff !important; border:1px solid #555; border-left:3px solid #222; }
+.bw .tt-cell-subj { color:#111; }
+.bw .tt-cell-cls  { color:#333; }
+.bw .tt-cell-meta { color:#555; }
+.bw table.tt thead tr th { background:#333 !important; }
+.bw .tt-time { background:#eee !important; }
+.bw .summary-section h4 { color:#111; }
+.bw table.summary thead th { background:#333 !important; }
 
 /* Summary table */
 .summary-section { margin-top:10px; border-top:1px solid #d0ddd0; padding-top:7px; }
@@ -46,7 +55,7 @@ table.summary tbody tr:nth-child(even) { background:#f5faf5; }
 </style>
 </head>
 <body>
-<div class="page">
+<div class="page{{ $bw ? ' bw' : '' }}">
 
 {{-- Header --}}
 <div class="doc-header">
@@ -57,9 +66,8 @@ table.summary tbody tr:nth-child(even) { background:#f5faf5; }
         @if($teacher) — {{ $teacher->name }} @endif
     </div>
     <div class="doc-meta">
-        @if($year) Academic Year: {{ $year->name }} @endif
-        @if($term) &nbsp;|&nbsp; Term: {{ $term->name }} @endif
-        &nbsp;|&nbsp; Generated: {{ now()->format('d M Y, H:i') }}
+        Generated: {{ now()->format('d M Y, H:i') }}
+        {{ $bw ? '· Black &amp; White' : '' }}
     </div>
 </div>
 
