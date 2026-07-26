@@ -292,6 +292,11 @@ table.te tbody tr:last-child td{border-bottom:none}
       <div class="fl">
         <label>Start Time <em>*</em></label>
         <input type="time" id="m-start" class="fi" step="60" value="07:40" onchange="TE.conflict()">
+        <div class="dur-chips" style="flex-wrap:wrap;gap:4px;margin-top:5px">
+          @foreach(['07:00','07:40','08:00','08:40','09:20','10:00','10:40','11:20','12:00','13:00','14:00','14:40'] as $t)
+          <span class="dur-ch" onclick="document.getElementById('m-start').value='{{ $t }}';TE.conflict()">{{ $t }}</span>
+          @endforeach
+        </div>
       </div>
       <div class="fl">
         <label>Duration (minutes) <em>*</em></label>
