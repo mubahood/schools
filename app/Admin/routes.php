@@ -267,4 +267,16 @@ Route::group([
     $router->resource('student-progressive-reports', StudentProgressiveReportController::class);
     $router->resource('progressive-assessment-sheets', ProgressiveAssessmentSheetController::class);
 
+    // ── Timetable & Load Allocation ─────────────────────────────────────────
+    // Custom pages (BEFORE resource routes to avoid parameter conflicts)
+    $router->get('timetable-dashboard',           'TimetableController@dashboard')->name('timetable.dashboard');
+    $router->get('timetable-view',                'TimetableController@view')->name('timetable.view');
+    $router->get('timetable-workload',            'TimetableController@workload')->name('timetable.workload');
+    $router->get('timetable/export-pdf',          'TimetableController@exportPdf')->name('timetable.export-pdf');
+    $router->get('timetable/entries-api',         'TimetableController@entriesApi')->name('timetable.entries-api');
+    $router->get('timetable/check-conflict',      'TimetableController@checkConflict')->name('timetable.check-conflict');
+    // Resource managers
+    $router->resource('timetable-entries', TimetableEntryController::class);
+    $router->resource('timetable-rooms',   TimetableRoomController::class);
+
 });
