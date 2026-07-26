@@ -42,6 +42,12 @@ Route::group([
     $router->resource('demo', DemoController::class);
     $router->resource('accounts', AccountController::class);
     $router->resource('fees', AcademicClassFeeController::class);
+    // Split Transactions — AJAX routes must come before resource()
+    $router->get('split-transactions/search-txn', 'SplitTransactionController@searchTransaction')->name('split-transactions.search-txn');
+    $router->get('split-transactions/search-student', 'SplitTransactionController@searchStudent')->name('split-transactions.search-student');
+    $router->get('split-transactions/{id}', 'SplitTransactionController@show')->name('split-transactions.show')->where('id', '[0-9]+');
+    $router->resource('split-transactions', SplitTransactionController::class)->except(['edit', 'update', 'destroy', 'show']);
+
     $router->resource('transactions', TransactionController::class);
     $router->resource('transactions-deleted', DeletedTransactionController::class);
     $router->resource('school-fees-payment', TransactionController::class);
@@ -71,6 +77,8 @@ Route::group([
     $router->resource('nursery-termly-report-cards', NurseryTermlyReportCardController::class);
     $router->resource('nursery-student-report-cards', NurseryStudentReportCardController::class);
     $router->resource('nursery-student-report-card-items', NurseryStudentReportCardItemController::class);
+    $router->get('students-financial-accounts/owing',   'StudentFinancialAccountController@index')->name('students-financial-accounts.owing');
+    $router->get('students-financial-accounts/advance', 'StudentFinancialAccountController@index')->name('students-financial-accounts.advance');
     $router->resource('students-financial-accounts', StudentFinancialAccountController::class);
     $router->get('/batch-print', 'StudentReportCardController@print')->name('print');
     $router->resource('account-parents', AccountParentController::class);

@@ -21,6 +21,10 @@ class ReportsFinance
     public  $total_payment_mobilNe_app = 0;
     public  $total_payment_total = 0;
     public  $total_school_fees_balance = 0;
+    public  $total_fees_advance = 0;
+    public  $total_fees_owing = 0;
+    public  $count_students_advance = 0;
+    public  $count_students_owing = 0;
     public  $total_budget = 0;
     public  $total_expense = 0;
     public  $total_stock_value = 0;
@@ -220,8 +224,31 @@ class ReportsFinance
                 'enterprise_id' => $ent->id,
             ])
                 ->whereIn('administrator_id', $this->active_studentes_ids)
-                ->where('status', 1) 
+                ->where('status', 1)
                 ->sum('balance');
+
+            // Students who have paid in advance (positive balance = credit)
+            $this->total_fees_advance = Account::where('enterprise_id', $ent->id)
+                ->whereIn('administrator_id', $this->active_studentes_ids)
+                ->where('balance', '>', 0)
+                ->sum('balance');
+
+            // Students who still owe (negative balance = debt)
+            $this->total_fees_owing = abs(Account::where('enterprise_id', $ent->id)
+                ->whereIn('administrator_id', $this->active_studentes_ids)
+                ->where('balance', '<', 0)
+                ->sum('balance'));
+
+            $this->count_students_advance = Account::where('enterprise_id', $ent->id)
+                ->whereIn('administrator_id', $this->active_studentes_ids)
+                ->where('balance', '>', 0)
+                ->count();
+
+            $this->count_students_owing = Account::where('enterprise_id', $ent->id)
+                ->whereIn('administrator_id', $this->active_studentes_ids)
+                ->where('balance', '<', 0)
+                ->count();
+
             $rep = ReportFinanceModel::where([
                 'term_id' => $this->term->id,
             ])->first();
@@ -233,6 +260,10 @@ class ReportsFinance
                 $rep->total_payment_mobile_app = $this->total_payment_mobile_app;
                 $rep->total_payment_total = $this->total_payment_total;
                 $rep->total_school_fees_balance = $this->total_school_fees_balance;
+                $rep->total_fees_advance = $this->total_fees_advance;
+                $rep->total_fees_owing = $this->total_fees_owing;
+                $rep->count_students_advance = $this->count_students_advance;
+                $rep->count_students_owing = $this->count_students_owing;
                 $rep->total_budget = $this->total_budget;
                 $rep->total_expense = $this->total_expense;
                 $rep->total_stock_value = $this->total_stock_value;

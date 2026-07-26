@@ -7,9 +7,22 @@ $class    = $report->academic_class;
 $stream   = $report->stream;
 $term     = $report->term;
 
-// Load items once, sorted by subject name
+// Subjects excluded at the assessment level
+$_excluded = is_array($assessment->excluded_subjects)
+    ? array_map('intval', $assessment->excluded_subjects)
+    : [];
+
+// Load items: only subjects that are (a) flagged show_in_report=Yes and
+// (b) not explicitly excluded on this assessment.
 $items = $report->items()->with(['subject', 'main_course'])->get()
-             ->sortBy(fn($i) => $i->subject->subject_name ?? '');
+             ->filter(function ($i) use ($_excluded) {
+                 if (!$i->subject) return false;
+                 if ($i->subject->show_in_report !== 'Yes') return false;
+                 if (!empty($_excluded) && in_array((int) $i->subject_id, $_excluded)) return false;
+                 return true;
+             })
+             ->sortBy(fn($i) => $i->subject->subject_name ?? '')
+             ->values();
 
 // Group by main_course — but only render the group header if it adds meaning
 // (i.e. group has >1 subject, OR group name differs from the single subject name)
@@ -42,8 +55,12 @@ foreach ($items as $item) {
     $subName = $item->subject->subject_name ?? '—';
     $avg     = (float)($item->average_mark ?? 0);
 
-    if ($avg > $bestAvg)    { $bestAvg    = $avg; $bestSubject    = $subName; }
-    if ($avg < $weakestAvg) { $weakestAvg = $avg; $weakestSubject = $subName; }
+    // Only consider this subject in stats if the student actually has scores
+    if ($avg > 0) {
+        if ($avg > $bestAvg)    { $bestAvg    = $avg; $bestSubject    = $subName; }
+        if ($avg < $weakestAvg) { $weakestAvg = $avg; $weakestSubject = $subName; }
+        $subjectSummaries[] = ['name'=>$subName, 'avg'=>$avg, 'grade'=>$item->grade_name ?? '—'];
+    }
 
     for ($t = 0; $t < $numTests; $t++) {
         $sd = $scores[$t] ?? null;
@@ -53,7 +70,6 @@ foreach ($items as $item) {
             $testCounts[$t]++;
         }
     }
-    $subjectSummaries[] = ['name'=>$subName, 'avg'=>$avg, 'grade'=>$item->grade_name ?? '—'];
 }
 
 // Per-test class average (from report if available, else compute)
@@ -251,8 +267,8 @@ $overallGradeColor = $gradeColorMap[$overallGrade] ?? '#333';
                     $tTotal = 0;
                     foreach($items as $itm) {
                         $sc = is_array($itm->test_scores) ? $itm->test_scores : (json_decode($itm->test_scores??'[]',true)??[]);
-                        $sv = $sc[$t-1]['score'] ?? 0;
-                        $tTotal += (int)$sv;
+                        $sv = (int)($sc[$t-1]['score'] ?? 0);
+                        if ($sv > 0) $tTotal += $sv;  // skip subjects the student has 0 in
                     }
                 @endphp
                 <td style="border:1px solid #aaa; padding:3px; color:#333; font-size:9.5px;">

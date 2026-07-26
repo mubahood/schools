@@ -328,6 +328,18 @@ class TransactionController extends AdminController
             return '<span style="color: #fff; background-color: #dc3545; padding: 2px 8px; border-radius: 3px; font-size: 12px;"><i class="fa fa-times"></i> Not Printed</span>';
         })->sortable();
 
+        $grid->column('split_action', 'Split')->display(function () {
+            if ($this->amount <= 0) return '—';
+            $existing = \App\Models\SplitTransaction::where('original_transaction_id', $this->id)
+                ->where('status', 'Applied')->first();
+            if ($existing) {
+                return '<a href="' . url('split-transactions/' . $existing->id) . '" class="btn btn-xs btn-success">'
+                    . '<i class="fa fa-code-fork"></i> Split#' . $existing->id . '</a>';
+            }
+            return '<a href="' . url('split-transactions/create?transaction_id=' . $this->id) . '" class="btn btn-xs btn-warning">'
+                . '<i class="fa fa-code-fork"></i> Split</a>';
+        });
+
         return $grid;
     }
 
@@ -433,17 +445,24 @@ class TransactionController extends AdminController
 
         $form->hidden('enterprise_id', __('Enterprise id'))->default($u->enterprise_id)->rules('required');
         $form->hidden('created_by_id', __('By id'))->default($u->id)->rules('required');
-        $form->hidden('source', "Money deposited to")->default('MANUAL_ENTRY')
-            ->readonly();
-
 
         if ($form->isCreating()) {
-            $form->radio('is_debit', "Transaction type")
+            $form->radio('is_debit', 'Transaction Type')
                 ->options([
-                    1 => 'Debit (+)',
-                    0 => 'Credit (-)',
-                ])->default(-1)
+                    1 => 'Credit (+) — Payment received',
+                    0 => 'Debit (−) — Fee / Charge',
+                ])
+                ->help('Credit adds to the student\'s account (payment). Debit charges/reduces the balance (fee).')
                 ->rules('required');
+        } else {
+            // On edit: show a read-only indicator of the current transaction direction
+            $form->display('amount', 'Transaction Direction')->with(function ($amount) {
+                $amount = (float) $amount;
+                if ($amount >= 0) {
+                    return '<span style="color:#28a745;font-weight:700"><i class="fa fa-plus-circle"></i> Credit (Payment) — amount is positive</span>';
+                }
+                return '<span style="color:#dc3545;font-weight:700"><i class="fa fa-minus-circle"></i> Debit (Charge) — amount is negative</span>';
+            });
         }
 
         $ajax_url = url(
@@ -468,22 +487,26 @@ class TransactionController extends AdminController
             ))->rules('required');
 
 
-        $form->decimal('amount', __('Amount'))
+        $form->decimal('amount', 'Amount (UGX)')
             ->attribute('type', 'number')
-            ->rules('required|int');
+            ->rules('required|int')
+            ->help($form->isCreating()
+                ? 'Enter a positive number — the Transaction Type above will determine the sign automatically.'
+                : 'Positive = Credit (payment). Negative = Debit (charge). Edit the sign directly if needed.');
 
         $form->datetime('payment_date', __('Date'))
             ->rules('required');
 
 
 
-        $form->radio('source', "Money deposited to")
+        $form->radio('source', 'Payment Channel')
             ->options([
-                "SCHOOL_PAY" => 'School Pay',
-                "PEG_PAY" => 'Peg Pay',
-                "BANK" => 'Bank',
-                "MANUAL_ENTRY" => 'Manual Entry (Cash)',
+                'MANUAL_ENTRY' => 'Manual Entry (Cash)',
+                'SCHOOL_PAY'   => 'School Pay',
+                'BANK'         => 'Bank Transfer',
+                'PEG_PAY'      => 'Peg Pay',
             ])
+            ->default('MANUAL_ENTRY')
             ->when('MANUAL_ENTRY', function (Form $form) {
                 $form->text('cash_receipt_number', 'Cash Receipt - number')
                     ->rules('required');

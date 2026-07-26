@@ -59,26 +59,15 @@ class QuickSearchController extends Controller
                 ->orderBy('name', 'asc')
                 ->get() as $key => $val
         ) {
-            $current_class_text = "";
-            if ($val->owner != null) {
-
-                if ($val->owner == null) {
-                    continue;
-                }
-                if ($val->owner->status != 1) {
-                    continue;
-                }
-
-                $user = $val->owner;
-                $user->current_class_text = $user->current_class_id;
-                $class = $user->getActiveClass();
-                if ($class != null) {
-                    $current_class_text = $user->name . " - (Bal: " . number_format($val->balance) . ")";
-                }
+            if ($val->owner == null || $val->owner->status != 1) {
+                continue;
             }
+            $user  = $val->owner;
+            $class = $user->getActiveClass();
+            $classLabel = $class ? $class->short_name : 'No class';
             $data[] = [
-                'id' => $val->id,
-                'text' => $val->name . $current_class_text,
+                'id'   => $val->id,
+                'text' => $user->name . ' - ' . $classLabel . ' (Bal: ' . number_format($val->balance) . ')',
             ];
         }
         return [

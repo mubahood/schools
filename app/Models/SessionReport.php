@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
@@ -141,98 +142,167 @@ class SessionReport extends Model
 
     public function do_process()
     {
+        // Fix: use startOfDay/endOfDay so records throughout the entire end date are included
+        $start_date = Carbon::parse($this->start_date)->startOfDay();
+        $end_date   = Carbon::parse($this->end_date)->endOfDay();
 
-        $start_date = Carbon::parse($this->start_date);
-        $end_date = Carbon::parse($this->end_date);
         if ($end_date->lessThan($start_date)) {
             throw new \Exception("End date must be after start date");
         }
-        $total_days = $start_date->diffInDays($end_date) + 1;
-        $total_boys_present = 0;
-        $total_girls_present = 0;
-        $top_absentees = 0;
-        $top_punctuals = 0;
 
-        // Get all participants in the date range with their student info
-        $records = Participant::where([
+        // total_days is the inclusive count of calendar days
+        $total_days          = Carbon::parse($this->start_date)->diffInDays(Carbon::parse($this->end_date)) + 1;
+        $total_boys_present  = 0;
+        $total_girls_present = 0;
+
+        // ── Audience filter (class / stream / all) ────────────────────────────
+        $audienceType = $this->target_audience_type ?? 'ALL';
+        $audienceData = is_array($this->target_audience_data) ? $this->target_audience_data : [];
+
+        // Build base participant query.
+        // NOTE: participants.academic_class_id is 0/null in this dataset — use
+        // admin_users.current_class_id (the student's enrolled class) for class matching.
+        $query = Participant::where([
             'participants.enterprise_id' => $this->enterprise_id,
-            'participants.type' => $this->type,
+            'participants.type'          => $this->type,
         ])
             ->join('admin_users', 'participants.administrator_id', '=', 'admin_users.id')
             ->whereBetween('participants.created_at', [$start_date, $end_date])
-            ->select('participants.*', 'admin_users.current_class_id', 'admin_users.sex')
-            ->get();
+            ->select('participants.*', 'admin_users.sex', 'admin_users.current_class_id');
 
-        $ent = $this->enterprise;
-        $activeTerm = $ent->active_term();
-        $classes = AcademicClass::where('academic_year_id', $activeTerm->academic_year_id)->get();
-        
-        $target_audience_data = [];
-        foreach ($classes as $class) {
-            $data['title'] = $class->short_name;
-            $data['title_long'] = $class->name;
-            
-            // Filter records by current_class_id from admin_users
-            $classRecords = $records->where('current_class_id', $class->id);
-            
-            $data['male_present'] = $classRecords
-                ->where('sex', 'Male')
-                ->where('is_present', 1)
-                ->count();
-            
-            $data['female_present'] = $classRecords
-                ->where('sex', 'Female')
-                ->where('is_present', 1)
-                ->count();
-            
-            $data['male_absent'] = $classRecords
-                ->where('sex', 'Male')
-                ->where('is_present', 0)
-                ->count();
-            
-            $data['female_absent'] = $classRecords
-                ->where('sex', 'Female')
-                ->where('is_present', 0)
-                ->count();
-            
-            $data['total_students'] = $data['male_present'] + $data['female_present'] + $data['male_absent'] + $data['female_absent'];
-            $data['male_present_percentage'] = $data['total_students'] > 0 ? round(($data['male_present'] / $data['total_students']) * 100, 2) : 0;
-            $data['female_present_percentage'] = $data['total_students'] > 0 ? round(($data['female_present'] / $data['total_students']) * 100, 2) : 0;
-            $data['male_absent_percentage'] = $data['total_students'] > 0 ? round(($data['male_absent'] / $data['total_students']) * 100, 2) : 0;
-            $data['female_absent_percentage'] = $data['total_students'] > 0 ? round(($data['female_absent'] / $data['total_students']) * 100, 2) : 0;
-            $target_audience_data[] = $data;
+        // Apply audience filter to participants
+        if ($audienceType === 'CLASS' && !empty($audienceData['class_ids'])) {
+            $query->whereIn('admin_users.current_class_id', $audienceData['class_ids']);
+        } elseif ($audienceType === 'STREAM' && !empty($audienceData['stream_ids'])) {
+            $studentIds = DB::table('student_has_classes')
+                ->whereIn('stream_id', $audienceData['stream_ids'])
+                ->pluck('administrator_id');
+            $query->whereIn('participants.administrator_id', $studentIds);
         }
 
-        $top_absentees = Participant::where([
-            'is_present' => 0,
+        $records = $query->get();
+
+        // ── Determine grouping rows ───────────────────────────────────────────
+        if ($audienceType === 'STREAM') {
+            // Build stream query — join classes so we can order class→stream and label rows
+            $streamQuery = DB::table('academic_class_sctreams as s')
+                ->join('academic_classes as c', 's.academic_class_id', '=', 'c.id')
+                ->where('s.enterprise_id', $this->enterprise_id)
+                ->orderByRaw("c.short_name")
+                ->orderBy('s.name')
+                ->select('s.id', 's.name as stream_name', 'c.short_name as class_short', 'c.id as class_id');
+
+            // If specific stream IDs were chosen, limit to them
+            if (!empty($audienceData['stream_ids'])) {
+                $streamQuery->whereIn('s.id', $audienceData['stream_ids']);
+            }
+
+            $streamRows = $streamQuery->get();
+
+            $target_audience_data = [];
+            foreach ($streamRows as $stream) {
+                $streamStudentIds = DB::table('student_has_classes')
+                    ->where('stream_id', $stream->id)
+                    ->pluck('administrator_id')
+                    ->toArray();
+
+                $data = $this->_tally($records->whereIn('administrator_id', $streamStudentIds));
+                // Label: "P.1 BLUE" — class prefix + stream name
+                $data['title']      = $stream->class_short . ' ' . $stream->stream_name;
+                $data['title_long'] = $stream->class_short . ' — ' . $stream->stream_name;
+
+                $total_boys_present  += $data['male_present'];
+                $total_girls_present += $data['female_present'];
+                $target_audience_data[] = $data;
+            }
+        } else {
+            // Group report by academic class
+            if ($audienceType === 'CLASS' && !empty($audienceData['class_ids'])) {
+                $classes = AcademicClass::whereIn('id', $audienceData['class_ids'])
+                    ->orderBy('short_name')->get();
+            } else {
+                // Filter by active academic year so we don't return classes from past years
+                $ent = $this->enterprise;
+                $activeYear = $ent ? $ent->active_academic_year() : null;
+                $classQuery = AcademicClass::where('enterprise_id', $this->enterprise_id)
+                    ->orderBy('short_name');
+                if ($activeYear) {
+                    $classQuery->where('academic_year_id', $activeYear->id);
+                }
+                $classes = $classQuery->get();
+            }
+
+            $target_audience_data = [];
+            foreach ($classes as $class) {
+                $data = $this->_tally($records->where('current_class_id', $class->id));
+                $data['title']      = $class->short_name;
+                $data['title_long'] = $class->name ?? $class->short_name;
+
+                $total_boys_present  += $data['male_present'];
+                $total_girls_present += $data['female_present'];
+                $target_audience_data[] = $data;
+            }
+        }
+
+        // ── Top absentees / punctuals ─────────────────────────────────────────
+        $absenteeQuery = Participant::where([
+            'is_present'    => 0,
             'enterprise_id' => $this->enterprise_id,
-            'type' => $this->type,
-        ])
-            ->whereBetween('created_at', [$start_date, $end_date])
+            'type'          => $this->type,
+        ])->whereBetween('created_at', [$start_date, $end_date]);
+
+        $punctualQuery = Participant::where([
+            'is_present'    => 1,
+            'enterprise_id' => $this->enterprise_id,
+            'type'          => $this->type,
+        ])->whereBetween('created_at', [$start_date, $end_date]);
+
+        if ($audienceType === 'CLASS' && !empty($audienceData['class_ids'])) {
+            $absenteeQuery->whereIn('academic_class_id', $audienceData['class_ids']);
+            $punctualQuery->whereIn('academic_class_id', $audienceData['class_ids']);
+        } elseif ($audienceType === 'STREAM' && !empty($audienceData['stream_ids'])) {
+            $streamStudentIds = DB::table('student_has_classes')
+                ->whereIn('stream_id', $audienceData['stream_ids'])
+                ->pluck('administrator_id');
+            $absenteeQuery->whereIn('administrator_id', $streamStudentIds);
+            $punctualQuery->whereIn('administrator_id', $streamStudentIds);
+        }
+
+        $top_absentees = $absenteeQuery
             ->groupBy('administrator_id')
             ->selectRaw('administrator_id, COUNT(*) as absence_count')
             ->orderByDesc('absence_count')
             ->take(10)
             ->get();
-        $top_punctuals = Participant::where([
-            'is_present' => 1,
-            'enterprise_id' => $this->enterprise_id,
-            'type' => $this->type,
-        ])
-            ->whereBetween('created_at', [$start_date, $end_date])
+
+        $top_punctuals = $punctualQuery
             ->groupBy('administrator_id')
             ->selectRaw('administrator_id, COUNT(*) as punctual_count')
             ->orderByDesc('punctual_count')
             ->take(10)
             ->get();
-        $this->title = "{$this->type} Report: " . $start_date->toDateString() . " to " . $end_date->toDateString();
 
-        $this->total_days = $total_days;
-        $this->top_absentees = $top_absentees;
-        $this->top_punctuals = $top_punctuals;
+        // ── Build title ───────────────────────────────────────────────────────
+        $typeLabel = str_replace('_', ' ', $this->type ?? 'ATTENDANCE');
+        $scopeLabel = '';
+        if ($audienceType === 'CLASS' && !empty($audienceData['class_ids'])) {
+            $names = AcademicClass::whereIn('id', $audienceData['class_ids'])->pluck('short_name')->join(', ');
+            $scopeLabel = " — {$names}";
+        } elseif ($audienceType === 'STREAM' && !empty($audienceData['stream_ids'])) {
+            $names = DB::table('academic_class_sctreams')->whereIn('id', $audienceData['stream_ids'])->pluck('name')->join(', ');
+            $scopeLabel = " — {$names}";
+        }
+        $this->title = "{$typeLabel} Report{$scopeLabel}: "
+            . Carbon::parse($this->start_date)->format('d M Y')
+            . ' to '
+            . Carbon::parse($this->end_date)->format('d M Y');
+
+        $this->total_days          = $total_days;
+        $this->total_boys_present  = $total_boys_present;
+        $this->total_girls_present = $total_girls_present;
         $this->target_audience_data = $target_audience_data;
-        $this->top_absentees = json_encode($top_absentees);
-        $this->top_punctuals = json_encode($top_punctuals);
+        $this->top_absentees       = json_encode($top_absentees);
+        $this->top_punctuals       = json_encode($top_punctuals);
         $this->save();
 
         // Generate PDF
@@ -242,6 +312,30 @@ class SessionReport extends Model
             // Log error but don't fail the entire process
             Log::error("Failed to generate PDF for SessionReport {$this->id}: " . $e->getMessage());
         }
+    }
+
+    /**
+     * Tally present/absent counts by sex from a collection of participant records.
+     */
+    private function _tally($rows): array
+    {
+        $malePresent   = $rows->where('sex', 'Male')->where('is_present', 1)->count();
+        $maleAbsent    = $rows->where('sex', 'Male')->where('is_present', 0)->count();
+        $femalePresent = $rows->where('sex', 'Female')->where('is_present', 1)->count();
+        $femaleAbsent  = $rows->where('sex', 'Female')->where('is_present', 0)->count();
+        $total         = $malePresent + $maleAbsent + $femalePresent + $femaleAbsent;
+
+        return [
+            'male_present'            => $malePresent,
+            'male_absent'             => $maleAbsent,
+            'female_present'          => $femalePresent,
+            'female_absent'           => $femaleAbsent,
+            'total_students'          => $total,
+            'male_present_percentage'   => $total > 0 ? round($malePresent   / $total * 100, 2) : 0,
+            'male_absent_percentage'    => $total > 0 ? round($maleAbsent    / $total * 100, 2) : 0,
+            'female_present_percentage' => $total > 0 ? round($femalePresent / $total * 100, 2) : 0,
+            'female_absent_percentage'  => $total > 0 ? round($femaleAbsent  / $total * 100, 2) : 0,
+        ];
     }
 
     /**

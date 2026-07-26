@@ -1996,8 +1996,10 @@ Route::get('generate-school-report', function (Request $request) {
     ->get();
 
   // Separate transactions into payments (positive) and bills (negative).
-  $payments = $transactions->where('amount', '>', 0);
-  $bills = $transactions->where('amount', '<', 0);
+  // Bursary credits (source='BURSARY') are tracked separately, not in income.
+  $payments         = $transactions->where('amount', '>', 0)->where('source', '!=', 'BURSARY');
+  $bursaryPayments  = $transactions->where('amount', '>', 0)->where('source', 'BURSARY');
+  $bills            = $transactions->where('amount', '<', 0);
 
   // Map accounts to users to link transactions to students.
   $accountToUserMap = Account::whereIn('id', $transactions->pluck('account_id')->unique())
@@ -2039,6 +2041,7 @@ Route::get('generate-school-report', function (Request $request) {
     $balance = DB::table('transactions')
       ->where('account_id', $accountId)
       ->where('term_id', $termId)
+      ->where('source', '!=', 'BURSARY')
       ->sum('amount');
     $paid = $expected + $balance;
 
@@ -2074,6 +2077,7 @@ Route::get('generate-school-report', function (Request $request) {
     'totalSchoolPay'      => number_format($payments->where('source', 'SCHOOL_PAY')->sum('amount')),
     'totalManualEntry'    => number_format($payments->where('source', 'MANUAL_ENTRY')->sum('amount')),
     'totalGenerated'      => number_format($bills->where('source', 'GENERATED')->sum('amount')),
+    'totalBursaries'      => number_format($bursaryPayments->sum('amount')),
   ];
 
   // 5b. Class-Level Breakdown
@@ -2113,7 +2117,7 @@ Route::get('generate-school-report', function (Request $request) {
   $report->expected_fees = collect($studentMetrics)->sum('raw_expected');
   $report->fees_collected_manual_entry = $payments->where('source', 'MANUAL_ENTRY')->sum('amount');
   $report->fees_collected_schoolpay = $payments->where('source', 'SCHOOL_PAY')->sum('amount');
-  $report->fees_collected_total = $payments->sum('amount');
+  $report->fees_collected_total = $payments->sum('amount'); // excludes BURSARY (see $payments definition above)
   $report->fees_collected_other = $payments->whereNotIn('source', ['MANUAL_ENTRY', 'SCHOOL_PAY'])->sum('amount');
   $report->save();
 

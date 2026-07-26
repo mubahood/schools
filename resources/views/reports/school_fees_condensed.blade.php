@@ -87,13 +87,13 @@
     <table class="kpi-card-container">
         <tr>
             <td style="width: 33.3%;"><div class="kpi-card"><p class="title">Total Billed</p><p class="value"><span class="small-text">UGX</span> {{ $summary['totalFeesBilled'] }}</p></div></td>
-            <td style="width: 33.3%;"><div class="kpi-card"><p class="title">Total Collected</p><p class="value"><span class="small-text">UGX</span> {{ $summary['totalFeesCollected'] }}</p></div></td>
+            <td style="width: 33.3%;"><div class="kpi-card"><p class="title">Total Collected (excl. Bursaries)</p><p class="value"><span class="small-text">UGX</span> {{ $summary['totalFeesCollected'] }}</p></div></td>
             <td style="width: 33.3%;"><div class="kpi-card"><p class="title">Total Outstanding</p><p class="value"><span class="small-text">UGX</span> {{ $summary['totalOutstanding'] }}</p></div></td>
         </tr>
         <tr>
-            <td><div class="kpi-card"><p class="title">Collections from SCHOOL_PAY</p><p class="value"><span class="small-text">UGX</span> {{ $summary['totalSchoolPay'] }}</p></div></td>
-            <td><div class="kpi-card"><p class="title">Collections from MANUAL_ENTRY</p><p class="value"><span class="small-text">UGX</span> {{ $summary['totalManualEntry'] }}</p></div></td>
-            <td><div class="kpi-card"><p class="title">System Generated Bills</p><p class="value"><span class="small-text">UGX</span> {{ $summary['totalGenerated'] }}</p></div></td>
+            <td><div class="kpi-card"><p class="title">Collections via School Pay</p><p class="value"><span class="small-text">UGX</span> {{ $summary['totalSchoolPay'] }}</p></div></td>
+            <td><div class="kpi-card"><p class="title">Collections via Cash / Manual</p><p class="value"><span class="small-text">UGX</span> {{ $summary['totalManualEntry'] }}</p></div></td>
+            <td><div class="kpi-card" style="border-left: 3px solid #6f42c1;"><p class="title">Bursaries Credited (separate)</p><p class="value" style="color:#6f42c1;"><span class="small-text">UGX</span> {{ $summary['totalBursaries'] ?? '0' }}</p></div></td>
         </tr>
     </table>
 

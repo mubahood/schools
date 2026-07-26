@@ -58,8 +58,11 @@ class StudentFinancialAccountController extends AdminController
         $ac->transfer_keyword = 1;
         $ac->save();
         die("done"); */
-        $grid = new Grid(new Account());
+        // Detect active view from URL slug (owing / advance / all)
+        $lastSegment = last(request()->segments());
+        $view = in_array($lastSegment, ['owing', 'advance']) ? $lastSegment : 'all';
 
+        $grid = new Grid(new Account());
 
         //'academic_class_id for active students only'
         $active_admins = Manifest::get_active_students_user_ids(Admin::user());
@@ -70,6 +73,49 @@ class StudentFinancialAccountController extends AdminController
                 'type' => 'STUDENT_ACCOUNT',
             ])
             ->whereIn('administrator_id', $active_admins);
+
+        if ($view === 'owing') {
+            $grid->model()->where('balance', '<', 0);
+        } elseif ($view === 'advance') {
+            $grid->model()->where('balance', '>', 0);
+        }
+
+        // Tab buttons at the top
+        $grid->header(function () use ($view) {
+            $allUrl     = admin_url('students-financial-accounts');
+            $owingUrl   = admin_url('students-financial-accounts/owing');
+            $advanceUrl = admin_url('students-financial-accounts/advance');
+
+            $tab = function ($url, $icon, $label, $active, $style) {
+                $base = "display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:22px;font-size:.85rem;font-weight:600;text-decoration:none;border:2px solid;margin-right:8px;transition:all .15s;";
+                if ($active) {
+                    $css = $base . $style['active'];
+                } else {
+                    $css = $base . $style['inactive'];
+                }
+                return "<a href='{$url}' style='{$css}'><i class='fa fa-{$icon}'></i> {$label}</a>";
+            };
+
+            $allStyle = [
+                'active'   => 'background:#1b4332;color:#fff;border-color:#1b4332;',
+                'inactive' => 'background:#fff;color:#1b4332;border-color:#1b4332;',
+            ];
+            $owingStyle = [
+                'active'   => 'background:#dc3545;color:#fff;border-color:#dc3545;',
+                'inactive' => 'background:#fff;color:#dc3545;border-color:#dc3545;',
+            ];
+            $advanceStyle = [
+                'active'   => 'background:#28a745;color:#fff;border-color:#28a745;',
+                'inactive' => 'background:#fff;color:#28a745;border-color:#28a745;',
+            ];
+
+            $html  = '<div style="padding:12px 0 6px;display:flex;align-items:center;flex-wrap:wrap;gap:4px">';
+            $html .= $tab($allUrl,     'users',              'All Students',      $view === 'all',     $allStyle);
+            $html .= $tab($owingUrl,   'exclamation-circle', 'With Balance Due',  $view === 'owing',   $owingStyle);
+            $html .= $tab($advanceUrl, 'check-circle',       'Paid in Advance',   $view === 'advance', $advanceStyle);
+            $html .= '</div>';
+            return $html;
+        });
 
         $grid->batchActions(function ($batch) {
             $batch->disableDelete();

@@ -271,7 +271,24 @@
         {{-- School Header --}}
         <div class="school-header">
             <p class="school-name">{{ strtoupper($ent->name) }}</p>
-            <p class="report-title">DAILY ATTENDANCE RECORD - {{ strtoupper(str_replace('_', ' ', $report->type ?? 'STUDENT REPORT')) }}</p>
+            <p class="report-title">ATTENDANCE RECORD — {{ strtoupper(str_replace('_', ' ', $report->type ?? 'STUDENT REPORT')) }}</p>
+            @php
+                $audType = $report->target_audience_type ?? 'ALL';
+                $audData = is_array($report->target_audience_data) ? $report->target_audience_data : [];
+                $scopeLabel = '';
+                if ($audType === 'CLASS' && !empty($audData['class_ids'])) {
+                    $names = \App\Models\AcademicClass::whereIn('id', $audData['class_ids'])
+                        ->orderBy('short_name')->pluck('short_name')->join(', ');
+                    $scopeLabel = 'Class(es): ' . $names;
+                } elseif ($audType === 'STREAM' && !empty($audData['stream_ids'])) {
+                    $names = \DB::table('academic_class_sctreams')->whereIn('id', $audData['stream_ids'])
+                        ->orderBy('name')->pluck('name')->join(', ');
+                    $scopeLabel = 'Stream(s): ' . $names;
+                } else {
+                    $scopeLabel = 'All Classes';
+                }
+            @endphp
+            <p style="font-size:10px; margin:2px 0 0;">SCOPE: {{ strtoupper($scopeLabel) }}</p>
         </div>
         
         {{-- Date and Week Information --}}

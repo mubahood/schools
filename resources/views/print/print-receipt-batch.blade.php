@@ -41,7 +41,7 @@ Transaction::whereIn('id', $id_array)->update(['is_printed' => 'Yes']);
             page-break-after: always;
         }
         .receipt-spacer {
-            height: 8px;
+            height: 20px;
         }
     </style>
 </head>

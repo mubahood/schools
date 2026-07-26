@@ -1135,19 +1135,20 @@ class HomeController extends Controller
                             ]));
                             return;
                         }
-                        //postive transactions made this term
+                        // Positive transactions this term, excluding bursary credits
                         $transsactions_tot = Transaction::where([
                             'enterprise_id' => $ent->id,
                             'term_id' => $term->id,
                         ])
                             ->where('amount', '>', 0)
+                            ->where('source', '!=', 'BURSARY')
                             ->sum('amount');
 
                         $column->append(view('widgets.box-5', [
                             'is_dark' => true,
                             'title' => 'Income Received',
                             'icon' => 'check-circle',
-                            'sub_title' => 'Payments this term',
+                            'sub_title' => 'Payments this term (excl. bursaries)',
                             'number' => "<small>UGX</small>" . number_format($transsactions_tot),
                             'link' => admin_url('transactions')
                         ]));
@@ -1242,6 +1243,104 @@ class HomeController extends Controller
                         ])->first();
                         $column->append(view('widgets.print-financial-report', [
                             'enterprise_id' => $r->id,
+                        ]));
+                    });
+                });
+
+                // ── Bursar insight row ───────────────────────────────────
+                $content->row(function (Row $row) {
+                    $u = Admin::user();
+                    $ent = $u->ent;
+
+                    $activeStudentIds = User::where([
+                        'user_type' => 'STUDENT',
+                        'status' => 1,
+                        'enterprise_id' => $u->enterprise_id,
+                    ])->pluck('id');
+
+                    $advanceAmount = Account::where('enterprise_id', $u->enterprise_id)
+                        ->whereIn('administrator_id', $activeStudentIds)
+                        ->where('balance', '>', 0)
+                        ->sum('balance');
+                    $advanceCount = Account::where('enterprise_id', $u->enterprise_id)
+                        ->whereIn('administrator_id', $activeStudentIds)
+                        ->where('balance', '>', 0)
+                        ->count();
+
+                    $owingAmount = abs(Account::where('enterprise_id', $u->enterprise_id)
+                        ->whereIn('administrator_id', $activeStudentIds)
+                        ->where('balance', '<', 0)
+                        ->sum('balance'));
+                    $owingCount = Account::where('enterprise_id', $u->enterprise_id)
+                        ->whereIn('administrator_id', $activeStudentIds)
+                        ->where('balance', '<', 0)
+                        ->count();
+
+                    $term = $ent->active_term();
+                    $expectedFees = Manifest::get_total_expected_tuition($u);
+                    $expectedServices = Manifest::get_total_expected_service_fees($u);
+                    $expectedTotal = $expectedFees + $expectedServices;
+                    $incomeReceived = $term
+                        ? Transaction::where(['enterprise_id' => $ent->id, 'term_id' => $term->id])
+                            ->where('amount', '>', 0)->where('source', '!=', 'BURSARY')->sum('amount')
+                        : 0;
+                    $collectionRate = $expectedTotal > 0 ? round(($incomeReceived / $expectedTotal) * 100, 1) : 0;
+
+                    $row->column(3, function (Column $column) use ($advanceAmount, $advanceCount) {
+                        $column->append(view('widgets.box-5', [
+                            'is_dark' => false,
+                            'title' => 'Fees Advance',
+                            'icon' => 'arrow-circle-up',
+                            'sub_title' => number_format($advanceCount) . ' student(s) paid in advance',
+                            'number' => "<small>UGX</small>" . number_format($advanceAmount),
+                            'link' => admin_url('students-financial-accounts/advance'),
+                        ]));
+                    });
+
+                    $row->column(3, function (Column $column) use ($owingAmount, $owingCount) {
+                        $column->append(view('widgets.box-5', [
+                            'is_dark' => false,
+                            'title' => 'Balance Due',
+                            'icon' => 'exclamation-circle',
+                            'sub_title' => number_format($owingCount) . ' student(s) with outstanding balance',
+                            'number' => "<small>UGX</small>" . number_format($owingAmount),
+                            'link' => admin_url('students-financial-accounts/owing'),
+                        ]));
+                    });
+
+                    $row->column(3, function (Column $column) use ($activeStudentIds) {
+                        $unverifiedCount = Account::where('enterprise_id', Admin::user()->enterprise_id)
+                            ->whereIn('administrator_id', $activeStudentIds)
+                            ->where('status', 0)
+                            ->count();
+                        $unverifiedBalance = abs(Account::where('enterprise_id', Admin::user()->enterprise_id)
+                            ->whereIn('administrator_id', $activeStudentIds)
+                            ->where('status', 0)
+                            ->where('balance', '<', 0)
+                            ->sum('balance'));
+                        $column->append(view('widgets.box-5', [
+                            'is_dark' => false,
+                            'title' => 'Unverified Accounts',
+                            'icon' => 'user-times',
+                            'sub_title' => 'UGX ' . number_format($unverifiedBalance) . ' in unverified debt',
+                            'number' => number_format($unverifiedCount) . ' accounts',
+                            'link' => admin_url('students-financial-accounts'),
+                        ]));
+                    });
+
+                    $row->column(3, function (Column $column) use ($activeStudentIds) {
+                        $totalStudents = count($activeStudentIds);
+                        $clearedStudents = Account::where('enterprise_id', Admin::user()->enterprise_id)
+                            ->whereIn('administrator_id', $activeStudentIds)
+                            ->where('balance', '>=', 0)
+                            ->count();
+                        $column->append(view('widgets.box-5', [
+                            'is_dark' => false,
+                            'title' => 'Cleared Students',
+                            'icon' => 'check-square-o',
+                            'sub_title' => 'Fees fully paid (balance ≥ 0)',
+                            'number' => number_format($clearedStudents) . ' / ' . number_format($totalStudents),
+                            'link' => admin_url('students-financial-accounts'),
                         ]));
                     });
                 });

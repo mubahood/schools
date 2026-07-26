@@ -82,8 +82,8 @@ contra_entry_transaction_id
         $t->payment_date = Carbon::now();
         $t->created_by_id = Auth::user()->id;
         $t->school_pay_transporter_id = "-";
-
-        $t->description = "UGX " . number_format($t->amount) . " was deducted from this account because this account was removed from " . $m->bursary->name . " bursary scheme.";
+        $t->source = 'BURSARY';
+        $t->description = "UGX " . number_format(abs($m->bursary->fund)) . " was deducted from this account because this account was removed from " . $m->bursary->name . " bursary scheme.";
         $t->save();
     }
 
@@ -93,10 +93,11 @@ contra_entry_transaction_id
         $t->enterprise_id = $m->enterprise_id;
         $t->account_id = $m->beneficiary->account->id;
         $t->amount = abs($m->bursary->fund);
-        $t->is_contra_entry     = 0; 
+        $t->is_contra_entry     = 0;
         $t->payment_date = Carbon::now();
         $t->created_by_id = Auth::user()->id;
         $t->school_pay_transporter_id = "-";
+        $t->source = 'BURSARY';
         $t->description = "Bursary funds of UGX " . number_format($t->amount) . " deposited to account by " . $m->bursary->name . " bursary scheme.";
         $t->save();
     }

@@ -11,6 +11,7 @@ use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
+use Illuminate\Support\Facades\DB;
 
 class SessionReportController extends AdminController
 {
@@ -228,31 +229,162 @@ class SessionReportController extends AdminController
         $u = Admin::user();
         $form->hidden('enterprise_id')->value($u->enterprise_id);
 
-        // Report Basic Information
-        $form->html('<h4 style="margin-top: 0; padding: 10px; background: #f5f5f5; border-left: 3px solid #3c8dbc;"><i class="fa fa-file-text"></i> Report Information</h4>');
+        // ── Report Basic Information ──────────────────────────────────────────
+        $form->html('<h4 style="margin-top:0;padding:10px;background:#f5f5f5;border-left:3px solid #3c8dbc;"><i class="fa fa-file-text"></i> Report Information</h4>');
 
-        $form->date('start_date', __('Start Date'))
+        $form->date('start_date', 'Start Date')
             ->default(date('Y-m-d'))
             ->rules('required')
             ->help('First day of the reporting period');
 
-        $form->date('end_date', __('End Date'))
+        $form->date('end_date', 'End Date')
             ->default(date('Y-m-d'))
             ->rules('required|after_or_equal:start_date')
             ->help('Last day of the reporting period');
 
-        $form->radio('type', __('Report Type'))
+        $form->radio('type', 'Attendance Type')
             ->options([
-                'CLASS_ATTENDANCE' => 'Class Attendance Report',
-                'THEOLOGY_ATTENDANCE' => 'Theology Class Attendance',
-                'STUDENT_REPORT' => 'Student Daily Report',
+                'CLASS_ATTENDANCE'    => 'Class Attendance',
+                'THEOLOGY_ATTENDANCE' => 'Theology Attendance',
+                'STUDENT_REPORT'      => 'Student Daily Report',
                 'ACTIVITY_ATTENDANCE' => 'Activity Participation',
-                'STUDENT_MEAL' => 'Student Meals Report',
-                'STUDENT_LEAVE' => 'Student Leave Report',
+                'STUDENT_MEAL'        => 'Student Meals',
+                'STUDENT_LEAVE'       => 'Student Leave',
             ])
             ->default('CLASS_ATTENDANCE')
-            ->rules('required')
-            ->help('Select the type of attendance report to generate');
+            ->rules('required');
+
+        $form->divider();
+
+        // ── Scope: All / By Class / By Stream ────────────────────────────────
+        $form->html('<h4 style="margin-top:0;padding:10px;background:#f5f5f5;border-left:3px solid #00a65a;"><i class="fa fa-filter"></i> Report Scope</h4>');
+
+        $form->radio('target_audience_type', 'Filter By')
+            ->options([
+                'ALL'    => 'All Classes (entire school)',
+                'CLASS'  => 'Specific Class(es)',
+                'STREAM' => 'Specific Stream(s)',
+            ])
+            ->default('ALL');
+
+        // Build class options
+        $classOptions = AcademicClass::where('enterprise_id', $u->enterprise_id)
+            ->orderBy('short_name')
+            ->get()
+            ->mapWithKeys(fn($c) => [$c->id => $c->short_name])
+            ->toArray();
+
+        // Build stream options (label: "ClassName – StreamName")
+        $streamOptions = DB::table('academic_class_sctreams as s')
+            ->join('academic_classes as c', 's.academic_class_id', '=', 'c.id')
+            ->where('s.enterprise_id', $u->enterprise_id)
+            ->orderBy('c.short_name')
+            ->orderBy('s.name')
+            ->get(['s.id', 's.name', 'c.short_name'])
+            ->mapWithKeys(fn($r) => [$r->id => "{$r->short_name} — {$r->name}"])
+            ->toArray();
+
+        // Encode for JS
+        $classOptionsJson  = json_encode($classOptions);
+        $streamOptionsJson = json_encode($streamOptions);
+
+        $form->html(<<<HTML
+<div class="form-group" id="scope-selector-wrap">
+    <label class="col-md-2 control-label">Classes / Streams</label>
+    <div class="col-md-8">
+        <div id="scope-class-wrap" style="display:none;">
+            <p class="help-block" style="margin-top:0;">Hold Ctrl / Cmd to select multiple.</p>
+            <select id="scope-class-select" name="_scope_class_ids[]" multiple
+                    size="8"
+                    style="width:100%;border:1px solid #d2d6de;padding:4px;border-radius:0;">
+            </select>
+        </div>
+        <div id="scope-stream-wrap" style="display:none;">
+            <p class="help-block" style="margin-top:0;">Hold Ctrl / Cmd to select multiple.</p>
+            <select id="scope-stream-select" name="_scope_stream_ids[]" multiple
+                    size="8"
+                    style="width:100%;border:1px solid #d2d6de;padding:4px;border-radius:0;">
+            </select>
+        </div>
+        <div id="scope-all-msg">
+            <em class="text-muted">All classes will be included in the report.</em>
+        </div>
+    </div>
+</div>
+<script>
+(function() {
+    var classOptions  = {$classOptionsJson};
+    var streamOptions = {$streamOptionsJson};
+
+    function buildOptions(sel, opts, savedIds) {
+        sel.innerHTML = '';
+        Object.entries(opts).forEach(function([id, label]) {
+            var opt = document.createElement('option');
+            opt.value = id;
+            opt.textContent = label;
+            if (savedIds && savedIds.indexOf(parseInt(id)) !== -1) opt.selected = true;
+            sel.appendChild(opt);
+        });
+    }
+
+    function refreshScope(val, savedClassIds, savedStreamIds) {
+        var cWrap  = document.getElementById('scope-class-wrap');
+        var sWrap  = document.getElementById('scope-stream-wrap');
+        var allMsg = document.getElementById('scope-all-msg');
+        var cSel   = document.getElementById('scope-class-select');
+        var sSel   = document.getElementById('scope-stream-select');
+        cWrap.style.display  = 'none';
+        sWrap.style.display  = 'none';
+        allMsg.style.display = 'none';
+        if (val === 'CLASS') {
+            buildOptions(cSel, classOptions, savedClassIds || []);
+            cWrap.style.display = 'block';
+        } else if (val === 'STREAM') {
+            buildOptions(sSel, streamOptions, savedStreamIds || []);
+            sWrap.style.display = 'block';
+        } else {
+            allMsg.style.display = 'block';
+        }
+    }
+
+    function init() {
+        // Read existing saved values from the page (edit mode)
+        var savedType      = document.querySelector('input[name="target_audience_type"]:checked');
+        var currentVal     = savedType ? savedType.value : 'ALL';
+
+        // Try to read saved IDs from hidden fields if they exist (edit mode pre-fill)
+        var savedClassIds  = [];
+        var savedStreamIds = [];
+        try {
+            var rawData = document.getElementById('_saved_audience_data');
+            if (rawData) {
+                var parsed = JSON.parse(rawData.value);
+                savedClassIds  = parsed.class_ids  || [];
+                savedStreamIds = parsed.stream_ids || [];
+            }
+        } catch(e) {}
+
+        refreshScope(currentVal, savedClassIds, savedStreamIds);
+
+        document.querySelectorAll('input[name="target_audience_type"]').forEach(function(radio) {
+            radio.addEventListener('change', function() {
+                refreshScope(this.value, savedClassIds, savedStreamIds);
+            });
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+</script>
+HTML);
+
+        $form->hidden('_saved_audience_data')
+            ->attribute('id', '_saved_audience_data')
+            ->default('{}');
 
         $form->divider();
 
@@ -304,15 +436,32 @@ class SessionReportController extends AdminController
             </ul>
         </div>');
 
-        // Process report automatically after save
+        // Capture raw multi-select inputs and pack into target_audience_data before save
+        $form->saving(function (Form $form) {
+            $audienceType = $form->input('target_audience_type') ?? 'ALL';
+            $data = [];
+
+            if ($audienceType === 'CLASS') {
+                $classIds = array_filter(array_map('intval', (array) request()->input('_scope_class_ids', [])));
+                $data = ['class_ids' => array_values($classIds)];
+            } elseif ($audienceType === 'STREAM') {
+                $streamIds = array_filter(array_map('intval', (array) request()->input('_scope_stream_ids', [])));
+                $data = ['stream_ids' => array_values($streamIds)];
+            }
+
+            $form->input('target_audience_data', $data);
+            $form->input('_saved_audience_data', json_encode($data));
+        });
+
+        // After save: re-process the report and generate PDF
         $form->saved(function (Form $form) {
             $report = SessionReport::find($form->model()->id);
             if ($report) {
                 try {
                     $report->do_process();
-                    admin_success('Success', 'Report generated successfully with PDF!');
+                    admin_success('Success', 'Attendance report generated and PDF created.');
                 } catch (\Exception $e) {
-                    admin_error('Error', 'Report saved but processing failed: ' . $e->getMessage());
+                    admin_error('Error', 'Saved but report processing failed: ' . $e->getMessage());
                 }
             }
         });

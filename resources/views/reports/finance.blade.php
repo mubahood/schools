@@ -110,6 +110,40 @@
 
         <tr>
             <td style="width: 30%;" class="pt-2">
+                <div class="my-card mr-1" style="border-left: 4px solid #28a745;">
+                    <p class="black fs-14 fw-700">Fees Advance</p>
+                    <p class="py-3"><span>UGX</span><span
+                            class="fs-26 fw-800" style="color:#28a745">{{ number_format($r->total_fees_advance ?? 0) }}</span>
+                    </p>
+                    <p class="fw-400 fs-14 text-dark">{{ number_format($r->count_students_advance ?? 0) }} student(s) who have paid in advance / overpaid.</p>
+                </div>
+            </td>
+            <td style="width: 30%;">
+                <div class="my-card mx-1" style="border-left: 4px solid #dc3545;">
+                    <p class="black fs-14 fw-700">Balance Due (Owing)</p>
+                    <p class="py-3"><span>UGX</span><span
+                            class="fs-26 fw-800" style="color:#dc3545">{{ number_format($r->total_fees_owing ?? 0) }}</span>
+                    </p>
+                    <p class="fw-400 fs-14 text-dark">{{ number_format($r->count_students_owing ?? 0) }} student(s) with outstanding fees balance.</p>
+                </div>
+            </td>
+            @php
+                $expectedTotal = ($r->total_expected_tuition ?? 0) + ($r->total_expected_service_fees ?? 0);
+                $collectionRate = $expectedTotal > 0 ? round(($r->total_payment_total / $expectedTotal) * 100, 1) : 0;
+                $totalActive = ($r->count_students_advance ?? 0) + ($r->count_students_owing ?? 0);
+                $clearedCount = $totalActive - ($r->count_students_owing ?? 0);
+            @endphp
+            <td style="width: 30%;">
+                <div class="my-card ml-1" style="border-left: 4px solid #007bff;">
+                    <p class="black fs-14 fw-700">Collection Rate</p>
+                    <p class="py-3"><span class="fs-26 fw-800" style="color:#007bff">{{ $collectionRate }}%</span></p>
+                    <p class="fw-400 fs-14 text-dark">{{ number_format($r->total_payment_total) }} collected of {{ number_format($expectedTotal) }} expected.</p>
+                </div>
+            </td>
+        </tr>
+
+        <tr>
+            <td style="width: 30%;" class="pt-2">
                 <div class="my-card mr-1">
                     <p class="black fs-14 fw-700">Total Budget</p>
                     <p class="py-3"><span>UGX</span><span
