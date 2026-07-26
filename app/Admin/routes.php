@@ -285,6 +285,7 @@ Route::group([
     // Cascade dropdowns
     $router->get('timetable/api/streams-by-class',      'TimetableController@apiStreamsByClass')->name('timetable.api.streams');
     $router->get('timetable/api/subjects-by-class',     'TimetableController@apiSubjectsByClass')->name('timetable.api.subjects');
+    $router->get('timetable/api/classes-by-year',       'TimetableController@apiClassesByYear')->name('timetable.api.classes');
     // Resource managers
     $router->resource('timetable-entries', TimetableEntryController::class);
     $router->resource('timetable-rooms',   TimetableRoomController::class);

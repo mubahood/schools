@@ -92,24 +92,37 @@ class TimetableController extends Controller
         $u   = Admin::user();
         $ent = $u->ent;
 
-        $years    = AcademicYear::where('enterprise_id', $u->enterprise_id)->orderByDesc('id')->get();
-        $terms    = Term::where('enterprise_id', $u->enterprise_id)->orderByDesc('id')->get();
-        $classes  = AcademicClass::where('enterprise_id', $u->enterprise_id)->orderBy('name')->get();
-        $teachers = User::where(['enterprise_id' => $u->enterprise_id, 'user_type' => 'employee'])
-            ->orderBy('name')->get();
-        $rooms    = TimetableRoom::where('enterprise_id', $u->enterprise_id)->where('is_active', 1)->orderBy('name')->get();
-        $streams  = AcademicClassSctream::where('enterprise_id', $u->enterprise_id)->orderBy('name')->get();
-
         $defaultYearId = $ent->academic_year_id ?: $ent->dp_year;
         $defaultTermId = optional($ent->dpTerm())->id;
+
+        $years    = AcademicYear::where('enterprise_id', $u->enterprise_id)->orderByDesc('id')->get();
+        $terms    = Term::where('enterprise_id', $u->enterprise_id)->orderByDesc('id')->get();
+        // Only classes for the current year — cascade will reload via AJAX when year changes
+        $classes  = AcademicClass::where('enterprise_id', $u->enterprise_id)
+            ->where('academic_year_id', $defaultYearId)
+            ->orderBy('name')->get(['id', 'name']);
+        $teachers = User::where(['enterprise_id' => $u->enterprise_id, 'user_type' => 'employee'])
+            ->orderBy('name')->get(['id', 'name']);
+        $rooms    = TimetableRoom::where('enterprise_id', $u->enterprise_id)
+            ->where('is_active', 1)->orderBy('name')->get(['id', 'name']);
 
         return $content
             ->title('Timetable View')
             ->breadcrumb(['text' => 'Timetable', 'url' => '#'], ['text' => 'View'])
             ->body(view('admin.timetable.view', compact(
-                'years', 'terms', 'classes', 'teachers', 'rooms', 'streams',
+                'years', 'terms', 'classes', 'teachers', 'rooms',
                 'defaultYearId', 'defaultTermId'
             )));
+    }
+
+    public function apiClassesByYear(Request $request): JsonResponse
+    {
+        $u      = Admin::user();
+        $yearId = $request->year_id ?: ($u->ent->academic_year_id ?: $u->ent->dp_year);
+        $classes = AcademicClass::where('enterprise_id', $u->enterprise_id)
+            ->where('academic_year_id', $yearId)
+            ->orderBy('name')->get(['id', 'name']);
+        return response()->json($classes);
     }
 
     // ─────────────────────────────────────────────
