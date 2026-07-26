@@ -5,44 +5,44 @@
 <title>School Timetable</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family: DejaVu Sans, Arial, sans-serif; font-size:8.5pt; color:#1a1a1a; background:#fff; }
-.page { padding:14px 16px; }
+body { font-family: DejaVu Sans, Arial, sans-serif; font-size:8pt; color:#1a1a1a; background:#fff; }
+.page { padding:10px 12px; }
 
 /* Header */
-.doc-header { text-align:center; padding-bottom:10px; margin-bottom:12px; border-bottom:2.5px solid #1b4332; }
-.school-name { font-size:13pt; font-weight:700; color:#1b4332; text-transform:uppercase; letter-spacing:1px; }
-.doc-title { font-size:10pt; font-weight:700; color:#2d6a4f; margin:3px 0; }
-.doc-meta { font-size:7.5pt; color:#6c757d; }
+.doc-header { text-align:center; padding-bottom:7px; margin-bottom:8px; border-bottom:2px solid #1b4332; }
+.school-name { font-size:12pt; font-weight:700; color:#1b4332; text-transform:uppercase; letter-spacing:.8px; }
+.doc-title { font-size:9pt; font-weight:700; color:#2d6a4f; margin:2px 0; }
+.doc-meta { font-size:7pt; color:#6c757d; }
 
 /* Timetable grid */
 table.tt { width:100%; border-collapse:collapse; }
 table.tt thead tr th {
     background:#1b4332;
     color:#fff;
-    font-size:7.5pt;
+    font-size:7pt;
     font-weight:700;
-    padding:5px 4px;
+    padding:4px 3px;
     text-align:center;
     border:1px solid #155c38;
 }
-table.tt thead tr th:first-child { width:56px; }
-.tt-time { background:#eaf2ec; font-size:7pt; font-weight:700; color:#1b4332; text-align:center; padding:4px 3px; border:1px solid #c8dcc9; vertical-align:middle; }
-.tt-cell { border:1px solid #dde8de; padding:2px; vertical-align:top; min-height:40px; }
-.tt-cell-inner { border-radius:4px; padding:4px 5px; min-height:36px; }
+table.tt thead tr th:first-child { width:48px; }
+.tt-time { background:#eaf2ec; font-size:6.5pt; font-weight:700; color:#1b4332; text-align:center; padding:3px 2px; border:1px solid #c8dcc9; vertical-align:middle; }
+.tt-cell { border:1px solid #d0ddd0; padding:1px; vertical-align:top; }
+.tt-cell-inner { border-radius:0; padding:3px 4px; }
 .tt-cell-subj { font-size:7.5pt; font-weight:700; color:#fff; margin-bottom:1px; }
-.tt-cell-cls  { font-size:6.5pt; color:rgba(255,255,255,.9); }
-.tt-cell-meta { font-size:6pt; color:rgba(255,255,255,.8); }
-.empty-cell { background:#f9fbf9; }
+.tt-cell-cls  { font-size:6.5pt; color:rgba(255,255,255,.95); font-weight:600; }
+.tt-cell-meta { font-size:6pt; color:rgba(255,255,255,.85); }
+.empty-cell { background:#fafbfa; min-height:28px; }
 
 /* Summary table */
-.summary-section { margin-top:16px; border-top:1.5px solid #e0e8e0; padding-top:10px; }
-.summary-section h4 { font-size:8pt; font-weight:700; color:#1b4332; text-transform:uppercase; letter-spacing:.6px; margin-bottom:8px; }
+.summary-section { margin-top:10px; border-top:1px solid #d0ddd0; padding-top:7px; }
+.summary-section h4 { font-size:7.5pt; font-weight:700; color:#1b4332; text-transform:uppercase; letter-spacing:.5px; margin-bottom:5px; }
 table.summary { border-collapse:collapse; }
-table.summary td, table.summary th { padding:4px 10px; border:1px solid #dde8de; font-size:7.5pt; }
+table.summary td, table.summary th { padding:3px 8px; border:1px solid #d0ddd0; font-size:7pt; }
 table.summary thead th { background:#1b4332; color:#fff; }
 table.summary tbody tr:nth-child(even) { background:#f5faf5; }
 
-.footer { margin-top:14px; border-top:1px solid #dde8de; padding-top:6px; text-align:right; font-size:6.5pt; color:#aaa; }
+.footer { margin-top:8px; border-top:1px solid #d0ddd0; padding-top:4px; text-align:right; font-size:6pt; color:#aaa; }
 </style>
 </head>
 <body>
