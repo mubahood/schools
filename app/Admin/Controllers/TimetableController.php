@@ -57,8 +57,10 @@ class TimetableController extends Controller
                 return $r;
             });
 
-        // Class schedule completeness: subjects with at least one entry vs total subjects
-        $classStats = AcademicClass::where('enterprise_id', $u->enterprise_id)->get()->map(function ($c) use ($base, $yearId) {
+        // Class schedule completeness: only classes belonging to the selected academic year
+        $classStats = AcademicClass::where('enterprise_id', $u->enterprise_id)
+            ->where('academic_year_id', $yearId)
+            ->orderBy('name')->get()->map(function ($c) use ($base, $yearId) {
             $totalSubjects    = Subject::where('academic_class_id', $c->id)->count();
             $scheduledSubjects = (clone $base)->where('academic_class_id', $c->id)
                 ->distinct('subject_id')->count('subject_id');
@@ -68,7 +70,7 @@ class TimetableController extends Controller
                 'scheduled'  => $scheduledSubjects,
                 'periods'    => (clone $base)->where('academic_class_id', $c->id)->count(),
             ];
-        })->filter(fn($c) => $c['total'] > 0 || $c['periods'] > 0)->values();
+        })->values();
 
         $years = AcademicYear::where('enterprise_id', $u->enterprise_id)->orderByDesc('id')->get();
         $terms = Term::where('enterprise_id', $u->enterprise_id)->orderByDesc('id')->get();
