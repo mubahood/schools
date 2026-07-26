@@ -54,13 +54,11 @@ table.tv-g thead th{background:#1b4332;color:#fff;padding:8px 10px;font-size:.76
 table.tv-g thead th.time-h{width:68px;text-align:center}
 .tt-time{background:#f0f4f3;text-align:center;font-size:.75rem;font-weight:800;color:#1b4332;padding:5px 4px;vertical-align:middle;border:1px solid #dee2e6;white-space:nowrap}
 .tt-cell{background:#fff;border:1px solid #e9ecef;padding:3px;vertical-align:top}
-.tt-ci{padding:7px 8px;margin-bottom:2px;position:relative}
+.tt-ci{padding:8px 10px;margin-bottom:2px}
 .tt-ci:last-child{margin-bottom:0}
-.tt-cs{font-size:.79rem;font-weight:800;color:#fff;line-height:1.2;margin-bottom:1px}
-.tt-cc{font-size:.69rem;color:rgba(255,255,255,.9);line-height:1.3;margin-bottom:1px}
-.tt-cm{font-size:.68rem;color:rgba(255,255,255,.8);line-height:1.3}
-.tt-ce{font-size:.64rem;color:rgba(255,255,255,.65);border-top:1px solid rgba(255,255,255,.2);margin-top:4px;padding-top:3px;display:block;text-decoration:none}
-.tt-ce:hover{color:#fff}
+.tt-cs{font-size:.86rem;font-weight:800;color:#fff;line-height:1.25;margin-bottom:3px;letter-spacing:.1px}
+.tt-cc{font-size:.74rem;color:rgba(255,255,255,.95);line-height:1.4;margin-bottom:1px;font-weight:600}
+.tt-cm{font-size:.71rem;color:rgba(255,255,255,.85);line-height:1.4}
 .tt-empty{text-align:center;padding:8px 4px;color:#dee2e6;font-size:.7rem}
 
 /* ── List ── */
@@ -367,10 +365,9 @@ function renderGrid(entries){
         h+='<div class="tt-ci" style="background:'+e.color+'">'
           +'<div class="tt-cs">'+txt(e.subject)+'</div>'
           +(e.class!=='—'?'<div class="tt-cc">'+txt(e.class)+(e.stream&&e.stream!=='—'?' · '+txt(e.stream):'')+'</div>':'')
-          +'<div class="tt-cm"><i class="fa fa-user" style="font-size:.6rem"></i> '+txt(e.teacher)+'</div>'
-          +(e.room&&e.room!=='—'?'<div class="tt-cm"><i class="fa fa-building" style="font-size:.6rem"></i> '+txt(e.room)+'</div>':'')
-          +'<div class="tt-cm">'+e.start_time+'–'+e.end_time+' ('+e.duration+'min)</div>'
-          +'<a href="'+e.edit_url+'" class="tt-ce">✏ Edit</a>'
+          +'<div class="tt-cm">'+txt(e.teacher)+'</div>'
+          +(e.room&&e.room!=='—'?'<div class="tt-cm">'+txt(e.room)+'</div>':'')
+          +'<div class="tt-cm" style="margin-top:3px;font-weight:600;color:rgba(255,255,255,.95)">'+e.start_time+'–'+e.end_time+' &middot; '+e.duration+'min</div>'
           +'</div>';
       });
       h+='</td>';

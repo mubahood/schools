@@ -42,7 +42,11 @@ class TimetableEntryController extends AdminController
             )));
     }
 
+    // All CRUD is handled via modal + JSON API — redirect any direct URL access
+    public function create(Content $content)   { return redirect(admin_url('timetable-entries')); }
+    public function edit($id, Content $content){ return redirect(admin_url('timetable-entries')); }
+    public function show($id, Content $content){ return redirect(admin_url('timetable-entries')); }
     protected function grid()      { return null; }
-    protected function detail($id) { return redirect(admin_url('timetable-entries')); }
+    protected function detail($id) { return null; }
     protected function form()      { return null; }
 }
