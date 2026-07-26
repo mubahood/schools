@@ -9,9 +9,11 @@ class AddColorToSubjects extends Migration
 {
     public function up()
     {
-        Schema::table('subjects', function (Blueprint $table) {
-            $table->string('color', 20)->nullable()->after('subject_name');
-        });
+        if (!Schema::hasColumn('subjects', 'color')) {
+            Schema::table('subjects', function (Blueprint $table) {
+                $table->string('color', 20)->nullable()->after('subject_name');
+            });
+        }
 
         // Seed default colors based on subject name keywords
         $map = [
