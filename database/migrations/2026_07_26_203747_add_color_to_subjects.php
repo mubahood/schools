@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\Subject;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class AddColorToSubjects extends Migration
@@ -29,12 +29,16 @@ class AddColorToSubjects extends Migration
             '#c77c00' => ['luganda', 'local', 'vernacular', 'mother tongue'],
         ];
 
-        Subject::whereNull('color')->get()->each(function ($s) use ($map) {
+        // Use raw DB to bypass model boot hooks
+        DB::table('subjects')->whereNull('color')->orderBy('id')->each(function ($s) use ($map) {
             $n = strtolower($s->subject_name ?? '');
             if (!$n) return;
             foreach ($map as $color => $keywords) {
                 foreach ($keywords as $kw) {
-                    if (str_contains($n, $kw)) { $s->update(['color' => $color]); return; }
+                    if (str_contains($n, $kw)) {
+                        DB::table('subjects')->where('id', $s->id)->update(['color' => $color]);
+                        return;
+                    }
                 }
             }
         });
