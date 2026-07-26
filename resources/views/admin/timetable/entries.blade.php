@@ -297,7 +297,7 @@ table.te tbody tr:last-child td{border-bottom:none}
         <label>Duration (minutes) <em>*</em></label>
         <input type="number" id="m-dur" class="fi" value="40" min="10" max="300" onchange="TE.conflict()">
         <div class="dur-chips">
-          @foreach([40,45,60,80,90] as $m)
+          @foreach([40,45,60,80,90,120] as $m)
           <span class="dur-ch" onclick="document.getElementById('m-dur').value={{ $m }};TE.conflict()">{{ $m }}</span>
           @endforeach
         </div>
