@@ -73,6 +73,7 @@ table.fin tbody tr:last-child td{border-bottom:none}
     <a href="{{ admin_url('finance-expenditures') }}"><i class="fa fa-minus-circle"></i> Expenditures</a>
     <a href="{{ admin_url('finance-budgets') }}" class="act"><i class="fa fa-bar-chart"></i> Budget</a>
     <a href="{{ admin_url('finance-creditors') }}"><i class="fa fa-credit-card"></i> Creditors</a>
+    <a href="{{ admin_url('finance-suppliers') }}"><i class="fa fa-truck"></i> Suppliers</a>
     <a href="{{ admin_url('accounts') }}"><i class="fa fa-list-alt"></i> Accounts</a>
     <button class="pri" style="margin-left:auto" onclick="FB.open()"><i class="fa fa-plus"></i> New Budget Entry</button>
   </div>
@@ -180,8 +181,8 @@ table.fin tbody tr:last-child td{border-bottom:none}
     </div>
     <div class="fg" style="margin-bottom:16px">
       <div class="fl">
-        <label>Particulars / Description</label>
-        <textarea id="bm-desc" class="fi" rows="2" style="resize:vertical" placeholder="Describe this budget line…"></textarea>
+        <label>Particulars / Description <em style="color:#e63946;font-style:normal">*</em></label>
+        <textarea id="bm-desc" class="fi" rows="2" style="resize:vertical" placeholder="Describe this budget line… (min 4 characters)"></textarea>
       </div>
     </div>
     <div class="merr-b" id="bm-err"></div>
@@ -250,6 +251,7 @@ window.FB = {
           +'<td style="text-align:right;padding-right:10px;white-space:nowrap">'
           +'<a href="'+expUrl+'" class="ab d" title="View expenditure for this account" style="font-size:.75rem"><i class="fa fa-external-link"></i></a>'
           +'<button class="ab e" onclick="FB.edit('+r.id+')" title="Edit"><i class="fa fa-pencil"></i></button>'
+          +'<button class="ab d" onclick="FB.dup('+r.id+')" title="Duplicate"><i class="fa fa-copy"></i></button>'
           +'<button class="ab x" onclick="FB.del('+r.id+')" title="Delete"><i class="fa fa-trash"></i></button>'
           +'</td></tr>';
       }).join('');
@@ -280,11 +282,22 @@ window.FB = {
     fetch(API+'/'+id,{method:'DELETE',headers:{'X-CSRF-TOKEN':CSRF,'X-Requested-With':'XMLHttpRequest'}})
       .then(r=>r.json()).then(function(d){ if(d.success){FB.load();btoast('Budget entry deleted');} });
   },
+  dup: function(id){
+    fetch(API+'/'+id+'/duplicate',{method:'POST',headers:{'X-CSRF-TOKEN':CSRF,'X-Requested-With':'XMLHttpRequest'}})
+      .then(r=>r.json()).then(function(d){ if(d.success){FB.load();btoast('Duplicated ✓');} });
+  },
   save: function(){
     var btn=document.getElementById('bm-save');
     btn.disabled=true; btn.innerHTML='<i class="fa fa-spinner fa-spin"></i> Saving…';
     bHideErr();
-    var body={term_id:v('bm-term'),payment_date:v('bm-date'),account_id:v('bm-acc'),quantity:v('bm-qty'),unit_price:v('bm-price'),description:v('bm-desc')||null};
+    var desc=v('bm-desc');
+    if(!desc||desc.length<4){
+      btn.disabled=false; btn.innerHTML='<i class="fa fa-check"></i> Save Budget Entry';
+      bShowErr('Particulars / Description is required (minimum 4 characters).');
+      document.getElementById('bm-desc').focus();
+      return;
+    }
+    var body={term_id:v('bm-term'),payment_date:v('bm-date'),account_id:v('bm-acc'),quantity:v('bm-qty'),unit_price:v('bm-price'),description:desc};
     fetch(eid?API+'/'+eid:API,{method:eid?'PUT':'POST',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':CSRF,'X-Requested-With':'XMLHttpRequest','Accept':'application/json'},body:JSON.stringify(body)})
       .then(r=>r.json()).then(function(d){
         btn.disabled=false; btn.innerHTML='<i class="fa fa-check"></i> Save Budget Entry';
@@ -304,8 +317,9 @@ window.FB = {
     function doSave(){
       if(done) return; done=true;
       var nv=inp.value.trim(); if(nv===cur){revert();return;}
+      if(nv.length<4){btoast('Particulars must be at least 4 characters.');revert();return;}
       cell.innerHTML='<span style="color:#adb5bd;font-size:.8rem"><i class="fa fa-spinner fa-spin"></i></span>';
-      var body={term_id:rec.term_id,payment_date:rec.payment_date,account_id:rec.account_id,quantity:rec.quantity,unit_price:rec.unit_price,description:nv||null};
+      var body={term_id:rec.term_id,payment_date:rec.payment_date,account_id:rec.account_id,quantity:rec.quantity,unit_price:rec.unit_price,description:nv};
       fetch(API+'/'+id,{method:'PUT',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':CSRF,'X-Requested-With':'XMLHttpRequest','Accept':'application/json'},body:JSON.stringify(body)})
         .then(r=>r.json()).then(function(d){
           if(d.success){rec.description=nv;cell.innerHTML='<span class="dt" title="'+esc(nv)+'">'+esc(nv.length>45?nv.substring(0,45)+'…':nv||'—')+'</span>';btoast('Saved ✓');}

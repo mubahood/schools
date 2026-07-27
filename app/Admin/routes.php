@@ -128,7 +128,8 @@ Route::group([
     $router->get('finance/api/budgets/{id}', 'FinanceController@apiBudShow');
     $router->post('finance/api/budgets', 'FinanceController@apiBudStore');
     $router->put('finance/api/budgets/{id}', 'FinanceController@apiBudUpdate');
-    $router->delete('finance/api/budgets/{id}', 'FinanceController@apiBudDestroy');
+    $router->delete('finance/api/budgets/{id}',                'FinanceController@apiBudDestroy');
+    $router->post('finance/api/budgets/{id}/duplicate',        'FinanceController@apiBudDuplicate');
 
     // Finance API — Creditors
     $router->get('finance/api/creditors', 'FinanceController@apiCredList');
@@ -141,6 +142,16 @@ Route::group([
     $router->get('finance/api/creditor-payments', 'FinanceController@apiPayList');
     $router->post('finance/api/creditor-payments', 'FinanceController@apiPayStore');
     $router->delete('finance/api/creditor-payments/{id}', 'FinanceController@apiPayDestroy');
+
+    // Finance AJAX page — Suppliers
+    $router->get('finance-suppliers', 'FinanceController@suppliers')->name('finance.suppliers');
+
+    // Finance API — Suppliers
+    $router->get('finance/api/suppliers',           'FinanceController@apiSupList');
+    $router->get('finance/api/suppliers/{id}',      'FinanceController@apiSupShow');
+    $router->post('finance/api/suppliers',           'FinanceController@apiSupStore');
+    $router->put('finance/api/suppliers/{id}',       'FinanceController@apiSupUpdate');
+    $router->delete('finance/api/suppliers/{id}',    'FinanceController@apiSupDestroy');
 
     // Finance API — Cascade
     $router->get('finance/api/accounts-by-vote', 'FinanceController@apiAccountsByVote');

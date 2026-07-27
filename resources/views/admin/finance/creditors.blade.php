@@ -101,6 +101,7 @@ table.fin tbody tr:last-child td{border-bottom:none}
     <a href="{{ admin_url('finance-expenditures') }}"><i class="fa fa-minus-circle"></i> Expenditures</a>
     <a href="{{ admin_url('finance-budgets') }}"><i class="fa fa-bar-chart"></i> Budget</a>
     <a href="{{ admin_url('finance-creditors') }}" class="act"><i class="fa fa-credit-card"></i> Creditors</a>
+    <a href="{{ admin_url('finance-suppliers') }}"><i class="fa fa-truck"></i> Suppliers</a>
     <a href="{{ admin_url('accounts') }}"><i class="fa fa-list-alt"></i> Accounts</a>
     <button class="pri" style="margin-left:auto" onclick="FC.openCred()"><i class="fa fa-plus"></i> New Creditor</button>
   </div>
@@ -643,7 +644,18 @@ function fmt(n){ return Number(n||0).toLocaleString(); }
 function today(){ return new Date().toISOString().slice(0,10); }
 function ctoast(msg){ var t=document.createElement('div');t.innerHTML=msg;t.style.cssText='position:fixed;bottom:28px;right:28px;background:#1b4332;color:#fff;padding:11px 22px;border-radius:10px;font-size:.88rem;font-weight:700;z-index:999999;box-shadow:0 6px 24px rgba(0,0,0,.22);animation:toastIn .2s ease';document.body.appendChild(t);setTimeout(function(){t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(function(){t.remove();},300);},2600); }
 
-// Boot
+// Boot: handle ?supplier_id= URL param to pre-set supplier filter
+(function(){
+  var urlSup = new URLSearchParams(location.search).get('supplier_id');
+  if(urlSup){
+    var sup = SUPPLIERS.find(function(s){ return s.id == parseInt(urlSup,10); });
+    if(sup){
+      document.getElementById('f-sup-id').value = urlSup;
+      var d=document.getElementById('ss-fsup-display');
+      if(d){ d.textContent=sup.name; d.style.color='#212529'; }
+    }
+  }
+})();
 FC.load();
 ssRenderAll('fsup', SUPPLIERS, true);
 ssRenderAll('sup', SUPPLIERS, false);

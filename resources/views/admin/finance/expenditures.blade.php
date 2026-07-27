@@ -97,6 +97,7 @@ table.fin tbody tr:last-child td{border-bottom:none}
     <a href="{{ admin_url('finance-expenditures') }}" class="act"><i class="fa fa-minus-circle"></i> Expenditures</a>
     <a href="{{ admin_url('finance-budgets') }}"><i class="fa fa-bar-chart"></i> Budget</a>
     <a href="{{ admin_url('finance-creditors') }}"><i class="fa fa-credit-card"></i> Creditors</a>
+    <a href="{{ admin_url('finance-suppliers') }}"><i class="fa fa-truck"></i> Suppliers</a>
     <a href="{{ admin_url('accounts') }}"><i class="fa fa-list-alt"></i> Accounts</a>
     <button class="pri" style="margin-left:auto" onclick="FE.open()"><i class="fa fa-plus"></i> New Expenditure</button>
   </div>
@@ -132,6 +133,10 @@ table.fin tbody tr:last-child td{border-bottom:none}
       @foreach($PAY_METHODS as $m)
         <option value="{{ $m }}">{{ $m }}</option>
       @endforeach
+    </select>
+    <span class="bl">Supplier</span>
+    <select id="f-sup-filter" onchange="FE.load()" style="max-width:180px">
+      <option value="">All</option>
     </select>
     <input type="search" id="f-q" placeholder="Search particulars…" oninput="FE.debSearch()" style="flex:1;min-width:140px">
   </div>
@@ -259,8 +264,8 @@ table.fin tbody tr:last-child td{border-bottom:none}
 
     <div class="fg" style="margin-bottom:16px">
       <div class="fl">
-        <label>Particulars / Description</label>
-        <textarea id="m-desc" class="fi" rows="2" style="resize:vertical" placeholder="Describe what was purchased…"></textarea>
+        <label>Particulars / Description <em style="color:#e63946;font-style:normal">*</em></label>
+        <textarea id="m-desc" class="fi" rows="2" style="resize:vertical" placeholder="Describe what was purchased… (min 4 characters)"></textarea>
       </div>
     </div>
 
@@ -359,12 +364,13 @@ window.FE = {
   load: function(){
     spin(true);
     var p = new URLSearchParams();
-    var t=v('f-term'), vt=v('f-vote'), ac=v('f-acc'), m=v('f-method'), q=v('f-q');
+    var t=v('f-term'), vt=v('f-vote'), ac=v('f-acc'), m=v('f-method'), q=v('f-q'), s=v('f-sup-filter');
     if(t)  p.set('term_id', t);
     if(vt) p.set('vote_id', vt);
     if(ac) p.set('account_id', ac);
     if(m)  p.set('payment_method', m);
     if(q)  p.set('q', q);
+    if(s)  p.set('supplier_id', s);
     fetch(API+'?'+p, hdr())
       .then(r=>r.json()).then(function(data){
         spin(false);
@@ -472,6 +478,13 @@ window.FE = {
     var btn = document.getElementById('m-save');
     btn.disabled=true; btn.innerHTML='<i class="fa fa-spinner fa-spin"></i> Saving…';
     hideErr();
+    var desc = v('m-desc');
+    if(!desc || desc.length < 4){
+      btn.disabled=false; btn.innerHTML='<i class="fa fa-check"></i> Save Expenditure';
+      showErr('Particulars / Description is required (minimum 4 characters).');
+      document.getElementById('m-desc').focus();
+      return;
+    }
     var isCredit = document.getElementById('m-credit-chk').checked;
     var body = {
       term_id:        v('m-term'),
@@ -481,7 +494,7 @@ window.FE = {
       payment_method: v('m-method')||null,
       quantity:       v('m-qty'),
       unit_price:     v('m-price'),
-      description:    v('m-desc')||null,
+      description:    desc,
       is_credit:      isCredit ? 'Yes' : 'No',
       credit_amount:  isCredit ? (v('m-credit-amt')||null) : null,
     };
@@ -519,8 +532,9 @@ window.FE = {
       if(done) return; done=true;
       var nv = inp.value.trim();
       if(nv===cur){ revert(); return; }
+      if(nv.length < 4){ toast('Particulars must be at least 4 characters.'); revert(); return; }
       cell.innerHTML = cr+'<span style="color:#adb5bd;font-size:.8rem"><i class="fa fa-spinner fa-spin"></i></span>';
-      var body={term_id:rec.term_id,payment_date:rec.payment_date,account_id:rec.account_id,supplier_id:rec.supplier_id||null,payment_method:rec.payment_method||null,quantity:rec.quantity,unit_price:rec.unit_price,description:nv||null,is_credit:rec.is_credit,credit_amount:rec.credit_amount};
+      var body={term_id:rec.term_id,payment_date:rec.payment_date,account_id:rec.account_id,supplier_id:rec.supplier_id||null,payment_method:rec.payment_method||null,quantity:rec.quantity,unit_price:rec.unit_price,description:nv,is_credit:rec.is_credit,credit_amount:rec.credit_amount};
       fetch(API+'/'+id,{method:'PUT',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':CSRF,'X-Requested-With':'XMLHttpRequest','Accept':'application/json'},body:JSON.stringify(body)})
         .then(r=>r.json()).then(function(d){
           if(d.success){rec.description=nv;cell.innerHTML=cr+'<span class="dt" title="'+esc(nv)+'">'+esc(nv.length>45?nv.substring(0,45)+'…':nv||'—')+'</span>';toast('Saved ✓');}
@@ -653,7 +667,15 @@ function toast(msg){
   setTimeout(function(){t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(function(){t.remove();},300);},2600);
 }
 
-// Boot
+// Boot: populate supplier filter and handle ?supplier_id= URL param
+(function(){
+  var sel = document.getElementById('f-sup-filter');
+  SUPPLIERS.forEach(function(s){
+    var o=document.createElement('option'); o.value=s.id; o.textContent=s.name; sel.appendChild(o);
+  });
+  var urlSup = new URLSearchParams(location.search).get('supplier_id');
+  if(urlSup) sel.value = urlSup;
+})();
 FE.load();
 ssRender('sup', SUPPLIERS);
 })();

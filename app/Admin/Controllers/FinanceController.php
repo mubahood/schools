@@ -14,6 +14,8 @@ use Encore\Admin\Layout\Content;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class FinanceController extends Controller
 {
@@ -234,7 +236,7 @@ class FinanceController extends Controller
             'payment_method' => 'nullable|string|max:50',
             'quantity'       => 'required|numeric|min:0.001',
             'unit_price'     => 'required|numeric|min:0',
-            'description'    => 'nullable|string|max:500',
+            'description'    => 'required|string|min:4|max:500',
             'is_credit'      => 'nullable|in:Yes,No',
             'credit_amount'  => 'nullable|numeric|min:0',
         ]);
@@ -263,7 +265,7 @@ class FinanceController extends Controller
             'payment_method' => 'nullable|string|max:50',
             'quantity'       => 'required|numeric|min:0.001',
             'unit_price'     => 'required|numeric|min:0',
-            'description'    => 'nullable|string|max:500',
+            'description'    => 'required|string|min:4|max:500',
             'is_credit'      => 'nullable|in:Yes,No',
             'credit_amount'  => 'nullable|numeric|min:0',
         ]);
@@ -328,7 +330,7 @@ class FinanceController extends Controller
             'account_id'   => 'required|integer',
             'quantity'     => 'required|numeric|min:0.001',
             'unit_price'   => 'required|numeric|min:0',
-            'description'  => 'nullable|string|max:500',
+            'description'  => 'required|string|min:4|max:500',
         ]);
 
         $data['enterprise_id'] = $u->enterprise_id;
@@ -351,7 +353,7 @@ class FinanceController extends Controller
             'account_id'   => 'required|integer',
             'quantity'     => 'required|numeric|min:0.001',
             'unit_price'   => 'required|numeric|min:0',
-            'description'  => 'nullable|string|max:500',
+            'description'  => 'required|string|min:4|max:500',
         ]);
 
         $r->update($data);
@@ -363,6 +365,17 @@ class FinanceController extends Controller
         FinancialRecord::where(['enterprise_id' => $this->eid(), 'type' => 'BUDGET'])
             ->findOrFail($id)->delete();
         return response()->json(['success' => true]);
+    }
+
+    public function apiBudDuplicate($id): JsonResponse
+    {
+        $orig = FinancialRecord::where(['enterprise_id' => $this->eid(), 'type' => 'BUDGET'])
+            ->findOrFail($id);
+        $copy = $orig->replicate();
+        $copy->created_by_id = Admin::user()->id;
+        $copy->save();
+        $copy->load(['account', 'par', 'term']);
+        return response()->json(['success' => true, 'record' => $this->fmtBud($copy)]);
     }
 
     // ─── Creditor API ──────────────────────────────────────────────────
@@ -505,6 +518,239 @@ class FinanceController extends Controller
             $cred->load(['supplier', 'term']);
             return response()->json(['success' => true, 'creditor' => $this->fmtCred($cred)]);
         }
+        return response()->json(['success' => true]);
+    }
+
+    // ─── Supplier helpers ──────────────────────────────────────────────
+
+    private function fetchSupRow(int $eid, int $id)
+    {
+        return DB::table('admin_users as u')
+            ->leftJoin(DB::raw("(
+                SELECT supplier_id,
+                       SUM(ABS(amount)) AS total_exp,
+                       COUNT(*)         AS exp_count
+                FROM financial_records
+                WHERE enterprise_id = {$eid}
+                  AND type = 'EXPENDITURE'
+                  AND supplier_id IS NOT NULL
+                GROUP BY supplier_id
+            ) exp"), 'exp.supplier_id', '=', 'u.id')
+            ->leftJoin(DB::raw("(
+                SELECT supplier_id,
+                       SUM(balance) AS outstanding,
+                       COUNT(*)     AS cred_count
+                FROM creditor_records
+                WHERE enterprise_id = {$eid}
+                  AND status IN ('Pending','Partial','Overdue')
+                  AND supplier_id IS NOT NULL
+                GROUP BY supplier_id
+            ) cr"), 'cr.supplier_id', '=', 'u.id')
+            ->where('u.enterprise_id', $eid)
+            ->where('u.user_type', 'supplier')
+            ->where('u.id', $id)
+            ->select(
+                'u.id', 'u.name', 'u.phone_number_1', 'u.phone_number_2',
+                'u.email', 'u.current_address', 'u.description',
+                DB::raw('COALESCE(exp.total_exp,  0) AS total_expenditure'),
+                DB::raw('COALESCE(exp.exp_count,  0) AS exp_count'),
+                DB::raw('COALESCE(cr.outstanding, 0) AS outstanding_credit'),
+                DB::raw('COALESCE(cr.cred_count,  0) AS cred_count')
+            )
+            ->first();
+    }
+
+    private function fmtSup(\stdClass $s): array
+    {
+        return [
+            'id'                 => $s->id,
+            'name'               => $s->name ?? '',
+            'phone_number_1'     => $s->phone_number_1 ?? '',
+            'phone_number_2'     => $s->phone_number_2 ?? '',
+            'email'              => $s->email ?? '',
+            'current_address'    => $s->current_address ?? '',
+            'description'        => $s->description ?? '',
+            'total_expenditure'  => (float) $s->total_expenditure,
+            'exp_count'          => (int)   $s->exp_count,
+            'outstanding_credit' => (float) $s->outstanding_credit,
+            'cred_count'         => (int)   $s->cred_count,
+        ];
+    }
+
+    // ─── Suppliers page ────────────────────────────────────────────────
+
+    public function suppliers(Content $content)
+    {
+        $SUP_API = admin_url('finance/api/suppliers');
+        $CSRF    = csrf_token();
+
+        return $content
+            ->title('Suppliers')
+            ->breadcrumb(['text' => 'Finance', 'url' => '#'], ['text' => 'Suppliers'])
+            ->body(view('admin.finance.suppliers', compact('SUP_API', 'CSRF')));
+    }
+
+    // ─── Suppliers API ─────────────────────────────────────────────────
+
+    public function apiSupList(Request $request): JsonResponse
+    {
+        $eid = (int) $this->eid();
+        $q   = $request->q;
+
+        $rows = DB::table('admin_users as u')
+            ->leftJoin(DB::raw("(
+                SELECT supplier_id,
+                       SUM(ABS(amount)) AS total_exp,
+                       COUNT(*)         AS exp_count
+                FROM financial_records
+                WHERE enterprise_id = {$eid}
+                  AND type = 'EXPENDITURE'
+                  AND supplier_id IS NOT NULL
+                GROUP BY supplier_id
+            ) exp"), 'exp.supplier_id', '=', 'u.id')
+            ->leftJoin(DB::raw("(
+                SELECT supplier_id,
+                       SUM(balance) AS outstanding,
+                       COUNT(*)     AS cred_count
+                FROM creditor_records
+                WHERE enterprise_id = {$eid}
+                  AND status IN ('Pending','Partial','Overdue')
+                  AND supplier_id IS NOT NULL
+                GROUP BY supplier_id
+            ) cr"), 'cr.supplier_id', '=', 'u.id')
+            ->where('u.enterprise_id', $eid)
+            ->where('u.user_type', 'supplier')
+            ->select(
+                'u.id', 'u.name', 'u.phone_number_1', 'u.phone_number_2',
+                'u.email', 'u.current_address', 'u.description',
+                DB::raw('COALESCE(exp.total_exp,  0) AS total_expenditure'),
+                DB::raw('COALESCE(exp.exp_count,  0) AS exp_count'),
+                DB::raw('COALESCE(cr.outstanding, 0) AS outstanding_credit'),
+                DB::raw('COALESCE(cr.cred_count,  0) AS cred_count')
+            )
+            ->when($q, function ($query) use ($q) {
+                $query->where(function ($sub) use ($q) {
+                    $sub->where('u.name', 'like', "%{$q}%")
+                        ->orWhere('u.phone_number_1', 'like', "%{$q}%")
+                        ->orWhere('u.email', 'like', "%{$q}%");
+                });
+            })
+            ->orderByDesc(DB::raw('COALESCE(exp.total_exp, 0)'))
+            ->orderBy('u.name')
+            ->get();
+
+        return response()->json($rows->map(fn($s) => $this->fmtSup($s)));
+    }
+
+    public function apiSupShow($id): JsonResponse
+    {
+        $s = $this->fetchSupRow((int) $this->eid(), (int) $id);
+        abort_if(!$s, 404);
+        return response()->json($this->fmtSup($s));
+    }
+
+    public function apiSupStore(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'name'            => 'required|string|max:200',
+            'phone_number_1'  => 'required|string|max:30',
+            'phone_number_2'  => 'nullable|string|max:30',
+            'email'           => 'nullable|email|max:150',
+            'current_address' => 'nullable|string|max:300',
+            'description'     => 'nullable|string|max:1000',
+        ]);
+
+        $eid  = $this->eid();
+        $base = 'sup_'.preg_replace('/[^a-z0-9]/', '', strtolower($data['name']));
+        $base = substr($base, 0, 20);
+        do {
+            $username = $base.'_'.rand(1000, 9999);
+        } while (Administrator::where('username', $username)->exists());
+
+        $parts    = explode(' ', trim($data['name']), 2);
+        $supplier = Administrator::create([
+            'name'            => $data['name'],
+            'first_name'      => $parts[0],
+            'last_name'       => $parts[1] ?? $parts[0],
+            'username'        => $username,
+            'password'        => bcrypt(Str::random(12)),
+            'email'           => $data['email'] ?? null,
+            'phone_number_1'  => $data['phone_number_1'],
+            'phone_number_2'  => $data['phone_number_2'] ?? null,
+            'current_address' => $data['current_address'] ?? null,
+            'description'     => $data['description'] ?? null,
+            'user_type'       => 'supplier',
+            'enterprise_id'   => $eid,
+        ]);
+
+        $row = $this->fetchSupRow($eid, $supplier->id) ?: (object) [
+            'id'                 => $supplier->id,
+            'name'               => $supplier->name,
+            'phone_number_1'     => $supplier->phone_number_1,
+            'phone_number_2'     => $supplier->phone_number_2,
+            'email'              => $supplier->email,
+            'current_address'    => $supplier->current_address,
+            'description'        => $supplier->description,
+            'total_expenditure'  => 0,
+            'exp_count'          => 0,
+            'outstanding_credit' => 0,
+            'cred_count'         => 0,
+        ];
+
+        return response()->json(['success' => true, 'record' => $this->fmtSup($row)]);
+    }
+
+    public function apiSupUpdate(Request $request, $id): JsonResponse
+    {
+        $supplier = Administrator::where([
+            'enterprise_id' => $this->eid(),
+            'user_type'     => 'supplier',
+        ])->findOrFail($id);
+
+        $data = $request->validate([
+            'name'            => 'required|string|max:200',
+            'phone_number_1'  => 'required|string|max:30',
+            'phone_number_2'  => 'nullable|string|max:30',
+            'email'           => 'nullable|email|max:150',
+            'current_address' => 'nullable|string|max:300',
+            'description'     => 'nullable|string|max:1000',
+        ]);
+
+        $parts = explode(' ', trim($data['name']), 2);
+        $supplier->update([
+            'name'            => $data['name'],
+            'first_name'      => $parts[0],
+            'last_name'       => $parts[1] ?? $parts[0],
+            'email'           => $data['email'] ?? null,
+            'phone_number_1'  => $data['phone_number_1'],
+            'phone_number_2'  => $data['phone_number_2'] ?? null,
+            'current_address' => $data['current_address'] ?? null,
+            'description'     => $data['description'] ?? null,
+        ]);
+
+        $row = $this->fetchSupRow((int) $this->eid(), (int) $id);
+        return response()->json(['success' => true, 'record' => $this->fmtSup($row)]);
+    }
+
+    public function apiSupDestroy($id): JsonResponse
+    {
+        $eid      = $this->eid();
+        $supplier = Administrator::where([
+            'enterprise_id' => $eid,
+            'user_type'     => 'supplier',
+        ])->findOrFail($id);
+
+        $expCount  = FinancialRecord::where(['enterprise_id' => $eid, 'supplier_id' => $id])->count();
+        $credCount = CreditorRecord::where(['enterprise_id' => $eid, 'supplier_id' => $id])->count();
+
+        if ($expCount > 0 || $credCount > 0) {
+            return response()->json([
+                'success' => false,
+                'message' => "Cannot delete: this supplier has {$expCount} expenditure(s) and {$credCount} creditor record(s). Reassign or delete those records first.",
+            ], 422);
+        }
+
+        $supplier->delete();
         return response()->json(['success' => true]);
     }
 
