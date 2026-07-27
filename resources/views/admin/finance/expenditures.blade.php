@@ -27,6 +27,9 @@ table.fin tbody tr:last-child td{border-bottom:none}
 .ab{background:none;border:none;cursor:pointer;padding:4px 7px;border-radius:5px;font-size:.82rem;transition:.12s;line-height:1}
 .ab:hover{background:#f0f4f3}
 .ab.e{color:#1b4332}.ab.d{color:#0077b6}.ab.x{color:#e63946}
+.ie-cell{cursor:text}
+.ie-cell:hover > span.dt{text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px}
+.ie-inp{width:100%;border:1.5px solid #1b4332!important;border-radius:5px;padding:4px 8px;font-size:.85rem;box-sizing:border-box;background:#fff;outline:none;font-family:inherit}
 #fe-spin{text-align:center;padding:40px;color:#1b4332}
 .fe-zero{text-align:center;padding:56px 20px;color:#adb5bd}
 .fe-zero i{font-size:2.8rem;display:block;margin-bottom:14px;opacity:.5}
@@ -381,7 +384,7 @@ window.FE = {
             : '<span style="color:#adb5bd">—</span>';
           return '<tr>'
             +'<td style="white-space:nowrap;color:#555">'+esc(r.payment_date)+'</td>'
-            +'<td title="'+esc(r.description)+'">'+cr+esc(r.description?r.description.substring(0,45):''+(r.description&&r.description.length>45?'…':''))+'</td>'
+            +'<td class="ie-cell" onclick="FE.inlineEdit(this,'+r.id+')" title="'+esc(r.description||'')+'">'+cr+'<span class="dt">'+esc(r.description?r.description.substring(0,45)+(r.description.length>45?'…':''):'—')+'</span></td>'
             +'<td style="color:#555">'+r.quantity+'</td>'
             +'<td style="color:#555">'+fmt(r.unit_price)+'</td>'
             +'<td><strong>'+fmt(r.amount)+'</strong></td>'
@@ -498,6 +501,37 @@ window.FE = {
       btn.disabled=false; btn.innerHTML='<i class="fa fa-check"></i> Save Expenditure';
       showErr('Network error. Please try again.');
     });
+  },
+
+  /* ── Inline edit (Particulars) ──────────────────────── */
+  inlineEdit: function(cell, id){
+    if(cell.querySelector('.ie-inp')) return;
+    var rec = totalRows.find(function(r){ return r.id===id; });
+    if(!rec) return;
+    var cur = rec.description||'';
+    var cr  = rec.has_creditor ? '<span class="cr-badge">CREDIT</span> ' : '';
+    cell.innerHTML = cr+'<input class="ie-inp" value="'+esc(cur)+'" placeholder="Enter particulars…">';
+    var inp = cell.querySelector('.ie-inp');
+    inp.focus(); inp.select();
+    var done = false;
+    function revert(){ cell.innerHTML=cr+'<span class="dt" title="'+esc(cur)+'">'+esc(cur.length>45?cur.substring(0,45)+'…':cur||'—')+'</span>'; }
+    function doSave(){
+      if(done) return; done=true;
+      var nv = inp.value.trim();
+      if(nv===cur){ revert(); return; }
+      cell.innerHTML = cr+'<span style="color:#adb5bd;font-size:.8rem"><i class="fa fa-spinner fa-spin"></i></span>';
+      var body={term_id:rec.term_id,payment_date:rec.payment_date,account_id:rec.account_id,supplier_id:rec.supplier_id||null,payment_method:rec.payment_method||null,quantity:rec.quantity,unit_price:rec.unit_price,description:nv||null,is_credit:rec.is_credit,credit_amount:rec.credit_amount};
+      fetch(API+'/'+id,{method:'PUT',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':CSRF,'X-Requested-With':'XMLHttpRequest','Accept':'application/json'},body:JSON.stringify(body)})
+        .then(r=>r.json()).then(function(d){
+          if(d.success){rec.description=nv;cell.innerHTML=cr+'<span class="dt" title="'+esc(nv)+'">'+esc(nv.length>45?nv.substring(0,45)+'…':nv||'—')+'</span>';toast('Saved ✓');}
+          else{revert();showErr(d.message||'Save failed');}
+        }).catch(function(){revert();});
+    }
+    inp.addEventListener('keydown',function(e){
+      if(e.key==='Enter'){e.preventDefault();inp.blur();}
+      if(e.key==='Escape'){done=true;revert();}
+    });
+    inp.addEventListener('blur',doSave);
   },
 
   close: function(){

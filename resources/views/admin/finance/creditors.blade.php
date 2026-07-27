@@ -44,6 +44,9 @@ table.fin tbody tr:last-child td{border-bottom:none}
 .ab{background:none;border:none;cursor:pointer;padding:4px 7px;border-radius:5px;font-size:.82rem;transition:.12s;line-height:1}
 .ab:hover{background:#f0f4f3}
 .ab.e{color:#1b4332}.ab.p{color:#28a745}.ab.x{color:#e63946}.ab.toggle{color:#0077b6}
+.ie-cell{cursor:text}
+.ie-cell:hover > span.dt{text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px}
+.ie-inp{width:100%;border:1.5px solid #1b4332!important;border-radius:5px;padding:4px 8px;font-size:.85rem;box-sizing:border-box;background:#fff;outline:none;font-family:inherit}
 #fc-spin{text-align:center;padding:40px;color:#1b4332}
 .fc-zero{text-align:center;padding:56px 20px;color:#adb5bd}
 .fc-zero i{font-size:2.8rem;display:block;margin-bottom:14px;opacity:.5}
@@ -297,7 +300,7 @@ document.addEventListener('keydown',function(e){
 })();
 
 var eid=null, payCredId=null, sfilt='', ssOpen={sup:false,fsup:false}, sDebTimer=null;
-var expandedRows = {};
+var expandedRows = {}, credRows = [];
 
 /* ═══════ SUPPLIER SEARCHABLE SELECT ═══════ */
 function ssRenderAll(key, items, allowClear){
@@ -335,6 +338,7 @@ window.FC = {
     expandedRows={};
     fetch(CRED_API+'?'+p, hdr()).then(r=>r.json()).then(function(data){
       cspin(false);
+      credRows=data;
       if(!data.length){ czero(true); return; }
       czero(false);
       document.getElementById('fc-body').innerHTML = data.map(function(r){
@@ -351,7 +355,7 @@ window.FC = {
         return '<tr class="cr-row" id="cr-'+r.id+'">'
           +'<td><button class="ab toggle" onclick="FC.togglePays('+r.id+')" title="Show payments"><i class="fa fa-chevron-right" id="chev-'+r.id+'"></i></button></td>'
           +'<td><strong>'+esc(r.supplier!='—'?r.supplier:'Unknown')+'</strong></td>'
-          +'<td title="'+esc(r.description)+'">'+esc(r.description?r.description.substring(0,50)+(r.description.length>50?'…':''):'')+'</td>'
+          +'<td class="ie-cell" onclick="FC.inlineEdit(this,'+r.id+')" title="'+esc(r.description||'')+'"><span class="dt">'+esc(r.description?r.description.substring(0,50)+(r.description.length>50?'…':''):'—')+'</span></td>'
           +'<td>UGX '+fmt(r.original_amount)+'</td>'
           +'<td style="color:#155724">'+fmt(r.paid_amount)+'</td>'
           +'<td><strong style="color:'+(r.balance>0?'#e63946':'#155724')+'">UGX '+fmt(r.balance)+'</strong>'
@@ -487,6 +491,30 @@ window.FC = {
     if(!confirm('Delete this creditor record and all its payments?')) return;
     fetch(CRED_API+'/'+id,{method:'DELETE',headers:{'X-CSRF-TOKEN':CSRF,'X-Requested-With':'XMLHttpRequest'}})
       .then(r=>r.json()).then(function(d){ if(d.success){FC.load();ctoast('Creditor deleted');} });
+  },
+
+  inlineEdit: function(cell, id){
+    if(cell.querySelector('.ie-inp')) return;
+    var rec = credRows.find(function(r){ return r.id===id; });
+    if(!rec) return;
+    var cur = rec.description||'';
+    cell.innerHTML='<input class="ie-inp" value="'+esc(cur)+'" placeholder="Enter description…">';
+    var inp=cell.querySelector('.ie-inp'); inp.focus(); inp.select();
+    var done=false;
+    function revert(){ cell.innerHTML='<span class="dt" title="'+esc(cur)+'">'+esc(cur.length>50?cur.substring(0,50)+'…':cur||'—')+'</span>'; }
+    function doSave(){
+      if(done) return; done=true;
+      var nv=inp.value.trim(); if(nv===cur){revert();return;}
+      cell.innerHTML='<span style="color:#adb5bd;font-size:.8rem"><i class="fa fa-spinner fa-spin"></i></span>';
+      var body={supplier_id:rec.supplier_id||null,description:nv,due_date:rec.due_date||null,payment_method:rec.payment_method||null,notes:rec.notes||null};
+      fetch(CRED_API+'/'+id,{method:'PUT',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':CSRF,'X-Requested-With':'XMLHttpRequest','Accept':'application/json'},body:JSON.stringify(body)})
+        .then(r=>r.json()).then(function(d){
+          if(d.success){rec.description=nv;cell.innerHTML='<span class="dt" title="'+esc(nv)+'">'+esc(nv.length>50?nv.substring(0,50)+'…':nv||'—')+'</span>';ctoast('Saved ✓');}
+          else{revert();}
+        }).catch(function(){revert();});
+    }
+    inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){e.preventDefault();inp.blur();} if(e.key==='Escape'){done=true;revert();} });
+    inp.addEventListener('blur',doSave);
   },
 
   openPay: function(credId, balance, supplier, desc){

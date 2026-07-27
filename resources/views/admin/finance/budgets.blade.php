@@ -25,6 +25,9 @@ table.fin tbody tr:last-child td{border-bottom:none}
 .ab{background:none;border:none;cursor:pointer;padding:4px 7px;border-radius:5px;font-size:.82rem;transition:.12s;line-height:1}
 .ab:hover{background:#f0f4f3}
 .ab.e{color:#155724}.ab.x{color:#e63946}.ab.d{color:#0077b6}
+.ie-cell{cursor:text}
+.ie-cell:hover > span.dt{text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px}
+.ie-inp{width:100%;border:1.5px solid #155724!important;border-radius:5px;padding:4px 8px;font-size:.85rem;box-sizing:border-box;background:#fff;outline:none;font-family:inherit}
 #fb-spin{text-align:center;padding:40px;color:#155724}
 .fb-zero{text-align:center;padding:56px 20px;color:#adb5bd}
 .fb-zero i{font-size:2.8rem;display:block;margin-bottom:14px;opacity:.5}
@@ -216,7 +219,7 @@ document.addEventListener('keydown', function(e){ if(e.key==='Escape'&&overlay.s
   VOTES.forEach(function(v){ var o=document.createElement('option');o.value=v.id;o.textContent=v.name;vs.appendChild(o); });
 })();
 
-var eid=null, sDebTimer=null;
+var eid=null, sDebTimer=null, budRows=[];
 
 window.FB = {
   load: function(){
@@ -227,6 +230,7 @@ window.FB = {
     if(ac) p.set('account_id',ac); if(q) p.set('q',q);
     fetch(API+'?'+p, hdr()).then(r=>r.json()).then(function(data){
       bspin(false);
+      budRows=data;
       if(!data.length){ bzero(true); return; }
       bzero(false);
       var total = data.reduce(function(s,r){return s+r.amount;},0);
@@ -236,7 +240,7 @@ window.FB = {
         var expUrl = '{{ admin_url("financial-records-expenditure") }}?account_id='+r.account_id;
         return '<tr>'
           +'<td style="color:#555;white-space:nowrap">'+esc(r.payment_date)+'</td>'
-          +'<td title="'+esc(r.description)+'">'+esc(r.description?r.description.substring(0,45):'')+'</td>'
+          +'<td class="ie-cell" onclick="FB.inlineEdit(this,'+r.id+')" title="'+esc(r.description||'')+'"><span class="dt">'+esc(r.description?r.description.substring(0,45)+(r.description.length>45?'…':''):'—')+'</span></td>'
           +'<td style="color:#555">'+r.quantity+'</td>'
           +'<td style="color:#555">'+fmt(r.unit_price)+'</td>'
           +'<td><strong style="color:#155724">'+fmt(r.amount)+'</strong></td>'
@@ -287,6 +291,29 @@ window.FB = {
         if(d.success){FB.close();FB.load();btoast(eid?'Budget updated ✓':'Budget saved ✓');}
         else{ var msg=d.message||'Validation failed'; if(d.errors) msg=Object.values(d.errors).map(e=>Array.isArray(e)?e[0]:e).join(' · '); bShowErr(msg); }
       }).catch(function(){ btn.disabled=false; btn.innerHTML='<i class="fa fa-check"></i> Save Budget Entry'; bShowErr('Network error.'); });
+  },
+  inlineEdit: function(cell, id){
+    if(cell.querySelector('.ie-inp')) return;
+    var rec = budRows.find(function(r){ return r.id===id; });
+    if(!rec) return;
+    var cur = rec.description||'';
+    cell.innerHTML='<input class="ie-inp" value="'+esc(cur)+'" placeholder="Enter particulars…">';
+    var inp=cell.querySelector('.ie-inp'); inp.focus(); inp.select();
+    var done=false;
+    function revert(){ cell.innerHTML='<span class="dt" title="'+esc(cur)+'">'+esc(cur.length>45?cur.substring(0,45)+'…':cur||'—')+'</span>'; }
+    function doSave(){
+      if(done) return; done=true;
+      var nv=inp.value.trim(); if(nv===cur){revert();return;}
+      cell.innerHTML='<span style="color:#adb5bd;font-size:.8rem"><i class="fa fa-spinner fa-spin"></i></span>';
+      var body={term_id:rec.term_id,payment_date:rec.payment_date,account_id:rec.account_id,quantity:rec.quantity,unit_price:rec.unit_price,description:nv||null};
+      fetch(API+'/'+id,{method:'PUT',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':CSRF,'X-Requested-With':'XMLHttpRequest','Accept':'application/json'},body:JSON.stringify(body)})
+        .then(r=>r.json()).then(function(d){
+          if(d.success){rec.description=nv;cell.innerHTML='<span class="dt" title="'+esc(nv)+'">'+esc(nv.length>45?nv.substring(0,45)+'…':nv||'—')+'</span>';btoast('Saved ✓');}
+          else{revert();}
+        }).catch(function(){revert();});
+    }
+    inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){e.preventDefault();inp.blur();} if(e.key==='Escape'){done=true;revert();} });
+    inp.addEventListener('blur',doSave);
   },
   close: function(){ overlay.style.opacity='0';overlay.style.transition='opacity .15s'; setTimeout(function(){overlay.style.display='none';overlay.style.opacity='';overlay.style.transition='';},150); },
   onVote: function(preAcc){
