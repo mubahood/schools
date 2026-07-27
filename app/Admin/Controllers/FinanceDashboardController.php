@@ -2,8 +2,6 @@
 
 namespace App\Admin\Controllers;
 
-use App\Models\Account;
-use App\Models\AccountParent;
 use App\Models\CreditorRecord;
 use App\Models\FinancialRecord;
 use App\Models\Term;
@@ -104,13 +102,16 @@ class FinanceDashboardController extends Controller
             ->where('enterprise_id', $eid)
             ->where('type', 'EXPENDITURE')
             ->where('payment_date', '>=', now()->subMonths(6)->startOfMonth())
-            ->groupBy('month')
+            ->groupBy(
+                DB::raw("DATE_FORMAT(payment_date,'%b %Y')"),
+                DB::raw("DATE_FORMAT(payment_date,'%Y%m')")
+            )
             ->select(
                 DB::raw("DATE_FORMAT(payment_date,'%b %Y') as month"),
                 DB::raw("DATE_FORMAT(payment_date,'%Y%m') as sort_key"),
                 DB::raw('SUM(ABS(amount)) as total')
             )
-            ->orderBy('sort_key')
+            ->orderBy(DB::raw("DATE_FORMAT(payment_date,'%Y%m')"))
             ->get();
 
         $monthLabels  = $monthlyRaw->pluck('month')->toArray();
