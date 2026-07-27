@@ -108,6 +108,7 @@ Route::group([
     $router->resource('supplier-orders', SupplierOrderController::class);
     $router->resource('gens', GenController::class);
     $router->resource('termly-school-fees-balancings', TermlySchoolFeesBalancingController::class);
+    $router->get('finance-dashboard', 'FinanceDashboardController@index')->name('finance-dashboard');
     $router->resource('financial-records', FinancialRecordController::class);
     $router->resource('financial-records-budget', FinancialBudgetRecordController::class);
     $router->resource('financial-records-expenditure', FinancialExpenditureRecordController::class);
