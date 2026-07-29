@@ -232,13 +232,17 @@
 </script>
 
 <!-- ═══════════════════════════════════════════════════════════
-     GOOGLE ADS TAG
+     GOOGLE ADS TAG (gtag.js)
+     AW-18220728156 — active account 486-480-0199
+     AW-625165834   — legacy account, kept for continuity
 ═══════════════════════════════════════════════════════════ -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=AW-625165834"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18220728156"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
+
+  gtag('config', 'AW-18220728156');
   gtag('config', 'AW-625165834');
 </script>
 
