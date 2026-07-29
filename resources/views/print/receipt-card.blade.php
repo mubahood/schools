@@ -127,9 +127,14 @@ $sigH      = $compact ? '20px' : '28px';
                     school fees.
                 @endif
             </div>
-            @if(!$is_bill && $spTxnId)
-            <div style="margin-top:{{ $compact ? '2px' : '3px' }}; font-size:{{ $subSz }};">
-                <span style="color:{{ $labelClr }};">Txn ID:</span> <b>{{ $spTxnId }}</b>
+            @if(!$is_bill && ($method || $spTxnId))
+            <div style="margin-top:{{ $compact ? '2px' : '3px' }}; font-size:{{ $subSz }}; line-height:1.6;">
+                @if($method)
+                <span><span style="color:{{ $labelClr }};">Payment Method:</span> <b>{{ $method }}</b></span>
+                @endif
+                @if($spTxnId)
+                &nbsp;&nbsp;<span style="color:{{ $labelClr }};">Txn ID:</span> <b>{{ $spTxnId }}</b>
+                @endif
             </div>
             @endif
         </td>
