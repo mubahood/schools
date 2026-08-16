@@ -9,7 +9,9 @@ use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
+use Encore\Admin\Layout\Content;
 use Encore\Admin\Widgets\Tab;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\MessageBag;
 
@@ -21,6 +23,96 @@ class ParentsController extends AdminController
      * @var string
      */
     protected $title = 'Parents';
+
+    /**
+     * Columns that may hold a guardian's contact number, in the order the grid's
+     * getParentPhonNumber() resolves them. Keep these in sync — if they diverge,
+     * the list shows a number the edit form cannot see.
+     */
+    public const PHONE_FALLBACK_COLUMNS = [
+        'emergency_person_phone',
+        'phone_number_2',
+        'father_phone',
+        'mother_phone',
+        'spouse_phone',
+    ];
+
+    /**
+     * Placeholder junk that earlier imports wrote into phone/username columns.
+     * These must never be treated as a real number.
+     */
+    public const PHONE_JUNK = ['+256(not set)', '(not set)', 'not set', 'null', 'n/a', '-', '+256'];
+
+    /**
+     * True when $value looks like a usable Ugandan mobile number.
+     *
+     * Deliberately local to this controller: Utils::phone_number_is_valid()
+     * currently returns true for everything, and tightening it globally would
+     * block saves across students/employees too.
+     */
+    public static function isRealPhone($value): bool
+    {
+        $value = trim((string) $value);
+        if ($value === '') {
+            return false;
+        }
+        if (in_array(strtolower($value), array_map('strtolower', self::PHONE_JUNK), true)) {
+            return false;
+        }
+        $prepared = Utils::prepare_phone_number($value);
+
+        // Must be +256 followed by exactly 9 digits, and nothing else.
+        return (bool) preg_match('/^\+256\d{9}$/', $prepared);
+    }
+
+    /**
+     * Resolve a guardian's real contact number from whichever column holds it.
+     * Returns null when the record genuinely has no usable number.
+     */
+    public static function resolvePhone($model): ?string
+    {
+        if (self::isRealPhone($model->phone_number_1 ?? null)) {
+            return Utils::prepare_phone_number($model->phone_number_1);
+        }
+        foreach (self::PHONE_FALLBACK_COLUMNS as $col) {
+            if (self::isRealPhone($model->$col ?? null)) {
+                return Utils::prepare_phone_number($model->$col);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Copy a guardian's number into phone_number_1 before the edit form renders.
+     *
+     * The grid renders getParentPhonNumber(), which falls back across several
+     * columns, while the form binds the raw phone_number_1 column. Without this
+     * the user sees a number in the list, opens Edit, and finds a blank required
+     * field — the exact bug reported from the field.
+     */
+    protected function backfillGuardianPhone($id): void
+    {
+        $parent = Administrator::find($id);
+        if ($parent === null) {
+            return;
+        }
+        if (self::isRealPhone($parent->phone_number_1)) {
+            return; // already good, leave it alone
+        }
+        $resolved = self::resolvePhone($parent);
+        if ($resolved === null) {
+            return; // nothing to copy; the form will legitimately ask for one
+        }
+        // Write directly: avoids firing model events / touching timestamps.
+        DB::table('admin_users')->where('id', $parent->id)->update(['phone_number_1' => $resolved]);
+    }
+
+    public function edit($id, Content $content)
+    {
+        $this->backfillGuardianPhone($id);
+
+        return parent::edit($id, $content);
+    }
 
     /**
      * Make a grid builder.
@@ -184,12 +276,35 @@ class ParentsController extends AdminController
 
         $form->text('first_name')->rules('required');
         $form->text('last_name')->rules('required');
-        $form->select('sex', 'Gender')->options(['Male' => 'Male', 'Female' => 'Female'])->rules('required');
+
+        // NOT required: 7,842 of 7,980 existing parents have no gender recorded.
+        // Making it mandatory made almost every parent record impossible to edit.
+        $form->select('sex', 'Gender')
+            ->options(['Male' => 'Male', 'Female' => 'Female'])
+            ->help('Optional.');
+
         $form->text('current_address', 'Address');
-        $form->text('phone_number_1', 'Mobile phone number')->rules('required');
+
+        $form->text('phone_number_1', 'Mobile phone number')
+            ->rules('required')
+            ->help('This is the number the parent uses to log in. Format: 0772123456 or +256772123456.');
+
         $form->text('phone_number_2', 'Home phone number');
         $form->text('nationality');
         $form->text('religion');
+
+        // ── Guardian / next-of-kin details ───────────────────────────────
+        // These columns already hold data for thousands of parents but were
+        // never shown on this form, so staff could not see or correct them.
+        $form->divider('Guardian & Next of Kin');
+        $form->text('spouse_name', 'Spouse name');
+        $form->text('spouse_phone', 'Spouse phone');
+        $form->text('father_name', 'Father name');
+        $form->text('father_phone', 'Father phone');
+        $form->text('mother_name', 'Mother name');
+        $form->text('mother_phone', 'Mother phone');
+        $form->text('emergency_person_name', 'Emergency contact name');
+        $form->text('emergency_person_phone', 'Emergency contact phone');
 
         //SYSTEM ACCOUNT
         $form->divider('System Account');
@@ -197,11 +312,14 @@ class ParentsController extends AdminController
         $roles = $roleModel::where(['slug' => 'parent'])
             ->get()->pluck('name', 'id');
 
+        // NOT required: 410 existing parents have no role row. The parent role is
+        // assigned automatically in saving() when this is left empty.
         $form->multipleSelect('roles', trans('admin.roles'))
             ->attribute([
                 'autocomplete' => 'off'
             ])
-            ->options($roles)->rules('required');
+            ->options($roles)
+            ->help('Leave empty to assign the Parent role automatically.');
 
         $ajax_url = url('/api/ajax-users?enterprise_id=' . $u->enterprise_id . "&user_type=student");
         $form->multipleSelect('kids', "Children")
@@ -212,7 +330,10 @@ class ParentsController extends AdminController
                 $data = Administrator::whereIn('id', $ids)->pluck('name', 'id');
                 return $data;
             })
-            ->ajax($ajax_url)->rules('required');
+            // NOT required: 1,118 existing parents have no child linked yet, and
+            // requiring it blocked staff from fixing their contact details.
+            ->ajax($ajax_url)
+            ->help('Optional here — children can also be linked from the student record.');
 
 
 
@@ -229,39 +350,77 @@ class ParentsController extends AdminController
 
         $form->ignore(['password_confirmation']);
         $form->saving(function (Form $form) {
-            $prepared_phone_number_1 = Utils::prepare_phone_number($form->phone_number_1);
-            if (!Utils::phone_number_is_valid($prepared_phone_number_1)) {
+            // ── Mobile number: must be a genuinely valid UG number ───────────
+            // Utils::phone_number_is_valid() returns true for everything, which is
+            // how "0not set" became the username "+256(not set)" on 241 accounts.
+            if (!self::isRealPhone($form->phone_number_1)) {
                 $error = new MessageBag([
-                    'title'   => 'Error',
-                    'message' => 'First phone number is invalid.'
+                    'title'   => 'Invalid mobile phone number',
+                    'message' => 'Enter a valid Ugandan mobile number, e.g. 0772123456 or +256772123456.'
                 ]);
                 return back()->with(compact('error'));
             }
+            $prepared_phone_number_1 = Utils::prepare_phone_number($form->phone_number_1);
 
-            if ($form->phone_number_2 != null) {
-                if (strlen($form->phone_number_2) > 3) {
-                    $prepared_phone_number_2 = Utils::prepare_phone_number($form->phone_number_2);
-                    if (!Utils::phone_number_is_valid($prepared_phone_number_2)) {
-                        $error = new MessageBag([
-                            'title'   => 'Error',
-                            'message' => 'Second phone number is invalid.'
-                        ]);
-                        return back()->with(compact('error'));
-                    }
+            // ── Home number: optional, but reject junk if supplied ───────────
+            $prepared_phone_number_2 = null;
+            if ($form->phone_number_2 !== null && strlen(trim($form->phone_number_2)) > 3) {
+                if (!self::isRealPhone($form->phone_number_2)) {
+                    $error = new MessageBag([
+                        'title'   => 'Invalid home phone number',
+                        'message' => 'Enter a valid Ugandan number, or leave the field empty.'
+                    ]);
+                    return back()->with(compact('error'));
                 }
-            }
-
-
-
-            if ($form->email == null || strlen($form->email) < 3) {
-                $form->email = $form->phone_number_1;
+                $prepared_phone_number_2 = Utils::prepare_phone_number($form->phone_number_2);
             }
 
             $form->phone_number_1 = $prepared_phone_number_1;
-            $form->username = $prepared_phone_number_1;
+            if ($prepared_phone_number_2 !== null) {
+                $form->phone_number_2 = $prepared_phone_number_2;
+            }
+
+            // ── Username drives phone login, so only set it when it is safe ──
+            // Several guardians legitimately share one number (up to 6 here), and
+            // there is no unique index — blindly assigning it would create
+            // duplicate usernames and make login resolve to an arbitrary account.
+            $currentId = $form->model()->id ?? null;
+            $usernameTaken = Administrator::where('username', $prepared_phone_number_1)
+                ->when($currentId, function ($q) use ($currentId) {
+                    return $q->where('id', '!=', $currentId);
+                })
+                ->exists();
+
+            if (!$usernameTaken) {
+                $form->username = $prepared_phone_number_1;
+            }
+            // else: keep the existing username. Login still works, because
+            // findUserByLogin() also matches on phone_number_1.
+
+            // Never fall back to writing a phone number into the email column.
+            if ($form->email !== null && trim($form->email) !== '' && !filter_var(trim($form->email), FILTER_VALIDATE_EMAIL)) {
+                $form->email = null;
+            }
 
             if ($form->password && $form->model()->password != $form->password) {
                 $form->password = Hash::make($form->password);
+            }
+        });
+
+        $form->saved(function (Form $form) {
+            // Guarantee every parent carries the Parent role even when the (now
+            // optional) roles field was left empty.
+            $model = $form->model();
+            if ($model === null || $model->id === null) {
+                return;
+            }
+            if ($model->roles()->count() > 0) {
+                return;
+            }
+            $roleModel = config('admin.database.roles_model');
+            $parentRole = $roleModel::where(['slug' => 'parent'])->first();
+            if ($parentRole !== null) {
+                $model->roles()->attach($parentRole->id);
             }
         });
 

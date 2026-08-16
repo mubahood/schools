@@ -51,20 +51,15 @@ class ApiAuthController extends Controller
 
         $r->username = trim($r->username);
 
-        $u = $this->findUserByLogin($r->username);
+        // A single phone number is often shared by several accounts (a guardian
+        // who is also a staff member, siblings, a shared family phone) and
+        // admin_users has no unique index on the identity columns. Collect every
+        // candidate in priority order and authenticate against each, so the
+        // account whose password actually matches is the one that logs in.
+        $candidates = $this->findUserCandidates($r->username);
 
-        if ($u == null) {
+        if ($candidates->isEmpty()) {
             return $this->error('User account not found.');
-        }
-
-        // If the matched account is a student, resolve to the parent account.
-        // Parents are the actual accounts used in the mobile app; students share
-        // the parent's credentials so we authenticate against the parent's password.
-        if ($u->user_type == 'student') {
-            $u = User::find($u->parent_id);
-            if ($u == null) {
-                return $this->error('Parent account not found. Please contact your administrator.');
-            }
         }
 
         // Block login with the default password and prompt user to contact admin.
@@ -79,12 +74,37 @@ class ApiAuthController extends Controller
 
         JWTAuth::factory()->setTTL(60 * 24 * 30 * 365);
 
-        $token = auth('api')->attempt([
-            'id' => $u->id,
-            'password' => trim($r->password),
-        ]);
+        $u = null;
+        $token = null;
+        $sawStudentWithoutParent = false;
+
+        foreach ($candidates as $candidate) {
+            // Students share the parent's credentials; the parent account is the
+            // one the mobile app actually uses, so resolve before authenticating.
+            if ($candidate->user_type == 'student') {
+                $candidate = User::find($candidate->parent_id);
+                if ($candidate == null) {
+                    $sawStudentWithoutParent = true;
+                    continue;
+                }
+            }
+
+            $attempt = auth('api')->attempt([
+                'id' => $candidate->id,
+                'password' => trim($r->password),
+            ]);
+
+            if ($attempt != null) {
+                $u = $candidate;
+                $token = $attempt;
+                break;
+            }
+        }
 
         if ($token == null) {
+            if ($sawStudentWithoutParent) {
+                return $this->error('Parent account not found. Please contact your administrator.');
+            }
             return $this->error('Wrong credentials.');
         }
         $u->token = $token;
@@ -100,43 +120,97 @@ class ApiAuthController extends Controller
      * Also checks phone_number_2 so users who registered with their secondary
      * number are not locked out.
      */
-    private function findUserByLogin(string $raw): ?User
+    /**
+     * Every account that could plausibly own this login identifier, in the same
+     * priority order findUserByLogin() uses, de-duplicated by id.
+     *
+     * login() authenticates against each in turn, so a shared phone number no
+     * longer locks out whichever account the database happened to return first.
+     * Capped because a handful of numbers are shared by several accounts and we
+     * never want an unbounded password-check loop.
+     */
+    private function findUserCandidates(string $raw)
     {
-        // 1. Exact match on all text identity columns plus numeric ID
-        $u = User::where(function ($q) use ($raw) {
+        $found = collect();
+
+        $push = function ($query) use ($found) {
+            foreach ($this->orderByLoginPriority($query)->limit(10)->get() as $row) {
+                if (!$found->has($row->id)) {
+                    $found->put($row->id, $row);
+                }
+            }
+        };
+
+        // 1a. Exact username / email.
+        $push(User::where(function ($q) use ($raw) {
+            $q->where('username', $raw)->orWhere('email', $raw);
+        }));
+
+        // 1b. Own phone columns, then numeric id.
+        $push(User::where(function ($q) use ($raw) {
             $q->where('phone_number_1', $raw)
               ->orWhere('phone_number_2', $raw)
-              ->orWhere('username', $raw)
-              ->orWhere('email', $raw)
-              ->orWhere('id', ctype_digit($raw) ? (int)$raw : -1);
-        })->first();
+              ->orWhere('id', ctype_digit($raw) ? (int) $raw : -1);
+        }));
 
-        if ($u) return $u;
-
-        // 2. "p<studentCode>" pattern: schools issue parents a login of the form
-        //    p<school_pay_payment_code> (e.g. p1010520770). Strip the prefix,
-        //    find the student, and return them — the caller resolves student → parent.
+        // 2. "p<studentCode>" pattern.
         if (preg_match('/^p(\d{5,})$/i', $raw, $m)) {
             $code = $m[1];
-            $student = User::where('user_type', 'student')
-                ->where(function ($q) use ($code) {
-                    $q->where('school_pay_payment_code', $code)
-                      ->orWhere('username', $code);
-                })->first();
-            if ($student) return $student;
+            $push(User::where('user_type', 'student')->where(function ($q) use ($code) {
+                $q->where('school_pay_payment_code', $code)->orWhere('username', $code);
+            }));
         }
 
-        // 3. Build all phone format variants and search any of them
+        // 3. Phone format variants against the identity columns.
         $variants = $this->phoneVariants($raw);
-        if (empty($variants)) return null;
+        if (!empty($variants)) {
+            $push(User::where(function ($q) use ($variants) {
+                foreach ($variants as $v) {
+                    $q->orWhere('phone_number_1', $v)
+                      ->orWhere('phone_number_2', $v)
+                      ->orWhere('username', $v);
+                }
+            }));
 
-        return User::where(function ($q) use ($variants) {
-            foreach ($variants as $v) {
-                $q->orWhere('phone_number_1', $v)
-                  ->orWhere('phone_number_2', $v)
-                  ->orWhere('username', $v);
-            }
-        })->first();
+            // 4. Last resort — guardian contact columns (someone else's number).
+            $push(User::where(function ($q) use ($variants) {
+                foreach ($variants as $v) {
+                    $q->orWhere('emergency_person_phone', $v)
+                      ->orWhere('father_phone', $v)
+                      ->orWhere('mother_phone', $v);
+                }
+            }));
+        }
+
+        return $found->values();
+    }
+
+    /**
+     * The single best account for this login identifier.
+     *
+     * Thin wrapper over findUserCandidates() so the tier order lives in exactly
+     * one place — duplicating it here is how the two would silently drift apart.
+     */
+    private function findUserByLogin(string $raw): ?User
+    {
+        return $this->findUserCandidates($raw)->first();
+    }
+
+    /**
+     * Break ties deterministically when several accounts share a phone number.
+     *
+     * admin_users has no unique index on phone_number_1/username, and one number
+     * is legitimately shared by up to six accounts here. This API serves the
+     * parent mobile app, so a parent must win over a student (which is then
+     * resolved to its parent anyway) and both must win over staff accounts.
+     */
+    private function orderByLoginPriority($query)
+    {
+        // FIELD() returns the 1-based position, 0 when absent. Listing the
+        // weakest first and sorting DESC yields: parent (2) > student (1) > rest (0).
+        return $query
+            ->orderByRaw("FIELD(user_type, 'student', 'parent') DESC")
+            ->orderBy('id');
     }
 
     /**
