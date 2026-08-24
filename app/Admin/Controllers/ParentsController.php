@@ -330,19 +330,6 @@ class ParentsController extends AdminController
         $form->text('nationality');
         $form->text('religion');
 
-        // ── Guardian / next-of-kin details ───────────────────────────────
-        // These columns already hold data for thousands of parents but were
-        // never shown on this form, so staff could not see or correct them.
-        $form->divider('Guardian & Next of Kin');
-        $form->text('spouse_name', 'Spouse name');
-        $form->text('spouse_phone', 'Spouse phone');
-        $form->text('father_name', 'Father name');
-        $form->text('father_phone', 'Father phone');
-        $form->text('mother_name', 'Mother name');
-        $form->text('mother_phone', 'Mother phone');
-        $form->text('emergency_person_name', 'Emergency contact name');
-        $form->text('emergency_person_phone', 'Emergency contact phone');
-
         //SYSTEM ACCOUNT
         $form->divider('System Account');
         $roleModel = config('admin.database.roles_model');
