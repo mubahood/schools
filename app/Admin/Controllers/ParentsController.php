@@ -66,6 +66,43 @@ class ParentsController extends AdminController
     }
 
     /**
+     * Hash a newly typed password, leaving an untouched one alone.
+     *
+     * On edit, laravel-admin renders the password field pre-filled with the
+     * stored bcrypt hash. If the admin does not touch it, that same hash is
+     * submitted back and must be saved verbatim — re-hashing it would lock the
+     * account out. A genuinely new password never equals the stored hash, so
+     * the inequality check distinguishes the two cases.
+     *
+     * Nothing is written when the field is absent or blank, so a partial
+     * submission cannot blank out a password.
+     */
+    public static function hashPasswordIfChanged(Form $form): void
+    {
+        $submitted = $form->password;
+        $current   = $form->model() !== null ? $form->model()->password : null;
+
+        // Blank field on edit. laravel-admin has already put 'password' in the
+        // update payload, and Field::prepare() does not drop empty values, so
+        // returning here would write '' and lock the parent out of their
+        // account. Put the existing hash back instead — a no-op write.
+        if ($submitted === null || trim((string) $submitted) === '') {
+            if ($current !== null && $current !== '') {
+                $form->password = $current;
+            }
+            return;
+        }
+        if ($current !== null && $current === $submitted) {
+            return; // untouched hash resubmitted
+        }
+        if (preg_match('/^\$2[aby]\$\d{2}\$/', (string) $submitted)) {
+            return; // already a bcrypt hash — never double-hash
+        }
+
+        $form->password = Hash::make($submitted);
+    }
+
+    /**
      * Resolve a guardian's real contact number from whichever column holds it.
      * Returns null when the record genuinely has no usable number.
      */
@@ -350,6 +387,21 @@ class ParentsController extends AdminController
 
         $form->ignore(['password_confirmation']);
         $form->saving(function (Form $form) {
+            // ── Partial (inline-grid) submissions ────────────────────────────
+            // The grid's editable password column PUTs to this same resource with
+            // ONLY that one field. Everything below must therefore be skipped, or
+            // it validates a phone number that was never submitted and — because
+            // assigning $form->column adds that column to the update payload —
+            // writes an empty phone_number_1 and username over good data.
+            $submitted = request()->all();
+            $phoneWasSubmitted = array_key_exists('phone_number_1', $submitted);
+
+            if (!$phoneWasSubmitted) {
+                // Hash a new password if this partial update carried one, then stop.
+                self::hashPasswordIfChanged($form);
+                return;
+            }
+
             // ── Mobile number: must be a genuinely valid UG number ───────────
             // Utils::phone_number_is_valid() returns true for everything, which is
             // how "0not set" became the username "+256(not set)" on 241 accounts.
@@ -402,9 +454,7 @@ class ParentsController extends AdminController
                 $form->email = null;
             }
 
-            if ($form->password && $form->model()->password != $form->password) {
-                $form->password = Hash::make($form->password);
-            }
+            self::hashPasswordIfChanged($form);
         });
 
         $form->saved(function (Form $form) {
