@@ -268,7 +268,19 @@ class ParentsController extends AdminController
         $grid->column('masters_university_year_graduated')->hide();
         $grid->column('phd_university_name')->hide();
         $grid->column('phd_university_year_graduated')->hide();
-        $grid->column('password')->editable();
+        // Password: editable, but the stored bcrypt hash is never rendered.
+        //
+        // Display callbacks run in the order they are chained, and editable() is
+        // itself queued as one (Column::callBuiltinDisplayer -> Column::display).
+        // Masking first therefore means the Editable displayer receives '' and
+        // emits data-value='' — the hash reaches neither the page text nor the
+        // edit box. Clicking the pencil opens a blank field, and whatever is
+        // typed is bcrypt-hashed by hashPasswordIfChanged() in saving().
+        $grid->column('password', 'Password')
+            ->display(function () {
+                return '';
+            })
+            ->editable();
 
         return $grid;
     }
