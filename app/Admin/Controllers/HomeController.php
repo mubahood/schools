@@ -1157,29 +1157,6 @@ class HomeController extends Controller
 
 
                     $row->column(3, function (Column $column) {
-                        $u = Admin::user();
-                        //ids of active students
-                        $students = User::where([
-                            'user_type' => 'STUDENT',
-                            'status' => 1,
-                            'enterprise_id' => $u->enterprise_id
-                        ])->get()->pluck('id')->toArray();
-
-                        $total_balance_of_students = Account::whereIn('administrator_id', $students)->sum('balance');
-
-                        $column->append(view('widgets.box-5', [
-                            'is_dark' => true,
-                            'title' => 'Fees Balance',
-                            'icon' => 'balance-scale',
-                            'sub_title' => 'All active students',
-                            'number' => "<small>UGX</small>" . number_format(
-                                $total_balance_of_students
-                            ),
-                            'link' => admin_url('students-financial-accounts')
-                        ]));
-                    });
-
-                    $row->column(3, function (Column $column) {
                         $term = Auth::user()->ent->dpTerm();
                         $r = ReportFinanceModel::where([
                             'enterprise_id' => $term->enterprise_id,
@@ -1286,6 +1263,21 @@ class HomeController extends Controller
                         : 0;
                     $collectionRate = $expectedTotal > 0 ? round(($incomeReceived / $expectedTotal) * 100, 1) : 0;
 
+                    // Balance Due leads: it is the figure the school acts on.
+                    // Fees Advance sits next to it, and the net Fees Balance last,
+                    // captioned with the subtraction it comes from.
+                    $row->column(3, function (Column $column) use ($owingAmount, $owingCount) {
+                        $column->append(view('widgets.box-5', [
+                            'is_dark' => true,
+                            'style' => 'danger',
+                            'title' => 'Balance Due',
+                            'icon' => 'exclamation-circle',
+                            'sub_title' => number_format($owingCount) . ' student(s) with outstanding balance',
+                            'number' => "<small>UGX</small>" . number_format($owingAmount),
+                            'link' => admin_url('students-financial-accounts/owing'),
+                        ]));
+                    });
+
                     $row->column(3, function (Column $column) use ($advanceAmount, $advanceCount) {
                         $column->append(view('widgets.box-5', [
                             'is_dark' => false,
@@ -1297,14 +1289,19 @@ class HomeController extends Controller
                         ]));
                     });
 
-                    $row->column(3, function (Column $column) use ($owingAmount, $owingCount) {
+                    // Net position. Derived from the two figures beside it rather
+                    // than re-summed, so the caption can never disagree with the
+                    // cards it references.
+                    $row->column(3, function (Column $column) use ($advanceAmount, $owingAmount) {
+                        $netBalance = $advanceAmount - $owingAmount;
                         $column->append(view('widgets.box-5', [
                             'is_dark' => false,
-                            'title' => 'Balance Due',
-                            'icon' => 'exclamation-circle',
-                            'sub_title' => number_format($owingCount) . ' student(s) with outstanding balance',
-                            'number' => "<small>UGX</small>" . number_format($owingAmount),
-                            'link' => admin_url('students-financial-accounts/owing'),
+                            'title' => 'Fees Balance',
+                            'icon' => 'balance-scale',
+                            'sub_title' => 'Advance UGX ' . number_format($advanceAmount)
+                                . ' &minus; Due UGX ' . number_format($owingAmount),
+                            'number' => "<small>UGX</small>" . number_format($netBalance),
+                            'link' => admin_url('students-financial-accounts'),
                         ]));
                     });
 
