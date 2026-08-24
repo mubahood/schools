@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\AcademicClass;
+use App\Services\FeesAccessService;
 use App\Models\AcademicClassSctream;
 use App\Models\Account;
 use App\Models\AdminRole;
@@ -450,6 +451,67 @@ class ApiMainController extends Controller
         return $this->success($u->get_my_theology_classes(), $message = "Success", 200);
     }
 
+    /**
+     * Fee gate for report cards.
+     *
+     * Returns NULL when access is allowed, or a ready-to-return JSON response
+     * when the student still owes school fees.
+     *
+     * Staff are exempt — this exists to withhold results from parents, never
+     * from the people who run the school. The response keeps the usual
+     * code/message/data shape so existing clients keep working, and adds
+     * fees_* fields so the app can render a "clear fees" screen.
+     */
+    private function feesGate($u, $studentId, $studentName = null)
+    {
+        if (FeesAccessService::isExemptStaff($u)) {
+            return null;
+        }
+
+        $balance = FeesAccessService::balanceFor($studentId);
+        if ($balance >= 0) {
+            return null; // cleared or in credit
+        }
+
+        return response()->json([
+            'code'             => 0,
+            'message'          => FeesAccessService::lockMessage($balance, $studentName),
+            'data'             => '',
+            'fees_locked'      => true,
+            'fees_balance'     => $balance,
+            'fees_outstanding' => FeesAccessService::outstandingFromBalance($balance),
+            'student_id'       => (int) $studentId,
+        ]);
+    }
+
+    /**
+     * Blank every result-bearing field on a report card so a locked parent
+     * cannot read marks, grades, position or comments from a list response,
+     * and cannot reach the generated PDF.
+     */
+    private function maskLockedReportCard($card, int $balance)
+    {
+        foreach ([
+            'total_marks', 'total_aggregates', 'position', 'average_aggregates',
+            'grade', 'total_students',
+            'class_teacher_comment', 'head_teacher_comment',
+            'sports_comment', 'mentor_comment', 'nurse_comment',
+            'pdf_url',
+        ] as $field) {
+            $card->$field = null;
+        }
+
+        $card->has_pdf          = false;
+        $card->full_pdf_url     = null;
+        $card->is_locked        = true;
+        $card->fees_locked      = true;
+        $card->fees_balance     = $balance;
+        $card->fees_outstanding = FeesAccessService::outstandingFromBalance($balance);
+        $card->lock_message     = FeesAccessService::lockMessage($balance);
+
+        return $card;
+    }
+
     public function student_report_cards(Request $r)
     {
         $u = auth('api')->user();
@@ -492,12 +554,31 @@ class ApiMainController extends Controller
 
         $allData = $query->limit(10000)->orderBy('id', 'desc')->get();
 
+        // Fee gate: a parent whose child still owes school fees gets the card
+        // listed but with every mark, grade, comment and PDF link withheld.
+        // Balances are fetched in ONE query to keep this off the N+1 path.
+        $staffExempt = FeesAccessService::isExemptStaff($u);
+        $balances    = $staffExempt
+            ? []
+            : FeesAccessService::balancesFor($allData->pluck('student_id')->all());
+
         // Enrich each card with PDF availability flags
         $data = [];
         foreach ($allData as $d) {
+            $balance = $staffExempt ? 0 : (int) ($balances[(int) $d->student_id] ?? 0);
+
+            if (!$staffExempt && $balance < 0) {
+                $data[] = $this->maskLockedReportCard($d, $balance);
+                continue;
+            }
+
             $hasPdf = !empty($d->pdf_url) && strlen($d->pdf_url) >= 3;
             $d->has_pdf     = $hasPdf;
             $d->full_pdf_url = $hasPdf ? url('storage/files/' . $d->pdf_url) : null;
+            $d->is_locked        = false;
+            $d->fees_locked      = false;
+            $d->fees_balance     = $balance;
+            $d->fees_outstanding = 0;
             $data[] = $d;
         }
 
@@ -532,6 +613,11 @@ class ApiMainController extends Controller
             if ((int) $card->enterprise_id !== (int) $u->enterprise_id) {
                 return $this->error('Access denied.', [], 403);
             }
+        }
+
+        // Fee gate: withhold the whole card while fees are outstanding.
+        if ($gate = $this->feesGate($u, $card->student_id)) {
+            return $gate;
         }
 
         // ── Secular subject marks ────────────────────────────────────────────────
@@ -3829,6 +3915,11 @@ lin
             }
         }
 
+        // Fee gate: no PDF may be generated while fees are outstanding.
+        if ($gate = $this->feesGate($u, $card->student_id)) {
+            return $gate;
+        }
+
         try {
             set_time_limit(120);
             $pdfName = $card->download_self();
@@ -3866,6 +3957,11 @@ lin
             }
         }
 
+        // Fee gate: no progressive-report PDF while fees are outstanding.
+        if ($gate = $this->feesGate($u, $report->student_id)) {
+            return $gate;
+        }
+
         try {
             set_time_limit(120);
             $pdfName = $report->download_self();
@@ -3896,6 +3992,11 @@ lin
             if (!in_array($card->student_id, $myStudentIds)) {
                 return $this->error('Access denied.', [], 403);
             }
+        }
+
+        // Fee gate: the file itself must not be served while fees are outstanding.
+        if ($gate = $this->feesGate($u, $card->student_id)) {
+            return $gate;
         }
 
         if (empty($card->pdf_url)) {
@@ -4078,6 +4179,16 @@ lin
 
         $data = $query->orderBy('id', 'desc')->limit(500)->get();
 
+        // Fee gate: drop reports for children whose fees are outstanding. These
+        // carry per-subject marks inside ->items, so masking single fields is not
+        // enough — the whole report is withheld until the balance is cleared.
+        if (!FeesAccessService::isExemptStaff($u)) {
+            $paBalances = FeesAccessService::balancesFor($data->pluck('student_id')->all());
+            $data = $data->reject(function ($rep) use ($paBalances) {
+                return (int) ($paBalances[(int) $rep->student_id] ?? 0) < 0;
+            })->values();
+        }
+
         // Flatten items + enrich with subject names for easy mobile consumption
         $data->each(function ($rep) {
             $rep->items->each(function ($item) {
@@ -4117,6 +4228,12 @@ lin
             if (!in_array((int) $report->student_id, $studentIds)) {
                 return $this->error('Unauthorized.');
             }
+        }
+
+        // Fee gate: progressive reports carry marks too, so they are withheld
+        // on the same terms as termly report cards.
+        if ($gate = $this->feesGate($u, $report->student_id)) {
+            return $gate;
         }
 
         $report->items->each(function ($item) {
