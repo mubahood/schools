@@ -551,7 +551,7 @@ class FinanceController extends Controller
             ->where('u.id', $id)
             ->select(
                 'u.id', 'u.name', 'u.phone_number_1', 'u.phone_number_2',
-                'u.email', 'u.current_address', 'u.description',
+                'u.email', 'u.current_address',
                 DB::raw('COALESCE(exp.total_exp,  0) AS total_expenditure'),
                 DB::raw('COALESCE(exp.exp_count,  0) AS exp_count'),
                 DB::raw('COALESCE(cr.outstanding, 0) AS outstanding_credit'),
@@ -622,7 +622,7 @@ class FinanceController extends Controller
             ->where('u.user_type', 'supplier')
             ->select(
                 'u.id', 'u.name', 'u.phone_number_1', 'u.phone_number_2',
-                'u.email', 'u.current_address', 'u.description',
+                'u.email', 'u.current_address',
                 DB::raw('COALESCE(exp.total_exp,  0) AS total_expenditure'),
                 DB::raw('COALESCE(exp.exp_count,  0) AS exp_count'),
                 DB::raw('COALESCE(cr.outstanding, 0) AS outstanding_credit'),
@@ -657,7 +657,6 @@ class FinanceController extends Controller
             'phone_number_2'  => 'nullable|string|max:30',
             'email'           => 'nullable|email|max:150',
             'current_address' => 'nullable|string|max:300',
-            'description'     => 'nullable|string|max:1000',
         ]);
 
         $eid  = $this->eid();
@@ -667,21 +666,28 @@ class FinanceController extends Controller
             $username = $base.'_'.rand(1000, 9999);
         } while (Administrator::where('username', $username)->exists());
 
-        $parts    = explode(' ', trim($data['name']), 2);
-        $supplier = Administrator::create([
-            'name'            => $data['name'],
-            'first_name'      => $parts[0],
-            'last_name'       => $parts[1] ?? $parts[0],
-            'username'        => $username,
-            'password'        => bcrypt(Str::random(12)),
-            'email'           => $data['email'] ?? null,
-            'phone_number_1'  => $data['phone_number_1'],
-            'phone_number_2'  => $data['phone_number_2'] ?? null,
-            'current_address' => $data['current_address'] ?? null,
-            'description'     => $data['description'] ?? null,
-            'user_type'       => 'supplier',
-            'enterprise_id'   => $eid,
-        ]);
+        $parts = explode(' ', trim($data['name']), 2);
+
+        // Assigned column by column rather than via Administrator::create().
+        // Administrator is a vendor model with no $fillable, so Laravel falls
+        // back to $guarded = ['*'] and mass assignment throws. Adding $fillable
+        // there would mean editing vendor code, which composer install wipes.
+        $supplier                  = new Administrator();
+        $supplier->name            = $data['name'];
+        $supplier->first_name      = $parts[0];
+        $supplier->last_name       = $parts[1] ?? $parts[0];
+        $supplier->username        = $username;
+        $supplier->password        = bcrypt(Str::random(12));
+        $supplier->email           = $data['email'] ?? null;
+        $supplier->phone_number_1  = $data['phone_number_1'];
+        $supplier->phone_number_2  = $data['phone_number_2'] ?? null;
+        $supplier->current_address = $data['current_address'] ?? null;
+        // NOTE: no `description` write. admin_users is already at MySQL's
+        // 65535-byte row limit, so the column cannot be added; see apiSupStore
+        // notes. Supplier notes need their own table if the feature is wanted.
+        $supplier->user_type       = 'supplier';
+        $supplier->enterprise_id   = $eid;
+        $supplier->save();
 
         $row = $this->fetchSupRow($eid, $supplier->id) ?: (object) [
             'id'                 => $supplier->id,
@@ -713,20 +719,19 @@ class FinanceController extends Controller
             'phone_number_2'  => 'nullable|string|max:30',
             'email'           => 'nullable|email|max:150',
             'current_address' => 'nullable|string|max:300',
-            'description'     => 'nullable|string|max:1000',
         ]);
 
         $parts = explode(' ', trim($data['name']), 2);
-        $supplier->update([
-            'name'            => $data['name'],
-            'first_name'      => $parts[0],
-            'last_name'       => $parts[1] ?? $parts[0],
-            'email'           => $data['email'] ?? null,
-            'phone_number_1'  => $data['phone_number_1'],
-            'phone_number_2'  => $data['phone_number_2'] ?? null,
-            'current_address' => $data['current_address'] ?? null,
-            'description'     => $data['description'] ?? null,
-        ]);
+        // Column-by-column for the same reason as the create above: Administrator
+        // is a vendor model with no $fillable, so ->update([...]) would throw.
+        $supplier->name            = $data['name'];
+        $supplier->first_name      = $parts[0];
+        $supplier->last_name       = $parts[1] ?? $parts[0];
+        $supplier->email           = $data['email'] ?? null;
+        $supplier->phone_number_1  = $data['phone_number_1'];
+        $supplier->phone_number_2  = $data['phone_number_2'] ?? null;
+        $supplier->current_address = $data['current_address'] ?? null;
+        $supplier->save();
 
         $row = $this->fetchSupRow((int) $this->eid(), (int) $id);
         return response()->json(['success' => true, 'record' => $this->fmtSup($row)]);

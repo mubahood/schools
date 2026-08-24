@@ -12,6 +12,34 @@ class FinancialRecord extends Model
 {
     use HasFactory;
 
+
+    /**
+     * Mass-assignable columns.
+     *
+     * Without this Laravel falls back to $guarded = ['*'] and every
+     * FinancialRecord::create()/update() throws MassAssignmentException, which
+     * is why creating an expenditure or a budget failed outright.
+     *
+     * amount, academic_year_id and parent_account_id are deliberately EXCLUDED:
+     * the creating()/updating() hooks derive them from the term, account and
+     * quantity x unit_price. Leaving them out means a crafted request cannot
+     * override the computed amount.
+     */
+    protected $fillable = [
+        'enterprise_id',
+        'account_id',
+        'term_id',
+        'supplier_id',
+        'created_by_id',
+        'type',
+        'description',
+        'payment_date',
+        'payment_method',
+        'quantity',
+        'unit_price',
+        'is_credit',
+        'credit_amount',
+    ];
     public function created_by()
     {
         return $this->belongsTo(Administrator::class, 'created_by_id');

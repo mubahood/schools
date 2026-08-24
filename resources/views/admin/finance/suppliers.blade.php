@@ -147,8 +147,7 @@ table.fin tbody tr:last-child td{border-bottom:none}
       </div>
       <div class="fg">
         <div class="fl">
-          <label>Notes / Description</label>
-          <textarea class="fi" id="fs-m-notes" rows="2" placeholder="Optional notes about this supplier…" style="resize:vertical"></textarea>
+
         </div>
       </div>
       <div class="merrc" id="fs-merr"></div>
@@ -263,7 +262,7 @@ window.FS = {
   open: function(){
     editId=0;
     val('fs-m-name',''); val('fs-m-phone1',''); val('fs-m-phone2','');
-    val('fs-m-email',''); val('fs-m-address',''); val('fs-m-notes','');
+    val('fs-m-email',''); val('fs-m-address','');
     document.getElementById('fs-m-title').textContent = 'New Supplier';
     document.getElementById('fs-m-sub').textContent   = 'Fill in the supplier details below';
     var btn=document.getElementById('fs-save-btn');
@@ -282,7 +281,6 @@ window.FS = {
     val('fs-m-phone2',  r.phone_number_2||'');
     val('fs-m-email',   r.email||'');
     val('fs-m-address', r.current_address||'');
-    val('fs-m-notes',   r.description||'');
     document.getElementById('fs-m-title').textContent = 'Edit Supplier';
     document.getElementById('fs-m-sub').textContent   = r.name;
     var btn=document.getElementById('fs-save-btn');
@@ -307,7 +305,7 @@ window.FS = {
     var payload={
       name: name, phone_number_1: phone1,
       phone_number_2: v('fs-m-phone2'), email: v('fs-m-email'),
-      current_address: v('fs-m-address'), description: v('fs-m-notes'),
+      current_address: v('fs-m-address'),
       _token: CSRF
     };
     fetch(editId ? API+'/'+editId : API, {

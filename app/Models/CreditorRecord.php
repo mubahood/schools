@@ -11,6 +11,28 @@ class CreditorRecord extends Model
 {
     use HasFactory;
 
+
+    /**
+     * Mass-assignable columns. See the note on FinancialRecord: without this
+     * every CreditorRecord::create()/update() throws MassAssignmentException.
+     */
+    protected $fillable = [
+        'enterprise_id',
+        'financial_record_id',
+        'supplier_id',
+        'account_id',
+        'term_id',
+        'academic_year_id',
+        'created_by_id',
+        'description',
+        'original_amount',
+        'paid_amount',
+        'balance',
+        'due_date',
+        'status',
+        'payment_method',
+        'notes',
+    ];
     public function financial_record()
     {
         return $this->belongsTo(FinancialRecord::class);
