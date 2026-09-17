@@ -60,6 +60,9 @@
             <a href="{{ admin_url('parent-commitment-records/create') }}" class="btn btn-sm btn-primary">
                 <i class="fa fa-plus"></i> New Commitment
             </a>
+            <a href="{{ admin_url('parent-commitment-records/demands/create') }}" class="btn btn-sm btn-danger">
+                <i class="fa fa-file-text-o"></i> Generate Fees Demands
+            </a>
             <a href="{{ admin_url('parent-commitment-records') }}" class="btn btn-sm btn-default">
                 <i class="fa fa-list"></i> All Records
             </a>

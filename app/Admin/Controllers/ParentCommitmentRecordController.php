@@ -6,6 +6,7 @@ use App\Models\Account;
 use App\Models\AcademicClass;
 use App\Models\Enterprise;
 use App\Models\ParentCommitmentRecord;
+use App\Models\SchoolFeesDemand;
 use App\Models\User;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
@@ -45,7 +46,9 @@ class ParentCommitmentRecordController extends AdminController
         $grid->tools(function ($tools) {
             $tools->append(
                 '<a href="' . admin_url('parent-commitment-dashboard') . '" class="btn btn-sm btn-info">'
-                . '<i class="fa fa-tachometer"></i> Commitment Dashboard</a>'
+                . '<i class="fa fa-tachometer"></i> Commitment Dashboard</a> '
+                . '<a href="' . admin_url('parent-commitment-records/demands/create') . '" class="btn btn-sm btn-danger">'
+                . '<i class="fa fa-file-text-o"></i> Generate Fees Demands</a>'
             );
         });
 
@@ -130,6 +133,15 @@ class ParentCommitmentRecordController extends AdminController
                 $actions->prepend(
                     '<a href="' . $url . '" target="_blank" class="btn btn-xs btn-danger" title="Print Demand Notice">'
                     . '<i class="fa fa-print"></i> Demand Notice</a> '
+                );
+            }
+            // Raise a real school-fees demand from this commitment. Offered for
+            // every status, because a Fulfilled promise can still leave a balance.
+            if ($rec->student_id) {
+                $gen = admin_url('parent-commitment-records/' . $rec->id . '/generate-demand');
+                $actions->prepend(
+                    '<a href="' . $gen . '" class="btn btn-xs btn-warning" title="Create a school-fees demand from this commitment">'
+                    . '<i class="fa fa-file-text-o"></i> Fees Demand</a> '
                 );
             }
         });
@@ -517,5 +529,197 @@ JS);
             'parent_contact'      => $parentContact,
             'outstanding_balance' => round($outstandingBalance, 2),
         ]);
+    }
+
+    // =========================================================================
+    // FEES DEMANDS — raise school-fees demands from commitment records
+    // =========================================================================
+
+    /**
+     * Options offered by the batch generator, and the query each one means.
+     *
+     * Kept in one place so the form, the summary count and the generator can
+     * never drift apart.
+     */
+    public const DEMAND_SCOPES = [
+        'overdue'         => 'Overdue commitments only',
+        'pending'         => 'Pending commitments only',
+        'pending_overdue' => 'Pending and Overdue (everything unfulfilled)',
+        'due_by'          => 'Commitments due on or before a date',
+        'all'             => 'All commitments',
+    ];
+
+    /**
+     * Build the commitment query for a scope. Only records with a linked student
+     * and a still-unpaid balance can become a demand, so both are enforced here
+     * rather than left to the caller.
+     */
+    protected function commitmentQueryFor(int $eid, string $scope, ?string $dueBy, $minBalance)
+    {
+        $q = ParentCommitmentRecord::where('enterprise_id', $eid)
+            ->whereNotNull('student_id')
+            ->where('student_id', '>', 0);
+
+        if ($scope === 'overdue') {
+            $q->where('promise_status', 'Overdue');
+        } elseif ($scope === 'pending') {
+            $q->where('promise_status', 'Pending');
+        } elseif ($scope === 'pending_overdue') {
+            $q->whereIn('promise_status', ['Pending', 'Overdue']);
+        } elseif ($scope === 'due_by') {
+            $q->whereIn('promise_status', ['Pending', 'Overdue']);
+            if ($dueBy) {
+                $q->whereDate('commitment_date', '<=', $dueBy);
+            }
+        }
+
+        if ($minBalance !== null && $minBalance !== '' && (float) $minBalance > 0) {
+            $q->where('outstanding_balance', '>=', abs((float) $minBalance));
+        }
+
+        return $q;
+    }
+
+    /**
+     * Students from those commitments who STILL owe money.
+     *
+     * A parent who has since cleared should never receive a demand, so the
+     * commitment set is intersected with live account balances before anything
+     * is created. Balances are negative for debt.
+     */
+    protected function stillOwingCommitments($commitments, int $eid)
+    {
+        $studentIds = collect($commitments)->pluck('student_id')->map('intval')->unique()->values();
+        if ($studentIds->isEmpty()) {
+            return collect();
+        }
+
+        $owing = Account::where('enterprise_id', $eid)
+            ->whereIn('administrator_id', $studentIds)
+            ->where('balance', '<', 0)
+            ->pluck('administrator_id')
+            ->map('intval')
+            ->flip();
+
+        return collect($commitments)->filter(function ($c) use ($owing) {
+            return $owing->has((int) $c->student_id);
+        })->values();
+    }
+
+    /** One commitment -> one demand, then straight to the printable notice. */
+    public function generateDemandForRecord($id)
+    {
+        $u   = Admin::user();
+        $eid = (int) $u->enterprise_id;
+
+        $record = ParentCommitmentRecord::where('enterprise_id', $eid)->findOrFail($id);
+
+        if (!$record->student_id) {
+            admin_error('Cannot raise a demand', 'This commitment has no student linked to it.');
+            return redirect(admin_url('parent-commitment-records'));
+        }
+
+        $owing = $this->stillOwingCommitments([$record], $eid);
+        if ($owing->isEmpty()) {
+            admin_error(
+                'Nothing outstanding',
+                'This student has no outstanding balance, so no demand was created.'
+            );
+            return redirect(admin_url('parent-commitment-records'));
+        }
+
+        try {
+            $demand = SchoolFeesDemand::createFromCommitments($owing, [
+                'enterprise_id' => $eid,
+                'description'   => 'Demand - ' . ($record->parent_name ?: 'parent') . ' commitment #' . $record->id,
+            ]);
+        } catch (\Throwable $e) {
+            admin_error('Could not create demand', $e->getMessage());
+            return redirect(admin_url('parent-commitment-records'));
+        }
+
+        admin_success('Demand created', 'School fees demand #' . $demand->id . ' is ready to print.');
+
+        return redirect(url('generate-demand-notice?id=' . $demand->id . '&salt=' . time()));
+    }
+
+    /** The batch generator form, with a live count of what each scope covers. */
+    public function demandBatchForm(Content $content)
+    {
+        $u   = Admin::user();
+        $eid = (int) $u->enterprise_id;
+
+        ParentCommitmentRecord::markOverdue($eid);
+
+        $counts = [];
+        foreach (array_keys(self::DEMAND_SCOPES) as $scope) {
+            $set = $this->commitmentQueryFor($eid, $scope, null, null)->get();
+            $counts[$scope] = [
+                'commitments' => $set->count(),
+                'owing'       => $this->stillOwingCommitments($set, $eid)->count(),
+            ];
+        }
+
+        return $content
+            ->title('Generate Fees Demands from Commitments')
+            ->description('Turn parent promises into printable demand notices')
+            ->body(view('admin.parent-commitment-demand-batch', [
+                'scopes' => self::DEMAND_SCOPES,
+                'counts' => $counts,
+                'action' => admin_url('parent-commitment-records/demands/batch'),
+            ]));
+    }
+
+    /** Create one demand covering every commitment matching the condition. */
+    public function demandBatchStore(Request $request)
+    {
+        $u   = Admin::user();
+        $eid = (int) $u->enterprise_id;
+
+        $data = $request->validate([
+            'scope'       => 'required|string|in:' . implode(',', array_keys(self::DEMAND_SCOPES)),
+            'due_by'      => 'nullable|date',
+            'min_balance' => 'nullable|numeric|min:0',
+            'description' => 'nullable|string|max:255',
+        ]);
+
+        ParentCommitmentRecord::markOverdue($eid);
+
+        $commitments = $this->commitmentQueryFor(
+            $eid,
+            $data['scope'],
+            $data['due_by'] ?? null,
+            $data['min_balance'] ?? null
+        )->get();
+
+        $owing = $this->stillOwingCommitments($commitments, $eid);
+
+        if ($owing->isEmpty()) {
+            admin_error(
+                'No demands created',
+                $commitments->count() . ' commitment(s) matched, but none of those students still owe anything.'
+            );
+            return redirect(admin_url('parent-commitment-records/demands/create'));
+        }
+
+        try {
+            $demand = SchoolFeesDemand::createFromCommitments($owing, [
+                'enterprise_id' => $eid,
+                'description'   => $data['description']
+                    ?: 'Commitments - ' . self::DEMAND_SCOPES[$data['scope']] . ' - ' . date('d M Y'),
+            ]);
+        } catch (\Throwable $e) {
+            admin_error('Could not create demand', $e->getMessage());
+            return redirect(admin_url('parent-commitment-records/demands/create'));
+        }
+
+        $skipped = $commitments->count() - $owing->count();
+        admin_success(
+            'Demand #' . $demand->id . ' created',
+            $owing->count() . ' student(s) included'
+                . ($skipped > 0 ? ', ' . $skipped . ' skipped (already cleared)' : '') . '.'
+        );
+
+        return redirect(url('generate-demand-notice?id=' . $demand->id . '&salt=' . time()));
     }
 }

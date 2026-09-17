@@ -301,6 +301,11 @@ Route::group([
     $router->get('parent-commitment-dashboard', 'ParentCommitmentRecordController@dashboard')->name('parent-commitment.dashboard');
     $router->get('parent-commitment-records/ajax/student-info', 'ParentCommitmentRecordController@ajaxStudentInfo')->name('parent-commitment-records.ajax.student-info');
     $router->get('parent-commitment-records/{pcom}/demand-notice', 'ParentCommitmentRecordController@demandNotice')->name('parent-commitment-records.demand-notice');
+    // Fees demands raised from commitment records. These MUST stay above the
+    // resource route below, or 'demands' is swallowed as a {pcom} id.
+    $router->get('parent-commitment-records/demands/create', 'ParentCommitmentRecordController@demandBatchForm')->name('parent-commitment-records.demands.create');
+    $router->post('parent-commitment-records/demands/batch', 'ParentCommitmentRecordController@demandBatchStore')->name('parent-commitment-records.demands.batch');
+    $router->get('parent-commitment-records/{pcom}/generate-demand', 'ParentCommitmentRecordController@generateDemandForRecord')->name('parent-commitment-records.generate-demand');
     $router->resource('parent-commitment-records', ParentCommitmentRecordController::class)
         ->parameters(['parent-commitment-records' => 'pcom']);
 
