@@ -724,7 +724,7 @@ use App\Models\Utils;
         </div>
 
         <p class="text-center" style="margin-top:1.5rem;color:#6c757d;font-size:.9rem">
-            Pay online by MTN Mobile Money, Airtel Money or card, or by bank transfer. More than 1,000 students? <a href="#contact">Talk to us</a> for a tailored package.
+            Pay online by MTN Mobile Money, Airtel Money or card, or by bank transfer. More than 1,000 students? <a href="mailto:{{ \App\Models\Utils::get_support_email() }}?subject=School%20Dynamics%20-%20package%20for%20over%201000%20students">Talk to us</a> for a tailored package.
         </p>
     </div>
 </section>
