@@ -217,7 +217,7 @@ Route::POST("mail-sender", (function (Request $r) {
     ];
 }));
 
-Route::middleware([JwtMiddleware::class])->group(function () {
+Route::middleware([JwtMiddleware::class, \App\Http\Middleware\EnsureEnterpriseAccess::class])->group(function () {
     Route::post("subject-create", [ApiMainController::class, 'subject_create']);
     Route::post("employee-create", [ApiMainController::class, 'employee_create']);
     Route::post("student-create", [ApiMainController::class, 'student_create']);

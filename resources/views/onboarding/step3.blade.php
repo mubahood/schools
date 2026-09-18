@@ -68,6 +68,19 @@ if (!isset($company)) {
         </div>
         
         <div class="form-group">
+            <label class="form-label" for="subdomain">Your School's Web Address *</label>
+            <div style="display:flex;align-items:center;gap:0">
+                <input type="text" id="subdomain" name="subdomain" class="form-input" required
+                       value="{{ old('subdomain', session('onboarding.step3.subdomain', '')) }}"
+                       placeholder="e.g. stmarys" maxlength="30" autocomplete="off"
+                       style="border-top-right-radius:0;border-bottom-right-radius:0">
+                <span style="padding:0 12px;background:var(--background-light);border:1px solid var(--border-color);border-left:0;border-radius:0 8px 8px 0;line-height:2.75;font-size:.9rem;color:var(--text-light);white-space:nowrap">.schooldynamics.ug</span>
+            </div>
+            <div class="form-help" id="subdomain_help">Lowercase letters, numbers and hyphens. Parents and staff will log in here. Suggested from your school name — you can change it.</div>
+            <div class="error-message" id="subdomain_error"></div>
+        </div>
+
+        <div class="form-group">
             <label class="form-label">School Type *</label>
             <div class="radio-group">
                 <label class="radio-option">
@@ -227,6 +240,33 @@ if (!isset($company)) {
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // ---- Web address: suggest from the school name until the owner edits it ----
+    (function () {
+        var nameEl = document.getElementById('school_name');
+        var subEl  = document.getElementById('subdomain');
+        var help   = document.getElementById('subdomain_help');
+        var err    = document.getElementById('subdomain_error');
+        if (!nameEl || !subEl) return;
+        var touched = subEl.value.length > 0;
+        function slug(v) { return (v || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').slice(0, 30); }
+        nameEl.addEventListener('input', function () { if (!touched) subEl.value = slug(nameEl.value); });
+        subEl.addEventListener('input', function () { touched = true; subEl.value = slug(subEl.value); err.textContent = ''; });
+        var timer = null;
+        function check() {
+            var v = slug(subEl.value); if (v.length < 3) return;
+            fetch('{{ route("onboarding.validate.subdomain") }}?subdomain=' + encodeURIComponent(v))
+              .then(function (r) { return r.json(); })
+              .then(function (d) {
+                  subEl.value = d.value || v;
+                  if (d.available) { err.textContent = ''; help.textContent = d.message; help.style.color = '#10b981'; }
+                  else { err.textContent = d.message; help.style.color = ''; }
+              }).catch(function () {});
+        }
+        subEl.addEventListener('blur', check);
+        subEl.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(check, 600); });
+        nameEl.addEventListener('blur', function () { if (!touched) check(); });
+    })();
+
     // === SESSION SAVING FUNCTIONALITY ===
     // Save form data to session on every input change
     const formInputs = document.querySelectorAll('#step3Form input, #step3Form textarea, #step3Form select');

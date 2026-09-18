@@ -67,8 +67,8 @@ Encore\Admin\Form::forget(['map', 'editor']); */
 
 $u = Auth::user();
 if ($u != null) {
-    // Skip email verification check for existing admin users (enterprise_id <= 28)
-    $skipEmailVerification = $u->enterprise_id && $u->enterprise_id <= 28;
+    // Grandfathered schools (billing_exempt) never had a wizard and are not asked to verify.
+    $skipEmailVerification = $u->ent && ($u->ent->billing_exempt || $u->enterprise_id == 1);
     
     if (!$skipEmailVerification) {
         // Check email verification first - this is mandatory for new users only
@@ -99,12 +99,8 @@ if ($u != null) {
         }
     }
     
-    if ($u->ent != null) {
-        if ($u->ent->has_valid_lisence != 'Yes') {
-            // die("System under maintenance. New features are being added. Please check back later.");
-            die('License for <b>' . $u->ent->name . '</b> has expired. Please contact, <b>Newline Technologies Ltd</b>. for renewal.');
-        }
-    }
+    // Access enforcement now lives in App\Http\Middleware\EnsureEnterpriseAccess
+    // (read-only suspension with a pay button instead of a die()).
 }
 
 if ($u != null) {
@@ -189,7 +185,11 @@ Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
         //$navbar->left(Shortcut::make($links, 'fa-plus')->title('ADD NEW'));
         $u = Admin::user();
         if ($u->isRole('dos', 'admin', 'bursar', 'super-admin', 'hm')) {
-            $navbar->left('<li><a href="javascript:;">WALLET: UGX ' . number_format($u->ent->wallet_balance) . '</a></li>');
+            $navbar->left('<li><a href="' . admin_url('billing') . '" title="Top up SMS credit">WALLET: UGX ' . number_format($u->ent->wallet_balance) . '</a></li>');
+            if (!$u->ent->billing_exempt && $u->enterprise_id != 1) {
+                $pill = \App\Services\BillingService::statusLabel($u->ent);
+                $navbar->left('<li><a href="' . admin_url('billing') . '"><span class="label label-' . $pill['class'] . '" style="font-size:12px;padding:5px 9px">' . $pill['text'] . '</span></a></li>');
+            }
         }
 
 

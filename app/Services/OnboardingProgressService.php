@@ -534,9 +534,10 @@ class OnboardingProgressService
             return false;
         }
 
-        // Skip email verification for existing admin users (enterprise_id <= 28)
-        if ($user->enterprise_id && $user->enterprise_id <= 28) {
-            return true; // Consider them already verified
+        // Grandfathered schools never had a wizard; they are billing_exempt.
+        $ent = $user->enterprise_id ? Enterprise::find($user->enterprise_id) : null;
+        if ($ent && ($ent->billing_exempt || $ent->id == 1)) {
+            return true;
         }
 
         // Check if user email is verified in OnBoardWizard table

@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use App\Services\BillingService;
 
 class OnboardingController extends Controller
 {
@@ -78,7 +79,11 @@ class OnboardingController extends Controller
      */
     public function processStep3(Request $request)
     {
-                $validator = Validator::make($request->all(), [
+        // Normalise the web address BEFORE validation so a typed "St. Mary's"
+        // becomes "st-mary-s" instead of failing the regex. Empty -> from the name.
+        $request->merge(['subdomain' => self::normaliseSubdomain($request->subdomain ?: $request->school_name)]);
+
+        $validator = Validator::make($request->all(), [
             // Basic Information
             'school_name' => 'required|string|max:255|unique:enterprises,name',
             'school_short_name' => 'required|string|max:50',
@@ -95,6 +100,9 @@ class OnboardingController extends Controller
             'hm_name' => 'nullable|string|max:255',
             'hm_phone' => 'nullable|string|max:20',
             
+            // Web address
+            'subdomain' => 'nullable|string|min:3|max:30|regex:/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/',
+
             // Branding
             'primary_color' => 'required|string|max:7|regex:/^#[0-9A-Fa-f]{6}$/',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -102,6 +110,8 @@ class OnboardingController extends Controller
             // Basic Information Messages
             'school_name.required' => 'School name is required.',
             'school_name.unique' => 'A school with this name is already registered.',
+            'subdomain.regex' => 'Web address may only contain lowercase letters, numbers and hyphens.',
+            'subdomain.min' => 'Web address must be at least 3 characters.',
             'school_short_name.required' => 'School short name is required.',
             'school_type.required' => 'Please select the school level/type.',
             'school_type.in' => 'Invalid school type selected.',
@@ -141,11 +151,11 @@ class OnboardingController extends Controller
             }, $words)), 0, 5));
         }
 
-        // Auto-generate subdomain if not provided
-        $subdomain = '';
-        if ($request->school_name) {
-            $subdomain = strtolower(preg_replace('/[^a-z0-9]/', '', strtolower($request->school_name)));
-            $subdomain = substr($subdomain, 0, 20);
+        // Web address: the owner's choice, or derived from the name. It becomes the
+        // tenant subdomain, so it must be unique and not a reserved word.
+        $subdomain = self::normaliseSubdomain($request->subdomain ?: $request->school_name);
+        if ($err = self::subdomainProblem($subdomain)) {
+            return response()->json(['success' => false, 'errors' => ['subdomain' => [$err]]]);
         }
 
         // Store basic enterprise data in session with defaults for missing fields
@@ -189,7 +199,7 @@ class OnboardingController extends Controller
         $enterpriseData['school_pay_import_automatically'] = 'No';
         $enterpriseData['school_pay_last_accepted_date'] = null;
         
-        // Add missing system fields
+        // Access is granted by BillingService::startTrial() at creation time.
         $enterpriseData['expiry'] = null;
 
         session(['onboarding_enterprise_data' => $enterpriseData]);
@@ -268,7 +278,7 @@ class OnboardingController extends Controller
             
             // Administrative Information
             $enterprise->administrator_id = $user->id;
-            $enterprise->hm_name = $enterpriseData['hm_name'];
+            $enterprise->hm_name = $enterpriseData['hm_name'] ?? '';
             
             // Branding & Appearance
             $enterprise->color = $enterpriseData['primary_color'];
@@ -295,17 +305,25 @@ class OnboardingController extends Controller
             $user->enterprise_id = $enterprise->id;
             $user->save();
 
-            // 4. Assign admin role to user (role_id = 2 for admin)
+            // 4. The owner holds exactly one role: Enterprise Admin (Owner), id 2.
+            //    (Role 6 was previously added here believing it was super-admin;
+            //    it is Director of Studies.)
             $adminRole = new AdminRoleUser();
             $adminRole->user_id = $user->id;
-            $adminRole->role_id = 2; // Admin role
+            $adminRole->role_id = 2;
             $adminRole->save();
 
-            // 5. Also assign super-admin role (role_id = 6)
-            $superAdminRole = new AdminRoleUser();
-            $superAdminRole->user_id = $user->id;
-            $superAdminRole->role_id = 6; // Super-admin role
-            $superAdminRole->save();
+            // 5. Unique tenant address, enforced by the DB.
+            DB::table('enterprises')->where('id', $enterprise->id)
+                ->update(['subdomain_slug' => $enterpriseData['subdomain']]);
+
+            // 6. A school cannot do anything without an academic year and a term;
+            //    the old flow left new owners to discover that alone. Seed the
+            //    current year with three terms, the first one active.
+            self::seedFirstAcademicYear($enterprise->id);
+
+            // 7. 30-day trial starts now; billing takes over from here.
+            BillingService::startTrial($enterprise);
 
             DB::commit();
 
@@ -313,10 +331,14 @@ class OnboardingController extends Controller
             session()->forget(['onboarding_user_data', 'onboarding_enterprise_data']);
 
             // Store user info for welcome step
+            $trialEnds = now()->addDays(BillingService::TRIAL_DAYS);
             session(['onboarding_success' => [
                 'user_name' => $user->name,
                 'school_name' => $enterprise->name,
-                'email' => $user->email
+                'email' => $user->email,
+                'subdomain' => $enterpriseData['subdomain'],
+                'trial_ends' => $trialEnds->format('d M Y'),
+                'trial_days' => BillingService::TRIAL_DAYS,
             ]]);
 
             return response()->json([
@@ -391,6 +413,83 @@ class OnboardingController extends Controller
             'available' => !$exists,
             'message' => $exists ? 'School name is already taken.' : 'School name is available.'
         ]);
+    }
+
+    public const RESERVED_SUBDOMAINS = ['www', 'api', 'admin', 'app', 'mail', 'ftp', 'login', 'register', 'billing',
+        'gateway', 'static', 'cdn', 'help', 'support', 'test', 'demo', 'schooldynamics', 'onboarding', 'kihp'];
+
+    public static function normaliseSubdomain(?string $raw): string
+    {
+        $s = strtolower(trim((string) $raw));
+        $s = preg_replace('/[^a-z0-9]+/', '-', $s);
+        $s = trim(preg_replace('/-+/', '-', $s), '-');
+
+        return substr($s, 0, 30);
+    }
+
+    /** Null when usable, otherwise the message to show. */
+    public static function subdomainProblem(string $s): ?string
+    {
+        if (strlen($s) < 3) {
+            return 'Web address must be at least 3 characters.';
+        }
+        if (in_array($s, self::RESERVED_SUBDOMAINS, true)) {
+            return 'That web address is reserved. Please choose another.';
+        }
+        $taken = Enterprise::whereRaw('LOWER(TRIM(subdomain)) = ?', [$s])->orWhere('subdomain_slug', $s)->exists();
+
+        return $taken ? 'That web address is already taken.' : null;
+    }
+
+    public function validateSubdomain(Request $request)
+    {
+        $s = self::normaliseSubdomain($request->get('subdomain'));
+        $problem = self::subdomainProblem($s);
+
+        return response()->json([
+            'available' => $problem === null,
+            'value' => $s,
+            'message' => $problem ?: ($s . '.schooldynamics.ug is available.'),
+        ]);
+    }
+
+    /**
+     * Make sure a brand-new school can be used immediately.
+     *
+     * Enterprise::my_update() already creates the academic year (and the
+     * AcademicYear model seeds its terms), so this only fills gaps: terms if
+     * none exist, exactly one active term, and the dp_year / dp_term_id
+     * pointers that older screens still read. Idempotent.
+     */
+    public static function seedFirstAcademicYear(int $enterpriseId): void
+    {
+        $now = now();
+        $yearId = DB::table('academic_years')->where('enterprise_id', $enterpriseId)->where('is_active', 1)->value('id')
+            ?: DB::table('academic_years')->where('enterprise_id', $enterpriseId)->orderBy('id')->value('id');
+        if (!$yearId) {
+            $y = (int) date('Y');
+            $yearId = DB::table('academic_years')->insertGetId([
+                'enterprise_id' => $enterpriseId, 'name' => (string) $y, 'details' => 'Academic year ' . $y,
+                'starts' => "$y-01-01", 'ends' => "$y-12-31", 'is_active' => 1, 'demo_id' => 0, 'process_data' => 'Yes',
+                'created_at' => $now, 'updated_at' => $now,
+            ]);
+        }
+        if (!DB::table('terms')->where('academic_year_id', $yearId)->exists()) {
+            $y = (int) date('Y');
+            foreach ([[1, "$y-02-01", "$y-05-10"], [2, "$y-05-25", "$y-08-25"], [3, "$y-09-15", "$y-12-10"]] as [$n, $from, $to]) {
+                DB::table('terms')->insert([
+                    'enterprise_id' => $enterpriseId, 'academic_year_id' => $yearId, 'name' => (string) $n,
+                    'term_name' => (string) $n, 'details' => "Term $n - $y", 'starts' => $from, 'ends' => $to,
+                    'is_active' => $n === 1 ? 1 : 0, 'demo_id' => 0, 'created_at' => $now, 'updated_at' => $now,
+                ]);
+            }
+        }
+        $activeTerm = DB::table('terms')->where('academic_year_id', $yearId)->where('is_active', 1)->orderBy('id')->value('id');
+        if (!$activeTerm) {
+            $activeTerm = DB::table('terms')->where('academic_year_id', $yearId)->orderBy('id')->value('id');
+            DB::table('terms')->where('id', $activeTerm)->update(['is_active' => 1]);
+        }
+        DB::table('enterprises')->where('id', $enterpriseId)->update(['dp_year' => $yearId, 'dp_term_id' => $activeTerm]);
     }
 
     public function validateSchoolEmail(Request $request)

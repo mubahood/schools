@@ -16,6 +16,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         // Fetch today's SchoolPay transactions every hour and auto-import them.
+        $schedule->command('billing:tick')->dailyAt('06:00')->withoutOverlapping();
         $schedule->command('schoolpay:sync')->hourly()
             ->withoutOverlapping()
             ->runInBackground()

@@ -2874,149 +2874,118 @@ Route::get('process-batch-service-subscriptions', function (Request $request) {
     return response('<p style="color:red;font-family:monospace;">Unauthorized. Please log in to the admin panel first.</p>', 401);
   }
 
-  set_time_limit(180); // Allow up to 3 minutes for large batches
+  set_time_limit(600);
+
+  $backUrl = admin_url('batch-service-subscriptions');
+  $shell   = function ($title, $body, $color = '#333') use ($backUrl) {
+    return response("
+      <div style='font-family:-apple-system,Segoe UI,Roboto,sans-serif;padding:24px;max-width:820px;margin:0 auto'>
+        <h3 style='color:{$color};margin:0 0 12px'>{$title}</h3>
+        {$body}
+        <hr style='border:none;border-top:1px solid #ddd;margin:16px 0'>
+        <p><a href='{$backUrl}' style='color:#337ab7'>← Back to Batch Subscriptions</a></p>
+      </div>");
+  };
 
   $rep = BatchServiceSubscription::find((int) $request->id);
   if (!$rep) {
-    return '<p style="color:red;font-family:monospace;">Batch not found.</p>';
+    return $shell('Batch not found', '<p>No batch subscription matches that id.</p>', '#c0392b');
   }
 
   // Enterprise ownership check
   if ((int) $rep->enterprise_id !== (int) $authUser->enterprise_id) {
-    return '<p style="color:red;font-family:monospace;">Access denied.</p>';
+    return $shell('Access denied', '<p>This batch belongs to another school.</p>', '#c0392b');
   }
 
-  if ($rep->is_processed === 'Yes') {
-    $backUrl = admin_url('batch-service-subscriptions');
-    return response("
-      <div style='font-family:monospace;padding:20px;max-width:700px'>
-        <h3 style='color:#856404'>Already Processed</h3>
-        <p>This batch was already processed.</p>
-        <p>Success: <strong>{$rep->success_count}</strong> &nbsp;|&nbsp;
-           Failed: <strong>{$rep->fail_count}</strong> &nbsp;|&nbsp;
-           Total: <strong>{$rep->total_count}</strong></p>
-        " . ($rep->processed_notes ? "<pre style='background:#f8f9fa;padding:10px;font-size:12px'>" . e($rep->processed_notes) . "</pre>" : '') . "
-        <p><a href='{$backUrl}'>← Back to Batch Subscriptions</a></p>
-      </div>");
+  $summaryOf = function ($b) {
+    return "<p>Created: <strong>" . (int) $b->success_count . "</strong> &nbsp;|&nbsp;
+               Already subscribed: <strong>" . (int) $b->skipped_count . "</strong> &nbsp;|&nbsp;
+               Failed: <strong>" . (int) $b->fail_count . "</strong> &nbsp;|&nbsp;
+               Total: <strong>" . (int) $b->total_count . "</strong></p>"
+      . ($b->processed_notes ? "<pre style='background:#f8f9fa;padding:12px;font-size:12px;white-space:pre-wrap'>" . e($b->processed_notes) . "</pre>" : '');
+  };
+
+  // A re-run must be asked for explicitly: ?reprocess=1. Without it, an
+  // already-processed batch is reported, never silently run again.
+  $isReprocess = in_array((string) $request->reprocess, ['1', 'yes', 'true'], true);
+
+  if ($rep->is_processed === 'Yes' && !$isReprocess) {
+    $reprocessUrl = url('process-batch-service-subscriptions?id=' . $rep->id . '&reprocess=1');
+    return $shell(
+      'Already Processed',
+      "<p>This batch has already been processed.</p>"
+        . $summaryOf($rep)
+        . "<p style='margin-top:16px'>
+             <a href='{$reprocessUrl}' style='background:#337ab7;color:#fff;padding:8px 14px;border-radius:4px;text-decoration:none'>
+               &#8635; Reprocess this batch
+             </a>
+           </p>
+           <p style='color:#777;font-size:13px'>Reprocessing only adds students who are still missing this subscription.
+             Students who already have it are skipped and are never charged twice.</p>",
+      '#856404'
+    );
   }
 
-  $administrators = $rep->administrators;
-  if (empty($administrators)) {
-    return '<p style="color:orange;font-family:monospace;">No subscribers found in this batch.</p>';
+  // ── Claim the batch ───────────────────────────────────────────────────────
+  // Only one run may process a batch. The Process button opens a new tab, and a
+  // run takes a while, so users used to click it twice: both passes walked the
+  // same student list, each inserting some subscriptions and reporting the
+  // other's inserts as "already subscribed", and the counters were then
+  // overwritten by whichever pass finished last. That is what produced the
+  // "student already subscribed" reports for students who had never been
+  // subscribed before that very run.
+  if (!$rep->claimForProcessing($isReprocess)) {
+    return $shell(
+      'Already Running',
+      "<p>This batch is currently being processed in another tab or by another user"
+        . ($rep->locked_at ? " (started " . e((string) $rep->locked_at) . ")" : "")
+        . ". Wait for it to finish, then refresh the batch list to see the result.</p>"
+        . "<p style='color:#777;font-size:13px'>Nothing was double-processed — this request stopped safely.</p>",
+      '#856404'
+    );
   }
 
-  $inventoryMode = $rep->to_be_managed_by_inventory ?? 'No';
-  $batchItems    = ($inventoryMode === 'Yes') ? $rep->batchItems()->get() : collect();
-  $quantity      = max(1, (int) $rep->quantity);
-
-  $success     = 0;
-  $fail        = 0;
-  $total_count = 0;
-  $rows        = [];
-  $fail_text   = '';
-
-  foreach ($administrators as $adminId) {
-    $total_count++;
-    $user = User::find($adminId);
-
-    if (!$user) {
-      $fail++;
-      $msg        = "User #{$adminId} not found";
-      $fail_text .= $msg . "\n";
-      $rows[]     = "<span style='color:#c0392b'>SKIP — {$msg}</span>";
-      continue;
-    }
-
-    // Pre-check for existing subscription (avoids relying solely on model Exception)
-    $existing = ServiceSubscription::where([
-      'service_id'       => $rep->service_id,
-      'administrator_id' => $user->id,
-      'due_term_id'      => $rep->due_term_id,
-    ])->first();
-
-    if ($existing) {
-      $fail++;
-      $msg        = "Already subscribed: {$user->name} (sub #{$existing->id})";
-      $fail_text .= $msg . "\n";
-      $rows[]     = "<span style='color:#e67e22'>SKIP — {$msg}</span>";
-      continue;
-    }
-
-    // Build individual subscription
-    $sub                          = new ServiceSubscription();
-    $sub->service_id              = $rep->service_id;
-    $sub->enterprise_id           = $rep->enterprise_id;
-    $sub->administrator_id        = $user->id;
-    $sub->quantity                = $quantity;
-    $sub->due_term_id             = $rep->due_term_id;
-    $sub->due_academic_year_id    = $rep->due_academic_year_id;
-    $sub->link_with               = $rep->link_with;
-    $sub->transport_route_id      = $rep->transport_route_id;
-    $sub->trip_type               = $rep->trip_type;
-    $sub->to_be_managed_by_inventory = $inventoryMode;
-    $sub->is_service_offered      = 'No';
-    $sub->is_completed            = 'No';
-
-    try {
-      $sub->save();
-
-      // Create per-subscriber inventory tracking records from the batch items
-      if ($inventoryMode === 'Yes' && $batchItems->count() > 0) {
-        foreach ($batchItems as $batchItem) {
-          if (empty($batchItem->stock_item_category_id)) continue;
-          \App\Models\ServiceItemToBeOffered::firstOrCreate(
-            [
-              'service_subscription_id' => $sub->id,
-              'stock_item_category_id'  => $batchItem->stock_item_category_id,
-            ],
-            [
-              'quantity'           => max(1, (int) ($batchItem->quantity ?? 1)),
-              'is_service_offered' => 'No',
-              'user_id'            => $user->id,
-              'enterprise_id'      => $rep->enterprise_id,
-            ]
-          );
-        }
-      }
-
-      $success++;
-      $rows[] = "<span style='color:#27ae60'>OK — {$user->name}</span>";
-    } catch (\Throwable $e) {
-      $fail++;
-      $msg        = $e->getMessage();
-      $fail_text .= "Error for {$user->name}: {$msg}\n";
-      $rows[]     = "<span style='color:#c0392b'>FAIL — {$user->name} — " . e($msg) . "</span>";
-    }
+  if (empty($rep->administrators)) {
+    $rep->releaseLock();
+    return $shell('No subscribers', '<p>This batch has no students selected.</p>', '#e67e22');
   }
 
-  // Persist final counts regardless of individual failures
+  // ── Process ───────────────────────────────────────────────────────────────
   try {
-    $rep->success_count   = $success;
-    $rep->fail_count      = $fail;
-    $rep->total_count     = $total_count;
-    $rep->is_processed    = 'Yes';
-    $rep->processed_notes = $fail_text;
-    $rep->save();
+    $result = $rep->processSubscriptions();
+    $rep->finishProcessing($result);
   } catch (\Throwable $e) {
-    $rows[] = "<span style='color:red'><strong>Warning:</strong> Could not save batch status — " . e($e->getMessage()) . "</span>";
+    $rep->releaseLock();
+    \Illuminate\Support\Facades\Log::error("Batch #{$rep->id} processing aborted: " . $e->getMessage());
+    return $shell(
+      'Processing stopped',
+      "<p>" . e($e->getMessage()) . "</p><p>The batch was left unprocessed and unlocked, so you can safely run it again.</p>",
+      '#c0392b'
+    );
   }
 
-  $summaryColor = ($fail === 0) ? '#27ae60' : (($success === 0) ? '#c0392b' : '#e67e22');
-  $backUrl      = admin_url('batch-service-subscriptions');
-  $rowsHtml     = implode('<br>', $rows);
+  // ── Report ────────────────────────────────────────────────────────────────
+  $palette = ['created' => '#27ae60', 'skipped' => '#e67e22', 'failed' => '#c0392b'];
+  $prefix  = ['created' => 'CREATED', 'skipped' => 'SKIPPED', 'failed' => 'FAILED '];
 
-  return response("
-    <div style='font-family:monospace;padding:20px;max-width:800px'>
-      <h3>Batch Processing Complete</h3>
+  $rowsHtml = '';
+  foreach ($result['rows'] as $row) {
+    $color = $palette[$row['status']];
+    $tag   = $prefix[$row['status']];
+    $rowsHtml .= "<div style='color:{$color}'><strong>{$tag}</strong> — " . e($row['label']) . "</div>";
+  }
+
+  $summaryColor = $result['failed'] > 0 ? '#c0392b' : ($result['created'] > 0 ? '#27ae60' : '#e67e22');
+
+  $body = "
       <p style='font-size:15px;color:{$summaryColor}'>
-        <strong>Success: {$success} &nbsp;|&nbsp; Failed: {$fail} &nbsp;|&nbsp; Total: {$total_count}</strong>
+        <strong>Created: {$result['created']} &nbsp;|&nbsp; Already subscribed: {$result['skipped']} &nbsp;|&nbsp; Failed: {$result['failed']} &nbsp;|&nbsp; Total: {$result['total']}</strong>
       </p>
+      <p style='color:#777;font-size:13px'>&ldquo;Already subscribed&rdquo; students were left untouched and were not charged again.</p>
       <hr style='border:none;border-top:1px solid #ddd;margin:12px 0'>
-      <div style='line-height:1.8;font-size:13px'>{$rowsHtml}</div>
-      <hr style='border:none;border-top:1px solid #ddd;margin:12px 0'>
-      <p><a href='{$backUrl}' style='color:#337ab7'>← Back to Batch Subscriptions</a></p>
-    </div>
-  ");
+      <div style='line-height:1.7;font-size:13px;font-family:monospace'>{$rowsHtml}</div>";
+
+  return $shell($isReprocess ? 'Batch Reprocessing Complete' : 'Batch Processing Complete', $body, $summaryColor);
 });
 Route::get('gen-code', function () {
   $data = '1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcefghijklmnopqrstuvwxyz';
@@ -3959,6 +3928,7 @@ Route::group(['prefix' => 'onboarding'], function () {
   Route::get('validate-phone', [OnboardingController::class, 'validatePhone'])->name('onboarding.validate.phone');
   Route::get('validate-school-name', [OnboardingController::class, 'validateSchoolName'])->name('onboarding.validate.school.name');
   Route::get('validate-school-email', [OnboardingController::class, 'validateSchoolEmail'])->name('onboarding.validate.school.email');
+  Route::get('validate-subdomain', [OnboardingController::class, 'validateSubdomain'])->name('onboarding.validate.subdomain');
 });
 
 // ── KIHP Public Landing Page ───────────────────────────────────────────────
@@ -4050,3 +4020,6 @@ Route::get('schoolpay/sync-and-import', function (Request $request) {
     ]);
 })->name('schoolpay.sync-and-import');
 
+// ---- Pesapal gateway endpoints (public; they verify with Pesapal, never trust input) ----
+Route::get('gateway/pesapal/callback', [\App\Http\Controllers\PesapalGatewayController::class, 'callback'])->name('gateway.pesapal.callback');
+Route::match(['get', 'post'], 'gateway/pesapal/ipn', [\App\Http\Controllers\PesapalGatewayController::class, 'ipn'])->name('gateway.pesapal.ipn');

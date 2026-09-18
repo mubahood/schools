@@ -166,6 +166,13 @@ Route::group([
     $router->resource('income-sheets', IncomeSheetController::class);
     $router->resource('bulk-messages', BulkMessageController::class);
     $router->resource('direct-messages', DirectMessageController::class);
+    // Subscription & billing (school-facing). Always reachable, even when suspended.
+    $router->get('billing', 'BillingController@index')->name('billing.index');
+    $router->post('billing/choose', 'BillingController@choose')->name('billing.choose');
+    $router->get('billing/pay/{invoice}', 'BillingController@pay')->name('billing.pay');
+    $router->post('billing/topup', 'BillingController@topup')->name('billing.topup');
+    $router->post('billing/bank/{invoice}', 'BillingController@bankNotice')->name('billing.bank');
+
     $router->resource('wallet-records', WalletRecordController::class);
     $router->resource('credit-purchases', CreditPurchaseController::class);
     $router->resource('student-has-optional-subjects', StudentHasOptionalSubjectController::class);

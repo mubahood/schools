@@ -53,30 +53,27 @@ if (!isset($company)) {
     </div>
     
     <div style="background: var(--background-white); border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
-        <h4 style="color: var(--text-dark); margin-bottom: 1rem; font-size: 1rem; display: flex; align-items: center;">
-            <i class='bx bx-list-check' style="margin-right: 0.5rem; color: var(--primary-color);"></i>
-            What's Next?
+        <h4 style="color: var(--text-dark); margin-bottom: 0.75rem; font-size: 1rem; display: flex; align-items: center;">
+            <i class='bx bx-time-five' style="margin-right: 0.5rem; color: var(--primary-color);"></i>
+            Your {{ $successData['trial_days'] ?? 30 }}-day free trial has started
         </h4>
-        <div style="display: grid; gap: 0.75rem; font-size: 0.85rem;">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <i class='bx bx-check' style="color: #10b981; font-size: 1rem;"></i>
-                <span style="color: var(--text-dark);">Log in to your administrator dashboard</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <i class='bx bx-check' style="color: #10b981; font-size: 1rem;"></i>
-                <span style="color: var(--text-dark);">Set up your academic year and terms</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <i class='bx bx-check' style="color: #10b981; font-size: 1rem;"></i>
-                <span style="color: var(--text-dark);">Add classes and subjects</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <i class='bx bx-check' style="color: #10b981; font-size: 1rem;"></i>
-                <span style="color: var(--text-dark);">Start enrolling students and staff</span>
-            </div>
+        <p style="color: var(--text-light); font-size: 0.85rem; line-height: 1.5; margin-bottom: 0.9rem;">
+            Everything is unlocked until <b>{{ $successData['trial_ends'] ?? '' }}</b>. Your school's address is
+            <b style="color: var(--primary-color);">{{ $successData['subdomain'] ?? '' }}.schooldynamics.ug</b>.
+            We have already created this year's academic year and three terms for you.
+        </p>
+        <div style="display: grid; gap: 0.5rem; font-size: 0.85rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;"><i class='bx bx-check' style="color: #10b981; font-size: 1rem;"></i><span>Log in and add your classes and subjects</span></div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;"><i class='bx bx-check' style="color: #10b981; font-size: 1rem;"></i><span>Import or enrol students, add your staff</span></div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;"><i class='bx bx-check' style="color: #10b981; font-size: 1rem;"></i><span>Choose a package any time from <b>Subscription &amp; Billing</b> — pay by Mobile Money or card</span></div>
+        </div>
+        <div style="margin-top: 1rem; padding: 0.85rem 1rem; background: var(--background-light); border-radius: 6px; font-size: 0.82rem; color: var(--text-dark);">
+            <b>Packages (per 6 months, double for a year):</b>
+            Starter up to 100 students <b>UGX 100,000</b> &middot; Growth up to 500 <b>UGX 300,000</b> &middot; Scale up to 1,000 <b>UGX 700,000</b>.
+            Pay in full or in 3 instalments.
         </div>
     </div>
-    
+
     <div style="background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); color: white; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; text-align: center;">
         <h4 style="margin-bottom: 0.75rem; font-size: 1rem;">
             <i class='bx bx-support' style="margin-right: 0.5rem;"></i>

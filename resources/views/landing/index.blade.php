@@ -642,151 +642,109 @@ use App\Models\Utils;
 
 
 <!-- Pricing Section -->
-<section class="section pricing-section">
+<section class="section pricing-section" id="pricing">
     <div class="container">
         <div class="section-header text-center">
             <h2 class="section-title">Simple, Transparent Pricing</h2>
-            <p class="section-subtitle">Pay only for active students with no hidden fees. Start with a 30-day free trial.</p>
+            <p class="section-subtitle">Three packages sized by your active students. Start with a 30-day free trial — no card needed.</p>
+            <div class="pricing-toggle" role="group" aria-label="Billing period">
+                <button type="button" class="pt-btn active" data-period="6m">6 months</button>
+                <button type="button" class="pt-btn" data-period="12m">12 months</button>
+            </div>
         </div>
-        
+
         <div class="pricing-grid">
             <div class="pricing-card" data-tier="starter">
                 <div class="pricing-header">
-                    <div class="pricing-icon">
-                        <i class="fas fa-school"></i>
-                    </div>
+                    <div class="pricing-icon"><i class="fas fa-school"></i></div>
                     <h3 class="pricing-title">Starter</h3>
-                    <p class="pricing-description">Perfect for small schools getting started</p>
+                    <p class="pricing-description">For nurseries and small schools</p>
                 </div>
                 <div class="pricing-details">
-                    <div class="pricing-range">1 - 500 Students</div>
+                    <div class="pricing-range">Up to 100 active students</div>
                     <div class="pricing-amount">
                         <span class="currency">UGX</span>
-                        <span class="price">3,000</span>
-                        <span class="period">per active student</span>
+                        <span class="price" data-6m="100,000" data-12m="200,000">100,000</span>
+                        <span class="period pt-period">per 6 months</span>
                     </div>
-                    <div class="pricing-calculation">
-                        <small>Example: 100 students = UGX 300,000/month</small>
-                    </div>
+                    <div class="pricing-calculation"><small class="pt-inst" data-6m="33,334" data-12m="66,667">or 3 instalments of UGX 33,334</small></div>
                 </div>
                 <div class="pricing-features">
-                    <div class="feature">
-                        <i class="fas fa-check"></i>
-                        <span>Complete student management</span>
-                    </div>
-                    <div class="feature">
-                        <i class="fas fa-check"></i>
-                        <span>Financial tracking & reports</span>
-                    </div>
-                    <div class="feature">
-                        <i class="fas fa-check"></i>
-                        <span>Document generation</span>
-                    </div>
-                    <div class="feature">
-                        <i class="fas fa-check"></i>
-                        <span>Basic support</span>
-                    </div>
+                    <div class="feature"><i class="fas fa-check"></i><span>Students, parents &amp; staff</span></div>
+                    <div class="feature"><i class="fas fa-check"></i><span>Fees, receipts &amp; SchoolPay</span></div>
+                    <div class="feature"><i class="fas fa-check"></i><span>Report cards &amp; assessments</span></div>
+                    <div class="feature"><i class="fas fa-check"></i><span>Parent mobile app</span></div>
                 </div>
             </div>
-            
-            <div class="pricing-card featured" data-tier="professional">
+
+            <div class="pricing-card featured" data-tier="growth">
                 <div class="popular-badge">Most Popular</div>
                 <div class="pricing-header">
-                    <div class="pricing-icon">
-                        <i class="fas fa-graduation-cap"></i>
-                    </div>
-                    <h3 class="pricing-title">Professional</h3>
-                    <p class="pricing-description">Ideal for growing institutions</p>
+                    <div class="pricing-icon"><i class="fas fa-graduation-cap"></i></div>
+                    <h3 class="pricing-title">Growth</h3>
+                    <p class="pricing-description">For established primary and secondary schools</p>
                 </div>
                 <div class="pricing-details">
-                    <div class="pricing-range">501 - 1,000 Students</div>
+                    <div class="pricing-range">101 – 500 active students</div>
                     <div class="pricing-amount">
                         <span class="currency">UGX</span>
-                        <span class="price">2,500</span>
-                        <span class="period">per active student</span>
+                        <span class="price" data-6m="300,000" data-12m="600,000">300,000</span>
+                        <span class="period pt-period">per 6 months</span>
                     </div>
-                    <div class="pricing-calculation">
-                        <small>Example: 750 students = UGX 1,875,000/month</small>
-                    </div>
+                    <div class="pricing-calculation"><small class="pt-inst" data-6m="100,000" data-12m="200,000">or 3 instalments of UGX 100,000</small></div>
                 </div>
                 <div class="pricing-features">
-                    <div class="feature">
-                        <i class="fas fa-check"></i>
-                        <span>Everything in Starter</span>
-                    </div>
-                    <div class="feature">
-                        <i class="fas fa-check"></i>
-                        <span>Advanced analytics</span>
-                    </div>
-                    <div class="feature">
-                        <i class="fas fa-check"></i>
-                        <span>Custom integrations</span>
-                    </div>
-                    <div class="feature">
-                        <i class="fas fa-check"></i>
-                        <span>Priority support</span>
-                    </div>
+                    <div class="feature"><i class="fas fa-check"></i><span>Everything in Starter</span></div>
+                    <div class="feature"><i class="fas fa-check"></i><span>Bulk SMS &amp; messaging</span></div>
+                    <div class="feature"><i class="fas fa-check"></i><span>Priority support</span></div>
                 </div>
             </div>
-            
-            <div class="pricing-card" data-tier="enterprise">
+
+            <div class="pricing-card" data-tier="scale">
                 <div class="pricing-header">
-                    <div class="pricing-icon">
-                        <i class="fas fa-university"></i>
-                    </div>
-                    <h3 class="pricing-title">Enterprise</h3>
-                    <p class="pricing-description">For large educational institutions</p>
+                    <div class="pricing-icon"><i class="fas fa-university"></i></div>
+                    <h3 class="pricing-title">Scale</h3>
+                    <p class="pricing-description">For large schools and multi-section institutions</p>
                 </div>
                 <div class="pricing-details">
-                    <div class="pricing-range">1,000+ Students</div>
+                    <div class="pricing-range">501 – 1,000 active students</div>
                     <div class="pricing-amount">
                         <span class="currency">UGX</span>
-                        <span class="price">1,500</span>
-                        <span class="period">per active student</span>
+                        <span class="price" data-6m="700,000" data-12m="1,400,000">700,000</span>
+                        <span class="period pt-period">per 6 months</span>
                     </div>
-                    <div class="pricing-calculation">
-                        <small>Example: 2,000 students = UGX 3,000,000/month</small>
-                    </div>
+                    <div class="pricing-calculation"><small class="pt-inst" data-6m="233,334" data-12m="466,667">or 3 instalments of UGX 233,334</small></div>
                 </div>
                 <div class="pricing-features">
-                    <div class="feature">
-                        <i class="fas fa-check"></i>
-                        <span>Everything in Professional</span>
-                    </div>
-                    <div class="feature">
-                        <i class="fas fa-check"></i>
-                        <span>Dedicated support team</span>
-                    </div>
-                    <div class="feature">
-                        <i class="fas fa-check"></i>
-                        <span>Custom development</span>
-                    </div>
-                    <div class="feature">
-                        <i class="fas fa-check"></i>
-                        <span>On-site training</span>
-                    </div>
+                    <div class="feature"><i class="fas fa-check"></i><span>Everything in Growth</span></div>
+                    <div class="feature"><i class="fas fa-check"></i><span>Dedicated onboarding</span></div>
+                    <div class="feature"><i class="fas fa-check"></i><span>Priority support</span></div>
                 </div>
             </div>
         </div>
-        
-        <div class="pricing-footer">
-            <div class="trial-info">
-                <div class="trial-badge">
-                    <i class="fas fa-gift"></i>
-                    <span>30-Day Free Trial</span>
-                </div>
-                <p>Start with a completely free 30-day trial. No credit card required. Cancel anytime.</p>
-            </div>
-            <div class="pricing-cta">
-                <a href="{{ url('access-system') }}" class="btn btn-primary btn-large">
-                    <i class="fas fa-rocket"></i>
-                    Start Your Free Trial
-                </a>
-                <p class="pricing-note">Setup takes less than 5 minutes</p>
-            </div>
-        </div>
+
+        <p class="text-center" style="margin-top:1.5rem;color:#6c757d;font-size:.9rem">
+            Pay online by MTN Mobile Money, Airtel Money or card, or by bank transfer. More than 1,000 students? <a href="#contact">Talk to us</a> for a tailored package.
+        </p>
     </div>
 </section>
+<style>
+  .pricing-toggle{display:inline-flex;border:1px solid #cfd6df;border-radius:999px;padding:3px;margin-top:1rem;background:#fff}
+  .pricing-toggle .pt-btn{border:0;background:transparent;padding:.45rem 1.2rem;border-radius:999px;font-weight:600;cursor:pointer;color:#555}
+  .pricing-toggle .pt-btn.active{background:#1a5c52;color:#fff}
+</style>
+<script>
+(function(){
+  var btns=document.querySelectorAll('.pricing-toggle .pt-btn'); if(!btns.length) return;
+  btns.forEach(function(b){ b.addEventListener('click',function(){
+    btns.forEach(function(x){x.classList.remove('active')}); b.classList.add('active');
+    var p=b.dataset.period;
+    document.querySelectorAll('.pricing-card .price').forEach(function(el){ el.textContent=el.dataset[p]; });
+    document.querySelectorAll('.pt-period').forEach(function(el){ el.textContent='per '+(p==='12m'?'12':'6')+' months'; });
+    document.querySelectorAll('.pt-inst').forEach(function(el){ el.textContent='or 3 instalments of UGX '+el.dataset[p]; });
+  });});
+})();
+</script>
 
 <!-- Call to Action Section -->
 <section class="section cta-section">
