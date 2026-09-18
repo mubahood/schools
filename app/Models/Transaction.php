@@ -178,6 +178,7 @@ class Transaction extends Model
             $del->is_tuition = $m->is_tuition;
             $del->is_service = $m->is_service;
             $del->service_id = $m->service_id;
+            $del->bursary_beneficiary_id = $m->bursary_beneficiary_id;
             $del->receipt_photo = $m->receipt_photo;
             $del->peg_pay_transaction_number = $m->peg_pay_transaction_number;
             $del->bank_transaction_number = $m->bank_transaction_number;
@@ -379,11 +380,17 @@ class Transaction extends Model
             if ($m->is_contra_entry == null) {
                 $m->is_contra_entry = false;
             }
+            // Only a transaction that carries no term of its own falls back to the
+            // active term. Anything that knows its own term (a service fee belongs
+            // to the term it was subscribed for) keeps it — that explicit value is
+            // what stops fees landing in the wrong term's reports.
             if ($m->term_id == null || ($m->term_id < 1)) {
                 if ($ent != null) {
                     $term = $ent->active_term();
-                    $m->term_id = $term->id;
-                    $m->academic_year_id = $term->academic_year_id;
+                    if ($term != null) {
+                        $m->term_id = $term->id;
+                        $m->academic_year_id = $term->academic_year_id;
+                    }
                 }
             }
 

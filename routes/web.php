@@ -3905,6 +3905,10 @@ Route::group(['prefix' => 'onboarding'], function () {
   Route::get('step1', [OnboardingController::class, 'step1'])->name('onboarding.step1');
   Route::get('step2', [OnboardingController::class, 'step2'])->name('onboarding.step2');
   Route::post('step2', [OnboardingController::class, 'processStep2'])->name('onboarding.process2');
+  Route::get('verify', [OnboardingController::class, 'verify'])->name('onboarding.verify');
+  Route::post('verify', [OnboardingController::class, 'processVerify'])->name('onboarding.verify.process');
+  Route::post('verify/resend', [OnboardingController::class, 'resendCode'])->name('onboarding.verify.resend');
+  Route::get('resume/{token}', [OnboardingController::class, 'resume'])->name('onboarding.resume');
   Route::get('step3', [OnboardingController::class, 'step3'])->name('onboarding.step3');
   Route::post('step3', [OnboardingController::class, 'processStep3'])->name('onboarding.process3');
   Route::get('step4', [OnboardingController::class, 'step4'])->name('onboarding.step4');

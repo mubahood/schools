@@ -14,6 +14,13 @@ class ServiceSubscription extends Model
 {
     use HasFactory;
 
+    /**
+     * Exception code raised when a subscriber already holds this service for the
+     * given term. Callers use it to tell a genuine duplicate apart from a real
+     * failure, so a re-run reports "already subscribed" as skipped, not failed.
+     */
+    const ERROR_ALREADY_SUBSCRIBED = 4090;
+
 
     protected $fillable = [
         'enterprise_id',
@@ -46,7 +53,10 @@ class ServiceSubscription extends Model
         parent::boot();
         self::created(function ($m) {
             self::my_update($m);
-            Service::update_fees($m->service);
+            // Bill only this subscription. Sweeping the whole service here made
+            // every insert walk all subscriptions of that service, so a batch of
+            // N students cost O(N^2) and took hours.
+            Service::bill_subscription($m->service, $m);
             
             // Auto-generate tracking items if inventory is enabled
             if ($m->to_be_managed_by_inventory === 'Yes' && !empty($m->items_to_be_offered)) {
@@ -61,28 +71,53 @@ class ServiceSubscription extends Model
         
         self::updated(function ($m) {
             self::my_update($m);
-            Service::update_fees($m->service);
+            Service::bill_subscription($m->service, $m);
         });
 
         self::creating(function ($m) {
 
-            $term = Term::find($m->due_term_id);
+            // A subscription is always identified by (service, subscriber, TERM).
+            // Every one of those three must be present, or the duplicate check
+            // below would compare against a wildcard and reject the wrong rows.
+            $termId = (int) $m->due_term_id;
+            if ($termId < 1) {
+                throw new Exception("Due term is required for a service subscription.", 1);
+            }
+
+            $subscriberId = (int) $m->administrator_id;
+            if ($subscriberId < 1) {
+                throw new Exception("A subscriber is required for a service subscription.", 1);
+            }
+
+            $term = Term::find($termId);
             if ($term == null) {
-                throw new Exception("Due term not found.", 1);
+                throw new Exception("Due term #{$termId} was not found.", 1);
             }
             $service = Service::find($m->service_id);
             if ($service == null) {
-                throw new Exception("Service Not Found.", 1);
+                throw new Exception("Service #{$m->service_id} was not found.", 1);
             }
 
-            //check if the user is already subscribed to the service in this term
+            // Already subscribed to THIS service for THIS term?
             $s = ServiceSubscription::where([
-                'service_id' => $m->service_id,
-                'administrator_id' => $m->administrator_id,
-                'due_term_id' => $m->due_term_id,
+                'service_id'       => $m->service_id,
+                'administrator_id' => $subscriberId,
+                'due_term_id'      => $termId,
             ])->first();
             if ($s != null) {
-                throw new Exception("This user is already subscribed to this service in this term.", 1);
+                $who       = optional($s->sub)->name ?: "#{$subscriberId}";
+                $termLabel = 'Term ' . $term->name;
+                if ($term->academic_year) {
+                    $termLabel .= ' ' . $term->academic_year->name;
+                }
+                // Identified by due term only. The creation date is deliberately
+                // left out: subscriptions are routinely created ahead of the term
+                // they bill, so quoting it reads as if the wrong term were meant.
+                throw new Exception(
+                    "{$who} is already subscribed to {$service->name} for {$termLabel}"
+                        . " (subscription #{$s->id}).",
+                    self::ERROR_ALREADY_SUBSCRIBED
+                );
             }
 
             $m->due_academic_year_id = $term->academic_year_id;
@@ -117,37 +152,62 @@ class ServiceSubscription extends Model
             }
             $m->due_academic_year_id = $term->academic_year_id;
 
-            /*  $s = ServiceSubscription::where([
-                'service_id' => $m->service_id,
+            // Only reverse a charge that was actually posted. The
+            // FeeDepositConfirmation row is the ledger's proof that this
+            // subscription was billed; without it, crediting the account would
+            // hand back money the student was never charged.
+            $billed = FeeDepositConfirmation::where([
+                'fee_id'           => $m->id,
                 'administrator_id' => $m->administrator_id,
             ])->first();
 
-            if ($s != null) {
-                return false;
-            } */
-            $quantity = ((int)($m->quantity));
-            if ($quantity < 0) {
-                $m->quantity = $quantity;
+            if ($billed == null) {
+                return $m;
             }
 
-            $t = new Transaction();
-            $t->enterprise_id = $m->enterprise_id;
-            $t->account_id = $m->sub->account->id;
-            $t->amount = $m->total;
-            $t->is_contra_entry     = 0;
-            $t->payment_date = Carbon::now();
+            // Guard every relation: a missing subscriber, account or service used
+            // to abort the delete with a fatal error rather than a clear message.
+            $subscriber = $m->sub;
+            if ($subscriber == null) {
+                throw new Exception("Cannot remove this subscription: subscriber #{$m->administrator_id} was not found.", 1);
+            }
+
+            $account = $subscriber->account;
+            if ($account == null) {
+                $account = Account::create($m->administrator_id);
+            }
+            if ($account == null) {
+                throw new Exception("Cannot remove this subscription: no financial account for {$subscriber->name}.", 1);
+            }
+
             $by = Auth::user();
             if ($by == null) {
                 $by = Admin::user();
             }
             if ($by == null) {
-                throw new Exception("User not found", 1);
+                throw new Exception("Cannot remove this subscription: no authenticated user to attribute the reversal to.", 1);
             }
-            $t->created_by_id = $by->id;
+
+            $serviceName = $m->service ? $m->service->name : "service #{$m->service_id}";
+
+            $t = new Transaction();
+            $t->enterprise_id             = $m->enterprise_id;
+            $t->account_id                = $account->id;
+            $t->amount                    = abs((int) $m->total);
+            $t->is_contra_entry           = 0;
+            $t->payment_date              = Carbon::now();
+            $t->created_by_id             = $by->id;
             $t->school_pay_transporter_id = "-";
-            $t->description = "UGX " . number_format($t->amount) . " was added to this account because this account was removed from " . $m->service->name . " service.";
+            $t->description = "UGX " . number_format($t->amount) . " was added to this account because this account was removed from " . $serviceName . " service.";
+
+            // The reversal belongs to the term the subscription was for.
+            $t->term_id          = $m->due_term_id;
+            $t->academic_year_id = $m->due_academic_year_id;
 
             $t->save();
+
+            // The subscription is no longer billed, so retire its billing marker.
+            $billed->delete();
 
             return $m;
         });

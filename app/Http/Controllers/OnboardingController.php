@@ -8,9 +8,12 @@ use App\Models\AdminRoleUser;
 use App\Models\Utils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use App\Services\BillingService;
+use App\Models\OnboardingDraft;
+use App\Models\OnBoardWizard;
 
 class OnboardingController extends Controller
 {
@@ -55,14 +58,20 @@ class OnboardingController extends Controller
             ]);
         }
 
-        // Store user data in session
-        session(['onboarding_user_data' => $request->only([
-            'first_name', 'last_name', 'email', 'phone_number', 'password'
-        ])]);
+        // Nothing is written to admin_users/enterprises until the owner proves the
+        // phone or email is theirs. The draft survives a closed browser.
+        $draft = OnboardingDraft::start($request->only(['first_name', 'last_name', 'email', 'phone_number', 'password']), $request->ip());
+        [$ok, $why] = $draft->canResend();
+        $channels = $ok ? $draft->sendOtp() : [];
+        session([
+            'onboarding_user_data' => $draft->user_data,
+            'onboarding_draft_token' => $draft->token,
+            'onboarding_otp_channels' => $channels,
+        ]);
 
         return response()->json([
             'success' => true,
-            'next_step' => url('onboarding/step3')
+            'next_step' => url('onboarding/verify')
         ]);
     }
 
@@ -71,7 +80,85 @@ class OnboardingController extends Controller
      */
     public function step3()
     {
+        if (!$this->verifiedDraft()) {
+            return redirect('onboarding/verify')->with('verify_error', 'Please verify your phone or email first.');
+        }
         return view('onboarding.step3');
+    }
+
+    /** The current session's draft, only if it has been verified and not yet used. */
+    private function verifiedDraft(): ?OnboardingDraft
+    {
+        $token = session('onboarding_draft_token');
+        if (!$token) {
+            return null;
+        }
+        $d = OnboardingDraft::where('token', $token)->whereNull('consumed_at')->first();
+
+        return ($d && $d->isVerified()) ? $d : null;
+    }
+
+    private function currentDraft(): ?OnboardingDraft
+    {
+        $token = session('onboarding_draft_token');
+
+        return $token ? OnboardingDraft::where('token', $token)->whereNull('consumed_at')->first() : null;
+    }
+
+    public function verify()
+    {
+        $draft = $this->currentDraft();
+        if (!$draft) {
+            return redirect('onboarding/step2')->with('error', 'Please start again.');
+        }
+        if ($draft->isVerified()) {
+            return redirect('onboarding/step3');
+        }
+        return view('onboarding.verify', ['draft' => $draft, 'channels' => session('onboarding_otp_channels', [])]);
+    }
+
+    public function processVerify(Request $request)
+    {
+        $draft = $this->currentDraft();
+        if (!$draft) {
+            return redirect('onboarding/step2')->with('error', 'Please start again.');
+        }
+        $err = $draft->verify((string) $request->input('code', ''), 'sms');
+        if ($err) {
+            return redirect('onboarding/verify')->with('verify_error', $err);
+        }
+        return redirect('onboarding/step3');
+    }
+
+    public function resendCode()
+    {
+        $draft = $this->currentDraft();
+        if (!$draft) {
+            return redirect('onboarding/step2');
+        }
+        [$ok, $why] = $draft->canResend();
+        if (!$ok) {
+            return redirect('onboarding/verify')->with('verify_error', $why);
+        }
+        session(['onboarding_otp_channels' => $draft->sendOtp()]);
+        return redirect('onboarding/verify');
+    }
+
+    /** Resume from the emailed link after the browser was closed. */
+    public function resume($token)
+    {
+        $draft = OnboardingDraft::where('token', $token)->whereNull('consumed_at')->first();
+        if (!$draft) {
+            return redirect('onboarding/step1')->with('error', 'That link has expired. Please register again.');
+        }
+        session(['onboarding_user_data' => $draft->user_data, 'onboarding_draft_token' => $draft->token]);
+        if ($draft->enterprise_data) {
+            session(['onboarding_enterprise_data' => $draft->enterprise_data]);
+        }
+        if (!$draft->isVerified()) {
+            return redirect('onboarding/verify');
+        }
+        return redirect($draft->enterprise_data ? 'onboarding/step4' : 'onboarding/step3');
     }
 
     /**
@@ -203,6 +290,10 @@ class OnboardingController extends Controller
         $enterpriseData['expiry'] = null;
 
         session(['onboarding_enterprise_data' => $enterpriseData]);
+        if ($draft = $this->currentDraft()) {
+            $draft->enterprise_data = $enterpriseData;
+            $draft->save();
+        }
 
         return response()->json([
             'success' => true,
@@ -231,6 +322,16 @@ class OnboardingController extends Controller
      */
     public function processStep4(Request $request)
     {
+        // Verification first: an unverified visitor gets sent to the code
+        // page rather than told their session expired.
+        $draft = $this->verifiedDraft();
+        if (!$draft) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please verify your phone or email before creating the school.',
+                'next_step' => url('onboarding/verify'),
+            ]);
+        }
         $userData = session('onboarding_user_data');
         $enterpriseData = session('onboarding_enterprise_data');
 
@@ -239,6 +340,14 @@ class OnboardingController extends Controller
                 'success' => false,
                 'message' => 'Session expired. Please start again.'
             ]);
+        }
+        // Re-check uniqueness at the moment of creation: another signup may have
+        // taken the email/phone/subdomain while this one sat unverified.
+        if (User::where('email', $userData['email'])->exists() || User::where('phone_number_1', $userData['phone_number'])->exists()) {
+            return response()->json(['success' => false, 'message' => 'That email or phone number has just been registered by someone else.']);
+        }
+        if (self::subdomainProblem($enterpriseData['subdomain'])) {
+            return response()->json(['success' => false, 'message' => 'That web address was just taken. Please go back and choose another.']);
         }
 
         DB::beginTransaction();
@@ -251,7 +360,8 @@ class OnboardingController extends Controller
             $user->last_name = $userData['last_name'];
             $user->email = $userData['email'];
             $user->phone_number_1 = $userData['phone_number'];
-            $user->password = Hash::make($userData['password']);
+            // Hashed once at step 2; the plaintext never lived in the draft.
+            $user->password = $userData['password_hash'] ?? Hash::make($userData['password'] ?? Str::random(16));
             $user->enterprise_id = 1; // Default enterprise initially
             $user->user_type = 'employee';
             $user->status = 1;
@@ -325,10 +435,19 @@ class OnboardingController extends Controller
             // 7. 30-day trial starts now; billing takes over from here.
             BillingService::startTrial($enterprise);
 
+            // 8. Identity was proven before creation, so the in-app "verify your
+            //    email" gate is already satisfied — the owner lands on the dashboard.
+            OnBoardWizard::where('enterprise_id', $enterprise->id)->update([
+                'email_is_verified' => 'Yes', 'email_verified_at' => now(), 'current_step' => 'school_details',
+            ]);
+            $draft->consumed_at = now();
+            $draft->enterprise_id = $enterprise->id;
+            $draft->save();
+
             DB::commit();
 
             // Clear session data
-            session()->forget(['onboarding_user_data', 'onboarding_enterprise_data']);
+            session()->forget(['onboarding_user_data', 'onboarding_enterprise_data', 'onboarding_draft_token', 'onboarding_otp_channels']);
 
             // Store user info for welcome step
             $trialEnds = now()->addDays(BillingService::TRIAL_DAYS);

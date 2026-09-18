@@ -146,7 +146,7 @@ class BillingService
         if ($inv->status !== Invoice::ISSUED) {
             throw new \RuntimeException('Invoice ' . $inv->number . ' is ' . $inv->status . ' and cannot be paid.');
         }
-        $gw = new PesapalGateway();
+        $gw = app(PesapalGateway::class);
         if (!$gw->isConfigured()) {
             throw new \RuntimeException('Online payment is not configured. Please use bank transfer.');
         }
@@ -180,11 +180,16 @@ class BillingService
             Log::warning('Pesapal notification for unknown order', ['order' => $orderTrackingId]);
             return null;
         }
+        $st = app(PesapalGateway::class)->status($orderTrackingId);
+
         if ($payment->status === Payment::SUCCEEDED) {
-            return $payment; // already settled; nothing to do
+            // Already settled. The only thing that can change now is a reversal.
+            if ($st['status'] === 'reversed') {
+                self::unsettle($payment, 'Pesapal reported the payment reversed');
+            }
+            return $payment->fresh();
         }
 
-        $st = (new PesapalGateway())->status($orderTrackingId);
         $payment->raw_payload = json_encode($st['raw']);
         $payment->method = $st['method'] ?: $payment->method;
         $payment->confirmation_code = $st['confirmation_code'] ?: $payment->confirmation_code;
@@ -207,6 +212,53 @@ class BillingService
         }
 
         return $payment->fresh();
+    }
+
+    /**
+     * Undo a settlement after a reversal/chargeback: invoice back to issued,
+     * access recomputed from what is still genuinely paid. Never throws.
+     */
+    public static function unsettle(Payment $payment, string $reason): void
+    {
+        DB::transaction(function () use ($payment, $reason) {
+            $inv = Invoice::where('id', $payment->invoice_id)->lockForUpdate()->first();
+            $payment->status = Payment::REVERSED;
+            $payment->method = trim(($payment->method ?? '') . ' | ' . $reason);
+            $payment->save();
+            if (!$inv || $inv->status !== Invoice::PAID) {
+                return;
+            }
+            $inv->status = Invoice::ISSUED;
+            $inv->paid_at = null;
+            $inv->save();
+
+            $ent = Enterprise::find($inv->enterprise_id);
+            if ($inv->kind === Invoice::KIND_SMS_CREDIT) {
+                $w = new WalletRecord();
+                $w->enterprise_id = $ent->id;
+                $w->amount = -1 * (int) $inv->amount;
+                $w->details = 'Reversal of ' . $inv->number . ' (' . $reason . ')';
+                $w->save();
+                return;
+            }
+            $sub = Subscription::where('id', $inv->subscription_id)->lockForUpdate()->first();
+            if (!$sub || !$sub->starts_at) {
+                return;
+            }
+            $paid = Invoice::where('subscription_id', $sub->id)->where('status', Invoice::PAID)->count();
+            $accessEnds = $paid > 0
+                ? Carbon::parse($sub->starts_at)->addMonths(intdiv($sub->months() * $paid, $sub->instalments))
+                : Carbon::now()->subDay();
+            if ($paid === 0) {
+                $sub->status = Subscription::PENDING;
+                $sub->save();
+            }
+            DB::table('enterprises')->where('id', $ent->id)->update([
+                'access_ends_at' => $accessEnds, 'expiry' => $accessEnds->toDateString(),
+            ]);
+            Log::warning('Payment reversed; access recomputed', ['enterprise' => $ent->id, 'invoice' => $inv->number, 'reason' => $reason]);
+            self::refreshAccess($ent);
+        });
     }
 
     /** Offline payment confirmed by Newline (bank slip, cash). */

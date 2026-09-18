@@ -173,6 +173,15 @@ Route::group([
     $router->post('billing/topup', 'BillingController@topup')->name('billing.topup');
     $router->post('billing/bank/{invoice}', 'BillingController@bankNotice')->name('billing.bank');
 
+    // Newline console (super-admin only; enforced in the controller)
+    $router->get('subscriptions-admin', 'SubscriptionsAdminController@index')->name('subscriptions-admin.index');
+    $router->post('subscriptions-admin/payments/{payment}/confirm', 'SubscriptionsAdminController@confirmPayment');
+    $router->post('subscriptions-admin/payments/{payment}/reject', 'SubscriptionsAdminController@rejectPayment');
+    $router->post('subscriptions-admin/invoices/{invoice}/pay', 'SubscriptionsAdminController@manualPay');
+    $router->post('subscriptions-admin/{enterprise}/extend', 'SubscriptionsAdminController@extend');
+    $router->post('subscriptions-admin/{enterprise}/exempt', 'SubscriptionsAdminController@toggleExempt');
+    $router->post('subscriptions-admin/{enterprise}/suspend', 'SubscriptionsAdminController@suspend');
+
     $router->resource('wallet-records', WalletRecordController::class);
     $router->resource('credit-purchases', CreditPurchaseController::class);
     $router->resource('student-has-optional-subjects', StudentHasOptionalSubjectController::class);

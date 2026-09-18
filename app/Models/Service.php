@@ -9,6 +9,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class Service extends Model
 {
@@ -100,80 +101,147 @@ class Service extends Model
 
 
 
+    /**
+     * Bills every subscription of this service that has not been billed yet.
+     *
+     * Kept for the service create/update path, where a fee change legitimately
+     * needs to sweep the whole service. Do NOT call this after creating a single
+     * subscription — use bill_subscription() instead, otherwise every insert
+     * re-walks all subscriptions of the service and the cost becomes quadratic.
+     */
     public static function update_fees($m)
     {
-
-        foreach ($m->subs as  $s) {
-            $fd = FeeDepositConfirmation::where([
-                'fee_id' => $s->id,
-                'administrator_id' => $s->administrator_id,
-            ])->first();
-            if ($fd != null) {
-                continue;
-            }
-
-            $ent = Enterprise::find($m->enterprise_id);
-            if ($ent == null) {
-                throw ("Ent not found.");
-            }
-            $admin = Administrator::find($s->administrator_id);
-            if ($admin == null) {
-                throw ("Admin acc not found.");
-            }
-            if ($admin->account == null) {
-                $acc = Account::create($s->administrator_id);
-            }
-
-            if ($admin->account == null) {
-                throw ("Fin Acc not found.");
-            }
-
-            $account_id = $admin->account->id;
-            $trans = new Transaction();
-            $trans->enterprise_id = $ent->id;
-            $trans->account_id = $account_id;
-
-            $by = Auth::user();
-            if ($by == null) {
-                $by = Admin::user();
-            }
-            if ($by == null) {
-                throw new Exception("User not found", 1);
-            }
-            $trans->created_by_id = $by->id;
-
-            $trans->school_pay_transporter_id = '-';
-            $fee = abs($m->fee);
-            $trans->amount = ((-1) * $fee); 
-            $trans->amount = $trans->amount * $s->quantity;
-
-
-            $today = Carbon::now();
-            $trans->payment_date = $today->toDateTimeString();
-
-            $trans->is_contra_entry = false;
-            $trans->type = 'FEES_BILL';
-            $trans->is_service = 'Yes';
-            $trans->service_id = $m->id;
-
-            $trans->contra_entry_account_id = 0;
-            $amount = number_format((int)($trans->amount));
-            $trans->description = "Debited UGX $amount for {$m->name} service.";
-
-            $t = $ent->active_term();
-            if ($t != null) {
-                $trans->term_id = $t->id;
-                $trans->academic_year_id = $t->academic_year_id;
-            }
-
-            $fee_dep = new  FeeDepositConfirmation();
-            $fee_dep->enterprise_id    = $ent->id;
-            $fee_dep->fee_id    = $s->id;
-            $fee_dep->administrator_id    = $s->administrator_id;
-
-            $fee_dep->save();
-            $trans->save();
+        if ($m == null) {
+            return 0;
         }
+
+        $billed = 0;
+        foreach ($m->subs as $s) {
+            if (self::bill_subscription($m, $s)) {
+                $billed++;
+            }
+        }
+
+        return $billed;
+    }
+
+    /**
+     * Posts the fee transaction for exactly one subscription.
+     *
+     * Idempotent: a FeeDepositConfirmation row is the ledger's "already billed"
+     * marker for a subscription, so calling this twice never double-charges.
+     *
+     * Returns true when a charge was posted, false when it was already billed.
+     */
+    public static function bill_subscription($service, $sub)
+    {
+        if ($service == null || $sub == null) {
+            return false;
+        }
+
+        $subscriptionId = (int) $sub->id;
+        $subscriberId   = (int) $sub->administrator_id;
+        if ($subscriptionId < 1 || $subscriberId < 1) {
+            return false;
+        }
+
+        $alreadyBilled = FeeDepositConfirmation::where([
+            'fee_id'           => $subscriptionId,
+            'administrator_id' => $subscriberId,
+        ])->first();
+        if ($alreadyBilled != null) {
+            return false;
+        }
+
+        $ent = Enterprise::find($service->enterprise_id);
+        if ($ent == null) {
+            throw new Exception("Enterprise #{$service->enterprise_id} was not found for service {$service->name}.", 1);
+        }
+
+        $admin = Administrator::find($subscriberId);
+        if ($admin == null) {
+            throw new Exception("Subscriber #{$subscriberId} was not found.", 1);
+        }
+
+        $account = $admin->account;
+        if ($account == null) {
+            $account = Account::create($subscriberId);
+        }
+        if ($account == null) {
+            throw new Exception("Financial account for {$admin->name} could not be created.", 1);
+        }
+
+        $by = Auth::user();
+        if ($by == null) {
+            $by = Admin::user();
+        }
+        if ($by == null) {
+            throw new Exception("Cannot bill {$admin->name}: no authenticated user to attribute the charge to.", 1);
+        }
+
+        $quantity = (int) $sub->quantity;
+        if ($quantity < 1) {
+            $quantity = 1;
+        }
+
+        $trans                          = new Transaction();
+        $trans->enterprise_id           = $ent->id;
+        $trans->account_id              = $account->id;
+        $trans->created_by_id           = $by->id;
+        $trans->school_pay_transporter_id = '-';
+        $trans->amount                  = (-1) * abs($service->fee) * $quantity;
+        $trans->payment_date            = Carbon::now()->toDateTimeString();
+        $trans->is_contra_entry         = false;
+        $trans->type                    = 'FEES_BILL';
+        $trans->is_service              = 'Yes';
+        $trans->service_id              = $service->id;
+        $trans->contra_entry_account_id = 0;
+        $trans->description             = "Debited UGX " . number_format((int) $trans->amount) . " for {$service->name} service.";
+
+        // The charge belongs to the term the subscription is FOR, not to whichever
+        // term happens to be active when the batch is run. Subscriptions are
+        // routinely created ahead of the term they bill.
+        $termId         = (int) $sub->due_term_id;
+        $academicYearId = (int) $sub->due_academic_year_id;
+
+        if ($termId > 0 && $academicYearId < 1) {
+            $dueTerm = Term::find($termId);
+            if ($dueTerm != null) {
+                $academicYearId = (int) $dueTerm->academic_year_id;
+            }
+        }
+
+        if ($termId < 1) {
+            $activeTerm = $ent->active_term();
+            if ($activeTerm != null) {
+                $termId         = (int) $activeTerm->id;
+                $academicYearId = (int) $activeTerm->academic_year_id;
+            }
+        }
+
+        if ($termId > 0) {
+            $trans->term_id = $termId;
+        }
+        if ($academicYearId > 0) {
+            $trans->academic_year_id = $academicYearId;
+        }
+
+        // The charge and its "already billed" marker must land together. Saving
+        // the marker first (as this used to) meant a failing transaction left a
+        // marker behind: the subscription then looked billed for ever, blocking
+        // every retry, while the student was never actually charged. Six real
+        // cases of exactly that were found on service 218 in Sep 2026.
+        DB::transaction(function () use ($trans, $ent, $subscriptionId, $subscriberId) {
+            $trans->save();
+
+            $fee_dep                   = new FeeDepositConfirmation();
+            $fee_dep->enterprise_id    = $ent->id;
+            $fee_dep->fee_id           = $subscriptionId;
+            $fee_dep->administrator_id = $subscriberId;
+            $fee_dep->save();
+        });
+
+        return true;
     }
     public function subs()
     {

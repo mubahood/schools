@@ -9,3 +9,4 @@ SSH_Access.txt
 *.sql
 *.md
 !README.md
+vps-credentials.txt

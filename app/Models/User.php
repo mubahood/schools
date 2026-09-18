@@ -199,6 +199,79 @@ class User extends Administrator implements JWTSubject
         return $this->belongsTo(AcademicClassSctream::class, 'stream_id');
     }
 
+    /**
+     * Per-term finance summary shown on the student profile.
+     *
+     * Overrides the vendor implementation, which summed EVERY fee definition ever
+     * attached to the class with no term filter — so a class carrying fees for five
+     * past terms displayed all five added together as "this term's" school fees.
+     * It also mixed signs (fees stored negative, services positive) so the two
+     * cancelled each other instead of adding up, and it dereferenced $this->account
+     * without a null check.
+     *
+     * Everything here is scoped to the active term and expressed as a positive
+     * amount owed, which is how the tiles are labelled. The authoritative balance
+     * shown beside these figures is still accounts.balance, untouched.
+     *
+     * @return array|null
+     */
+    public function get_finances()
+    {
+        if ($this->user_type != 'student') {
+            return null;
+        }
+
+        $ent = $this->ent;
+        if ($ent == null) {
+            return null;
+        }
+
+        $term = $ent->active_term();
+        if ($term == null) {
+            return null;
+        }
+
+        $class = $this->current_class;
+        if ($class == null) {
+            return null;
+        }
+
+        $account = $this->account;
+        if ($account == null) {
+            return null;
+        }
+
+        $termId = (int) $term->id;
+
+        // Summed in the database rather than by loading every row into memory.
+        $feesOwed     = abs((int) $class->academic_class_fees()->where('due_term_id', $termId)->sum('amount'));
+        $servicesOwed = abs((int) $this->services()->where('due_term_id', $termId)->sum('total'));
+
+        $broughtForward = (int) $account->transactions()
+            ->where('type', 'BALANCE_BROUGHT_FORWARD')
+            ->where('term_id', $termId)->sum('amount');
+
+        // Only a debt carried in adds to what is payable; a credit carried in does not.
+        $broughtForwardOwed = $broughtForward < 0 ? abs($broughtForward) : 0;
+
+        $paid = (int) $account->transactions()
+            ->where('term_id', $termId)
+            ->where('amount', '>', 0)->sum('amount');
+
+        $payable = $feesOwed + $servicesOwed + $broughtForwardOwed;
+
+        return [
+            'class'         => $class,
+            'term'          => $term,
+            'fees'          => $feesOwed,
+            'services'      => $servicesOwed,
+            'balance_bf'    => $broughtForward,
+            'total_payable' => $payable,
+            'total_paid'    => $paid,
+            'balance'       => $payable - $paid,
+        ];
+    }
+
     public function services()
     {
         return $this->hasMany(ServiceSubscription::class, 'administrator_id');

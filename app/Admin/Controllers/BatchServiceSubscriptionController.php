@@ -67,18 +67,46 @@ class BatchServiceSubscriptionController extends AdminController
                 : "<span class='label label-default'>No</span>";
         });
 
-        $grid->column('success_count', 'Success')->sortable();
+        $grid->column('success_count', 'Created')->sortable();
+        $grid->column('skipped_count', 'Already Subscribed')
+            ->help('Students who already held this service for this term. They were left untouched and not charged again.')
+            ->sortable();
         $grid->column('fail_count', 'Failed')->sortable();
         $grid->column('total_count', 'Total')->sortable();
 
         $grid->column('processed_notes', 'Notes')->limit(40)->hide();
 
         $grid->column('processed_button', 'Status')->display(function () {
-            if ($this->is_processed === 'Yes') {
-                return "<span class='badge badge-success'>Processed</span>";
+            // A batch that is mid-run offers no button at all — a second click is
+            // what used to create the parallel pass whose inserts the first pass
+            // then reported as "already subscribed". Checked before anything else
+            // so it also covers a reprocess that is currently running.
+            if ($this->isLocked()) {
+                return "<span class='badge badge-warning'><i class='fa fa-spinner fa-spin'></i> Running…</span>";
             }
-            $url = url('process-batch-service-subscriptions?id=' . $this->id);
-            return "<a target='_blank' href='{$url}' class='btn btn-sm btn-primary'>
+
+            $processUrl = url('process-batch-service-subscriptions?id=' . $this->id);
+
+            if ($this->is_processed === 'Yes') {
+                // Re-running is explicit (&reprocess=1) and confirmed, so it can
+                // never happen by accident. It is also idempotent: students who
+                // already hold the service for this term are skipped, so the only
+                // effect is to add the ones still missing it.
+                $reprocessUrl = $processUrl . '&reprocess=1';
+                $confirm = 'Reprocess this batch?\n\n'
+                    . 'Students who already have this service for this term will be SKIPPED '
+                    . 'and will NOT be charged again.\n\n'
+                    . 'Only students still missing the subscription will be added.';
+
+                return "<span class='badge badge-success'>Processed</span>"
+                    . " <a target='_blank' rel='nofollow' href='{$reprocessUrl}'"
+                    . " class='btn btn-xs btn-default' style='margin-left:6px'"
+                    . " onclick=\"return confirm('{$confirm}')\""
+                    . " title='Add any students in this batch who are still missing the subscription'>"
+                    . "<i class='fa fa-refresh'></i> Reprocess</a>";
+            }
+
+            return "<a target='_blank' href='{$processUrl}' class='btn btn-sm btn-primary'>
                         <i class='fa fa-play'></i> Process
                     </a>";
         });
@@ -107,7 +135,8 @@ class BatchServiceSubscriptionController extends AdminController
         });
         $show->field('to_be_managed_by_inventory', 'Managed by Inventory');
         $show->field('is_processed', 'Processed');
-        $show->field('success_count', 'Successes');
+        $show->field('success_count', 'Subscriptions Created');
+        $show->field('skipped_count', 'Already Subscribed (skipped)');
         $show->field('fail_count', 'Failures');
         $show->field('total_count', 'Total Attempted');
         $show->field('processed_notes', 'Notes');
@@ -174,10 +203,14 @@ class BatchServiceSubscriptionController extends AdminController
             // Show current processing status
             $batch = $form->model();
             if ($batch && $batch->is_processed === 'Yes') {
+                $created = (int) $batch->success_count;
+                $skipped = (int) $batch->skipped_count;
+                $failed  = (int) $batch->fail_count;
+                $total   = (int) $batch->total_count;
                 $form->html("<div class='alert alert-success'>
                     <i class='fa fa-check-circle'></i>
                     <strong>Already processed.</strong>
-                    Success: {$batch->success_count} | Failed: {$batch->fail_count} | Total: {$batch->total_count}
+                    Created: {$created} | Already subscribed: {$skipped} | Failed: {$failed} | Total: {$total}
                 </div>");
             }
         }
@@ -264,7 +297,7 @@ class BatchServiceSubscriptionController extends AdminController
             $form->radio('is_processed', 'Mark as Processed?')
                 ->options(['No' => 'No — Allow re-processing', 'Yes' => 'Yes — Already processed'])
                 ->default('No')
-                ->help('Set to "No" to allow re-running the batch (already-subscribed students will be skipped).');
+                ->help('Set to "No" to allow re-running the batch. Re-running is safe: students who already hold this service for this term are skipped, never charged twice.');
         }
 
         $form->hidden('total')->default(0);

@@ -2,11 +2,9 @@
 
 namespace App\Admin\Actions;
 
-use App\Models\BatchServiceSubscription;
-use App\Models\ServiceSubscription;
-use App\Models\User;
 use Encore\Admin\Actions\BatchAction;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Log;
 
 class ProcessBatchServiceSubscriptions extends BatchAction
 {
@@ -14,117 +12,70 @@ class ProcessBatchServiceSubscriptions extends BatchAction
 
     public function handle(Collection $collection)
     {
-        set_time_limit(180);
+        set_time_limit(600);
 
-        $totalSuccess = 0;
-        $totalFail    = 0;
-        $skipped      = 0;
-        $errors       = [];
+        $created   = 0;
+        $skipped   = 0;
+        $failed    = 0;
+        $done      = 0;
+        $busy      = 0;
+        $empty     = 0;
 
         foreach ($collection as $rep) {
             if ($rep->is_processed === 'Yes') {
-                $skipped++;
+                $done++;
                 continue;
             }
 
-            $administrators = $rep->administrators;
-            if (empty($administrators)) {
-                $skipped++;
+            // Claim first. Without this, two runs process the same list in
+            // parallel and each reports the other's inserts as "already
+            // subscribed" while the counters get overwritten by whoever ends last.
+            if (!$rep->claimForProcessing()) {
+                $busy++;
                 continue;
             }
 
-            $inventoryMode = $rep->to_be_managed_by_inventory ?? 'No';
-            $batchItems    = ($inventoryMode === 'Yes') ? $rep->batchItems()->get() : collect();
-            $quantity      = max(1, (int) $rep->quantity);
-
-            $success   = 0;
-            $fail      = 0;
-            $failText  = '';
-
-            foreach ($administrators as $adminId) {
-                $user = User::find($adminId);
-
-                if (!$user) {
-                    $fail++;
-                    $failText .= "User #{$adminId} not found\n";
+            try {
+                if (empty($rep->administrators)) {
+                    $empty++;
+                    $rep->releaseLock();
                     continue;
                 }
 
-                $existing = ServiceSubscription::where([
-                    'service_id'       => $rep->service_id,
-                    'administrator_id' => $user->id,
-                    'due_term_id'      => $rep->due_term_id,
-                ])->first();
+                $result = $rep->processSubscriptions();
+                $rep->finishProcessing($result);
 
-                if ($existing) {
-                    $fail++;
-                    $failText .= "Already subscribed: {$user->name}\n";
-                    continue;
-                }
-
-                $sub                             = new ServiceSubscription();
-                $sub->service_id                 = $rep->service_id;
-                $sub->enterprise_id              = $rep->enterprise_id;
-                $sub->administrator_id           = $user->id;
-                $sub->quantity                   = $quantity;
-                $sub->due_term_id                = $rep->due_term_id;
-                $sub->due_academic_year_id       = $rep->due_academic_year_id;
-                $sub->link_with                  = $rep->link_with;
-                $sub->transport_route_id         = $rep->transport_route_id;
-                $sub->trip_type                  = $rep->trip_type;
-                $sub->to_be_managed_by_inventory = $inventoryMode;
-                $sub->is_service_offered         = 'No';
-                $sub->is_completed               = 'No';
-
-                try {
-                    $sub->save();
-
-                    if ($inventoryMode === 'Yes' && $batchItems->count() > 0) {
-                        foreach ($batchItems as $batchItem) {
-                            if (empty($batchItem->stock_item_category_id)) continue;
-                            \App\Models\ServiceItemToBeOffered::firstOrCreate(
-                                [
-                                    'service_subscription_id' => $sub->id,
-                                    'stock_item_category_id'  => $batchItem->stock_item_category_id,
-                                ],
-                                [
-                                    'quantity'           => max(1, (int) ($batchItem->quantity ?? 1)),
-                                    'is_service_offered' => 'No',
-                                    'user_id'            => $user->id,
-                                    'enterprise_id'      => $rep->enterprise_id,
-                                ]
-                            );
-                        }
-                    }
-
-                    $success++;
-                } catch (\Throwable $e) {
-                    $fail++;
-                    $failText .= "Error for {$user->name}: {$e->getMessage()}\n";
-                }
-            }
-
-            $rep->is_processed    = 'Yes';
-            $rep->success_count   = $success;
-            $rep->fail_count      = $fail;
-            $rep->total_count     = $success + $fail;
-            $rep->processed_notes = $failText ?: null;
-            $rep->save();
-
-            $totalSuccess += $success;
-            $totalFail    += $fail;
-
-            if ($failText) {
-                $errors[] = "Batch #{$rep->id}: {$failText}";
+                $created += $result['created'];
+                $skipped += $result['skipped'];
+                $failed  += $result['failed'];
+            } catch (\Throwable $e) {
+                // Leave the batch unprocessed and unlocked so it can be retried.
+                $rep->releaseLock();
+                $failed++;
+                Log::error("Batch #{$rep->id} processing aborted: " . $e->getMessage());
             }
         }
 
-        $msg = "Processed: {$totalSuccess} subscriptions created, {$totalFail} skipped/failed";
+        $parts = ["{$created} subscription(s) created"];
         if ($skipped) {
-            $msg .= ", {$skipped} batches already done";
+            $parts[] = "{$skipped} already subscribed (skipped)";
+        }
+        if ($failed) {
+            $parts[] = "{$failed} failed";
+        }
+        if ($done) {
+            $parts[] = "{$done} batch(es) already processed";
+        }
+        if ($busy) {
+            $parts[] = "{$busy} batch(es) already running elsewhere";
+        }
+        if ($empty) {
+            $parts[] = "{$empty} batch(es) had no subscribers";
         }
 
-        if ($totalFail > 0 && !empty($errors)) {
+        $msg = implode(', ', $parts) . '.';
+
+        if ($failed > 0) {
             return $this->response()->warning($msg)->refresh();
         }
 
@@ -133,6 +84,9 @@ class ProcessBatchServiceSubscriptions extends BatchAction
 
     public function dialog()
     {
-        $this->confirm('Process all selected batches now? Already-processed batches will be skipped.');
+        $this->confirm(
+            'Process all selected batches now? Batches already processed, or already running in another tab, are left alone. '
+                . 'Students who already hold the service for that term are skipped, not charged twice.'
+        );
     }
 }
