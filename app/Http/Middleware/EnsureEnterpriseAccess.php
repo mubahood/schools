@@ -40,7 +40,7 @@ class EnsureEnterpriseAccess
             return $next($request);
         }
 
-        $alwaysAllowed = $request->is('billing*') || $request->is('gateway/*') || $request->is('auth/logout')
+        $alwaysAllowed = $request->is('billing*') || $request->is('invoice/*') || $request->is('gateway/*') || $request->is('auth/logout')
             || $request->routeIs('admin.logout') || $request->is('api/users/login') || $request->is('api/users/me');
         if ($alwaysAllowed) {
             return $next($request);

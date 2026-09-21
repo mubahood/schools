@@ -172,6 +172,8 @@ Route::group([
     $router->get('billing/pay/{invoice}', 'BillingController@pay')->name('billing.pay');
     $router->post('billing/topup', 'BillingController@topup')->name('billing.topup');
     $router->post('billing/bank/{invoice}', 'BillingController@bankNotice')->name('billing.bank');
+    $router->get('billing/invoice/{invoice}/view', 'BillingController@invoiceView')->name('billing.invoice.view');
+    $router->get('billing/invoice/{invoice}/pdf', 'BillingController@invoicePdf')->name('billing.invoice.pdf');
 
     // Newline console (super-admin only; enforced in the controller)
     $router->get('subscriptions-admin', 'SubscriptionsAdminController@index')->name('subscriptions-admin.index');
@@ -181,6 +183,16 @@ Route::group([
     $router->post('subscriptions-admin/{enterprise}/extend', 'SubscriptionsAdminController@extend');
     $router->post('subscriptions-admin/{enterprise}/exempt', 'SubscriptionsAdminController@toggleExempt');
     $router->post('subscriptions-admin/{enterprise}/suspend', 'SubscriptionsAdminController@suspend');
+    // Invoicing and per-school controls
+    $router->get('subscriptions-admin/invoices/{invoice}', 'SubscriptionsAdminController@showInvoice');
+    $router->get('subscriptions-admin/invoices/{invoice}/view', 'SubscriptionsAdminController@invoiceView');
+    $router->get('subscriptions-admin/invoices/{invoice}/pdf', 'SubscriptionsAdminController@invoicePdf');
+    $router->post('subscriptions-admin/invoices/{invoice}/issue', 'SubscriptionsAdminController@publish');
+    $router->post('subscriptions-admin/invoices/{invoice}/void', 'SubscriptionsAdminController@voidInvoice');
+    $router->post('subscriptions-admin/invoices/{invoice}/remind', 'SubscriptionsAdminController@remind');
+    $router->get('subscriptions-admin/{enterprise}/invoices/new', 'SubscriptionsAdminController@newInvoice');
+    $router->post('subscriptions-admin/{enterprise}/invoices', 'SubscriptionsAdminController@storeInvoice');
+    $router->get('subscriptions-admin/{enterprise}', 'SubscriptionsAdminController@show');
 
     $router->resource('wallet-records', WalletRecordController::class);
     $router->resource('credit-purchases', CreditPurchaseController::class);

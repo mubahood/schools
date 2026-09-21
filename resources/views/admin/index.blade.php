@@ -92,6 +92,66 @@
 
 <div class="db-body">
 
+@if(!empty($billingAlert))
+@php
+  $ba = $billingAlert; $bi = $ba['inv'];
+  $bBrand = config('newline.brand');
+  $bTone  = $ba['locked'] ? '#8E0F0F' : ($ba['overdue'] ? '#B3261E' : $bBrand);
+@endphp
+<style>
+  .bill-alert{background:{{ $bTone }};color:#fff;border-radius:10px;padding:18px 22px;margin-bottom:16px;
+              box-shadow:0 8px 22px rgba(0,0,0,.14)}
+  .bill-alert .ba-top{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+  .bill-alert .ba-k{font-size:11px;text-transform:uppercase;letter-spacing:1.3px;opacity:.92;font-weight:700}
+  .bill-alert .ba-amt{font-size:27px;font-weight:800;line-height:1.15;margin:2px 0}
+  .bill-alert .ba-sub{font-size:13.5px;opacity:.95}
+  .bill-alert .ba-due{background:rgba(255,255,255,.17);border-radius:8px;padding:9px 15px;text-align:center;min-width:150px}
+  .bill-alert .ba-due .d1{font-size:10.5px;text-transform:uppercase;letter-spacing:1px;opacity:.9}
+  .bill-alert .ba-due .d2{font-size:16px;font-weight:800}
+  .bill-alert .ba-due .d3{font-size:11.5px;opacity:.95}
+  .bill-alert .ba-btn{display:inline-block;text-decoration:none;border-radius:7px;padding:11px 18px;
+                      font-weight:700;font-size:13.5px;margin:10px 8px 0 0}
+  .bill-alert .ba-pay{background:#fff;color:{{ $bTone }}}
+  .bill-alert .ba-pay:hover{background:#eef4f8;color:{{ $bTone }}}
+  .bill-alert .ba-alt{border:1.5px solid rgba(255,255,255,.7);color:#fff}
+  .bill-alert .ba-alt:hover{background:rgba(255,255,255,.14);color:#fff}
+  .bill-alert .ba-lock{background:rgba(0,0,0,.2);border-radius:7px;padding:9px 14px;margin-top:12px;font-size:13px}
+  @media(max-width:700px){.bill-alert .ba-amt{font-size:22px}.bill-alert .ba-btn{display:block;text-align:center;margin-right:0}}
+</style>
+<div class="bill-alert">
+  <div class="ba-top">
+    <div>
+      <div class="ba-k">
+        @if($ba['locked']) System locked — licence payment required
+        @elseif($ba['overdue']) Licence payment overdue
+        @else Licence payment due @endif
+      </div>
+      <div class="ba-amt">UGX {{ number_format($bi->balance() ?: $bi->amount) }}</div>
+      <div class="ba-sub">{{ $bi->title }} · Invoice {{ $bi->number }}</div>
+    </div>
+    <div class="ba-due">
+      <div class="d1">Deadline</div>
+      <div class="d2">{{ $bi->due_at ? $bi->due_at->format('d M Y') : 'On receipt' }}</div>
+      @if($ba['days'] !== null)
+        <div class="d3">{{ $ba['days'] < 0 ? abs($ba['days']).' day(s) overdue' : ($ba['days'] === 0 ? 'Due today' : $ba['days'].' day(s) left') }}</div>
+      @endif
+    </div>
+  </div>
+  @if($ba['locked'])
+    <div class="ba-lock">
+      Your data is safe and still readable, but changes are disabled until this invoice is paid.
+      Payment is confirmed within seconds and access is restored automatically.
+    </div>
+  @endif
+  <div>
+    <a class="ba-btn ba-pay" href="{{ $ba['pay_url'] }}">Pay now — Mobile Money, Visa or Mastercard</a>
+    <a class="ba-btn ba-alt" href="{{ $ba['pdf_url'] }}">Download invoice (PDF)</a>
+    <a class="ba-btn ba-alt" href="{{ $bi->publicUrl() }}" target="_blank">Send to the person who pays</a>
+  </div>
+</div>
+@endif
+
+
 {{-- ═══════════════════════════════════════════════════════════
      SUPER ADMIN
 ═══════════════════════════════════════════════════════════ --}}

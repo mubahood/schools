@@ -4027,3 +4027,9 @@ Route::get('schoolpay/sync-and-import', function (Request $request) {
 // ---- Pesapal gateway endpoints (public; they verify with Pesapal, never trust input) ----
 Route::get('gateway/pesapal/callback', [\App\Http\Controllers\PesapalGatewayController::class, 'callback'])->name('gateway.pesapal.callback');
 Route::match(['get', 'post'], 'gateway/pesapal/ipn', [\App\Http\Controllers\PesapalGatewayController::class, 'ipn'])->name('gateway.pesapal.ipn');
+
+// ---- Public invoice: readable and payable with no login, even while a school is locked out ----
+Route::get('invoice/{token}', [\App\Http\Controllers\PublicInvoiceController::class, 'show'])->name('invoice.public');
+Route::get('invoice/{token}/view', [\App\Http\Controllers\PublicInvoiceController::class, 'raw'])->name('invoice.public.view');
+Route::get('invoice/{token}/pdf', [\App\Http\Controllers\PublicInvoiceController::class, 'pdf'])->name('invoice.public.pdf');
+Route::get('invoice/{token}/pay', [\App\Http\Controllers\PublicInvoiceController::class, 'pay'])->name('invoice.public.pay');

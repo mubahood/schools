@@ -311,6 +311,11 @@ class BillingService
                 return;
             }
 
+            if ($inv->kind === Invoice::KIND_LICENCE) {
+                self::applyLicence($inv, $ent, $when);
+                return;
+            }
+
             // Subscription instalment: access runs to the share of the period paid for.
             $sub = Subscription::where('id', $inv->subscription_id)->lockForUpdate()->first();
             if (!$sub) {
@@ -341,6 +346,168 @@ class BillingService
                 'expiry' => $accessEnds->toDateString(),
             ]);
         });
+    }
+
+    /**
+     * A paid licence invoice: the term it was raised for becomes the active
+     * term, and access runs to that term's end plus the grace window. A school
+     * that was locked out is unlocked by this, which is the whole point of
+     * leaving the invoice reachable while suspended.
+     */
+    private static function applyLicence(Invoice $inv, Enterprise $ent, Carbon $when): void
+    {
+        $term = $inv->term_id ? DB::table('terms')->where('id', $inv->term_id)->where('enterprise_id', $ent->id)->first() : null;
+
+        if ($term) {
+            // Exactly one active term per school, and its year active with it.
+            DB::table('terms')->where('enterprise_id', $ent->id)->where('id', '<>', $term->id)->update(['is_active' => 0]);
+            DB::table('terms')->where('id', $term->id)->update(['is_active' => 1]);
+            if ($term->academic_year_id) {
+                DB::table('academic_years')->where('enterprise_id', $ent->id)->where('id', '<>', $term->academic_year_id)->update(['is_active' => 0]);
+                DB::table('academic_years')->where('id', $term->academic_year_id)->update(['is_active' => 1]);
+            }
+        }
+
+        $ends = $term && $term->ends ? Carbon::parse($term->ends)->endOfDay() : $when->copy()->addMonths(4);
+        if ($ends->isPast()) {
+            // Paying late must still buy a usable window, never a dead one.
+            $ends = $when->copy()->addDays(30);
+        }
+        $ends = $ends->addDays((int) ($ent->grace_days ?: 7));
+
+        // Never shorten a window the school has already paid for.
+        if ($ent->access_ends_at && Carbon::parse($ent->access_ends_at)->gt($ends)) {
+            $ends = Carbon::parse($ent->access_ends_at);
+        }
+
+        DB::table('enterprises')->where('id', $ent->id)->update([
+            'access_status' => self::ACTIVE,
+            'access_ends_at' => $ends,
+            'has_valid_lisence' => 'Yes',
+            'expiry' => $ends->toDateString(),
+        ]);
+
+        Log::info('Licence invoice settled', ['invoice' => $inv->number, 'enterprise' => $ent->id,
+            'term' => $term->id ?? null, 'access_ends_at' => $ends->toDateString()]);
+    }
+
+    /**
+     * Raise a licence invoice for a school. Starts life as a draft so Newline
+     * can read the document before the school ever sees it.
+     *
+     * $data: title, description, notes, inclusions[], due_at, term_id, items[]
+     *        where each item is [label, description, quantity, unit, unit_amount].
+     */
+    public static function createLicenceInvoice(Enterprise $ent, array $data, ?int $byUserId = null): Invoice
+    {
+        return DB::transaction(function () use ($ent, $data, $byUserId) {
+            $items = array_values(array_filter($data['items'] ?? [], fn ($i) => trim((string) ($i['label'] ?? '')) !== ''));
+            if (!$items) {
+                throw new \InvalidArgumentException('An invoice needs at least one line item.');
+            }
+
+            $term = !empty($data['term_id']) ? DB::table('terms')->where('id', $data['term_id'])->where('enterprise_id', $ent->id)->first() : null;
+            $total = 0;
+            foreach ($items as $i) {
+                $total += (int) max(0, (int) ($i['quantity'] ?? 1)) * (int) max(0, (int) ($i['unit_amount'] ?? 0));
+            }
+            if ($total <= 0) {
+                throw new \InvalidArgumentException('An invoice must come to more than zero.');
+            }
+
+            $inv = new Invoice();
+            $inv->number = 'TMP-' . uniqid();
+            $inv->enterprise_id = $ent->id;
+            $inv->kind = Invoice::KIND_LICENCE;
+            $inv->title = $data['title'] ?? 'System Licence & Support';
+            $inv->term_id = $term->id ?? null;
+            $inv->academic_year_id = $term->academic_year_id ?? null;
+            $inv->amount = $total;
+            $inv->currency = 'UGX';
+            $inv->status = Invoice::DRAFT;
+            $inv->description = $data['description'] ?? trim(($inv->title . ' — ' . ($term ? self::termLabel($term) : '')), ' —');
+            $inv->notes = $data['notes'] ?? null;
+            $inv->inclusions = !empty($data['inclusions']) ? json_encode(array_values($data['inclusions'])) : null;
+            $inv->due_at = !empty($data['due_at']) ? Carbon::parse($data['due_at'])->endOfDay() : Carbon::now()->addDays((int) config('newline.invoice.default_due_days', 14))->endOfDay();
+            $inv->created_by = $byUserId;
+            $inv->save();
+            $inv->number = Invoice::nextNumber($inv->id);
+            $inv->public_token = \Illuminate\Support\Str::random(48);
+            $inv->save();
+
+            $sort = 0;
+            foreach ($items as $i) {
+                $qty = (int) max(1, (int) ($i['quantity'] ?? 1));
+                $unitAmount = (int) max(0, (int) ($i['unit_amount'] ?? 0));
+                \App\Models\Billing\InvoiceItem::create([
+                    'invoice_id' => $inv->id,
+                    'label' => mb_substr(trim($i['label']), 0, 190),
+                    'description' => $i['description'] ?? null,
+                    'quantity' => $qty,
+                    'unit' => $i['unit'] ?? null,
+                    'unit_amount' => $unitAmount,
+                    'amount' => $qty * $unitAmount,
+                    'sort' => $sort++,
+                ]);
+            }
+
+            return $inv->fresh();
+        });
+    }
+
+    /** Make a draft visible and payable to the school. */
+    public static function publishInvoice(Invoice $inv): Invoice
+    {
+        if ($inv->status !== Invoice::DRAFT) {
+            return $inv;
+        }
+        $inv->status = Invoice::ISSUED;
+        $inv->issued_at = Carbon::now();
+        $inv->save();
+        Log::info('Invoice issued to school', ['invoice' => $inv->number, 'enterprise' => $inv->enterprise_id]);
+
+        return $inv->fresh();
+    }
+
+    public static function voidInvoice(Invoice $inv, ?string $reason = null): Invoice
+    {
+        if ($inv->status === Invoice::PAID) {
+            throw new \RuntimeException('A paid invoice cannot be voided; reverse the payment instead.');
+        }
+        $inv->status = Invoice::VOID;
+        $inv->notes = trim(($inv->notes ?? '') . "\nVoided: " . ($reason ?: 'no reason given'));
+        $inv->save();
+        Payment::where('invoice_id', $inv->id)->whereIn('status', [Payment::INITIATED, Payment::PENDING])
+            ->update(['status' => Payment::FAILED]);
+
+        return $inv->fresh();
+    }
+
+    /**
+     * The one invoice the school must deal with right now: the oldest unpaid
+     * one, overdue first. This is what takes over the billing page and the
+     * dashboard.
+     */
+    public static function dueInvoice(Enterprise $ent): ?Invoice
+    {
+        return Invoice::where('enterprise_id', $ent->id)
+            ->where('status', Invoice::ISSUED)
+            ->orderByRaw('CASE WHEN due_at IS NULL THEN 1 ELSE 0 END')
+            ->orderBy('due_at')
+            ->orderBy('id')
+            ->first();
+    }
+
+    public static function termLabel($term): string
+    {
+        if (!$term) {
+            return '';
+        }
+        $name = trim((string) ($term->name ?? ''));
+        $name = is_numeric($name) ? 'Term ' . $name : ($name ?: 'Term');
+        $year = DB::table('academic_years')->where('id', $term->academic_year_id)->value('name');
+
+        return trim($name . ($year ? ', ' . trim($year) : ''));
     }
 
     // ------------------------------------------------------------ lifecycle

@@ -20,6 +20,64 @@
   <a class="sc-kpi {{ $filter==='exempt'?'on':'' }}" href="{{ $base }}?f=exempt"><div class="k">Billing exempt</div><div class="v">{{ $counts['exempt'] }}</div></a>
 </div>
 
+<form method="GET" action="{{ $base }}" class="form-inline" style="margin-bottom:14px">
+  <input class="form-control" name="q" value="{{ $search }}" placeholder="Search school, web address, email or phone" style="width:320px">
+  <input type="hidden" name="f" value="{{ $filter }}">
+  <button class="btn btn-default">Search</button>
+  @if($search)<a class="btn btn-link" href="{{ $base }}">clear</a>@endif
+</form>
+
+@if($drafts->count())
+<div class="box box-default">
+  <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-file-o"></i> Draft invoices — not yet visible to the school ({{ $drafts->count() }})</h3></div>
+  <div class="box-body table-responsive no-padding">
+    <table class="table table-hover">
+      <thead><tr><th>Invoice</th><th>School</th><th>For</th><th>Due</th><th class="text-right">Amount</th><th></th></tr></thead>
+      <tbody>
+      @foreach($drafts as $d)
+        <tr class="sc-row">
+          <td><a href="{{ $base }}/invoices/{{ $d->id }}"><b>{{ $d->number }}</b></a></td>
+          <td>{{ optional(\App\Models\Enterprise::find($d->enterprise_id))->name }}</td>
+          <td><small>{{ $d->title }}</small></td>
+          <td><small>{{ $d->due_at ? $d->due_at->format('d M Y') : '—' }}</small></td>
+          <td class="text-right"><b>UGX {{ number_format($d->amount) }}</b></td>
+          <td class="text-right" style="white-space:nowrap">
+            <a class="btn btn-default btn-xs" href="{{ $base }}/invoices/{{ $d->id }}">Review</a>
+            <form method="POST" action="{{ $base }}/invoices/{{ $d->id }}/issue" onsubmit="return confirm('Issue this invoice to the school?')">{!! csrf_field() !!}<button class="btn btn-primary btn-xs">Issue</button></form>
+          </td>
+        </tr>
+      @endforeach
+      </tbody>
+    </table>
+  </div>
+</div>
+@endif
+
+@if($overdue->count())
+<div class="box box-danger">
+  <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-exclamation-triangle"></i> Overdue invoices ({{ $overdue->count() }})</h3></div>
+  <div class="box-body table-responsive no-padding">
+    <table class="table table-hover">
+      <thead><tr><th>Invoice</th><th>School</th><th>Was due</th><th class="text-right">Amount</th><th></th></tr></thead>
+      <tbody>
+      @foreach($overdue as $o)
+        <tr class="sc-row">
+          <td><a href="{{ $base }}/invoices/{{ $o->id }}"><b>{{ $o->number }}</b></a></td>
+          <td>{{ optional(\App\Models\Enterprise::find($o->enterprise_id))->name }}</td>
+          <td class="text-red">{{ $o->due_at->format('d M Y') }} <small>({{ abs($o->daysToDue()) }} days)</small></td>
+          <td class="text-right"><b>UGX {{ number_format($o->amount) }}</b></td>
+          <td class="text-right" style="white-space:nowrap">
+            <form method="POST" action="{{ $base }}/invoices/{{ $o->id }}/remind" onsubmit="return confirm('Send an SMS and email reminder now?')">{!! csrf_field() !!}<button class="btn btn-warning btn-xs">Remind</button></form>
+            <a class="btn btn-default btn-xs" href="{{ $base }}/invoices/{{ $o->id }}">Open</a>
+          </td>
+        </tr>
+      @endforeach
+      </tbody>
+    </table>
+  </div>
+</div>
+@endif
+
 @if($claims->count())
 <div class="box box-warning">
   <div class="box-header with-border"><h3 class="box-title"><i class="fa fa-university"></i> Bank / cash claims awaiting confirmation ({{ $claims->count() }})</h3></div>
@@ -54,14 +112,21 @@
       <tbody>
       @foreach($rows as $x)
         <tr class="sc-row">
-          <td><b>{{ $x->ent->name }}</b><br><small class="text-muted">#{{ $x->ent->id }} · {{ $x->ent->subdomain_slug ?: $x->ent->subdomain }}</small></td>
+          <td><a href="{{ $base }}/{{ $x->ent->id }}"><b>{{ $x->ent->name }}</b></a><br><small class="text-muted">#{{ $x->ent->id }} · {{ $x->ent->subdomain_slug ?: $x->ent->subdomain }}</small></td>
           <td><span class="label label-{{ $x->label['class'] }}">{{ $x->label['text'] }}</span>@if($x->ent->billing_exempt) <span class="label label-default">exempt</span>@endif</td>
           <td class="{{ $x->days!==null && $x->days<0 ? 'text-red' : '' }}">{{ $x->days ?? '—' }}</td>
           <td>{{ number_format($x->students) }}</td>
           <td>{{ $x->plan }}</td>
           <td>{{ $x->last_paid }}</td>
-          <td class="text-right">{{ $x->open ? number_format($x->open) : '—' }}</td>
+          <td class="text-right">
+            @if($x->due)
+              <a href="{{ $base }}/invoices/{{ $x->due->id }}" class="{{ $x->due->isOverdue() ? 'text-red' : '' }}"><b>{{ number_format($x->open) }}</b></a>
+              <br><small class="text-muted">due {{ $x->due->due_at ? $x->due->due_at->format('d M') : '—' }}</small>
+            @else — @endif
+          </td>
           <td class="sc-tools" style="white-space:nowrap">
+            <a class="btn btn-xs" style="background:{{ config('newline.brand') }};color:#fff" href="{{ $base }}/{{ $x->ent->id }}/invoices/new">Invoice</a>
+            <a class="btn btn-default btn-xs" href="{{ $base }}/{{ $x->ent->id }}">Open</a><br>
             <form method="POST" action="{{ $base }}/{{ $x->ent->id }}/extend" class="form-inline">{!! csrf_field() !!}
               <input class="form-control input-sm" name="days" type="number" min="1" max="365" value="30"> <button class="btn btn-primary btn-xs" title="Extend access by N days">+days</button>
             </form>
