@@ -3,7 +3,7 @@
 @php $co = $co ?? config('newline'); $pdf = $pdf ?? false; @endphp
 <style>
 @if($pdf)
-  @page { margin: 11mm 11mm 17mm 11mm; }
+  @@page { margin: 11mm 11mm 17mm 11mm; }
   body { margin: 0; }
 @endif
 .iv { font-family: Helvetica, Arial, sans-serif; font-size: 10px; line-height: 1.45;

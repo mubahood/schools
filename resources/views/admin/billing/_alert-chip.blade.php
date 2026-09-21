@@ -9,9 +9,9 @@
     .nl-inv-sep{display:inline-block;width:1px;height:10px;margin:0 8px -1px;background:rgba(255,255,255,.55)}
     .nl-inv-n{font-weight:800}
     .nl-urgent .nl-inv-chip{animation:nlPulse 2.4s ease-in-out infinite}
-    @keyframes nlPulse{0%,100%{box-shadow:0 0 0 0 rgba(179,38,30,.55)}50%{box-shadow:0 0 0 5px rgba(179,38,30,0)}}
-    @media (prefers-reduced-motion:reduce){.nl-urgent .nl-inv-chip{animation:none}}
-    @media (max-width:767px){.nl-inv-label{display:none}.nl-inv-sep{margin:0 4px -1px}}
+    @@keyframes nlPulse{0%,100%{box-shadow:0 0 0 0 rgba(179,38,30,.55)}50%{box-shadow:0 0 0 5px rgba(179,38,30,0)}}
+    @@media (prefers-reduced-motion:reduce){.nl-urgent .nl-inv-chip{animation:none}}
+    @@media (max-width:767px){.nl-inv-label{display:none}.nl-inv-sep{margin:0 4px -1px}}
   </style>
   <a href="{{ admin_url('billing') }}"
      title="{{ $ba['headline'] }}: UGX {{ number_format($ba['amount']) }}, invoice {{ $ba['inv']->number }}">
