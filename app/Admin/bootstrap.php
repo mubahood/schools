@@ -184,7 +184,7 @@ Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
 
         //$navbar->left(Shortcut::make($links, 'fa-plus')->title('ADD NEW'));
         $u = Admin::user();
-        if ($u->isRole('dos', 'admin', 'bursar', 'super-admin', 'hm')) {
+        if ($u->isRole('dos', 'admin', 'bursar', 'finance', 'super-admin', 'hm', 'deputy-hm')) {
             $navbar->left('<li><a href="' . admin_url('billing') . '" title="Top up SMS credit">WALLET: UGX ' . number_format($u->ent->wallet_balance) . '</a></li>');
 
             // An outstanding invoice rides in the header on every screen, with the
