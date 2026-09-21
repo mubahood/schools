@@ -525,8 +525,22 @@ class BillingService
         }
 
         $ends = $ent->access_ends_at ? Carbon::parse($ent->access_ends_at) : ($ent->trial_ends_at ? Carbon::parse($ent->trial_ends_at) : null);
-        $hasPaid = Subscription::where('enterprise_id', $ent->id)->where('status', Subscription::ACTIVE)->exists();
+        // "Paid" means a live package OR a settled licence invoice — a school on a
+        // negotiated licence is a paying customer, not one still on trial.
+        $hasPaid = Subscription::where('enterprise_id', $ent->id)->where('status', Subscription::ACTIVE)->exists()
+            || Invoice::where('enterprise_id', $ent->id)->where('kind', Invoice::KIND_LICENCE)
+                ->where('status', Invoice::PAID)->exists();
         $now = Carbon::now();
+
+        // An issued invoice whose deadline has passed caps the window: the date
+        // printed on the invoice is the date the system enforces, whatever a
+        // previously paid period says. Clearing the invoice lifts the cap.
+        $missed = Invoice::where('enterprise_id', $ent->id)->where('status', Invoice::ISSUED)
+            ->whereNotNull('due_at')->where('due_at', '<', $now)->min('due_at');
+        if ($missed) {
+            $missed = Carbon::parse($missed);
+            $ends = ($ends === null || $missed->lt($ends)) ? $missed : $ends;
+        }
 
         if ($ends === null) {
             // No dates to reason from: an operator hold (suspended) must stay

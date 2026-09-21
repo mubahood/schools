@@ -48,7 +48,7 @@ class BillingController extends Controller
             ->whereIn('status', [Subscription::ACTIVE, Subscription::PENDING])
             ->orderByDesc('id')->with('plan')->first();
         $openInvoices = Invoice::where('enterprise_id', $ent->id)->where('status', Invoice::ISSUED)->orderBy('due_at')->get();
-        $history = Invoice::where('enterprise_id', $ent->id)->orderByDesc('id')->limit(30)->get();
+        $history = Invoice::where('enterprise_id', $ent->id)->where('status', '<>', Invoice::DRAFT)->orderByDesc('id')->limit(30)->get();
 
         return $content->title('Subscription & Billing')
             ->description($ent->name)
