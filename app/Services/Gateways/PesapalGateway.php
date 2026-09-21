@@ -59,7 +59,11 @@ class PesapalGateway
         if (!empty($this->cfg['ipn_id'])) {
             return $this->cfg['ipn_id'];
         }
-        $key = 'pesapal.ipn.' . $this->cfg['environment'] . '.' . md5($this->cfg['ipn_url']);
+        // Keyed by the merchant too: an IPN id belongs to the account that
+        // registered it, so rotating credentials must not reuse the old one.
+        $key = 'pesapal.ipn.' . $this->cfg['environment']
+            . '.' . substr(md5((string) $this->cfg['consumer_key']), 0, 10)
+            . '.' . md5($this->cfg['ipn_url']);
 
         return Cache::rememberForever($key, function () {
             // Reuse an existing registration for the same URL if Pesapal has one.
