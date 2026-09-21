@@ -59,18 +59,8 @@
           @if($pesapalReady)
             <a class="btn btn-success btn-sm" href="{{ admin_url('billing/pay/'.$inv->id) }}"><i class="fa fa-mobile"></i> Pay with Mobile Money / Card</a>
           @endif
-          <button class="btn btn-default btn-sm" type="button" data-toggle="collapse" data-target="#bank{{ $inv->id }}">Paid by bank?</button>
         </td>
       </tr>
-      <tr class="collapse" id="bank{{ $inv->id }}"><td colspan="5" style="background:#fafbfc">
-        <form method="POST" action="{{ admin_url('billing/bank/'.$inv->id) }}" class="form-inline">
-          {!! csrf_field() !!}
-          <label>Bank / deposit reference &nbsp;</label>
-          <input class="form-control input-sm" name="reference" required maxlength="80" placeholder="e.g. slip no. or transaction id">
-          <button class="btn btn-primary btn-sm">Submit for confirmation</button>
-          <span class="text-muted" style="margin-left:8px;font-size:12px">Newline confirms and activates you.</span>
-        </form>
-      </td></tr>
     @endforeach
     </tbody>
   </table>

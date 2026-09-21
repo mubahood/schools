@@ -124,21 +124,4 @@ class BillingController extends Controller
 
         return redirect(admin_url('billing/pay/' . $inv->id));
     }
-
-    /** School says "I paid by bank transfer" — recorded as pending for Newline to confirm. */
-    public function bankNotice(Request $r, $invoiceId)
-    {
-        $data = $r->validate(['reference' => 'required|string|max:80']);
-        $ent = $this->ent();
-        $inv = Invoice::where('enterprise_id', $ent->id)->where('status', Invoice::ISSUED)->findOrFail($invoiceId);
-        \App\Models\Billing\Payment::create([
-            'invoice_id' => $inv->id, 'enterprise_id' => $ent->id, 'gateway' => 'bank',
-            'gateway_ref' => 'bank-claim:' . $inv->id . ':' . time(), 'merchant_ref' => $inv->number,
-            'amount' => $inv->amount, 'status' => 'pending', 'method' => 'Bank transfer, ref ' . $data['reference'],
-            'recorded_by' => Admin::user()->id,
-        ]);
-        admin_success('Recorded', 'Thank you. Newline will confirm the transfer and activate your subscription.');
-
-        return redirect(admin_url('billing'));
-    }
 }

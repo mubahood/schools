@@ -79,15 +79,14 @@
 <div class="row" style="margin:0 0 16px">
   <div class="col-md-6" style="padding-left:0">
     <div class="du-card" style="margin:0">
-      <b>Paid by bank transfer or cash?</b>
-      <form method="POST" action="{{ admin_url('billing/bank/'.$inv->id) }}" style="margin-top:8px">
-        {!! csrf_field() !!}
-        <div class="input-group">
-          <input class="form-control" name="reference" required maxlength="80" placeholder="Bank slip / transaction reference">
-          <span class="input-group-btn"><button class="btn btn-default">Submit for confirmation</button></span>
-        </div>
-        <small class="text-muted">Newline verifies the transfer and activates your access.</small>
-      </form>
+      <b>What happens when you pay</b>
+      <ul style="margin:8px 0 0;padding-left:18px;font-size:13px;line-height:1.7">
+        <li>Pesapal confirms the payment instantly — Mobile Money, Visa or Mastercard</li>
+        <li>Your licence is activated automatically, within seconds</li>
+        <li>Your receipt appears here on this page</li>
+        <li>Nothing needs to be sent to Newline</li>
+      </ul>
+      <small class="text-muted" style="display:block;margin-top:8px">The payment link is the only way to settle this invoice.</small>
     </div>
   </div>
   @if($others->count())

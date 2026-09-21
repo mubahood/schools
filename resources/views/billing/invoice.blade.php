@@ -3,7 +3,6 @@
 @php
   $brand = $co['brand']; $ink = $co['ink']; $muted = $co['muted'];
   $stamp = $inv->isPaid() ? ['PAID', '#1B8A3A'] : ($inv->isOverdue() ? ['OVERDUE', '#C62828'] : ($inv->isDraft() ? ['DRAFT', '#8A8F98'] : null));
-  $bank = array_filter($co['bank'] ?? []); $momo = array_filter($co['momo'] ?? []);
 @endphp
 <!DOCTYPE html>
 <html lang="en">
@@ -108,7 +107,6 @@
       @foreach($co['address_lines'] as $l)<div class="muted">{{ $l }}</div>@endforeach
       <div class="muted" style="margin-top:4px">{{ implode(' · ', $co['phones']) }}</div>
       <div class="muted">{{ $co['email'] }} · {{ $co['website'] }}</div>
-      @if(!empty($co['tin']))<div class="muted" style="margin-top:3px">TIN: {{ $co['tin'] }}</div>@endif
     </td>
     <td style="width:2%"></td>
     <td style="width:49%" class="party">
@@ -227,28 +225,23 @@
 @if(!$inv->isPaid())
 <table style="margin-top:9px">
   <tr>
-    <td class="pay" style="width:{{ ($bank || $momo) ? '52%' : '100%' }}">
-      <div class="lbl" style="margin-bottom:5px">Pay online — Mobile Money, Visa or Mastercard</div>
-      <div style="margin:6px 0"><a class="btn" href="{{ $payUrl }}">Pay this invoice now</a></div>
-      <div class="muted" style="font-size:9px">Open the secure payment page:</div>
+    <td class="pay" style="width:57%">
+      <div class="lbl" style="margin-bottom:5px">How to pay &mdash; Mobile Money, Visa or Mastercard</div>
+      <div style="margin:7px 0"><a class="btn" href="{{ $payUrl }}">Pay this invoice now</a></div>
+      <div class="muted" style="font-size:9px">Or open the secure payment page directly:</div>
       <div class="link">{{ $payUrl }}</div>
-      <div class="muted" style="font-size:9px;margin-top:5px">Payment is confirmed instantly by Pesapal and the system unlocks automatically — no receipt needs to be sent to us.</div>
     </td>
-    @if($bank || $momo)
-    <td style="width:3%"></td>
-    <td class="pay" style="width:45%">
-      <div class="lbl" style="margin-bottom:5px">Or pay by transfer</div>
-      @if($bank)
-        @if(!empty($bank['bank_name']))<div><b>Bank:</b> {{ $bank['bank_name'] }}</div>@endif
-        @if(!empty($bank['account_name']))<div><b>Account name:</b> {{ $bank['account_name'] }}</div>@endif
-        @if(!empty($bank['account_no']))<div><b>Account no:</b> {{ $bank['account_no'] }}</div>@endif
-        @if(!empty($bank['branch']))<div><b>Branch:</b> {{ $bank['branch'] }}</div>@endif
-        @if(!empty($bank['swift']))<div><b>SWIFT:</b> {{ $bank['swift'] }}</div>@endif
-      @endif
-      @if($momo)<div style="margin-top:4px"><b>Mobile Money:</b> {{ $momo['number'] ?? '' }} {{ !empty($momo['name']) ? '('.$momo['name'].')' : '' }}</div>@endif
-      <div class="muted" style="font-size:9px;margin-top:5px">Quote <b>{{ $inv->number }}</b> as the reference, then submit the slip number on your Billing page.</div>
+    <td style="width:2%"></td>
+    <td class="pay" style="width:41%">
+      <div class="lbl" style="margin-bottom:5px">What happens when you pay</div>
+      <table>
+        <tr><td class="tick">&bull;</td><td style="font-size:9.5px">Pesapal confirms the payment instantly</td></tr>
+        <tr><td class="tick">&bull;</td><td style="font-size:9.5px">{{ $termLabel ? $termLabel . ' is activated' : 'Your licence is activated' }} automatically</td></tr>
+        <tr><td class="tick">&bull;</td><td style="font-size:9.5px">Your receipt appears on your Billing page</td></tr>
+        <tr><td class="tick">&bull;</td><td style="font-size:9.5px">Nothing needs to be sent to us</td></tr>
+      </table>
+      <div class="muted" style="font-size:8.5px;margin-top:5px">This link is the only way to settle this invoice.</div>
     </td>
-    @endif
   </tr>
 </table>
 @endif

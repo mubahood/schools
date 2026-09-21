@@ -171,7 +171,6 @@ Route::group([
     $router->post('billing/choose', 'BillingController@choose')->name('billing.choose');
     $router->get('billing/pay/{invoice}', 'BillingController@pay')->name('billing.pay');
     $router->post('billing/topup', 'BillingController@topup')->name('billing.topup');
-    $router->post('billing/bank/{invoice}', 'BillingController@bankNotice')->name('billing.bank');
     $router->get('billing/invoice/{invoice}/view', 'BillingController@invoiceView')->name('billing.invoice.view');
     $router->get('billing/invoice/{invoice}/pdf', 'BillingController@invoicePdf')->name('billing.invoice.pdf');
 
