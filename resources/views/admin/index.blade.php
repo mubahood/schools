@@ -95,58 +95,36 @@
 @if(!empty($billingAlert))
 @php
   $ba = $billingAlert; $bi = $ba['inv'];
-  $bBrand = config('newline.brand');
-  $bTone  = $ba['locked'] ? '#8E0F0F' : ($ba['overdue'] ? '#B3261E' : $bBrand);
+  $bTone = $ba['locked'] ? '#8E0F0F' : ($ba['overdue'] ? '#B3261E' : config('newline.brand'));
 @endphp
 <style>
-  .bill-alert{background:{{ $bTone }};color:#fff;border-radius:10px;padding:18px 22px;margin-bottom:16px;
-              box-shadow:0 8px 22px rgba(0,0,0,.14)}
-  .bill-alert .ba-top{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
-  .bill-alert .ba-k{font-size:11px;text-transform:uppercase;letter-spacing:1.3px;opacity:.92;font-weight:700}
-  .bill-alert .ba-amt{font-size:27px;font-weight:800;line-height:1.15;margin:2px 0}
-  .bill-alert .ba-sub{font-size:13.5px;opacity:.95}
-  .bill-alert .ba-due{background:rgba(255,255,255,.17);border-radius:8px;padding:9px 15px;text-align:center;min-width:150px}
-  .bill-alert .ba-due .d1{font-size:10.5px;text-transform:uppercase;letter-spacing:1px;opacity:.9}
-  .bill-alert .ba-due .d2{font-size:16px;font-weight:800}
-  .bill-alert .ba-due .d3{font-size:11.5px;opacity:.95}
-  .bill-alert .ba-btn{display:inline-block;text-decoration:none;border-radius:7px;padding:11px 18px;
-                      font-weight:700;font-size:13.5px;margin:10px 8px 0 0}
-  .bill-alert .ba-pay{background:#fff;color:{{ $bTone }}}
-  .bill-alert .ba-pay:hover{background:#eef4f8;color:{{ $bTone }}}
-  .bill-alert .ba-alt{border:1.5px solid rgba(255,255,255,.7);color:#fff}
-  .bill-alert .ba-alt:hover{background:rgba(255,255,255,.14);color:#fff}
-  .bill-alert .ba-lock{background:rgba(0,0,0,.2);border-radius:7px;padding:9px 14px;margin-top:12px;font-size:13px}
-  @media(max-width:700px){.bill-alert .ba-amt{font-size:22px}.bill-alert .ba-btn{display:block;text-align:center;margin-right:0}}
+  .bill-bar{background:#fff;border:1px solid #DCE3EA;border-left:3px solid {{ $bTone }};
+            padding:9px 12px;margin-bottom:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .bill-bar .t{flex:1;min-width:220px;font-size:13px;line-height:1.4}
+  .bill-bar .t b{color:{{ $bTone }}}
+  .bill-bar .d{font-size:12px;color:#6B7A8C}
+  .bill-bar a.b{display:inline-block;text-decoration:none;padding:6px 13px;font-size:12.5px;font-weight:600;border:1px solid;margin-left:5px}
+  .bill-bar a.p{background:{{ $bTone }};border-color:{{ $bTone }};color:#fff}
+  .bill-bar a.p:hover{color:#fff;filter:brightness(1.07)}
+  .bill-bar a.g{background:#fff;border-color:#CBD5DE;color:#233}
+  .bill-bar a.g:hover{background:#F4F7FA;color:#233}
+  @media(max-width:640px){.bill-bar a.b{margin:6px 5px 0 0}}
 </style>
-<div class="bill-alert">
-  <div class="ba-top">
-    <div>
-      <div class="ba-k">
-        @if($ba['locked']) System locked — licence payment required
-        @elseif($ba['overdue']) Licence payment overdue
-        @else Licence payment due @endif
-      </div>
-      <div class="ba-amt">UGX {{ number_format($bi->balance() ?: $bi->amount) }}</div>
-      <div class="ba-sub">{{ $bi->title }} · Invoice {{ $bi->number }}</div>
-    </div>
-    <div class="ba-due">
-      <div class="d1">Deadline</div>
-      <div class="d2">{{ $bi->due_at ? $bi->due_at->format('d M Y') : 'On receipt' }}</div>
-      @if($ba['days'] !== null)
-        <div class="d3">{{ $ba['days'] < 0 ? abs($ba['days']).' day(s) overdue' : ($ba['days'] === 0 ? 'Due today' : $ba['days'].' day(s) left') }}</div>
+<div class="bill-bar">
+  <div class="t">
+    <b>{{ $ba['locked'] ? 'System locked, licence unpaid' : ($ba['overdue'] ? 'Licence payment overdue' : 'Licence payment due') }}:
+       UGX {{ number_format($bi->balance() ?: $bi->amount) }}</b>
+    <div class="d">
+      {{ $bi->number }}
+      @if($bi->due_at)
+        &middot; due {{ $bi->due_at->format('d M Y') }}@if($ba['days'] !== null), {{ $ba['days'] < 0 ? abs($ba['days']).' days overdue' : ($ba['days'] === 0 ? 'today' : $ba['days'].' days left') }}@endif
       @endif
+      @if($ba['locked']) &middot; data is safe, access returns as soon as payment clears @endif
     </div>
   </div>
-  @if($ba['locked'])
-    <div class="ba-lock">
-      Your data is safe and still readable, but changes are disabled until this invoice is paid.
-      Payment is confirmed within seconds and access is restored automatically.
-    </div>
-  @endif
-  <div>
-    <a class="ba-btn ba-pay" href="{{ $ba['pay_url'] }}">Pay now — Mobile Money, Visa or Mastercard</a>
-    <a class="ba-btn ba-alt" href="{{ $ba['pdf_url'] }}">Download invoice (PDF)</a>
-    <a class="ba-btn ba-alt" href="{{ $bi->publicUrl() }}" target="_blank">Send to the person who pays</a>
+  <div style="white-space:nowrap">
+    <a class="b g" href="{{ $ba['pdf_url'] }}" target="_blank" rel="noopener">PDF</a>
+    <a class="b p" href="{{ $ba['pay_url'] }}">Pay now</a>
   </div>
 </div>
 @endif

@@ -46,9 +46,9 @@ class PublicInvoiceController extends Controller
             ->header('X-Frame-Options', 'SAMEORIGIN');
     }
 
-    public function pdf(string $token)
+    public function pdf(string $token, ?Request $r = null)
     {
-        return InvoiceDocument::pdf($this->find($token));
+        return InvoiceDocument::pdf($this->find($token), !($r ?: request())->boolean('download'));
     }
 
     public function pay(string $token)

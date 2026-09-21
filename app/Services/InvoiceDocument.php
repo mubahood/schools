@@ -28,7 +28,7 @@ class InvoiceDocument
             'owner' => $owner,
             'termLabel' => $term ? BillingService::termLabel($term) : null,
             'termWindow' => $term && $term->starts && $term->ends
-                ? \Carbon\Carbon::parse($term->starts)->format('d M Y') . ' – ' . \Carbon\Carbon::parse($term->ends)->format('d M Y')
+                ? \Carbon\Carbon::parse($term->starts)->format('d M Y') . ' to ' . \Carbon\Carbon::parse($term->ends)->format('d M Y')
                 : null,
             'co' => config('newline'),
             'logo' => self::embed(config('newline.logo')),
@@ -57,8 +57,8 @@ class InvoiceDocument
         return View::make('billing.invoice', self::data($inv))->render();
     }
 
-    /** Streams as a download; the filename is the invoice number. */
-    public static function pdf(Invoice $inv, bool $inline = false)
+    /** Opens in the browser's viewer by default; ?download=1 saves it. */
+    public static function pdf(Invoice $inv, bool $inline = true)
     {
         $pdf = \App::make('dompdf.wrapper');
         $pdf->getDomPDF()->getOptions()->set('isHtml5ParserEnabled', true);

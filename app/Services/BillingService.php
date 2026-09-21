@@ -8,6 +8,7 @@ use App\Models\Billing\Plan;
 use App\Models\Billing\Subscription;
 use App\Models\Enterprise;
 use App\Models\User;
+use Encore\Admin\Auth\Database\Administrator;
 use App\Models\WalletRecord;
 use App\Services\Gateways\PesapalGateway;
 use Carbon\Carbon;
@@ -141,7 +142,7 @@ class BillingService
     // ------------------------------------------------------------ pay (Pesapal)
 
     /** Create the gateway order and return the URL to send the payer to. */
-    public static function initiatePesapal(Invoice $inv, User $payer): string
+    public static function initiatePesapal(Invoice $inv, Administrator $payer): string
     {
         if ($inv->status !== Invoice::ISSUED) {
             throw new \RuntimeException('Invoice ' . $inv->number . ' is ' . $inv->status . ' and cannot be paid.');

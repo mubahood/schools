@@ -293,7 +293,7 @@ class SubscriptionsAdminController extends Controller
 
     public function invoicePdf($invoiceId)
     {
-        return InvoiceDocument::pdf(Invoice::findOrFail($invoiceId));
+        return InvoiceDocument::pdf(Invoice::findOrFail($invoiceId), !request()->boolean('download'));
     }
 
     public function publish($invoiceId)

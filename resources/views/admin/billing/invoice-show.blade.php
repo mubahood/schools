@@ -5,12 +5,11 @@
   $statusClass = ['draft'=>'default','issued'=>'warning','paid'=>'success','void'=>'default'][$inv->status] ?? 'default';
 @endphp
 <style>
-  .iv-head{background:#fff;border:1px solid #e0e6ec;border-radius:10px;padding:16px 20px;margin-bottom:14px}
+  .iv-head{background:#fff;border:1px solid #DCE3EA;padding:12px 14px;margin-bottom:12px}
   .iv-head .amt{font-size:26px;font-weight:800;color:{{ $brand }}}
   .iv-act form{display:inline}
   .iv-act .btn{margin:0 4px 6px 0}
-  .iv-paper{background:#fff;border:1px solid #e0e6ec;border-radius:10px;padding:6px}
-  .iv-paper iframe{width:100%;border:0;min-height:1150px;display:block}
+  .iv-paper{background:#fff;border:1px solid #DCE3EA;padding:20px}
   .iv-link input{font-size:12px;padding:6px;border:1px solid #cfd8e0;border-radius:5px;width:100%;color:#405060}
 </style>
 
@@ -33,7 +32,7 @@
       <div class="text-muted" style="font-size:12px">Created {{ $inv->created_at->format('d M Y') }}</div>
     </div>
     <div class="col-md-4 iv-act text-right">
-      <a class="btn btn-default btn-sm" href="{{ $base }}/invoices/{{ $inv->id }}/pdf"><i class="fa fa-download"></i> PDF</a>
+      <a class="btn btn-default btn-sm" href="{{ $base }}/invoices/{{ $inv->id }}/pdf" target="_blank" rel="noopener"><i class="fa fa-file-pdf-o"></i> PDF</a>
       @if($inv->isDraft())
         <form method="POST" action="{{ $base }}/invoices/{{ $inv->id }}/issue" onsubmit="return confirm('Issue {{ $inv->number }} to {{ addslashes($e->name) }}? They will see it on their dashboard immediately.')">
           {!! csrf_field() !!}<button class="btn btn-sm" style="background:{{ $brand }};color:#fff"><i class="fa fa-paper-plane"></i> Issue to school</button>
@@ -92,14 +91,6 @@
 @endif
 
 <div class="iv-paper">
-  <iframe id="doc" src="{{ $base }}/invoices/{{ $inv->id }}/view" title="Invoice {{ $inv->number }}"></iframe>
+  @include('billing._invoice-css', ['co' => config('newline'), 'pdf' => false])
+  @include('billing._invoice', \App\Services\InvoiceDocument::data($inv) + ['pdf' => false])
 </div>
-
-<script>
-  (function () {
-    var f = document.getElementById('doc');
-    f.addEventListener('load', function () {
-      try { f.style.height = (f.contentDocument.body.scrollHeight + 40) + 'px'; } catch (e) {}
-    });
-  })();
-</script>

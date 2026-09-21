@@ -93,7 +93,7 @@ class BillingController extends Controller
         $ent = $this->ent();
         $inv = Invoice::where('enterprise_id', $ent->id)->findOrFail($invoiceId);
         try {
-            $url = BillingService::initiatePesapal($inv, Admin::user());
+            $url = BillingService::initiatePesapal($inv, \App\Models\User::find(Admin::user()->id) ?: Admin::user());
         } catch (\Throwable $e) {
             admin_error('Could not start payment', $e->getMessage());
             return redirect(admin_url('billing'));
@@ -110,11 +110,11 @@ class BillingController extends Controller
         return response(InvoiceDocument::html($inv))->header('Content-Type', 'text/html; charset=UTF-8');
     }
 
-    public function invoicePdf($invoiceId)
+    public function invoicePdf($invoiceId, Request $r = null)
     {
         $inv = Invoice::where('enterprise_id', $this->ent()->id)->where('status', '<>', Invoice::DRAFT)->findOrFail($invoiceId);
 
-        return InvoiceDocument::pdf($inv);
+        return InvoiceDocument::pdf($inv, !request()->boolean('download'));
     }
 
     public function topup(Request $r)
