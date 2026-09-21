@@ -67,7 +67,7 @@
     </div>
     <div>
       <a class="btn btn-g" href="{{ url('invoice/'.$inv->public_token.'/pdf') }}" target="_blank" rel="noopener">PDF</a>
-      @if(!$paid)<a class="btn btn-p" href="{{ url('invoice/'.$inv->public_token.'/pay') }}">Pay now</a>@endif
+      @if(!$paid)<a class="btn btn-p" href="{{ url('invoice/'.$inv->public_token.'/pay') }}" target="_blank" rel="noopener" data-pay>Pay now</a>@endif
     </div>
   </div>
 
@@ -78,5 +78,21 @@
   </div>
 </div>
 
+
+<script>
+  // Payment now happens in a second tab. When this one is looked at again,
+  // refresh once so it cannot keep showing "payment due" after it was paid.
+  (function () {
+    var opened = false;
+    document.querySelectorAll('[data-pay]').forEach(function (a) {
+      a.addEventListener('click', function () { opened = true; });
+    });
+    window.addEventListener('focus', function () {
+      if (!opened) { return; }
+      opened = false;
+      window.location.reload();
+    });
+  })();
+</script>
 </body>
 </html>

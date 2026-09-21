@@ -146,7 +146,7 @@
 <div class="pay" style="margin-top:9px">
   <table>
     <tr>
-      <td style="width:34%"><a class="btn" href="{{ $payUrl }}">Pay this invoice</a></td>
+      <td style="width:34%"><a class="btn" href="{{ $payUrl }}" target="_blank" rel="noopener">Pay this invoice</a></td>
       <td style="width:66%">
         <span class="lbl">Mobile Money, Visa or Mastercard</span>
         <div class="url">{{ $payUrl }}</div>

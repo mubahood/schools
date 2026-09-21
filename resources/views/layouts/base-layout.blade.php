@@ -258,7 +258,7 @@ use App\Models\Utils;
                             </li>
 
                             <li class="nav-item">
-                                <a href="https://forms.gle/NP8RXx7YcpPbfi6b8" class="nav-link">Get Started</a>
+                                <a href="https://forms.gle/NP8RXx7YcpPbfi6b8" class="nav-link" target="_blank" rel="noopener">Get Started</a>
                             </li>
                         </ul>
                     </div>

@@ -82,7 +82,7 @@
             <td class="{{ $i->isOverdue() ? 'text-red' : '' }}"><small>{{ $i->due_at ? $i->due_at->format('d M y') : '—' }}</small></td>
             <td class="text-right">{{ number_format($i->amount) }}</td>
             <td><span class="label label-{{ ['draft'=>'default','issued'=>'warning','paid'=>'success','void'=>'default'][$i->status] ?? 'default' }}">{{ $i->status }}</span></td>
-            <td class="text-right"><a class="btn btn-xs btn-default" href="{{ $base }}/invoices/{{ $i->id }}/pdf">PDF</a></td>
+            <td class="text-right"><a class="btn btn-xs btn-default" href="{{ $base }}/invoices/{{ $i->id }}/pdf" target="_blank" rel="noopener">PDF</a></td>
           </tr>
         @endforeach
         </tbody>

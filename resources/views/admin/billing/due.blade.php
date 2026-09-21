@@ -49,7 +49,7 @@
   <div style="white-space:nowrap">
     <a class="dbtn dbtn-g" href="{{ admin_url('billing/invoice/'.$inv->id.'/pdf') }}" target="_blank" rel="noopener">PDF</a>
     @if($pesapalReady)
-      <a class="dbtn dbtn-p" href="{{ admin_url('billing/pay/'.$inv->id) }}">Pay now</a>
+      <a class="dbtn dbtn-p" href="{{ admin_url('billing/pay/'.$inv->id) }}" target="_blank" rel="noopener" data-pay>Pay now</a>
     @endif
   </div>
 </div>
@@ -72,7 +72,7 @@
       <tr>
         <td>{{ $o->number }} <small class="text-muted">{{ $o->title ?: $o->description }}</small></td>
         <td class="text-right">UGX {{ number_format($o->amount) }}</td>
-        <td class="text-right" style="width:70px"><a class="btn btn-xs btn-default" href="{{ admin_url('billing/pay/'.$o->id) }}">Pay</a></td>
+        <td class="text-right" style="width:70px"><a class="btn btn-xs btn-default" href="{{ admin_url('billing/pay/'.$o->id) }}" target="_blank" rel="noopener" data-pay>Pay</a></td>
       </tr>
     @endforeach
   </table>
@@ -104,3 +104,19 @@
   </table>
 </div>
 @endif
+
+<script>
+  // Payment now happens in a second tab. When this one is looked at again,
+  // refresh once so it cannot keep showing "payment due" after it was paid.
+  (function () {
+    var opened = false;
+    document.querySelectorAll('[data-pay]').forEach(function (a) {
+      a.addEventListener('click', function () { opened = true; });
+    });
+    window.addEventListener('focus', function () {
+      if (!opened) { return; }
+      opened = false;
+      window.location.reload();
+    });
+  })();
+</script>

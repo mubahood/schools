@@ -57,7 +57,7 @@
         <td class="text-right"><b>UGX {{ number_format($inv->amount) }}</b></td>
         <td class="text-right" style="white-space:nowrap">
           @if($pesapalReady)
-            <a class="btn btn-success btn-sm" href="{{ admin_url('billing/pay/'.$inv->id) }}"><i class="fa fa-mobile"></i> Pay with Mobile Money / Card</a>
+            <a class="btn btn-success btn-sm" href="{{ admin_url('billing/pay/'.$inv->id) }}" target="_blank" rel="noopener" data-pay><i class="fa fa-mobile"></i> Pay with Mobile Money / Card</a>
           @endif
         </td>
       </tr>
