@@ -111,38 +111,10 @@ class HomeController extends Controller
             'ent'  => $ent,
             'role' => $role,
             'dash' => $dash,
-            'billingAlert' => $this->billingAlert($ent, $role),
+            'billingAlert' => \App\Services\BillingAlert::forUser($u),
         ]);
     }
 
-    /**
-     * An unpaid licence invoice, for the people who can actually do something
-     * about it. Never shown to teachers, parents or students.
-     */
-    private function billingAlert($ent, string $role): ?array
-    {
-        if (!$ent || !in_array($role, ['admin', 'bursar', 'hm'], true)) {
-            return null;
-        }
-        try {
-            $inv = \App\Services\BillingService::dueInvoice($ent);
-            if (!$inv) {
-                return null;
-            }
-            $days = $inv->daysToDue();
-
-            return [
-                'inv' => $inv,
-                'days' => $days,
-                'overdue' => $inv->isOverdue(),
-                'locked' => in_array($ent->access_status, ['suspended', 'cancelled'], true) && !$ent->billing_exempt,
-                'pay_url' => admin_url('billing'),
-                'pdf_url' => admin_url('billing/invoice/' . $inv->id . '/pdf'),
-            ];
-        } catch (\Throwable $e) {
-            return null;
-        }
-    }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -832,6 +804,15 @@ class HomeController extends Controller
         $eid = $u->enterprise_id;
 
         $content->header($u->ent->name . ' - Dashboard');
+
+        // An outstanding licence invoice leads this page for the staff who can settle it.
+        if ($billingAlert = \App\Services\BillingAlert::forUser($u)) {
+            $content->row(function (Row $row) use ($billingAlert) {
+                $row->column(12, function (Column $column) use ($billingAlert) {
+                    $column->append(view('admin.billing._alert-bar', ['ba' => $billingAlert])->render());
+                });
+            });
+        }
 
         // Check for onboarding progress (only for enterprise owners)
         $onboardingData = OnboardingProgressService::getDashboardSummary($u);

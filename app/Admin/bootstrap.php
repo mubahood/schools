@@ -186,7 +186,12 @@ Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
         $u = Admin::user();
         if ($u->isRole('dos', 'admin', 'bursar', 'super-admin', 'hm')) {
             $navbar->left('<li><a href="' . admin_url('billing') . '" title="Top up SMS credit">WALLET: UGX ' . number_format($u->ent->wallet_balance) . '</a></li>');
-            if (!$u->ent->billing_exempt && $u->enterprise_id != 1) {
+
+            // An outstanding invoice rides in the header on every screen, with the
+            // days remaining, so it cannot be scrolled past or forgotten.
+            if ($alert = \App\Services\BillingAlert::forUser($u)) {
+                $navbar->left(view('admin.billing._alert-chip', ['ba' => $alert])->render());
+            } elseif (!$u->ent->billing_exempt && $u->enterprise_id != 1) {
                 $pill = \App\Services\BillingService::statusLabel($u->ent);
                 $navbar->left('<li><a href="' . admin_url('billing') . '"><span class="label label-' . $pill['class'] . '" style="font-size:12px;padding:5px 9px">' . $pill['text'] . '</span></a></li>');
             }

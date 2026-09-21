@@ -93,40 +93,7 @@
 <div class="db-body">
 
 @if(!empty($billingAlert))
-@php
-  $ba = $billingAlert; $bi = $ba['inv'];
-  $bTone = $ba['locked'] ? '#8E0F0F' : ($ba['overdue'] ? '#B3261E' : config('newline.brand'));
-@endphp
-<style>
-  .bill-bar{background:#fff;border:1px solid #DCE3EA;border-left:3px solid {{ $bTone }};
-            padding:9px 12px;margin-bottom:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-  .bill-bar .t{flex:1;min-width:220px;font-size:13px;line-height:1.4}
-  .bill-bar .t b{color:{{ $bTone }}}
-  .bill-bar .d{font-size:12px;color:#6B7A8C}
-  .bill-bar a.b{display:inline-block;text-decoration:none;padding:6px 13px;font-size:12.5px;font-weight:600;border:1px solid;margin-left:5px}
-  .bill-bar a.p{background:{{ $bTone }};border-color:{{ $bTone }};color:#fff}
-  .bill-bar a.p:hover{color:#fff;filter:brightness(1.07)}
-  .bill-bar a.g{background:#fff;border-color:#CBD5DE;color:#233}
-  .bill-bar a.g:hover{background:#F4F7FA;color:#233}
-  @media(max-width:640px){.bill-bar a.b{margin:6px 5px 0 0}}
-</style>
-<div class="bill-bar">
-  <div class="t">
-    <b>{{ $ba['locked'] ? 'System locked, licence unpaid' : ($ba['overdue'] ? 'Licence payment overdue' : 'Licence payment due') }}:
-       UGX {{ number_format($bi->balance() ?: $bi->amount) }}</b>
-    <div class="d">
-      {{ $bi->number }}
-      @if($bi->due_at)
-        &middot; due {{ $bi->due_at->format('d M Y') }}@if($ba['days'] !== null), {{ $ba['days'] < 0 ? abs($ba['days']).' days overdue' : ($ba['days'] === 0 ? 'today' : $ba['days'].' days left') }}@endif
-      @endif
-      @if($ba['locked']) &middot; data is safe, access returns as soon as payment clears @endif
-    </div>
-  </div>
-  <div style="white-space:nowrap">
-    <a class="b g" href="{{ $ba['pdf_url'] }}" target="_blank" rel="noopener">PDF</a>
-    <a class="b p" href="{{ $ba['pay_url'] }}">Pay now</a>
-  </div>
-</div>
+@include('admin.billing._alert-bar', ['ba' => $billingAlert])
 @endif
 
 
