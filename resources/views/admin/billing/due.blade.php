@@ -21,7 +21,11 @@
   .dbtn-g:hover{background:#F4F7FA;color:#233}
   .dgrid{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
   .dgrid>div{flex:1;min-width:150px}
-  .dlink input{width:100%;font-size:12px;padding:6px 8px;border:1px solid #CBD5DE;color:#4A5B6B}
+  .dlink input{flex:1;min-width:0;font-size:12px;padding:6px 8px;border:1px solid #CBD5DE;color:#4A5B6B}
+  .dlink .row{display:flex;gap:6px;margin-top:4px}
+  .dlink .row a,.dlink .row button{border:1px solid #CBD5DE;background:#fff;color:#233;font-size:12px;
+        font-weight:600;padding:6px 11px;text-decoration:none;white-space:nowrap;cursor:pointer}
+  .dlink .row a:hover,.dlink .row button:hover{background:#F4F7FA;color:#233}
   .dpaper{background:#fff;border:1px solid #DCE3EA;padding:20px}
   @media(max-width:700px){.dbtn{display:block;margin:6px 0 0}}
 </style>
@@ -60,7 +64,11 @@
   <div class="dz"><div class="k">Status</div><div class="v"><span class="label label-{{ $label['class'] }}">{{ $label['text'] }}</span></div></div>
   <div class="dz dlink" style="flex:2;min-width:280px">
     <div class="k">Share with whoever pays (no login needed)</div>
-    <input readonly onclick="this.select()" value="{{ $inv->publicUrl() }}" style="margin-top:4px">
+    <div class="row">
+      <input id="shareUrl" readonly onclick="this.select()" value="{{ $inv->publicUrl() }}">
+      <button type="button" id="copyBtn">Copy</button>
+      <a href="{{ $inv->publicUrl() }}" target="_blank" rel="noopener">Open</a>
+    </div>
   </div>
 </div>
 
@@ -105,6 +113,20 @@
 </div>
 @endif
 
+<script>
+  (function () {
+    var btn = document.getElementById('copyBtn'), box = document.getElementById('shareUrl');
+    if (!btn || !box) { return; }
+    btn.addEventListener('click', function () {
+      var done = function () { btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = 'Copy'; }, 1600); };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(box.value).then(done, function () { box.select(); document.execCommand('copy'); done(); });
+      } else {
+        box.select(); document.execCommand('copy'); done();
+      }
+    });
+  })();
+</script>
 <script>
   // Payment now happens in a second tab. When this one is looked at again,
   // refresh once so it cannot keep showing "payment due" after it was paid.

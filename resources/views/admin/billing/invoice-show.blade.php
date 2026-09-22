@@ -64,7 +64,10 @@
   @if(!$inv->isDraft())
   <div class="iv-link" style="margin-top:12px">
     <div class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:.7px">Shareable payment link (no login needed)</div>
-    <input readonly onclick="this.select()" value="{{ $inv->publicUrl() }}">
+    <div style="display:flex;gap:6px;margin-top:4px">
+      <input readonly onclick="this.select()" value="{{ $inv->publicUrl() }}" style="flex:1;min-width:0">
+      <a class="btn btn-default btn-sm" href="{{ $inv->publicUrl() }}" target="_blank" rel="noopener">Open</a>
+    </div>
   </div>
   @endif
 </div>
