@@ -161,8 +161,8 @@
     <td style="width:58%"></td>
     <td style="width:42%">
       @if(!empty($co['invoice']['signature_image']) && ($sig = \App\Services\InvoiceDocument::embed($co['invoice']['signature_image'])))
-        <div style="height:30px"><img src="{{ $sig }}" style="height:30px"></div>
-      @else<div style="height:14px"></div>@endif
+        <div style="height:46px"><img src="{{ $sig }}" style="height:46px"></div>
+      @else<div style="height:22px"></div>@endif
       <div class="sig">
         <b>{{ $co['invoice']['signatory_name'] }}</b><br>
         <span class="m">{{ $co['invoice']['signatory_title'] }}, {{ $co['legal_name'] }}</span>

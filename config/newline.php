@@ -38,7 +38,8 @@ return [
         'default_due_days' => 14,
         'signatory_name' => env('NEWLINE_SIGNATORY_NAME', 'Muhindo Mubaraka'),
         'signatory_title' => env('NEWLINE_SIGNATORY_TITLE', 'Chief Operations Officer'),
-        'signature_image' => env('NEWLINE_SIGNATURE_IMAGE', ''),
+        // Signed automatically on every invoice. Override per-environment if needed.
+        'signature_image' => env('NEWLINE_SIGNATURE_IMAGE', 'assets/images/newline-signature.png'),
         'footer_note' => 'Thank you for partnering with Newline Technologies Limited.',
     ],
 ];
