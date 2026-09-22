@@ -57,7 +57,21 @@ class PesapalGateway
     public function ipnId(): string
     {
         if (!empty($this->cfg['ipn_id'])) {
-            return $this->cfg['ipn_id'];
+            // Confirm the pin actually belongs to the account we are authenticating
+            // as. Cached per merchant, so this costs one call after a key change.
+            $pin = $this->cfg['ipn_id'];
+            $ok = Cache::rememberForever('pesapal.pin.' . substr(md5((string) $this->cfg['consumer_key']), 0, 10) . '.' . $pin, function () use ($pin) {
+                foreach ((array) $this->get('api/URLSetup/GetIpnList') as $row) {
+                    if (($row['ipn_id'] ?? '') === $pin) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+            if ($ok) {
+                return $pin;
+            }
+            Log::warning('Pesapal: PESAPAL_IPN_ID does not belong to the current merchant account; registering instead', ['pinned' => $pin]);
         }
         // Keyed by the merchant too: an IPN id belongs to the account that
         // registered it, so rotating credentials must not reuse the old one.
