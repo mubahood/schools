@@ -145,6 +145,7 @@ table.fin tbody tr:last-child td{border-bottom:none}
       </thead>
       <tbody id="fc-body"></tbody>
     </table>
+    <div class="fpg" id="fc-pager" style="display:none"><div class="pg-info" id="fc-pginfo"></div><div class="pg-nav"><span style="color:#6b7a8c;margin-right:6px">Rows</span><select id="fc-perpage"><option>25</option><option selected>50</option><option>100</option><option>200</option></select><button type="button" id="fc-first">&laquo;</button><button type="button" id="fc-prev">Prev</button><span id="fc-pgnum" style="padding:0 8px;color:#42556b"></span><button type="button" id="fc-next">Next</button><button type="button" id="fc-last">&raquo;</button></div></div>
     <div id="fc-zero" class="fc-zero" style="display:none">
       <i class="fa fa-credit-card"></i>No creditor records found.<br>
       <a href="#" onclick="FC.openCred();return false">+ Add the first creditor</a>
@@ -329,6 +330,39 @@ function ssOpenKey(key, allowClear){
 
 /* ═══════ WINDOW.FC ═══════════════════════ */
 window.FC = {
+  // ── paging: the server sends one page and the totals for the whole set ──
+  _page: 1,
+  _meta: null,
+  perPage: function(){ var e=document.getElementById('fc-perpage'); return e ? parseInt(e.value,10) : 50; },
+  renderPager: function(meta){
+    FC._meta = meta;
+    var box = document.getElementById('fc-pager'); if(!box) return;
+    box.style.display = meta.total > 0 ? 'flex' : 'none';
+    var from = meta.total ? ((meta.page-1)*meta.per_page + 1) : 0;
+    var to   = Math.min(meta.page*meta.per_page, meta.total);
+    document.getElementById('fc-pginfo').textContent =
+      'Showing ' + from.toLocaleString() + '\u2013' + to.toLocaleString() + ' of ' + meta.total.toLocaleString();
+    document.getElementById('fc-pgnum').textContent = meta.page + ' / ' + meta.last_page;
+    ['first','prev'].forEach(function(k){ document.getElementById('fc-'+k).disabled = meta.page <= 1; });
+    ['next','last'].forEach(function(k){ document.getElementById('fc-'+k).disabled = meta.page >= meta.last_page; });
+  },
+  goPage: function(n){
+    var m = FC._meta; if(!m) return;
+    n = Math.max(1, Math.min(n, m.last_page));
+    if(n === m.page) return;
+    FC._page = n; FC.load();
+  },
+  bindPager: function(){
+    var self = this, p = 'fc';
+    var on = function(id, fn){ var el = document.getElementById(id); if(el) el.addEventListener('click', fn); };
+    on(p+'-first', function(){ self.goPage(1); });
+    on(p+'-prev',  function(){ self.goPage((self._meta?self._meta.page:1) - 1); });
+    on(p+'-next',  function(){ self.goPage((self._meta?self._meta.page:1) + 1); });
+    on(p+'-last',  function(){ self.goPage(self._meta?self._meta.last_page:1); });
+    var pp = document.getElementById(p+'-perpage');
+    if(pp) pp.addEventListener('change', function(){ self._page = 1; self.load(); });
+  },
+
   load: function(){
     cspin(true);
     var p=new URLSearchParams();
@@ -337,10 +371,13 @@ window.FC = {
     if(s) p.set('supplier_id',s);
     if(q) p.set('q',q);
     expandedRows={};
-    fetch(CRED_API+'?'+p, hdr()).then(r=>r.json()).then(function(data){
+    p.set('page', FC._page); p.set('per_page', FC.perPage());
+    fetch(CRED_API+'?'+p, hdr()).then(r=>r.json()).then(function(resp){
+      var data = resp.data || [], meta = resp.meta || {page:1,last_page:1,total:data.length,per_page:data.length,sum:0};
+      FC.renderPager(meta);
       cspin(false);
       credRows=data;
-      if(!data.length){ czero(true); return; }
+      if(!meta.total){ czero(true); return; }
       czero(false);
       document.getElementById('fc-body').innerHTML = data.map(function(r){
         var pct = r.original_amount > 0 ? Math.round((r.paid_amount/r.original_amount)*100) : 0;
@@ -661,3 +698,4 @@ ssRenderAll('fsup', SUPPLIERS, true);
 ssRenderAll('sup', SUPPLIERS, false);
 })();
 </script>
+<script>FC.bindPager();</script>

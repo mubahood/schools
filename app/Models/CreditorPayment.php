@@ -5,9 +5,12 @@ namespace App\Models;
 use Encore\Admin\Auth\Database\Administrator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CreditorPayment extends Model
 {
+    use SoftDeletes;
+
     use HasFactory;
 
 

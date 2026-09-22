@@ -14,6 +14,8 @@ use Encore\Admin\Layout\Content;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use App\Services\Finance\FinanceException;
+use App\Services\Finance\FinanceService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -61,6 +63,67 @@ class FinanceController extends Controller
         ])->orderBy('name')->get(['id', 'name'])
           ->map(fn($s) => ['id' => $s->id, 'name' => $s->name])
           ->toJson();
+    }
+
+    /**
+     * Rules shared by budgets and expenditures. Every foreign key is checked
+     * against THIS school, so a crafted request cannot file our money under
+     * another school's account or term.
+     */
+    private function rules(bool $expenditure): array
+    {
+        $eid = $this->eid();
+        $mine = fn ($table) => function ($attr, $value, $fail) use ($table, $eid) {
+            if ($value && !DB::table($table)->where('id', $value)->where('enterprise_id', $eid)->exists()) {
+                $fail('That ' . Str::singular(str_replace('_', ' ', $table)) . ' does not belong to your school.');
+            }
+        };
+
+        $rules = [
+            'term_id'      => ['required', 'integer', $mine('terms')],
+            'payment_date' => 'required|date|before_or_equal:' . now()->addDay()->toDateString(),
+            'account_id'   => ['required', 'integer', $mine('accounts')],
+            'quantity'     => 'required|integer|min:1|max:1000000',
+            'unit_price'   => 'required|integer|min:0|max:100000000000',
+            'description'  => 'required|string|min:4|max:500',
+        ];
+        if ($expenditure) {
+            $rules += [
+                'supplier_id'    => ['nullable', 'integer', $mine('admin_users')],
+                'payment_method' => 'nullable|string|max:50',
+                'is_credit'      => 'nullable|in:Yes,No',
+                'credit_amount'  => 'nullable|integer|min:0',
+            ];
+        }
+
+        return $rules;
+    }
+
+    /** One page of a filtered query, with the totals computed in the database. */
+    private function page($query, Request $request, callable $fmt): array
+    {
+        $perPage = min(500, max(10, (int) $request->get('per_page', 50)));
+        $page    = max(1, (int) $request->get('page', 1));
+
+        $totals = (clone $query)->selectRaw('COUNT(*) n, COALESCE(SUM(ABS(amount)),0) total')->first();
+        $rows   = $query->orderByDesc('payment_date')->orderByDesc('id')
+            ->forPage($page, $perPage)->get()->map($fmt);
+
+        return [
+            'data'  => $rows,
+            'meta'  => [
+                'page'      => $page,
+                'per_page'  => $perPage,
+                'total'     => (int) $totals->n,
+                'last_page' => max(1, (int) ceil($totals->n / $perPage)),
+                'sum'       => (float) $totals->total,
+            ],
+        ];
+    }
+
+    private function fail(FinanceException $e): JsonResponse
+    {
+        return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
     }
 
     private function fmtExp(FinancialRecord $r): array
@@ -204,7 +267,7 @@ class FinanceController extends Controller
 
     public function apiExpList(Request $request): JsonResponse
     {
-        $q = FinancialRecord::where(['enterprise_id' => $this->eid(), 'type' => 'EXPENDITURE'])
+        $q = FinancialRecord::where(['enterprise_id' => $this->eid(), 'type' => FinanceService::TYPE_EXPENDITURE])
             ->with(['account', 'par', 'term', 'supplier', 'creditor_record']);
 
         if ($request->term_id)        $q->where('term_id', $request->term_id);
@@ -212,89 +275,91 @@ class FinanceController extends Controller
         if ($request->account_id)     $q->where('account_id', $request->account_id);
         if ($request->supplier_id)    $q->where('supplier_id', $request->supplier_id);
         if ($request->payment_method) $q->where('payment_method', $request->payment_method);
-        if ($request->q)              $q->where('description', 'like', '%'.$request->q.'%');
+        if ($request->date_from)      $q->whereDate('payment_date', '>=', $request->date_from);
+        if ($request->date_to)        $q->whereDate('payment_date', '<=', $request->date_to);
+        if ($request->q)              $q->where('description', 'like', '%' . $request->q . '%');
 
-        $rows = $q->orderBy('id', 'desc')->get()->map(fn($r) => $this->fmtExp($r));
-        return response()->json($rows);
+        return response()->json($this->page($q, $request, fn ($r) => $this->fmtExp($r)));
     }
 
     public function apiExpShow($id): JsonResponse
     {
-        $r = FinancialRecord::where(['enterprise_id' => $this->eid(), 'type' => 'EXPENDITURE'])
+        $r = FinancialRecord::where(['enterprise_id' => $this->eid(), 'type' => FinanceService::TYPE_EXPENDITURE])
             ->with(['account', 'par', 'term', 'supplier', 'creditor_record'])->findOrFail($id);
         return response()->json($this->fmtExp($r));
     }
 
     public function apiExpStore(Request $request): JsonResponse
     {
-        $u    = Admin::user();
-        $data = $request->validate([
-            'term_id'        => 'required|integer',
-            'payment_date'   => 'required|date',
-            'account_id'     => 'required|integer',
-            'supplier_id'    => 'nullable|integer',
-            'payment_method' => 'nullable|string|max:50',
-            'quantity'       => 'required|numeric|min:0.001',
-            'unit_price'     => 'required|numeric|min:0',
-            'description'    => 'required|string|min:4|max:500',
-            'is_credit'      => 'nullable|in:Yes,No',
-            'credit_amount'  => 'nullable|numeric|min:0',
-        ]);
-
-        $data['enterprise_id'] = $u->enterprise_id;
-        $data['created_by_id'] = $u->id;
-        $data['type']          = 'EXPENDITURE';
+        $data = $request->validate($this->rules(true));
+        $data['enterprise_id'] = $this->eid();
+        $data['created_by_id'] = Admin::user()->id;
         $data['is_credit']     = $data['is_credit'] ?? 'No';
         if (empty($data['supplier_id'])) $data['supplier_id'] = null;
 
-        $r = FinancialRecord::create($data);
+        try {
+            $r = FinanceService::create($data, FinanceService::TYPE_EXPENDITURE);
+        } catch (FinanceException $e) {
+            return $this->fail($e);
+        }
         $r->load(['account', 'par', 'term', 'supplier', 'creditor_record']);
+
         return response()->json(['success' => true, 'record' => $this->fmtExp($r)]);
     }
 
     public function apiExpUpdate(Request $request, $id): JsonResponse
     {
-        $r = FinancialRecord::where(['enterprise_id' => $this->eid(), 'type' => 'EXPENDITURE'])
+        $r = FinancialRecord::where(['enterprise_id' => $this->eid(), 'type' => FinanceService::TYPE_EXPENDITURE])
             ->findOrFail($id);
-
-        $data = $request->validate([
-            'term_id'        => 'required|integer',
-            'payment_date'   => 'required|date',
-            'account_id'     => 'required|integer',
-            'supplier_id'    => 'nullable|integer',
-            'payment_method' => 'nullable|string|max:50',
-            'quantity'       => 'required|numeric|min:0.001',
-            'unit_price'     => 'required|numeric|min:0',
-            'description'    => 'required|string|min:4|max:500',
-            'is_credit'      => 'nullable|in:Yes,No',
-            'credit_amount'  => 'nullable|numeric|min:0',
-        ]);
-
+        $data = $request->validate($this->rules(true));
         $data['is_credit'] = $data['is_credit'] ?? 'No';
         if (empty($data['supplier_id'])) $data['supplier_id'] = null;
 
-        $r->update($data);
+        try {
+            $r = FinanceService::update($r, $data);
+        } catch (FinanceException $e) {
+            return $this->fail($e);
+        }
         $r = $r->fresh(['account', 'par', 'term', 'supplier', 'creditor_record']);
+
         return response()->json(['success' => true, 'record' => $this->fmtExp($r)]);
     }
 
     public function apiExpDestroy($id): JsonResponse
     {
-        FinancialRecord::where(['enterprise_id' => $this->eid(), 'type' => 'EXPENDITURE'])
-            ->findOrFail($id)->delete();
+        $r = FinancialRecord::where(['enterprise_id' => $this->eid(), 'type' => FinanceService::TYPE_EXPENDITURE])
+            ->findOrFail($id);
+        try {
+            FinanceService::delete($r);
+        } catch (FinanceException $e) {
+            return $this->fail($e);
+        }
+
         return response()->json(['success' => true]);
     }
 
     public function apiExpDuplicate($id): JsonResponse
     {
-        $orig = FinancialRecord::where(['enterprise_id' => $this->eid(), 'type' => 'EXPENDITURE'])
+        $orig = FinancialRecord::where(['enterprise_id' => $this->eid(), 'type' => FinanceService::TYPE_EXPENDITURE])
             ->findOrFail($id);
-        $copy = $orig->replicate();
-        $copy->is_credit     = 'No';
-        $copy->credit_amount = null;
-        $copy->created_by_id = Admin::user()->id;
-        $copy->save();
+
+        $copy = FinanceService::create([
+            'enterprise_id'  => $orig->enterprise_id,
+            'account_id'     => $orig->account_id,
+            'term_id'        => $orig->term_id,
+            'supplier_id'    => $orig->supplier_id,
+            'created_by_id'  => Admin::user()->id,
+            'description'    => $orig->description,
+            // A copy is today's spending, not a second copy of an old date.
+            'payment_date'   => now()->toDateString(),
+            'payment_method' => $orig->payment_method,
+            'quantity'       => $orig->quantity,
+            'unit_price'     => $orig->unit_price,
+            'is_credit'      => 'No',
+        ], FinanceService::TYPE_EXPENDITURE);
+
         $copy->load(['account', 'par', 'term', 'supplier', 'creditor_record']);
+
         return response()->json(['success' => true, 'record' => $this->fmtExp($copy)]);
     }
 
@@ -302,79 +367,85 @@ class FinanceController extends Controller
 
     public function apiBudList(Request $request): JsonResponse
     {
-        $q = FinancialRecord::where(['enterprise_id' => $this->eid(), 'type' => 'BUDGET'])
+        $q = FinancialRecord::where(['enterprise_id' => $this->eid(), 'type' => FinanceService::TYPE_BUDGET])
             ->with(['account', 'par', 'term']);
 
         if ($request->term_id)    $q->where('term_id', $request->term_id);
         if ($request->vote_id)    $q->where('parent_account_id', $request->vote_id);
         if ($request->account_id) $q->where('account_id', $request->account_id);
-        if ($request->q)          $q->where('description', 'like', '%'.$request->q.'%');
+        if ($request->q)          $q->where('description', 'like', '%' . $request->q . '%');
 
-        $rows = $q->orderBy('id', 'desc')->get()->map(fn($r) => $this->fmtBud($r));
-        return response()->json($rows);
+        return response()->json($this->page($q, $request, fn ($r) => $this->fmtBud($r)));
     }
 
     public function apiBudShow($id): JsonResponse
     {
-        $r = FinancialRecord::where(['enterprise_id' => $this->eid(), 'type' => 'BUDGET'])
+        $r = FinancialRecord::where(['enterprise_id' => $this->eid(), 'type' => FinanceService::TYPE_BUDGET])
             ->with(['account', 'par', 'term'])->findOrFail($id);
         return response()->json($this->fmtBud($r));
     }
 
     public function apiBudStore(Request $request): JsonResponse
     {
-        $u    = Admin::user();
-        $data = $request->validate([
-            'term_id'      => 'required|integer',
-            'payment_date' => 'required|date',
-            'account_id'   => 'required|integer',
-            'quantity'     => 'required|numeric|min:0.001',
-            'unit_price'   => 'required|numeric|min:0',
-            'description'  => 'required|string|min:4|max:500',
-        ]);
+        $data = $request->validate($this->rules(false));
+        $data['enterprise_id'] = $this->eid();
+        $data['created_by_id'] = Admin::user()->id;
 
-        $data['enterprise_id'] = $u->enterprise_id;
-        $data['created_by_id'] = $u->id;
-        $data['type']          = 'BUDGET';
-
-        $r = FinancialRecord::create($data);
+        try {
+            $r = FinanceService::create($data, FinanceService::TYPE_BUDGET);
+        } catch (FinanceException $e) {
+            return $this->fail($e);
+        }
         $r->load(['account', 'par', 'term']);
+
         return response()->json(['success' => true, 'record' => $this->fmtBud($r)]);
     }
 
     public function apiBudUpdate(Request $request, $id): JsonResponse
     {
-        $r = FinancialRecord::where(['enterprise_id' => $this->eid(), 'type' => 'BUDGET'])
+        $r = FinancialRecord::where(['enterprise_id' => $this->eid(), 'type' => FinanceService::TYPE_BUDGET])
             ->findOrFail($id);
+        try {
+            $r = FinanceService::update($r, $request->validate($this->rules(false)));
+        } catch (FinanceException $e) {
+            return $this->fail($e);
+        }
+        $r = $r->fresh(['account', 'par', 'term']);
 
-        $data = $request->validate([
-            'term_id'      => 'required|integer',
-            'payment_date' => 'required|date',
-            'account_id'   => 'required|integer',
-            'quantity'     => 'required|numeric|min:0.001',
-            'unit_price'   => 'required|numeric|min:0',
-            'description'  => 'required|string|min:4|max:500',
-        ]);
-
-        $r->update($data);
-        return response()->json(['success' => true, 'record' => $this->fmtBud($r->fresh(['account', 'par', 'term']))]);
+        return response()->json(['success' => true, 'record' => $this->fmtBud($r)]);
     }
 
     public function apiBudDestroy($id): JsonResponse
     {
-        FinancialRecord::where(['enterprise_id' => $this->eid(), 'type' => 'BUDGET'])
-            ->findOrFail($id)->delete();
+        $r = FinancialRecord::where(['enterprise_id' => $this->eid(), 'type' => FinanceService::TYPE_BUDGET])
+            ->findOrFail($id);
+        try {
+            FinanceService::delete($r);
+        } catch (FinanceException $e) {
+            return $this->fail($e);
+        }
+
         return response()->json(['success' => true]);
     }
 
     public function apiBudDuplicate($id): JsonResponse
     {
-        $orig = FinancialRecord::where(['enterprise_id' => $this->eid(), 'type' => 'BUDGET'])
+        $orig = FinancialRecord::where(['enterprise_id' => $this->eid(), 'type' => FinanceService::TYPE_BUDGET])
             ->findOrFail($id);
-        $copy = $orig->replicate();
-        $copy->created_by_id = Admin::user()->id;
-        $copy->save();
+
+        $copy = FinanceService::create([
+            'enterprise_id' => $orig->enterprise_id,
+            'account_id'    => $orig->account_id,
+            'term_id'       => $orig->term_id,
+            'created_by_id' => Admin::user()->id,
+            'description'   => $orig->description,
+            'payment_date'  => now()->toDateString(),
+            'quantity'      => $orig->quantity,
+            'unit_price'    => $orig->unit_price,
+        ], FinanceService::TYPE_BUDGET);
+
         $copy->load(['account', 'par', 'term']);
+
         return response()->json(['success' => true, 'record' => $this->fmtBud($copy)]);
     }
 
@@ -400,11 +471,23 @@ class FinanceController extends Controller
         if ($request->q)
             $q->where('description', 'like', '%'.$request->q.'%');
 
-        $rows = $q->orderByRaw("FIELD(status,'Overdue','Pending','Partial','Paid')")
-            ->orderBy('due_date')->orderBy('id', 'desc')
-            ->get()->map(fn($r) => $this->fmtCred($r));
+        $q->orderByRaw("FIELD(status,'Overdue','Pending','Partial','Paid')")
+            ->orderBy('due_date')->orderBy('id', 'desc');
 
-        return response()->json($rows);
+        $perPage = min(500, max(10, (int) $request->get('per_page', 50)));
+        $page    = max(1, (int) $request->get('page', 1));
+        $totals  = (clone $q)->selectRaw('COUNT(*) n, COALESCE(SUM(balance),0) total')->first();
+
+        return response()->json([
+            'data' => $q->forPage($page, $perPage)->get()->map(fn ($r) => $this->fmtCred($r)),
+            'meta' => [
+                'page'      => $page,
+                'per_page'  => $perPage,
+                'total'     => (int) $totals->n,
+                'last_page' => max(1, (int) ceil($totals->n / $perPage)),
+                'sum'       => (float) $totals->total,
+            ],
+        ]);
     }
 
     public function apiCredShow($id): JsonResponse
@@ -481,25 +564,24 @@ class FinanceController extends Controller
 
     public function apiPayStore(Request $request): JsonResponse
     {
-        $u    = Admin::user();
         $data = $request->validate([
             'creditor_record_id' => 'required|integer',
-            'amount_paid'        => 'required|numeric|min:1',
-            'payment_date'       => 'required|date',
+            'amount_paid'        => 'required|integer|min:1',
+            'payment_date'       => 'required|date|before_or_equal:' . now()->addDay()->toDateString(),
             'payment_method'     => 'nullable|string|max:50',
             'reference'          => 'nullable|string|max:200',
-            'notes'              => 'nullable|string',
+            'notes'              => 'nullable|string|max:1000',
         ]);
 
-        $cred = CreditorRecord::where('enterprise_id', $u->enterprise_id)
-            ->findOrFail($data['creditor_record_id']);
+        $cred = CreditorRecord::where('enterprise_id', $this->eid())->findOrFail($data['creditor_record_id']);
+        $data['created_by_id'] = Admin::user()->id;
 
-        $data['enterprise_id'] = $u->enterprise_id;
-        $data['created_by_id'] = $u->id;
-
-        $p = CreditorPayment::create($data);
-        $cred->updateStatus();
-        $cred->load(['supplier', 'term']);
+        try {
+            $p = FinanceService::payCreditor($cred, $data);
+        } catch (FinanceException $e) {
+            return $this->fail($e);
+        }
+        $cred = $cred->fresh(['supplier', 'term']);
 
         return response()->json([
             'success'  => true,
@@ -511,13 +593,12 @@ class FinanceController extends Controller
     public function apiPayDestroy($id): JsonResponse
     {
         $p    = CreditorPayment::where('enterprise_id', $this->eid())->findOrFail($id);
-        $cred = CreditorRecord::find($p->creditor_record_id);
-        $p->delete();
+        $cred = FinanceService::deleteCreditorPayment($p);
         if ($cred) {
-            $cred->updateStatus();
-            $cred->load(['supplier', 'term']);
+            $cred = $cred->fresh(['supplier', 'term']);
             return response()->json(['success' => true, 'creditor' => $this->fmtCred($cred)]);
         }
+
         return response()->json(['success' => true]);
     }
 

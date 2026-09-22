@@ -351,8 +351,8 @@ class HomeController extends Controller
         $recentTxns    = (clone $txnBase)->orderBy('id','desc')->take(8)->get(['id','source','amount','type','created_at']);
 
         // Financial records (budget/expenditure)
-        $totalBudget   = DB::table('financial_records')->where(['enterprise_id'=>$eid,'type'=>'BUDGET'])->sum('amount');
-        $totalExpend   = abs(DB::table('financial_records')->where(['enterprise_id'=>$eid,'type'=>'EXPENDITURE'])->sum('amount'));
+        $totalBudget   = DB::table('financial_records')->whereNull('deleted_at')->where(['enterprise_id'=>$eid,'type'=>'BUDGET'])->sum('amount');
+        $totalExpend   = abs(DB::table('financial_records')->whereNull('deleted_at')->where(['enterprise_id'=>$eid,'type'=>'EXPENDITURE'])->sum('amount'));
 
         // Top debtors
         $topDebtors = DB::table('accounts')

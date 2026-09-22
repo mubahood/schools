@@ -59,7 +59,6 @@ Route::group([
     $router->resource('fund-requisitions', FundRequisitionController::class);
     $router->resource('stock-item-categories', StockItemCategoryController::class);
     $router->resource('stock-batches', StockBatchController::class);
-    $router->resource('suppliers', SuppliersController::class);
     $router->resource('stock-records', StockRecordController::class);
     $router->resource('stock-records-archived', StockRecordController::class);
     $router->resource('stock-batches-archived', StockBatchController::class);
@@ -108,58 +107,59 @@ Route::group([
     $router->resource('supplier-orders', SupplierOrderController::class);
     $router->resource('gens', GenController::class);
     $router->resource('termly-school-fees-balancings', TermlySchoolFeesBalancingController::class);
-    $router->get('finance-dashboard', 'FinanceDashboardController@index')->name('finance-dashboard');
+    // Finance: the school's money. Restricted to finance staff; heads read only.
+    $router->group(['middleware' => [\App\Http\Middleware\EnsureFinanceAccess::class]], function ($router) {
+        // Legacy grid screens. Same ledger, so the same guard applies.
+        $router->resource('financial-records-budget', \App\Admin\Controllers\FinancialBudgetRecordController::class);
+        $router->resource('financial-records-expenditure', \App\Admin\Controllers\FinancialExpenditureRecordController::class);
+        $router->get('finance-dashboard', 'FinanceDashboardController@index')->name('finance-dashboard');
 
-    // Finance AJAX pages
-    $router->get('finance-expenditures', 'FinanceController@expenditures')->name('finance.expenditures');
-    $router->get('finance-budgets', 'FinanceController@budgets')->name('finance.budgets');
-    $router->get('finance-creditors', 'FinanceController@creditors')->name('finance.creditors');
+        // Finance AJAX pages
+        $router->get('finance-expenditures', 'FinanceController@expenditures')->name('finance.expenditures');
+        $router->get('finance-budgets', 'FinanceController@budgets')->name('finance.budgets');
+        $router->get('finance-creditors', 'FinanceController@creditors')->name('finance.creditors');
 
-    // Finance API — Expenditures
-    $router->get('finance/api/expenditures', 'FinanceController@apiExpList');
-    $router->get('finance/api/expenditures/{id}', 'FinanceController@apiExpShow');
-    $router->post('finance/api/expenditures', 'FinanceController@apiExpStore');
-    $router->put('finance/api/expenditures/{id}', 'FinanceController@apiExpUpdate');
-    $router->delete('finance/api/expenditures/{id}', 'FinanceController@apiExpDestroy');
-    $router->post('finance/api/expenditures/{id}/duplicate', 'FinanceController@apiExpDuplicate');
+        // Finance API — Expenditures
+        $router->get('finance/api/expenditures', 'FinanceController@apiExpList');
+        $router->get('finance/api/expenditures/{id}', 'FinanceController@apiExpShow');
+        $router->post('finance/api/expenditures', 'FinanceController@apiExpStore');
+        $router->put('finance/api/expenditures/{id}', 'FinanceController@apiExpUpdate');
+        $router->delete('finance/api/expenditures/{id}', 'FinanceController@apiExpDestroy');
+        $router->post('finance/api/expenditures/{id}/duplicate', 'FinanceController@apiExpDuplicate');
 
-    // Finance API — Budgets
-    $router->get('finance/api/budgets', 'FinanceController@apiBudList');
-    $router->get('finance/api/budgets/{id}', 'FinanceController@apiBudShow');
-    $router->post('finance/api/budgets', 'FinanceController@apiBudStore');
-    $router->put('finance/api/budgets/{id}', 'FinanceController@apiBudUpdate');
-    $router->delete('finance/api/budgets/{id}',                'FinanceController@apiBudDestroy');
-    $router->post('finance/api/budgets/{id}/duplicate',        'FinanceController@apiBudDuplicate');
+        // Finance API — Budgets
+        $router->get('finance/api/budgets', 'FinanceController@apiBudList');
+        $router->get('finance/api/budgets/{id}', 'FinanceController@apiBudShow');
+        $router->post('finance/api/budgets', 'FinanceController@apiBudStore');
+        $router->put('finance/api/budgets/{id}', 'FinanceController@apiBudUpdate');
+        $router->delete('finance/api/budgets/{id}',                'FinanceController@apiBudDestroy');
+        $router->post('finance/api/budgets/{id}/duplicate',        'FinanceController@apiBudDuplicate');
 
-    // Finance API — Creditors
-    $router->get('finance/api/creditors', 'FinanceController@apiCredList');
-    $router->get('finance/api/creditors/{id}', 'FinanceController@apiCredShow');
-    $router->post('finance/api/creditors', 'FinanceController@apiCredStore');
-    $router->put('finance/api/creditors/{id}', 'FinanceController@apiCredUpdate');
-    $router->delete('finance/api/creditors/{id}', 'FinanceController@apiCredDestroy');
+        // Finance API — Creditors
+        $router->get('finance/api/creditors', 'FinanceController@apiCredList');
+        $router->get('finance/api/creditors/{id}', 'FinanceController@apiCredShow');
+        $router->post('finance/api/creditors', 'FinanceController@apiCredStore');
+        $router->put('finance/api/creditors/{id}', 'FinanceController@apiCredUpdate');
+        $router->delete('finance/api/creditors/{id}', 'FinanceController@apiCredDestroy');
 
-    // Finance API — Creditor Payments
-    $router->get('finance/api/creditor-payments', 'FinanceController@apiPayList');
-    $router->post('finance/api/creditor-payments', 'FinanceController@apiPayStore');
-    $router->delete('finance/api/creditor-payments/{id}', 'FinanceController@apiPayDestroy');
+        // Finance API — Creditor Payments
+        $router->get('finance/api/creditor-payments', 'FinanceController@apiPayList');
+        $router->post('finance/api/creditor-payments', 'FinanceController@apiPayStore');
+        $router->delete('finance/api/creditor-payments/{id}', 'FinanceController@apiPayDestroy');
 
-    // Finance AJAX page — Suppliers
-    $router->get('finance-suppliers', 'FinanceController@suppliers')->name('finance.suppliers');
+        // Finance AJAX page — Suppliers
+        $router->get('finance-suppliers', 'FinanceController@suppliers')->name('finance.suppliers');
 
-    // Finance API — Suppliers
-    $router->get('finance/api/suppliers',           'FinanceController@apiSupList');
-    $router->get('finance/api/suppliers/{id}',      'FinanceController@apiSupShow');
-    $router->post('finance/api/suppliers',           'FinanceController@apiSupStore');
-    $router->put('finance/api/suppliers/{id}',       'FinanceController@apiSupUpdate');
-    $router->delete('finance/api/suppliers/{id}',    'FinanceController@apiSupDestroy');
+        // Finance API — Suppliers
+        $router->get('finance/api/suppliers',           'FinanceController@apiSupList');
+        $router->get('finance/api/suppliers/{id}',      'FinanceController@apiSupShow');
+        $router->post('finance/api/suppliers',           'FinanceController@apiSupStore');
+        $router->put('finance/api/suppliers/{id}',       'FinanceController@apiSupUpdate');
+        $router->delete('finance/api/suppliers/{id}',    'FinanceController@apiSupDestroy');
 
-    // Finance API — Cascade
-    $router->get('finance/api/accounts-by-vote', 'FinanceController@apiAccountsByVote');
-    $router->resource('financial-records', FinancialRecordController::class);
-    $router->resource('financial-records-budget', FinancialBudgetRecordController::class);
-    $router->resource('financial-records-expenditure', FinancialExpenditureRecordController::class);
-    $router->resource('creditor-records', CreditorRecordController::class);
-    $router->resource('creditor-payments', CreditorPaymentController::class);
+        // Finance API — Cascade
+        $router->get('finance/api/accounts-by-vote', 'FinanceController@apiAccountsByVote');
+    });
     $router->resource('mark-records', MarkRecordController::class);
     $router->resource('theology-mark-records', TheologyMarkRecordController::class);
     $router->resource('report-finances', ReportFinanceController::class);

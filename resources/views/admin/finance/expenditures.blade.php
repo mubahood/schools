@@ -160,6 +160,7 @@ table.fin tbody tr:last-child td{border-bottom:none}
         <td colspan="5" class="fin-total"></td>
       </tr></tfoot>
     </table>
+    <div class="fpg" id="fe-pager" style="display:none"><div class="pg-info" id="fe-pginfo"></div><div class="pg-nav"><span style="color:#6b7a8c;margin-right:6px">Rows</span><select id="fe-perpage"><option>25</option><option selected>50</option><option>100</option><option>200</option></select><button type="button" id="fe-first">&laquo;</button><button type="button" id="fe-prev">Prev</button><span id="fe-pgnum" style="padding:0 8px;color:#42556b"></span><button type="button" id="fe-next">Next</button><button type="button" id="fe-last">&raquo;</button></div></div>
     <div id="fe-zero" class="fe-zero" style="display:none">
       <i class="fa fa-file-text-o"></i>
       No expenditure records found.<br>
@@ -360,6 +361,39 @@ function ssOpen_(key){
 
 /* ═══════════════ WINDOW.FE ═════════════════════════════════ */
 window.FE = {
+  // ── paging: the server sends one page and the totals for the whole set ──
+  _page: 1,
+  _meta: null,
+  perPage: function(){ var e=document.getElementById('fe-perpage'); return e ? parseInt(e.value,10) : 50; },
+  renderPager: function(meta){
+    FE._meta = meta;
+    var box = document.getElementById('fe-pager'); if(!box) return;
+    box.style.display = meta.total > 0 ? 'flex' : 'none';
+    var from = meta.total ? ((meta.page-1)*meta.per_page + 1) : 0;
+    var to   = Math.min(meta.page*meta.per_page, meta.total);
+    document.getElementById('fe-pginfo').textContent =
+      'Showing ' + from.toLocaleString() + '\u2013' + to.toLocaleString() + ' of ' + meta.total.toLocaleString();
+    document.getElementById('fe-pgnum').textContent = meta.page + ' / ' + meta.last_page;
+    ['first','prev'].forEach(function(k){ document.getElementById('fe-'+k).disabled = meta.page <= 1; });
+    ['next','last'].forEach(function(k){ document.getElementById('fe-'+k).disabled = meta.page >= meta.last_page; });
+  },
+  goPage: function(n){
+    var m = FE._meta; if(!m) return;
+    n = Math.max(1, Math.min(n, m.last_page));
+    if(n === m.page) return;
+    FE._page = n; FE.load();
+  },
+  bindPager: function(){
+    var self = this, p = 'fe';
+    var on = function(id, fn){ var el = document.getElementById(id); if(el) el.addEventListener('click', fn); };
+    on(p+'-first', function(){ self.goPage(1); });
+    on(p+'-prev',  function(){ self.goPage((self._meta?self._meta.page:1) - 1); });
+    on(p+'-next',  function(){ self.goPage((self._meta?self._meta.page:1) + 1); });
+    on(p+'-last',  function(){ self.goPage(self._meta?self._meta.last_page:1); });
+    var pp = document.getElementById(p+'-perpage');
+    if(pp) pp.addEventListener('change', function(){ self._page = 1; self.load(); });
+  },
+
 
   load: function(){
     spin(true);
@@ -371,15 +405,18 @@ window.FE = {
     if(m)  p.set('payment_method', m);
     if(q)  p.set('q', q);
     if(s)  p.set('supplier_id', s);
+    p.set('page', FE._page); p.set('per_page', FE.perPage());
     fetch(API+'?'+p, hdr())
-      .then(r=>r.json()).then(function(data){
+      .then(r=>r.json()).then(function(resp){
         spin(false);
+        var data = resp.data || [], meta = resp.meta || {page:1,last_page:1,total:data.length,per_page:data.length,sum:0};
         totalRows = data;
-        if(!data.length){ zero(true); return; }
+        FE.renderPager(meta);
+        if(!meta.total){ zero(true); return; }
         zero(false);
         document.getElementById('fe-tbl').style.display='table';
-        var total = data.reduce(function(s,r){ return s + r.amount; }, 0);
-        document.getElementById('fe-total-amt').textContent = 'UGX '+fmt(total);
+        // the footer total is the whole filtered set, not just this page
+        document.getElementById('fe-total-amt').textContent = 'UGX '+fmt(meta.sum);
         document.getElementById('fe-foot').style.display='';
         document.getElementById('fe-body').innerHTML = data.map(function(r){
           var cr = r.has_creditor
@@ -409,6 +446,7 @@ window.FE = {
       });
   },
 
+  resetPage: function(){ FE._page = 1; },
   debSearch: function(){
     clearTimeout(sDebTimer);
     sDebTimer = setTimeout(FE.load, 400);
@@ -680,3 +718,4 @@ FE.load();
 ssRender('sup', SUPPLIERS);
 })();
 </script>
+<script>FE.bindPager();</script>

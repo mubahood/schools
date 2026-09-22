@@ -2,28 +2,29 @@
 
 namespace App\Models;
 
-use App\Models\User;
+use App\Services\Finance\FinanceService;
 use Encore\Admin\Auth\Database\Administrator;
-use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * A single line of the school's ledger: either a budget line or money spent.
+ *
+ * The rules live in FinanceService. The hooks below only make sure that a row
+ * written by any route — this module, a legacy screen, a console command —
+ * goes through the same normalisation.
+ */
 class FinancialRecord extends Model
 {
     use HasFactory;
-
+    use SoftDeletes;
 
     /**
-     * Mass-assignable columns.
-     *
-     * Without this Laravel falls back to $guarded = ['*'] and every
-     * FinancialRecord::create()/update() throws MassAssignmentException, which
-     * is why creating an expenditure or a budget failed outright.
-     *
-     * amount, academic_year_id and parent_account_id are deliberately EXCLUDED:
-     * the creating()/updating() hooks derive them from the term, account and
-     * quantity x unit_price. Leaving them out means a crafted request cannot
-     * override the computed amount.
+     * amount, academic_year_id and parent_account_id are deliberately absent:
+     * they are derived from the term, the account and quantity x unit price,
+     * so a crafted request cannot dictate what a record is worth or which
+     * vote it lands under.
      */
     protected $fillable = [
         'enterprise_id',
@@ -40,6 +41,22 @@ class FinancialRecord extends Model
         'is_credit',
         'credit_amount',
     ];
+
+    protected $casts = [
+        'amount' => 'integer',
+        'quantity' => 'integer',
+        'unit_price' => 'integer',
+        'credit_amount' => 'integer',
+        'payment_date' => 'date',
+        'deleted_at' => 'datetime',
+    ];
+
+    /**
+     * Set by FinanceService::update() when the caller genuinely supplied
+     * quantity and unit price. False means "do not touch the money".
+     */
+    public bool $moneyGiven = true;
+
     public function created_by()
     {
         return $this->belongsTo(Administrator::class, 'created_by_id');
@@ -64,150 +81,37 @@ class FinancialRecord extends Model
     {
         return $this->belongsTo(Account::class);
     }
+
     public function creditor_record()
     {
         return $this->hasOne(CreditorRecord::class, 'financial_record_id');
     }
 
-    public static function boot()
+    public function audits()
+    {
+        return $this->hasMany(FinanceAudit::class, 'subject_id')
+            ->where('subject_type', 'financial_record')->orderByDesc('id');
+    }
+
+    public function isExpenditure(): bool
+    {
+        return $this->type === FinanceService::TYPE_EXPENDITURE;
+    }
+
+    protected static function boot()
     {
         parent::boot();
 
-        // Auto-create a CreditorRecord when an expenditure is saved on credit
-        self::created(function ($m) {
-            if ($m->type === 'EXPENDITURE'
-                && ($m->is_credit ?? 'No') === 'Yes'
-                && !empty($m->credit_amount)
-                && abs((int)$m->credit_amount) > 0
-            ) {
-                $creditor = new CreditorRecord();
-                $creditor->enterprise_id       = $m->enterprise_id;
-                $creditor->financial_record_id = $m->id;
-                $creditor->supplier_id         = $m->supplier_id;
-                $creditor->account_id          = $m->account_id;
-                $creditor->term_id             = $m->term_id;
-                $creditor->academic_year_id    = $m->academic_year_id;
-                $creditor->description         = $m->description ?? '';
-                $creditor->original_amount     = abs((int)$m->credit_amount);
-                $creditor->paid_amount         = 0;
-                $creditor->balance             = abs((int)$m->credit_amount);
-                $creditor->status              = 'Pending';
-                $creditor->created_by_id       = $m->created_by_id;
-                $creditor->save();
+        self::creating(function (self $m) {
+            if (!$m->created_by_id) {
+                $m->created_by_id = \Encore\Admin\Facades\Admin::user()->id
+                    ?? optional(Enterprise::find($m->enterprise_id))->administrator_id;
             }
+            FinanceService::normalise($m, true);
         });
 
-        // Sync changes to credit_amount/supplier back to the linked CreditorRecord
-        self::updated(function ($m) {
-            if ($m->type !== 'EXPENDITURE') return;
-            $creditor = CreditorRecord::where('financial_record_id', $m->id)->first();
-            if (!$creditor) return;
-
-            if (($m->is_credit ?? 'No') === 'Yes' && !empty($m->credit_amount)) {
-                $creditor->original_amount = abs((int)$m->credit_amount);
-                $creditor->supplier_id     = $m->supplier_id;
-                $creditor->description     = $m->description ?? $creditor->description;
-                $creditor->balance         = max(0, $creditor->original_amount - $creditor->paid_amount);
-                $creditor->updateStatus();
-            }
-        });
-
-        self::creating(function ($m) {
-
-            if (
-                $m->type != 'BUDGET'
-            ) {
-                if ($m->type != 'EXPENDITURE') {
-                    throw new Exception("Type not found.", 1);
-                }
-            }
-            $t = Term::find($m->term_id);
-            if ($t == null) {
-                $ent = Enterprise::find($t->enterprise_id);
-                $t = $ent->active_term();
-            }
-            if ($t == null) {
-                throw new Exception("Term  not found.", 1);
-            }
-
-            $m->academic_year_id = $t->academic_year_id;
-            $m->term_id = $t->id;
-            $acc = Account::find($m->account_id);
-            if ($acc == null) {
-                throw new Exception("Account  not found.", 1);
-            }
-            $m->parent_account_id = $acc->account_parent_id;
-
-            $m->amount = $m->quantity * $m->unit_price;
-
-            if ($m->type == 'EXPENDITURE') {
-                $amount = ((int)($m->amount));
-                if ($amount < 0) {
-                    $amount = -1 * $amount;
-                }
-                $m->amount = -1 * $amount;
-            }
-            if ($m->type == 'BUDGET') {
-                $amount = ((int)($m->amount));
-                if ($amount < 0) {
-                    $m->amount = -1 * $amount;
-                }
-            }
-
-            if ($m->created_by_id == null) {
-                $m->created_by_id = $ent->administrator_id;
-            }
-
-            return $m;
-        });
-
-        self::updating(function ($m) {
-
-            if (
-                $m->type != 'BUDGET'
-            ) {
-                if ($m->type != 'EXPENDITURE') {
-                    throw new Exception("Type not found.", 1);
-                }
-            }
-            $t = Term::find($m->term_id);
-            if ($t == null) {
-                $ent = Enterprise::find($t->enterprise_id);
-                $t = $ent->active_term();
-            }
-            if ($t == null) {
-                throw new Exception("Term  not found.", 1);
-            }
-
-            $m->academic_year_id = $t->academic_year_id;
-            $m->term_id = $t->id;
-            $acc = Account::find($m->account_id);
-            if ($acc == null) {
-                throw new Exception("Account  not found.", 1);
-            }
-            $m->parent_account_id = $acc->account_parent_id;
-
-            $m->amount = $m->quantity * $m->unit_price;
-
-            if ($m->type == 'EXPENDITURE') {
-                $amount = ((int)($m->amount));
-                if ($amount < 0) {
-                    $amount = -1 * $amount;
-                }
-                $m->amount = -1 * $amount;
-            }
-            if ($m->type == 'BUDGET') {
-                $amount = ((int)($m->amount));
-                if ($amount < 0) {
-                    $m->amount = -1 * $amount;
-                }
-            }
-
-            if ($m->created_by_id == null) {
-                $m->created_by_id = $ent->administrator_id;
-            }
-
-            return $m;
+        self::updating(function (self $m) {
+            FinanceService::normalise($m, $m->moneyGiven);
         });
     }
 }

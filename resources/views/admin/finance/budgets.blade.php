@@ -120,6 +120,7 @@ table.fin tbody tr:last-child td{border-bottom:none}
         <td colspan="4" class="fin-total-row"></td>
       </tr></tfoot>
     </table>
+    <div class="fpg" id="fb-pager" style="display:none"><div class="pg-info" id="fb-pginfo"></div><div class="pg-nav"><span style="color:#6b7a8c;margin-right:6px">Rows</span><select id="fb-perpage"><option>25</option><option selected>50</option><option>100</option><option>200</option></select><button type="button" id="fb-first">&laquo;</button><button type="button" id="fb-prev">Prev</button><span id="fb-pgnum" style="padding:0 8px;color:#42556b"></span><button type="button" id="fb-next">Next</button><button type="button" id="fb-last">&raquo;</button></div></div>
     <div id="fb-zero" class="fb-zero" style="display:none">
       <i class="fa fa-bar-chart"></i>No budget entries found.<br>
       <a href="#" onclick="FB.open();return false">+ Add the first budget entry</a>
@@ -223,18 +224,54 @@ document.addEventListener('keydown', function(e){ if(e.key==='Escape'&&overlay.s
 var eid=null, sDebTimer=null, budRows=[];
 
 window.FB = {
+  // ── paging: the server sends one page and the totals for the whole set ──
+  _page: 1,
+  _meta: null,
+  perPage: function(){ var e=document.getElementById('fb-perpage'); return e ? parseInt(e.value,10) : 50; },
+  renderPager: function(meta){
+    FB._meta = meta;
+    var box = document.getElementById('fb-pager'); if(!box) return;
+    box.style.display = meta.total > 0 ? 'flex' : 'none';
+    var from = meta.total ? ((meta.page-1)*meta.per_page + 1) : 0;
+    var to   = Math.min(meta.page*meta.per_page, meta.total);
+    document.getElementById('fb-pginfo').textContent =
+      'Showing ' + from.toLocaleString() + '\u2013' + to.toLocaleString() + ' of ' + meta.total.toLocaleString();
+    document.getElementById('fb-pgnum').textContent = meta.page + ' / ' + meta.last_page;
+    ['first','prev'].forEach(function(k){ document.getElementById('fb-'+k).disabled = meta.page <= 1; });
+    ['next','last'].forEach(function(k){ document.getElementById('fb-'+k).disabled = meta.page >= meta.last_page; });
+  },
+  goPage: function(n){
+    var m = FB._meta; if(!m) return;
+    n = Math.max(1, Math.min(n, m.last_page));
+    if(n === m.page) return;
+    FB._page = n; FB.load();
+  },
+  bindPager: function(){
+    var self = this, p = 'fb';
+    var on = function(id, fn){ var el = document.getElementById(id); if(el) el.addEventListener('click', fn); };
+    on(p+'-first', function(){ self.goPage(1); });
+    on(p+'-prev',  function(){ self.goPage((self._meta?self._meta.page:1) - 1); });
+    on(p+'-next',  function(){ self.goPage((self._meta?self._meta.page:1) + 1); });
+    on(p+'-last',  function(){ self.goPage(self._meta?self._meta.last_page:1); });
+    var pp = document.getElementById(p+'-perpage');
+    if(pp) pp.addEventListener('change', function(){ self._page = 1; self.load(); });
+  },
+
   load: function(){
     bspin(true);
     var p=new URLSearchParams();
     var t=v('fb-term'),vt=v('fb-vote'),ac=v('fb-acc'),q=v('fb-q');
     if(t) p.set('term_id',t); if(vt) p.set('vote_id',vt);
     if(ac) p.set('account_id',ac); if(q) p.set('q',q);
-    fetch(API+'?'+p, hdr()).then(r=>r.json()).then(function(data){
+    p.set('page', FB._page); p.set('per_page', FB.perPage());
+    fetch(API+'?'+p, hdr()).then(r=>r.json()).then(function(resp){
+      var data = resp.data || [], meta = resp.meta || {page:1,last_page:1,total:data.length,per_page:data.length,sum:0};
+      FB.renderPager(meta);
       bspin(false);
       budRows=data;
-      if(!data.length){ bzero(true); return; }
+      if(!meta.total){ bzero(true); return; }
       bzero(false);
-      var total = data.reduce(function(s,r){return s+r.amount;},0);
+      var total = meta.sum;
       document.getElementById('fb-total').textContent='UGX '+fmt(total);
       document.getElementById('fb-foot').style.display='';
       document.getElementById('fb-body').innerHTML = data.map(function(r){
@@ -367,3 +404,4 @@ function btoast(msg){ var t=document.createElement('div');t.innerHTML=msg;t.styl
 FB.load();
 })();
 </script>
+<script>FB.bindPager();</script>

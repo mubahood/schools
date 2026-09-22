@@ -70,25 +70,25 @@ class FinanceDashboardController extends Controller
             ->count();
 
         // ── Expenditure by vote/category (this term) ─────────────────────────
-        $byVote = DB::table('financial_records as fr')
-            ->join('account_parents as ap', 'ap.id', '=', 'fr.parent_account_id')
+        $byVote = DB::table('financial_records as fr')->whereNull('fr.deleted_at')
+            ->leftJoin('account_parents as ap', 'ap.id', '=', 'fr.parent_account_id')
             ->where('fr.enterprise_id', $eid)
             ->where('fr.type', 'EXPENDITURE')
             ->where('fr.term_id', $termId)
             ->groupBy('ap.id', 'ap.name')
-            ->select('ap.name', DB::raw('SUM(ABS(fr.amount)) as total'))
+            ->select(DB::raw("COALESCE(ap.name,'Unclassified') as name"), DB::raw('SUM(ABS(fr.amount)) as total'))
             ->orderByDesc('total')
             ->limit(8)
             ->get();
 
         // ── Budget vs Actual by vote ──────────────────────────────────────────
-        $budgetByVote = DB::table('financial_records as fr')
-            ->join('account_parents as ap', 'ap.id', '=', 'fr.parent_account_id')
+        $budgetByVote = DB::table('financial_records as fr')->whereNull('fr.deleted_at')
+            ->leftJoin('account_parents as ap', 'ap.id', '=', 'fr.parent_account_id')
             ->where('fr.enterprise_id', $eid)
             ->where('fr.type', 'BUDGET')
             ->where('fr.term_id', $termId)
             ->groupBy('ap.id', 'ap.name')
-            ->select('ap.name', DB::raw('SUM(ABS(fr.amount)) as total'))
+            ->select(DB::raw("COALESCE(ap.name,'Unclassified') as name"), DB::raw('SUM(ABS(fr.amount)) as total'))
             ->get()
             ->keyBy('name');
 
@@ -98,7 +98,7 @@ class FinanceDashboardController extends Controller
         $voteBudget = array_map(fn($n) => $budgetByVote->get($n)?->total ?? 0, $voteLabels);
 
         // ── Monthly expenditure trend (last 6 months) ─────────────────────────
-        $monthlyRaw = DB::table('financial_records')
+        $monthlyRaw = DB::table('financial_records')->whereNull('deleted_at')
             ->where('enterprise_id', $eid)
             ->where('type', 'EXPENDITURE')
             ->where('payment_date', '>=', now()->subMonths(6)->startOfMonth())
@@ -118,7 +118,7 @@ class FinanceDashboardController extends Controller
         $monthAmounts = $monthlyRaw->pluck('total')->toArray();
 
         // ── Payment method breakdown ──────────────────────────────────────────
-        $payMethods = DB::table('financial_records')
+        $payMethods = DB::table('financial_records')->whereNull('deleted_at')
             ->where('enterprise_id', $eid)
             ->where('type', 'EXPENDITURE')
             ->whereNotNull('payment_method')
@@ -128,7 +128,7 @@ class FinanceDashboardController extends Controller
             ->get();
 
         // ── Recent expenditures ───────────────────────────────────────────────
-        $recentExp = DB::table('financial_records as fr')
+        $recentExp = DB::table('financial_records as fr')->whereNull('fr.deleted_at')
             ->leftJoin('account_parents as ap', 'ap.id', '=', 'fr.parent_account_id')
             ->leftJoin('accounts as a', 'a.id', '=', 'fr.account_id')
             ->where('fr.enterprise_id', $eid)
