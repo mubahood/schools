@@ -492,7 +492,7 @@ window.FE = {
         FE.ssPick('sup', r.supplier_id, r.supplier);
       }
       // Credit
-      if(r.is_credit==='Yes'){
+      if(r.is_credit === true || r.is_credit === 1){
         document.getElementById('m-credit-chk').checked=true;
         document.getElementById('m-credit-fields').style.display='block';
         val('m-credit-amt', r.credit_amount||'');
@@ -533,7 +533,7 @@ window.FE = {
       quantity:       v('m-qty'),
       unit_price:     v('m-price'),
       description:    desc,
-      is_credit:      isCredit ? 'Yes' : 'No',
+      is_credit:      isCredit,
       credit_amount:  isCredit ? (v('m-credit-amt')||null) : null,
     };
     fetch(eid ? API+'/'+eid : API, {

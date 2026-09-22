@@ -91,7 +91,7 @@ class FinanceController extends Controller
             $rules += [
                 'supplier_id'    => ['nullable', 'integer', $mine('admin_users')],
                 'payment_method' => 'nullable|string|max:50',
-                'is_credit'      => 'nullable|in:Yes,No',
+                'is_credit'      => 'nullable|boolean',
                 'credit_amount'  => 'nullable|integer|min:0',
             ];
         }
@@ -144,7 +144,7 @@ class FinanceController extends Controller
             'payment_method' => $r->payment_method ?? '',
             'term_id'        => $r->term_id,
             'term'           => optional($r->term)->name_text ?? '—',
-            'is_credit'      => $r->is_credit ?? 'No',
+            'is_credit'      => (bool) $r->is_credit,
             'credit_amount'  => $r->credit_amount,
             'has_creditor'   => $r->creditor_record !== null,
             'creditor_id'    => optional($r->creditor_record)->id,
@@ -294,7 +294,7 @@ class FinanceController extends Controller
         $data = $request->validate($this->rules(true));
         $data['enterprise_id'] = $this->eid();
         $data['created_by_id'] = Admin::user()->id;
-        $data['is_credit']     = $data['is_credit'] ?? 'No';
+        $data['is_credit']     = (bool) ($data['is_credit'] ?? false);
         if (empty($data['supplier_id'])) $data['supplier_id'] = null;
 
         try {
@@ -312,7 +312,7 @@ class FinanceController extends Controller
         $r = FinancialRecord::where(['enterprise_id' => $this->eid(), 'type' => FinanceService::TYPE_EXPENDITURE])
             ->findOrFail($id);
         $data = $request->validate($this->rules(true));
-        $data['is_credit'] = $data['is_credit'] ?? 'No';
+        $data['is_credit'] = (bool) ($data['is_credit'] ?? false);
         if (empty($data['supplier_id'])) $data['supplier_id'] = null;
 
         try {
@@ -355,7 +355,7 @@ class FinanceController extends Controller
             'payment_method' => $orig->payment_method,
             'quantity'       => $orig->quantity,
             'unit_price'     => $orig->unit_price,
-            'is_credit'      => 'No',
+            'is_credit'      => false,
         ], FinanceService::TYPE_EXPENDITURE);
 
         $copy->load(['account', 'par', 'term', 'supplier', 'creditor_record']);

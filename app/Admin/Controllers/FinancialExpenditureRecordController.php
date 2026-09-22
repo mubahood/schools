@@ -232,10 +232,11 @@ class FinancialExpenditureRecordController extends AdminController
         $form->text('description', 'Particulars / Description');
 
         $form->divider('Credit Settings');
+        // is_credit is a boolean column now, so the options are 0 and 1.
         $form->radio('is_credit', 'Was this bought on credit?')
-            ->options(['No' => 'No — fully paid', 'Yes' => 'Yes — part or all on credit'])
-            ->default('No')
-            ->when('Yes', function ($f) {
+            ->options([0 => 'No — fully paid', 1 => 'Yes — part or all on credit'])
+            ->default(0)
+            ->when(1, function ($f) {
                 $f->decimal('credit_amount', 'Credit Amount (UGX)')
                     ->help('Enter the portion of the total that was NOT paid yet (owed to the supplier).')
                     ->rules('required|min:1');

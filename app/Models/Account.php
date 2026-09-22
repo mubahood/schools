@@ -175,11 +175,20 @@ class Account extends Model
                     return false;
                 }
             }
-            self::deleting(function ($m) {
-                throw new Exception("Account cannot be deleted.", 1);
-                return false;
-                DB::statement("DELETE FROM transactions WHERE account_id = ?", [$m->id]);
-            });
+        });
+
+        /**
+         * Registered at boot, not inside creating(): the old hook was nested in
+         * the create closure, so it only existed after an account had been
+         * created in the same request and a plain delete slipped straight past
+         * it. That is how 1,501 finance records and 225 transactions came to
+         * reference accounts that no longer exist.
+         *
+         * Deleting is allowed, but nothing is left dangling: dependents move to
+         * the school's fallback accounts first.
+         */
+        self::deleting(function ($m) {
+            \App\Services\Finance\FinanceService::absorbAccount($m);
         });
     }
 

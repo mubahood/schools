@@ -2,8 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Account;
-use App\Models\AccountParent;
+use App\Services\Finance\FinanceService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -72,7 +71,7 @@ class FinanceRepair extends Command
             if (!$apply) {
                 continue;
             }
-            $acc = $this->unclassifiedAccount((int) $o->enterprise_id);
+            $acc = FinanceService::unclassifiedAccount((int) $o->enterprise_id);
             DB::table('financial_records as f')
                 ->leftJoin('accounts as a', 'a.id', '=', 'f.account_id')
                 ->where('f.enterprise_id', $o->enterprise_id)
@@ -100,7 +99,7 @@ class FinanceRepair extends Command
             if (!$apply) {
                 continue;
             }
-            $acc = $this->unclassifiedAccount((int) $o->enterprise_id);
+            $acc = FinanceService::unclassifiedAccount((int) $o->enterprise_id);
             DB::table('financial_records as f')
                 ->leftJoin('account_parents as ap', 'ap.id', '=', 'f.parent_account_id')
                 ->where('f.enterprise_id', $o->enterprise_id)
@@ -108,6 +107,64 @@ class FinanceRepair extends Command
                 ->update(['f.parent_account_id' => $acc->account_parent_id]);
         }
         if ($voteOrphans->isEmpty()) {
+            $this->line('   none');
+        }
+
+        // ── 4. transactions whose account was deleted ───────────────────
+        $this->newLine();
+        $this->info('4. Transactions whose account no longer exists');
+        $txOrphans = $scope(DB::table('transactions as t'))
+            ->leftJoin('accounts as a', 'a.id', '=', 't.account_id')
+            ->whereNull('a.id')
+            ->select('t.enterprise_id', DB::raw('COUNT(*) n'), DB::raw('SUM(t.amount) total'))
+            ->groupBy('t.enterprise_id')->get();
+
+        foreach ($txOrphans as $o) {
+            $this->line(sprintf('   school %-4s %6s rows   net UGX %s', $o->enterprise_id,
+                number_format($o->n), number_format($o->total)));
+            if (!$apply) {
+                continue;
+            }
+            $acc = FinanceService::unallocatedAccount((int) $o->enterprise_id);
+            DB::table('transactions as t')
+                ->leftJoin('accounts as a', 'a.id', '=', 't.account_id')
+                ->where('t.enterprise_id', $o->enterprise_id)->whereNull('a.id')
+                ->update(['t.account_id' => $acc->id]);
+        }
+        if ($txOrphans->isEmpty()) {
+            $this->line('   none');
+        } else {
+            $this->line('   <fg=gray>moved to "Unallocated (deleted accounts)" — kept out of student fee totals</>');
+        }
+
+        // ── 5. accounts whose vote was deleted ──────────────────────────
+        $this->newLine();
+        $this->info('5. Accounts whose vote no longer exists');
+        $accOrphans = $scope(DB::table('accounts as a'))
+            ->leftJoin('account_parents as p', 'p.id', '=', 'a.account_parent_id')
+            ->whereNotNull('a.account_parent_id')->whereNull('p.id')
+            ->select('a.enterprise_id', DB::raw('COUNT(*) n'))->groupBy('a.enterprise_id')->get();
+
+        foreach ($accOrphans as $o) {
+            $this->line(sprintf('   school %-4s %6s accounts', $o->enterprise_id, number_format($o->n)));
+            if (!$apply) {
+                continue;
+            }
+            // Votes are a finance-module idea. A student account does not need
+            // one, so it is cleared rather than filed under Unclassified.
+            DB::table('accounts as a')->leftJoin('account_parents as p', 'p.id', '=', 'a.account_parent_id')
+                ->where('a.enterprise_id', $o->enterprise_id)
+                ->whereNotNull('a.account_parent_id')->whereNull('p.id')
+                ->where('a.type', '<>', 'OTHER_ACCOUNT')
+                ->update(['a.account_parent_id' => null]);
+
+            $vote = FinanceService::unclassifiedVote((int) $o->enterprise_id);
+            DB::table('accounts as a')->leftJoin('account_parents as p', 'p.id', '=', 'a.account_parent_id')
+                ->where('a.enterprise_id', $o->enterprise_id)
+                ->whereNotNull('a.account_parent_id')->whereNull('p.id')
+                ->update(['a.account_parent_id' => $vote->id]);
+        }
+        if ($accOrphans->isEmpty()) {
             $this->line('   none');
         }
 
@@ -123,6 +180,11 @@ class FinanceRepair extends Command
         $this->line('   quantity x price mismatches : ' . number_format($stillBad));
         $this->line('   lines with a missing account: ' . number_format($stillOrphan));
         $this->line('   lines with a missing vote   : ' . number_format($stillVote));
+        $this->line('   transactions with no account: ' . number_format(
+            $scope(DB::table('transactions as t'))->leftJoin('accounts as a', 'a.id', '=', 't.account_id')->whereNull('a.id')->count()));
+        $this->line('   accounts with a missing vote: ' . number_format(
+            $scope(DB::table('accounts as a'))->leftJoin('account_parents as p', 'p.id', '=', 'a.account_parent_id')
+                ->whereNotNull('a.account_parent_id')->whereNull('p.id')->count()));
 
         $kpi = abs((float) $scope(DB::table('financial_records')->whereNull('deleted_at'))->where('type', 'EXPENDITURE')->sum('amount'));
         $byVote = abs((float) $scope(DB::table('financial_records as fr')->whereNull('fr.deleted_at'))
@@ -134,38 +196,4 @@ class FinanceRepair extends Command
         return self::SUCCESS;
     }
 
-    /** One per school, created on demand, never shown as a choice when spending. */
-    private function unclassifiedAccount(int $eid): Account
-    {
-        // AccountParent declares no $fillable, so it is built explicitly.
-        $parent = AccountParent::where('enterprise_id', $eid)->where('name', 'Unclassified')->first();
-        if (!$parent) {
-            $parent = new AccountParent();
-            $parent->enterprise_id = $eid;
-            $parent->name = 'Unclassified';
-            $parent->description = 'Holds records whose original vote was deleted. Reassign them to a real vote.';
-            $parent->save();
-        }
-        $acc = Account::where('enterprise_id', $eid)->where('name', 'Unclassified')->first();
-        if (!$acc) {
-            $acc = new Account();
-            $acc->enterprise_id = $eid;
-            $acc->administrator_id = optional(\App\Models\Enterprise::find($eid))->administrator_id ?: 1;
-            $acc->name = 'Unclassified';
-            $acc->type = 'OTHER_ACCOUNT';
-            $acc->is_system = 1;
-            $acc->status = 1;
-            $acc->is_balance_verified = 0;
-            $acc->balance = 0;
-            $acc->description = 'Holds records whose original account was deleted. Reassign them to a real account.';
-            $acc->account_parent_id = $parent->id;
-            $acc->save();
-        } elseif (!$acc->account_parent_id) {
-            $acc->account_parent_id = $parent->id;
-            $acc->is_system = 1;
-            $acc->save();
-        }
-
-        return $acc;
-    }
 }

@@ -13,10 +13,16 @@ class AccountParent extends Model
     {
         parent::boot();
 
-        self::booting(function ($m) {
-            die("You cannot delete this account.");
-            if ($m->name == 'Other') {
-            }
+        /**
+         * This used to be a die() inside a booting() listener, which is
+         * registered too late to ever fire — so votes could be deleted freely
+         * and took 793 records with them into an inner join that dropped them
+         * from every breakdown.
+         *
+         * Deleting a vote now rehomes its accounts and records first.
+         */
+        self::deleting(function ($m) {
+            \App\Services\Finance\FinanceService::absorbVote($m);
         });
     }
 

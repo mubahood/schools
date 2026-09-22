@@ -44,6 +44,7 @@ class FinancialRecord extends Model
 
     protected $casts = [
         'amount' => 'integer',
+        'is_credit' => 'boolean',
         'quantity' => 'integer',
         'unit_price' => 'integer',
         'credit_amount' => 'integer',

@@ -82,7 +82,7 @@ class FinanceService
 
         $m->amount = self::sign($m->type, (int) $m->amount);
 
-        if ($m->type === self::TYPE_EXPENDITURE && ($m->is_credit ?? 'No') === 'Yes') {
+        if ($m->type === self::TYPE_EXPENDITURE && (bool) $m->is_credit) {
             $credit = abs((int) $m->credit_amount);
             if ($credit <= 0) {
                 throw new FinanceException('An expenditure on credit needs a credit amount.');
@@ -92,7 +92,7 @@ class FinanceService
             }
             $m->credit_amount = $credit;
         } else {
-            $m->is_credit = 'No';
+            $m->is_credit = false;
             $m->credit_amount = null;
         }
     }
@@ -103,6 +103,127 @@ class FinanceService
         $abs = abs($amount);
 
         return $type === self::TYPE_EXPENDITURE ? -$abs : $abs;
+    }
+
+    // ── Fallback homes ──────────────────────────────────────────────────
+    //
+    // Deleting a category used to orphan everything filed under it: the rows
+    // stayed in the totals but dropped out of every grouped report. Each school
+    // now keeps system-owned fallbacks, and deletions move their dependents
+    // here instead of leaving them pointing at nothing.
+
+    public const UNCLASSIFIED = 'Unclassified';
+    public const UNALLOCATED = 'Unallocated (deleted accounts)';
+
+    /** The vote that holds budget and expenditure lines whose own vote was deleted. */
+    public static function unclassifiedVote(int $eid): \App\Models\AccountParent
+    {
+        $p = \App\Models\AccountParent::where('enterprise_id', $eid)->where('name', self::UNCLASSIFIED)->first();
+        if (!$p) {
+            $p = new \App\Models\AccountParent();
+            $p->enterprise_id = $eid;
+            $p->name = self::UNCLASSIFIED;
+            $p->description = 'Holds records whose original vote was deleted. Reassign them to a real vote.';
+            $p->save();
+        }
+
+        return $p;
+    }
+
+    /** The account that holds budget and expenditure lines whose account was deleted. */
+    public static function unclassifiedAccount(int $eid): Account
+    {
+        return self::systemAccount($eid, self::UNCLASSIFIED,
+            'Holds finance records whose original account was deleted. Reassign them to a real account.');
+    }
+
+    /**
+     * The account that holds fee transactions whose student account was deleted.
+     * Deliberately an OTHER_ACCOUNT: it keeps the money attached and visible
+     * without inventing a student that fee reports would then count.
+     */
+    public static function unallocatedAccount(int $eid): Account
+    {
+        return self::systemAccount($eid, self::UNALLOCATED,
+            'Holds transactions whose original account was deleted. They belong to no current student.');
+    }
+
+    private static function systemAccount(int $eid, string $name, string $description): Account
+    {
+        $acc = Account::where('enterprise_id', $eid)->where('name', $name)->first();
+        if (!$acc) {
+            $acc = new Account();
+            $acc->enterprise_id = $eid;
+            $acc->administrator_id = optional(\App\Models\Enterprise::find($eid))->administrator_id ?: 1;
+            $acc->name = $name;
+            $acc->type = 'OTHER_ACCOUNT';
+            $acc->status = 1;
+            $acc->balance = 0;
+            $acc->is_balance_verified = 0;
+            $acc->description = $description;
+            $acc->saveQuietly();
+        }
+        $vote = self::unclassifiedVote($eid);
+        if ((int) $acc->account_parent_id !== (int) $vote->id || !$acc->is_system) {
+            $acc->account_parent_id = $vote->id;
+            $acc->is_system = 1;
+            $acc->saveQuietly();
+        }
+
+        return $acc;
+    }
+
+    /**
+     * Move everything that depends on an account being deleted onto the
+     * fallbacks, so nothing is left pointing at a row that no longer exists.
+     * Returns what was moved, for the caller to report.
+     */
+    public static function absorbAccount(Account $account): array
+    {
+        $eid = (int) $account->enterprise_id;
+        if ($account->is_system) {
+            throw new FinanceException('The ' . $account->name . ' account is used to hold orphaned records and cannot be deleted.');
+        }
+
+        $moved = ['records' => 0, 'transactions' => 0];
+        DB::transaction(function () use ($account, $eid, &$moved) {
+            $fallbackFin = self::unclassifiedAccount($eid);
+            $moved['records'] = DB::table('financial_records')
+                ->where('account_id', $account->id)
+                ->update(['account_id' => $fallbackFin->id, 'parent_account_id' => $fallbackFin->account_parent_id]);
+
+            if (DB::getSchemaBuilder()->hasTable('transactions')) {
+                $fallbackTx = self::unallocatedAccount($eid);
+                $moved['transactions'] = DB::table('transactions')
+                    ->where('account_id', $account->id)
+                    ->update(['account_id' => $fallbackTx->id]);
+            }
+        });
+
+        return $moved;
+    }
+
+    /**
+     * Same for a vote: its accounts and any records filed directly under it
+     * move to the school's Unclassified vote.
+     */
+    public static function absorbVote(\App\Models\AccountParent $vote): array
+    {
+        $eid = (int) $vote->enterprise_id;
+        if (trim((string) $vote->name) === self::UNCLASSIFIED) {
+            throw new FinanceException('The Unclassified vote holds orphaned records and cannot be deleted.');
+        }
+
+        $moved = ['accounts' => 0, 'records' => 0];
+        DB::transaction(function () use ($vote, $eid, &$moved) {
+            $fallback = self::unclassifiedVote($eid);
+            $moved['accounts'] = DB::table('accounts')
+                ->where('account_parent_id', $vote->id)->update(['account_parent_id' => $fallback->id]);
+            $moved['records'] = DB::table('financial_records')
+                ->where('parent_account_id', $vote->id)->update(['parent_account_id' => $fallback->id]);
+        });
+
+        return $moved;
     }
 
     // ── Writes ──────────────────────────────────────────────────────────
@@ -173,7 +294,7 @@ class FinanceService
             return;
         }
         $creditor = CreditorRecord::where('financial_record_id', $m->id)->first();
-        $onCredit = ($m->is_credit ?? 'No') === 'Yes' && abs((int) $m->credit_amount) > 0;
+        $onCredit = (bool) $m->is_credit && abs((int) $m->credit_amount) > 0;
 
         if (!$onCredit) {
             if ($creditor) {
