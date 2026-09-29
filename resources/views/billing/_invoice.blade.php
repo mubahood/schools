@@ -43,7 +43,8 @@
     <td class="bx" style="width:49%">
       <span class="lbl">Bill to</span>
       <div class="nm">{{ $ent->name }}</div>
-      @if($ent->address)<div class="m">{{ $ent->address }}</div>@endif
+      {{-- some schools have their own name stored as the address; printing it twice reads as a mistake --}}
+      @if($ent->address && strcasecmp(trim($ent->address), trim($ent->name)) !== 0)<div class="m">{{ $ent->address }}</div>@endif
       @if($ent->p_o_box)<div class="m">{{ \Illuminate\Support\Str::startsWith(strtoupper(trim($ent->p_o_box)), ['P.O','PO ','P O']) ? $ent->p_o_box : 'P.O. Box '.trim($ent->p_o_box) }}</div>@endif
       <div class="m" style="margin-top:3px">{{ $ent->phone_number }}</div>
       <div class="m">{{ $ent->email }}</div>
