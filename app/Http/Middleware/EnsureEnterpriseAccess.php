@@ -9,18 +9,33 @@ use Encore\Admin\Facades\Admin;
 use Illuminate\Http\Request;
 
 /**
- * Enforces the school's access lifecycle. Replaces the die() in admin/bootstrap.php.
+ * Enforces the school's access lifecycle.
  *
- * trialing / active / past_due  -> full access (past_due shows a banner)
- * suspended                     -> read-only: GET passes, writes are refused,
- *                                  billing and logout always allowed
- * cancelled                     -> billing page only
+ * A school whose invoice has passed its deadline, or whose licence has run
+ * out, is locked: every screen gives way to the licence page, which carries
+ * the bill and the way to pay it. The bill itself, the payment gateway and
+ * logout are never locked away — locking someone out of the thing that
+ * unlocks them would be a trap.
  *
- * Staff of the platform enterprise (id 1) and billing-exempt schools are never
- * touched. The parent mobile API gets a clean JSON refusal, never a redirect.
+ * Staff of the platform enterprise (id 1) and billing-exempt schools are
+ * never touched. Clients that expect JSON get a refusal they can act on
+ * rather than a redirect they cannot follow.
  */
 class EnsureEnterpriseAccess
 {
+    /** Reachable even while locked. Everything else gives way to the licence page. */
+    private function isAlwaysAllowed(Request $request): bool
+    {
+        return $request->is('licence-expired')
+            || $request->is('billing*')
+            || $request->is('invoice/*')
+            || $request->is('gateway/*')
+            || $request->is('auth/*')
+            || $request->routeIs('admin.logout')
+            || $request->is('api/users/login')
+            || $request->is('api/users/me');
+    }
+
     public function handle(Request $request, Closure $next)
     {
         $user = Admin::user() ?: auth('api')->user();
@@ -32,38 +47,34 @@ class EnsureEnterpriseAccess
             return $next($request);
         }
 
-        // Keep the status honest even if the daily tick has not run today.
-        $status = BillingService::refreshAccess($ent);
-        $request->attributes->set('enterprise_access_status', $status);
+        $lock = BillingService::lockState($ent);
+        $request->attributes->set('enterprise_access_status', $ent->fresh()->access_status);
+        $request->attributes->set('enterprise_lock', $lock);
 
-        if (in_array($status, [BillingService::TRIALING, BillingService::ACTIVE, BillingService::PAST_DUE, BillingService::PENDING_VERIFICATION], true)) {
+        if (!$lock) {
+            return $next($request);
+        }
+        if ($this->isAlwaysAllowed($request)) {
             return $next($request);
         }
 
-        $alwaysAllowed = $request->is('billing*') || $request->is('invoice/*') || $request->is('gateway/*') || $request->is('auth/logout')
-            || $request->routeIs('admin.logout') || $request->is('api/users/login') || $request->is('api/users/me');
-        if ($alwaysAllowed) {
-            return $next($request);
-        }
-
-        $readOnly = $status === BillingService::SUSPENDED && in_array($request->method(), ['GET', 'HEAD', 'OPTIONS'], true);
-        if ($readOnly) {
-            return $next($request);
-        }
-
-        $isApi = $request->is('api/*') || $request->expectsJson() || auth('api')->check();
-        if ($isApi) {
+        $invoice = $lock['invoice'] ?? null;
+        if ($request->is('api/*') || $request->expectsJson() || auth('api')->check()) {
             return response()->json([
                 'code' => 0,
-                'message' => $status === BillingService::SUSPENDED
-                    ? 'This school\'s subscription is suspended. Changes are disabled until payment is made.'
-                    : 'This school\'s subscription is not active.',
+                'message' => 'This school\'s licence has expired. ' . $lock['reason']
+                    . ' Please ask your school administrator to settle invoice '
+                    . ($invoice->number ?? '') . '.',
                 'data' => '',
-                'access' => $status,
-                'pay_url' => admin_url('billing'),
+                'locked' => true,
+                'access' => $lock['status'],
+                'days_overdue' => $lock['days_overdue'],
+                'invoice_number' => $invoice->number ?? null,
+                'amount_due' => $lock['amount'],
+                'pay_url' => $invoice ? $invoice->publicUrl() : admin_url('billing'),
             ], 200);
         }
 
-        return redirect(admin_url('billing'))->with('billing_blocked', $status);
+        return redirect(admin_url('licence-expired'));
     }
 }

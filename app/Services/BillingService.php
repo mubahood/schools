@@ -567,6 +567,56 @@ class BillingService
         return $new;
     }
 
+    /**
+     * Is this school locked out, and why?
+     *
+     * Returns null when the school may work normally. Otherwise the caller gets
+     * everything the lock screen needs, so the decision is made once and the
+     * page, the API and the console all agree.
+     *
+     * A missed invoice deadline locks immediately. The grace window still
+     * applies to a subscription simply running out, but a bill that was issued
+     * with a date on it is expected to be paid by that date.
+     */
+    public static function lockState(Enterprise $ent): ?array
+    {
+        if (!$ent || $ent->id == 1 || $ent->billing_exempt) {
+            return null;
+        }
+
+        $status = self::refreshAccess($ent);
+        $overdue = Invoice::where('enterprise_id', $ent->id)
+            ->where('status', Invoice::ISSUED)
+            ->whereNotNull('due_at')->where('due_at', '<', Carbon::now())
+            ->orderBy('due_at')->first();
+
+        $hardStatus = in_array($status, [self::SUSPENDED, self::CANCELLED], true);
+        if (!$overdue && !$hardStatus) {
+            return null;
+        }
+
+        $since = $overdue && $overdue->due_at
+            ? Carbon::parse($overdue->due_at)
+            : ($ent->access_ends_at ? Carbon::parse($ent->access_ends_at) : Carbon::now());
+        $days = (int) $since->copy()->startOfDay()->diffInDays(Carbon::now()->startOfDay());
+
+        return [
+            'status' => $status,
+            'invoice' => $overdue,
+            'since' => $since,
+            'days_overdue' => max(0, $days),
+            'amount' => $overdue ? ($overdue->balance() ?: $overdue->amount) : 0,
+            'reason' => $overdue
+                ? 'An invoice passed its payment deadline.'
+                : ($status === self::CANCELLED ? 'The subscription was cancelled.' : 'The licence period ended.'),
+        ];
+    }
+
+    public static function isLocked(Enterprise $ent): bool
+    {
+        return self::lockState($ent) !== null;
+    }
+
     /** Days of access left (negative = days overdue). */
     public static function daysLeft(Enterprise $ent): ?int
     {

@@ -40,59 +40,108 @@ class SubscriptionsAdminController extends Controller
     {
         $filter = $r->get('f', 'all');
         $search = trim((string) $r->get('q', ''));
-        $q = Enterprise::where('id', '<>', 1)->orderBy('name');
+        $perPage = min(100, max(10, (int) $r->get('per_page', 25)));
+
+        $q = Enterprise::where('id', '<>', 1);
         if ($search !== '') {
             $q->where(function ($w) use ($search) {
-                $w->where('name', 'like', "%{$search}%")->orWhere('subdomain', 'like', "%{$search}%")
-                  ->orWhere('subdomain_slug', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('phone_number', 'like', "%{$search}%");
+                foreach (['name', 'subdomain', 'subdomain_slug', 'email', 'phone_number'] as $c) {
+                    $w->orWhere($c, 'like', "%{$search}%");
+                }
             });
         }
-        $rows = $q->get()->map(function (Enterprise $e) {
-            BillingService::refreshAccess($e);
-            $e = $e->fresh();
-            $sub = Subscription::where('enterprise_id', $e->id)->where('status', Subscription::ACTIVE)->orderByDesc('id')->with('plan')->first();
-            $last = Payment::where('enterprise_id', $e->id)->where('status', Payment::SUCCEEDED)->orderByDesc('received_at')->first();
+        switch ($filter) {
+            case 'past_due':  $q->where('access_status', 'past_due'); break;
+            case 'suspended': $q->where('access_status', 'suspended'); break;
+            case 'trialing':  $q->where('access_status', 'trialing'); break;
+            case 'exempt':    $q->where('billing_exempt', 1); break;
+            case 'paying':    $q->where('billing_exempt', 0)->where('access_status', 'active'); break;
+            case 'owing':     $q->whereIn('id', Invoice::where('status', Invoice::ISSUED)->select('enterprise_id')); break;
+            case 'overdue':   $q->whereIn('id', Invoice::where('status', Invoice::ISSUED)
+                                ->whereNotNull('due_at')->where('due_at', '<', Carbon::now())->select('enterprise_id')); break;
+        }
+
+        $page = $q->orderBy('name')->paginate($perPage, ['*'], 'page', max(1, (int) $r->get('page', 1)))->appends($r->query());
+        $ids = collect($page->items())->pluck('id');
+
+        // Everything the table needs, in a handful of queries rather than one
+        // set per row. The page used to fire 374 queries for 38 schools.
+        $students = DB::table('admin_users')->whereIn('enterprise_id', $ids)
+            ->where('user_type', 'student')->where('status', 1)
+            ->selectRaw('enterprise_id, COUNT(*) n')->groupBy('enterprise_id')->pluck('n', 'enterprise_id');
+
+        $open = Invoice::whereIn('enterprise_id', $ids)->where('status', Invoice::ISSUED)
+            ->selectRaw('enterprise_id, COUNT(*) n, SUM(amount) total, MIN(due_at) soonest')
+            ->groupBy('enterprise_id')->get()->keyBy('enterprise_id');
+
+        $dueInvoice = Invoice::whereIn('enterprise_id', $ids)->where('status', Invoice::ISSUED)
+            ->orderByRaw('CASE WHEN due_at IS NULL THEN 1 ELSE 0 END')->orderBy('due_at')->orderBy('id')
+            ->get()->groupBy('enterprise_id')->map->first();
+
+        $lastPaid = Payment::whereIn('enterprise_id', $ids)->where('status', Payment::SUCCEEDED)
+            ->orderByDesc('received_at')->get()->groupBy('enterprise_id')->map->first();
+
+        $subs = Subscription::whereIn('enterprise_id', $ids)->where('status', Subscription::ACTIVE)
+            ->with('plan')->orderByDesc('id')->get()->groupBy('enterprise_id')->map->first();
+
+        $rows = collect($page->items())->map(function (Enterprise $e) use ($students, $open, $dueInvoice, $lastPaid, $subs) {
+            $o = $open[$e->id] ?? null;
+            $sub = $subs[$e->id] ?? null;
+            $pay = $lastPaid[$e->id] ?? null;
+            $due = $dueInvoice[$e->id] ?? null;
+
             return (object) [
-                'ent' => $e, 'label' => BillingService::statusLabel($e), 'days' => BillingService::daysLeft($e),
-                'students' => BillingService::activeStudents($e), 'plan' => $sub ? $sub->plan->name . ' ' . $sub->months() . 'm' : '—',
-                'last_paid' => $last ? $last->received_at->format('d M Y') . ' · ' . number_format($last->amount) : '—',
-                'open' => Invoice::where('enterprise_id', $e->id)->where('status', Invoice::ISSUED)->sum('amount'),
-                'due' => BillingService::dueInvoice($e),
+                'ent' => $e,
+                'label' => BillingService::statusLabel($e),
+                'days' => BillingService::daysLeft($e),
+                'students' => (int) ($students[$e->id] ?? 0),
+                'plan' => $sub ? $sub->plan->name . ' ' . $sub->months() . 'm' : null,
+                'last_paid' => $pay,
+                'open_count' => (int) ($o->n ?? 0),
+                'open_total' => (int) ($o->total ?? 0),
+                'due' => $due,
+                'overdue' => $due && $due->due_at && $due->due_at->isPast(),
+                'locked' => !$e->billing_exempt && ($due && $due->due_at && $due->due_at->isPast()
+                    || in_array($e->access_status, ['suspended', 'cancelled'], true)),
             ];
         });
-        $rows = $rows->filter(function ($x) use ($filter) {
-            switch ($filter) {
-                case 'expiring':  return in_array($x->ent->access_status, ['trialing', 'active']) && !$x->ent->billing_exempt && $x->days !== null && $x->days <= 14;
-                case 'past_due':  return $x->ent->access_status === 'past_due';
-                case 'suspended': return $x->ent->access_status === 'suspended';
-                case 'trialing':  return $x->ent->access_status === 'trialing';
-                case 'exempt':    return (bool) $x->ent->billing_exempt;
-                case 'paying':    return !$x->ent->billing_exempt && $x->ent->access_status === 'active';
-                default:          return true;
-            }
-        })->values();
-
-        $claims = Payment::where('status', Payment::PENDING)->whereIn('gateway', ['bank', 'cash'])
-            ->with('invoice')->orderBy('created_at')->get();
-
-        $mrr = Subscription::where('status', Subscription::ACTIVE)->get()
-            ->sum(fn ($s) => (int) round($s->total_amount / $s->months()));
 
         return $content->title('Subscriptions')->description('Newline console')
             ->body(view('admin.billing.console', [
-                'rows' => $rows, 'claims' => $claims, 'filter' => $filter, 'mrr' => $mrr, 'search' => $search,
+                'rows' => $rows,
+                'page' => $page,
+                'filter' => $filter,
+                'search' => $search,
+                'perPage' => $perPage,
+                'claims' => Payment::where('status', Payment::PENDING)->whereIn('gateway', ['bank', 'cash'])
+                    ->with('invoice')->orderBy('created_at')->get(),
                 'drafts' => Invoice::where('status', Invoice::DRAFT)->orderByDesc('id')->limit(20)->get(),
                 'overdue' => Invoice::where('status', Invoice::ISSUED)->whereNotNull('due_at')
                     ->where('due_at', '<', Carbon::now())->orderBy('due_at')->get(),
-                'counts' => [
-                    'paying' => Enterprise::where('access_status', 'active')->where('billing_exempt', 0)->where('id', '<>', 1)->count(),
-                    'trialing' => Enterprise::where('access_status', 'trialing')->count(),
-                    'past_due' => Enterprise::where('access_status', 'past_due')->count(),
-                    'suspended' => Enterprise::where('access_status', 'suspended')->count(),
-                    'exempt' => Enterprise::where('billing_exempt', 1)->where('id', '<>', 1)->count(),
-                ],
+                'names' => Enterprise::pluck('name', 'id'),
+                'stats' => $this->stats(),
             ]));
+    }
+
+    /** Headline numbers, each a single aggregate query. */
+    private function stats(): array
+    {
+        $mrr = (int) Subscription::where('status', Subscription::ACTIVE)->get()
+            ->sum(fn ($s) => (int) round($s->total_amount / max(1, $s->months())));
+
+        return [
+            'mrr' => $mrr,
+            'schools' => Enterprise::where('id', '<>', 1)->count(),
+            'paying' => Enterprise::where('id', '<>', 1)->where('billing_exempt', 0)->where('access_status', 'active')->count(),
+            'trialing' => Enterprise::where('access_status', 'trialing')->count(),
+            'exempt' => Enterprise::where('id', '<>', 1)->where('billing_exempt', 1)->count(),
+            'suspended' => Enterprise::where('access_status', 'suspended')->count(),
+            'owed' => (int) Invoice::where('status', Invoice::ISSUED)->sum('amount'),
+            'overdue_total' => (int) Invoice::where('status', Invoice::ISSUED)->whereNotNull('due_at')
+                ->where('due_at', '<', Carbon::now())->sum('amount'),
+            'collected_30d' => (int) Payment::where('status', Payment::SUCCEEDED)
+                ->where('received_at', '>=', Carbon::now()->subDays(30))->sum('amount'),
+        ];
     }
 
     /** Confirm a bank/cash claim the school submitted: settles the invoice. */
@@ -186,7 +235,7 @@ class SubscriptionsAdminController extends Controller
         $e = $e->fresh();
 
         $owner = $e->administrator_id ? \App\Models\User::find($e->administrator_id) : null;
-        $terms = DB::table('terms')->where('enterprise_id', $e->id)
+        $terms = DB::table('terms')->where('terms.enterprise_id', $e->id)
             ->leftJoin('academic_years', 'academic_years.id', '=', 'terms.academic_year_id')
             ->select('terms.*', 'academic_years.name as year_name')
             ->orderByDesc('terms.id')->limit(12)->get();
@@ -214,7 +263,7 @@ class SubscriptionsAdminController extends Controller
     public function newInvoice(Content $content, $enterpriseId)
     {
         $e = Enterprise::findOrFail($enterpriseId);
-        $terms = DB::table('terms')->where('enterprise_id', $e->id)
+        $terms = DB::table('terms')->where('terms.enterprise_id', $e->id)
             ->leftJoin('academic_years', 'academic_years.id', '=', 'terms.academic_year_id')
             ->select('terms.*', 'academic_years.name as year_name')
             ->orderByDesc('terms.id')->limit(12)->get();
@@ -366,6 +415,31 @@ class SubscriptionsAdminController extends Controller
         $this->audit('remind', $e->id, ['invoice' => $inv->number, 'sent' => $sent]);
         $sent ? admin_success('Reminder sent', implode(' and ', $sent) . '.')
               : admin_error('Nothing could be sent', 'No usable phone or email on file for this school.');
+
+        return back();
+    }
+
+    /** Lift a suspension without having to invent a date or an exemption. */
+    public function restore(Request $r, $enterpriseId)
+    {
+        $d = $r->validate(['days' => 'nullable|integer|min:1|max:365']);
+        $e = Enterprise::findOrFail($enterpriseId);
+        $days = (int) ($d['days'] ?? 14);
+        $ends = Carbon::now()->addDays($days);
+        DB::table('enterprises')->where('id', $e->id)->update([
+            'access_status' => 'active',
+            'access_ends_at' => $ends,
+            'has_valid_lisence' => 'Yes',
+            'expiry' => $ends->toDateString(),
+        ]);
+        // An overdue invoice would re-lock them on the next request.
+        $moved = Invoice::where('enterprise_id', $e->id)->where('status', Invoice::ISSUED)
+            ->whereNotNull('due_at')->where('due_at', '<', Carbon::now())
+            ->update(['due_at' => $ends]);
+
+        $this->audit('restore', $e->id, ['days' => $days, 'invoices_extended' => $moved]);
+        admin_success('Access restored', $e->name . ' is active until ' . $ends->format('d M Y')
+            . ($moved ? ', and ' . $moved . ' overdue invoice(s) moved to that date.' : '.'));
 
         return back();
     }

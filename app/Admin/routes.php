@@ -107,6 +107,10 @@ Route::group([
     $router->resource('supplier-orders', SupplierOrderController::class);
     $router->resource('gens', GenController::class);
     $router->resource('termly-school-fees-balancings', TermlySchoolFeesBalancingController::class);
+    // Shown in place of the system when a school's licence has lapsed.
+    // Must sit inside the admin group so only a signed-in user reaches it.
+    $router->get('licence-expired', 'LicenceController@expired')->name('licence.expired');
+
     // Finance: the school's money. Restricted to finance staff; heads read only.
     $router->group(['middleware' => [\App\Http\Middleware\EnsureFinanceAccess::class]], function ($router) {
         // Legacy grid screens. Same ledger, so the same guard applies.
@@ -182,6 +186,7 @@ Route::group([
     $router->post('subscriptions-admin/{enterprise}/extend', 'SubscriptionsAdminController@extend');
     $router->post('subscriptions-admin/{enterprise}/exempt', 'SubscriptionsAdminController@toggleExempt');
     $router->post('subscriptions-admin/{enterprise}/suspend', 'SubscriptionsAdminController@suspend');
+    $router->post('subscriptions-admin/{enterprise}/restore', 'SubscriptionsAdminController@restore');
     // Invoicing and per-school controls
     $router->get('subscriptions-admin/invoices/{invoice}', 'SubscriptionsAdminController@showInvoice');
     $router->get('subscriptions-admin/invoices/{invoice}/view', 'SubscriptionsAdminController@invoiceView');
