@@ -177,19 +177,50 @@ class SubscriptionsAdminController extends Controller
         return back();
     }
 
-    /** Give a school N more days (goodwill, agreed delay). */
+    /**
+     * Give a school N more days.
+     *
+     * "More days" is counted from the date the school would actually lose
+     * access, which is usually an unpaid invoice rather than the access
+     * window. The old version only moved the window, so a school locked by an
+     * overdue invoice stayed locked however many days were added, and a school
+     * with an invoice due tonight was shown months it did not have.
+     *
+     * Any unpaid invoice falling due before the new date moves to it, the
+     * access window is never shortened, and the change is audited.
+     */
     public function extend(Request $r, $enterpriseId)
     {
         $d = $r->validate(['days' => 'required|integer|min:1|max:365', 'reason' => 'nullable|string|max:200']);
         $e = Enterprise::findOrFail($enterpriseId);
-        $base = $e->access_ends_at && Carbon::parse($e->access_ends_at)->isFuture() ? Carbon::parse($e->access_ends_at) : Carbon::now();
-        $ends = $base->addDays((int) $d['days']);
-        DB::table('enterprises')->where('id', $e->id)->update([
-            'access_ends_at' => $ends, 'access_status' => $e->access_status === 'trialing' ? 'trialing' : 'active',
-            'has_valid_lisence' => 'Yes', 'expiry' => $ends->toDateString(),
-        ]);
-        $this->audit('extend', $e->id, ['days' => $d['days'], 'reason' => $d['reason'] ?? '', 'until' => $ends->toDateString()]);
-        admin_success('Extended', $e->name . ' now has access until ' . $ends->format('d M Y') . '.');
+        $days = (int) $d['days'];
+
+        $current = BillingService::effectiveDeadline($e);
+        $base = $current && $current->isFuture() ? $current->copy() : Carbon::now();
+        $newEnd = $base->addDays($days)->endOfDay();
+
+        $window = $e->access_ends_at ? Carbon::parse($e->access_ends_at) : null;
+        $windowEnd = ($window && $window->gt($newEnd)) ? $window : $newEnd;
+
+        DB::transaction(function () use ($e, $newEnd, $windowEnd, &$moved) {
+            DB::table('enterprises')->where('id', $e->id)->update([
+                'access_ends_at' => $windowEnd,
+                'access_status' => $e->access_status === 'trialing' ? 'trialing' : 'active',
+                'has_valid_lisence' => 'Yes',
+                'expiry' => $windowEnd->toDateString(),
+            ]);
+            $moved = Invoice::where('enterprise_id', $e->id)->where('status', Invoice::ISSUED)
+                ->where(function ($q) use ($newEnd) {
+                    $q->whereNull('due_at')->orWhere('due_at', '<', $newEnd);
+                })
+                ->update(['due_at' => $newEnd]);
+        });
+
+        $this->audit('extend', $e->id, ['days' => $days, 'reason' => $d['reason'] ?? '',
+            'until' => $newEnd->toDateString(), 'invoices_moved' => $moved]);
+        admin_success('Extended by ' . $days . ' days',
+            $e->name . ' has access until ' . $newEnd->format('d M Y')
+            . ($moved ? ', and ' . $moved . ' unpaid invoice' . ($moved > 1 ? 's are' : ' is') . ' now due that day.' : '.'));
 
         return back();
     }

@@ -622,20 +622,58 @@ class BillingService
     }
 
     /** Days of access left (negative = days overdue). */
+    /**
+     * The date this school actually loses access: the earlier of its access
+     * window and the deadline of any unpaid invoice. An invoice due tonight
+     * beats an access date months away, and a screen that ignored that would
+     * promise days the school does not have.
+     */
+    public static function effectiveDeadline(Enterprise $ent): ?Carbon
+    {
+        if ($ent->id == 1) {
+            return null;
+        }
+        $window = null;
+        if (!$ent->billing_exempt) {
+            $raw = $ent->access_ends_at ?: $ent->trial_ends_at;
+            $window = $raw ? Carbon::parse($raw) : null;
+        }
+        $due = Invoice::where('enterprise_id', $ent->id)->where('status', Invoice::ISSUED)
+            ->whereNotNull('due_at')->min('due_at');
+        $due = $due ? Carbon::parse($due) : null;
+
+        if ($window && $due) {
+            return $due->lt($window) ? $due : $window;
+        }
+
+        return $due ?: $window;
+    }
+
     public static function daysLeft(Enterprise $ent): ?int
     {
-        $ends = $ent->access_ends_at ?: $ent->trial_ends_at;
+        $ends = self::effectiveDeadline($ent);
 
-        return $ends ? (int) Carbon::now()->startOfDay()->diffInDays(Carbon::parse($ends)->startOfDay(), false) : null;
+        return $ends ? (int) Carbon::now()->startOfDay()->diffInDays($ends->copy()->startOfDay(), false) : null;
     }
 
     /** Short label for the header pill. */
     public static function statusLabel(Enterprise $ent): array
     {
-        if ($ent->billing_exempt || $ent->id == 1) {
+        if ($ent->id == 1) {
             return ['text' => 'Licensed', 'class' => 'success'];
         }
         $d = self::daysLeft($ent);
+        // An unpaid invoice outranks every other state, exempt or not.
+        $owing = Invoice::where('enterprise_id', $ent->id)->where('status', Invoice::ISSUED)->exists();
+        if ($owing && $d !== null && $d < 0) {
+            return ['text' => 'Locked · invoice overdue', 'class' => 'danger'];
+        }
+        if ($owing && $d !== null) {
+            return ['text' => 'Invoice due · ' . $d . ' day' . ($d == 1 ? '' : 's') . ' left', 'class' => $d <= 3 ? 'warning' : 'info'];
+        }
+        if ($ent->billing_exempt) {
+            return ['text' => 'Licensed', 'class' => 'success'];
+        }
         switch ($ent->access_status) {
             case self::TRIALING:  return ['text' => 'Trial: ' . max(0, $d) . ' day' . ($d == 1 ? '' : 's') . ' left', 'class' => $d <= 7 ? 'warning' : 'info'];
             case self::ACTIVE:    return ['text' => 'Active · ' . max(0, $d) . ' days left', 'class' => $d <= 14 ? 'warning' : 'success'];

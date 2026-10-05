@@ -35,7 +35,9 @@
         <dt>Contact</dt><dd>{{ $e->phone_number }} · {{ $e->email }}</dd>
         <dt>Address</dt><dd>{{ $e->address ?: '—' }}</dd>
         <dt>Owner</dt><dd>{{ $owner->name ?? '—' }} <small class="text-muted">{{ $owner->phone_number_1 ?? '' }} {{ $owner->email ?? '' }}</small></dd>
-        <dt>Access until</dt><dd>{{ $e->access_ends_at ? \Carbon\Carbon::parse($e->access_ends_at)->format('d M Y') : '—' }}</dd>
+        @php $dl = \App\Services\BillingService::effectiveDeadline($e);
+             $byInvoice = $dl && \App\Models\Billing\Invoice::where('enterprise_id',$e->id)->where('status','issued')->where('due_at',$dl)->exists(); @endphp
+        <dt>Access until</dt><dd>{{ $dl ? $dl->format('d M Y') : '—' }}@if($byInvoice) <small class="text-muted">(invoice deadline)</small>@endif</dd>
         <dt>Active term</dt><dd>{{ $activeTerm ? (is_numeric(trim($activeTerm->name)) ? 'Term '.trim($activeTerm->name) : trim($activeTerm->name)).', '.trim($activeTerm->year_name ?? '') : '— none set —' }}</dd>
       </dl>
     </div>
