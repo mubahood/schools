@@ -16,6 +16,40 @@ use Illuminate\Routing\Controller;
 /** The school's own billing page: choose a package, pay, top up SMS. */
 class BillingController extends Controller
 {
+    /**
+     * Billing is for the people who can settle a bill. Everyone else is sent
+     * to the licence page while the school is locked, which tells them who to
+     * ask, or back to the dashboard otherwise. Without this, a teacher locked
+     * out of the system could still open /billing and see the amount and a
+     * pay button that the licence page deliberately keeps from them.
+     */
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            $u = Admin::user();
+            if (!$u) {
+                return $next($request);
+            }
+            $allowed = $u->isRole('super-admin');
+            foreach (LicenceController::BILLING_ROLES as $r) {
+                if ($u->isRole($r)) {
+                    $allowed = true;
+                    break;
+                }
+            }
+            if ($allowed) {
+                return $next($request);
+            }
+            $ent = Enterprise::find($u->enterprise_id);
+            if ($ent && BillingService::isLocked($ent)) {
+                return redirect(admin_url('licence-expired'));
+            }
+            admin_info('Billing', 'Subscription and billing are managed by your school administrator.');
+
+            return redirect(admin_url('/'));
+        });
+    }
+
     private function ent(): Enterprise
     {
         return Enterprise::findOrFail(Admin::user()->enterprise_id);
