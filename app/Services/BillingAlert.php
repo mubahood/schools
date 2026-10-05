@@ -46,8 +46,8 @@ class BillingAlert
                 return null;
             }
             $days = $inv->daysToDue();
-            $locked = in_array($ent->access_status, ['suspended', 'cancelled'], true) && !$ent->billing_exempt;
             $overdue = $inv->isOverdue();
+            $locked = $overdue || (!$ent->billing_exempt && in_array($ent->access_status, ['suspended', 'cancelled'], true));
 
             return [
                 'inv' => $inv,

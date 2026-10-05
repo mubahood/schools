@@ -101,8 +101,8 @@ class SubscriptionsAdminController extends Controller
                 'open_total' => (int) ($o->total ?? 0),
                 'due' => $due,
                 'overdue' => $due && $due->due_at && $due->due_at->isPast(),
-                'locked' => !$e->billing_exempt && ($due && $due->due_at && $due->due_at->isPast()
-                    || in_array($e->access_status, ['suspended', 'cancelled'], true)),
+                'locked' => ($due && $due->due_at && $due->due_at->isPast())
+                    || (!$e->billing_exempt && in_array($e->access_status, ['suspended', 'cancelled'], true)),
             ];
         });
 

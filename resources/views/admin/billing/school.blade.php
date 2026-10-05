@@ -58,7 +58,7 @@
       @endif
       <div class="text-muted" style="font-size:12px;margin-top:8px">
         {{ $e->billing_exempt
-            ? 'Exempt: this school is never locked and the lifecycle ignores its dates. Invoices still show on their dashboard.'
+            ? 'Exempt: trial and subscription dates never lock this school. An invoice you issue still does, once its deadline passes.'
             : 'Billed: access follows the dates above, with a '.$e->grace_days.'-day grace window before lock-out.' }}
       </div>
     </div>

@@ -580,7 +580,7 @@ class BillingService
      */
     public static function lockState(Enterprise $ent): ?array
     {
-        if (!$ent || $ent->id == 1 || $ent->billing_exempt) {
+        if (!$ent || $ent->id == 1) {
             return null;
         }
 
@@ -590,7 +590,11 @@ class BillingService
             ->whereNotNull('due_at')->where('due_at', '<', Carbon::now())
             ->orderBy('due_at')->first();
 
-        $hardStatus = in_array($status, [self::SUSPENDED, self::CANCELLED], true);
+        // Exemption keeps a school off the AUTOMATIC lifecycle — trials and
+        // subscription dates running out. It does not make an invoice Newline
+        // deliberately issued, with a deadline printed on it, unenforceable.
+        // Only an explicitly raised bill can lock an exempt school.
+        $hardStatus = !$ent->billing_exempt && in_array($status, [self::SUSPENDED, self::CANCELLED], true);
         if (!$overdue && !$hardStatus) {
             return null;
         }

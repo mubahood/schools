@@ -17,8 +17,8 @@ use Illuminate\Http\Request;
  * logout are never locked away — locking someone out of the thing that
  * unlocks them would be a trap.
  *
- * Staff of the platform enterprise (id 1) and billing-exempt schools are
- * never touched. Clients that expect JSON get a refusal they can act on
+ * Staff of the platform enterprise (id 1) are never touched. A billing-exempt
+ * school is spared the automatic lifecycle but not an overdue invoice. Clients that expect JSON get a refusal they can act on
  * rather than a redirect they cannot follow.
  */
 class EnsureEnterpriseAccess
@@ -43,7 +43,9 @@ class EnsureEnterpriseAccess
             return $next($request);
         }
         $ent = Enterprise::find($user->enterprise_id);
-        if (!$ent || $ent->id == 1 || $ent->billing_exempt) {
+        // Exempt schools are NOT waved through here: lockState() decides, and
+        // an overdue invoice locks them like anyone else.
+        if (!$ent || $ent->id == 1) {
             return $next($request);
         }
 
